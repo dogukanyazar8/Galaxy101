@@ -73,7 +73,7 @@ namespace Galaxy101.Tests
         [Timeout(420000)]
         public IEnumerator BotsPlayAWholeHandAndTheBoardTracksEveryTile()
         {
-            var game = Build(-1, 4242, false);
+            var game = Build(-1, 4242, true);
             Time.timeScale = 6;
             yield return Until(() => game.Current == TableGame.Phase.Opponent, 30, "the deal to finish");
             int checks = 0; long lastChecked = -1; float deadline = Time.realtimeSinceStartup + 380;
@@ -88,7 +88,20 @@ namespace Galaxy101.Tests
             }
             Assert.That(game.TurnsPlayed, Is.GreaterThan(4));
             Assert.That(checks, Is.GreaterThan(4));
+
+            // Finish banner, then the hand result card (T24) with every seat, then the next hand.
+            var hud = hudOwner.GetComponent<TableHud>();
+            yield return Until(() => game.ResultOpen, 30, "the hand result card");
+            yield return null;
+            Assert.That(hud.Canvas.Q<VisualElement>("table-result-card"), Is.Not.Null);
+            for (int k = 0; k < 4; k++) Assert.That(hud.Canvas.Q<VisualElement>("result-row-" + k), Is.Not.Null, "result row " + k);
+            Assert.That(hud.Canvas.Q<Label>("result-next-label").text, Does.StartWith("Sonraki el").Or.StartWith("Next hand"));
+            string capture = Environment.GetEnvironmentVariable("GALAXY_TABLE_RESULT_CAPTURE");
+            if (!string.IsNullOrEmpty(capture)) { Time.timeScale = 1; yield return Capture(hudOwner.GetComponent<UIDocument>(), capture); Time.timeScale = 6; }
             Debug.Log("GALAXY101_TABLE_SOAK turns=" + game.TurnsPlayed + " reason=" + game.LastResult.FinishInfo.Reason + " checks=" + checks);
+            game.NextHand();
+            yield return Until(() => game.HandNumber == 2 && !game.ResultOpen, 30, "the next hand");
+            Assert.That(game.Current, Is.EqualTo(TableGame.Phase.Deal).Or.EqualTo(TableGame.Phase.Opponent).Or.EqualTo(TableGame.Phase.Draw).Or.EqualTo(TableGame.Phase.Discard));
         }
 
         [UnityTest]
@@ -96,6 +109,19 @@ namespace Galaxy101.Tests
         public IEnumerator IDiscardDrawAndDiscardAgainWhileBotsPlay()
         {
             var game = Build(TableGame.Me, 777, true);
+            Time.timeScale = 1;
+            yield return Until(() => game.Current == TableGame.Phase.Seating, 10, "the waiting table");
+            Assert.That(game.Seated, Is.EqualTo(new[] { true, false, false, false }));
+            var waitingHud = hudOwner.GetComponent<TableHud>();
+            yield return null;
+            Assert.That(waitingHud.Canvas.Q<VisualElement>("table-waiting"), Is.Not.Null);
+            Assert.That(waitingHud.Canvas.Q<VisualElement>("invite-1"), Is.Not.Null);
+            yield return Until(() => game.Seated[2], 5, "Ayşe to join at 1.3 s");
+            string seatCapture = Environment.GetEnvironmentVariable("GALAXY_TABLE_SEAT_CAPTURE");
+            if (!string.IsNullOrEmpty(seatCapture)) yield return Capture(hudOwner.GetComponent<UIDocument>(), seatCapture);
+            game.Invite(1);
+            Assert.That(game.Seated[1], Is.True, "Davet et fills the seat at once");
+            yield return Until(() => game.Countdown > 0, 10, "the 3-2-1 countdown");
             Time.timeScale = 3;
             yield return Until(() => game.CanDiscard, 40, "my first discard turn (I start with 22 tiles)");
             Assert.That(game.Rack.Count, Is.EqualTo(22));
@@ -212,9 +238,10 @@ namespace Galaxy101.Tests
 
             game.RequestExit();
             yield return null;
-            Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo(MainMenuController.GalaxyTableScene), "the first press mid-hand only warns");
-            Assert.That(game.HudState().Flash, Does.Contain("tekrar bas").Or.Contain("Press again"));
-            game.RequestExit();
+            Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo(MainMenuController.GalaxyTableScene), "the exit button opens the confirmation card");
+            Assert.That(game.ExitOpen, Is.True);
+            game.CancelExit(); Assert.That(game.ExitOpen, Is.False, "Masada kal closes the card");
+            game.RequestExit(); game.ConfirmExit();
             yield return Until(() => SceneManager.GetActiveScene().name == "Bootstrap" && UnityEngine.Object.FindAnyObjectByType<MainMenuController>() != null, 60, "the menu after leaving");
             Assert.That(UnityEngine.Object.FindAnyObjectByType<TableGame>(), Is.Null);
         }
@@ -225,6 +252,7 @@ namespace Galaxy101.Tests
             var panel = UnityEngine.Object.Instantiate(document.panelSettings); var original = document.panelSettings;
             panel.targetTexture = target; document.panelSettings = panel;
             for (int i = 0; i < 20; i++) yield return null;
+            yield return new WaitForSecondsRealtime(1.2f); // entrance animations settle
             var previous = RenderTexture.active; RenderTexture.active = target;
             var pixels = new Texture2D(1280, 720, TextureFormat.RGBA32, false); pixels.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0); pixels.Apply();
             RenderTexture.active = previous; File.WriteAllBytes(path, pixels.EncodeToPNG());

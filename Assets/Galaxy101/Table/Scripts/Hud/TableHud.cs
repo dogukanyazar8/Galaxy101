@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -31,7 +32,28 @@ namespace Galaxy101.Table
             /// <summary>Time.realtimeSinceStartup when the active turn began (the ring counts down from it); -1 = HUD build time.</summary>
             public float TurnStartedAt = -1;
             public string Flash, ResultLine;
+            /// <summary>Faz 4: seats filled while waiting, 3-2-1 countdown, finish banner, hand result, leave card.</summary>
+            public bool[] Seated = { true, true, true, true };
+            public int Countdown, Hand = 1;
+            public float CountdownAt;
+            public bool ExitOpen;
+            public MomentInfo Moment;
+            public ResultInfo Result;
         }
+
+        /// <summary>Finish banner (spec/10 §7–§8): seat −1 = no avatar (TAŞ BİTTİ).</summary>
+        public sealed class MomentInfo { public string Title, Sub; public int Seat = -1; public float StartedAt; }
+
+        /// <summary>Hand result card (T24). Bot tables are offline: XP only, no chips.</summary>
+        public sealed class ResultInfo
+        {
+            public string Title, Sub, Head;
+            public int Xp, TotalXp, Winner, Seconds = 15;
+            public float StartedAt;
+            public readonly List<ResultRow> Rows = new List<ResultRow>();
+        }
+
+        public sealed class ResultRow { public int Seat, Total; public int? Hand; public string Note; }
 
         /// <summary>HUD buttons: exit, settings, chat, gift, sort-run, sort-pair, open, pairs.</summary>
         public event Action<string> Command;
@@ -158,6 +180,11 @@ namespace Galaxy101.Table
             BuildToast(state);
             BuildMe(state);
             BuildActions(state);
+            if (state.Phase == "seat") BuildWaiting(state);
+            if (state.Countdown > 0) BuildCountdown(state);
+            if (state.Moment != null) BuildMoment(state.Moment);
+            if (state.Result != null) BuildResult(state.Result);
+            if (state.ExitOpen) BuildExit();
             ApplyGaps(hudLayer); ApplyGaps(anchorLayer);
             LateUpdate();
         }
@@ -170,6 +197,7 @@ namespace Galaxy101.Table
 
         private string Status(int k, State s, bool me)
         {
+            if (s.Phase == "seat") return L((string)Seat(k)["rank"], (string)Seat(k)["rank"]);
             if (s.Opened[k] > 0 && s.OpenedPairs[k]) return L("Açtı · " + s.Opened[k] + " çift", "Opened · " + s.Opened[k] + " pairs");
             if (s.Opened[k] > 0) return L("Açtı · " + s.Opened[k], "Opened · " + s.Opened[k]);
             return me ? L("Açmadı · " + s.TileCounts[k] + " taş", "Not opened · " + s.TileCounts[k] + " tiles") : L(s.TileCounts[k] + " taş", s.TileCounts[k] + " tiles");
@@ -179,6 +207,7 @@ namespace Galaxy101.Table
         {
             var anchor = Anchor("a" + k);
             var column = Centered(anchor); column.style.alignItems = Align.Center;
+            if (!s.Seated[k]) { BuildEmptySeat(column, k); return; }
             var avatar = Avatar(Seat(k), 62, k == s.Active && s.Phase == "opp", 4, false);
             avatar.name = "opponent-" + k; column.Add(avatar);
             var plate = new VisualElement { pickingMode = PickingMode.Ignore }; plate.style.marginTop = 6; plate.style.alignItems = Align.Center;
@@ -186,6 +215,209 @@ namespace Galaxy101.Table
             plate.Add(Text((string)Seat(k)["name"], "Montserrat-700", 14, "#F4F1E8"));
             var status = Text(Status(k, s, false), "Baloo2-800", 11, s.Opened[k] > 0 ? "#8EF0B0" : "var(--mt)"); status.style.marginTop = 1; plate.Add(status);
             column.Add(plate);
+        }
+
+        /// <summary>Empty seat (T01): dashed ring with a blinking dot and a "Davet et" pill.</summary>
+        private void BuildEmptySeat(VisualElement column, int k)
+        {
+            var ring = new VisualElement { name = "empty-seat-" + k, pickingMode = PickingMode.Ignore };
+            ring.style.width = ring.style.height = 62; ring.style.alignItems = Align.Center; ring.style.justifyContent = Justify.Center;
+            view.Decorate(ring, "rgba(5,8,22,.45)", 31);
+            var dashed = new CssDashedCircle(62, 2, new Color(1, 1, 1, .3f)); MenuView.Place(dashed, 0, 0, 62, 62); ring.Add(dashed);
+            var dot = new VisualElement { pickingMode = PickingMode.Ignore }; dot.style.width = dot.style.height = 10; view.Decorate(dot, "var(--a1)", 5); ring.Add(dot);
+            // dots 1.2s: the dot breathes in and out.
+            motions.Add(t => dot.style.opacity = 0.3f + 0.7f * Mathf.Abs(Mathf.Sin(t * Mathf.PI / 1.2f)));
+            column.Add(ring);
+            var invite = Text(L("Davet et", "Invite"), "Baloo2-800", 12, "#F4F1E8"); invite.name = "invite-" + k; invite.style.marginTop = 6;
+            Pad(invite, 6, 14, 6, 14); view.Decorate(invite, "var(--pnH)", 15, 3, "var(--pnS)"); GalaxyFilters.HoverBrightness(invite, 1.25f);
+            column.Add(Clickable(invite, "invite:" + k));
+        }
+
+        /// <summary>"MASA HAZIRLANIYOR" card at top 470 with the n/4 fill bar (T01–T02).</summary>
+        private void BuildWaiting(State s)
+        {
+            int seated = s.Seated.Count(x => x);
+            var row = FullRow(470);
+            var card = new VisualElement { name = "table-waiting", pickingMode = PickingMode.Ignore }; card.style.alignItems = Align.Center;
+            Pad(card, 18, 28, 18, 28); view.Decorate(card, "rgba(5,8,22,.62)", 24); Border(card, 1, new Color(1, 1, 1, .1f)); GalaxyFilters.BackdropBlur(card, 8);
+            var title = Text(L("MASA HAZIRLANIYOR", "SETTING UP THE TABLE"), "Baloo2-800", 11, "var(--a1)"); MenuView.Tracking(title, 2, 11); card.Add(title);
+            var sub = Text(seated == 4 ? L("Masa doldu · oyun başlıyor", "Table full · starting") : L("Oyuncular bekleniyor · " + seated + "/4", "Waiting for players · " + seated + "/4"), "Montserrat-700", 22, "#F4F1E8");
+            sub.style.marginTop = 10; card.Add(sub);
+            var track = new VisualElement { pickingMode = PickingMode.Ignore }; track.style.width = 200; track.style.height = 8; track.style.marginTop = 10; track.style.overflow = Overflow.Hidden;
+            view.Decorate(track, "rgba(255,255,255,.14)", 4);
+            var fill = new VisualElement { pickingMode = PickingMode.Ignore }; fill.style.position = Position.Absolute; fill.style.left = 0; fill.style.top = 0; fill.style.bottom = 0;
+            fill.style.width = 200 * seated / 4f; view.Decorate(fill, "linear-gradient(90deg,var(--a2),var(--a1))", 4); GalaxyFilters.Shadow(fill, 0, 0, 6, view.C("var(--gl)"));
+            track.Add(fill); card.Add(track); row.Add(card); hudLayer.Add(row);
+        }
+
+        /// <summary>3-2-1 (countPop 1 s): 140 px logo digits, scale 2.4 → 1 in the first quarter, then 0.7 while fading.</summary>
+        private void BuildCountdown(State s)
+        {
+            var row = FullRow(250);
+            var digit = Text(s.Countdown.ToString(), "Montserrat-800", 140, "var(--a1)"); digit.name = "table-countdown";
+            digit.style.textShadow = new TextShadow { offset = new Vector2(0, 6), blurRadius = 0, color = view.C("var(--lS)") };
+            GalaxyFilters.Shadow(digit, 0, 0, 15, view.C("var(--gl)"));
+            float began = s.CountdownAt;
+            motions.Add(t =>
+            {
+                float u = Mathf.Clamp01(t - began);
+                float scale = u < .25f ? Mathf.Lerp(2.4f, 1, TableConstants.EaseOutCubic(u / .25f)) : u < .6f ? 1 : Mathf.Lerp(1, .7f, (u - .6f) / .4f);
+                digit.style.scale = new Scale(Vector2.one * scale); digit.style.opacity = u < .25f ? u / .25f : u < .6f ? 1 : 1 - (u - .6f) / .4f;
+            });
+            row.Add(digit); hudLayer.Add(row);
+        }
+
+        /// <summary>Finish banner (T23) at top 96: spinning gold ring around the finisher, logo-style title, pops in.</summary>
+        private void BuildMoment(MomentInfo m)
+        {
+            var row = FullRow(96);
+            var banner = Row(18); banner.name = "table-moment"; Pad(banner, 16, 30, 16, m.Seat >= 0 ? 18 : 30);
+            view.Decorate(banner, "rgba(5,8,22,.72)", 28); Border(banner, 2, view.C("var(--a1)")); GalaxyFilters.BackdropBlur(banner, 10);
+            GalaxyFilters.Shadow(banner, 0, 0, 25, view.C("var(--gl)"));
+            if (m.Seat >= 0)
+            {
+                var holder = new VisualElement { pickingMode = PickingMode.Ignore }; holder.style.width = holder.style.height = 76;
+                var spin = new VisualElement { pickingMode = PickingMode.Ignore }; MenuView.Place(spin, -8, -8, 92, 92);
+                view.Decorate(spin, "conic-gradient(var(--a1),var(--lg1),var(--a2),var(--a1))", 46); holder.Add(spin);
+                holder.Add(Avatar(Seat(m.Seat), 76, false, 0, false));
+                motions.Add(t => { spin.style.rotate = new Rotate(t * 150 % 360); holder.style.translate = new Translate(0, -6 * Mathf.Abs(Mathf.Sin(t * Mathf.PI / 2))); });
+                banner.Add(holder);
+            }
+            var texts = new VisualElement { pickingMode = PickingMode.Ignore };
+            var title = Text(m.Title, "Montserrat-800", 40, "var(--a1)"); MenuView.Tracking(title, 2, 40); title.name = "table-moment-title";
+            title.style.textShadow = new TextShadow { offset = new Vector2(0, 3), blurRadius = 0, color = view.C("var(--lS)") };
+            texts.Add(title);
+            var sub = Text(m.Sub, "Baloo2-800", 14, "var(--ic)"); sub.style.marginTop = 4; texts.Add(sub);
+            banner.Add(texts);
+            float began = m.StartedAt;
+            // popIn .55s cubic-bezier(.2,1.3,.4,1): 0 → 1.1 → 1.
+            motions.Add(t => { float u = Mathf.Clamp01((t - began) / .55f); float k = u < .6f ? Mathf.Lerp(0, 1.1f, TableConstants.EaseOutCubic(u / .6f)) : Mathf.Lerp(1.1f, 1, (u - .6f) / .4f); banner.style.scale = new Scale(Vector2.one * k); });
+            row.Add(banner); hudLayer.Add(row);
+        }
+
+        /// <summary>Dimmed, blurred full-canvas backdrop that keeps pointer presses off the 3D view.</summary>
+        private VisualElement Backdrop(string name, string command)
+        {
+            var layer = Layer(name); layer.pickingMode = PickingMode.Position; layer.style.alignItems = Align.Center; layer.style.justifyContent = Justify.Center;
+            var dim = Layer(name + "-dim"); dim.pickingMode = PickingMode.Position; dim.style.backgroundColor = new Color(0, 0, 0, .55f); GalaxyFilters.BackdropBlur(dim, 6);
+            if (command != null) Clickable(dim, command);
+            layer.Add(dim); hudLayer.Add(layer); return layer;
+        }
+
+        private VisualElement Card(float width, int radius)
+        {
+            var card = new VisualElement { pickingMode = PickingMode.Position }; card.style.width = width;
+            view.Decorate(card, "var(--pn)", radius, 10, "var(--pnS)"); Border(card, 1, new Color(1, 1, 1, .1f));
+            GalaxyFilters.Shadow(card, 0, 40, 45, new Color(0, 0, 0, .6f));
+            float began = Time.realtimeSinceStartup;
+            // modalIn .35s: y +18 → 0, scale .95 → 1.
+            motions.Add(t => { float u = TableConstants.EaseOutCubic(Mathf.Clamp01((t - began) / .35f)); card.style.translate = new Translate(0, 18 * (1 - u)); card.style.scale = new Scale(Vector2.one * Mathf.Lerp(.95f, 1, u)); });
+            return card;
+        }
+
+        /// <summary>Hand result (T24): rows sorted by hand score, XP instead of chips (offline bot table), 15 s "Sonraki el".</summary>
+        private void BuildResult(ResultInfo r)
+        {
+            var layer = Backdrop("table-result", null);
+            var card = Card(780, 30); card.name = "table-result-card"; card.style.overflow = Overflow.Hidden;
+            var header = Row(18); Pad(header, 26, 30, 18, 30);
+            var left = new VisualElement { pickingMode = PickingMode.Ignore }; left.style.flexGrow = 1;
+            var caption = Text(r.Title + " · " + r.Sub, "Baloo2-800", 11, "var(--mt)"); MenuView.Tracking(caption, 2, 11); left.Add(caption);
+            var head = Text(r.Head, "Montserrat-800", 40, "var(--a1)"); head.name = "table-result-head"; head.style.marginTop = 4;
+            head.style.textShadow = new TextShadow { offset = new Vector2(0, 3), blurRadius = 0, color = view.C("var(--lS)") }; left.Add(head);
+            header.Add(left);
+            var right = new VisualElement { pickingMode = PickingMode.Ignore }; right.style.alignItems = Align.FlexEnd;
+            var xpCap = Text("XP", "Baloo2-800", 10, "var(--mt)"); MenuView.Tracking(xpCap, 1.4f, 10); right.Add(xpCap);
+            var xp = Text("+" + view.N(r.Xp), "Montserrat-700", 30, "#8EF0B0"); xp.name = "table-result-xp"; xp.style.marginTop = 2; right.Add(xp);
+            header.Add(right); card.Add(header);
+
+            var body = new VisualElement { pickingMode = PickingMode.Ignore }; Pad(body, 0, 30, 0, 30);
+            var cols = Row(10); Pad(cols, 0, 14, 0, 14);
+            cols.Add(Cell(Text("", "Baloo2-800", 10, "var(--mt)"), 40, false));
+            var player = Text(L("OYUNCU", "PLAYER"), "Baloo2-800", 10, "var(--mt)"); MenuView.Tracking(player, 1.4f, 10); var pc = Cell(player, 0, false); pc.style.flexGrow = 1; cols.Add(pc);
+            var handCap = Text(L("EL PUANI", "HAND"), "Baloo2-800", 10, "var(--mt)"); MenuView.Tracking(handCap, 1.4f, 10); cols.Add(Cell(handCap, 110, true));
+            var totalCap = Text(L("TOPLAM", "TOTAL"), "Baloo2-800", 10, "var(--mt)"); MenuView.Tracking(totalCap, 1.4f, 10); cols.Add(Cell(totalCap, 110, true));
+            body.Add(cols);
+            int index = 0;
+            foreach (var row in r.Rows)
+            {
+                var line = Row(10); line.name = "result-row-" + row.Seat; line.style.marginTop = 6; Pad(line, 9, 14, 9, 14);
+                view.Decorate(line, row.Seat == 0 ? "var(--pnH)" : "var(--dp)", 16);
+                if (row.Seat == r.Winner) Border(line, 2, view.C("var(--a1)"));
+                var rank = Text(index + 1 + ".", "Montserrat-700", 20, index == 0 ? "var(--a1)" : "var(--mt)"); line.Add(Cell(rank, 40, false));
+                var who = Row(10); who.style.flexGrow = 1;
+                var dot = new VisualElement { pickingMode = PickingMode.Ignore }; dot.style.width = dot.style.height = 36; dot.style.alignItems = Align.Center; dot.style.justifyContent = Justify.Center;
+                view.Decorate(dot, (string)Seat(row.Seat)["color"], 18); dot.Add(Text((string)Seat(row.Seat)["ini"], "Montserrat-700", 13, "#fff")); who.Add(dot);
+                who.Add(Text((string)Seat(row.Seat)["name"], "Montserrat-700", 16, "#F4F1E8"));
+                who.Add(Text(row.Note, "Baloo2-800", 11, "var(--mt)"));
+                line.Add(who);
+                string hand = row.Hand.HasValue ? (row.Hand.Value > 0 ? "+" + row.Hand.Value : row.Hand.Value < 0 ? "−" + -row.Hand.Value : "0") : "–";
+                string handColor = !row.Hand.HasValue ? "var(--mt)" : row.Hand.Value < 0 ? "#8EF0B0" : row.Hand.Value >= 202 ? "#FF8A94" : "#F4F1E8";
+                line.Add(Cell(Text(hand, "Montserrat-700", 18, handColor), 110, true));
+                line.Add(Cell(Text(row.Total < 0 ? "−" + -row.Total : row.Total.ToString(), "Montserrat-700", 18, "#F4F1E8"), 110, true));
+                float began = r.StartedAt + index * .09f;
+                // drawerIn .35s, 90 ms apart: rows slide in from the left.
+                motions.Add(t => { float u = TableConstants.EaseOutCubic(Mathf.Clamp01((t - began) / .35f)); line.style.translate = new Translate(-44 * (1 - u), 0); line.style.opacity = u; });
+                body.Add(line); index++;
+            }
+            card.Add(body);
+
+            var strip = Row(12); strip.style.marginTop = 16; strip.style.marginLeft = 30; strip.style.marginRight = 30; Pad(strip, 10, 14, 10, 14); view.Decorate(strip, "var(--dp)", 16);
+            var gifts = Text(L("ALDIĞIN İKRAMLAR", "TREATS RECEIVED"), "Baloo2-800", 10, "var(--mt)"); MenuView.Tracking(gifts, 1.4f, 10); strip.Add(gifts);
+            var none = Text(L("Bu elde ikram gelmedi", "No treats this hand"), "Baloo2-700", 13, "var(--mt)"); none.style.flexGrow = 1; none.style.flexShrink = 1; strip.Add(none);
+            strip.Add(Text(L("Toplam ", "Total ") + "+" + view.N(r.TotalXp) + " XP", "Baloo2-800", 13, "#8EF0B0"));
+            card.Add(strip);
+
+            var buttons = Row(12); buttons.style.justifyContent = Justify.FlexEnd; Pad(buttons, 20, 30, 26, 30);
+            var leave = Text(L("Masadan kalk", "Leave table"), "Montserrat-700", 17, "#F4F1E8"); leave.name = "result-leave"; Pad(leave, 15, 24, 15, 24);
+            view.Decorate(leave, "var(--pnH)", 18, 5, "var(--pnS)"); GalaxyFilters.HoverBrightness(leave, 1.2f); buttons.Add(Clickable(leave, "exit"));
+            var next = new VisualElement { name = "result-next", pickingMode = PickingMode.Position }; next.style.overflow = Overflow.Hidden; Pad(next, 15, 34, 15, 34);
+            view.Decorate(next, "linear-gradient(var(--a1),var(--a2))", 18, 5, "var(--aS)");
+            var bar = new VisualElement { pickingMode = PickingMode.Ignore }; bar.style.position = Position.Absolute; bar.style.left = 0; bar.style.top = 0; bar.style.bottom = 0; bar.style.backgroundColor = new Color(1, 1, 1, .32f);
+            next.Add(bar);
+            var label = Text("", "Montserrat-800", 18, "var(--aT)"); label.name = "result-next-label"; next.Add(label);
+            float start = r.StartedAt; int total = r.Seconds;
+            // barFill 15s + the countdown in the label ("Sonraki el · 11").
+            motions.Add(t =>
+            {
+                float elapsed = Mathf.Max(0, t - start);
+                bar.style.width = Length.Percent(Mathf.Clamp01(elapsed / total) * 100);
+                label.text = L("Sonraki el · ", "Next hand · ") + Mathf.Max(0, total - Mathf.FloorToInt(elapsed));
+            });
+            buttons.Add(Clickable(next, "next"));
+            card.Add(buttons);
+            layer.Add(card);
+        }
+
+        private static VisualElement Cell(VisualElement content, float width, bool alignRight)
+        {
+            var cell = new VisualElement { pickingMode = PickingMode.Ignore }; if (width > 0) cell.style.width = width;
+            cell.style.flexDirection = FlexDirection.Row; cell.style.justifyContent = alignRight ? Justify.FlexEnd : Justify.FlexStart; cell.style.flexShrink = 0;
+            cell.Add(content); return cell;
+        }
+
+        /// <summary>Leave card (T25). The bot table is offline and XP-only, so the stake sentence becomes the XP one.</summary>
+        private void BuildExit()
+        {
+            var layer = Backdrop("table-exit-card", "exit-stay");
+            var card = Card(460, 28); card.name = "table-exit-confirm"; card.style.alignItems = Align.Center; Pad(card, 28, 28, 28, 28);
+            var icon = new VisualElement { pickingMode = PickingMode.Ignore }; icon.style.width = icon.style.height = 64; icon.style.alignItems = Align.Center; icon.style.justifyContent = Justify.Center;
+            view.Decorate(icon, "rgba(255,94,108,.16)", 20); icon.Add(view.Icon("table-exit", 32, "#FF8A94")); card.Add(icon);
+            var title = Text(L("Masadan kalkmak istiyor musun?", "Leave the table?"), "Montserrat-700", 24, "#F4F1E8"); title.style.marginTop = 12; card.Add(title);
+            var body = Text(L("El bitmeden kalkarsan bu elin XP'sini alamazsın ve yerine bot oynar.", "If you leave before the hand ends you get no XP for it and a bot takes your seat."), "Baloo2-700", 15, "var(--mt)");
+            body.style.whiteSpace = WhiteSpace.Normal; body.style.maxWidth = 360; body.style.unityTextAlign = TextAnchor.UpperCenter; body.style.marginTop = 12; card.Add(body);
+            var buttons = Row(10); buttons.style.alignSelf = Align.Stretch; buttons.style.marginTop = 20;
+            var stay = Text(L("Masada kal", "Stay"), "Montserrat-700", 17, "var(--aT)"); stay.name = "exit-stay"; stay.style.flexGrow = 1; stay.style.flexBasis = 0; stay.style.unityTextAlign = TextAnchor.MiddleCenter;
+            Pad(stay, 14, 14, 14, 14); view.Decorate(stay, "linear-gradient(var(--a1),var(--a2))", 16, 5, "var(--aS)"); buttons.Add(Clickable(stay, "exit-stay"));
+            var leave = Text(L("Kalk", "Leave"), "Montserrat-700", 17, "#fff"); leave.name = "exit-leave"; leave.style.flexGrow = 1; leave.style.flexBasis = 0; leave.style.unityTextAlign = TextAnchor.MiddleCenter;
+            Pad(leave, 14, 14, 14, 14); view.Decorate(leave, "linear-gradient(#FF7A86,#E8455A)", 16, 5, "#A3283A"); buttons.Add(Clickable(leave, "exit-leave"));
+            card.Add(buttons); layer.Add(card);
+        }
+
+        private static VisualElement FullRow(float top)
+        {
+            var row = new VisualElement { pickingMode = PickingMode.Ignore }; row.style.position = Position.Absolute; row.style.left = 0; row.style.right = 0; row.style.top = top; row.style.alignItems = Align.Center;
+            return row;
         }
 
         private void BuildDiscardLabel()
@@ -228,9 +460,9 @@ namespace Galaxy101.Table
             bar.Add(logo);
 
             var room = Row(8); Pad(room, 7, 13, 7, 13); view.Decorate(room, "var(--dp)", 15);
-            room.Add(Text(L("Tekli · 101", "Solo · 101"), "Baloo2-800", 12, "var(--ic)"));
+            room.Add(Text(L("Botlara karşı · 101", "vs Bots · 101"), "Baloo2-800", 12, "var(--ic)"));
             var dot = new VisualElement { pickingMode = PickingMode.Ignore }; dot.style.width = dot.style.height = 4; view.Decorate(dot, "var(--mt)", 2); room.Add(dot);
-            room.Add(Text(L("Bahis " + view.N(5000), "Stake " + view.N(5000)), "Baloo2-800", 12, "var(--ic)"));
+            room.Add(Text(L("Antrenman · XP", "Practice · XP"), "Baloo2-800", 12, "var(--ic)"));
             bar.Add(room);
 
             var spacer = new VisualElement { pickingMode = PickingMode.Ignore }; spacer.style.flexGrow = 1; bar.Add(spacer);

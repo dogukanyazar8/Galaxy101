@@ -8,6 +8,7 @@ using Okey101.Bots;
 using Okey101.Core.Model;
 using Okey101.Core.Rules;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Galaxy101.Table
 {
@@ -32,7 +33,7 @@ namespace Galaxy101.Table
         [Tooltip("Scene the exit button returns to (the Galaxy 101 main menu).")]
         [SerializeField] private string menuScene = "Bootstrap";
 
-        public enum Phase { Waiting, Deal, Draw, Discard, Opponent, Finished }
+        public enum Phase { Waiting, Seating, Deal, Draw, Discard, Opponent, Finished }
 
         public LocalSession Session { get; private set; }
         public TableBoard Board { get; private set; }
@@ -51,7 +52,21 @@ namespace Galaxy101.Table
         public bool HumanTurn => humanSeat == Me && Active == Me && (Current == Phase.Draw || Current == Phase.Discard);
         public bool CanDraw => HumanTurn && Current == Phase.Draw;
         public bool CanDiscard => HumanTurn && Current == Phase.Discard;
-        public bool CanArrange => Current != Phase.Waiting && Current != Phase.Deal;
+        public bool CanArrange => Current != Phase.Waiting && Current != Phase.Seating && Current != Phase.Deal;
+
+        // ---------- Faz 4: seating, finish moment, hand result, leave card ----------
+        /// <summary>Seats taken while the table fills (spec/10 §1); seat 0 is me.</summary>
+        public bool[] Seated { get; } = { true, false, false, false };
+        public int Countdown { get; private set; }
+        public bool ResultOpen { get; private set; }
+        public bool ExitOpen { get; private set; }
+        /// <summary>XP this session (bot tables are offline and award XP only; no chips).</summary>
+        public int XpEarned { get; private set; }
+        public int LastXp { get; private set; }
+        private string momentTitle, momentSub; private int momentSeat = -1; private bool momentOn;
+        private float countdownAt, resultAt, momentAt;
+        private TaskCompletionSource<bool> nextHandSignal;
+        private bool seating = true;
         public bool IOpened => OpenedKind(Me) != OpeningKind.None;
         public bool CanMeld => CanDiscard && IOpened;
         public event Action Changed;
@@ -66,7 +81,6 @@ namespace Galaxy101.Table
         private string flash; private bool flashBad; private float flashUntil;
         private bool warned;
         private System.Random random;
-        private float exitArmedUntil = -1;
         private bool leaving;
 
         private void Awake()
@@ -89,7 +103,7 @@ namespace Galaxy101.Table
         }
 
         /// <summary>Test hook: configure before Start (seat −1 = bots everywhere).</summary>
-        public void Configure(int human, uint fixedSeed, float seconds = 30) { humanSeat = human; seed = fixedSeed; turnSeconds = seconds; }
+        public void Configure(int human, uint fixedSeed, float seconds = 30, bool seatPlayers = true) { humanSeat = human; seed = fixedSeed; turnSeconds = seconds; seating = seatPlayers; }
 
         private void OnDestroy()
         {
@@ -119,6 +133,7 @@ namespace Galaxy101.Table
                 if (left <= 0) { humanDone?.TrySetResult(false); }
             }
             if (flash != null && Time.unscaledTime > flashUntil) { flash = null; Notify(); }
+            if (ExitOpen && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) CancelExit();
         }
 
         // ---------- flow ----------
@@ -133,6 +148,7 @@ namespace Galaxy101.Table
                     HandNumber++; LastResult = null; staged.Clear(); LastDrawn = -1;
                     var view = Session.GetView(Me);
                     Indicator = TileCodes.IndicatorFace(view.Indicator);
+                    if (HandNumber == 1 && seating) await SeatPlayers();
                     Rack.Deal(view.OwnHand.Select(t => t.Value).ToList());
                     Current = Phase.Deal; Active = -1; Notify();
                     float landed = Board.Deal(BuildBoard(view), view.ActivePlayer); SyncedVersion = view.Version;
@@ -209,15 +225,83 @@ namespace Galaxy101.Table
             if (receipt.Accepted) AfterCommit();
         }
 
+        /// <summary>
+        /// Waiting for players (spec/10 §1, T01–T02): lobby camera, the deck on the felt, bots join at 1.3 / 2.7 / 4.1 s
+        /// (Ayşe, Zeynep, Burak; "Davet et" seats one at once); 0.9 s after the table fills a 3-2-1 countdown runs while
+        /// the camera descends to the player view.
+        /// </summary>
+        private async Task SeatPlayers()
+        {
+            Current = Phase.Seating; Active = -1;
+            for (int k = 1; k < 4; k++) Seated[k] = false;
+            Board.Clear(); Board.LayoutDeck(106);
+            table.CameraRig.GoTo(TableCameraRig.View.Lobby, 0);
+            Notify();
+            float start = Time.time; var joins = new[] { (2, 1.3f), (1, 2.7f), (3, 4.1f) };
+            while (!Seated.All(x => x))
+            {
+                foreach (var (seat, at) in joins) if (!Seated[seat] && Time.time - start >= at) Invite(seat);
+                await Seconds(0.05f);
+            }
+            await Seconds(0.9f);
+            table.CameraRig.GoTo(TableCameraRig.View.Player, 3f);
+            for (int n = 3; n >= 1; n--) { Countdown = n; countdownAt = Time.realtimeSinceStartup; Notify(); await Seconds(1); }
+            Countdown = 0;
+        }
+
+        /// <summary>"Davet et": the empty seat fills immediately.</summary>
+        public void Invite(int seat)
+        {
+            if (Current != Phase.Seating || seat < 1 || seat > 3 || Seated[seat]) return;
+            Seated[seat] = true; Notify();
+        }
+
+        /// <summary>
+        /// Finish moment (spec/10 §7–§8: 3.8 s banner for a finisher, 2.4 s "TAŞ BİTTİ"), then the hand result (T24) for
+        /// 15 s or until "Sonraki el". Bot tables award XP only: +340 for the hand winner, +60 otherwise.
+        /// </summary>
         private async Task ShowResult()
         {
             var view = Session.GetView(Me); LastResult = view.Result;
             for (int k = 0; k < 4; k++) Totals[k] += view.Result.Scores[k].Total ?? 0;
-            Current = Phase.Finished; Active = -1; Notify();
-            Debug.Log("GALAXY101_TABLE_HAND_END hand=" + HandNumber + " reason=" + view.Result.FinishInfo.Reason + " winner=" + view.Result.FinishInfo.Winner
-                + " scores=" + string.Join(",", view.Result.Scores.Select(s => s.Total?.ToString() ?? "-")) + " turns=" + TurnsPlayed);
-            await Seconds(5);
+            int winner = HandWinner(view.Result);
+            LastXp = humanSeat == Me ? (winner == Me ? 340 : 60) : 0; XpEarned += LastXp;
+            Current = Phase.Finished; Active = -1;
+            var info = view.Result.FinishInfo;
+            Debug.Log("GALAXY101_TABLE_HAND_END hand=" + HandNumber + " reason=" + info.Reason + " winner=" + info.Winner
+                + " scores=" + string.Join(",", view.Result.Scores.Select(x => x.Total?.ToString() ?? "-")) + " turns=" + TurnsPlayed);
+            if (info.Winner.HasValue)
+            {
+                int w = info.Winner.Value; momentSeat = w;
+                momentTitle = w == Me ? L("BİTİRDİN!", "YOU FINISHED!") : Upper(Name(w)) + L(" BİTİRDİ!", " FINISHED!");
+                momentSub = info.Reason == FinishReason.AllPairs ? L("Çiftle bitirdi · el puanlanmadı", "Finished with pairs · hand not scored")
+                    : L("Son taşını desteye kapattı · ", "Closed the last tile on the deck · ") + Signed(view.Result.Scores[w].Total ?? -101) + L(" puan", " points");
+            }
+            else { momentSeat = -1; momentTitle = L("TAŞ BİTTİ", "DECK EMPTY"); momentSub = L("En düşük puanlı oyuncu eli alır", "Lowest score takes the hand"); }
+            momentOn = true; momentAt = Time.realtimeSinceStartup; Notify();
+            await Seconds(info.Winner.HasValue ? 3.8f : 2.4f);
+            momentOn = false;
+            ResultOpen = true; resultAt = Time.realtimeSinceStartup; nextHandSignal = new TaskCompletionSource<bool>(); Notify();
+            await Task.WhenAny(nextHandSignal.Task, Seconds(15));
+            ResultOpen = false; nextHandSignal = null; Notify();
         }
+
+        /// <summary>Lowest hand score takes the hand; a pairs finish (unscored) goes to the finisher.</summary>
+        private static int HandWinner(RoundResult result)
+        {
+            if (result.FinishInfo.Reason == FinishReason.AllPairs && result.FinishInfo.Winner.HasValue) return result.FinishInfo.Winner.Value;
+            int best = 0;
+            for (int k = 1; k < 4; k++) if ((result.Scores[k].Total ?? int.MaxValue) < (result.Scores[best].Total ?? int.MaxValue)) best = k;
+            return best;
+        }
+
+        /// <summary>"Sonraki el": skip the rest of the 15 s.</summary>
+        public void NextHand() => nextHandSignal?.TrySetResult(true);
+
+        private string Name(int seat) => hud != null ? hud.SeatName(seat) : "P" + seat;
+        private string FirstName(int seat) => hud != null ? hud.SeatFirstName(seat) : "P" + seat;
+        private string Upper(string text) => text.ToUpper(new System.Globalization.CultureInfo(hud != null && hud.L("tr", "en") == "en" ? "en-US" : "tr-TR"));
+        private static string Signed(int value) => value > 0 ? "+" + value : value < 0 ? "−" + (-value) : "0";
 
         // ---------- commands ----------
         private static CommandMeta Meta(PlayerView view) => new CommandMeta(view.RoundId, view.Actor, view.OwnLastSequence + 1, view.Version);
@@ -432,26 +516,32 @@ namespace Galaxy101.Table
                 case "sort-run": SortRack(true); break;
                 case "sort-pair": SortRack(false); break;
                 case "exit": RequestExit(); break;
+                case "exit-stay": CancelExit(); break;
+                case "exit-leave": ConfirmExit(); break;
+                case "next": NextHand(); break;
+                default:
+                    if (command.StartsWith("invite:", StringComparison.Ordinal) && int.TryParse(command.Substring(7), out int seat)) Invite(seat);
+                    break;
             }
         }
 
-        /// <summary>
-        /// Leave the table for the main menu. During a hand the first press only warns (the full T25 confirmation card is
-        /// a later phase); a second press within 2.6 s leaves.
-        /// </summary>
-        public void RequestExit()
+        /// <summary>Exit button (T25): the confirmation card; Esc or "Masada kal" closes it, "Kalk" leaves.</summary>
+        public void RequestExit() { if (leaving) return; ExitOpen = true; Notify(); }
+        public void CancelExit() { if (!ExitOpen) return; ExitOpen = false; Notify(); }
+
+        /// <summary>"Kalk": green notice, then the main menu after 1.7 s (spec/10 §10).</summary>
+        public void ConfirmExit()
         {
             if (leaving) return;
-            bool inHand = Current != Phase.Finished && Current != Phase.Waiting;
-            if (inHand && Time.unscaledTime > exitArmedUntil)
-            {
-                exitArmedUntil = Time.unscaledTime + 2.6f;
-                Flash(L("Masadan kalkmak için tekrar bas · el bitmeden kalkarsan bahis kaybedilir", "Press again to leave · leaving mid-hand forfeits the stake"), true);
-                return;
-            }
-            leaving = true; life?.Cancel();
+            leaving = true; ExitOpen = false; life?.Cancel();
             Flash(L("Masadan kalktın · lobiye dönülüyor", "You left the table · returning to the lobby"), false);
             Debug.Log("GALAXY101_TABLE_EXIT scene=" + menuScene);
+            StartCoroutine(LeaveAfter(1.7f));
+        }
+
+        private System.Collections.IEnumerator LeaveAfter(float seconds)
+        {
+            yield return new WaitForSecondsRealtime(seconds);
             UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(menuScene, UnityEngine.SceneManagement.LoadSceneMode.Single);
         }
 
@@ -467,11 +557,15 @@ namespace Galaxy101.Table
             var eval = HandEvaluation.Of(Rack, Indicator);
             var s = new TableHud.State
             {
-                Phase = Current == Phase.Deal ? "deal" : Current == Phase.Draw ? "draw" : Current == Phase.Discard ? "discard" : Current == Phase.Finished ? "fin" : "opp",
+                Phase = Current == Phase.Seating ? "seat" : Current == Phase.Deal ? "deal" : Current == Phase.Draw ? "draw" : Current == Phase.Discard ? "discard" : Current == Phase.Finished ? "fin" : "opp",
                 Active = Active, DeckCount = view.StockCount, TurnSeconds = Mathf.RoundToInt(turnSeconds), TurnStartedAt = turnStartedReal,
-                Warn = HumanTurn && warned, TurnHint = turnHint, ShowIndicator = Current != Phase.Deal, FirstTurn = view.Phase == RoundPhase.PlanningTurn && view.PendingDraw == null,
+                Warn = HumanTurn && warned, TurnHint = turnHint, ShowIndicator = Current != Phase.Deal && Current != Phase.Seating, FirstTurn = view.Phase == RoundPhase.PlanningTurn && view.PendingDraw == null,
                 Pairs = eval.Pairs.Count, Flash = flash, FlashBad = flashBad,
+                Countdown = Countdown, CountdownAt = countdownAt, ExitOpen = ExitOpen, Hand = HandNumber,
             };
+            for (int k = 0; k < 4; k++) s.Seated[k] = Current != Phase.Seating || Seated[k];
+            if (Current == Phase.Seating) s.DeckCount = 106;
+            if (momentOn) s.Moment = new TableHud.MomentInfo { Title = momentTitle, Sub = momentSub, Seat = momentSeat, StartedAt = momentAt };
             for (int k = 0; k < 4; k++)
             {
                 s.TileCounts[k] = k == Me ? Rack.Count : view.Players[k].HandCount;
@@ -480,13 +574,23 @@ namespace Galaxy101.Table
             s.OpenSum = s.Opened[Me] > 0 ? s.Opened[Me] : eval.Sum;
             s.CanOpen = CanDiscard && (s.Opened[Me] > 0 ? !s.OpenedPairs[Me] && eval.Groups.Count > 0 : eval.Sum >= 101);
             s.CanPair = CanDiscard && (s.OpenedPairs[Me] ? eval.Pairs.Count > 0 : s.Opened[Me] == 0 && eval.Pairs.Count >= 5);
-            if (Current == Phase.Finished && LastResult != null)
+            if (ResultOpen && LastResult != null)
             {
-                var info = LastResult.FinishInfo;
-                s.ResultLine = info.Winner.HasValue
-                    ? (info.Winner.Value == Me ? L("Bitirdin!", "You finished!") : hud.SeatName(info.Winner.Value) + L(" bitirdi", " finished"))
-                    : L("Taş bitti · en düşük puan eli alır", "Deck out · lowest score takes the hand");
-                s.ResultLine += " · " + string.Join("  ", Enumerable.Range(0, 4).Select(k => hud.SeatFirstName(k) + " " + (LastResult.Scores[k].Total?.ToString() ?? "–")));
+                var info = LastResult.FinishInfo; int winner = HandWinner(LastResult);
+                var result = new TableHud.ResultInfo
+                {
+                    Title = L(HandNumber + ". EL BİTTİ", "HAND " + HandNumber + " OVER"),
+                    Sub = info.Winner.HasValue ? Upper(FirstName(info.Winner.Value)) + L(" BİTİRDİ", " FINISHED") : L("TAŞ BİTTİ", "DECK EMPTY"),
+                    Head = winner == Me ? L("Kazandın!", "You won!") : FirstName(winner) + L(" kazandı", " won"),
+                    Xp = LastXp, TotalXp = XpEarned, Winner = winner, StartedAt = resultAt, Seconds = 15,
+                };
+                foreach (int k in Enumerable.Range(0, 4).OrderBy(k => LastResult.Scores[k].Total ?? int.MaxValue).ThenBy(k => k))
+                {
+                    var kind = view.Players[k].Opening;
+                    string note = info.Winner == k ? L("bitirdi", "finished") : kind == OpeningKind.Pairs ? L("çift açtı", "opened pairs") : kind != OpeningKind.None ? L("açtı", "opened") : L("açmadı", "not opened");
+                    result.Rows.Add(new TableHud.ResultRow { Seat = k, Note = note, Hand = LastResult.Scores[k].Total, Total = Totals[k] });
+                }
+                s.Result = result;
             }
             return s;
         }

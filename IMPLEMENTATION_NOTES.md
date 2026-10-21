@@ -65,6 +65,17 @@ Kaynak: `Design/galaxy101_unity_handoff/` içindeki PROMPT, README, yedi spec, J
 - Menü bağlantısı: ana menüde "Botlara karşı" + Hemen oyna artık `GalaxyTable` sahnesini açar (`MainMenuController.StartLocalAsync`, varsayılan `GalaxyTableScene`). Masadaki çıkış düğmesi `Bootstrap` (ana menü) sahnesine döner; el sürerken ilk basış uyarır, 2.6 sn içinde ikinci basış çıkar (tam T25 onay kartı sonraki faz). Eski masa (`Table`) yalnızca tanı argümanlarıyla (`-okeyPractice`, `-okeyA3Output`, `-okeyA4Output`) ve eski kabul testlerinde `LegacyTableScene` ile açılır.
 - Henüz yok: el sonu tablosu penceresi (şimdilik toast satırı), bitiş/dağıtım efektleri (kıvılcım, halka dalgası, deste dönüşü, konfeti), "yeni" sarı çizgi ve geçerli per yeşil çizgisi, bekleme/geri sayım, masadan kalk onayı, sohbet/ikram/ayarlar pencereleri. Dağıtılan ıstaka sırasızdır; ölçer, taşlar dizilene (ya da Seri diz'e basılana) kadar 0 görünür.
 
+## 3D oyun masası — faz 4 (döngüyü kapatan pencereler), 21 Ekim 2026
+
+- Ürün kararı: bot masası çevrimdışıdır ve **yalnızca XP** verir (eli alan +340, diğerleri +60; çip yok). Üst bar oda hapı "Botlara karşı · 101 • Antrenman · XP".
+- Bekleme (T01–T02): ilk elde lobi kamerası, deste masada; Ayşe 1.3 sn, Zeynep 2.7 sn, Burak 4.1 sn'de oturur; boş koltukta kesikli halka + yanıp sönen nokta + "Davet et" (koltuğu hemen doldurur); "MASA HAZIRLANIYOR · n/4" kartı ve dolum çubuğu; masa dolunca 0.9 sn sonra 3-2-1 (countPop) ve kamera 3 sn'de oyuncu görünümüne iner. Sonraki eller doğrudan dağıtımla başlar.
+- Bitiş anı (T23): bitiren için 3.8 sn şerit (dönen altın halkalı avatar, "AYŞE Y. BİTİRDİ!" / "BİTİRDİN!", alt satırda gerçek el puanı; çiftle bitişte "el puanlanmadı"); deste bitince 2.4 sn "TAŞ BİTTİ" şeridi.
+- El sonu tablosu (T24): satırlar el puanına göre, motorun gerçek puanları (cezalar ve çarpanlar dahil), not (bitirdi / açtı / çift açtı / açmadı), birikimli toplam, eli alan altın çerçeveli; sağ üstte XP; satırlar 90 ms arayla kayarak girer; "Sonraki el · 15" dolum çubuğuyla geri sayar (bitince ya da basınca yeni el); "Masadan kalk" çıkış kartını açar.
+- Masadan kalk (T25): çıkış düğmesi kartı açar; "Masada kal", arka plana tık ve Esc kapatır; "Kalk" yeşil bildirim + 1.7 sn sonra ana menü. Metin XP kararına göre: "El bitmeden kalkarsan bu elin XP'sini alamazsın ve yerine bot oynar."
+- Bağlantı koptu (T26) çevrimiçi masaya (S8) taşındı; bot masasında ağ yok.
+- XP şimdilik oturum içinde tutulur; profile kalıcı yazılması S2 (profil) ile gelecek.
+- Testler: oturma + davet + geri sayım, bitiş şeridi → tablo (4 satır) → sonraki el, çıkış kartı → menü. Ekran karşılaştırmaları: `docs/testing/table_T01_bekleme.png`, `docs/testing/table_T24_el_sonu.png`. EditMode 428/428, PlayMode 110/110.
+
 ## Tekrar üretim
 
 1. Unity Hub üzerinden bu kökü Unity 6000.6.6f1 ile açın; Bootstrap sahnesini çalıştırın.

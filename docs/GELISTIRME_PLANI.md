@@ -39,7 +39,7 @@ Sıra mantığı: **tasarımı hazır olan önce.** T01–T27 tasarlı; kural du
 
 | Faz | İçerik | Referans | Bağımlılık |
 |---|---|---|---|
-| 4 · Döngüyü kapat | El sonu tablosu + "Sonraki el · 15", bitiş anı şeridi (BİTİRDİN / X BİTİRDİ), TAŞ BİTTİ şeridi, masadan kalk kartı, bekleme + davet + 3-2-1, bağlantı koptu kartı | T01, T02, T23, T24, T25, T26 | yok |
+| 4 · Döngüyü kapat | El sonu tablosu + "Sonraki el · 15" (bot maçı: yalnız XP), bitiş anı şeridi (BİTİRDİN / X BİTİRDİ), TAŞ BİTTİ şeridi, masadan kalk kartı, bekleme + davet + 3-2-1 | T01, T02, T23, T24, T25 | yok |
 | 5 · Kural arayüzü | Okey seçici, ceza onayı + rozet, yerden alma kuralı görünümü, kural mesajları (TR/EN), puan dökümü çarpanları, maç sonu | **Tasarım paketi** | tasarım |
 | 6 · Efektler | Karma halkaları, deste dönüşü, kıvılcım/dalga, gösterge parlaması, yeni taş + geçerli per çizgileri, halka nabızları, konfeti/spot | spec/12, T03, T04, T23 | Faz 4 |
 | 7 · Masa pencereleri | Ayarlar (görünüm, oyun, ses, bildirim) + kuşbakışı kamera + masa/ıstaka/taş görünüm değişimi; rakip kartı; sohbet; ikram/hediye paneli + roket | T07–T22 | ikram fiyatı Faz S3 ekonomisine bağlanır |
@@ -61,13 +61,18 @@ Yaklaşım: her fazda **sözleşme (OpenAPI) → sunucu + test → Unity `Http*S
 | S5 · Mağaza | Katalog sunucudan; önce gem ile alım, sonra Unity IAP + makbuz doğrulama | Simüle kumar sınıfı: nakde çevirme yok, yaş derecelendirmesi |
 | S6 · Arkadaşlar | WebSocket ile çevrimiçi durumu, davet kodu, deep link, paylaşım | `IFriendsService`, `IShareService` |
 | S7 · Liderlik | Yalnızca sunucu otoriteli maç sonuçları; bot maçları sayılmaz | Masa hattıyla birleşir (S8) |
-| S8 · Çevrimiçi masa | Sunucu otoriteli oyun: `com.okey101.core` sunucuda koşar, istemci `LocalSession` yerine ağ oturumu kullanır; eşleştirme; Eşli/Katlamalı/Dereceli/Özel oda kuralları | Masa Faz 4–7 + S1–S6 |
+| S8 · Çevrimiçi masa (+ bağlantı koptu kartı, T26) | Sunucu otoriteli oyun: `com.okey101.core` sunucuda koşar, istemci `LocalSession` yerine ağ oturumu kullanır; eşleştirme; Eşli/Katlamalı/Dereceli/Özel oda kuralları | Masa Faz 4–7 + S1–S6 |
 
 Kimlik sırası: misafir → Google bağlama (Android Credential Manager, Windows OAuth PKCE) → iOS'ta Sign in with Apple zorunlu (App Store 4.8).
 
+## Ürün kararları
+
+- **Bot maçı çevrimdışıdır, yalnızca XP verir** (21 Ekim 2026). Çip kazanılmaz/kaybedilmez, bahis yok. Ekonomi (S3) yalnızca çevrimiçi maçlar için çip işler.
+- Açık: maç uzunluğu (el sayısı), XP miktarları. Tasarım brief'i: `docs/TASARIM_BRIEF_MASA.md`.
+
 ## Entegrasyon noktaları
 
-1. **Masa ↔ ekonomi (S3 sonrası):** el sonu çip/XP değişimi ve ikram ücretleri sunucu işlemine döner. Bot masası çevrimdışı çalışmaya devam eder; çevrimiçi değilken ödül verip vermeyeceği ürün kararı.
+1. **Masa ↔ ekonomi (S3 sonrası):** el sonu çip/XP değişimi ve ikram ücretleri sunucu işlemine döner. Bot masası çevrimdışıdır ve yalnızca XP verir.
 2. **Masa ↔ çevrimiçi (S8):** `TableGame` bir oturum arayüzüne ayrılır (`LocalSession` / ağ oturumu). Kural motoru iki tarafta aynı olduğu için istemci önizlemesi (ölçer, Aç doğrulaması) sunucuyla tutarlı kalır.
 3. **Menü modları:** "Botlara karşı" yerel masa; diğer modlar S8'de eşleştirmeye bağlanır.
 

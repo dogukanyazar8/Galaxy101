@@ -1,0 +1,7 @@
+{
+  "name": "com.okey101.core",
+  "version": "0.1.0",
+  "displayName": "Okey 101 Core",
+  "description": "Portable rules and deterministic local round state for Okey 101.",
+  "unity": "6000.6"
+}

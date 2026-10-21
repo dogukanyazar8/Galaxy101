@@ -1,0 +1,33 @@
+{
+ "cell": [
+  256,
+  360
+ ],
+ "grid": [
+  8,
+  7
+ ],
+ "order": "R1-13,B1-13,Y1-13,K1-13,J",
+ "skins": {
+  "classic": {
+   "roughness": 0.4,
+   "emission": 0
+  },
+  "galaxy": {
+   "roughness": 0.4,
+   "emission": 0.55
+  },
+  "gold": {
+   "roughness": 0.4,
+   "emission": 0.25
+  },
+  "neon": {
+   "roughness": 0.4,
+   "emission": 1.6
+  },
+  "marble": {
+   "roughness": 0.4,
+   "emission": 0
+  }
+ }
+}

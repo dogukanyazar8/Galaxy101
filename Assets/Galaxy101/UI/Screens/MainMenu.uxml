@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="galaxy-canvas" class="galaxy-canvas">
+        <ui:VisualElement name="dialog-underlay" class="fill" picking-mode="Ignore">
+            <ui:VisualElement name="scene-underlay" class="fill" picking-mode="Ignore">
+                <ui:VisualElement name="background" class="fill background" picking-mode="Ignore" />
+                <ui:VisualElement name="main-layer" class="fill" />
+            </ui:VisualElement>
+            <ui:VisualElement name="modal-layer" class="fill" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <ui:VisualElement name="dialog-layer" class="fill" picking-mode="Ignore" />
+        <ui:VisualElement name="toast-layer" class="fill toast-layer" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>

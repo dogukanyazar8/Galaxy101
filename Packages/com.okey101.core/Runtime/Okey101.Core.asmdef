@@ -1,0 +1,7 @@
+{
+  "name": "Okey101.Core",
+  "rootNamespace": "Okey101.Core",
+  "references": [],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

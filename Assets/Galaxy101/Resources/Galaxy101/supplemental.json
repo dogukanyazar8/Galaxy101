@@ -1,0 +1,322 @@
+{
+  "offers": [
+    [
+      {
+        "id": "chips-0",
+        "kind": "chips",
+        "amount": 50000,
+        "bonus": 0,
+        "price": 19.99,
+        "scale": 0.8,
+        "pop": false
+      },
+      {
+        "id": "chips-1",
+        "kind": "chips",
+        "amount": 250000,
+        "bonus": 10,
+        "price": 79.99,
+        "scale": 0.9,
+        "pop": false
+      },
+      {
+        "id": "chips-2",
+        "kind": "chips",
+        "amount": 1000000,
+        "bonus": 25,
+        "price": 249.99,
+        "scale": 1,
+        "pop": true
+      },
+      {
+        "id": "chips-3",
+        "kind": "chips",
+        "amount": 5000000,
+        "bonus": 50,
+        "price": 899.99,
+        "scale": 1.12,
+        "pop": false
+      }
+    ],
+    [
+      {
+        "id": "gems-0",
+        "kind": "gems",
+        "amount": 100,
+        "bonus": 0,
+        "price": 29.99,
+        "scale": 0.8,
+        "pop": false
+      },
+      {
+        "id": "gems-1",
+        "kind": "gems",
+        "amount": 550,
+        "bonus": 10,
+        "price": 139.99,
+        "scale": 0.9,
+        "pop": false
+      },
+      {
+        "id": "gems-2",
+        "kind": "gems",
+        "amount": 1200,
+        "bonus": 20,
+        "price": 279.99,
+        "scale": 1,
+        "pop": true
+      },
+      {
+        "id": "gems-3",
+        "kind": "gems",
+        "amount": 2500,
+        "bonus": 25,
+        "price": 549.99,
+        "scale": 1.12,
+        "pop": false
+      }
+    ],
+    [
+      {
+        "id": "skin-0",
+        "kind": "skin",
+        "tr": "Galaksi taşı",
+        "en": "Galaxy tiles",
+        "amount": 0,
+        "price": 800,
+        "pop": true,
+        "face": "linear-gradient(#3B2F7A,#1C1648)",
+        "edge": "#120E30",
+        "edge2": "#0A0820",
+        "col": "#FFD964",
+        "glow": "rgba(140,110,255,.5)",
+        "bonus": 0,
+        "scale": 1
+      },
+      {
+        "id": "skin-1",
+        "kind": "skin",
+        "tr": "Altın taş",
+        "en": "Gold tiles",
+        "amount": 0,
+        "price": 1200,
+        "pop": false,
+        "face": "linear-gradient(#FFE9A8,#E8B045)",
+        "edge": "#C88A2A",
+        "edge2": "#8A5A12",
+        "col": "#5A2E00",
+        "glow": "rgba(255,201,74,.45)",
+        "bonus": 0,
+        "scale": 1
+      },
+      {
+        "id": "skin-2",
+        "kind": "skin",
+        "tr": "Neon taş",
+        "en": "Neon tiles",
+        "amount": 0,
+        "price": 600,
+        "pop": false,
+        "face": "linear-gradient(#14202E,#0A1018)",
+        "edge": "#06090E",
+        "edge2": "#000",
+        "col": "#3DF5E0",
+        "glow": "rgba(61,245,224,.45)",
+        "bonus": 0,
+        "scale": 1
+      },
+      {
+        "id": "skin-3",
+        "kind": "skin",
+        "tr": "Mermer taş",
+        "en": "Marble tiles",
+        "amount": 0,
+        "price": 400,
+        "pop": false,
+        "face": "linear-gradient(#FFFFFF,#E4E6EC)",
+        "edge": "#C9CCD6",
+        "edge2": "#9499A8",
+        "col": "#2B3A55",
+        "glow": "transparent",
+        "bonus": 0,
+        "scale": 1
+      }
+    ]
+  ],
+  "deal": {
+    "id": "deal",
+    "chips": 1000000,
+    "gems": 50,
+    "price": 99.99,
+    "oldPrice": 199.99
+  },
+  "stats": {
+    "hands": 1284,
+    "wins": 527,
+    "winRate": 41,
+    "bestOpening": 186,
+    "okeyFinish": 73,
+    "xp": 6240,
+    "nextXp": 9000,
+    "lp": 720,
+    "nextLp": 1000,
+    "modeWinRates": [
+      44,
+      38,
+      36,
+      42
+    ]
+  },
+  "badges": [
+    {
+      "glyph": "1",
+      "color": "#3CCB6E",
+      "tr": "İlk zafer",
+      "en": "First win",
+      "desc_tr": "İlk elini kazan",
+      "desc_en": "Win your first hand",
+      "cur": 0,
+      "max": 0,
+      "locked": false
+    },
+    {
+      "glyph": "OK",
+      "color": "#F5A623",
+      "tr": "Okey ustası",
+      "en": "Okey master",
+      "desc_tr": "50 kez okey atarak bitir",
+      "desc_en": "Finish 50 hands with the okey",
+      "cur": 0,
+      "max": 0,
+      "locked": false
+    },
+    {
+      "glyph": "5",
+      "color": "#3D7BFF",
+      "tr": "5 çift",
+      "en": "5 pairs",
+      "desc_tr": "Çiftten 5 kez aç",
+      "desc_en": "Open with pairs 5 times",
+      "cur": 0,
+      "max": 0,
+      "locked": false
+    },
+    {
+      "glyph": "100",
+      "color": "#FF6B6B",
+      "tr": "100 el",
+      "en": "100 hands",
+      "desc_tr": "100 el oyna",
+      "desc_en": "Play 100 hands",
+      "cur": 0,
+      "max": 0,
+      "locked": false
+    },
+    {
+      "glyph": "×2",
+      "color": "#8B5CF6",
+      "tr": "Katlama kralı",
+      "en": "Doubling king",
+      "desc_tr": "Katlamalıda 25 el kazan",
+      "desc_en": "Win 25 Doubling hands",
+      "cur": 0,
+      "max": 0,
+      "locked": false
+    },
+    {
+      "glyph": "7",
+      "color": "#16B6A8",
+      "tr": "Seri galibiyet",
+      "en": "Win streak",
+      "desc_tr": "Üst üste 7 el kazan",
+      "desc_en": "Win 7 hands in a row",
+      "cur": 4,
+      "max": 7,
+      "locked": true
+    },
+    {
+      "glyph": "◆",
+      "color": "#7FE3FF",
+      "tr": "Elmas lig",
+      "en": "Diamond league",
+      "desc_tr": "Elmas lige yüksel",
+      "desc_en": "Reach Diamond league",
+      "cur": 720,
+      "max": 1000,
+      "locked": true
+    },
+    {
+      "glyph": "★",
+      "color": "#FFD964",
+      "tr": "Galaksi gezgini",
+      "en": "Galaxy explorer",
+      "desc_tr": "Tüm gezegen temalarını dene",
+      "desc_en": "Try every planet theme",
+      "cur": 3,
+      "max": 5,
+      "locked": true
+    },
+    {
+      "glyph": "1K",
+      "color": "#E85D9A",
+      "tr": "Efsane",
+      "en": "Legend",
+      "desc_tr": "1.000 el kazan",
+      "desc_en": "Win 1,000 hands",
+      "cur": 527,
+      "max": 1000,
+      "locked": true
+    }
+  ],
+  "history": [
+    {
+      "mode": 0,
+      "place": 1,
+      "delta": 4800,
+      "minutes": 12,
+      "lp": null
+    },
+    {
+      "mode": 1,
+      "place": 2,
+      "delta": 1200,
+      "minutes": 38,
+      "lp": null
+    },
+    {
+      "mode": 3,
+      "place": 1,
+      "delta": 0,
+      "minutes": 64,
+      "lp": "+24 LP"
+    },
+    {
+      "mode": 0,
+      "place": 3,
+      "delta": -2500,
+      "minutes": 95,
+      "lp": null
+    },
+    {
+      "mode": 2,
+      "place": 1,
+      "delta": 9600,
+      "minutes": 140,
+      "lp": null
+    },
+    {
+      "mode": 1,
+      "place": 4,
+      "delta": -5000,
+      "minutes": 210,
+      "lp": null
+    },
+    {
+      "mode": 0,
+      "place": 2,
+      "delta": 1500,
+      "minutes": 1440,
+      "lp": null
+    }
+  ]
+}

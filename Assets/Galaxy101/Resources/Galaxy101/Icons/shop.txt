@@ -1,0 +1,1 @@
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--aT)"><path d="M3 8.5 4.6 3.5h14.8L21 8.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z" style="fill:rgba(255,255,255,.6)"></path><path d="M4.5 11v8.5a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V11"></path><path d="M10 20.5V15.5h4v5"></path></svg>

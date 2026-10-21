@@ -1,0 +1,355 @@
+{
+  "units": "meter, Y-up (three.js); Unity: Z mirrored by glTFast",
+  "constants": {
+    "TY": 0.76,
+    "TW": 0.05,
+    "TH": 0.07,
+    "TD": 0.010,
+    "TD_range_mm": [
+      8,
+      24
+    ],
+    "SL": 0.053,
+    "RZ": 0.8,
+    "TILT_rad": -0.36,
+    "HALF": 0.86,
+    "FELT": 0.76
+  },
+  "seatYawDeg": [
+    0,
+    90,
+    180,
+    -90
+  ],
+  "camera": {
+    "fovDeg": 40,
+    "views": {
+      "player": {
+        "pos": [
+          0,
+          1.55,
+          1.62
+        ],
+        "target": [
+          0,
+          0.62,
+          -0.25
+        ]
+      },
+      "top": {
+        "pos": [
+          0,
+          2.6,
+          1.42
+        ],
+        "target": [
+          0,
+          0.58,
+          0.16
+        ]
+      },
+      "lobby": {
+        "pos": [
+          0,
+          3.2,
+          2.95
+        ],
+        "target": [
+          0,
+          0.45,
+          -0.3
+        ]
+      }
+    },
+    "transitions": {
+      "viewChange": 1.3,
+      "countdown": 3,
+      "dealStart": 0.8,
+      "finishReturn": 1.1
+    },
+    "breathe": {
+      "x": [
+        0.006,
+        0.21
+      ],
+      "y": [
+        0.004,
+        0.33
+      ]
+    },
+    "rocketShake": 0.4
+  },
+  "lights": {
+    "hemi": {
+      "ground": "#0a0a14",
+      "intensity": 0.45,
+      "sky": "theme.st"
+    },
+    "key": {
+      "color": "#fff4e2",
+      "intensity": 1.7,
+      "pos": [
+        1.1,
+        4.2,
+        2
+      ],
+      "shadowMap": 2048,
+      "ortho": 1.5,
+      "bias": -0.0004,
+      "normalBias": 0.015
+    },
+    "spot": {
+      "intensity": 9,
+      "range": 7,
+      "angle": 0.62,
+      "penumbra": 0.7,
+      "decay": 1.6,
+      "pos": [
+        0,
+        3.2,
+        0.3
+      ]
+    },
+    "back": {
+      "color": "theme.a2",
+      "intensity": 5,
+      "range": 7,
+      "pos": [
+        0,
+        1.5,
+        -2.3
+      ]
+    },
+    "fill": {
+      "color": "#9fb6ff",
+      "intensity": 1.6,
+      "pos": [
+        0,
+        1.6,
+        2.2
+      ]
+    },
+    "toneMapping": "ACES",
+    "exposure": 1.05,
+    "envIntensity": 0.75
+  },
+  "rack": {
+    "local": [
+      0,
+      "TY+0.033",
+      "RZ"
+    ],
+    "slot": {
+      "x": "(i-7)*SL",
+      "bottom": {
+        "y": 0.045,
+        "z": "-0.003+TD/2"
+      },
+      "top": {
+        "y": 0.128,
+        "z": "-0.022+TD/2"
+      }
+    },
+    "oppFillOrder": "center-out: [1,7],[0,7],[1,8],[0,8],[1,6],[0,6]..."
+  },
+  "discard": {
+    "local": [
+      0.6,
+      "TY+TD/2+min(k,4)*TD",
+      0.6
+    ],
+    "jitterRad": 0.25,
+    "keep": 4,
+    "zone": {
+      "rInner": 0.058,
+      "rOuter": 0.066,
+      "dropRadius": 0.1
+    }
+  },
+  "melds": {
+    "x": "-0.245 + a*0.049",
+    "z": "0.37 - row*0.08",
+    "maxCellsPerRow": 11
+  },
+  "indicator": {
+    "pos": [
+      0,
+      "TY+TH/2*cos(0.42)+0.002",
+      0.07
+    ],
+    "tiltRad": -0.42
+  },
+  "deck": {
+    "stack": 5,
+    "rows": {
+      ">60": 4,
+      ">25": 2,
+      "else": 1
+    },
+    "gap": 0.006,
+    "start": 106,
+    "afterDeal": 20
+  },
+  "giftSlots": {
+    "opponents": [
+      [
+        -0.43,
+        0.57
+      ],
+      [
+        -0.3,
+        0.61
+      ],
+      [
+        -0.46,
+        0.44
+      ]
+    ],
+    "me": [
+      [
+        -0.58,
+        0.42
+      ],
+      [
+        -0.6,
+        0.27
+      ],
+      [
+        -0.47,
+        0.5
+      ]
+    ],
+    "max": 3
+  },
+  "anchors": {
+    "player": {
+      "side": [
+        0,
+        0.86,
+        0.98
+      ],
+      "top": [
+        0,
+        1.16,
+        1.14
+      ]
+    },
+    "top": {
+      "side": [
+        0,
+        0.8,
+        1.22
+      ],
+      "top": [
+        0.56,
+        0.86,
+        0.98
+      ]
+    },
+    "screenClamp": {
+      "x": [
+        84,
+        1196
+      ],
+      "y": [
+        150,
+        580
+      ]
+    }
+  },
+  "chairs": {
+    "local": [
+      0,
+      0,
+      1.32
+    ]
+  },
+  "timings_ms": {
+    "seatJoins": {
+      "ayse": 1300,
+      "zeynep": 2700,
+      "burak": 4100
+    },
+    "countdownStep": 1000,
+    "dealLead": 750,
+    "dealStep": 24,
+    "dealTileFlight": 780,
+    "indicatorAfterLast": 500,
+    "playStartsAfterLast": 1500,
+    "firstBotGift": 1800,
+    "turnSeconds": 30,
+    "warnDefault": 5,
+    "opp": {
+      "active": 120,
+      "draw": 720,
+      "isle": 1150,
+      "discard": 1450,
+      "discardAfterIsle": 1800,
+      "step": 1600,
+      "stepWithIsle": 1950
+    },
+    "oppTakeDiscardChance": 0.25,
+    "oppBubbleChance": 0.16,
+    "finishBanner": 3800,
+    "deckOutBanner": 2400,
+    "resultAutoNext": 15000,
+    "groupHold": 360,
+    "doubleClick": 380,
+    "giftFlight": 1350,
+    "giftLand": 500,
+    "rocketFlight": 5600,
+    "recvToast": 5200,
+    "recvDelay": 1400,
+    "recvDelayRocket": 5800
+  },
+  "tweens": {
+    "slide": "clamp(0.18+d*0.6,0.18,0.34) easeOutCubic, no arc, no fx",
+    "travel": "clamp(0.42+d*0.38,0.42,0.85) easeInOutCubic, arc clamp(d*0.42,0.05,0.24)",
+    "deal": "cubic bezier 0.78s, c1 radius 0.16-0.24 at TY+0.30..0.42, c2 = 30% to center +0.22, spin 360deg",
+    "pop": "0.28s scale 1+0.07*sin(pi*u)",
+    "newBar": "1.6s yellow #FFD964"
+  },
+  "rocketPathNDC": [
+    [
+      -0.78,
+      0.62,
+      1.7
+    ],
+    [
+      -0.05,
+      0.86,
+      1.15
+    ],
+    [
+      0.82,
+      0.5,
+      1
+    ],
+    [
+      0.62,
+      -0.5,
+      0.78
+    ],
+    [
+      -0.15,
+      -0.62,
+      0.7
+    ],
+    [
+      -0.72,
+      -0.1,
+      0.95
+    ],
+    [
+      -0.25,
+      0.42,
+      1.6
+    ]
+  ],
+  "suitColors": {
+    "R": "#D7263D",
+    "B": "#1F5FBF",
+    "Y": "#E39B12",
+    "K": "#1B1B1B"
+  }
+}

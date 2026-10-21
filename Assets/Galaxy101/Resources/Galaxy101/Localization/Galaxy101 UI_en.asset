@@ -1,0 +1,1271 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: Galaxy101 UI_en
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: 4a6f01a60700e5247973469c6b08daab, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 853856256
+    m_Localized: PLAY NOW
+    m_Metadata:
+      m_Items: []
+  - m_Id: 962908160
+    m_Localized: PLANET THEME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 962908161
+    m_Localized: Gold II
+    m_Metadata:
+      m_Items: []
+  - m_Id: 962908162
+    m_Localized: Shop
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102464
+    m_Localized: Friends
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102465
+    m_Localized: Leaderboard
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102466
+    m_Localized: Daily reward
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102467
+    m_Localized: Rules
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102468
+    m_Localized: Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102469
+    m_Localized: Close
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102470
+    m_Localized: Reset to default
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102471
+    m_Localized: Cancel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102472
+    m_Localized: Save
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102473
+    m_Localized: Planet theme
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102474
+    m_Localized: Colors, logo and background follow the planet you pick
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102475
+    m_Localized: Edit profile
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102476
+    m_Localized: My profile
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102477
+    m_Localized: Buy chips
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102478
+    m_Localized: Buy gems
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102479
+    m_Localized: "Player ID \xB7 4821 9930"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102480
+    m_Localized: Linked
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102481
+    m_Localized: Log out
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102482
+    m_Localized: Delete account
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102483
+    m_Localized: Offline
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102484
+    m_Localized: Game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102485
+    m_Localized: Sound
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102486
+    m_Localized: Display
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102487
+    m_Localized: Language
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102488
+    m_Localized: Account
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102489
+    m_Localized: Tile movement and table behavior
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102490
+    m_Localized: Music, effects and notification sounds
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102491
+    m_Localized: Theme, resolution and visual effects
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102492
+    m_Localized: App language
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102493
+    m_Localized: Profile, linked accounts and notifications
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102494
+    m_Localized: Auto-sort
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102495
+    m_Localized: Drawn tiles go to the right spot on your rack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102496
+    m_Localized: Highlight sets
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102497
+    m_Localized: Valid sets glow green
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102498
+    m_Localized: Double-click to discard
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102499
+    m_Localized: Discard quickly without dragging
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102500
+    m_Localized: Table chat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102501
+    m_Localized: Show messages and emojis at the table
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102502
+    m_Localized: Turn timer warning
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102503
+    m_Localized: How many seconds before your time runs out
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102504
+    m_Localized: Tile size
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102505
+    m_Localized: Size of the tiles on your rack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102506
+    m_Localized: Small
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102507
+    m_Localized: Medium
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102508
+    m_Localized: Large
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102509
+    m_Localized: Master volume
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102510
+    m_Localized: Overall level of all sounds
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102511
+    m_Localized: Music
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102512
+    m_Localized: Menu and table music
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102513
+    m_Localized: Effects
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102514
+    m_Localized: Tile, dice and button sounds
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102515
+    m_Localized: Tile sounds
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102516
+    m_Localized: Sound when drawing and discarding
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102517
+    m_Localized: Notification sound
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102518
+    m_Localized: Your-turn and invite alerts
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102519
+    m_Localized: Background motion
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102520
+    m_Localized: Spinning planet and shooting stars
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102521
+    m_Localized: Resolution
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102522
+    m_Localized: Screen size
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102523
+    m_Localized: Effect quality
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102524
+    m_Localized: Lower settings run smoother on older computers
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102525
+    m_Localized: Low
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102526
+    m_Localized: High
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102527
+    m_Localized: Friend requests
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102528
+    m_Localized: Get notified about new requests
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102529
+    m_Localized: Table invites
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102530
+    m_Localized: Let friends invite you to their table
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102531
+    m_Localized: Turkey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102532
+    m_Localized: International
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102533
+    m_Localized: en-US
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102534
+    m_Localized: chips
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102535
+    m_Localized: +${b}%
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102536
+    m_Localized: gems
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102537
+    m_Localized: Tile skin
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102538
+    m_Localized: MOST POPULAR
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102539
+    m_Localized: "WEEKEND DEAL \xB7 50% OFF"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102540
+    m_Localized: 1,000,000 chips + 50 gems
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102541
+    m_Localized: Buy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102542
+    m_Localized: Invite
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102543
+    m_Localized: Sent
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102544
+    m_Localized: Watch
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102545
+    m_Localized: Message
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102546
+    m_Localized: Accept
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102547
+    m_Localized: Decline
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102548
+    m_Localized: 'LV '
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102549
+    m_Localized: Search by name or code
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102550
+    m_Localized: Your code
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102551
+    m_Localized: Add friend
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102552
+    m_Localized: No friends match "${s.q.trim()}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102553
+    m_Localized: No pending requests
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102554
+    m_Localized: No friends here yet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102555
+    m_Localized: RANK
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102556
+    m_Localized: PLAYER
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102557
+    m_Localized: LEAGUE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102558
+    m_Localized: POINTS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102559
+    m_Localized: Day ${d}
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102560
+    m_Localized: Collect
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102561
+    m_Localized: Daily quests
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102562
+    m_Localized: ${doneN}/${TASKS.length} completed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102563
+    m_Localized: Resets in ${hh}h ${mm}m
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102564
+    m_Localized: Claim
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102565
+    m_Localized: Claimed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102566
+    m_Localized: In progress
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102567
+    m_Localized: EXAMPLE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102568
+    m_Localized: ${m} min ago
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102569
+    m_Localized: ${Math.floor(m / 60)} h ago
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102570
+    m_Localized: Yesterday
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102571
+    m_Localized: LEVEL 24
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102572
+    m_Localized: No status message yet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102573
+    m_Localized: To level 25
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102574
+    m_Localized: 6,240 / 9,000 XP
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102575
+    m_Localized: Share profile
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102576
+    m_Localized: HANDS PLAYED
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102577
+    m_Localized: 527 won
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102578
+    m_Localized: WIN RATE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102579
+    m_Localized: 41%
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102580
+    m_Localized: +3% this month
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102581
+    m_Localized: BEST OPENING
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102582
+    m_Localized: points
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102583
+    m_Localized: OKEY FINISH
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102584
+    m_Localized: doubled hands
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102585
+    m_Localized: "SEASON 3 \xB7 RANKED"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102586
+    m_Localized: SEASON BEST
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102587
+    m_Localized: Gold I
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102588
+    m_Localized: 280 LP to Gold I
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102589
+    m_Localized: WIN RATE BY MODE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102590
+    m_Localized: ${p}%
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102591
+    m_Localized: FRAMES
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102592
+    m_Localized: Tap to equip
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102593
+    m_Localized: Unlocks at level 30
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102594
+    m_Localized: Equipped
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102595
+    m_Localized: Owned
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102596
+    m_Localized: MODE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102597
+    m_Localized: PLACE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102598
+    m_Localized: CHIPS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102599
+    m_Localized: WHEN
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102600
+    m_Localized: "101 \xB7 5K table"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102601
+    m_Localized: '#${pl}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102602
+    m_Localized: Edit profile
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102603
+    m_Localized: LV 24
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102604
+    m_Localized: AVATAR COLOR
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102605
+    m_Localized: Player name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102606
+    m_Localized: Other players see this name at the table.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102607
+    m_Localized: "3\u201316 characters: letters, numbers, space, dot or underscore."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102608
+    m_Localized: Status message
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102609
+    m_Localized: e.g. Always up for a quick game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102610
+    m_Localized: Avatar frame
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102611
+    m_Localized: LV 30
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102612
+    m_Localized: You can change your name once every 30 days.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102613
+    m_Localized: DELETE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102614
+    m_Localized: Delete your account?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102615
+    m_Localized: Log out?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102616
+    m_Localized: Your account will be deleted after 30 days. Logging in during that time cancels the deletion.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102617
+    m_Localized: Your chips, progress and friends are saved to your Google account. You can log back in anytime.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102618
+    m_Localized: Type ${word} to confirm
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102619
+    m_Localized: Delete account
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102620
+    m_Localized: Log out
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102621
+    m_Localized: Deletion scheduled
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102622
+    m_Localized: Logged out
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102623
+    m_Localized: Log in within 30 days to cancel.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102624
+    m_Localized: See you at the table soon.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102625
+    m_Localized: OK
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102626
+    m_Localized: Search with a friend code or player name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102627
+    m_Localized: e.g. MK-3321
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102628
+    m_Localized: Search
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102629
+    m_Localized: Enter a code or name and press Search.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102630
+    m_Localized: You are already friends with this player.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102631
+    m_Localized: No player found. Check the code and try again.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102632
+    m_Localized: Request sent
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102633
+    m_Localized: Send request
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102634
+    m_Localized: Copied
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102635
+    m_Localized: Copy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102636
+    m_Localized: More
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102637
+    m_Localized: Send your profile card to friends
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102638
+    m_Localized: Season 3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102639
+    m_Localized: HANDS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102640
+    m_Localized: WIN
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102641
+    m_Localized: BEST
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102642
+    m_Localized: Profile link
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102643
+    m_Localized: Share via
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102644
+    m_Localized: Copy link
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102645
+    m_Localized: "Opening ${name}\u2026"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102646
+    m_Localized: Invite a friend, earn chips
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102647
+    m_Localized: You both get 2,000 chips when they play their first hand with your link.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102648
+    m_Localized: '''Chips'', ''Gems'', ''Cosmetics'''
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102649
+    m_Localized: '''Weekly'', ''Season'', ''Friends'''
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102650
+    m_Localized: '''Overview'', ''Badges'', ''Match history'''
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102651
+    m_Localized: '''Classic'', ''Gold'', ''Galaxy'''
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102652
+    m_Localized: '''Classic'', ''Gold'', ''Galaxy'''
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102653
+    m_Localized: '''125,400 chips and 340 gems'', ''Level 24, Gold II rank and badges'', ''Friend list and match history'''
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102654
+    m_Localized: Chips
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102655
+    m_Localized: Gems
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102656
+    m_Localized: Cosmetics
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102657
+    m_Localized: Weekly
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102658
+    m_Localized: Season
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102659
+    m_Localized: Overview
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102660
+    m_Localized: Badges
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102661
+    m_Localized: Match history
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102662
+    m_Localized: Classic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102663
+    m_Localized: Gold
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102664
+    m_Localized: Galaxy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102665
+    m_Localized: 125,400 chips and 340 gems
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102666
+    m_Localized: Level 24, Gold II rank and badges
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102667
+    m_Localized: Friend list and match history
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102668
+    m_Localized: Could not save changes. Try again.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102669
+    m_Localized: Online
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102670
+    m_Localized: All
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102671
+    m_Localized: Requests
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102672
+    m_Localized: Could not open the table. Try again.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102673
+    m_Localized: ' s'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102674
+    m_Localized: Done
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102675
+    m_Localized: Not enough gems
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102676
+    m_Localized: Solo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102677
+    m_Localized: "Solo \xB7 101 \xB7 5K table"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102678
+    m_Localized: Pairs
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102679
+    m_Localized: "Pairs \xB7 101 \xB7 5K table"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102680
+    m_Localized: Doubling
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102681
+    m_Localized: "Doubling \xB7 101 \xB7 10K table"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102682
+    m_Localized: Ranked
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102683
+    m_Localized: "Ranked \xB7 Gold II"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102684
+    m_Localized: Vs bots
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102685
+    m_Localized: "Vs bots \xB7 practice"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102686
+    m_Localized: Private room
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102687
+    m_Localized: "Private room \xB7 password"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102688
+    m_Localized: Tiles and the okey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102689
+    m_Localized: 'There are 106 tiles: two of each number from 1 to 13 in red, yellow, blue and black, plus 2 false okeys.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102690
+    m_Localized: The tile turned up in the middle is the indicator. The tile one above it is the okey and can stand in for any tile.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102691
+    m_Localized: A false okey takes the place of the okey itself and has the okey's value.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102692
+    m_Localized: If the indicator is yellow 7, the okey is yellow 8.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102693
+    m_Localized: Dealing
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102694
+    m_Localized: The tiles are shuffled and every player gets 21 tiles.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102695
+    m_Localized: The starting player gets 22 tiles and begins by discarding one.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102696
+    m_Localized: The remaining tiles form the draw pile in the middle. Play goes counter-clockwise.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102697
+    m_Localized: Opening your hand
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102698
+    m_Localized: To open your hand, your sets must add up to at least 101.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102699
+    m_Localized: 'Run: at least 3 consecutive tiles of the same color. Group: 3 or 4 tiles of the same number in different colors.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102700
+    m_Localized: You can also open with at least 5 pairs.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102701
+    m_Localized: Run 46 + group 36 = 82 points. You need 19 more to open.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102702
+    m_Localized: Adding tiles
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102703
+    m_Localized: Once you have opened, you can add matching tiles to any set on the table.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102704
+    m_Localized: If you hold the tile the okey stands for in a set on the table, you can swap it in and take the okey.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102705
+    m_Localized: You can add red 13 to the red run on the table.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102706
+    m_Localized: Finishing
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102707
+    m_Localized: The player who places all their tiles in sets and discards their last tile finishes the hand.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102708
+    m_Localized: If you finish by discarding the okey, every penalty is doubled.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102709
+    m_Localized: Discarding the okey as your last tile doubles all penalties.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102710
+    m_Localized: Scoring
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102711
+    m_Localized: The player who finishes gets -101 points.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102712
+    m_Localized: Players who opened get a penalty equal to the sum of the tiles left in their hand.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102713
+    m_Localized: A player who never opened gets 202 penalty points. Players who opened with pairs get double penalties.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102714
+    m_Localized: The player with the lowest score at the end wins.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102715
+    m_Localized: Indicator
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102716
+    m_Localized: Okey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102717
+    m_Localized: Add
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102718
+    m_Localized: Last tile
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102719
+    m_Localized: Diamond I
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102720
+    m_Localized: Diamond II
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102721
+    m_Localized: In lobby
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102722
+    m_Localized: "At a table \xB7 Pairs"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102723
+    m_Localized: Looking for a ranked match
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102724
+    m_Localized: 2 hours ago
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102725
+    m_Localized: 3 days ago
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102726
+    m_Localized: "Mutual friend: Ay\u015Fe Y."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102727
+    m_Localized: Your opponent last match
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102728
+    m_Localized: Win 3 hands
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102729
+    m_Localized: Open with pairs
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102730
+    m_Localized: Play 5 hands
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102731
+    m_Localized: Finish by discarding the okey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102732
+    m_Localized: Add 40 tiles to sets
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102733
+    m_Localized: Chips, gems and tile skins
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102734
+    m_Localized: 3 friends online
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102735
+    m_Localized: "Season 3 \xB7 12 days left"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102736
+    m_Localized: "5-day streak \xB7 log in daily to grow your reward"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102737
+    m_Localized: Stats, rank and badges
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102738
+    m_Localized: How to play 101 Okey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102739
+    m_Localized: Saturn
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102740
+    m_Localized: Golden rings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102741
+    m_Localized: Mars
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102742
+    m_Localized: Red desert
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102743
+    m_Localized: Neptune
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102744
+    m_Localized: Ice blue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102745
+    m_Localized: Jupiter
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102746
+    m_Localized: Storm belts
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102747
+    m_Localized: Venus
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102748
+    m_Localized: Pink haze
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102749
+    m_Localized: Galaxy tiles
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102750
+    m_Localized: Gold tiles
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102751
+    m_Localized: Neon tiles
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102752
+    m_Localized: Marble tiles
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102753
+    m_Localized: First win
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102754
+    m_Localized: Win your first hand
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102755
+    m_Localized: Okey master
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102756
+    m_Localized: Finish 50 hands with the okey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102757
+    m_Localized: 5 pairs
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102758
+    m_Localized: Open with pairs 5 times
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102759
+    m_Localized: 100 hands
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102760
+    m_Localized: Play 100 hands
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102761
+    m_Localized: Doubling king
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102762
+    m_Localized: Win 25 Doubling hands
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102763
+    m_Localized: Win streak
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102764
+    m_Localized: Win 7 hands in a row
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102765
+    m_Localized: Diamond league
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102766
+    m_Localized: Reach Diamond league
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102767
+    m_Localized: Galaxy explorer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102768
+    m_Localized: Try every planet theme
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102769
+    m_Localized: Legend
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1802865266688
+    m_Localized: Win 1,000 hands
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4283099828224
+    m_Localized: Win 1,000 hands
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

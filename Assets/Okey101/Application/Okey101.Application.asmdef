@@ -1,0 +1,6 @@
+{
+  "name": "Okey101.Application",
+  "rootNamespace": "Okey101.Application",
+  "references": ["Okey101.Core"],
+  "noEngineReferences": true
+}

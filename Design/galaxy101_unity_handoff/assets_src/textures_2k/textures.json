@@ -1,0 +1,330 @@
+{
+ "galaxy101_masa_istasyon": {
+  "cuha": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "cuha_BaseColor.png",
+   "Normal": "cuha_Normal.png",
+   "MetallicRoughness": "cuha_MetallicRoughness.png",
+   "pattern": "felt",
+   "metallic": 0.0,
+   "roughness": 0.96
+  },
+  "holo": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "holo_BaseColor.png"
+  }
+ },
+ "galaxy101_masa_ceviz": {
+  "masa_ceviz_govde": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "masa_ceviz_govde_BaseColor.png",
+   "Normal": "masa_ceviz_govde_Normal.png",
+   "MetallicRoughness": "masa_ceviz_govde_MetallicRoughness.png",
+   "pattern": "wood",
+   "metallic": 0.0,
+   "roughness": 0.5
+  },
+  "cuha": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "cuha_BaseColor.png",
+   "Normal": "cuha_Normal.png",
+   "MetallicRoughness": "cuha_MetallicRoughness.png",
+   "pattern": "felt",
+   "metallic": 0.0,
+   "roughness": 0.96
+  },
+  "masa_ceviz_kenar": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "masa_ceviz_kenar_BaseColor.png",
+   "Normal": "masa_ceviz_kenar_Normal.png",
+   "MetallicRoughness": "masa_ceviz_kenar_MetallicRoughness.png",
+   "pattern": "wood",
+   "metallic": 0.0,
+   "roughness": 0.32
+  },
+  "holo": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "holo_BaseColor.png"
+  }
+ },
+ "galaxy101_masa_hologram": {
+  "cuha": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "cuha_BaseColor.png",
+   "Emission": "cuha_Emission.png"
+  },
+  "holo": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "holo_BaseColor.png"
+  }
+ },
+ "galaxy101_masa_andromeda": {
+  "cuha": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "cuha_BaseColor.png",
+   "Emission": "cuha_Emission.png"
+  },
+  "holo": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "holo_BaseColor.png"
+  }
+ },
+ "galaxy101_istaka_ceviz": {
+  "istaka_ceviz": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "istaka_ceviz_BaseColor.png",
+   "Normal": "istaka_ceviz_Normal.png",
+   "MetallicRoughness": "istaka_ceviz_MetallicRoughness.png",
+   "pattern": "wood",
+   "metallic": 0.0,
+   "roughness": 0.42
+  },
+  "istaka_ceviz_uc": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "istaka_ceviz_uc_BaseColor.png",
+   "Normal": "istaka_ceviz_uc_Normal.png",
+   "MetallicRoughness": "istaka_ceviz_uc_MetallicRoughness.png",
+   "pattern": "wood",
+   "metallic": 0.0,
+   "roughness": 0.4
+  }
+ },
+ "galaxy101_istaka_sedef": {
+  "istaka_gulagaci": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "istaka_gulagaci_BaseColor.png",
+   "Normal": "istaka_gulagaci_Normal.png",
+   "MetallicRoughness": "istaka_gulagaci_MetallicRoughness.png",
+   "pattern": "wood",
+   "metallic": 0.0,
+   "roughness": 0.3
+  },
+  "istaka_sedef_panel": {
+   "size": [
+    2304,
+    384
+   ],
+   "BaseColor": "istaka_sedef_panel_BaseColor.png",
+   "Normal": "istaka_sedef_panel_Normal.png",
+   "MetallicRoughness": "istaka_sedef_panel_MetallicRoughness.png",
+   "pattern": "inlay",
+   "metallic": 0.0,
+   "roughness": 0.22
+  },
+  "istaka_gulagaci_uc": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "istaka_gulagaci_uc_BaseColor.png",
+   "Normal": "istaka_gulagaci_uc_Normal.png",
+   "MetallicRoughness": "istaka_gulagaci_uc_MetallicRoughness.png",
+   "pattern": "wood",
+   "metallic": 0.0,
+   "roughness": 0.3
+  }
+ },
+ "galaxy101_istaka_aluminyum": {
+  "istaka_aluminyum": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "istaka_aluminyum_BaseColor.png",
+   "Normal": "istaka_aluminyum_Normal.png",
+   "MetallicRoughness": "istaka_aluminyum_MetallicRoughness.png",
+   "pattern": "brushed",
+   "metallic": 0.8,
+   "roughness": 0.34
+  },
+  "istaka_eloksal": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "istaka_eloksal_BaseColor.png",
+   "Normal": "istaka_eloksal_Normal.png",
+   "MetallicRoughness": "istaka_eloksal_MetallicRoughness.png",
+   "pattern": "brushed",
+   "metallic": 0.95,
+   "roughness": 0.34
+  }
+ },
+ "galaxy101_istaka_karbon": {
+  "istaka_karbon": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "istaka_karbon_BaseColor.png",
+   "Normal": "istaka_karbon_Normal.png",
+   "MetallicRoughness": "istaka_karbon_MetallicRoughness.png",
+   "pattern": "weave",
+   "metallic": 0.35,
+   "roughness": 0.32
+  }
+ },
+ "galaxy101_istaka_andromeda": {
+  "istaka_andromeda_panel": {
+   "size": [
+    2048,
+    512
+   ],
+   "BaseColor": "istaka_andromeda_panel_BaseColor.png",
+   "Emission": "istaka_andromeda_panel_Emission.png"
+  }
+ },
+ "galaxy101_oda_istasyon": {
+  "zemin": {
+   "size": [
+    2048,
+    2048
+   ],
+   "BaseColor": "zemin_BaseColor.png",
+   "Normal": "zemin_Normal.png",
+   "MetallicRoughness": "zemin_MetallicRoughness.png",
+   "pattern": "seams",
+   "metallic": 0.55,
+   "roughness": 0.5
+  },
+  "duvar": {
+   "size": [
+    2048,
+    1024
+   ],
+   "BaseColor": "duvar_BaseColor.png",
+   "Normal": "duvar_Normal.png",
+   "MetallicRoughness": "duvar_MetallicRoughness.png",
+   "pattern": "seams",
+   "metallic": 0.4,
+   "roughness": 0.6,
+   "Emission": "duvar_Emission.png"
+  }
+ },
+ "galaxy101_ikram_coffee": {
+  "iznik_desen": {
+   "size": [
+    1024,
+    256
+   ],
+   "BaseColor": "iznik_desen_BaseColor.png"
+  },
+  "kopuk": {
+   "size": [
+    1024,
+    1024
+   ],
+   "BaseColor": "kopuk_BaseColor.png"
+  }
+ },
+ "galaxy101_ikram_cola": {
+  "pipet": {
+   "size": [
+    512,
+    512
+   ],
+   "BaseColor": "pipet_BaseColor.png"
+  },
+  "limon_dilim": {
+   "size": [
+    1024,
+    1024
+   ],
+   "BaseColor": "limon_dilim_BaseColor.png"
+  }
+ },
+ "galaxy101_ikram_simit": {
+  "ahsap": {
+   "size": [
+    1024,
+    1024
+   ],
+   "BaseColor": "ahsap_BaseColor.png",
+   "Normal": "ahsap_Normal.png",
+   "MetallicRoughness": "ahsap_MetallicRoughness.png",
+   "pattern": "wood",
+   "metallic": 0.0,
+   "roughness": 0.6
+  }
+ },
+ "galaxy101_ikram_baklava": {
+  "hamur_kat": {
+   "size": [
+    128,
+    1024
+   ],
+   "BaseColor": "hamur_kat_BaseColor.png"
+  }
+ },
+ "galaxy101_ikram_seeds": {
+  "kese_kagidi": {
+   "size": [
+    1024,
+    1024
+   ],
+   "BaseColor": "kese_kagidi_BaseColor.png",
+   "Normal": "kese_kagidi_Normal.png",
+   "MetallicRoughness": "kese_kagidi_MetallicRoughness.png",
+   "pattern": "paper",
+   "metallic": 0.0,
+   "roughness": 0.9
+  }
+ },
+ "galaxy101_hediye_cake": {
+  "mum": {
+   "size": [
+    256,
+    512
+   ],
+   "BaseColor": "mum_BaseColor.png"
+  }
+ },
+ "galaxy101_hediye_trophy": {
+  "plaka": {
+   "size": [
+    1024,
+    384
+   ],
+   "BaseColor": "plaka_BaseColor.png"
+  }
+ }
+}

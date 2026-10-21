@@ -1,0 +1,17 @@
+{
+  "name": "Galaxy101.Editor",
+  "rootNamespace": "Galaxy101",
+  "references": [
+    "Galaxy101.Runtime",
+    "Unity.Localization",
+    "Unity.Localization.Editor",
+    "Unity.ResourceManager",
+    "Unity.Addressables.Editor",
+    "Unity.RenderPipelines.Universal.Runtime",
+    "Unity.RenderPipelines.Core.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": true
+}

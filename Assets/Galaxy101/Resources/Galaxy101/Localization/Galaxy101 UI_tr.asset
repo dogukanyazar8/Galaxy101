@@ -1,0 +1,1271 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: Galaxy101 UI_tr
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: tr
+  m_SharedData: {fileID: 11400000, guid: 4a6f01a60700e5247973469c6b08daab, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 853856256
+    m_Localized: HEMEN OYNA
+    m_Metadata:
+      m_Items: []
+  - m_Id: 962908160
+    m_Localized: GEZEGEN TEMASI
+    m_Metadata:
+      m_Items: []
+  - m_Id: 962908161
+    m_Localized: "Alt\u0131n II"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 962908162
+    m_Localized: "Ma\u011Faza"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102464
+    m_Localized: "Arkada\u015Flar"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102465
+    m_Localized: Liderlik
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102466
+    m_Localized: "G\xFCnl\xFCk \xF6d\xFCl"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102467
+    m_Localized: Kurallar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102468
+    m_Localized: Ayarlar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102469
+    m_Localized: Kapat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102470
+    m_Localized: "Varsay\u0131lana d\xF6n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102471
+    m_Localized: "Vazge\xE7"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102472
+    m_Localized: Kaydet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102473
+    m_Localized: "Gezegen temas\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102474
+    m_Localized: "Renkler, logo ve arka plan se\xE7ti\u011Fin gezegene g\xF6re de\u011Fi\u015Fir"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102475
+    m_Localized: "Profili d\xFCzenle"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102476
+    m_Localized: Profilim
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102477
+    m_Localized: "\xC7ip sat\u0131n al"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102478
+    m_Localized: "Elmas sat\u0131n al"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102479
+    m_Localized: "Oyuncu ID \xB7 4821 9930"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102480
+    m_Localized: "Ba\u011Fl\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102481
+    m_Localized: "\xC7\u0131k\u0131\u015F yap"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102482
+    m_Localized: "Hesab\u0131 sil"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102483
+    m_Localized: "\xC7evrimd\u0131\u015F\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102484
+    m_Localized: Oyun
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102485
+    m_Localized: Ses
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102486
+    m_Localized: "G\xF6r\xFCnt\xFC"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102487
+    m_Localized: Dil
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102488
+    m_Localized: Hesap
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102489
+    m_Localized: "Ta\u015F hareketleri ve masa davran\u0131\u015F\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102490
+    m_Localized: "M\xFCzik, efektler ve bildirim sesleri"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102491
+    m_Localized: "Tema, \xE7\xF6z\xFCn\xFCrl\xFCk ve g\xF6rsel efektler"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102492
+    m_Localized: "Uygulaman\u0131n dili"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102493
+    m_Localized: "Profil, ba\u011Fl\u0131 hesaplar ve bildirimler"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102494
+    m_Localized: "Otomatik s\u0131rala"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102495
+    m_Localized: "Yeni \xE7ekilen ta\u015F \u0131stakada uygun yere yerle\u015Fsin"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102496
+    m_Localized: Perleri vurgula
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102497
+    m_Localized: "Ge\xE7erli perlerin \xE7evresi ye\u015Fil yans\u0131n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102498
+    m_Localized: "\xC7ift t\u0131kla ta\u015F at"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102499
+    m_Localized: "S\xFCr\xFCklemeden h\u0131zl\u0131 at\u0131\u015F"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102500
+    m_Localized: Masa sohbeti
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102501
+    m_Localized: "Masa i\xE7i mesaj ve emojiler g\xF6r\xFCns\xFCn"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102502
+    m_Localized: "Tur s\xFCresi uyar\u0131s\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102503
+    m_Localized: "S\xFCre bitmeden ka\xE7 saniye \xF6nce uyar\u0131ls\u0131n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102504
+    m_Localized: "Ta\u015F boyutu"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102505
+    m_Localized: "Istakadaki ta\u015Flar\u0131n b\xFCy\xFCkl\xFC\u011F\xFC"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102506
+    m_Localized: "K\xFC\xE7\xFCk"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102507
+    m_Localized: Orta
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102508
+    m_Localized: "B\xFCy\xFCk"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102509
+    m_Localized: Ana ses
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102510
+    m_Localized: "T\xFCm seslerin genel seviyesi"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102511
+    m_Localized: "M\xFCzik"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102512
+    m_Localized: "Men\xFC ve masa m\xFCzi\u011Fi"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102513
+    m_Localized: Efektler
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102514
+    m_Localized: "Ta\u015F, zar ve buton sesleri"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102515
+    m_Localized: "Ta\u015F sesleri"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102516
+    m_Localized: "Ta\u015F \xE7ekme ve atma sesi"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102517
+    m_Localized: Bildirim sesi
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102518
+    m_Localized: "S\u0131ra sende ve davet uyar\u0131lar\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102519
+    m_Localized: Arka plan hareketi
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102520
+    m_Localized: "D\xF6nen gezegen ve kayan y\u0131ld\u0131zlar"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102521
+    m_Localized: "\xC7\xF6z\xFCn\xFCrl\xFCk"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102522
+    m_Localized: Ekran boyutu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102523
+    m_Localized: Efekt kalitesi
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102524
+    m_Localized: "D\xFC\u015F\xFCk ayar eski bilgisayarlarda ak\u0131c\u0131l\u0131\u011F\u0131 art\u0131r\u0131r"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102525
+    m_Localized: "D\xFC\u015F\xFCk"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102526
+    m_Localized: "Y\xFCksek"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102527
+    m_Localized: "Arkada\u015Fl\u0131k istekleri"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102528
+    m_Localized: "Yeni istekler i\xE7in bildirim al"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102529
+    m_Localized: Masa davetleri
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102530
+    m_Localized: "Arkada\u015Flar\u0131n seni masaya \xE7a\u011F\u0131rabilsin"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102531
+    m_Localized: "T\xFCrkiye"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102532
+    m_Localized: "Uluslararas\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102533
+    m_Localized: tr-TR
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102534
+    m_Localized: "\xE7ip"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102535
+    m_Localized: +%${b}
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102536
+    m_Localized: elmas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102537
+    m_Localized: "Ta\u015F g\xF6r\xFCn\xFCm\xFC"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102538
+    m_Localized: "EN POP\xDCLER"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102539
+    m_Localized: "HAFTA SONU FIRSATI \xB7 %50"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102540
+    m_Localized: "1.000.000 \xE7ip + 50 elmas"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102541
+    m_Localized: "Sat\u0131n al"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102542
+    m_Localized: Davet et
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102543
+    m_Localized: "G\xF6nderildi"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102544
+    m_Localized: "\u0130zle"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102545
+    m_Localized: Mesaj
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102546
+    m_Localized: Kabul et
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102547
+    m_Localized: Reddet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102548
+    m_Localized: 'SV '
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102549
+    m_Localized: "Oyuncu ad\u0131 veya kod ara"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102550
+    m_Localized: Kodun
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102551
+    m_Localized: "Arkada\u015F ekle"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102552
+    m_Localized: "\"${s.q.trim()}\" ile e\u015Fle\u015Fen arkada\u015F yok"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102553
+    m_Localized: Bekleyen istek yok
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102554
+    m_Localized: "Burada hen\xFCz arkada\u015F yok"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102555
+    m_Localized: SIRA
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102556
+    m_Localized: OYUNCU
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102557
+    m_Localized: "L\u0130G"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102558
+    m_Localized: PUAN
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102559
+    m_Localized: "${d}. G\xFCn"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102560
+    m_Localized: Topla
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102561
+    m_Localized: "G\xFCnl\xFCk g\xF6revler"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102562
+    m_Localized: "${doneN}/${TASKS.length} tamamland\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102563
+    m_Localized: Yenilenmeye ${hh} sa ${mm} dk
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102564
+    m_Localized: Al
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102565
+    m_Localized: "Al\u0131nd\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102566
+    m_Localized: Devam ediyor
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102567
+    m_Localized: "\xD6RNEK"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102568
+    m_Localized: "${m} dk \xF6nce"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102569
+    m_Localized: "${Math.floor(m / 60)} sa \xF6nce"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102570
+    m_Localized: "D\xFCn"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102571
+    m_Localized: "SEV\u0130YE 24"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102572
+    m_Localized: "Hen\xFCz durum mesaj\u0131 yok"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102573
+    m_Localized: Seviye 25'e
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102574
+    m_Localized: 6.240 / 9.000 XP
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102575
+    m_Localized: "Profili payla\u015F"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102576
+    m_Localized: OYNANAN EL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102577
+    m_Localized: "527 kazan\u0131ld\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102578
+    m_Localized: KAZANMA
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102579
+    m_Localized: '%41'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102580
+    m_Localized: Bu ay +%3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102581
+    m_Localized: "EN \u0130Y\u0130 A\xC7ILI\u015E"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102582
+    m_Localized: puan
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102583
+    m_Localized: "OKEY B\u0130T\u0130\u015E"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102584
+    m_Localized: katlanan el
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102585
+    m_Localized: "SEZON 3 \xB7 DERECEL\u0130"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102586
+    m_Localized: "SEZON EN \u0130Y\u0130"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102587
+    m_Localized: "Alt\u0131n I"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102588
+    m_Localized: "Alt\u0131n I'e 280 LP"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102589
+    m_Localized: "MODLARA G\xD6RE KAZANMA"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102590
+    m_Localized: '%${p}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102591
+    m_Localized: "\xC7ER\xC7EVELER"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102592
+    m_Localized: "Takmak i\xE7in dokun"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102593
+    m_Localized: "Seviye 30'da a\xE7\u0131l\u0131r"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102594
+    m_Localized: "Tak\u0131l\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102595
+    m_Localized: Sahipsin
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102596
+    m_Localized: MOD
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102597
+    m_Localized: SIRA
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102598
+    m_Localized: "\xC7\u0130P"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102599
+    m_Localized: ZAMAN
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102600
+    m_Localized: "101 \xB7 5K masa"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102601
+    m_Localized: ${pl}.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102602
+    m_Localized: "Profili d\xFCzenle"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102603
+    m_Localized: SV 24
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102604
+    m_Localized: "AVATAR RENG\u0130"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102605
+    m_Localized: "Oyuncu ad\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102606
+    m_Localized: "Masadaki di\u011Fer oyuncular bu ad\u0131 g\xF6r\xFCr."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102607
+    m_Localized: "3\u201316 karakter: harf, rakam, bo\u015Fluk, nokta veya alt \xE7izgi."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102608
+    m_Localized: "Durum mesaj\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102609
+    m_Localized: "\xD6rn. H\u0131zl\u0131 bir el i\xE7in hep haz\u0131r\u0131m"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102610
+    m_Localized: "Avatar \xE7er\xE7evesi"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102611
+    m_Localized: SV 30
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102612
+    m_Localized: "Ad\u0131n\u0131 30 g\xFCnde bir de\u011Fi\u015Ftirebilirsin."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102613
+    m_Localized: "S\u0130L"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102614
+    m_Localized: "Hesab\u0131n\u0131 silmek istiyor musun?"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102615
+    m_Localized: "\xC7\u0131k\u0131\u015F yapmak istiyor musun?"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102616
+    m_Localized: "Hesab\u0131n 30 g\xFCn sonra kal\u0131c\u0131 olarak silinir. Bu s\xFCre i\xE7inde giri\u015F yaparsan silme i\u015Flemi iptal olur."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102617
+    m_Localized: "\xC7iplerin, ilerlemen ve arkada\u015Flar\u0131n Google hesab\u0131nda saklan\u0131r. \u0130stedi\u011Fin zaman tekrar giri\u015F yapabilirsin."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102618
+    m_Localized: "Onaylamak i\xE7in ${word} yaz"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102619
+    m_Localized: "Hesab\u0131 sil"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102620
+    m_Localized: "\xC7\u0131k\u0131\u015F yap"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102621
+    m_Localized: "Silme talebin al\u0131nd\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102622
+    m_Localized: "\xC7\u0131k\u0131\u015F yap\u0131ld\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102623
+    m_Localized: "30 g\xFCn i\xE7inde giri\u015F yaparak iptal edebilirsin."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102624
+    m_Localized: "Masada g\xF6r\xFC\u015Fmek \xFCzere."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102625
+    m_Localized: Tamam
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102626
+    m_Localized: "Arkada\u015F kodu veya oyuncu ad\u0131yla ara"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102627
+    m_Localized: "\xD6rn. MK-3321"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102628
+    m_Localized: Ara
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102629
+    m_Localized: Kod ya da ad girip Ara'ya bas.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102630
+    m_Localized: "Bu oyuncuyla zaten arkada\u015Fs\u0131n\u0131z."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102631
+    m_Localized: "Oyuncu bulunamad\u0131. Kodu kontrol edip tekrar dene."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102632
+    m_Localized: "\u0130stek g\xF6nderildi"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102633
+    m_Localized: "\u0130stek g\xF6nder"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102634
+    m_Localized: "Kopyaland\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102635
+    m_Localized: Kopyala
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102636
+    m_Localized: "Di\u011Fer"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102637
+    m_Localized: "Profil kart\u0131n\u0131 arkada\u015Flar\u0131na g\xF6nder"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102638
+    m_Localized: Sezon 3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102639
+    m_Localized: EL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102640
+    m_Localized: KAZANMA
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102641
+    m_Localized: "EN \u0130Y\u0130"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102642
+    m_Localized: "Profil ba\u011Flant\u0131s\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102643
+    m_Localized: "\u015Eununla payla\u015F"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102644
+    m_Localized: "Ba\u011Flant\u0131y\u0131 kopyala"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102645
+    m_Localized: "${name} a\xE7\u0131l\u0131yor\u2026"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102646
+    m_Localized: "Arkada\u015F\u0131n\u0131 davet et, \xE7ip kazan"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102647
+    m_Localized: "Ba\u011Flant\u0131nla gelen arkada\u015F\u0131n ilk elini oynay\u0131nca ikiniz de 2.000 \xE7ip kazan\u0131rs\u0131n\u0131z."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102648
+    m_Localized: "'\xC7ip', 'Elmas', 'G\xF6r\xFCn\xFCm'"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102649
+    m_Localized: "'Haftal\u0131k', 'Sezon', 'Arkada\u015Flar'"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102650
+    m_Localized: "'Genel', 'Rozetler', 'Ma\xE7 ge\xE7mi\u015Fi'"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102651
+    m_Localized: "'Klasik', 'Alt\u0131n', 'Galaksi'"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102652
+    m_Localized: "'Klasik', 'Alt\u0131n', 'Galaksi'"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102653
+    m_Localized: "'125.400 \xE7ip ve 340 elmas', 'Seviye 24, Alt\u0131n II derecesi ve rozetler', 'Arkada\u015F listesi ve ma\xE7 ge\xE7mi\u015Fi'"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102654
+    m_Localized: "\xC7ip"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102655
+    m_Localized: Elmas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102656
+    m_Localized: "G\xF6r\xFCn\xFCm"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102657
+    m_Localized: "Haftal\u0131k"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102658
+    m_Localized: Sezon
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102659
+    m_Localized: Genel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102660
+    m_Localized: Rozetler
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102661
+    m_Localized: "Ma\xE7 ge\xE7mi\u015Fi"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102662
+    m_Localized: Klasik
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102663
+    m_Localized: "Alt\u0131n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102664
+    m_Localized: Galaksi
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102665
+    m_Localized: "125.400 \xE7ip ve 340 elmas"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102666
+    m_Localized: "Seviye 24, Alt\u0131n II derecesi ve rozetler"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102667
+    m_Localized: "Arkada\u015F listesi ve ma\xE7 ge\xE7mi\u015Fi"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102668
+    m_Localized: "De\u011Fi\u015Fiklikler kaydedilemedi. Tekrar dene."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102669
+    m_Localized: "\xC7evrimi\xE7i"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102670
+    m_Localized: "T\xFCm\xFC"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102671
+    m_Localized: "\u0130stekler"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102672
+    m_Localized: "Masa a\xE7\u0131lamad\u0131. Yeniden deneyin."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102673
+    m_Localized: ' sn'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102674
+    m_Localized: "\u0130\u015Flem tamam"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102675
+    m_Localized: Yetersiz elmas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102676
+    m_Localized: Tekli
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102677
+    m_Localized: "Tekli \xB7 101 \xB7 5K masa"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102678
+    m_Localized: "E\u015Fli"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102679
+    m_Localized: "E\u015Fli \xB7 101 \xB7 5K masa"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102680
+    m_Localized: "Katlamal\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102681
+    m_Localized: "Katlamal\u0131 \xB7 101 \xB7 10K masa"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102682
+    m_Localized: Dereceli
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102683
+    m_Localized: "Dereceli \xB7 Alt\u0131n II"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102684
+    m_Localized: "Botlara kar\u015F\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102685
+    m_Localized: "Botlara kar\u015F\u0131 \xB7 antrenman"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102686
+    m_Localized: "\xD6zel oda"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102687
+    m_Localized: "\xD6zel oda \xB7 \u015Fifreli"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102688
+    m_Localized: "Ta\u015Flar ve okey"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102689
+    m_Localized: "Oyunda 106 ta\u015F var: k\u0131rm\u0131z\u0131, sar\u0131, mavi ve siyah renklerde 1'den 13'e kadar iki\u015Fer ta\u015F ve 2 sahte okey."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102690
+    m_Localized: "Ortadan a\xE7\u0131lan ta\u015F g\xF6stergedir. G\xF6stergenin bir \xFCst\xFC okeydir ve her ta\u015F\u0131n yerine ge\xE7ebilir."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102691
+    m_Localized: "Sahte okey, okeyin kendisi yerine kullan\u0131l\u0131r; de\u011Feri okeyin de\u011Feridir."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102692
+    m_Localized: "G\xF6sterge sar\u0131 7 ise okey sar\u0131 8 olur."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102693
+    m_Localized: "Da\u011F\u0131t\u0131m"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102694
+    m_Localized: "Ta\u015Flar kar\u0131\u015Ft\u0131r\u0131l\u0131r ve her oyuncuya 21 ta\u015F da\u011F\u0131t\u0131l\u0131r."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102695
+    m_Localized: "Oyunu ba\u015Flatan oyuncu 22 ta\u015F al\u0131r ve ilk hamlede bir ta\u015F atarak ba\u015Flar."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102696
+    m_Localized: "Kalan ta\u015Flar ortada \xE7ekme destesi olur. S\u0131ra saat y\xF6n\xFCn\xFCn tersine ilerler."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102697
+    m_Localized: "Elini a\xE7mak"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102698
+    m_Localized: "Elini a\xE7abilmek i\xE7in perlerinin toplam\u0131 en az 101 olmal\u0131."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102699
+    m_Localized: "Seri: ayn\u0131 renkte en az 3 ard\u0131\u015F\u0131k ta\u015F. Grup: ayn\u0131 say\u0131da, farkl\u0131 renklerde 3 veya 4 ta\u015F."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102700
+    m_Localized: "\u0130stersen en az 5 \xE7iftle \xE7iftten de a\xE7abilirsin."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102701
+    m_Localized: "Seri 46 + grup 36 = 82 puan. A\xE7mak i\xE7in 19 puan daha gerekir."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102702
+    m_Localized: "Ta\u015F i\u015Flemek"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102703
+    m_Localized: "Elini a\xE7t\u0131ktan sonra masadaki t\xFCm perlere uygun ta\u015F ekleyebilirsin."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102704
+    m_Localized: "Masadaki bir perde okeyin yerini tutan ta\u015F sende varsa, onu koyup okeyi alabilirsin."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102705
+    m_Localized: "K\u0131rm\u0131z\u0131 13'\xFC masadaki k\u0131rm\u0131z\u0131 seriye i\u015Fleyebilirsin."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102706
+    m_Localized: Bitirmek
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102707
+    m_Localized: "Elindeki t\xFCm ta\u015Flar\u0131 perlere yerle\u015Ftirip son ta\u015F\u0131n\u0131 atan oyuncu eli bitirir."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102708
+    m_Localized: "Son ta\u015F olarak okeyi atarak bitirirsen b\xFCt\xFCn cezalar ikiye katlan\u0131r."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102709
+    m_Localized: "Son ta\u015F olarak okeyi atmak cezalar\u0131 ikiye katlar."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102710
+    m_Localized: Puanlama
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102711
+    m_Localized: "Eli bitiren oyuncu -101 puan al\u0131r."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102712
+    m_Localized: "Elini a\xE7an oyuncular ellerinde kalan ta\u015Flar\u0131n toplam\u0131 kadar ceza al\u0131r."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102713
+    m_Localized: "Elini a\xE7amayan oyuncu 202 ceza al\u0131r. \xC7iftten a\xE7anlar\u0131n cezas\u0131 ikiye katlan\u0131r."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102714
+    m_Localized: "Oyun sonunda en d\xFC\u015F\xFCk puana sahip oyuncu kazan\u0131r."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102715
+    m_Localized: "G\xF6sterge"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102716
+    m_Localized: Okey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102717
+    m_Localized: "\u0130\u015Fle"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102718
+    m_Localized: "Son ta\u015F"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102719
+    m_Localized: Elmas I
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102720
+    m_Localized: Elmas II
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102721
+    m_Localized: Lobide
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102722
+    m_Localized: "Masada \xB7 E\u015Fli"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102723
+    m_Localized: "Dereceli ma\xE7 ar\u0131yor"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102724
+    m_Localized: "2 saat \xF6nce"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102725
+    m_Localized: "3 g\xFCn \xF6nce"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102726
+    m_Localized: "Ortak arkada\u015F: Ay\u015Fe Y."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102727
+    m_Localized: "Son ma\xE7ta rakibindi"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102728
+    m_Localized: 3 el kazan
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102729
+    m_Localized: "\xC7iftten a\xE7"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102730
+    m_Localized: 5 el oyna
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102731
+    m_Localized: Okey atarak bitir
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102732
+    m_Localized: "40 ta\u015F i\u015Fle"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102733
+    m_Localized: "\xC7ip, elmas ve ta\u015F g\xF6r\xFCn\xFCmleri"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102734
+    m_Localized: "3 arkada\u015F\u0131n \xE7evrimi\xE7i"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102735
+    m_Localized: "Sezon 3 \xB7 biti\u015Fe 12 g\xFCn"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102736
+    m_Localized: "5 g\xFCnl\xFCk seri \xB7 her g\xFCn gir, \xF6d\xFCl b\xFCy\xFCs\xFCn"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102737
+    m_Localized: "\u0130statistikler, derece ve rozetler"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102738
+    m_Localized: "101 Okey nas\u0131l oynan\u0131r"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102739
+    m_Localized: "Sat\xFCrn"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102740
+    m_Localized: "Alt\u0131n halkalar"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102741
+    m_Localized: Mars
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102742
+    m_Localized: "K\u0131z\u0131l \xE7\xF6l"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102743
+    m_Localized: "Nept\xFCn"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102744
+    m_Localized: Buz mavisi
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102745
+    m_Localized: "J\xFCpiter"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102746
+    m_Localized: "F\u0131rt\u0131na ku\u015Faklar\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102747
+    m_Localized: "Ven\xFCs"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102748
+    m_Localized: Pembe sis
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102749
+    m_Localized: "Galaksi ta\u015F\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102750
+    m_Localized: "Alt\u0131n ta\u015F"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102751
+    m_Localized: "Neon ta\u015F"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102752
+    m_Localized: "Mermer ta\u015F"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102753
+    m_Localized: "\u0130lk zafer"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102754
+    m_Localized: "\u0130lk elini kazan"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102755
+    m_Localized: "Okey ustas\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102756
+    m_Localized: 50 kez okey atarak bitir
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102757
+    m_Localized: "5 \xE7ift"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102758
+    m_Localized: "\xC7iftten 5 kez a\xE7"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102759
+    m_Localized: 100 el
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102760
+    m_Localized: 100 el oyna
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102761
+    m_Localized: "Katlama kral\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102762
+    m_Localized: "Katlamal\u0131da 25 el kazan"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102763
+    m_Localized: Seri galibiyet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102764
+    m_Localized: "\xDCst \xFCste 7 el kazan"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102765
+    m_Localized: Elmas lig
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102766
+    m_Localized: "Elmas lige y\xFCksel"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102767
+    m_Localized: Galaksi gezgini
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102768
+    m_Localized: "T\xFCm gezegen temalar\u0131n\u0131 dene"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 967102769
+    m_Localized: Efsane
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1802865266688
+    m_Localized: 1.000 el kazan
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4283099828224
+    m_Localized: 1.000 el kazan
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

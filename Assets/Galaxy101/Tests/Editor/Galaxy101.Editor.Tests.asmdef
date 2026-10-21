@@ -1,0 +1,14 @@
+{
+  "name": "Galaxy101.Editor.Tests",
+  "rootNamespace": "Galaxy101.Tests",
+  "references": [
+    "Galaxy101.Runtime",
+    "Okey101.Core"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

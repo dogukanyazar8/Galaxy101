@@ -1,0 +1,5 @@
+{
+  "name": "Okey101.Presentation",
+  "rootNamespace": "Okey101.Presentation",
+  "references": ["Okey101.Core", "Okey101.Application", "Okey101.Bots", "Galaxy101.Runtime", "Unity.InputSystem", "UnityEngine.UI"]
+}

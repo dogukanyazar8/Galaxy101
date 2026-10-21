@@ -1,0 +1,6 @@
+{
+  "name": "Okey101.PlayMode.Tests",
+  "references": ["Okey101.Core", "Okey101.TestSupport", "Okey101.Application", "Okey101.Bots", "Okey101.Presentation", "Galaxy101.Runtime", "Unity.InputSystem", "UnityEngine.UI"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false
+}

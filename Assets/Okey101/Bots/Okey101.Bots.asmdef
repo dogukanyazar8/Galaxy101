@@ -1,0 +1,6 @@
+{
+  "name": "Okey101.Bots",
+  "rootNamespace": "Okey101.Bots",
+  "references": ["Okey101.Core", "Okey101.Application"],
+  "noEngineReferences": true
+}

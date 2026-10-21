@@ -1,0 +1,83 @@
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
+
+namespace Galaxy101
+{
+    [RequireComponent(typeof(UIDocument))]
+    public sealed class MainMenuController : MonoBehaviour
+    {
+        public MenuView View {get;private set;}
+        public MenuModel Model {get;private set;}
+        private GalaxyBackground background;
+        private UIDocument document;
+        private bool navigating;
+        private LocalizationBridge localization;
+        private int appliedResolution;
+        public event Action<int> PlayRequested;
+        /// <summary>"Botlara karşı" opens the 3D Galaxy table; the legacy diagnostic probes keep the classic table.</summary>
+        public const string GalaxyTableScene="GalaxyTable",LegacyTableScene="Table";
+        private void Start()
+        {
+            Initialize();
+#if UNITY_EDITOR || OKEY_DIAGNOSTICS
+            var args=Environment.GetCommandLineArgs();
+            if(Array.IndexOf(args,"-okeyPractice")>=0||Array.IndexOf(args,"-okeyA3Output")>=0||Array.IndexOf(args,"-okeyA4Output")>=0)OnPlay(4,LegacyTableScene);
+#endif
+        }
+        public void Initialize(string persistencePath=null)
+        {
+            if(View!=null)return;
+            document=GetComponent<UIDocument>();
+            if(document.panelSettings==null)document.panelSettings=Resources.Load<PanelSettings>("Galaxy101/UI/PanelSettings");
+            if(document.panelSettings==null)throw new InvalidOperationException("Missing authored Galaxy101 PanelSettings.");
+            var presenter=GetComponent<MenuGammaPresenter>()??gameObject.AddComponent<MenuGammaPresenter>();presenter.Initialize(document);
+            string path=persistencePath??GalaxyPreferencesBridge.ResolveStatePath();
+            var content=Resources.Load<TextAsset>("Galaxy101/content");var themes=Resources.Load<TextAsset>("Galaxy101/themes");
+            if(content==null||themes==null)throw new InvalidOperationException("Galaxy101 menu data resources are missing.");
+            Model=new MenuModel(content.text,themes.text,path);var services=new MenuServices(Model);var loc=new LocalizationBridge(Model);localization=loc;
+            View=new MenuView(document.rootVisualElement,Model,services,loc);View.BuildMain();
+            var effects=new GameObject("Galaxy background");effects.transform.SetParent(transform,false);background=effects.AddComponent<GalaxyBackground>();background.Initialize(View.BackgroundTarget);
+            View.BackgroundChanged+=background.Configure;View.PlayRequested+=OnPlay;Model.Changed+=ApplySettings;
+            ApplySettings();background.Configure(Model.Planet,(bool)Model.Settings["motion"],(string)Model.Settings["quality"]);
+            background.SetFocused(UnityEngine.Application.isFocused||UnityEngine.Application.isBatchMode);UnityEngine.Application.targetFrameRate=60;
+            Debug.Log("GALAXY101_MENU_READY version="+UnityEngine.Application.version+" theme="+Model.Planet+" language="+(string)Model.Settings["lang"]);
+        }
+        private void OnPlay(int mode)=>OnPlay(mode,GalaxyTableScene);
+        private async void OnPlay(int mode,string scene)
+        {
+            PlayRequested?.Invoke(mode);Debug.Log("GALAXY101_PLAY_REQUESTED mode="+mode);
+            if(mode!=4||navigating)return;
+            try{await StartLocalAsync(scene);}
+            catch(Exception exception){Debug.LogException(exception);if(this!=null)View.Toast(View.L("Masa açılamadı. Yeniden deneyin.","Could not open the table. Try again."));}
+        }
+        public async Task StartLocalAsync(string scene=GalaxyTableScene)
+        {
+            Initialize();if(navigating||View.Modals.Panel!=null||View.Modals.Dialog!=null)return;navigating=true;
+            try
+            {
+                View.Root.SetEnabled(false);var load=SceneManager.LoadSceneAsync(scene,LoadSceneMode.Single);
+                if(load==null)throw new InvalidOperationException(scene+" scene is missing from the Windows build.");
+                while(!load.isDone)await Task.Yield();
+            }
+            finally{if(this!=null){navigating=false;View.Root.SetEnabled(true);}}
+        }
+        private void ApplySettings()
+        {
+            if(Model==null)return;int height=(int)Model.Settings["resolution"];
+            bool offscreen=UnityEngine.Application.isBatchMode;
+            if(!UnityEngine.Application.isEditor&&!offscreen&&height!=appliedResolution){Screen.SetResolution(height*16/9,height,FullScreenMode.Windowed);appliedResolution=height;}
+            if(!offscreen)AudioListener.volume=(int)Model.Settings["master"]/100f;
+        }
+        private void OnApplicationFocus(bool value){background?.SetFocused(value||UnityEngine.Application.isBatchMode);View?.SetFocused(value||UnityEngine.Application.isBatchMode);}
+        private void OnDestroy()
+        {
+            if(Model!=null)Model.Changed-=ApplySettings;
+            if(View!=null){if(background!=null)View.BackgroundChanged-=background.Configure;View.PlayRequested-=OnPlay;View.Dispose();}
+            localization?.Dispose();
+        }
+    }
+}

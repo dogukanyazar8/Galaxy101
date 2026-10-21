@@ -1,0 +1,673 @@
+{
+  "modes": [
+    {
+      "tr": "Tekli",
+      "en": "Solo",
+      "glyph": "1",
+      "bg": "#3D7BFF",
+      "shadow": "#2148B0",
+      "online": "8.214",
+      "playSub_tr": "Tekli · 101 · 5K masa",
+      "playSub_en": "Solo · 101 · 5K table"
+    },
+    {
+      "tr": "Eşli",
+      "en": "Pairs",
+      "glyph": "2",
+      "bg": "#FF6B6B",
+      "shadow": "#C23E4A",
+      "online": "3.902",
+      "playSub_tr": "Eşli · 101 · 5K masa",
+      "playSub_en": "Pairs · 101 · 5K table"
+    },
+    {
+      "tr": "Katlamalı",
+      "en": "Doubling",
+      "glyph": "×2",
+      "bg": "#8B5CF6",
+      "shadow": "#5B34B8",
+      "online": "2.117",
+      "playSub_tr": "Katlamalı · 101 · 10K masa",
+      "playSub_en": "Doubling · 101 · 10K table"
+    },
+    {
+      "tr": "Dereceli",
+      "en": "Ranked",
+      "glyph": "II",
+      "bg": "#16B6A8",
+      "shadow": "#0C7F75",
+      "online": "5.630",
+      "playSub_tr": "Dereceli · Altın II",
+      "playSub_en": "Ranked · Gold II"
+    },
+    {
+      "tr": "Botlara karşı",
+      "en": "Vs bots",
+      "glyph": "•",
+      "bg": "#3CCB6E",
+      "shadow": "#22914A",
+      "online": "Çevrimdışı",
+      "playSub_tr": "Botlara karşı · antrenman",
+      "playSub_en": "Vs bots · practice"
+    },
+    {
+      "tr": "Özel oda",
+      "en": "Private room",
+      "glyph": "#",
+      "bg": "var(--pnH)",
+      "shadow": "var(--pnS)",
+      "online": "412",
+      "playSub_tr": "Özel oda · şifreli",
+      "playSub_en": "Private room · password"
+    }
+  ],
+  "settingsDefaults": {
+    "autoSort": true,
+    "highlight": true,
+    "dbl": false,
+    "chat": true,
+    "warn": 5,
+    "tile": "Orta",
+    "master": 80,
+    "music": 60,
+    "sfx": 90,
+    "tileSnd": true,
+    "notifSnd": true,
+    "motion": true,
+    "quality": "Yüksek",
+    "lang": "tr",
+    "friendReq": true,
+    "invites": true
+  },
+  "spinSpeedSeconds": {
+    "Yavaş": 80,
+    "Normal": 40,
+    "Hızlı": 16
+  },
+  "resolutionScale": {
+    "1280×720 (önizleme)": 1,
+    "1920×1080 (1080p)": 1.5,
+    "2560×1440 (2K)": 2
+  },
+  "tileColors": {
+    "R": "#C8302E",
+    "Y": "#D9951A",
+    "B": "#2B5DA8",
+    "K": "#1E1E24"
+  },
+  "rules": [
+    {
+      "tr": [
+        "Taşlar ve okey",
+        [
+          "Oyunda 106 taş var: kırmızı, sarı, mavi ve siyah renklerde 1'den 13'e kadar ikişer taş ve 2 sahte okey.",
+          "Ortadan açılan taş göstergedir. Göstergenin bir üstü okeydir ve her taşın yerine geçebilir.",
+          "Sahte okey, okeyin kendisi yerine kullanılır; değeri okeyin değeridir."
+        ],
+        "Gösterge sarı 7 ise okey sarı 8 olur."
+      ],
+      "en": [
+        "Tiles and the okey",
+        [
+          "There are 106 tiles: two of each number from 1 to 13 in red, yellow, blue and black, plus 2 false okeys.",
+          "The tile turned up in the middle is the indicator. The tile one above it is the okey and can stand in for any tile.",
+          "A false okey takes the place of the okey itself and has the okey's value."
+        ],
+        "If the indicator is yellow 7, the okey is yellow 8."
+      ],
+      "tiles": [
+        "Y7:g",
+        "|",
+        "Y8*:o"
+      ]
+    },
+    {
+      "tr": [
+        "Dağıtım",
+        [
+          "Taşlar karıştırılır ve her oyuncuya 21 taş dağıtılır.",
+          "Oyunu başlatan oyuncu 22 taş alır ve ilk hamlede bir taş atarak başlar.",
+          "Kalan taşlar ortada çekme destesi olur. Sıra saat yönünün tersine ilerler."
+        ],
+        ""
+      ],
+      "en": [
+        "Dealing",
+        [
+          "The tiles are shuffled and every player gets 21 tiles.",
+          "The starting player gets 22 tiles and begins by discarding one.",
+          "The remaining tiles form the draw pile in the middle. Play goes counter-clockwise."
+        ],
+        ""
+      ],
+      "tiles": []
+    },
+    {
+      "tr": [
+        "Elini açmak",
+        [
+          "Elini açabilmek için perlerinin toplamı en az 101 olmalı.",
+          "Seri: aynı renkte en az 3 ardışık taş. Grup: aynı sayıda, farklı renklerde 3 veya 4 taş.",
+          "İstersen en az 5 çiftle çiftten de açabilirsin."
+        ],
+        "Seri 46 + grup 36 = 82 puan. Açmak için 19 puan daha gerekir."
+      ],
+      "en": [
+        "Opening your hand",
+        [
+          "To open your hand, your sets must add up to at least 101.",
+          "Run: at least 3 consecutive tiles of the same color. Group: 3 or 4 tiles of the same number in different colors.",
+          "You can also open with at least 5 pairs."
+        ],
+        "Run 46 + group 36 = 82 points. You need 19 more to open."
+      ],
+      "tiles": [
+        "K10",
+        "K11",
+        "K12",
+        "K13",
+        "|",
+        "B12",
+        "R12",
+        "Y12"
+      ]
+    },
+    {
+      "tr": [
+        "Taş işlemek",
+        [
+          "Elini açtıktan sonra masadaki tüm perlere uygun taş ekleyebilirsin.",
+          "Masadaki bir perde okeyin yerini tutan taş sende varsa, onu koyup okeyi alabilirsin."
+        ],
+        "Kırmızı 13'ü masadaki kırmızı seriye işleyebilirsin."
+      ],
+      "en": [
+        "Adding tiles",
+        [
+          "Once you have opened, you can add matching tiles to any set on the table.",
+          "If you hold the tile the okey stands for in a set on the table, you can swap it in and take the okey."
+        ],
+        "You can add red 13 to the red run on the table."
+      ],
+      "tiles": [
+        "R10",
+        "R11",
+        "R12",
+        "|",
+        "R13*:a"
+      ]
+    },
+    {
+      "tr": [
+        "Bitirmek",
+        [
+          "Elindeki tüm taşları perlere yerleştirip son taşını atan oyuncu eli bitirir.",
+          "Son taş olarak okeyi atarak bitirirsen bütün cezalar ikiye katlanır."
+        ],
+        "Son taş olarak okeyi atmak cezaları ikiye katlar."
+      ],
+      "en": [
+        "Finishing",
+        [
+          "The player who places all their tiles in sets and discards their last tile finishes the hand.",
+          "If you finish by discarding the okey, every penalty is doubled."
+        ],
+        "Discarding the okey as your last tile doubles all penalties."
+      ],
+      "tiles": [
+        "B5",
+        "B6",
+        "B7",
+        "|",
+        "Y8*:l"
+      ]
+    },
+    {
+      "tr": [
+        "Puanlama",
+        [
+          "Eli bitiren oyuncu -101 puan alır.",
+          "Elini açan oyuncular ellerinde kalan taşların toplamı kadar ceza alır.",
+          "Elini açamayan oyuncu 202 ceza alır. Çiftten açanların cezası ikiye katlanır.",
+          "Oyun sonunda en düşük puana sahip oyuncu kazanır."
+        ],
+        ""
+      ],
+      "en": [
+        "Scoring",
+        [
+          "The player who finishes gets -101 points.",
+          "Players who opened get a penalty equal to the sum of the tiles left in their hand.",
+          "A player who never opened gets 202 penalty points. Players who opened with pairs get double penalties.",
+          "The player with the lowest score at the end wins."
+        ],
+        ""
+      ],
+      "tiles": []
+    }
+  ],
+  "ruleTileTags": {
+    "tr": {
+      "g": "Gösterge",
+      "o": "Okey",
+      "a": "İşle",
+      "l": "Son taş"
+    },
+    "en": {
+      "g": "Indicator",
+      "o": "Okey",
+      "a": "Add",
+      "l": "Last tile"
+    }
+  },
+  "leaderboard": {
+    "global": [
+      [
+        "Selin A.",
+        "SA",
+        "#FF6B6B",
+        4820,
+        "d1"
+      ],
+      [
+        "Okeyci_34",
+        "OK",
+        "#16B6A8",
+        4615,
+        "d2"
+      ],
+      [
+        "Hakan T.",
+        "HT",
+        "#3D7BFF",
+        4402,
+        "d2"
+      ],
+      [
+        "Derya K.",
+        "DK",
+        "#8B5CF6",
+        3990,
+        "g1"
+      ],
+      [
+        "Emre B.",
+        "EB",
+        "#3CCB6E",
+        3877,
+        "g1"
+      ],
+      [
+        "Can Y.",
+        "CY",
+        "#FF8A5B",
+        3740,
+        "g1"
+      ],
+      [
+        "Melis T.",
+        "MT",
+        "#E85D9A",
+        3655,
+        "g1"
+      ],
+      [
+        "Ali R.",
+        "AR",
+        "#5B8CFF",
+        3590,
+        "g1"
+      ],
+      [
+        "Nazlı E.",
+        "NE",
+        "#F5A623",
+        3512,
+        "g1"
+      ],
+      [
+        "Ozan K.",
+        "OZ",
+        "#22B8CF",
+        3480,
+        "g1"
+      ]
+    ],
+    "friends": [
+      [
+        "Burak C.",
+        "BC",
+        "#8B5CF6",
+        3120,
+        "g1"
+      ],
+      [
+        "Ayşe Y.",
+        "AY",
+        "#3D7BFF",
+        2610,
+        "g2"
+      ],
+      [
+        "Doğukan Y.",
+        "DY",
+        "#FF8A5B",
+        2140,
+        "g2",
+        true
+      ],
+      [
+        "Hakan T.",
+        "HT",
+        "#3D7BFF",
+        1980,
+        "g2"
+      ],
+      [
+        "Derya K.",
+        "DK",
+        "#8B5CF6",
+        1720,
+        "g2"
+      ],
+      [
+        "Emre B.",
+        "EB",
+        "#3CCB6E",
+        1405,
+        "g2"
+      ]
+    ],
+    "leagues": {
+      "tr": {
+        "d1": "Elmas I",
+        "d2": "Elmas II",
+        "g1": "Altın I",
+        "g2": "Altın II"
+      },
+      "en": {
+        "d1": "Diamond I",
+        "d2": "Diamond II",
+        "g1": "Gold I",
+        "g2": "Gold II"
+      }
+    },
+    "note": "Haftalık sekmede puanlar ×0.32; sezon/arkadaş sekmesinde ×1. Satır: [ad, baş harf, avatar rengi, puan, lig kodu, (ben?)]"
+  },
+  "friends": [
+    {
+      "id": "ay",
+      "name": "Ayşe Y.",
+      "ini": "AY",
+      "c": "#3D7BFF",
+      "lv": 28,
+      "on": true,
+      "st": [
+        "Lobide",
+        "In lobby"
+      ],
+      "sc": "#8EF0B0",
+      "act": "invite"
+    },
+    {
+      "id": "bc",
+      "name": "Burak C.",
+      "ini": "BC",
+      "c": "#8B5CF6",
+      "lv": 41,
+      "on": true,
+      "st": [
+        "Masada · Eşli",
+        "At a table · Pairs"
+      ],
+      "sc": "var(--a1)",
+      "act": "watch"
+    },
+    {
+      "id": "sa",
+      "name": "Selin A.",
+      "ini": "SA",
+      "c": "#FF6B6B",
+      "lv": 52,
+      "on": true,
+      "st": [
+        "Dereceli maç arıyor",
+        "Looking for a ranked match"
+      ],
+      "sc": "#8EF0B0",
+      "act": "invite"
+    },
+    {
+      "id": "eb",
+      "name": "Emre B.",
+      "ini": "EB",
+      "c": "#3CCB6E",
+      "lv": 19,
+      "on": false,
+      "st": [
+        "2 saat önce",
+        "2 hours ago"
+      ],
+      "act": "msg"
+    },
+    {
+      "id": "ht",
+      "name": "Hakan T.",
+      "ini": "HT",
+      "c": "#22B8CF",
+      "lv": 33,
+      "on": false,
+      "st": [
+        "Dün",
+        "Yesterday"
+      ],
+      "act": "msg"
+    },
+    {
+      "id": "dk",
+      "name": "Derya K.",
+      "ini": "DK",
+      "c": "#E85D9A",
+      "lv": 24,
+      "on": false,
+      "st": [
+        "3 gün önce",
+        "3 days ago"
+      ],
+      "act": "msg"
+    }
+  ],
+  "friendCodes": {
+    "ay": "AY-2187",
+    "bc": "BC-5530",
+    "sa": "SA-7712",
+    "eb": "EB-3054",
+    "ht": "HT-6621",
+    "dk": "DK-9408",
+    "kd": "KD-1290",
+    "zo": "ZO-4416"
+  },
+  "searchDirectory": [
+    {
+      "name": "Mert K.",
+      "ini": "MK",
+      "c": "#FF8A5B",
+      "lv": 31,
+      "code": "MK-3321"
+    },
+    {
+      "name": "Elif S.",
+      "ini": "ES",
+      "c": "#E85D9A",
+      "lv": 18,
+      "code": "ES-8842"
+    },
+    {
+      "name": "Barış Ö.",
+      "ini": "BÖ",
+      "c": "#16B6A8",
+      "lv": 45,
+      "code": "BO-5170"
+    },
+    {
+      "name": "Cem A.",
+      "ini": "CA",
+      "c": "#3D7BFF",
+      "lv": 9,
+      "code": "CA-2604"
+    },
+    {
+      "name": "Kerem D.",
+      "ini": "KD",
+      "c": "#F5A623",
+      "lv": 12,
+      "code": "KD-1290"
+    }
+  ],
+  "friendRequests": [
+    {
+      "id": "kd",
+      "name": "Kerem D.",
+      "ini": "KD",
+      "c": "#F5A623",
+      "lv": 12,
+      "st": [
+        "Ortak arkadaş: Ayşe Y.",
+        "Mutual friend: Ayşe Y."
+      ]
+    },
+    {
+      "id": "zo",
+      "name": "Zeynep O.",
+      "ini": "ZO",
+      "c": "#16B6A8",
+      "lv": 37,
+      "st": [
+        "Son maçta rakibindi",
+        "Your opponent last match"
+      ]
+    }
+  ],
+  "dailyQuests": [
+    {
+      "tr": "3 el kazan",
+      "en": "Win 3 hands",
+      "cur": 1,
+      "max": 3,
+      "rw": 2000
+    },
+    {
+      "tr": "Çiftten aç",
+      "en": "Open with pairs",
+      "cur": 1,
+      "max": 1,
+      "rw": 1500
+    },
+    {
+      "tr": "5 el oyna",
+      "en": "Play 5 hands",
+      "cur": 5,
+      "max": 5,
+      "rw": 1000,
+      "pre": true
+    },
+    {
+      "tr": "Okey atarak bitir",
+      "en": "Finish by discarding the okey",
+      "cur": 0,
+      "max": 1,
+      "rw": 5000,
+      "gem": 5
+    },
+    {
+      "tr": "40 taş işle",
+      "en": "Add 40 tiles to sets",
+      "cur": 26,
+      "max": 40,
+      "rw": 2500
+    }
+  ],
+  "dailyStreakChips": [
+    1000,
+    2000,
+    3000,
+    4000,
+    5000,
+    7500,
+    15000
+  ],
+  "panels": {
+    "shop": {
+      "tile": "linear-gradient(160deg,var(--a1),var(--a2))",
+      "sh": "var(--aS)",
+      "tr": [
+        "Mağaza",
+        "Çip, elmas ve taş görünümleri"
+      ],
+      "en": [
+        "Shop",
+        "Chips, gems and tile skins"
+      ]
+    },
+    "friends": {
+      "tile": "linear-gradient(160deg,#7AA6FF,#3D6BF0)",
+      "sh": "#2448B8",
+      "tr": [
+        "Arkadaşlar",
+        "3 arkadaşın çevrimiçi"
+      ],
+      "en": [
+        "Friends",
+        "3 friends online"
+      ]
+    },
+    "leader": {
+      "tile": "linear-gradient(160deg,#C2A4FF,#7C4DEB)",
+      "sh": "#5530B0",
+      "tr": [
+        "Liderlik",
+        "Sezon 3 · bitişe 12 gün"
+      ],
+      "en": [
+        "Leaderboard",
+        "Season 3 · 12 days left"
+      ]
+    },
+    "daily": {
+      "tile": "linear-gradient(160deg,#4FDB80,#25A857)",
+      "sh": "#18793F",
+      "tr": [
+        "Günlük ödül",
+        "5 günlük seri · her gün gir, ödül büyüsün"
+      ],
+      "en": [
+        "Daily reward",
+        "5-day streak · log in daily to grow your reward"
+      ]
+    },
+    "me": {
+      "tile": "linear-gradient(160deg,#FFA27A,#F0683A)",
+      "sh": "#B2441E",
+      "tr": [
+        "Profilim",
+        "İstatistikler, derece ve rozetler"
+      ],
+      "en": [
+        "My profile",
+        "Stats, rank and badges"
+      ]
+    },
+    "rules": {
+      "tile": "linear-gradient(160deg,#5BE6D6,#14A596)",
+      "sh": "#0C746A",
+      "tr": [
+        "Kurallar",
+        "101 Okey nasıl oynanır"
+      ],
+      "en": [
+        "Rules",
+        "How to play 101 Okey"
+      ]
+    }
+  }
+}

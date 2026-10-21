@@ -1,0 +1,1 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"><ui:VisualElement name="body" class="g-panel-body"><ui:VisualElement name="deal" class="g-panel-row g-shop-deal"/><ui:VisualElement name="products" class="g-panel-row g-panel-body"/></ui:VisualElement></ui:UXML>

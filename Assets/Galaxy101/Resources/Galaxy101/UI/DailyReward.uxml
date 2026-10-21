@@ -1,0 +1,1 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"><ui:VisualElement name="body" class="g-panel-body"><ui:VisualElement name="days" class="g-panel-row"/><ui:VisualElement name="quests-heading" class="g-panel-row"/><ui:VisualElement name="quests" class="g-panel-body"/></ui:VisualElement></ui:UXML>

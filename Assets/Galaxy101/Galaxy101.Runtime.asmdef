@@ -1,0 +1,15 @@
+{
+  "name": "Galaxy101.Runtime",
+  "rootNamespace": "Galaxy101",
+  "references": [
+    "Unity.Localization",
+    "Unity.ResourceManager",
+    "Unity.InputSystem",
+    "Unity.RenderPipelines.Universal.Runtime",
+    "Unity.RenderPipelines.Core.Runtime",
+    "Okey101.Core",
+    "Okey101.Application",
+    "Okey101.Bots"
+  ],
+  "autoReferenced": true
+}

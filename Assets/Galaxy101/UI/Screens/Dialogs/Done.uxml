@@ -1,0 +1,1 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"><ui:VisualElement name="body" class="g-dialog"><ui:VisualElement name="header" class="g-dialog-header g-panel-row"/><ui:VisualElement name="content"/><ui:VisualElement name="footer" class="g-dialog-footer g-panel-row"/></ui:VisualElement></ui:UXML>

@@ -1,0 +1,8 @@
+{
+  "name": "Okey101.TestSupport",
+  "rootNamespace": "Okey101.TestSupport",
+  "references": ["Okey101.Core"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false,
+  "noEngineReferences": true
+}

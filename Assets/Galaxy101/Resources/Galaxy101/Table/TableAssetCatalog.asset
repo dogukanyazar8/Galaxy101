@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9aef0bd293e301243b9f21bf434769fe, type: 3}
+  m_Name: TableAssetCatalog
+  m_EditorClassIdentifier: Galaxy101.Runtime::Galaxy101.Table.TableAssetCatalog
+  Tables:
+  - Key: station
+    Prefab: {fileID: 6774362108308526734, guid: 7743bbbc74983c448bf8e4df78267657, type: 3}
+  - Key: wood
+    Prefab: {fileID: 7728569014744748347, guid: b566fff10bda4e5489223dd1636e4be1, type: 3}
+  - Key: holo
+    Prefab: {fileID: 591316156305684718, guid: b918d304880d1754e8b259e43c37945c, type: 3}
+  - Key: andromeda
+    Prefab: {fileID: 5113029369561022032, guid: ce9b94443c0a7ff429537523ca459e93, type: 3}
+  Racks:
+  - Key: walnut
+    Prefab: {fileID: 8439215008197871657, guid: 7bf92231d0a8a1941bc0c17f426f22dd, type: 3}
+  - Key: sedef
+    Prefab: {fileID: 6219029203836141440, guid: b5a4b732897147c4897e3bc75e0f1d71, type: 3}
+  - Key: chrome
+    Prefab: {fileID: 8480700846752623709, guid: 23a48cd566084794a8118ca8020af126, type: 3}
+  - Key: carbon
+    Prefab: {fileID: 4694012144507996269, guid: 1bb481abcad5d124f8663f8636e1d7b8, type: 3}
+  - Key: neon
+    Prefab: {fileID: 707068558619958963, guid: 4465570e90346424e9012141ceb56a3b, type: 3}
+  - Key: andromeda
+    Prefab: {fileID: 543333658705594332, guid: f699691e9465291478fd1e917ec76cb9, type: 3}
+  TileSets:
+  - Key: classic
+    Prefab: {fileID: 8739646810523933172, guid: c38dc9671984dbf4c933961d6d77c9e3, type: 3}
+  - Key: galaxy
+    Prefab: {fileID: 5938397371580813149, guid: 835fcd6b2551f4d4689a124e89b4aa07, type: 3}
+  - Key: gold
+    Prefab: {fileID: 339357266009319102, guid: c4b53b2dd8cb27940b4ccf03f44dadb9, type: 3}
+  - Key: neon
+    Prefab: {fileID: 5831619583959116824, guid: be3b7dbda563ef9419246742ad13e7e1, type: 3}
+  - Key: marble
+    Prefab: {fileID: 4561487574545187154, guid: a76464e106cd9b84e9f44cb91a6b24c3, type: 3}
+  GiftModels:
+  - Key: tea
+    Prefab: {fileID: 7302379937757395889, guid: 0fed62f7c5e62be4982511e61a18afe7, type: 3}
+  - Key: coffee
+    Prefab: {fileID: 3724270357448461055, guid: 4ee6a3544a425a94596b28f4fb6d2c96, type: 3}
+  - Key: cola
+    Prefab: {fileID: 8302960760913949491, guid: dcd918359fd01f048a0d5a7f2fe3e2c5, type: 3}
+  - Key: simit
+    Prefab: {fileID: 5920441775983855740, guid: 82cdba39195459346bd1608f60a1f65e, type: 3}
+  - Key: baklava
+    Prefab: {fileID: 4077197371450097597, guid: b1e8410abeb025f4182b20e3ce5fbf2f, type: 3}
+  - Key: seeds
+    Prefab: {fileID: 5564395322613942886, guid: 2dade6a40442d014f98ebf447423bcaa, type: 3}
+  - Key: flower
+    Prefab: {fileID: 6018430699681457190, guid: 01cd3940dfca79f4193ad3265f111adf, type: 3}
+  - Key: cake
+    Prefab: {fileID: 5096824668493663730, guid: 4e86eb94ebe67b34ea533b2319056f50, type: 3}
+  - Key: trophy
+    Prefab: {fileID: 7055681965436527783, guid: a5a647ca7d2026b4a9b1a8299915d026, type: 3}
+  - Key: rocket
+    Prefab: {fileID: 2688760131345519717, guid: 0f3e45cfacc0f484483075c80149b7ca, type: 3}
+  Chair: {fileID: 5885979764039450167, guid: 91257cbb140258145be3e8ffc548a384, type: 3}
+  Room: {fileID: 2151638816027519036, guid: d4242e7fcbbc63943b2fd96de24797bb, type: 3}

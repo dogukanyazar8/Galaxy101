@@ -43,3 +43,7 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# Addressables writes this during player builds and removes it afterwards
+/Assets/AddressableAssetsData/link.xml
+/Assets/AddressableAssetsData/link.xml.meta

@@ -76,6 +76,12 @@ Kaynak: `Design/galaxy101_unity_handoff/` içindeki PROMPT, README, yedi spec, J
 - XP şimdilik oturum içinde tutulur; profile kalıcı yazılması S2 (profil) ile gelecek.
 - Testler: oturma + davet + geri sayım, bitiş şeridi → tablo (4 satır) → sonraki el, çıkış kartı → menü. Ekran karşılaştırmaları: `docs/testing/table_T01_bekleme.png`, `docs/testing/table_T24_el_sonu.png`. EditMode 428/428, PlayMode 110/110.
 
+## Düzeltme — Release'de botlara karşı masa siyah ekran, 21 Ekim 2026
+
+- Neden: menü ve masa `UIDocument`'ları sahne yüklenirken önce yetkili `Resources/Galaxy101/UI/PanelSettings` asset'ine bağlanır, sonra `MenuGammaPresenter` onları kendi kopyasına taşır. Asset'in ekran paneli boş olarak kalır; asset `clearColor = true` olduğu için her karede sunulan görüntüyü siyaha temizliyordu. 3D masa ve arayüz doğru çiziliyor, son aşamada siliniyordu.
+- Düzeltme: yetkili asset artık temizlemez (`m_ClearColor: 0`, `MenuAssetBuilder` da öyle üretir). Temizleme yalnızca sunucunun sahip olduğu kopyada açıktır (`ownedPanel.clearColor = true`).
+- Doğrulama: Acceptance (Release + tanı) derlemesinde `-galaxyTableProbe <png>` menüden "Botlara karşı"yı açıp sunulan kareyi okur. Eski davranış `-galaxyLegacyPanelClear` ile taklit edildiğinde kare tamamen siyah (ortalama piksel ≈ 0); düzeltmeyle masa ve HUD görünür (`docs/testing/release_bot_table_fixed.png`). Gerileme testi: `PanelSettingsTests`. EditMode 429/429, PlayMode 110/110.
+
 ## Tekrar üretim
 
 1. Unity Hub üzerinden bu kökü Unity 6000.6.6f1 ile açın; Bootstrap sahnesini çalıştırın.

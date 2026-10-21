@@ -27,7 +27,10 @@ namespace Galaxy101.Editor
             LocalizationImporter.Import();
             string panelPath=ResourcesRoot+"/PanelSettings.asset";var panel=AssetDatabase.LoadAssetAtPath<PanelSettings>(panelPath);
             if(panel==null){panel=ScriptableObject.CreateInstance<PanelSettings>();AssetDatabase.CreateAsset(panel,panelPath);}
-            panel.scaleMode=PanelScaleMode.ScaleWithScreenSize;panel.referenceResolution=new Vector2Int(1280,720);panel.screenMatchMode=PanelScreenMatchMode.MatchWidthOrHeight;panel.match=.5f;panel.sortingOrder=10;panel.clearColor=true;panel.colorClearValue=new Color(0,0,0,0);
+            panel.scaleMode=PanelScaleMode.ScaleWithScreenSize;panel.referenceResolution=new Vector2Int(1280,720);panel.screenMatchMode=PanelScreenMatchMode.MatchWidthOrHeight;panel.match=.5f;panel.sortingOrder=10;
+            // The authored panel never draws: MenuGammaPresenter renders an owned copy into its own target (and clears that).
+            // A UIDocument binds this asset for a moment on scene load; a clearing screen panel left empty would wipe the frame.
+            panel.clearColor=false;panel.colorClearValue=new Color(0,0,0,0);
             panel.forceGammaRendering=true;
             string settingsPath=ResourcesRoot+"/TextSettings.asset";var text=AssetDatabase.LoadAssetAtPath<PanelTextSettings>(settingsPath);
             if(text==null){text=ScriptableObject.CreateInstance<PanelTextSettings>();AssetDatabase.CreateAsset(text,settingsPath);}

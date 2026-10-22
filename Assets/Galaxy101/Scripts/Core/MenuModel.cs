@@ -58,6 +58,7 @@ namespace Galaxy101
         {
             var defaults = (JObject)Content["settingsDefaults"].DeepClone();
             defaults["resolution"] = 720;
+            defaults["fps"] = FramePacing.Auto; // Kare hızı: 0 Otomatik, −1 Sınırsız, 30–1000 üst sınır
             return defaults;
         }
 

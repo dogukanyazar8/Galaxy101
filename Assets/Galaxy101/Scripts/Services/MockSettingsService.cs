@@ -39,6 +39,12 @@ namespace Galaxy101
             if (height != 720 && height != 1080 && height != 1440) return false;
             var draft = Load(); draft["resolution"] = height; return Save(draft);
         }
+        /// <summary>Kare hızı applies and is saved at once, like the resolution.</summary>
+        public bool SetFrameRate(int choice)
+        {
+            if (!FramePacing.IsValidChoice(choice)) return false;
+            var draft = Load(); draft["fps"] = choice; return Save(draft);
+        }
         private static void ApplyResolution(int height)
         {
             if (Application.isPlaying && !Application.isEditor && !Application.isBatchMode && Screen.height != height)

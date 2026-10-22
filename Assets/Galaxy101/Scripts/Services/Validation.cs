@@ -39,6 +39,7 @@ namespace Galaxy101
                 {
                     if (!TryInteger(value, out long number)) return false;
                     if (p.Name == "resolution") { if (number != 720 && number != 1080 && number != 1440) return false; }
+                    else if (p.Name == "fps") { if (!FramePacing.IsValidChoice(number)) return false; }
                     else if (p.Name == "warn") { if (number < 1 || number > 10) return false; }
                     else if (number < 0 || number > 100) return false;
                 }

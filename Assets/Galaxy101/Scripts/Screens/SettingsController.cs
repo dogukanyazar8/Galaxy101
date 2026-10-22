@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -86,6 +88,7 @@ namespace Galaxy101
                 case 2:
                     Toggle(v, scroll, "motion", v.L("Arka plan hareketi", "Background motion"), v.L("Dönen gezegen ve kayan yıldızlar", "Spinning planet and shooting stars"), true);
                     Resolution(v, scroll);
+                    FrameRate(v, scroll);
                     Segment(v, scroll, "quality", v.L("Efekt kalitesi", "Effect quality"), v.L("Düşük ayar eski bilgisayarlarda akıcılığı artırır", "Lower settings run smoother on older computers"), new[] { "Düşük", "Orta", "Yüksek" });
                     Planets(v, scroll);
                     break;
@@ -98,6 +101,7 @@ namespace Galaxy101
                 draft = v.Services.Settings.ResetToDefaults();
                 if (!v.Services.Settings.SetLanguage((string)draft["lang"])) { draft["lang"] = v.Model.Settings["lang"]; PanelUi.SaveFailure(v); }
                 if (!v.Services.Settings.SetResolution((int)draft["resolution"])) { draft["resolution"] = v.Model.Settings["resolution"]; PanelUi.SaveFailure(v); }
+                if (!v.Services.Settings.SetFrameRate((int)draft["fps"])) { draft["fps"] = v.Model.Settings["fps"]; PanelUi.SaveFailure(v); }
                 v.PreviewSettings(draft); v.Refresh();
             }, "");
             reset.name = "settings-reset"; reset.style.backgroundColor = UnityEngine.Color.clear; reset.style.color = v.C("mt"); reset.style.fontSize = 14;
@@ -174,6 +178,47 @@ namespace Galaxy101
             }
             PanelUi.Gap(group, 4);
             SettingRow(v, list, v.L("Çözünürlük", "Resolution"), v.L("Ekran boyutu", "Screen size"), group);
+        }
+
+        /// <summary>
+        /// Kare hızı: ‹ Otomatik · 144 Hz › stepper over <see cref="FramePacing.Options"/> for the window's monitor. Applies and
+        /// saves at once (like the resolution) and follows the window to another monitor while the panel is open.
+        /// </summary>
+        private void FrameRate(MenuView v, VisualElement list)
+        {
+            var options = new List<int>(FramePacing.Options(FramePacing.MaxHz, FramePacing.IsMobile));
+            int current = (int)draft["fps"];
+            if (!options.Contains(current)) { options.Add(current); options.Sort((a, b) => a == FramePacing.Auto ? -1 : b == FramePacing.Auto ? 1 : a == FramePacing.Unlimited ? 1 : b == FramePacing.Unlimited ? -1 : a.CompareTo(b)); }
+            int index = options.IndexOf(current);
+            void Pick(int next)
+            {
+                if (next < 0 || next >= options.Count || next == index) return;
+                int value = options[next]; draft["fps"] = value;
+                if (!v.Services.Settings.SetFrameRate(value)) { draft["fps"] = v.Model.Settings["fps"]; PanelUi.SaveFailure(v); }
+                v.Refresh();
+            }
+            var group = v.Row(); group.AddToClassList("g-segment"); group.name = "setting-fps"; group.style.alignItems = Align.Center;
+            Button Arrow(string glyph, string name, int step)
+            {
+                bool enabled = index + step >= 0 && index + step < options.Count;
+                var arrow = PanelUi.CustomButton(v, glyph, () => Pick(index + step), "g-segment-button"); arrow.name = name;
+                // Stays a normal button at the ends (a disabled one would vanish in this style); it just does nothing there.
+                arrow.style.width = 38; arrow.style.minWidth = 38; arrow.style.paddingLeft = arrow.style.paddingRight = 0; arrow.EnableInClassList("at-end", !enabled); arrow.style.opacity = enabled ? 1 : .5f;
+                return arrow;
+            }
+            var value = v.Text(FramePacing.Label(current, v.Loc.Language, FramePacing.CurrentHz), 15, true); value.name = "setting-fps-value";
+            value.style.minWidth = 158; value.style.unityTextAlign = TextAnchor.MiddleCenter; value.style.whiteSpace = WhiteSpace.NoWrap;
+            group.Add(Arrow("‹", "setting-fps-prev", -1)); group.Add(value); group.Add(Arrow("›", "setting-fps-next", 1));
+            PanelUi.Gap(group, 4);
+            string how = current == FramePacing.Auto ? v.L("Ekranın yenileme hızıyla eşitlenir (VSync)", "Locked to your display's refresh rate (VSync)")
+                : current == FramePacing.Unlimited ? v.L("VSync kapalı, sınır yok · ısı ve güç kullanımı artar", "VSync off, no limit · more heat and power use")
+                : v.L("VSync kapalı · en fazla " + current + " FPS", "VSync off · at most " + current + " FPS");
+            string monitor = v.L("Monitör en fazla ", "Display up to ") + Math.Round(FramePacing.MaxHz) + " Hz";
+            var row = SettingRow(v, list, v.L("Kare hızı", "Frame rate"), how + " · " + monitor, group);
+            // The window moved to another monitor or Windows changed its refresh rate: offer that monitor's rates.
+            Action changed = () => v.Refresh();
+            row.RegisterCallback<AttachToPanelEvent>(_ => FramePacing.DisplayChanged += changed);
+            row.RegisterCallback<DetachFromPanelEvent>(_ => FramePacing.DisplayChanged -= changed);
         }
 
         private void Planets(MenuView v, VisualElement list)

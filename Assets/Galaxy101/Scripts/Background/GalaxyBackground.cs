@@ -91,8 +91,10 @@ namespace Galaxy101
             float scale=Mathf.Clamp(Mathf.Min(Screen.width/1280f,Screen.height/720f),1,2.2f);
             int width=Mathf.RoundToInt(1280*scale),height=Mathf.RoundToInt(720*scale);
             if(width!=outputWidth||height!=outputHeight) dirty=true;
-            int fps=quality=="low"?20:quality=="medium"?30:60;
-            if(!dirty && (!running||timeState.Seconds-renderedAt<1.0/fps)) return;
+            // Efekt kalitesi: Düşük 20, Orta 30 updates per second; Yüksek follows the game's own frame rate (Kare hızı), so a
+            // 144 Hz display gets a 144 Hz planet instead of a 60 Hz one.
+            int fps=quality=="low"?20:quality=="medium"?30:0;
+            if(!dirty && (!running||fps>0&&timeState.Seconds-renderedAt<1.0/fps)) return;
             EnsureResources();ResizeOutput(width,height);
             RenderFrame(scale);renderedAt=timeState.Seconds;starDelta=0;dirty=false;
         }

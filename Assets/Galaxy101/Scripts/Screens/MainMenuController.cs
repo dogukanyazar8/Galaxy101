@@ -43,7 +43,7 @@ namespace Galaxy101
             var effects=new GameObject("Galaxy background");effects.transform.SetParent(transform,false);background=effects.AddComponent<GalaxyBackground>();background.Initialize(View.BackgroundTarget);
             View.BackgroundChanged+=background.Configure;View.PlayRequested+=OnPlay;Model.Changed+=ApplySettings;
             ApplySettings();background.Configure(Model.Planet,(bool)Model.Settings["motion"],(string)Model.Settings["quality"]);
-            background.SetFocused(UnityEngine.Application.isFocused||UnityEngine.Application.isBatchMode);UnityEngine.Application.targetFrameRate=60;
+            background.SetFocused(UnityEngine.Application.isFocused||UnityEngine.Application.isBatchMode);
             Debug.Log("GALAXY101_MENU_READY version="+UnityEngine.Application.version+" theme="+Model.Planet+" language="+(string)Model.Settings["lang"]);
         }
         private void OnPlay(int mode)=>OnPlay(mode,GalaxyTableScene);
@@ -91,6 +91,7 @@ namespace Galaxy101
             bool offscreen=UnityEngine.Application.isBatchMode;
             if(!UnityEngine.Application.isEditor&&!offscreen&&height!=appliedResolution){Screen.SetResolution(height*16/9,height,FullScreenMode.Windowed);appliedResolution=height;}
             if(!offscreen)AudioListener.volume=(int)Model.Settings["master"]/100f;
+            FramePacing.Apply((int)Model.Settings["fps"]);
         }
         private void OnApplicationFocus(bool value){background?.SetFocused(value||UnityEngine.Application.isBatchMode);View?.SetFocused(value||UnityEngine.Application.isBatchMode);}
         private void OnDestroy()

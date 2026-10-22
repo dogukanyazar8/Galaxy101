@@ -179,7 +179,7 @@ namespace Okey101.Presentation
             Presenter.Initialize();
             toolbar = gameObject.AddComponent<TurnToolbar>(); toolbar.Initialize(this);
             gameObject.AddComponent<TableInput>().Initialize(this);
-            UnityEngine.Application.targetFrameRate = 60; Refresh(0);
+            Refresh(0); // frame rate: Galaxy101.FramePacing (Ayarlar → Görüntü → Kare hızı)
 #if UNITY_EDITOR || OKEY_DIAGNOSTICS
             GetComponent<DebugPanel>()?.Initialize(this);
             var acceptanceArgs = Environment.GetCommandLineArgs();

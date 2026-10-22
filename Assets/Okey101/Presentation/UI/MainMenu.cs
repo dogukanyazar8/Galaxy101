@@ -40,7 +40,6 @@ namespace Okey101.Presentation
             MenuUI.Apply(MenuUI.LoadSettings());
             play.onClick.AddListener(StartFromUI);settings.onClick.AddListener(()=>settingsPanel.Show(MenuUI.LoadSettings(),null));
             quit.onClick.AddListener(()=>{if(!settingsPanel.IsOpen)UnityEngine.Application.Quit();});
-            UnityEngine.Application.targetFrameRate=60;
             Debug.Log("T12_MENU_READY");
         }
         private void Start()

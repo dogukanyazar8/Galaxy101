@@ -142,6 +142,20 @@ Kabul listesi (spec/17):
 - Sapmalar: roket dumanı 0.2 opaklık / 7 cm (referansın 0.32 / 13 cm'si kameraya yakın geçişte kalın bant oluyor). Ses ayarları yalnızca durum tutar (prototipte de ses yok). Mağazada alınmamış taş setleri kilidi üretimde (spec notu) yok.
 - Kareler: `docs/testing/faz7_*.png`. Testler: aşağıdaki doğrulama.
 
+## Kare hızı ayarı (Ayarlar → Görüntü → Kare hızı), 22 Ekim 2026
+
+- Önceki durum: ana menü (ve eski masa/menü) `Application.targetFrameRate = 60` sabitliyordu, Windows kalite profilinde VSync kapalıydı; 144/240 Hz monitörde de ~60 FPS.
+- `FramePacing` (tek merkez, sahne yüklenmeden önce açılır; ekranların ayrı ayrı 60 ataması kaldırıldı):
+  - **Otomatik** (varsayılan): masaüstünde `vSyncCount = 1` — Windows'un pencerenin monitöründe çalıştırdığı yenileme hızına kilitlenir (60/144/165…; `targetFrameRate` yok sayılır). Mobilde VSync ayarı geçersiz, `targetFrameRate` = ekranın hızı.
+  - **Üst sınır** (30 … monitörün en yüksek hızı; standart 30/60/75/90/100/120/144/165/170/180/200/240/280/300/360/480/500 ve monitörün kendi tepe değeri, örn. 157): VSync kapalı, `targetFrameRate = sınır`. Mobilde ekranın gösterdiğinden fazlası istenmez.
+  - **Sınırsız** (yalnız masaüstü): VSync kapalı, sınır yok.
+  - Monitör izleme: 0.5 sn'de bir pencerenin ekranı ve yenileme hızı okunur (`Screen.mainWindowDisplayInfo`, `Screen.resolutions`); pencere başka monitöre geçince ya da Windows hızı değişince yeniden uygulanır ve açık ayar satırı o monitörün seçeneklerini gösterir.
+  - Odak kaybı: masaüstü sürüm odakta değilken 30 FPS'e iner (editör ve batch hariç), odak gelince seçime döner.
+- Ayar `fps` olarak profil kaydında (0 Otomatik, −1 Sınırsız, 30–1000); eski kayıtlar diğer ayarlarını koruyup Otomatik ile açılır. Çözünürlük gibi seçildiği an uygulanır ve kaydedilir; "Varsayılana dön" Otomatik'e döndürür.
+- Arka plan (gezegen/yıldız): Efekt kalitesi Yüksek'te artık oyunun kare hızıyla güncellenir (önce 60'ta sabitti); Orta 30, Düşük 20 aynı.
+- Kapsam dışı: masa içi ayarlar penceresinde kare hızı satırı yok (menüdeki ayar masada da geçerli); tam ekran özel modda monitörün yenileme hızını değiştirmek (oyun pencere modunda çalışıyor).
+- Testler: `FramePacingTests` (seçenekler, politika, etiket, doğrulama, kayıt), `FrameRateSettingsTests` (satır, VSync/targetFrameRate, kayıt). Kare: `docs/testing/fps_settings.png`.
+
 ## Tekrar üretim
 
 1. Unity Hub üzerinden bu kökü Unity 6000.6.6f1 ile açın; Bootstrap sahnesini çalıştırın.

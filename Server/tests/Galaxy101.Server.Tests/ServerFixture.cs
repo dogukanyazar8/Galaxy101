@@ -28,6 +28,8 @@ public sealed class ServerFixture : WebApplicationFactory<Program>, IAsyncLifeti
         builder.UseSetting("Auth:SigningKey", Convert.ToBase64String(new byte[32]));
         builder.UseSetting("RateLimits:AuthPerMinute", "100000");
         builder.UseSetting("RateLimits:RequestBurst", "100000");
+        builder.UseSetting("Game:HandsPerMatch", "2");
+        builder.UseSetting("Game:TimeoutsBeforeAuto", "1");
         builder.ConfigureServices(services =>
         {
             services.RemoveAll<TimeProvider>();

@@ -50,7 +50,7 @@ public sealed class DailyService(GameDb db, Ledger ledger, Catalog catalog, Game
     {
         var today = calendar.Today;
         await using var tx = await db.Database.BeginTransactionAsync(ct);
-        var state = await db.DailyStates.FromSql($"SELECT * FROM daily_states WHERE account_id = {account} FOR UPDATE").FirstOrDefaultAsync(ct);
+        var state = (await db.DailyStates.FromSql($"SELECT * FROM daily_states WHERE account_id = {account} FOR UPDATE").ToListAsync(ct)).FirstOrDefault();
         if (state is null) return ErrorCodes.NotFound;
         if (state.LastClaimDay == today) return ErrorCodes.AlreadyClaimed;
         var day = state.LastClaimDay == today.AddDays(-1) ? state.StreakCount % 7 + 1 : 1;
@@ -101,7 +101,7 @@ public sealed class DailyService(GameDb db, Ledger ledger, Catalog catalog, Game
 
     private async Task<DailyState?> LockedCurrentAsync(Guid account, CancellationToken ct)
     {
-        var state = await db.DailyStates.FromSql($"SELECT * FROM daily_states WHERE account_id = {account} FOR UPDATE").FirstOrDefaultAsync(ct);
+        var state = (await db.DailyStates.FromSql($"SELECT * FROM daily_states WHERE account_id = {account} FOR UPDATE").ToListAsync(ct)).FirstOrDefault();
         if (state is null) return null;
         if (state.QuestDay != calendar.Today) { state.QuestDay = calendar.Today; state.QuestProgress = []; state.QuestClaimedMask = 0; }
         if (state.QuestProgress.Length < catalog.Quests.Count)

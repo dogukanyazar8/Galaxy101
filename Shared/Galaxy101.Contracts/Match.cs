@@ -131,11 +131,15 @@ namespace Galaxy101.Contracts
         public RoundResultDto Result { get; set; }
     }
 
-    /// <summary><c>kind</c>: "draw", "return", "shortOpening", "commit", "timeout"; <c>tile</c> is public only for discards and discard-pile draws.</summary>
+    /// <summary>
+    /// The move that produced this state. <c>kind</c>: "draw", "return", "shortOpening", "commit"; <c>auto</c> when the
+    /// server played it for the seat. <c>tile</c> is public only for discards and discard-pile draws.
+    /// </summary>
     public sealed class MatchEventDto
     {
         public string Kind { get; set; }
         public int Seat { get; set; }
+        public bool Auto { get; set; }
         public int? Tile { get; set; }
     }
 

@@ -109,6 +109,11 @@ public static class RealtimeEndpoint
                     // Malformed payloads are the client's problem, not a reason to drop the table.
                     error = ErrorCodes.Validation;
                 }
+                catch (Exception e) when (e is not OperationCanceledException)
+                {
+                    log.LogError(e, "Realtime {Type} failed for {Account}", message.Type, c.Account);
+                    error = "server_error";
+                }
                 if (message.Id is not null) c.Send(MessageTypes.Ack, new AckMessage { Id = message.Id, Ok = error is null, Code = error });
             }, lifetime.ApplicationStopping);
         }

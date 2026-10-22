@@ -51,7 +51,14 @@ public sealed class RealtimeClient : IAsyncDisposable
         return await WaitAsync<AckMessage>(MessageTypes.Ack, a => a.Id == id);
     }
 
-    public void Forget<T>(string type) { lock (seen) seen.RemoveAll(x => x.Type == type); }
+    public void Forget(string type) { Drain(); lock (seen) seen.RemoveAll(x => x.Type == type); }
+
+    /// <summary>Non-blocking: has a frame of this type arrived (and not been consumed by a wait)?</summary>
+    public bool Received(string type) { Drain(); lock (seen) return seen.Any(x => x.Type == type); }
+
+    public int Count(string type) { Drain(); lock (seen) return seen.Count(x => x.Type == type); }
+
+    private void Drain() { while (inbox.Reader.TryRead(out var frame)) lock (seen) seen.Add(frame); }
 
     private async Task ReadAsync()
     {

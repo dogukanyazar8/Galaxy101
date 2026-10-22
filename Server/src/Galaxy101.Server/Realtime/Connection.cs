@@ -64,14 +64,15 @@ public sealed class Connection(Guid account, WebSocket socket, ILogger log)
             }
         }
         catch (OperationCanceledException) { }
-        catch (WebSocketException) { }
+        catch (Exception e) when (e is WebSocketException or IOException) { } // the peer went away
         finally
         {
             ArrayPool<byte>.Shared.Return(buffer);
             Close();
             await writer;
             if (socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
-                try { await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None); } catch (WebSocketException) { }
+                try { await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None); }
+                catch (Exception e) when (e is WebSocketException or IOException or ObjectDisposedException) { }
         }
     }
 
@@ -83,7 +84,7 @@ public sealed class Connection(Guid account, WebSocket socket, ILogger log)
                 await socket.SendAsync(frame, WebSocketMessageType.Text, true, ct);
         }
         catch (OperationCanceledException) { }
-        catch (WebSocketException) { closing.Cancel(); }
+        catch (Exception e) when (e is WebSocketException or IOException or ObjectDisposedException) { closing.Cancel(); }
     }
 
     private Task CloseAsync(WebSocketCloseStatus status, string reason) =>

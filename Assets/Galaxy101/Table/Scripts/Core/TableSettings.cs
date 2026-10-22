@@ -51,7 +51,9 @@ namespace Galaxy101.Table
         }
 
         public bool Bool(string key) => key == "lang" || key == "master" ? throw new ArgumentException(key) : (bool)values[key];
-        public int Int(string key) => key == "master" ? (int?)menu?.Settings["master"] ?? 80 : (int)values[key];
+        public int Int(string key) => key == "master" ? (int?)menu?.Settings["master"] ?? 80 : key == "fps" ? (int?)menu?.Settings["fps"] ?? FramePacing.Auto : (int)values[key];
+        /// <summary>Kare hızı (menu setting, shared): <see cref="FramePacing.Auto"/>, <see cref="FramePacing.Unlimited"/> or a cap.</summary>
+        public int FrameRate => Int("fps");
         public string Text(string key) => key == "lang" ? ((string)menu?.Settings["lang"] == "en" ? "en" : "tr") : (string)values[key];
 
         public bool AutoSort => Bool("autoSort");
@@ -70,7 +72,7 @@ namespace Galaxy101.Table
         public void Set(string key, JToken value)
         {
             if (!Valid(key, value)) throw new ArgumentException("Invalid table setting " + key + " = " + value);
-            if (key == "lang" || key == "master") { if (!SetMenu(key, value)) return; }
+            if (key == "lang" || key == "master" || key == "fps") { if (!SetMenu(key, value)) return; if (key == "fps") FramePacing.Apply((int)value); }
             else
             {
                 if (JToken.DeepEquals(values[key], value)) return;
@@ -79,11 +81,12 @@ namespace Galaxy101.Table
             Changed?.Invoke(key);
         }
 
-        /// <summary>"Varsayılana dön": every row back to the design default, the language to Türkçe and the master volume to 80.</summary>
+        /// <summary>"Varsayılana dön": every row back to the design default, the language to Türkçe, the master volume to 80 and the frame rate to Otomatik.</summary>
         public void Reset()
         {
             foreach (var property in Defaults().Properties()) values[property.Name] = property.Value;
             Save(); SetMenu("lang", "tr"); SetMenu("master", 80);
+            if (SetMenu("fps", FramePacing.Auto) || FramePacing.Choice != FramePacing.Auto) FramePacing.Apply(FramePacing.Auto);
             Changed?.Invoke(null);
         }
 
@@ -112,6 +115,7 @@ namespace Galaxy101.Table
             switch (key)
             {
                 case "lang": return value.Type == JTokenType.String && ((string)value == "tr" || (string)value == "en");
+                case "fps": return value.Type == JTokenType.Integer && FramePacing.IsValidChoice((long)value);
                 case "warn": return value.Type == JTokenType.Integer && Array.IndexOf(WarnChoices, (int)value) >= 0;
                 case "view": return value.Type == JTokenType.String && Array.IndexOf(Views, (string)value) >= 0;
                 case "tableSkin": return value.Type == JTokenType.String && Array.IndexOf(TableAssetCatalog.TableSkins, (string)value) >= 0;

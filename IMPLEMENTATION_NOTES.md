@@ -153,7 +153,8 @@ Kabul listesi (spec/17):
   - Odak kaybı: masaüstü sürüm odakta değilken 30 FPS'e iner (editör ve batch hariç), odak gelince seçime döner.
 - Ayar `fps` olarak profil kaydında (0 Otomatik, −1 Sınırsız, 30–1000); eski kayıtlar diğer ayarlarını koruyup Otomatik ile açılır. Çözünürlük gibi seçildiği an uygulanır ve kaydedilir; "Varsayılana dön" Otomatik'e döndürür.
 - Arka plan (gezegen/yıldız): Efekt kalitesi Yüksek'te artık oyunun kare hızıyla güncellenir (önce 60'ta sabitti); Orta 30, Düşük 20 aynı.
-- Kapsam dışı: masa içi ayarlar penceresinde kare hızı satırı yok (menüdeki ayar masada da geçerli); tam ekran özel modda monitörün yenileme hızını değiştirmek (oyun pencere modunda çalışıyor).
+- Masa ayarları → Görünüm sekmesinin başında aynı "Kare hızı" satırı (menüyle ortak ayar; anında uygulanır, "Varsayılana dön" Otomatik yapar). İkram bildirim kartı ve emoji katmanı artık pencerelerin altında.
+- Kapsam dışı: tam ekran özel modda monitörün yenileme hızını değiştirmek (oyun pencere modunda çalışıyor).
 - Testler: `FramePacingTests` (seçenekler, politika, etiket, doğrulama, kayıt), `FrameRateSettingsTests` (satır, VSync/targetFrameRate, kayıt). Kare: `docs/testing/fps_settings.png`.
 
 ## Tekrar üretim

@@ -640,6 +640,12 @@ namespace Galaxy101.Tests
             // T15: Görünüm — cards with SEÇİLİ; T20: Hologram + Neon cam, then a new tile style.
             hud.Press("settings-tab:2"); yield return null;
             Assert.That(root.Q<VisualElement>("setting-tableSkin-station").Q<Label>("setting-in-use"), Is.Not.Null);
+            // Kare hızı (shared with the menu): Otomatik → 30 FPS cap, VSync off at once.
+            Assert.That(root.Q<Label>("setting-fps-value").text, Does.StartWith(hud.L("Otomatik", "Auto")));
+            Click(root, "setting-fps-next"); yield return null;
+            Assert.That(hud.Settings.FrameRate, Is.EqualTo(30)); Assert.That((int)hud.Model.Settings["fps"], Is.EqualTo(30));
+            Assert.That(QualitySettings.vSyncCount, Is.EqualTo(0)); Assert.That(Application.targetFrameRate, Is.EqualTo(30));
+            Assert.That(root.Q<Label>("setting-fps-value").text, Is.EqualTo("30 FPS"));
             if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "set_look.png"));
             yield return null; AssertNoOverflow(root, "settings · look");
             Click(root, "setting-tableSkin-holo"); Click(root, "setting-rackSkin-neon"); yield return null;
@@ -676,6 +682,7 @@ namespace Galaxy101.Tests
             Assert.That(hud.Settings.WarnSeconds, Is.EqualTo(5)); Assert.That(hud.Settings.Int("music"), Is.EqualTo(55));
             Assert.That(table.TableSkin, Is.EqualTo("station")); Assert.That(table.RackSkin, Is.EqualTo("walnut")); Assert.That(table.TileSkin, Is.EqualTo("classic"));
             Assert.That(table.CameraRig.Current, Is.EqualTo(TableCameraRig.View.Player));
+            Assert.That(hud.Settings.FrameRate, Is.EqualTo(FramePacing.Auto)); Assert.That(QualitySettings.vSyncCount, Is.EqualTo(1));
             Assert.Throws<ArgumentException>(() => hud.Settings.Set("warn", 7), "only 3 / 5 / 10 / off");
             Click(root, "settings-done"); yield return null;
             Assert.That(hud.Window, Is.Null);

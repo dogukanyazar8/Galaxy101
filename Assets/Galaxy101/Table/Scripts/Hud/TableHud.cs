@@ -1240,6 +1240,7 @@ namespace Galaxy101.Table
         {
             if (table != null && table.CameraRig != null) table.RenderInto(null);
             if (viewTarget != null) { viewTarget.Release(); Kill(viewTarget); }
+            FramePacing.DisplayChanged -= OnDisplayChanged;
             view?.Dispose(); loc?.Dispose();
         }
     }

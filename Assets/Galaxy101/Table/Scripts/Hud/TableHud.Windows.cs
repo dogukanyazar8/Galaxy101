@@ -56,12 +56,16 @@ namespace Galaxy101.Table
 
         private void InitializeWindows(bool persist)
         {
-            windowLayer = Layer("table-windows"); canvas.Add(windowLayer);
+            // The received-gift card and emoji sit under the windows (reference z-index 12 under the 42 of the settings).
             socialLayer = Layer("table-social"); canvas.Add(socialLayer);
+            windowLayer = Layer("table-windows"); canvas.Add(windowLayer);
             canvas.schedule.Execute(() => { float now = Time.realtimeSinceStartup; for (int i = motions2.Count - 1; i >= 0; i--) if (!motions2[i](now)) motions2.RemoveAt(i); }).Every(16);
             Settings = new TableSettings(model, persist);
             ApplySceneSettings(null, 0);
             Settings.Changed += OnSettingChanged;
+            FramePacing.DisplayChanged += OnDisplayChanged;
+            // A table opened straight from the editor (no menu first) still uses the saved frame rate.
+            if (persist && FramePacing.Choice != Settings.FrameRate) FramePacing.Apply(Settings.FrameRate);
         }
 
         private void UpdateWindows()
@@ -228,12 +232,12 @@ namespace Galaxy101.Table
         }
 
         /// <summary>One settings row: padding 13 16, radius 16, dp, title 700 16 over a 700 12.5 muted line, control on the right.</summary>
-        private VisualElement SettingRow(VisualElement list, string key, VisualElement control)
+        private VisualElement SettingRow(VisualElement list, string key, VisualElement control, string title = null, string description = null)
         {
             var row = Row(16); row.name = "setting-row-" + key; Pad(row, 13, 16, 13, 16); view.Decorate(row, "var(--dp)", 16);
             var labels = Box(); labels.style.flexGrow = 1; labels.style.flexShrink = 1; labels.style.minWidth = 0;
-            labels.Add(Text(S("sRows." + key + ".0"), "Montserrat-700", 16, "#F4F1E8"));
-            var desc = Text(S("sRows." + key + ".1"), "Baloo2-700", 12, "var(--mt)"); desc.style.whiteSpace = WhiteSpace.Normal; desc.style.flexShrink = 1; desc.style.marginTop = 2; labels.Add(desc);
+            labels.Add(Text(title ?? S("sRows." + key + ".0"), "Montserrat-700", 16, "#F4F1E8"));
+            var desc = Text(description ?? S("sRows." + key + ".1"), "Baloo2-700", 12, "var(--mt)"); desc.style.whiteSpace = WhiteSpace.Normal; desc.style.flexShrink = 1; desc.style.marginTop = 2; labels.Add(desc);
             row.Add(labels); row.Add(control); list.Add(row); return row;
         }
 
@@ -308,8 +312,40 @@ namespace Galaxy101.Table
             ["marble"] = ("linear-gradient(#FFFFFF,#E4E6EC)", "#C9CCD6", "#9499A8", "#2B3A55", "#C21F36", "#2B3A55", null),
         };
 
+        /// <summary>
+        /// Kare hızı (same setting as the menu's Görüntü tab): ‹ Otomatik · 144 Hz › over the options of the window's
+        /// monitor; applies and saves at once.
+        /// </summary>
+        private void FrameRateRow(VisualElement list)
+        {
+            var options = new List<int>(FramePacing.Options(FramePacing.MaxHz, FramePacing.IsMobile));
+            int current = Settings.FrameRate;
+            if (!options.Contains(current)) { options.Add(current); options.Sort((a, b) => a == FramePacing.Auto ? -1 : b == FramePacing.Auto ? 1 : a == FramePacing.Unlimited ? 1 : b == FramePacing.Unlimited ? -1 : a.CompareTo(b)); }
+            int index = options.IndexOf(current);
+            var group = Row(3); group.name = "setting-fps"; Pad(group, 3, 3, 3, 3); view.Decorate(group, "var(--sd)", 12); group.style.flexShrink = 0;
+            VisualElement Arrow(string glyph, string name, int step)
+            {
+                bool enabled = index + step >= 0 && index + step < options.Count;
+                var arrow = Text(glyph, "Montserrat-700", 16, enabled ? "#F4F1E8" : "var(--mt)"); arrow.name = name; arrow.style.width = 34; arrow.style.unityTextAlign = TextAnchor.MiddleCenter; Pad(arrow, 6, 0, 6, 0);
+                view.Decorate(arrow, "transparent", 9); arrow.EnableInClassList("at-end", !enabled); arrow.style.opacity = enabled ? 1 : .5f;
+                if (enabled) GalaxyFilters.HoverBrightness(arrow, 1.3f);
+                Tap(arrow, () => { if (enabled) Settings.Set("fps", options[index + step]); });
+                return arrow;
+            }
+            var value = Text(FramePacing.Label(current, Lang, FramePacing.CurrentHz), "Montserrat-700", 14, "var(--aT)"); value.name = "setting-fps-value";
+            value.style.minWidth = 150; value.style.unityTextAlign = TextAnchor.MiddleCenter; Pad(value, 8, 10, 8, 10); view.Decorate(value, "linear-gradient(var(--a1),var(--a2))", 9);
+            group.Add(Arrow("‹", "setting-fps-prev", -1)); group.Add(value); group.Add(Arrow("›", "setting-fps-next", 1));
+            string how = current == FramePacing.Auto ? L("Ekranın yenileme hızıyla eşitlenir (VSync)", "Locked to your display's refresh rate (VSync)")
+                : current == FramePacing.Unlimited ? L("VSync kapalı, sınır yok · ısı ve güç kullanımı artar", "VSync off, no limit · more heat and power use")
+                : L("VSync kapalı · en fazla " + current + " FPS", "VSync off · at most " + current + " FPS");
+            SettingRow(list, "fps", group, L("Kare hızı", "Frame rate"), how + " · " + L("Monitör en fazla ", "Display up to ") + Math.Round(FramePacing.MaxHz) + " Hz");
+        }
+
+        private void OnDisplayChanged() { if (Window == "settings") RenderWindows(true); }
+
         private void BuildLookTab(VisualElement list)
         {
+            FrameRateRow(list);
             list.Add(LookCaption(S("lkView")));
             var views = CardGrid(2);
             for (int i = 0; i < TableSettings.Views.Length; i++)

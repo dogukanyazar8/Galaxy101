@@ -41,6 +41,7 @@ namespace Okey101.Core.Rules
             private OpeningKind opening;
             private int seriesTilesUsed;
             private long nextMeldId;
+            private readonly int[] ownerPenalties = new int[4];
 
             public Candidate(RoundState source, TileFace indicator)
             {
@@ -191,6 +192,8 @@ namespace Okey101.Core.Rules
                 table[index] = new Meld(target.Id, target.Owner, new MeldProposal(target.Group.Kind, tiles));
                 hand.Remove(action.ReplacementId);
                 hand.Add(action.JokerId);
+                // spec/17 §3: whoever laid the okey pays +101 when another player takes it.
+                if (target.Owner != source.ActivePlayer) ownerPenalties[target.Owner] += Penalties.Standard;
                 return ErrorCode.None;
             }
 
@@ -205,8 +208,10 @@ namespace Okey101.Core.Rules
             public RoundState Build()
             {
                 var players = new PlayerState[4];
-                for (var player = 0; player < players.Length; player++) players[player] = source.Players[player];
-                players[source.ActivePlayer] = new PlayerState(hand, opening, source.Players[source.ActivePlayer].Penalties);
+                for (var player = 0; player < players.Length; player++)
+                    players[player] = ownerPenalties[player] == 0 ? source.Players[player]
+                        : new PlayerState(source.Players[player].Hand, source.Players[player].Opening, source.Players[player].Penalties + ownerPenalties[player]);
+                players[source.ActivePlayer] = new PlayerState(hand, opening, players[source.ActivePlayer].Penalties);
                 return new RoundState(source.RoundId, source.Version, source.Seed, source.StartingPlayer,
                     source.ActivePlayer, source.TurnNumber, source.Phase, source.Indicator, source.Stock,
                     players, table, source.Discards, source.PendingDraw, source.OpeningAtTurnStart,

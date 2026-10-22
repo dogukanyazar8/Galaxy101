@@ -223,8 +223,10 @@ namespace Okey101.Core.Tests
             for (var p = 0; p < 4; p++)
             {
                 Assert.That(next.Discards[p], Is.EqualTo(state.Discards[p]));
-                Assert.That(next.Players[p].Penalties, Is.EqualTo(state.Players[p].Penalties));
-                if (p != state.ActivePlayer) Assert.That(next.Players[p], Is.SameAs(state.Players[p]));
+                // spec/17 §3: taking another player's okey costs that meld owner +101.
+                int taken = actions.OfType<SwapJoker>().Count(s => p != state.ActivePlayer && state.Table.Any(m => m.Id == s.MeldId && m.Owner == p));
+                Assert.That(next.Players[p].Penalties, Is.EqualTo(state.Players[p].Penalties + 101 * taken));
+                if (p != state.ActivePlayer && taken == 0) Assert.That(next.Players[p], Is.SameAs(state.Players[p]));
             }
             Assert.That(next.PendingDraw, Is.SameAs(state.PendingDraw));
             Assert.That(next.OpeningAtTurnStart, Is.EqualTo(state.OpeningAtTurnStart));

@@ -21,7 +21,7 @@ namespace Okey101.Core.Turns
             if (meta.ExpectedVersion != state.Version) return RuleResult<RoundState>.Fail(ErrorCode.StaleVersion);
             if (state.Phase == RoundPhase.Finished || state.Phase == RoundPhase.Cancelled ||
                 (command is DrawCommand && state.Phase != RoundPhase.AwaitingDraw) ||
-                (command is CommitTurnCommand && state.Phase != RoundPhase.PlanningTurn))
+                ((command is CommitTurnCommand || command is ReturnDiscardCommand || command is ShortOpeningCommand) && state.Phase != RoundPhase.PlanningTurn))
                 return RuleResult<RoundState>.Fail(ErrorCode.WrongPhase);
             if (token.IsCancellationRequested) return RuleResult<RoundState>.Fail(ErrorCode.Cancelled);
             if (state.Version == long.MaxValue || !StateInvariant.ValidateAuthority(state).Success)
@@ -32,6 +32,8 @@ namespace Okey101.Core.Turns
             {
                 case DrawCommand draw: result = Draw(state, draw, token); break;
                 case CommitTurnCommand commit: result = Commit(state, commit); break;
+                case ReturnDiscardCommand back: result = ReturnDiscard(state, back); break;
+                case ShortOpeningCommand shortOpening: result = ShortOpening(state, shortOpening); break;
                 default: return RuleResult<RoundState>.Fail(ErrorCode.InvalidState);
             }
             if (!result.Success) return result;
@@ -43,11 +45,10 @@ namespace Okey101.Core.Turns
 
         private static RuleResult<RoundState> Draw(RoundState state, DrawCommand command, CancellationToken token)
         {
-            if (command.Source == DrawSource.PreviousDiscard)
-            {
-                var witness = DiscardTurnFinder.Find(PlayerViewProjector.ForPlayer(state, state.ActivePlayer), token);
-                if (!witness.Success) return RuleResult<RoundState>.Fail(witness.Error);
-            }
+            // spec/17 §4: the previous discard can always be taken; if it is of no use it goes back (ReturnDiscard). Once put
+            // back, only the stock remains this turn.
+            if (command.Source == DrawSource.PreviousDiscard && state.PreviousDiscardReturned)
+                return RuleResult<RoundState>.Fail(ErrorCode.PreviousDiscardUnavailable);
             if (token.IsCancellationRequested) return RuleResult<RoundState>.Fail(ErrorCode.Cancelled);
 
             var stock = new List<TileId>(state.Stock);
@@ -77,6 +78,39 @@ namespace Okey101.Core.Turns
                 stock, players, state.Table, discards,
                 new DrawReceipt(command.Source, tile, command.Source == DrawSource.Stock && stock.Count == 0),
                 player.Opening, 0, false, AcceptedSequences(state, command.Meta)));
+        }
+
+        private static RuleResult<RoundState> ReturnDiscard(RoundState state, ReturnDiscardCommand command)
+        {
+            var draw = state.PendingDraw;
+            if (draw == null || draw.Source != DrawSource.PreviousDiscard) return RuleResult<RoundState>.Fail(ErrorCode.InvalidState);
+            var actor = state.ActivePlayer;
+            var players = CopyPlayers(state);
+            var hand = new List<TileId>(players[actor].Hand);
+            if (!hand.Remove(draw.Tile)) return RuleResult<RoundState>.Fail(ErrorCode.InvalidState);
+            players[actor] = new PlayerState(hand, players[actor].Opening, players[actor].Penalties);
+            var discards = CopyDiscards(state);
+            var previous = (actor + 3) % 4;
+            discards[previous] = new List<TileId>(discards[previous]) { draw.Tile };
+            return RuleResult<RoundState>.Ok(new RoundState(state.RoundId, state.Version + 1, state.Seed,
+                state.StartingPlayer, actor, state.TurnNumber, RoundPhase.AwaitingDraw, state.Indicator, state.Stock,
+                players, state.Table, discards, null, state.OpeningAtTurnStart, 0, false,
+                AcceptedSequences(state, command.Meta), null, true));
+        }
+
+        /// <summary>Eksik açılış: +101 to a player who has not opened; nothing else changes.</summary>
+        private static RuleResult<RoundState> ShortOpening(RoundState state, ShortOpeningCommand command)
+        {
+            var actor = state.ActivePlayer;
+            var player = state.Players[actor];
+            if (player.Opening != OpeningKind.None) return RuleResult<RoundState>.Fail(ErrorCode.InvalidOpening);
+            if (player.Penalties > int.MaxValue - Penalties.Standard) return RuleResult<RoundState>.Fail(ErrorCode.InvalidState);
+            var players = CopyPlayers(state);
+            players[actor] = new PlayerState(player.Hand, player.Opening, player.Penalties + Penalties.Standard);
+            return RuleResult<RoundState>.Ok(new RoundState(state.RoundId, state.Version + 1, state.Seed,
+                state.StartingPlayer, actor, state.TurnNumber, state.Phase, state.Indicator, state.Stock,
+                players, state.Table, state.Discards, state.PendingDraw, state.OpeningAtTurnStart, state.SeriesTilesUsed,
+                state.IsInitialTurn, AcceptedSequences(state, command.Meta), null, state.PreviousDiscardReturned));
         }
 
         private static RuleResult<RoundState> Commit(RoundState state, CommitTurnCommand command)

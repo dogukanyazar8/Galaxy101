@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#06070F}
+a{color:#FFD964}
+a:hover{color:#fff}
+@keyframes modalIn{from{opacity:0;transform:translateY(18px) scale(.95)}to{opacity:1;transform:none}}
+@keyframes toastIn{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+@keyframes popIn{0%{opacity:0;transform:scale(.3)}70%{opacity:1;transform:scale(1.1)}100%{opacity:1;transform:scale(1)}}
+@keyframes pulseG{0%,100%{box-shadow:0 5px 0 var(--aS),0 0 0 0 var(--gl)}50%{box-shadow:0 5px 0 var(--aS),0 0 0 12px rgba(0,0,0,0)}}
+@keyframes glowP{0%,100%{opacity:1}50%{opacity:.5}}
+</style>
+</helmet>
+<div style="padding:{{ pad }};background:#06070F;min-height:100vh;color:#fff;font-family:'Baloo 2',sans-serif;transform:{{ rootTf }};transform-origin:0 0;width:{{ rootW }}">
+  <sc-if value="{{ chrome }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:1100px;margin-bottom:72px">
+      <div style="font:800 12px 'Baloo 2';letter-spacing:2px;color:#FFD964">GALAXY 101 · {{ hdrKick }}</div>
+      <div style="font:800 44px/1.1 Montserrat">{{ hdrTitle }}</div>
+      <div style="font:600 17px/1.5 'Baloo 2';color:#A9AEDD;text-wrap:pretty">{{ hdrIntro }}</div>
+    </div>
+  </sc-if>
+  <sc-for list="{{ groups }}" as="g" hint-placeholder-count="2">
+    <section id="{{ g.anchor }}" style="display:flex;flex-direction:column;gap:30px;margin-bottom:{{ gmb }}">
+      <sc-if value="{{ chrome }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:8px;max-width:1100px">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="font:800 15px Montserrat;color:#1A1200;background:#FFD964;border-radius:9px;padding:4px 11px">{{ g.no }}</div>
+            <div style="font:800 30px Montserrat">{{ g.title }}</div>
+          </div>
+          <div style="font:600 16px/1.5 'Baloo 2';color:#A9AEDD;text-wrap:pretty">{{ g.why }}</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ g.hasLen }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:14px;max-width:1600px">
+          <div style="font:900 12px 'Baloo 2';letter-spacing:1.6px;color:#A9AEDD">{{ lenL.title }}</div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+            <sc-for list="{{ lenL.opts }}" as="lo" hint-placeholder-count="3">
+              <div style="position:relative;display:flex;flex-direction:column;gap:10px;padding:20px 22px;border-radius:22px;background:#232A66;box-shadow:0 7px 0 #0B0D2B;border:{{ lo.bd }}">
+                <sc-if value="{{ lo.rec }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:-11px;left:20px;font:900 10px 'Baloo 2';letter-spacing:1.2px;padding:3px 9px;border-radius:7px;background:#FFD964;color:#3A1F00">{{ lenL.recTag }}</div></sc-if>
+                <div style="font:800 20px Montserrat">{{ lo.name }}</div>
+                <div style="font:600 15px/1.45 'Baloo 2';color:#D3D6FF;text-wrap:pretty">{{ lo.how }}</div>
+                <div style="display:flex;gap:8px;font:700 14px/1.4 'Baloo 2';color:#6BE8B0"><div>+</div><div>{{ lo.pro }}</div></div>
+                <div style="display:flex;gap:8px;font:700 14px/1.4 'Baloo 2';color:#FF8A95"><div>−</div><div>{{ lo.con }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font:700 16px/1.5 'Baloo 2';color:#FFE7A3;text-wrap:pretty">{{ lenL.rec }}</div>
+        </div>
+      </sc-if>
+      <sc-for list="{{ g.states }}" as="s" hint-placeholder-count="2">
+        <div id="{{ s.id }}" style="display:flex;flex-direction:column;gap:14px">
+          <sc-if value="{{ chrome }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <div style="font:800 14px Montserrat;padding:4px 10px;border-radius:8px;background:#1C2050;color:#FFD964">{{ s.id }}</div>
+              <div style="font:700 19px Montserrat">{{ s.title }}</div>
+              <div style="font:600 15px 'Baloo 2';color:#8A90C0">{{ s.note }}</div>
+            </div>
+          </sc-if>
+          <div style="display:flex;gap:40px">
+            <sc-for list="{{ s.frames }}" as="f" hint-placeholder-count="2">
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <sc-if value="{{ chrome }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;align-items:center;gap:8px;font:800 13px 'Baloo 2';color:#9AA0C8"><div style="width:12px;height:12px;border-radius:50%;background:{{ f.sw }}"></div>{{ f.cap }}</div>
+                </sc-if>
+                <div ref="{{ f.ref }}" style="position:relative;width:1280px;height:720px;overflow:hidden;flex:none;border-radius:{{ f.rad }};background:radial-gradient(120% 90% at 50% 0%,var(--bg1),var(--bg2) 55%,var(--bg3));color:#fff;font-family:var(--fB)">
+
+                  <sc-if value="{{ f.scene }}" hint-placeholder-val="{{ true }}">
+                    <div style="position:absolute;left:70px;top:-150px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle at 38% 32%,var(--p1),var(--p2) 45%,var(--p4) 85%);box-shadow:0 0 90px var(--pg);opacity:.8"></div>
+                    <div style="position:absolute;left:0;right:0;top:150px;height:640px;perspective:1100px">
+                      <div style="position:absolute;left:100px;right:100px;top:0;bottom:0;border-radius:48px;transform:rotateX(44deg);transform-origin:50% 0;background:radial-gradient(ellipse at 50% 32%,var(--bd),var(--pn) 60%,var(--sd));border:12px solid var(--dp);box-shadow:0 0 0 3px var(--pnH),0 50px 90px rgba(0,0,0,.6)">
+                        <div style="position:absolute;left:50%;top:70px;width:420px;height:420px;margin-left:-210px;border-radius:50%;border:2px solid rgba(255,255,255,.07)"></div>
+                        <div style="position:absolute;left:0;right:0;top:430px;text-align:center;font:800 40px var(--fL);letter-spacing:12px;color:rgba(255,255,255,.06)">GALAXY 101</div>
+                      </div>
+                    </div>
+                    <div style="position:absolute;left:552px;top:292px;display:flex;gap:4px">
+                      <div style="width:26px;height:34px;border-radius:5px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:0 -4px 0 var(--te),0 -8px 0 var(--tf2),0 -12px 0 var(--te),0 4px 0 rgba(0,0,0,.4)"></div>
+                      <div style="width:26px;height:34px;border-radius:5px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:0 -4px 0 var(--te),0 -8px 0 var(--tf2),0 -12px 0 var(--te),0 4px 0 rgba(0,0,0,.4)"></div>
+                      <div style="width:26px;height:34px;border-radius:5px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:0 -4px 0 var(--te),0 -8px 0 var(--tf2),0 4px 0 rgba(0,0,0,.4)"></div>
+                      <div style="width:26px;height:34px;border-radius:5px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:0 -4px 0 var(--te),0 -8px 0 var(--tf2),0 -12px 0 var(--te),0 4px 0 rgba(0,0,0,.4)"></div>
+                      <div style="width:26px;height:34px;border-radius:5px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:0 -4px 0 var(--te),0 4px 0 rgba(0,0,0,.4)"></div>
+                      <div style="width:26px;height:34px;border-radius:5px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:0 -4px 0 var(--te),0 -8px 0 var(--tf2),0 4px 0 rgba(0,0,0,.4)"></div>
+                    </div>
+                    <div style="position:absolute;left:627px;top:338px;width:26px;height:36px;border-radius:5px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -3px 0 var(--te),0 3px 0 rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><div style="font:800 15px/1 var(--fH);color:#24242C">12</div><div style="width:4px;height:4px;border-radius:50%;background:#24242C"></div></div>
+                    <div style="position:absolute;left:640px;top:383px;transform:translateX(-50%);font:900 9px var(--fB);letter-spacing:1.4px;padding:2px 8px;border-radius:7px;background:rgba(5,8,22,.72);color:var(--ic);white-space:nowrap">{{ f.indL }}</div>
+
+                    <sc-for list="{{ f.melds }}" as="m" hint-placeholder-count="4">
+                      <div style="position:absolute;left:{{ m.x }};top:{{ m.y }};display:flex;gap:2px">
+                        <sc-for list="{{ m.tiles }}" as="t" hint-placeholder-count="3">
+                          <div style="position:relative;width:26px;height:36px">
+                            <sc-if value="{{ t.glow }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:-5px;border-radius:8px;box-shadow:0 0 0 3px var(--a1),0 0 22px 5px var(--gl);animation:glowP 1.1s ease-in-out infinite"></div></sc-if>
+                            <sc-if value="{{ t.full }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;inset:0;border-radius:5px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -3px 0 var(--te),0 2px 0 rgba(0,0,0,.45);outline:{{ t.ol }};outline-offset:-2px;opacity:{{ t.op }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><div style="font:800 15px/1 var(--fH);color:{{ t.col }}">{{ t.n }}</div><div style="width:4px;height:4px;border-radius:50%;background:{{ t.dot }}"></div></div></sc-if>
+                            <sc-if value="{{ t.ghost }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;border-radius:5px;border:2px dashed var(--a1);background:rgba(255,255,255,.08);box-sizing:border-box"></div></sc-if>
+                            <sc-if value="{{ t.badge }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:-11px;right:-9px;min-width:17px;height:17px;padding:0 3px;box-sizing:border-box;border-radius:9px;background:#fff;border:2px solid #E8B730;display:grid;place-items:center;font:800 10px/1 var(--fH);color:{{ t.bcol }};box-shadow:0 2px 4px rgba(0,0,0,.45)">{{ t.bn }}</div></sc-if>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-for>
+
+                    <sc-for list="{{ f.opps }}" as="o" hint-placeholder-count="3">
+                      <div style="position:absolute;left:{{ o.x }};top:{{ o.y }};transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px">
+                        <div style="position:relative;width:62px;height:62px">
+                          <div style="position:absolute;inset:0;border-radius:50%;background:{{ o.color }};border:{{ o.ring }};box-shadow:{{ o.glow }};box-sizing:border-box;display:grid;place-items:center;font:700 19px var(--fH);color:#fff">{{ o.ini }}</div>
+                          <div style="position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);background:var(--a1);color:var(--aT);font:900 10px var(--fB);padding:1px 7px;border-radius:7px;white-space:nowrap">{{ o.lv }}</div>
+                          <sc-if value="{{ o.pen }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:-8px;right:-30px;font:800 12px var(--fH);padding:3px 8px;border-radius:999px;background:linear-gradient(#FF7A86,#E8455A);color:#fff;box-shadow:0 3px 0 #9E1F33;white-space:nowrap">{{ o.pen }}</div></sc-if>
+                          <sc-if value="{{ o.hasBub }}" hint-placeholder-val="{{ false }}">
+                            <div style="position:absolute;bottom:74px;left:50%;transform:translateX(-50%);padding:7px 13px;border-radius:14px;background:{{ o.bub.bg }};color:{{ o.bub.fg }};font:800 13px var(--fB);white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.4)">
+                              <div>{{ o.bub.text }}</div>
+                              <div style="position:absolute;left:50%;bottom:-5px;width:10px;height:10px;margin-left:-5px;transform:rotate(45deg);background:{{ o.bub.tc }}"></div>
+                            </div>
+                          </sc-if>
+                        </div>
+                        <div style="display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 12px 5px;border-radius:12px;background:rgba(5,8,22,.72);border:1px solid rgba(255,255,255,.08)">
+                          <div style="display:flex;align-items:center;gap:5px;font:700 14px var(--fH);white-space:nowrap">{{ o.name }}<sc-if value="{{ o.bot }}" hint-placeholder-val="{{ false }}"><div style="font:900 8px var(--fB);letter-spacing:1px;padding:1px 5px;border-radius:5px;background:rgba(255,255,255,.16);color:var(--ic)">BOT</div></sc-if></div>
+                          <div style="font:800 11px var(--fB);color:{{ o.stc }};white-space:nowrap">{{ o.status }}</div>
+                        </div>
+                      </div>
+                    </sc-for>
+
+                    <div style="position:absolute;left:125px;top:485px;width:100px;height:100px;border-radius:50%;border:{{ f.discL.rb }};box-shadow:{{ f.discL.rs }};box-sizing:border-box;display:grid;place-items:center">
+                      <sc-if value="{{ f.discL.lbl }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:50%;top:-30px;transform:translateX(-50%);font:900 10px var(--fB);letter-spacing:1.4px;color:var(--aT);background:var(--a1);padding:4px 9px;border-radius:8px;white-space:nowrap">{{ f.discL.lbl }}</div></sc-if>
+                      <sc-if value="{{ f.discL.has }}" hint-placeholder-val="{{ true }}"><div style="width:44px;height:58px;border-radius:7px;transform:rotate(-10deg);background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -4px 0 var(--te),0 4px 0 rgba(0,0,0,.45);outline:{{ f.discL.t.ol }};outline-offset:-2px;opacity:{{ f.discL.op }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px"><div style="font:800 24px/1 var(--fH);color:{{ f.discL.t.col }}">{{ f.discL.t.n }}</div><div style="width:5px;height:5px;border-radius:50%;background:{{ f.discL.t.dot }}"></div></div></sc-if>
+                    </div>
+                    <div style="position:absolute;left:1085px;top:480px;width:100px;height:100px;border-radius:50%;border:{{ f.discR.rb }};box-shadow:{{ f.discR.rs }};box-sizing:border-box;display:grid;place-items:center">
+                      <sc-if value="{{ f.discR.lbl }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:50%;top:-30px;transform:translateX(-50%);font:900 10px var(--fB);letter-spacing:1.4px;color:var(--aT);background:var(--a1);padding:4px 9px;border-radius:8px;white-space:nowrap">{{ f.discR.lbl }}</div></sc-if>
+                      <sc-if value="{{ f.discR.has }}" hint-placeholder-val="{{ true }}"><div style="width:44px;height:58px;border-radius:7px;transform:rotate(8deg);background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -4px 0 var(--te),0 4px 0 rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px"><div style="font:800 24px/1 var(--fH);color:{{ f.discR.t.col }}">{{ f.discR.t.n }}</div><div style="width:5px;height:5px;border-radius:50%;background:{{ f.discR.t.dot }}"></div></div></sc-if>
+                    </div>
+
+                    <div style="position:absolute;left:236px;top:462px;width:760px;height:236px;border-radius:18px 18px 0 0;background:linear-gradient(180deg,#1A140F,#0B0806);box-shadow:inset 0 2px 0 rgba(255,255,255,.08),0 20px 50px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.06);box-sizing:border-box">
+                      <div style="position:absolute;left:0;right:0;top:86px;height:8px;background:linear-gradient(#8A6A42,#4A3620)"></div>
+                      <div style="position:absolute;left:0;right:0;top:178px;height:8px;background:linear-gradient(#8A6A42,#4A3620)"></div>
+                      <div style="position:absolute;left:13px;top:18px;display:flex;gap:3px">
+                        <sc-for list="{{ f.r1 }}" as="t" hint-placeholder-count="15">
+                          <div style="position:relative;width:46px;height:66px;flex:none">
+                            <sc-if value="{{ t.full }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;inset:0;border-radius:7px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -5px 0 var(--te),0 3px 0 rgba(0,0,0,.5);outline:{{ t.ol }};outline-offset:-1px;opacity:{{ t.op }};transform:{{ t.tf }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><div style="font:800 28px/1 var(--fH);color:{{ t.col }};letter-spacing:-1px">{{ t.n }}</div><div style="width:6px;height:6px;border-radius:50%;background:{{ t.dot }}"></div></div></sc-if>
+                            <sc-if value="{{ t.ghost }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;border-radius:7px;border:2px dashed rgba(255,255,255,.3);box-sizing:border-box"></div></sc-if>
+                            <sc-if value="{{ t.use }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:50%;top:-22px;transform:translateX(-50%);font:900 9px var(--fB);letter-spacing:1.2px;padding:2px 7px;border-radius:6px;background:var(--a1);color:var(--aT);white-space:nowrap;box-shadow:0 0 14px var(--gl)">{{ t.useL }}</div></sc-if>
+                          </div>
+                        </sc-for>
+                      </div>
+                      <div style="position:absolute;left:13px;top:110px;display:flex;gap:3px">
+                        <sc-for list="{{ f.r2 }}" as="t" hint-placeholder-count="15">
+                          <div style="position:relative;width:46px;height:66px;flex:none">
+                            <sc-if value="{{ t.full }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;inset:0;border-radius:7px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -5px 0 var(--te),0 3px 0 rgba(0,0,0,.5);outline:{{ t.ol }};outline-offset:-1px;opacity:{{ t.op }};transform:{{ t.tf }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><div style="font:800 28px/1 var(--fH);color:{{ t.col }};letter-spacing:-1px">{{ t.n }}</div><div style="width:6px;height:6px;border-radius:50%;background:{{ t.dot }}"></div></div></sc-if>
+                            <sc-if value="{{ t.ghost }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;border-radius:7px;border:2px dashed rgba(255,255,255,.3);box-sizing:border-box"></div></sc-if>
+                            <sc-if value="{{ t.use }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:50%;top:-22px;transform:translateX(-50%);font:900 9px var(--fB);letter-spacing:1.2px;padding:2px 7px;border-radius:6px;background:var(--a1);color:var(--aT);white-space:nowrap;box-shadow:0 0 14px var(--gl)">{{ t.useL }}</div></sc-if>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+
+                    <div style="position:absolute;left:26px;top:620px;width:74px;height:74px">
+                      <div style="position:absolute;inset:0;border-radius:50%;background:#F97316;border:{{ f.me.ring }};box-shadow:{{ f.me.glow }};box-sizing:border-box;display:grid;place-items:center;font:700 22px var(--fH);color:#fff">DY</div>
+                      <div style="position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);background:var(--a1);color:var(--aT);font:900 10px var(--fB);padding:1px 7px;border-radius:7px;white-space:nowrap">{{ f.me.lv }}</div>
+                      <sc-if value="{{ f.me.pen }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font:800 12px var(--fH);padding:3px 8px;border-radius:999px;background:linear-gradient(#FF7A86,#E8455A);color:#fff;box-shadow:0 3px 0 #9E1F33;white-space:nowrap">{{ f.me.pen }}</div></sc-if>
+                    </div>
+                    <div style="position:absolute;left:112px;top:604px;display:flex;flex-direction:column;gap:6px">
+                      <div style="font:700 16px var(--fH);white-space:nowrap">{{ f.me.name }}</div>
+                      <div style="font:800 12px var(--fB);color:{{ f.me.stc }};white-space:nowrap">{{ f.me.status }}</div>
+                      <div style="display:flex;gap:8px">
+                        <div style="width:38px;height:38px;border-radius:13px;background:linear-gradient(160deg,#5FA8FF,#2F6FE0);box-shadow:0 4px 0 #173F8A;display:grid;place-items:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16v10H10l-4.5 3.5V15.5H4z"></path></svg></div>
+                        <div style="width:38px;height:38px;border-radius:13px;background:linear-gradient(160deg,var(--a1),var(--a2));box-shadow:0 4px 0 var(--aS);display:grid;place-items:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--aT)"><path d="M4 10h16v10H4zM3 7h18v3H3zM12 7v13"></path></svg></div>
+                      </div>
+                    </div>
+
+                    <div style="position:absolute;right:16px;bottom:16px;display:flex;align-items:flex-end;gap:10px">
+                      <div style="display:flex;flex-direction:column;gap:7px">
+                        <div style="font:700 12px var(--fH);padding:8px 12px;border-radius:12px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);white-space:nowrap;text-align:center">{{ f.sortRun }}</div>
+                        <div style="font:700 12px var(--fH);padding:8px 12px;border-radius:12px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);white-space:nowrap;text-align:center">{{ f.sortPair }}</div>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:10px;padding:8px 8px 8px 10px;border-radius:22px;background:rgba(5,8,22,.72);border:1px solid rgba(255,255,255,.08)">
+                        <div style="position:relative;width:60px;height:60px;border-radius:50%;background:conic-gradient({{ f.gauge.col }} {{ f.gauge.deg }},rgba(255,255,255,.1) 0)">
+                          <div style="position:absolute;inset:6px;border-radius:50%;background:var(--dp);display:flex;flex-direction:column;align-items:center;justify-content:center">
+                            <div style="font:700 18px/1 var(--fH)">{{ f.gauge.v }}</div>
+                            <div style="font:800 9px var(--fB);color:var(--mt)">{{ f.gauge.sub }}</div>
+                          </div>
+                        </div>
+                        <div style="font:800 17px var(--fH);padding:12px 18px;border-radius:15px;background:{{ f.ob.bg }};color:{{ f.ob.fg }};box-shadow:0 5px 0 {{ f.ob.sh }};opacity:{{ f.ob.op }};animation:{{ f.ob.anim }};white-space:nowrap">{{ f.ob.lbl }}</div>
+                      </div>
+                    </div>
+
+                    <div style="position:absolute;left:0;right:0;top:0;height:120px;background:linear-gradient(rgba(3,5,14,.8),rgba(3,5,14,.45) 45%,transparent)"></div>
+                    <div style="position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:12px;padding:14px 20px">
+                      <div style="width:44px;height:44px;border-radius:14px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);display:grid;place-items:center;flex:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--ic)"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 17l-5-5 5-5M5 12h11"></path></svg></div>
+                      <div style="font:800 17px/1 var(--fL);letter-spacing:3px;background:linear-gradient(180deg,var(--lg1),var(--a1) 50%,var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap">GALAXY 101</div>
+                      <div style="position:relative">
+                        <div style="display:flex;align-items:center;gap:8px;font:800 12px var(--fB);background:var(--dp);padding:7px 13px;border-radius:999px;color:var(--ic);white-space:nowrap">
+                          <div>{{ f.room }}</div>
+                          <sc-if value="{{ f.tag }}" hint-placeholder-val="{{ false }}"><div style="font:900 9px var(--fB);letter-spacing:1.2px;padding:2px 7px;border-radius:6px;background:var(--a1);color:var(--aT)">{{ f.tag }}</div></sc-if>
+                          <div style="width:4px;height:4px;border-radius:50%;background:var(--mt)"></div>
+                          <div>{{ f.stake }}</div>
+                        </div>
+                        <sc-if value="{{ f.hand }}" hint-placeholder-val="{{ false }}">
+                          <div style="position:absolute;left:0;top:38px;display:flex;align-items:center;gap:7px;padding:3px 10px 3px 8px;border-radius:999px;background:rgba(5,8,22,.75);font:800 11px var(--fB);color:var(--ic);white-space:nowrap">
+                            <div style="display:flex;gap:3px">
+                              <sc-for list="{{ f.hand.dots }}" as="d" hint-placeholder-count="5"><div style="width:6px;height:6px;border-radius:50%;background:{{ d.bg }}"></div></sc-for>
+                            </div>
+                            <div>{{ f.hand.v }}</div>
+                          </div>
+                        </sc-if>
+                      </div>
+                      <div style="flex:1"></div>
+                      <sc-if value="{{ f.banner }}" hint-placeholder-val="{{ true }}"><div style="font:800 13px var(--fB);padding:9px 18px;border-radius:999px;background:linear-gradient(var(--a1),var(--a2));color:var(--aT);box-shadow:0 4px 0 var(--aS);white-space:nowrap">{{ f.banner }}</div></sc-if>
+                      <div style="flex:1"></div>
+                      <div style="display:flex;align-items:center;gap:8px;background:var(--dp);border-radius:999px;padding:5px 14px 5px 6px;box-shadow:inset 0 2px 0 rgba(0,0,0,.3)">
+                        <div style="width:20px;height:27px;border-radius:5px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -3px 0 var(--te)"></div>
+                        <div style="font:800 12px var(--fB);color:var(--mt)">{{ f.deckL }}</div>
+                        <div style="font:700 16px var(--fH)">{{ f.deckN }}</div>
+                      </div>
+                      <sc-if value="{{ f.chipMode }}" hint-placeholder-val="{{ false }}">
+                        <div style="display:flex;align-items:center;gap:8px;background:var(--dp);border-radius:999px;padding:5px 14px 5px 6px;box-shadow:inset 0 2px 0 rgba(0,0,0,.3)">
+                          <div style="width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box"></div>
+                          <div style="font:700 16px var(--fH)">{{ f.chips }}</div>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ f.chipMuted }}" hint-placeholder-val="{{ false }}">
+                        <div style="display:flex;align-items:center;gap:8px;background:var(--dp);border-radius:999px;padding:5px 8px 5px 6px;box-shadow:inset 0 2px 0 rgba(0,0,0,.3)">
+                          <div style="width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#E6E6EE,#9A9AAE 60%,#5E5E72);border:2px dashed #D8D8E2;box-sizing:border-box;opacity:.7"></div>
+                          <div style="font:700 16px var(--fH);color:var(--mt);opacity:.75">{{ f.chips }}</div>
+                          <div style="font:900 9px var(--fB);letter-spacing:1.2px;padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.12);color:var(--ic)">{{ f.chipTag }}</div>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ f.xpMode }}" hint-placeholder-val="{{ true }}">
+                        <div style="display:flex;align-items:center;gap:9px;background:var(--dp);border-radius:999px;padding:4px 14px 4px 4px;box-shadow:inset 0 2px 0 rgba(0,0,0,.3)">
+                          <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(var(--a1),var(--a2));color:var(--aT);display:grid;place-items:center;font:800 12px var(--fH)">{{ f.xp.lv }}</div>
+                          <div style="display:flex;flex-direction:column;gap:4px">
+                            <div style="width:100px;height:7px;border-radius:4px;background:rgba(255,255,255,.14);overflow:hidden"><div style="width:{{ f.xp.w }};height:100%;border-radius:4px;background:linear-gradient(90deg,var(--a2),var(--a1))"></div></div>
+                            <div style="font:800 10px/1 var(--fB);color:var(--mt);white-space:nowrap">{{ f.xp.txt }}</div>
+                          </div>
+                        </div>
+                      </sc-if>
+                      <div style="width:44px;height:44px;border-radius:14px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);display:grid;place-items:center;flex:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" style="stroke:var(--ic)"><circle cx="12" cy="12" r="3.2"></circle><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"></path></svg></div>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ f.tip }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:absolute;left:{{ f.tip.x }};top:{{ f.tip.y }};transform:{{ f.tip.tf }};padding:8px 13px;border-radius:12px;background:#0A0D22;border:1px solid rgba(255,255,255,.18);font:800 13px var(--fB);white-space:nowrap;box-shadow:0 8px 20px rgba(0,0,0,.45);z-index:6">
+                      <div>{{ f.tip.text }}</div>
+                      <sc-if value="{{ f.tip.down }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;left:50%;bottom:-6px;width:10px;height:10px;margin-left:-5px;transform:rotate(45deg);background:#0A0D22;border-right:1px solid rgba(255,255,255,.18);border-bottom:1px solid rgba(255,255,255,.18)"></div></sc-if>
+                      <sc-if value="{{ f.tip.up }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:50%;top:-6px;width:10px;height:10px;margin-left:-5px;transform:rotate(45deg);background:#0A0D22;border-left:1px solid rgba(255,255,255,.18);border-top:1px solid rgba(255,255,255,.18)"></div></sc-if>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ f.drag }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:absolute;left:{{ f.drag.x }};top:{{ f.drag.y }};width:46px;height:66px;transform:translate(-50%,-50%) rotate(-6deg) scale(1.08);z-index:7;border-radius:7px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -5px 0 var(--te),0 18px 30px rgba(0,0,0,.55);outline:{{ f.drag.t.ol }};outline-offset:-1px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><div style="font:800 28px/1 var(--fH);color:{{ f.drag.t.col }}">{{ f.drag.t.n }}</div><div style="width:6px;height:6px;border-radius:50%;background:{{ f.drag.t.dot }}"></div></div>
+                  </sc-if>
+                  <sc-if value="{{ f.cur }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:absolute;left:{{ f.cur.x }};top:{{ f.cur.y }};width:0;height:0;z-index:8">
+                      <sc-if value="{{ f.cur.press }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:-24px;top:-24px;width:48px;height:48px;border-radius:50%;border:3px solid var(--a1);box-shadow:0 0 18px var(--gl);box-sizing:border-box"></div></sc-if>
+                      <svg width="26" height="30" viewBox="0 0 26 30" style="position:absolute;left:-3px;top:-2px"><path d="M3 2l18 13-8 1.5 4.5 9-3.5 1.7-4.5-9L3 23z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ f.dim }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;background:{{ f.dimBg }};z-index:9"></div></sc-if>
+
+                  <sc-if value="{{ f.ex }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:absolute;left:640px;top:350px;transform:translate(-50%,-50%);width:440px;z-index:10">
+                      <div style="background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:22px;box-shadow:0 7px 0 var(--pnS),0 26px 60px rgba(0,0,0,.55);padding:24px;display:flex;flex-direction:column;gap:14px;animation:modalIn .3s both">
+                        <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(#FF7A86,#E8455A);box-shadow:0 4px 0 #9E1F33;display:grid;place-items:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 17l-5-5 5-5M5 12h11"></path></svg></div>
+                        <div style="font:700 22px/1.2 var(--fH)">{{ f.ex.title }}</div>
+                        <div style="font:700 15px/1.45 var(--fB);color:var(--mt);text-wrap:pretty">{{ f.ex.body }}</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+                          <div style="font:800 15px var(--fH);text-align:center;padding:13px;border-radius:15px;background:linear-gradient(var(--a1),var(--a2));color:var(--aT);box-shadow:0 5px 0 var(--aS)">{{ f.ex.stay }}</div>
+                          <div style="font:800 15px var(--fH);text-align:center;padding:13px;border-radius:15px;background:linear-gradient(#FF7A86,#E8455A);color:#fff;box-shadow:0 5px 0 #9E1F33">{{ f.ex.go }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ f.he }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:absolute;left:190px;top:44px;width:900px;z-index:10;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:22px;box-shadow:0 7px 0 var(--pnS),0 30px 70px rgba(0,0,0,.55);padding:22px 26px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box;animation:modalIn .35s both">
+                      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px">
+                        <div style="display:flex;flex-direction:column;gap:6px">
+                          <div style="font:900 10px var(--fB);letter-spacing:1.6px;color:var(--mt)">{{ f.he.kick }}</div>
+                          <div style="display:flex;align-items:center;gap:12px">
+                            <div style="font:800 34px/1.05 var(--fL);background:linear-gradient(180deg,var(--lg1),var(--a1) 50%,var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap">{{ f.he.title }}</div>
+                            <sc-if value="{{ f.he.mult }}" hint-placeholder-val="{{ false }}"><div style="font:800 18px var(--fH);padding:4px 12px;border-radius:12px;background:linear-gradient(var(--a1),var(--a2));color:var(--aT);box-shadow:0 4px 0 var(--aS)">{{ f.he.mult }}</div></sc-if>
+                          </div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+                          <div style="font:900 10px var(--fB);letter-spacing:1.4px;color:var(--mt)">{{ f.he.rwL }}</div>
+                          <div style="display:flex;align-items:center;gap:8px;font:700 30px/1 var(--fH);color:{{ f.he.rwC }}">
+                            <sc-if value="{{ f.he.rwCoin }}" hint-placeholder-val="{{ false }}"><div style="width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box"></div></sc-if>
+                            <div>{{ f.he.rw }}</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div style="display:grid;grid-template-columns:36px 40px minmax(0,1fr) 80px 180px 80px;gap:10px;padding:0 14px;font:900 10px var(--fB);letter-spacing:1.4px;color:var(--mt)">
+                        <div></div><div></div><div>{{ f.he.cP }}</div><div style="text-align:center">{{ f.he.cPen }}</div><div style="text-align:right">{{ f.he.cHand }}</div><div style="text-align:right">{{ f.he.cTot }}</div>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:7px">
+                        <sc-for list="{{ f.he.rows }}" as="r" hint-placeholder-count="4">
+                          <div style="display:grid;grid-template-columns:36px 40px minmax(0,1fr) 80px 180px 80px;gap:10px;align-items:center;padding:9px 12px;border-radius:14px;background:{{ r.bg }};border:{{ r.bd }}">
+                            <div style="font:800 18px var(--fH);color:{{ r.rankC }}">{{ r.rank }}</div>
+                            <div style="width:36px;height:36px;border-radius:50%;background:{{ r.color }};display:grid;place-items:center;font:700 12px var(--fH);border:2px solid rgba(255,255,255,.7);box-sizing:border-box">{{ r.ini }}</div>
+                            <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+                              <div style="display:flex;align-items:center;gap:8px"><div style="font:700 15px var(--fH);white-space:nowrap">{{ r.name }}</div><div style="font:800 11px var(--fB);color:var(--mt);white-space:nowrap">{{ r.note }}</div></div>
+                              <sc-if value="{{ r.hasBadges }}" hint-placeholder-val="{{ false }}">
+                                <div style="display:flex;gap:5px;flex-wrap:wrap">
+                                  <sc-for list="{{ r.badges }}" as="b" hint-placeholder-count="1"><div style="font:800 11px var(--fB);padding:2px 8px;border-radius:999px;background:{{ b.bg }};color:{{ b.fg }};white-space:nowrap">{{ b.t }}</div></sc-for>
+                                </div>
+                              </sc-if>
+                            </div>
+                            <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+                              <sc-if value="{{ r.pen }}" hint-placeholder-val="{{ false }}"><div style="font:800 13px var(--fH);padding:3px 9px;border-radius:999px;background:linear-gradient(#FF7A86,#E8455A);color:#fff;box-shadow:0 3px 0 #9E1F33">{{ r.pen }}</div><div style="font:800 10px var(--fB);color:#FF8A95;white-space:nowrap">{{ r.penWhy }}</div></sc-if>
+                              <sc-if value="{{ r.noPen }}" hint-placeholder-val="{{ true }}"><div style="font:800 14px var(--fB);color:var(--mt);opacity:.6">—</div></sc-if>
+                            </div>
+                            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px">
+                              <div style="font:700 19px/1 var(--fH);color:{{ r.handC }}">{{ r.hand }}</div>
+                              <sc-if value="{{ r.expl }}" hint-placeholder-val="{{ false }}"><div style="font:800 11px var(--fB);color:var(--mt);white-space:nowrap">{{ r.expl }}</div></sc-if>
+                            </div>
+                            <div style="font:700 19px var(--fH);text-align:right">{{ r.total }}</div>
+                          </div>
+                        </sc-for>
+                      </div>
+                      <sc-if value="{{ f.he.notice }}" hint-placeholder-val="{{ false }}">
+                        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;border:2px dashed var(--a1);background:rgba(255,255,255,.04)">
+                          <div style="width:30px;height:30px;border-radius:50%;background:var(--a1);color:var(--aT);display:grid;place-items:center;font:900 16px var(--fH);flex:none">i</div>
+                          <div style="display:flex;flex-direction:column"><div style="font:700 16px var(--fH)">{{ f.he.notice.t }}</div><div style="font:700 13px var(--fB);color:var(--mt)">{{ f.he.notice.s }}</div></div>
+                        </div>
+                      </sc-if>
+                      <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:14px;background:var(--dp)">
+                        <div style="font:900 10px var(--fB);letter-spacing:1.4px;color:var(--mt);white-space:nowrap">{{ f.he.giftL }}</div>
+                        <div style="font:700 13px var(--fB);color:var(--ic)">{{ f.he.giftT }}</div>
+                        <div style="flex:1"></div>
+                        <sc-if value="{{ f.he.giftXp }}" hint-placeholder-val="{{ false }}"><div style="font:800 13px var(--fB);color:#6BE8B0">{{ f.he.giftXp }}</div></sc-if>
+                      </div>
+                      <div style="display:flex;justify-content:flex-end;gap:12px">
+                        <div style="font:800 16px var(--fH);padding:13px 22px;border-radius:16px;background:var(--pnH);box-shadow:0 5px 0 var(--pnS);white-space:nowrap">{{ f.he.leave }}</div>
+                        <div style="position:relative;overflow:hidden;font:800 16px var(--fH);padding:13px 26px;border-radius:16px;background:linear-gradient(var(--a1),var(--a2));color:var(--aT);box-shadow:0 5px 0 var(--aS);white-space:nowrap;min-width:150px;text-align:center"><div style="position:absolute;left:0;top:0;bottom:0;width:38%;background:rgba(255,255,255,.28)"></div><div style="position:relative">{{ f.he.next }}</div></div>
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ f.ms }}" hint-placeholder-val="{{ false }}">
+                    <sc-for list="{{ f.ms.conf }}" as="cf" hint-placeholder-count="0"><div style="position:absolute;left:{{ cf.x }};top:{{ cf.y }};width:{{ cf.w }};height:{{ cf.h }};background:{{ cf.c }};transform:{{ cf.r }};border-radius:2px;z-index:10"></div></sc-for>
+                    <div style="position:absolute;left:110px;top:36px;width:1060px;z-index:11;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:22px;box-shadow:0 7px 0 var(--pnS),0 30px 70px rgba(0,0,0,.55);padding:26px 28px;display:grid;grid-template-columns:380px minmax(0,1fr);gap:26px;box-sizing:border-box;animation:modalIn .4s both">
+                      <div style="display:flex;flex-direction:column;gap:14px">
+                        <div style="display:flex;align-items:center;gap:16px">
+                          <div style="width:84px;height:84px;border-radius:26px;background:{{ f.ms.trBg }};box-shadow:0 6px 0 {{ f.ms.trSh }},0 0 40px {{ f.ms.trGl }};display:grid;place-items:center;flex:none">
+                            <sc-if value="{{ f.ms.win }}" hint-placeholder-val="{{ true }}"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--aT)"><path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4.5a2.5 2.5 0 0 0 2.6 4M17 6h2.5a2.5 2.5 0 0 1-2.6 4M12 14v3.5M8.5 20.5h7M9.5 17.5h5v3h-5z"></path></svg></sc-if>
+                            <sc-if value="{{ f.ms.lose }}" hint-placeholder-val="{{ false }}"><div style="font:800 40px var(--fH);color:#2A2F45">{{ f.ms.place }}</div></sc-if>
+                          </div>
+                          <div style="display:flex;flex-direction:column;gap:4px">
+                            <div style="font:900 10px var(--fB);letter-spacing:1.6px;color:var(--mt)">{{ f.ms.kick }}</div>
+                            <div style="font:800 38px/1.05 var(--fL);background:linear-gradient(180deg,var(--lg1),var(--a1) 50%,var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap">{{ f.ms.title }}</div>
+                            <div style="font:700 14px var(--fB);color:var(--ic)">{{ f.ms.sub }}</div>
+                          </div>
+                        </div>
+                        <div style="font:900 10px var(--fB);letter-spacing:1.4px;color:var(--mt);margin-top:6px">{{ f.ms.rankL }}</div>
+                        <div style="display:flex;flex-direction:column;gap:8px">
+                          <sc-for list="{{ f.ms.rank }}" as="r" hint-placeholder-count="4">
+                            <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:15px;background:{{ r.bg }};border:{{ r.bd }}">
+                              <div style="width:30px;height:30px;border-radius:50%;background:{{ r.rb }};color:{{ r.rf }};display:grid;place-items:center;font:800 14px var(--fH);flex:none">{{ r.r }}</div>
+                              <div style="width:36px;height:36px;border-radius:50%;background:{{ r.color }};display:grid;place-items:center;font:700 12px var(--fH);border:2px solid rgba(255,255,255,.7);box-sizing:border-box;flex:none">{{ r.ini }}</div>
+                              <div style="flex:1;font:700 16px var(--fH);white-space:nowrap">{{ r.name }}</div>
+                              <div style="font:700 20px var(--fH)">{{ r.tot }}</div>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:14px">
+                        <div style="display:flex;flex-direction:column;gap:10px;padding:16px 18px;border-radius:18px;background:var(--dp)">
+                          <div style="display:flex;align-items:flex-end;justify-content:space-between">
+                            <div style="display:flex;flex-direction:column;gap:2px"><div style="font:900 10px var(--fB);letter-spacing:1.4px;color:var(--mt)">{{ f.ms.xpL }}</div><div style="font:800 36px/1 var(--fH);color:#6BE8B0">{{ f.ms.xp }}</div></div>
+                            <div style="display:flex;flex-direction:column;gap:3px;min-width:300px">
+                              <sc-for list="{{ f.ms.lines }}" as="ln" hint-placeholder-count="3">
+                                <div style="display:grid;grid-template-columns:minmax(0,1fr) 70px 60px;gap:8px;font:700 13px var(--fB);color:var(--ic)"><div>{{ ln.k }}</div><div style="color:var(--mt);text-align:right">{{ ln.x }}</div><div style="text-align:right;color:#6BE8B0">{{ ln.v }}</div></div>
+                              </sc-for>
+                            </div>
+                          </div>
+                          <div style="position:relative;display:flex;align-items:center;gap:10px;margin-top:4px">
+                            <div style="font:800 12px var(--fH);padding:3px 8px;border-radius:8px;background:var(--pnH);white-space:nowrap">{{ f.ms.lvFrom }}</div>
+                            <div style="position:relative;flex:1;height:12px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden">
+                              <div style="position:absolute;left:0;top:0;bottom:0;width:{{ f.ms.newW }};background:linear-gradient(90deg,#5BE3A6,#A6F5CF);box-shadow:0 0 12px rgba(91,227,166,.6)"></div>
+                              <div style="position:absolute;left:0;top:0;bottom:0;width:{{ f.ms.prevW }};background:linear-gradient(90deg,var(--a2),var(--a1))"></div>
+                            </div>
+                            <div style="font:800 12px var(--fH);padding:3px 8px;border-radius:8px;background:var(--pnH);white-space:nowrap">{{ f.ms.lvTo }}</div>
+                          </div>
+                          <div style="display:flex;align-items:center;justify-content:center;gap:10px">
+                            <sc-if value="{{ f.ms.lvUp }}" hint-placeholder-val="{{ false }}"><div style="font:900 11px var(--fB);letter-spacing:1.4px;padding:3px 12px;border-radius:999px;background:linear-gradient(var(--a1),var(--a2));color:var(--aT);box-shadow:0 3px 0 var(--aS),0 0 22px var(--gl);white-space:nowrap;animation:popIn .5s .2s both">{{ f.ms.lvUpL }}</div></sc-if>
+                            <div style="font:800 11px var(--fB);color:var(--mt)">{{ f.ms.lvTxt }}</div>
+                          </div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:18px;background:var(--dp)">
+                          <div style="display:grid;grid-template-columns:minmax(0,1fr) repeat(5,58px) 70px;gap:4px;font:900 10px var(--fB);letter-spacing:1.2px;color:var(--mt)">
+                            <div>{{ f.ms.tblL }}</div>
+                            <sc-for list="{{ f.ms.hands }}" as="h" hint-placeholder-count="5"><div style="text-align:right">{{ h }}</div></sc-for>
+                            <div style="text-align:right">{{ f.ms.totL }}</div>
+                          </div>
+                          <sc-for list="{{ f.ms.tbl }}" as="tr" hint-placeholder-count="4">
+                            <div style="display:grid;grid-template-columns:minmax(0,1fr) repeat(5,58px) 70px;gap:4px;align-items:center;padding:6px 0;border-top:1px solid rgba(255,255,255,.07)">
+                              <div style="display:flex;align-items:center;gap:8px"><div style="width:22px;height:22px;border-radius:50%;background:{{ tr.color }};display:grid;place-items:center;font:700 9px var(--fH)">{{ tr.ini }}</div><div style="font:700 13px var(--fH);white-space:nowrap;color:{{ tr.nc }}">{{ tr.name }}</div></div>
+                              <sc-for list="{{ tr.cells }}" as="ce" hint-placeholder-count="5"><div style="font:700 13px var(--fH);text-align:right;color:{{ ce.c }}">{{ ce.v }}</div></sc-for>
+                              <div style="font:800 14px var(--fH);text-align:right">{{ tr.tot }}</div>
+                            </div>
+                          </sc-for>
+                        </div>
+                        <div style="display:flex;justify-content:flex-end;gap:12px">
+                          <div style="font:800 16px var(--fH);padding:13px 22px;border-radius:16px;background:var(--pnH);box-shadow:0 5px 0 var(--pnS);white-space:nowrap">{{ f.ms.lobby }}</div>
+                          <div style="font:800 16px var(--fH);padding:13px 28px;border-radius:16px;background:linear-gradient(var(--a1),var(--a2));color:var(--aT);box-shadow:0 5px 0 var(--aS);white-space:nowrap">{{ f.ms.again }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ f.cat }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:absolute;inset:0;padding:28px 34px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px">
+                      <div style="display:flex;flex-direction:column;gap:4px">
+                        <div style="font:900 10px var(--fB);letter-spacing:1.6px;color:var(--a1)">{{ f.cat.kick }}</div>
+                        <div style="font:800 28px/1.1 var(--fL)">{{ f.cat.title }}</div>
+                      </div>
+                      <div style="display:grid;grid-template-columns:420px minmax(0,1fr);gap:20px;flex:1;min-height:0">
+                        <div style="display:flex;flex-direction:column;gap:9px">
+                          <sc-for list="{{ f.cat.types }}" as="ty" hint-placeholder-count="5">
+                            <div style="display:flex;flex-direction:column;gap:9px;padding:11px 14px 13px;border-radius:18px;background:var(--pn);box-shadow:0 5px 0 var(--pnS)">
+                              <div style="display:flex;align-items:center;gap:8px"><div style="font:700 15px var(--fH)">{{ ty.name }}</div><div style="font:700 12px var(--fB);color:var(--mt)">{{ ty.use }}</div><div style="flex:1"></div><div style="font:800 11px var(--fB);padding:2px 9px;border-radius:999px;background:var(--dp);color:var(--ic);white-space:nowrap">{{ ty.dur }}</div></div>
+                              <div style="display:flex">
+                                <div style="display:flex;align-items:center;gap:10px;padding:7px 16px 7px 7px;border-radius:999px;background:{{ ty.x.bg }};color:{{ ty.x.fg }};border:{{ ty.x.bd }};font:800 13px var(--fB);white-space:nowrap;box-shadow:0 6px 16px rgba(0,0,0,.35)">
+                                  <div style="width:22px;height:22px;border-radius:50%;background:{{ ty.x.ib }};color:{{ ty.x.ifg }};display:grid;place-items:center;font:900 13px/1 var(--fH);flex:none">{{ ty.x.ic }}</div>
+                                  <div>{{ ty.x.text }}</div>
+                                  <sc-if value="{{ ty.x.cnt }}" hint-placeholder-val="{{ false }}"><div style="font:800 13px var(--fH);padding:2px 9px;border-radius:999px;background:{{ ty.x.cb }};color:#fff">{{ ty.x.cnt }}</div></sc-if>
+                                </div>
+                              </div>
+                            </div>
+                          </sc-for>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+                          <div style="display:flex;flex-direction:column;padding:12px 16px;border-radius:18px;background:var(--pn);box-shadow:0 5px 0 var(--pnS)">
+                            <div style="display:grid;grid-template-columns:12px minmax(0,1fr) minmax(0,1fr);gap:12px;padding-bottom:6px;font:900 10px var(--fB);letter-spacing:1.4px;color:var(--mt)"><div></div><div>TR</div><div>EN</div></div>
+                            <sc-for list="{{ f.cat.msgs }}" as="mg" hint-placeholder-count="10">
+                              <div style="display:grid;grid-template-columns:12px minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:center;padding:2px 0;border-top:1px solid rgba(255,255,255,.06);font:700 11.5px/1.25 var(--fB)">
+                                <div style="width:9px;height:9px;border-radius:{{ mg.rad }};background:{{ mg.dot }}"></div>
+                                <div>{{ mg.tr }}</div>
+                                <div style="color:var(--ic)">{{ mg.en }}</div>
+                              </div>
+                            </sc-for>
+                          </div>
+                          <div style="display:flex;flex-direction:column;gap:5px;padding:12px 16px;border-radius:18px;background:var(--dp)">
+                            <div style="font:900 10px var(--fB);letter-spacing:1.4px;color:var(--a1)">{{ f.cat.rulesL }}</div>
+                            <sc-for list="{{ f.cat.rules }}" as="ru" hint-placeholder-count="4"><div style="display:flex;gap:8px;font:700 12px/1.35 var(--fB);color:var(--ic)"><div style="color:var(--a1)">{{ ru.n }}</div><div>{{ ru.t }}</div></div></sc-for>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ f.ld }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:absolute;inset:0;background:radial-gradient(120% 110% at 75% 30%,var(--bg1),var(--bg2) 50%,var(--bg3))"></div>
+                    <div style="position:absolute;inset:0;background-image:radial-gradient(1.5px 1.5px at 12% 18%,rgba(255,255,255,.8),transparent),radial-gradient(1.5px 1.5px at 34% 72%,rgba(255,255,255,.6),transparent),radial-gradient(2px 2px at 58% 12%,rgba(255,255,255,.7),transparent),radial-gradient(1.5px 1.5px at 88% 84%,rgba(255,255,255,.6),transparent),radial-gradient(1.5px 1.5px at 46% 46%,rgba(255,255,255,.5),transparent),radial-gradient(2px 2px at 22% 90%,rgba(255,255,255,.6),transparent),radial-gradient(1.5px 1.5px at 94% 22%,rgba(255,255,255,.7),transparent)"></div>
+                    <div style="position:absolute;left:740px;top:110px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle at 36% 30%,var(--p1),var(--p2) 45%,var(--p4) 85%);box-shadow:0 0 120px var(--pg);opacity:{{ f.ld.po }}"></div>
+                    <div style="position:absolute;left:660px;top:280px;width:580px;height:96px;border-radius:50%;border:7px solid var(--rg);transform:rotate(-14deg);opacity:{{ f.ld.ro }};box-sizing:border-box"></div>
+                    <sc-if value="{{ f.ld.ok }}" hint-placeholder-val="{{ true }}">
+                      <div style="position:absolute;left:110px;top:190px;width:540px;display:flex;flex-direction:column;gap:16px">
+                        <div style="font:900 12px var(--fB);letter-spacing:2px;color:var(--a1)">{{ f.ld.kick }}</div>
+                        <div style="font:800 76px/1 var(--fL);letter-spacing:5px;background:linear-gradient(180deg,var(--lg1),var(--a1) 50%,var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap">GALAXY 101</div>
+                        <div style="display:flex;flex-direction:column;gap:8px;margin-top:26px">
+                          <div style="display:flex;justify-content:space-between;font:800 14px var(--fB)"><div style="color:var(--ic)">{{ f.ld.load }}</div><div style="color:var(--a1)">{{ f.ld.pct }}</div></div>
+                          <div style="height:12px;border-radius:6px;background:rgba(255,255,255,.14);overflow:hidden"><div style="width:{{ f.ld.pct }};height:100%;border-radius:6px;background:linear-gradient(90deg,var(--a2),var(--a1));box-shadow:0 0 14px var(--gl)"></div></div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:22px;background:var(--pn);box-shadow:0 7px 0 var(--pnS);margin-top:30px">
+                          <div style="width:40px;height:40px;border-radius:13px;background:linear-gradient(160deg,var(--a1),var(--a2));display:grid;place-items:center;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--aT)"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.6 1 2.5h6c0-.9.2-1.7 1-2.5A6 6 0 0 0 12 3z"></path></svg></div>
+                          <div style="font:700 16px/1.35 var(--fB);text-wrap:pretty">{{ f.ld.tip }}</div>
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ f.ld.err }}" hint-placeholder-val="{{ false }}">
+                      <div style="position:absolute;inset:0;background:rgba(3,5,14,.45)"></div>
+                      <div style="position:absolute;left:640px;top:360px;transform:translate(-50%,-50%);width:460px">
+                        <div style="background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:22px;box-shadow:0 7px 0 var(--pnS),0 26px 60px rgba(0,0,0,.55);padding:26px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;animation:modalIn .3s both">
+                          <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(#FF7A86,#E8455A);box-shadow:0 5px 0 #9E1F33;display:grid;place-items:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8.5a15 15 0 0 1 20 0M5.5 12a10 10 0 0 1 13 0M9 15.5a5 5 0 0 1 6 0M12 19h.01M3 3l18 18"></path></svg></div>
+                          <div style="font:700 24px/1.2 var(--fH)">{{ f.ld.title }}</div>
+                          <div style="font:700 15px/1.45 var(--fB);color:var(--mt);text-wrap:pretty">{{ f.ld.body }}</div>
+                          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:6px">
+                            <div style="font:800 15px var(--fH);padding:13px;border-radius:15px;background:var(--pnH);box-shadow:0 5px 0 var(--pnS)">{{ f.ld.lobby }}</div>
+                            <div style="font:800 15px var(--fH);padding:13px;border-radius:15px;background:linear-gradient(var(--a1),var(--a2));color:var(--aT);box-shadow:0 5px 0 var(--aS)">{{ f.ld.retry }}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </sc-if>
+                  </sc-if>
+
+                  <div style="position:absolute;left:{{ f.tL }};right:{{ f.tR }};top:14px;display:grid;justify-items:center;z-index:12">
+                    <sc-for list="{{ f.toasts }}" as="x" hint-placeholder-count="0">
+                      <div style="grid-area:1/1;position:relative;transform:{{ x.tf }};opacity:{{ x.op }};z-index:{{ x.z }}">
+                      <div style="display:flex;align-items:center;gap:10px;padding:9px 18px 9px 9px;border-radius:999px;background:{{ x.bg }};color:{{ x.fg }};border:{{ x.bd }};font:800 14px var(--fB);box-shadow:0 8px 24px rgba(0,0,0,.45);white-space:nowrap;animation:toastIn .3s both">
+                        <div style="width:26px;height:26px;border-radius:50%;background:{{ x.ib }};color:{{ x.ifg }};display:grid;place-items:center;font:900 15px/1 var(--fH);flex:none">{{ x.ic }}</div>
+                        <div style="display:flex;flex-direction:column">
+                          <div>{{ x.text }}</div>
+                          <sc-if value="{{ x.sub }}" hint-placeholder-val="{{ false }}"><div style="font:800 11px/1.2 var(--fB);opacity:.9">{{ x.sub }}</div></sc-if>
+                        </div>
+                        <sc-if value="{{ x.cnt }}" hint-placeholder-val="{{ false }}"><div style="font:800 14px var(--fH);padding:3px 10px;border-radius:999px;background:{{ x.cb }};color:#fff">{{ x.cnt }}</div></sc-if>
+                        <sc-if value="{{ x.q }}" hint-placeholder-val="{{ false }}"><div style="font:800 11px var(--fB);padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.16)">{{ x.q }}</div></sc-if>
+                      </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </section>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;tr&quot;,&quot;en&quot;],&quot;default&quot;:&quot;tr&quot;,&quot;tsType&quot;:&quot;'tr'|'en'&quot;},&quot;themes&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;both&quot;,&quot;saturn&quot;,&quot;mars&quot;],&quot;default&quot;:&quot;both&quot;,&quot;tsType&quot;:&quot;'both'|'saturn'|'mars'&quot;}}">
+class Component extends DCLogic {
+  state = { solo: null };
+  componentDidMount() {
+    window.__g101 = { solo: (id, th, lang) => this.setState({ solo: id ? { id, th: th || 'sat', lang: lang || null } : null }) };
+  }
+  vref(k, vars) {
+    this._r = this._r || {};
+    if (!this._r[k]) this._r[k] = el => { if (el) for (const n in vars) el.style.setProperty('--' + n, vars[n]); };
+    return this._r[k];
+  }
+  renderVals() {
+    const solo = this.state.solo;
+    const lang = (solo && solo.lang) || this.props.lang || 'tr';
+    const en = lang === 'en';
+    const L = (a, b) => (en ? b : a);
+    const FONTS = { fH: "'Montserrat',sans-serif", fB: "'Baloo 2',sans-serif", fL: "'Montserrat',sans-serif" };
+    const TH = {
+      sat: { name: L('Satürn', 'Saturn'), v: { bg1:'#2A2F6E',bg2:'#161A45',bg3:'#0A0C28',pn:'#232A66',pnH:'#2D3680',pnS:'#0B0D2B',dp:'#0B0E2E',sd:'#10133A',bd:'#2E3680',a1:'#FFD964',a2:'#F5A623',aS:'#B86E0F',aT:'#3A1F00',gl:'rgba(255,201,74,.45)',mt:'#A9AEDD',ic:'#D3D6FF',p1:'#F3E1B5',p2:'#D9B77A',p4:'#B98F55',pg:'rgba(255,214,140,.35)',rg:'#E8CF98',lg1:'#FFF4C8',tf1:'#FFFDF6',tf2:'#EEE2C6',te:'#D9C9A2',te2:'#A8925F' } },
+      mars: { name: 'Mars', v: { bg1:'#5A1F17',bg2:'#2C0E0B',bg3:'#140605',pn:'#4A1E19',pnH:'#5C2620',pnS:'#1C0907',dp:'#1E0A08',sd:'#2A0F0C',bd:'#6A2A22',a1:'#FFA26B',a2:'#E8552E',aS:'#8E2A12',aT:'#2A0800',gl:'rgba(255,120,70,.45)',mt:'#E3B2A4',ic:'#FFD8CC',p1:'#E0754A',p2:'#B8482A',p4:'#8E3420',pg:'rgba(255,110,60,.35)',rg:'transparent',lg1:'#FFE2CC',tf1:'#FFF7F0',tf2:'#F0D8C6',te:'#DDB8A0',te2:'#A3705A' } }
+    };
+    const C = { R: '#D7263D', B: '#1F5FBF', Y: '#E09A12', K: '#24242C' };
+    const GOLD = '#E8B730', GREEN = '#6BE8B0';
+    const tl = (code, fl = {}) => {
+      if (!code) return { empty: true, full: false, ghost: false, badge: false, use: false, glow: false };
+      let ghost = false;
+      if (code[0] === '~') { ghost = true; code = code.slice(1); }
+      let t;
+      if (code.indexOf('OK') === 0) {
+        const rep = code.split(':')[1];
+        t = { n: '13', col: C.K, dot: GOLD, ok: true, ol: '2px solid ' + GOLD, badge: !!rep, bn: rep ? rep.slice(1) : '', bcol: rep ? C[rep[0]] : '' };
+      } else t = { n: code.slice(1), col: C[code[0]], dot: C[code[0]], ok: false, ol: 'none', badge: false, bn: '', bcol: '' };
+      const o = Object.assign({ empty: false, full: !ghost, ghost, op: 1, tf: 'none', use: false, useL: '', glow: false }, t);
+      if (ghost) o.badge = false;
+      if (fl.sel) { o.ol = '3px solid var(--a1)'; o.tf = 'translateY(-16px)'; }
+      if (fl.use) { o.ol = '3px solid var(--a1)'; o.use = true; o.useL = L('YERDEN', 'FROM PILE'); }
+      if (fl.err) o.ol = '3px solid #FF5E6C';
+      if (fl.glow) o.glow = true;
+      return o;
+    };
+    const R1 = ['R10','R11','R12','R13','','B9','Y9','K9','','Y4','Y5','Y6','','K12',''];
+    const R2 = ['B2','K7','','R3','Y7','B11','','Y12','','B5','R7','','B12','K11',''];
+    const O1 = ['','','','','','B9','Y9','','','Y4','Y5','Y6','','K12',''];
+    const O2 = ['B2','K7','','R3','Y7','B11','','Y12','','','R7','','B12','K11',''];
+    const rack = (mods = [], b) => {
+      const a = (b || [R1, R2]).map(r => r.map(c => [c, {}]));
+      mods.forEach(([r, i, c, fl]) => { a[r][i] = [c, fl || {}]; });
+      const out = a.map(r => r.map(([c, fl]) => tl(c, fl)));
+      return { r1: out[0], r2: out[1] };
+    };
+    const meld = (x, y, codes, fl = {}) => ({ x: x + 'px', y: y + 'px', tiles: codes.map((c, i) => tl(c, fl[i] || {})) });
+    const aM = (o = {}) => [
+      meld(440, 232, ['Y9','Y10','Y11','Y12']),
+      meld(560, 232, o.blue ? ['B5','B6','OK:B7','B8'] : ['B3','R3','K3'], o.f2 || {}),
+      meld(690, 232, ['R5','R6','OK:R7','R8','R9']),
+      meld(840, 232, ['K10','K11','K12'])
+    ];
+    const myM = (fl1 = {}) => [meld(380, 412, ['B5','B6','OK:B7'], fl1), meld(470, 412, ['K9','R9','OK:B9']), meld(560, 412, ['R10','R11','R12','R13'])];
+    const ACT = ['3px solid var(--a1)', '0 0 0 5px var(--gl),0 0 22px var(--gl)'];
+    const IDLE = ['3px solid rgba(255,255,255,.55)', '0 4px 10px rgba(0,0,0,.35)'];
+    const bub = (text, red) => ({ hasBub: true, bub: { text, bg: red ? 'linear-gradient(#FF7A86,#E8455A)' : '#fff', tc: red ? '#E8455A' : '#fff', fg: red ? '#fff' : '#1A1D3A' } });
+    const opp = (k, ex = {}) => {
+      const d = { ay: [640, 84, 'AY', '#3D7BEA', 42, 'Ayşe Y.', L('Açtı · 119', 'Opened · 119'), GREEN], bc: [128, 232, 'BC', '#8A5CF6', 18, 'Burak C.', L('21 taş', '21 tiles'), 'var(--mt)'], ze: [1152, 232, 'ZE', '#14B8A6', 31, 'Zeynep E.', L('21 taş', '21 tiles'), 'var(--mt)'] }[k];
+      return Object.assign({ x: d[0] + 'px', y: d[1] + 'px', ini: d[2], color: d[3], lv: L('SV ', 'LV ') + d[4], name: d[5], status: d[6], stc: d[7], ring: IDLE[0], glow: IDLE[1], pen: '', hasBub: false, bub: {}, bot: true }, ex);
+    };
+    const me = (ex = {}) => Object.assign({ name: 'Doğukan Y.', lv: L('SV 24', 'LV 24'), status: L('Açmadı · 21 taş', 'Not opened · 21 tiles'), stc: 'var(--mt)', ring: ACT[0], glow: ACT[1], pen: '' }, ex);
+    const meOpen = () => me({ status: L('Açtı · 107', 'Opened · 107'), stc: GREEN });
+    const RING = { pulse: ['3px solid var(--a1)', '0 0 0 6px var(--gl),0 0 28px var(--gl)', 1], dim: ['2px dashed rgba(255,255,255,.3)', 'none', 0.5], red: ['3px solid #FF5E6C', '0 0 0 6px rgba(255,94,108,.25),0 0 24px rgba(255,94,108,.55)', 1], none: ['2px solid rgba(255,255,255,.12)', 'none', 1], hot: ['3px dashed var(--a1)', '0 0 20px var(--gl)', 1] };
+    const disc = (code, ring, lbl) => { const r = RING[ring]; return { has: !!code, t: code ? tl(code) : {}, rb: r[0], rs: r[1], op: r[2], lbl: lbl || '' }; };
+    const gg = (v, open) => ({ v: String(v), sub: open ? L('AÇIK', 'OPEN') : '/101', col: v >= 101 ? '#5BE3A6' : 'var(--a1)', deg: Math.min(100, v / 101 * 100) + '%' });
+    const btn = on => on ? { bg: 'linear-gradient(var(--a1),var(--a2))', fg: 'var(--aT)', sh: 'var(--aS)', op: 1, lbl: L('Aç', 'Open'), anim: 'pulseG 1.6s infinite' } : { bg: 'var(--pnH)', fg: 'var(--ic)', sh: 'var(--pnS)', op: 1, lbl: L('Aç', 'Open'), anim: 'none' };
+    const TT = {
+      info: { bg: 'rgba(8,11,28,.95)', fg: '#fff', bd: '1px solid rgba(255,255,255,.16)', ib: 'var(--a1)', ifg: 'var(--aT)', ic: 'i' },
+      ok: { bg: 'linear-gradient(#6BE8B0,#2FBF7E)', fg: '#04301B', bd: 'none', ib: 'rgba(0,0,0,.16)', ifg: '#04301B', ic: '✓' },
+      warn: { bg: 'rgba(8,11,28,.95)', fg: '#FFD27A', bd: '2px solid #FFB13D', ib: '#FFB13D', ifg: '#3A1F00', ic: '!' },
+      err: { bg: 'linear-gradient(#FF7A86,#E8455A)', fg: '#fff', bd: 'none', ib: 'rgba(0,0,0,.18)', ifg: '#fff', ic: '×' },
+      bub: { bg: '#fff', fg: '#1A1D3A', bd: 'none', ib: '#3D7BEA', ifg: '#fff', ic: 'A' },
+      bubpen: { bg: 'linear-gradient(#FF7A86,#E8455A)', fg: '#fff', bd: 'none', ib: 'rgba(0,0,0,.2)', ifg: '#fff', ic: 'B' },
+      pen: { bg: 'linear-gradient(#3A0A14,#22060B)', fg: '#fff', bd: '2px solid #FF5E6C', ib: 'linear-gradient(#FF7A86,#E8455A)', ifg: '#fff', ic: '!' }
+    };
+    const toast = (type, text, sub, queued, cnt, q) => Object.assign({ text, sub: sub || '', cnt: cnt || '', q: q || '', cb: 'linear-gradient(#FF7A86,#E8455A)', tf: 'none', op: 1, z: 2 }, TT[type], queued ? { tf: 'translateY(30px) scale(.88)', op: 0.6, z: 1 } : {});
+    const TXT = {
+      draw: L("Sıra sende · desteden ya da Burak'ın taşından çek", "Your turn · draw from the deck or Burak's tile"),
+      opened: L('Elini açtın · şimdi bir taş at', 'Hand opened · now discard a tile'),
+      discard: L('Atacağın taşı halkaya sürükle ya da çift tıkla', 'Drag a tile onto the ring or double-click it')
+    };
+    const base = () => Object.assign({
+      scene: true, room: L('Botlara karşı · 101', 'vs Bots · 101'), tag: L('ANTRENMAN', 'PRACTICE'), stake: L('Çipsiz · XP', 'No chips · XP'),
+      hand: { v: L('2 / 5. el', 'Hand 2 / 5'), dots: [1, 1, 0, 0, 0].map(d => ({ bg: d ? 'var(--a1)' : 'rgba(255,255,255,.22)' })) },
+      banner: TXT.draw, deckN: '24', deckL: L('Taş', 'Deck'),
+      xpMode: true, xp: { lv: '24', w: '93%', txt: '11.200 / 12.000 XP' }, chipMode: false, chipMuted: false, chips: '125.400', chipTag: L('ÇİPSİZ', 'NO CHIPS'),
+      opps: [opp('ay'), opp('bc'), opp('ze')], me: me(), melds: aM(), discL: disc('K5', 'pulse'), discR: disc('', 'none'),
+      gauge: gg(88), ob: btn(false), sortRun: L('Seri diz', 'Sort runs'), sortPair: L('Çift diz', 'Sort pairs'), indL: L('GÖSTERGE', 'INDICATOR'),
+      toasts: [], tip: null, cur: null, drag: null, dim: false, dimBg: 'rgba(3,5,14,.62)', ex: null, op: null, pc: null, he: null, ms: null, cat: null, ld: null
+    }, rack());
+    const opened = f => { Object.assign(f, rack([], [O1, O2])); f.me = meOpen(); f.gauge = gg(107, true); f.discL = disc('', 'none'); f.banner = TXT.opened; };
+    const P = { ay: ['AY', '#3D7BEA', 'Ayşe Y.'], dy: ['DY', '#F97316', 'Doğukan Y.'], ze: ['ZE', '#14B8A6', 'Zeynep E.'], bc: ['BC', '#8A5CF6', 'Burak C.'] };
+    const N = { fin: L('bitirdi', 'finished'), op: L('açtı', 'opened'), cl: L('açmadı', 'not opened'), pr: L('çift açtı', 'opened pairs'), prf: L('çiftle bitti', 'finished with pairs') };
+    const Bd = (t, mult) => ({ t, bg: mult ? 'linear-gradient(var(--a1),var(--a2))' : 'rgba(255,255,255,.12)', fg: mult ? 'var(--aT)' : 'var(--ic)' });
+    const row = (rank, k, note, o = {}) => {
+      const p = P[k], mine = k === 'dy', hl = !!o.hl;
+      const hc = o.hand === '—' ? 'var(--mt)' : (o.hand || '')[0] === '−' ? GREEN : '#FF8A95';
+      return { penWhy: o.penWhy || '', rank: rank + '.', ini: p[0], color: p[1], name: p[2] + (mine ? L(' (sen)', ' (you)') : ''), note, badges: o.badges || [], hasBadges: !!(o.badges && o.badges.length), pen: o.pen || '', noPen: !o.pen, hand: o.hand, handC: hc, expl: o.expl || '', total: o.total, rankC: hl ? 'var(--a1)' : 'var(--mt)', bg: hl ? 'rgba(255,255,255,.07)' : mine ? 'var(--pnH)' : 'var(--dp)', bd: hl ? '2px solid var(--a1)' : '2px solid transparent' };
+    };
+    const heBase = () => ({ cP: L('OYUNCU', 'PLAYER'), cPen: L('CEZA', 'PENALTY'), cHand: L('EL PUANI', 'HAND'), cTot: L('TOPLAM', 'TOTAL'), giftL: L('ALDIĞIN İKRAMLAR', 'TREATS RECEIVED'), giftT: L('Bu elde ikram gelmedi', 'No treats this hand'), giftXp: '', leave: L('Masadan kalk', 'Leave table'), next: L('Sonraki el · 15', 'Next hand · 15'), mult: '', notice: null, rwL: 'XP', rw: '+60 XP', rwC: GREEN, rwCoin: false });
+    const seeded = n => { let s = 7; const r = () => (s = (s * 16807) % 2147483647) / 2147483647; const cols = ['var(--a1)', 'var(--a2)', '#6BE8B0', '#5FA8FF', '#FF7A86', '#ffffff']; return Array.from({ length: n }, (_, i) => ({ x: Math.round(40 + r() * 1200) + 'px', y: Math.round(r() * 700) + 'px', w: Math.round(7 + r() * 8) + 'px', h: Math.round(4 + r() * 5) + 'px', c: cols[i % 6], r: 'rotate(' + Math.round(r() * 180) + 'deg)' })); };
+    const msBuild = win => {
+      const rk = win ? [['dy', '−64'], ['ay', '−26'], ['ze', '225'], ['bc', '1.049']] : [['ay', '−219'], ['dy', '176'], ['ze', '225'], ['bc', '847']];
+      const H = win ? { dy: ['56', '−101', '157', '26', '−202'], ay: ['−101', '98', '87', '−202', '92'], ze: ['70', '126', '−101', '68', '62'], bc: ['54', '46', '40', '505', '404'] } : { dy: ['56', '−101', '157', '26', '38'], ay: ['−101', '98', '87', '−202', '−101'], ze: ['70', '126', '−101', '68', '62'], bc: ['54', '46', '40', '505', '202'] };
+      const medal = ['linear-gradient(var(--a1),var(--a2))', 'linear-gradient(#F2F4FA,#AEB4C8)', 'linear-gradient(#F0B98A,#B8743E)', 'rgba(255,255,255,.12)'];
+      return {
+        win, lose: !win, place: '2', conf: win ? seeded(48) : [],
+        trBg: win ? 'linear-gradient(160deg,var(--a1),var(--a2))' : 'linear-gradient(160deg,#F2F4FA,#AEB4C8)', trSh: win ? 'var(--aS)' : '#6E7488', trGl: win ? 'var(--gl)' : 'rgba(0,0,0,0)',
+        kick: L('MAÇ BİTTİ · 5 EL', 'MATCH OVER · 5 HANDS'), title: win ? L('Kazandın!', 'You won!') : L('2. oldun', 'You placed 2nd'),
+        sub: win ? L('5 elin sonunda en düşük toplam senin', 'Lowest total after 5 hands') : L('Ayşe kazandı · aradaki fark 395', 'Ayşe won · 395 points apart'),
+        rankL: L('FİNAL SIRALAMASI', 'FINAL STANDINGS'),
+        rank: rk.map(([k, tot], i) => ({ r: String(i + 1), ini: P[k][0], color: P[k][1], name: P[k][2] + (k === 'dy' ? L(' (sen)', ' (you)') : ''), tot, rb: medal[i], rf: i < 3 ? '#1A1D2E' : 'var(--ic)', bg: i === 0 ? 'rgba(255,255,255,.07)' : k === 'dy' ? 'var(--pnH)' : 'var(--dp)', bd: i === 0 ? '2px solid var(--a1)' : '2px solid transparent' })),
+        xpL: L('KAZANDIĞIN XP', 'XP EARNED'), xp: win ? '+1.360 XP' : '+780 XP',
+        lines: win ? [{ k: L('El galibiyeti', 'Hands won'), x: '2 × 340', v: '+680' }, { k: L('Diğer eller', 'Other hands'), x: '3 × 60', v: '+180' }, { k: L('Maç birinciliği', '1st place'), x: '', v: '+500' }] : [{ k: L('El galibiyeti', 'Hands won'), x: '1 × 340', v: '+340' }, { k: L('Diğer eller', 'Other hands'), x: '4 × 60', v: '+240' }, { k: L('Maç ikinciliği', '2nd place'), x: '', v: '+200' }],
+        lvFrom: win ? L('SV 25', 'LV 25') : L('SV 24', 'LV 24'), lvTo: win ? L('SV 26', 'LV 26') : L('SV 25', 'LV 25'), prevW: win ? '0%' : '93%', newW: win ? '4%' : '99.8%',
+        lvUp: win, lvUpL: L('SEVİYE ATLADIN · SV 25', 'LEVEL UP · LV 25'),
+        lvTxt: win ? '560 / 13.000 XP' : L('11.980 / 12.000 XP · 20 XP kaldı', '11,980 / 12,000 XP · 20 XP to go'),
+        tblL: L('EL EL PUANLAR', 'POINTS BY HAND'), hands: [L('1. EL', 'H1'), L('2. EL', 'H2'), L('3. EL', 'H3'), L('4. EL', 'H4'), L('5. EL', 'H5')], totL: L('TOPLAM', 'TOTAL'),
+        tbl: rk.map(([k, tot]) => ({ ini: P[k][0], color: P[k][1], name: P[k][2], nc: k === 'dy' ? 'var(--a1)' : '#fff', tot, cells: H[k].map(v => ({ v, c: v[0] === '−' ? GREEN : 'var(--ic)' })) })),
+        again: L('Tekrar oyna', 'Play again'), lobby: L('Lobiye dön', 'Back to lobby')
+      };
+    };
+    const ST = {
+      T28: { t: L('Bot masası başlığı · XP ve seviye çubuğu', 'Bot table header · XP and level bar'), n: L('Çip alanının yerinde seviye ilerlemesi; ANTRENMAN etiketi ve el sayacı.', 'Level progress where chips used to be; PRACTICE tag and hand counter.'), f: f => {} },
+      T30: { t: L('Masadan kalk · bot varyantı', 'Leave table · bot variant'), n: L('T25 yerine; bahis cümlesi yok.', 'Replaces T25; no stake sentence.'), f: f => { f.dim = true; f.ex = { title: L('Masadan kalkmak istiyor musun?', 'Leave the table?'), body: L("El bitmeden kalkarsan bu elin XP'sini alamazsın.", "If you leave before the hand ends, you won't get this hand's XP."), stay: L('Masada kal', 'Stay'), go: L('Kalk', 'Leave') }; } },
+      T33: { t: L('Okey otomatik · masada gösterim', 'Automatic okey · shown on the table'), n: L('Okey konduğu yerdeki en yüksek değeri alır; köşesinde temsil ettiği rakam.', 'The okey takes the highest value where it sits; its corner shows the number.'), f: f => { opened(f); f.melds = aM().concat(myM()); f.tip = { x: '449px', y: '398px', tf: 'translate(-50%,-100%)', down: true, up: false, text: L('Okey · Mavi 7 yerine', 'Okey · stands for Blue 7') }; } },
+      T34: { t: L('Ceza · attığın taşla rakip açtı', 'Penalty · next player opened with your tile'), n: L('Taş değeri × 10: Mavi 9 attın, Zeynep onunla açtı → +90.', 'Tile value × 10: you threw Blue 9, Zeynep opened with it → +90.'), f: f => { f.me = me({ pen: '+90' }); f.banner = null; f.opps = [opp('ay'), opp('bc'), opp('ze', Object.assign({ status: L('Açtı · 112', 'Opened · 112'), stc: GREEN }, bub(L('Elini açtı · 112', 'Opened · 112'))))]; f.melds = aM().concat([meld(905, 300, ['B7', 'B8', 'B9'], { 2: { glow: 1 } }), meld(905, 346, ['K11', 'R11', 'Y11'])]); f.toasts = [toast('pen', L('Attığın 9 ile Zeynep elini açtı', 'Zeynep opened with your 9'), '', false, '+90')]; } },
+      T35: { t: L('Ceza · eksik açılış', 'Penalty · short opening'), n: L('Aç her zaman basılabilir; 101 altındaki açılış geri alınır, +101 yazılır.', 'Open is always tappable; an opening under 101 is reverted and +101 is written.'), f: f => { f.me = me({ pen: '+101' }); f.banner = null; f.gauge = Object.assign(gg(88), { col: '#FF5E6C' }); f.toasts = [toast('pen', L('Eksik açılış · 88 / 101', 'Short opening · 88 / 101'), L('Taşlar ıstakana döndü', 'Tiles returned to your rack'), false, '+101')]; } },
+      T36: { t: L('Ceza rozetleri ve rakip bildirimleri', 'Penalty badges and opponent alerts'), n: L('Rozet o elin toplam cezası. Rakibin cezası balonda, bana yazılan ceza toast.', 'Badge = penalty total for the hand. Opponent penalties in bubbles, mine as a toast.'), f: f => { opened(f); f.banner = null; f.me = Object.assign(meOpen(), { pen: '+101' }); f.melds = aM().concat([meld(380, 412, ['B5', 'B6', 'B7'], { 2: { glow: 1 } }), meld(470, 412, ['K9', 'R9', 'OK:B9']), meld(560, 412, ['R10', 'R11', 'R12', 'R13'])]); f.opps = [opp('ay'), opp('bc', Object.assign({ pen: '+202' }, bub(L('İşlek taş attı · +101', 'Threw a playable tile · +101'), true))), opp('ze')]; f.toasts = [toast('pen', L('Ayşe masadaki okeyini aldı', 'Ayşe took your okey from the table'), '', false, '+101')]; } },
+      T38: { t: L('Yerden alındı · kullan ya da geri bırak', 'Picked up · use it or put it back'), n: L('Alınan taşta YERDEN etiketi; işe yaramazsa halkaya geri bırakılır.', 'The picked tile is tagged FROM PILE; if useless it goes back on the pile.'), f: f => { Object.assign(f, rack([[0, 12, 'Y7', { use: 1 }]])); f.discL = disc('', 'hot', L('GERİ BIRAK', 'PUT BACK')); f.banner = null; f.gauge = gg(110); f.ob = btn(true); f.toasts = [toast('info', L('İşine yaramazsa taşı yerine geri bırakabilirsin', "If it doesn't help, you can put it back"))]; } },
+      T39: { t: L('Geri bırakma', 'Putting it back'), n: L('Halkaya sürükle ya da halkaya dokun; ardından desteden çek. Sonraki oyuncuya atılamaz.', 'Drag to the ring or tap it; then draw from the deck. It cannot be discarded to the next player.'), f: f => { Object.assign(f, rack([[0, 12, '~Y7']])); f.discL = disc('', 'pulse', L('GERİ BIRAK', 'PUT BACK')); f.banner = L('Geri bırakmak için halkaya sürükle', 'Drag to the ring to put it back'); f.drag = { x: '196px', y: '522px', t: tl('Y7') }; f.cur = { x: '210px', y: '540px', press: false }; } },
+      T40: { t: L('Toast türleri ve metin kataloğu', 'Toast types and copy catalogue'), n: L('Ceza türü eklendi; eski 101 / 5 çift engelleri ceza mesajına dönüştü.', 'Penalty type added; the old 101 / 5-pair blocks became penalty messages.'), f: f => { f.scene = false; f.toasts = []; f.cat = catalog(); } },
+      T41: { t: L('Kuyruk · üst üste mesajlar', 'Queue · stacked messages'), n: L('Ceza öne geçer, süre uyarısı arkada bekler (+1); rakip olayı balonda.', 'Penalty jumps ahead, timer warning waits behind (+1); opponent event in a bubble.'), f: f => { f.banner = null; f.me = me({ pen: '+101' }); f.gauge = Object.assign(gg(88), { col: '#FF5E6C' }); f.toasts = [toast('warn', L('Süren bitiyor!', 'Time is running out!'), '', true), toast('pen', L('Eksik açılış · 88 / 101', 'Short opening · 88 / 101'), L('Taşlar ıstakana döndü', 'Tiles returned to your rack'), false, '+101', '+1')]; f.opps = [opp('ay'), opp('bc'), opp('ze', Object.assign({ status: L('Çift açtı', 'Opened pairs'), stc: GREEN }, bub(L('Zeynep çift açtı · 5 çift', 'Zeynep opened pairs · 5 pairs'))))]; } },
+      T42: { t: L('El sonu v2 · bot maçı', 'Hand end v2 · bot match'), n: L('Çarpan rozetleri, ceza sütunu, açıklamalı el puanı; sağ üstte yalnızca XP.', 'Multiplier badges, penalty column, explained hand score; XP only top right.'), f: f => { f.dim = true; f.banner = null; f.he = Object.assign(heBase(), { kick: L('4. EL BİTTİ · AYŞE BİTİRDİ', 'HAND 4 OVER · AYŞE FINISHED'), title: L('Ayşe kazandı', 'Ayşe won'), mult: '×2', rows: [row(1, 'ay', N.fin, { badges: [Bd(L('Okeyle bitti ×2', 'Okey finish ×2'), 1)], hand: '−202', expl: '−101 × 2 = −202', total: '−118', hl: 1 }), row(2, 'ze', N.pr, { badges: [Bd(L('Çift açtı · el ×2', 'Pairs · hand ×2'))], hand: '+68', expl: '17 × 2 × 2 = 68', total: '163' }), row(3, 'dy', N.op, { pen: '+90', penWhy: L('9 ile açtırdı', 'fed a 9'), hand: '+26', expl: '13 × 2 = 26', total: '228' }), row(4, 'bc', N.cl, { pen: '+101', penWhy: L('işlek taş', 'playable tile'), hand: '+404', expl: '202 × 2 = 404', total: '645' })] }); } },
+      T43: { t: L('El sonu v2 · çevrimiçi (çip)', 'Hand end v2 · online (chips)'), n: L('Üç çarpan birlikte ×8; sağ üstte çip.', 'Three multipliers stack to ×8; chips top right.'), f: f => { f.room = L('Tekli · 101', 'Solo · 101'); f.tag = ''; f.stake = L('Bahis 5.000', 'Stake 5,000'); f.hand = null; f.xpMode = false; f.chipMode = true; f.opps = [opp('ay', { bot: false }), opp('bc', { bot: false }), opp('ze', { bot: false })]; f.dim = true; f.banner = null; f.he = Object.assign(heBase(), { kick: L('3. EL BİTTİ · AYŞE BİTİRDİ', 'HAND 3 OVER · AYŞE FINISHED'), title: L('Ayşe kazandı', 'Ayşe won'), mult: '×8', rwL: L('ÇİP', 'CHIPS'), rw: '−5.000', rwC: '#FF8A95', rwCoin: true, giftXp: '+60 XP', rows: [row(1, 'ay', N.fin, { badges: [Bd(L('Okeyle bitti ×2', 'Okey finish ×2'), 1), Bd(L('Çiftle ×2', 'Pairs ×2'), 1), Bd(L('Elden bitti ×2', 'Hand finish ×2'), 1)], hand: '−808', expl: '−101 × 8 = −808', total: '−724', hl: 1 }), row(2, 'dy', N.op, { hand: '+104', expl: '13 × 8 = 104', total: '216' }), row(3, 'ze', N.pr, { badges: [Bd(L('Çift açtı · el ×2', 'Pairs · hand ×2'))], hand: '+272', expl: '17 × 8 × 2 = 272', total: '367' }), row(4, 'bc', N.cl, { pen: '+101', penWhy: L('okey attı', 'threw okey'), hand: '+1.616', expl: '202 × 8 = 1.616', total: '1.857' })] }); } },
+      T44: { t: L('Çiftle bitti · puansız el', 'Finished with pairs · unscored hand'), n: L('El puanı sütunu boş, toplamlar değişmez.', 'Hand column empty, totals unchanged.'), f: f => { f.dim = true; f.banner = null; f.he = Object.assign(heBase(), { kick: L('4. EL BİTTİ · ZEYNEP ÇİFTLE BİTTİ', 'HAND 4 OVER · ZEYNEP FINISHED WITH PAIRS'), title: L('Zeynep bitirdi', 'Zeynep finished'), notice: { t: L('Bu el puanlanmadı', 'This hand was not scored'), s: L('Çiftle bitti · toplamlar değişmedi', 'Finished with pairs · totals unchanged') }, rows: [row(1, 'ay', N.op, { hand: '—', total: '84' }), row(2, 'ze', N.prf, { hand: '—', total: '95', hl: 1 }), row(3, 'dy', N.op, { hand: '—', total: '112' }), row(4, 'bc', N.cl, { hand: '—', total: '140' })] }); } },
+      T45: { t: L('Maç sonu · kazandın + seviye atlama', 'Match end · you won + level up'), n: L('Kupa, konfeti, XP dökümü, seviye çubuğu SV 24 → 25.', 'Trophy, confetti, XP breakdown, level bar LV 24 → 25.'), f: f => { f.hand = { v: L('5 / 5. el', 'Hand 5 / 5'), dots: [1, 1, 1, 1, 1].map(() => ({ bg: 'var(--a1)' })) }; f.dim = true; f.dimBg = 'rgba(3,5,14,.7)'; f.banner = null; f.ms = msBuild(true); } },
+      T46: { t: L('Maç sonu · 2. sıra', 'Match end · 2nd place'), n: L('Konfeti yok; seviye çubuğunda yeni kazanılan kısım yeşil.', 'No confetti; newly earned XP shows green on the bar.'), f: f => { f.hand = { v: L('5 / 5. el', 'Hand 5 / 5'), dots: [1, 1, 1, 1, 1].map(() => ({ bg: 'var(--a1)' })) }; f.dim = true; f.dimBg = 'rgba(3,5,14,.7)'; f.banner = null; f.ms = msBuild(false); } },
+      T47: { t: L('Okeyi al · sürükleme', 'Take the okey · dragging'), n: L('Mavi 7 sürüklenirken Mavi 7 yerindeki tüm okeyler parlar. Okeyi masaya açan oyuncuya +101 yazılır.', 'While dragging Blue 7, every okey standing for Blue 7 glows. The player who laid the okey gets +101.'), f: f => { opened(f); Object.assign(f, rack([[1, 8, '~B7']], [O1, O2])); f.melds = aM({ blue: 1, f2: { 2: { glow: 1 } } }).concat(myM({ 2: { glow: 1 } })); f.banner = L("Mavi 7'yi okeyin üstüne bırak · okey ıstakana gelir", 'Drop Blue 7 on the okey · the okey comes to your rack'); f.drag = { x: '652px', y: '222px', t: tl('B7') }; f.cur = { x: '664px', y: '232px', press: false }; } },
+      T48: { t: L('Okeyi al · uzun basma ipucu', 'Take the okey · long-press hint'), n: L('Okeye 500 ms basılı tutunca.', 'After a 500 ms press on the okey.'), f: f => { opened(f); f.melds = aM({ blue: 1, f2: { 2: { glow: 1 } } }).concat(myM()); f.tip = { x: '629px', y: '282px', tf: 'translate(-50%,0)', down: false, up: true, text: L('Bu okeyin yerine Mavi 7 koyarak alabilirsin', 'Put Blue 7 in its place to take this okey') }; f.cur = { x: '629px', y: '252px', press: true }; } },
+      T49: { t: L('Okeyi al · geçersiz deneme', 'Take the okey · invalid attempt'), n: L('Yanlış taş kırmızı çerçeveyle ıstakaya döner.', 'The wrong tile returns to the rack with a red frame.'), f: f => { opened(f); Object.assign(f, rack([[1, 1, '~K7']], [O1, O2])); f.melds = aM({ blue: 1, f2: { 2: { err: 1 } } }).concat(myM()); f.banner = null; f.drag = { x: '600px', y: '330px', t: tl('K7', { err: 1 }) }; f.toasts = [toast('err', L('Bu okey yalnızca Mavi 7 ile alınabilir', 'This okey can only be taken with Blue 7'))]; } },
+      T50: { t: L('Yükleme ekranı', 'Loading screen'), n: L('Tema degradesi, gezegen, logo, ilerleme, ipucu.', 'Theme gradient, planet, logo, progress, tip.'), f: f => { f.scene = false; f.ld = { ok: true, err: false, po: 0.9, ro: 0.85, kick: L('BOTLARA KARŞI · 101 · 5 EL', 'VS BOTS · 101 · 5 HANDS'), load: L('3D masa yükleniyor…', 'Loading 3D table…'), pct: '64%', tip: L('İpucu: Bir pere basılı tutarak toplu taşıyabilirsin', 'Tip: Press and hold a set to move it as a group') }; } },
+      T51: { t: L('Masa açılamadı', "Table couldn't open"), n: L('Yükleme arka planı üstünde hata kartı.', 'Error card over the loading background.'), f: f => { f.scene = false; f.ld = { ok: false, err: true, po: 0.5, ro: 0.4, title: L('Masa açılamadı', "Couldn't open the table"), body: L('Bağlantı kurulamadı. İnternetini kontrol edip yeniden dene.', "We couldn't connect. Check your connection and try again."), lobby: L('Lobiye dön', 'Back to lobby'), retry: L('Yeniden dene', 'Try again') }; } }
+    };
+    function catalog() {
+      const dot = { info: 'var(--a1)', ok: '#5BE3A6', warn: '#FFB13D', err: '#FF8A95', pen: '#E8455A', bub: '#FFFFFF', bubpen: '#FF5E6C' };
+      const M = [
+        ['pen', 'İşlek taş attın · +101', 'You threw a playable tile · +101'],
+        ['pen', 'Okey attın · +101', 'You threw the okey · +101'],
+        ['pen', 'Eksik açılış · 88 / 101 · +101', 'Short opening · 88 / 101 · +101'],
+        ['pen', 'Eksik çift açılışı · 4 / 5 çift · +101', 'Short pairs opening · 4 / 5 pairs · +101'],
+        ['pen', 'Attığın 9 ile Zeynep elini açtı · +90', 'Zeynep opened with your 9 · +90'],
+        ['pen', 'Ayşe masadaki okeyini aldı · +101', 'Ayşe took your okey from the table · +101'],
+        ['info', 'Çiftle açtın · yalnızca çift açabilirsin', 'You opened with pairs · you can only lay pairs'],
+        ['info', 'İşine yaramazsa taşı yerine geri bırakabilirsin', "If it doesn't help, you can put it back"],
+        ['info', 'Per taşınıyor · ıstakada istediğin yere bırak', 'Moving set · drop it anywhere on your rack'],
+        ['err', 'Son taş işlenemez', "The last tile can't be added on"],
+        ['err', 'Bitirmek için önce elini açmalısın', 'Open your hand before finishing'],
+        ['err', 'Bu taş o pere işlenemez', 'That tile does not fit this set'],
+        ['err', 'Yerden aldığın taşı atamazsın · kullan ya da geri bırak', "You can't discard the picked-up tile · use it or put it back"],
+        ['err', 'Bu okey yalnızca Mavi 7 ile alınabilir', 'This okey can only be taken with Blue 7'],
+        ['warn', 'Süren doldu · senin yerine oynandı', "Time's up · a move was played for you"],
+        ['warn', 'Süren bitiyor!', 'Time is running out!'],
+        ['bub', 'Ayşe elini açtı · 118', 'Ayşe opened · 118'],
+        ['bub', 'Zeynep çift açtı · 5 çift', 'Zeynep opened pairs · 5 pairs'],
+        ['bubpen', 'Burak işlek taş attı · +101', 'Burak threw a playable tile · +101'],
+        ['bubpen', 'Burak okey attı · +101', 'Burak threw the okey · +101'],
+        ['bubpen', 'Zeynep eksik açtı · +101', 'Zeynep opened short · +101']
+      ];
+      return {
+        kick: L('MESAJ KATALOĞU', 'MESSAGE CATALOGUE'), title: L('Kural ve sistem mesajları', 'Rule and system messages'),
+        types: [
+          { name: L('Ceza', 'Penalty'), use: L('sana yazılan ceza', 'penalty to you'), dur: L('3.5 sn + rozet', '3.5 s + badge'), x: toast('pen', L('İşlek taş attın', 'You threw a playable tile'), '', false, '+101') },
+          { name: L('Bilgi', 'Info'), use: L('yönlendirme', 'guidance'), dur: L('2.5 sn', '2.5 s'), x: toast('info', L('İşine yaramazsa taşı yerine geri bırakabilirsin', "If it doesn't help, you can put it back")) },
+          { name: L('Başarı', 'Success'), use: L('tamamlanan eylem', 'completed action'), dur: L('2 sn', '2 s'), x: toast('ok', L('Elini açtın · şimdi bir taş at', 'Hand opened · now discard a tile')) },
+          { name: L('Uyarı', 'Warning'), use: L('süre', 'timer'), dur: L('3.5 sn · süre: tur sonuna dek', '3.5 s · timer: until turn ends'), x: toast('warn', L('Süren bitiyor!', 'Time is running out!')) },
+          { name: L('Hata', 'Error'), use: L('reddedilen hamle', 'rejected move'), dur: L('3 sn + titreşim', '3 s + shake'), x: toast('err', L('Bu taş o pere işlenemez', 'That tile does not fit this set')) },
+          { name: L('Rakip balonu', 'Opponent bubble'), use: L('avatar üstünde', 'above avatar'), dur: L('2.5 sn', '2.5 s'), x: toast('bubpen', L('Burak okey attı · +101', 'Burak threw the okey · +101')) }
+        ],
+        msgs: M.map(([k, tr, enx]) => ({ dot: dot[k], rad: k === 'pen' || k === 'bubpen' ? '2px' : '50%', tr, en: enx })),
+        rulesL: L('KUYRUK KURALLARI', 'QUEUE RULES'),
+        rules: [
+          L('Tek toast tam görünür; sıradakiler arkada küçülmüş bekler, üsttekinde "+n" sayacı. Ceza ve hata öne geçer.', 'One toast is fully visible; queued ones wait behind, shrunk, with a "+n" counter. Penalties and errors jump ahead.'),
+          L('Aynı metin tekrar gelirse yeni toast açılmaz, süresi baştan başlar. "Süren bitiyor!" tur bitene dek kalır.', 'A repeated text restarts the timer instead of stacking. "Time is running out!" stays until the turn ends.'),
+          L('Rakip olayları ve cezaları kuyruğa girmez; rakibin avatarında balon + rozet. Toast varken sıra bandı gizlenir.', 'Opponent events and penalties skip the queue: bubble + badge on their avatar. The turn banner hides while a toast shows.')
+        ].map((t, i) => ({ n: String(i + 1), t }))
+      };
+    }
+    const GR = [
+      { no: '1', title: L('Bot masası başlığı · antrenman', 'Bot table header · practice'), why: L('Bot maçı çevrimdışı ve yalnızca XP verir. Oda hapı "Botlara karşı · 101" + ANTRENMAN, bahis yerine "Çipsiz · XP", altında el sayacı, çip yerine XP/seviye hapı. Rakip plakalarında BOT etiketi.', 'Bot matches are offline and award XP only. Room pill "vs Bots · 101" + PRACTICE, "No chips · XP" instead of the stake, hand counter beneath, XP/level pill instead of chips. BOT tag on opponent plates.'), ids: ['T28', 'T30'] },
+      { no: '2', title: L('Okey gösterimi', 'Okey display'), why: L('Seçim yok: okey, konduğu yerdeki en yüksek değeri otomatik alır (Mavi 5-6-okey → 7). Puanlar eşitse (9-9-okey) motor ilk uygun rengi seçer. Masada temsil ettiği taş görünür.', 'No picker: the okey automatically takes the highest value where it sits (Blue 5-6-okey → 7). On equal points (9-9-okey) the engine picks the first valid colour. The table shows what it stands for.'), ids: ['T33'] },
+      { no: '3', title: L('Cezalar', 'Penalties'), why: L('Onay kartı yok. +101: işlek taş atmak, okey atmak, eksik açılış, masaya açtığın okeyin başka oyuncu tarafından alınması. Attığın taşla sonraki oyuncu elini açarsa taş değeri × 10 (9 → +90).', 'No confirm card. +101: throwing a playable tile, throwing the okey, a short opening, another player taking the okey you laid. If the next player opens with your discard: tile value × 10 (9 → +90).'), ids: ['T34', 'T35', 'T36'] },
+      { no: '4', title: L('Yerden taş alma', 'Taking the discard'), why: L('Önceki oyuncunun attığı taş her zaman alınabilir. İşe yaramazsa aynı tur yerine geri bırakılır ve desteden çekilir; alınan taş sonraki oyuncuya atılamaz.', "The previous player's discard can always be taken. If it doesn't help it goes back the same turn and you draw from the deck; it can't be discarded to the next player."), ids: ['T38', 'T39'] },
+      { no: '5', title: L('Kural ve sistem mesajları', 'Rule and system messages'), why: L('Ceza, bilgi, başarı, uyarı, hata + rakip balonu; süreler ve kuyruk.', 'Penalty, info, success, warning, error + opponent bubble; durations and queue.'), ids: ['T40', 'T41'] },
+      { no: '6', title: L('El sonu tablosu v2', 'Hand-end table v2'), why: L('T24 yerine. Not, ceza (nedeniyle), çarpan rozetleri ve açıklamalı el puanı. Bot maçında yalnızca XP, çevrimiçi maçta çip.', 'Replaces T24. Note, penalty (with reason), multiplier badges and explained hand score. XP only in bot matches, chips online.'), ids: ['T42', 'T43', 'T44'] },
+      { no: '7', title: L('Maç sonu ekranı', 'Match-end screen'), why: L('Sonsuz el döngüsü yerine sabit uzunlukta maç. En düşük toplam kazanır.', 'A fixed-length match replaces the endless hand loop. Lowest total wins.'), ids: ['T45', 'T46'], hasLen: true },
+      { no: '8', title: L('Okeyi masadan alma', 'Taking the okey from the table'), why: L('Okeyin temsil ettiği gerçek taş okeyin üstüne bırakılır; okey ıstakaya uçar, okeyi açan oyuncuya +101 yazılır.', 'Drop the real tile the okey stands for onto it; the okey flies to the rack and its owner gets +101.'), ids: ['T47', 'T48', 'T49'] },
+      { no: '9', title: L('Menü → masa geçişi', 'Menu → table transition'), why: L('Yükleme ekranı ve "Masa açılamadı" hata durumu.', 'Loading screen and the "Couldn\'t open the table" error.'), ids: ['T50', 'T51'] }
+    ];
+    const thSel = this.props.themes ?? 'both';
+    const ths = solo ? [solo.th] : thSel === 'saturn' ? ['sat'] : thSel === 'mars' ? ['mars'] : ['sat', 'mars'];
+    const mkFrame = (id, th) => {
+      const f = base();
+      ST[id].f(f);
+      f.ref = this.vref(th, Object.assign({}, TH[th].v, FONTS));
+      f.cap = TH[th].name + ' · ' + id + (en ? ' · EN' : '');
+      f.sw = TH[th].v.a1;
+      f.rad = solo ? '0' : '18px';
+      f.tL = f.scene ? '500px' : '0'; f.tR = f.scene ? '330px' : '0';
+      return f;
+    };
+    let groups = GR.map(g => ({ no: g.no, title: g.title, why: g.why, anchor: 'g' + g.no, hasLen: !solo && !!g.hasLen, states: g.ids.filter(id => !solo || id === solo.id).map(id => ({ id, title: ST[id].t, note: ST[id].n, frames: ths.map(th => mkFrame(id, th)) })) })).filter(g => g.states.length);
+    const sc = solo ? Math.min(window.innerWidth / 1280, window.innerHeight / 720) : 1;
+    return {
+      groups, chrome: !solo, pad: solo ? '0' : '64px', gmb: solo ? '0' : '110px', rootTf: solo ? 'scale(' + sc + ')' : 'none', rootW: solo ? '1280px' : 'max-content',
+      hdrKick: L('OYUN MASASI · EK DURUMLAR', 'GAME TABLE · EXTRA STATES'),
+      hdrTitle: L('Masa ek durumları · T28–T51', 'Extra table states · T28–T51'),
+      hdrIntro: L('Gerçek 101 kural motorunun ürettiği, T01–T27 prototipinde olmayan durumlar. Her kare 1280×720, T05 masa düzeninin üstünde, Satürn ve Mars temasıyla. Dil ve tema için Tweaks panelini kullanın.', 'States produced by the real 101 rules engine that the T01–T27 prototype skipped. Each frame is 1280×720 over the T05 table layout, in Saturn and Mars. Use Tweaks for language and theme.'),
+      lenL: {
+        title: L('MAÇ UZUNLUĞU · SEÇENEKLER', 'MATCH LENGTH · OPTIONS'), recTag: L('ÖNERİLEN', 'RECOMMENDED'),
+        opts: [
+          { name: L('A · Sabit 5 el', 'A · Fixed 5 hands'), how: L('Her maç 5 el. Üst barda "2 / 5. el" sayacı.', 'Every match is 5 hands. Top bar shows "Hand 2 / 5".'), pro: L('Süre öngörülebilir (bot ile ~20–25 dk), sayaç net.', 'Predictable length (~20–25 min vs bots), clear counter.'), con: L('Kısa oturum isteyen için uzun.', 'Long for players wanting a quick session.'), rec: false, bd: '2px solid transparent' },
+          { name: L('B · Seçilebilir 3 / 5 / 7 el', 'B · Selectable 3 / 5 / 7 hands'), how: L('Bot lobisinde Hızlı 3 · Normal 5 · Uzun 7. Varsayılan 5.', 'Quick 3 · Normal 5 · Long 7 in the bot lobby. Default 5.'), pro: L("A'nın netliği + oyuncuya kontrol. XP uzunluktan bağımsız el başına.", "A's clarity plus player control. XP is per hand, independent of length."), con: L('Lobiye tek bir seçim satırı eklenir.', 'Adds one selector row to the lobby.'), rec: true, bd: '2px solid #FFD964' },
+          { name: L('C · Puan eşiği', 'C · Score threshold'), how: L('Bir oyuncunun toplamı 1.000 puanı geçince maç biter.', 'The match ends when anyone passes 1,000 points.'), pro: L('Geleneksel kahve 101 hissi.', 'Feels like traditional café 101.'), con: L('Süre belirsiz, el sayacı gösterilemez; ×8 bir elde maçı bitirebilir.', 'Unknown length, no hand counter; one ×8 hand can end it.'), rec: false, bd: '2px solid transparent' }
+        ],
+        rec: L('Öneri: B. Varsayılan 5 el; T45–T46 bu varsayımla çizildi. XP: el kazanma +340, el kaybetme +60, maç sırası bonusu 1. +500 · 2. +200 · 3. +80 · 4. +0. Maç bitmeden kalkan o elin ve maç bonusunun XP\'sini almaz.', 'Recommendation: B, default 5 hands; T45–T46 assume this. XP: hand win +340, hand loss +60, placement bonus 1st +500 · 2nd +200 · 3rd +80 · 4th +0. Leaving early forfeits that hand\'s XP and the placement bonus.')
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

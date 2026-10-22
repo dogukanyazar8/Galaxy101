@@ -44,12 +44,12 @@ namespace Okey101.Core.Turns
             else if (state.IsInitialTurn)
             {
                 if (state.Phase != RoundPhase.PlanningTurn || actor != state.StartingPlayer || state.TurnNumber != 0 ||
-                    state.Version != 0 || state.PendingDraw != null || state.Table.Count != 0 || state.Stock.Count != 20 ||
+                    state.PendingDraw != null || state.Table.Count != 0 || state.Stock.Count != 20 ||
                     state.OpeningAtTurnStart != OpeningKind.None)
                     return RuleResult<bool>.Fail(ErrorCode.InvalidState);
                 for (var p = 0; p < 4; p++)
                     if (state.Players[p].Hand.Count != (p == actor ? 22 : 21) || state.Players[p].Opening != OpeningKind.None ||
-                        state.Players[p].Penalties != 0 || state.Discards[p].Count != 0 || state.LastAcceptedSequences[p] != 0)
+                        (p != actor && (state.Players[p].Penalties != 0 || state.LastAcceptedSequences[p] != 0)) || state.Discards[p].Count != 0)
                         return RuleResult<bool>.Fail(ErrorCode.InvalidState);
             }
             else

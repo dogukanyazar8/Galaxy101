@@ -39,6 +39,30 @@ namespace Okey101.Core.Model
         }
     }
 
+    /// <summary>
+    /// Put the tile taken from the previous player's discard back on its pile (spec/17 §4). Only before any other
+    /// change this turn; the player then draws from the stock and cannot take the same pile again this turn.
+    /// </summary>
+    public sealed class ReturnDiscardCommand : GameCommand
+    {
+        public ReturnDiscardCommand(CommandMeta meta) : base(meta) { }
+    }
+
+    /// <summary>
+    /// A failed opening attempt (series below 101 or fewer than 5 pairs, spec/17 §3): the groups stay on the rack and the
+    /// player takes +101. Only while the player has not opened.
+    /// </summary>
+    public sealed class ShortOpeningCommand : GameCommand
+    {
+        public OpeningKind Opening { get; }
+        public ShortOpeningCommand(CommandMeta meta, OpeningKind opening) : base(meta)
+        {
+            Immutable.EnumValue(opening, nameof(opening));
+            if (opening == OpeningKind.None) throw new ArgumentException("A short opening names its kind.", nameof(opening));
+            Opening = opening;
+        }
+    }
+
     public sealed class CommitTurnCommand : GameCommand
     {
         public TurnPlan Plan { get; }

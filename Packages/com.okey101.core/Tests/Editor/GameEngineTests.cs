@@ -99,12 +99,14 @@ namespace Okey101.Core.Tests
         }
 
         [Test]
-        public void DiscardDrawRequiresWitness()
+        public void DiscardDrawMustBeUsed()
         {
+            // spec/17 §4: the previous discard can always be taken (no witness); unused it must go back.
             var picked = Id(TileColor.Red, 4);
             var builder = Waiting(new[] { Spare }, picked).WithTable(new Meld(0, 1, Run(TileColor.Red, 1, 2, 3)));
             var unopened = Authority(builder.Build());
-            Reject(unopened, new DrawCommand(Meta(unopened), DrawSource.PreviousDiscard), ErrorCode.NoLegalUse);
+            var takenUnopened = Apply(unopened, new DrawCommand(Meta(unopened), DrawSource.PreviousDiscard));
+            Reject(takenUnopened, new CommitTurnCommand(Meta(takenUnopened), Plan(Spare)), ErrorCode.DiscardMustBeUsed);
             var opened = Authority(builder.WithOpening(0, OpeningKind.Series).Build());
             var drawn = Apply(opened, new DrawCommand(Meta(opened), DrawSource.PreviousDiscard));
             Assert.That(drawn.Players[0].Hand.Last(), Is.EqualTo(picked));

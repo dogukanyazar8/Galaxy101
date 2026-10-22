@@ -50,6 +50,19 @@ namespace Okey101.Core.Turns
                 discards[p] = candidate.Discards[p];
             }
             players[actor] = new PlayerState(hand, player.Opening, player.Penalties + penalty);
+            // spec/17 §3: opening with the previous player's discard costs that player the tile value × 10
+            // (a discarded okey already cost +101 when it was thrown; it adds nothing here).
+            if (draw != null && draw.Source == DrawSource.PreviousDiscard && drawnState.OpeningAtTurnStart == OpeningKind.None &&
+                FirstOpeningContains(plan, draw.Tile))
+            {
+                var fed = Penalties.Fed(draw.Tile, TileCatalog.Create()[candidate.Indicator.Value].PrintedFace.Value);
+                var giver = (actor + 3) % 4;
+                if (fed > 0)
+                {
+                    if (players[giver].Penalties > int.MaxValue - fed) return RuleResult<RoundState>.Fail(ErrorCode.InvalidState);
+                    players[giver] = new PlayerState(players[giver].Hand, players[giver].Opening, players[giver].Penalties + fed);
+                }
+            }
             var pile = new List<TileId>(discards[actor]) { plan.Discard };
             discards[actor] = pile;
             return RuleResult<RoundState>.Ok(new RoundState(candidate.RoundId, candidate.Version, candidate.Seed,

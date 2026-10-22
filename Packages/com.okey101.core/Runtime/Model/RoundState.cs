@@ -52,13 +52,15 @@ namespace Okey101.Core.Model
         public bool IsInitialTurn { get; }
         public IReadOnlyList<long> LastAcceptedSequences { get; }
         public RoundResult Result { get; }
+        /// <summary>The previous discard was taken and put back this turn: only the stock may be drawn now.</summary>
+        public bool PreviousDiscardReturned { get; }
 
         public RoundState(Guid roundId, long version, uint seed, int startingPlayer, int activePlayer,
             int turnNumber, RoundPhase phase, TileId indicator, IReadOnlyList<TileId> stock,
             IReadOnlyList<PlayerState> players, IReadOnlyList<Meld> table,
             IReadOnlyList<IReadOnlyList<TileId>> discards, DrawReceipt pendingDraw,
             OpeningKind openingAtTurnStart, int seriesTilesUsed, bool isInitialTurn,
-            IReadOnlyList<long> lastAcceptedSequences, RoundResult result = null)
+            IReadOnlyList<long> lastAcceptedSequences, RoundResult result = null, bool previousDiscardReturned = false)
         {
             if (roundId == Guid.Empty) throw new ArgumentException("A round identity is required.", nameof(roundId));
             if (version < 0) throw new ArgumentOutOfRangeException(nameof(version));
@@ -79,6 +81,7 @@ namespace Okey101.Core.Model
                 if (sequence < 0) throw new ArgumentOutOfRangeException(nameof(lastAcceptedSequences));
             PendingDraw = pendingDraw; OpeningAtTurnStart = openingAtTurnStart;
             SeriesTilesUsed = seriesTilesUsed; IsInitialTurn = isInitialTurn; Result = result;
+            PreviousDiscardReturned = previousDiscardReturned;
         }
     }
 }

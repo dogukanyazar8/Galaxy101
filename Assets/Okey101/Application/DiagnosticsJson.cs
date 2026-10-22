@@ -42,6 +42,7 @@ namespace Okey101.Application
             [DataMember(IsRequired=true, Order=15)] public bool IsInitialTurn;
             [DataMember(IsRequired=true, Order=16)] public long[] LastAcceptedSequences;
             [DataMember(IsRequired=true, Order=17)] public ResultDto Result;
+            [DataMember(IsRequired=false, EmitDefaultValue=false, Order=18)] public bool PreviousDiscardReturned; // omitted when false: fixture hashes stay stable
         }
         [DataContract] internal sealed class PlayerDto
         {
@@ -172,7 +173,7 @@ namespace Okey101.Application
             Table=s.Table.Select(m=>new MeldDto { Id=m.Id, Owner=m.Owner, Group=Group(m.Group) }).ToArray(),
             Discards=s.Discards.Select(p=>p.Select(id=>id.Value).ToArray()).ToArray(),
             PendingDraw=s.PendingDraw==null ? null : new DrawDto { Source=(int)s.PendingDraw.Source, Tile=s.PendingDraw.Tile.Value, WasLastStock=s.PendingDraw.WasLastStock },
-            OpeningAtTurnStart=(int)s.OpeningAtTurnStart, SeriesTilesUsed=s.SeriesTilesUsed, IsInitialTurn=s.IsInitialTurn, LastAcceptedSequences=s.LastAcceptedSequences.ToArray(),
+            OpeningAtTurnStart=(int)s.OpeningAtTurnStart, SeriesTilesUsed=s.SeriesTilesUsed, IsInitialTurn=s.IsInitialTurn, LastAcceptedSequences=s.LastAcceptedSequences.ToArray(), PreviousDiscardReturned=s.PreviousDiscardReturned,
             Result=s.Result==null ? null : new ResultDto { Reason=(int)s.Result.FinishInfo.Reason, Winner=s.Result.FinishInfo.Winner, WinnerOpening=(int)s.Result.FinishInfo.WinnerOpening,
                 WinnerOpenedThisTurn=s.Result.FinishInfo.WinnerOpenedThisTurn, DiscardedRealJoker=s.Result.FinishInfo.DiscardedRealJoker,
                 Scores=s.Result.Scores.Select(x=>new ScoreDto { HasScore=x.HasScore,N=x.N,J=x.J,P=x.P,B=x.B,M=x.M,Total=x.Total }).ToArray() } };
@@ -187,7 +188,8 @@ namespace Okey101.Application
                 s.PendingDraw==null?null:new DrawReceipt((DrawSource)s.PendingDraw.Source,new TileId(s.PendingDraw.Tile),s.PendingDraw.WasLastStock),
                 (OpeningKind)s.OpeningAtTurnStart,s.SeriesTilesUsed,s.IsInitialTurn,Items(s.LastAcceptedSequences,4),
                 result==null?null:new RoundResult(new FinishInfo((FinishReason)result.Reason,result.Winner,(OpeningKind)result.WinnerOpening,result.WinnerOpenedThisTurn,result.DiscardedRealJoker),
-                    Items(result.Scores,4).Select(x=>new ScoreBreakdown(x.HasScore,x.N,x.J,x.P,x.B,x.M,x.Total)).ToArray()));
+                    Items(result.Scores,4).Select(x=>new ScoreBreakdown(x.HasScore,x.N,x.J,x.P,x.B,x.M,x.Total)).ToArray()),
+                s.PreviousDiscardReturned);
         }
         private static PlacedDto Placed(PlacedTile t)=>new PlacedDto { Id=t.Id.Value,Color=(int)t.RepresentedFace.Color,Number=t.RepresentedFace.Number };
         private static PlacedTile Placed(PlacedDto t)=>new PlacedTile(new TileId(t.Id),new TileFace((TileColor)t.Color,t.Number));
@@ -196,9 +198,11 @@ namespace Okey101.Application
         { if(g==null) throw new SerializationException("Group is required."); return new MeldProposal((MeldKind)g.Kind,Items(g.Tiles,13).Select(Placed).ToArray()); }
         private static CommandDto Command(GameCommand c)
         {
-            var dto=new CommandDto { Kind=c is DrawCommand?"Draw":"Commit",RoundId=c.Meta.RoundId.ToString("D"),Actor=c.Meta.Actor,Sequence=c.Meta.Sequence,ExpectedVersion=c.Meta.ExpectedVersion,Actions=Array.Empty<ActionDto>() };
+            var dto=new CommandDto { Kind=c is DrawCommand?"Draw":c is ReturnDiscardCommand?"Return":c is ShortOpeningCommand?"ShortOpening":"Commit",RoundId=c.Meta.RoundId.ToString("D"),Actor=c.Meta.Actor,Sequence=c.Meta.Sequence,ExpectedVersion=c.Meta.ExpectedVersion,Actions=Array.Empty<ActionDto>() };
             if(c is DrawCommand draw) dto.Source=(int)draw.Source;
             else if(c is CommitTurnCommand commit) { dto.Actions=commit.Plan.Actions.Select(Action).ToArray(); dto.Discard=commit.Plan.Discard.Value; dto.AcceptPenalty=commit.Plan.AcceptPenalty; }
+            else if(c is ReturnDiscardCommand) { }
+            else if(c is ShortOpeningCommand shortOpening) dto.Source=(int)shortOpening.Opening;
             else throw new SerializationException("Unknown command.");
             return dto;
         }
@@ -210,6 +214,8 @@ namespace Okey101.Application
             {
                 case "Draw": if(actions.Length!=0) throw new SerializationException("Draw cannot carry actions."); return new DrawCommand(meta,(DrawSource)c.Source);
                 case "Commit": return new CommitTurnCommand(meta,new TurnPlan(actions.Select(Action).ToArray(),new TileId(c.Discard),c.AcceptPenalty));
+                case "Return": if(actions.Length!=0) throw new SerializationException("Return cannot carry actions."); return new ReturnDiscardCommand(meta);
+                case "ShortOpening": if(actions.Length!=0) throw new SerializationException("A short opening cannot carry actions."); return new ShortOpeningCommand(meta,(OpeningKind)c.Source);
                 default: throw new SerializationException("Unknown command discriminant.");
             }
         }

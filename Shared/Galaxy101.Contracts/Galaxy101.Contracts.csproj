@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Wire contracts shared by the server and the Unity client: plain mutable classes so both
+       System.Text.Json (server) and Newtonsoft.Json (Unity) bind them without attributes. -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RootNamespace>Galaxy101.Contracts</RootNamespace>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,8 @@
+*
+!Server/Directory.Build.props
+!Server/src/**
+!Shared/Galaxy101.Contracts/**
+!Packages/com.okey101.core/Runtime/**
+!Assets/Okey101/Bots/BotPlanner.cs
+**/bin
+**/obj

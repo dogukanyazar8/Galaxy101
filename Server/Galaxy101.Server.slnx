@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Galaxy101.Rules/Galaxy101.Rules.csproj" />
+    <Project Path="src/Galaxy101.Server/Galaxy101.Server.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Galaxy101.Server.Tests/Galaxy101.Server.Tests.csproj" />
+  </Folder>
+  <Project Path="../Shared/Galaxy101.Contracts/Galaxy101.Contracts.csproj" />
+</Solution>

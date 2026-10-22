@@ -1,0 +1,194 @@
+{
+  "chips": [
+    {
+      "id": "chips-0",
+      "chips": 50000,
+      "bonusPercent": 0,
+      "storeProductId": "galaxy101.chips_0",
+      "referencePrice": 19.99,
+      "popular": false
+    },
+    {
+      "id": "chips-1",
+      "chips": 250000,
+      "bonusPercent": 10,
+      "storeProductId": "galaxy101.chips_1",
+      "referencePrice": 79.99,
+      "popular": false
+    },
+    {
+      "id": "chips-2",
+      "chips": 1000000,
+      "bonusPercent": 25,
+      "storeProductId": "galaxy101.chips_2",
+      "referencePrice": 249.99,
+      "popular": true
+    },
+    {
+      "id": "chips-3",
+      "chips": 5000000,
+      "bonusPercent": 50,
+      "storeProductId": "galaxy101.chips_3",
+      "referencePrice": 899.99,
+      "popular": false
+    }
+  ],
+  "gems": [
+    {
+      "id": "gems-0",
+      "gems": 100,
+      "bonusPercent": 0,
+      "storeProductId": "galaxy101.gems_0",
+      "referencePrice": 29.99,
+      "popular": false
+    },
+    {
+      "id": "gems-1",
+      "gems": 550,
+      "bonusPercent": 10,
+      "storeProductId": "galaxy101.gems_1",
+      "referencePrice": 139.99,
+      "popular": false
+    },
+    {
+      "id": "gems-2",
+      "gems": 1200,
+      "bonusPercent": 20,
+      "storeProductId": "galaxy101.gems_2",
+      "referencePrice": 279.99,
+      "popular": true
+    },
+    {
+      "id": "gems-3",
+      "gems": 2500,
+      "bonusPercent": 25,
+      "storeProductId": "galaxy101.gems_3",
+      "referencePrice": 549.99,
+      "popular": false
+    }
+  ],
+  "skins": [
+    {
+      "id": "skin-0",
+      "gemPrice": 800,
+      "popular": true
+    },
+    {
+      "id": "skin-1",
+      "gemPrice": 1200,
+      "popular": false
+    },
+    {
+      "id": "skin-2",
+      "gemPrice": 600,
+      "popular": false
+    },
+    {
+      "id": "skin-3",
+      "gemPrice": 400,
+      "popular": false
+    }
+  ],
+  "deal": {
+    "id": "deal",
+    "chips": 1000000,
+    "gems": 50,
+    "storeProductId": "galaxy101.deal",
+    "referencePrice": 99.99,
+    "referenceOldPrice": 199.99
+  },
+  "streak": [
+    1000,
+    2000,
+    3000,
+    4000,
+    5000,
+    7500,
+    15000
+  ],
+  "quests": [
+    {
+      "id": "winHands",
+      "target": 3,
+      "chips": 2000,
+      "gems": 0
+    },
+    {
+      "id": "pairsOpenings",
+      "target": 1,
+      "chips": 1500,
+      "gems": 0
+    },
+    {
+      "id": "handsPlayed",
+      "target": 5,
+      "chips": 1000,
+      "gems": 0
+    },
+    {
+      "id": "okeyFinishes",
+      "target": 1,
+      "chips": 5000,
+      "gems": 5
+    },
+    {
+      "id": "tilesAdded",
+      "target": 40,
+      "chips": 2500,
+      "gems": 0
+    }
+  ],
+  "gifts": [
+    {
+      "id": "tea",
+      "chips": 100
+    },
+    {
+      "id": "coffee",
+      "chips": 150
+    },
+    {
+      "id": "cola",
+      "chips": 120
+    },
+    {
+      "id": "simit",
+      "chips": 200
+    },
+    {
+      "id": "baklava",
+      "chips": 500
+    },
+    {
+      "id": "seeds",
+      "chips": 80
+    },
+    {
+      "id": "flower",
+      "chips": 1000
+    },
+    {
+      "id": "cake",
+      "chips": 2500
+    },
+    {
+      "id": "trophy",
+      "chips": 5000
+    },
+    {
+      "id": "rocket",
+      "chips": 10000
+    }
+  ],
+  "emotes": [
+    "😂",
+    "😍",
+    "😎",
+    "😡",
+    "👏",
+    "🔥",
+    "🤔",
+    "🙏",
+    "😱"
+  ]
+}

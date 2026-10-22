@@ -87,6 +87,10 @@ namespace Galaxy101.Table
         private readonly List<(string Why, int Amount)>[] penaltyReasons = { new List<(string, int)>(), new List<(string, int)>(), new List<(string, int)>(), new List<(string, int)>() };
         private int pickedTile = -1;
         private bool deckOnly;
+        // T33/T47–T49: the rack tile being dragged (okey targets), the okey under the pointer / long-pressed, a refused okey.
+        private int dragTile = -1, tipOkey = -1, invalidOkey = -1;
+        private bool tipTake;
+        private float tipUntil, invalidUntil;
         private System.Random random;
         private bool leaving;
 
@@ -110,7 +114,10 @@ namespace Galaxy101.Table
         }
 
         /// <summary>Test hook: configure before Start (seat −1 = bots everywhere).</summary>
-        public void Configure(int human, uint fixedSeed, float seconds = 30, bool seatPlayers = true) { humanSeat = human; seed = fixedSeed; turnSeconds = seconds; seating = seatPlayers; }
+        public void Configure(int human, uint fixedSeed, float seconds = 30, bool seatPlayers = true, RoundState firstHand = null)
+        { humanSeat = human; seed = fixedSeed; turnSeconds = seconds; seating = seatPlayers; initialState = firstHand; }
+
+        private RoundState initialState;
 
         private void OnDestroy()
         {
@@ -140,6 +147,8 @@ namespace Galaxy101.Table
                 if (left <= 0) { humanDone?.TrySetResult(false); }
             }
             if (ExitOpen && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) CancelExit();
+            if (tipOkey >= 0 && tipTake && Time.unscaledTime > tipUntil) { tipOkey = -1; Notify(); }
+            if (invalidOkey >= 0 && Time.unscaledTime > invalidUntil) { invalidOkey = -1; Notify(); }
         }
 
         // ---------- flow ----------
@@ -150,7 +159,8 @@ namespace Galaxy101.Table
                 while (!token.IsCancellationRequested)
                 {
                     uint handSeed = seed != 0 ? seed + (uint)HandNumber : (uint)random.Next(1, int.MaxValue);
-                    if (HandNumber == 0) Session.Start(handSeed, humanSeat == Me ? Me : (int?)null); else Session.StartNextRound(handSeed);
+                    if (HandNumber == 0 && initialState != null) Session.Start(initialState);
+                    else if (HandNumber == 0) Session.Start(handSeed, humanSeat == Me ? Me : (int?)null); else Session.StartNextRound(handSeed);
                     HandNumber++; LastResult = null; staged.Clear(); LastDrawn = -1; pickedTile = -1; deckOnly = false;
                     for (int k = 0; k < 4; k++) { handPenalties[k] = 0; penaltyReasons[k].Clear(); }
                     var view = Session.GetView(Me);
@@ -160,6 +170,7 @@ namespace Galaxy101.Table
                     Current = Phase.Deal; Active = -1; Notify();
                     float landed = Board.Deal(BuildBoard(view), view.ActivePlayer); SyncedVersion = view.Version;
                     await Seconds(landed);
+                    SyncBoard(); // a hand resumed mid-game also has melds and discards
                     while (!token.IsCancellationRequested)
                     {
                         view = Session.GetView(Me);
@@ -493,6 +504,60 @@ namespace Galaxy101.Table
             SyncBoard(); Notify();
         }
 
+        // ---------- okeys on the table (spec/17 §2, §8) ----------
+        /// <summary>Every okey (real joker) in a table meld with the face it stands for, as the board shows it.</summary>
+        public List<(int Id, TileFace Face, int Meld, int Owner)> TableOkeys()
+        {
+            var list = new List<(int, TileFace, int, int)>();
+            if (Session == null || Current == Phase.Waiting || Current == Phase.Seating) return list;
+            foreach (var meld in (staged.Count > 0 && Active == Me ? Projection() : PlayerViewProjector.ForEvaluation(Session.GetView(Me)).Value).Table)
+                foreach (var tile in meld.Group.Tiles)
+                    if (TileCatalog.IsRealJoker(tile.Id, Indicator)) list.Add((tile.Id.Value, tile.RepresentedFace, meld.Id, meld.Owner));
+            return list;
+        }
+
+        public bool IsTableOkey(int id) => TableOkeys().Any(o => o.Id == id);
+
+        private string FaceName(TileFace face)
+            => T("color." + (face.Color == TileColor.Red ? "R" : face.Color == TileColor.Blue ? "B" : face.Color == TileColor.Yellow ? "Y" : "K")) + " " + face.Number;
+
+        private static string FaceColor(TileFace face)
+            => face.Color == TileColor.Red ? "#D7263D" : face.Color == TileColor.Blue ? "#1F5FBF" : face.Color == TileColor.Yellow ? "#E09A12" : "#24242C";
+
+        /// <summary>The input reports the rack tile being dragged (−1 when released): matching okeys light up (T47).</summary>
+        public void SetDragTile(int id) { if (dragTile == id) return; dragTile = id; Notify(); }
+
+        /// <summary>Hover shows what an okey stands for; a 500 ms press shows how to take it (T33, T48).</summary>
+        public void ShowOkeyTip(int id, bool take)
+        {
+            if (tipOkey == id && tipTake == take) { tipUntil = Time.unscaledTime + 2.5f; return; }
+            tipOkey = id; tipTake = take; tipUntil = Time.unscaledTime + 2.5f; Notify();
+        }
+
+        public void HideOkeyTip() { if (tipOkey < 0 || tipTake) return; tipOkey = -1; Notify(); }
+
+        /// <summary>
+        /// Take an okey from the table (§8, T47): only after opening, only with the real tile it stands for. The tile takes
+        /// the okey's place, the okey comes to my rack; whoever laid it pays +101 when the turn is committed.
+        /// </summary>
+        public void TakeOkey(int tileId, int okeyId)
+        {
+            if (!CanDiscard || !Rack.TryFind(tileId, out _)) return;
+            var okey = TableOkeys().FirstOrDefault(o => o.Id == okeyId);
+            if (okey.Id != okeyId) return;
+            if (OpenedKind(Me) == OpeningKind.None) { Message(TableHud.ToastKind.Error, T("msg.openFirst")); return; }
+            bool fits = !TileCatalog.IsRealJoker(new TileId(tileId), Indicator) && TileCatalog.GetNonJokerFace(new TileId(tileId), Indicator) == okey.Face;
+            var next = staged.Concat(new[] { (TableAction)new SwapJoker(okey.Meld, new TileId(okeyId), new TileId(tileId)) }).ToList();
+            if (!fits || !Evaluate(next).Success)
+            {
+                invalidOkey = okeyId; invalidUntil = Time.unscaledTime + 1.2f;
+                Message(TableHud.ToastKind.Error, T("msg.okeyOnlyWith", FaceName(okey.Face))); return;
+            }
+            staged.Clear(); staged.AddRange(next);
+            Rack.Remove(tileId); Rack.Add(okeyId, TileCodes.FaceFor(Indicator), autoSort);
+            SyncBoard(); Notify();
+        }
+
         /// <summary>İşle: drop one rack tile onto a table meld (front or back; jokers take the face that fits).</summary>
         public void LayOff(int id, int meldId)
         {
@@ -663,6 +728,15 @@ namespace Galaxy101.Table
                 s.Penalties[k] = k == Me ? view.OwnPenalties : view.Players[k].Penalties;
             }
             s.OpenSum = s.Opened[Me] > 0 ? s.Opened[Me] : eval.Sum;
+            var dragFace = dragTile >= 0 && !TileCatalog.IsRealJoker(new TileId(dragTile), Indicator) ? TileCatalog.GetNonJokerFace(new TileId(dragTile), Indicator) : (TileFace?)null;
+            bool canTake = CanDiscard && OpenedKind(Me) != OpeningKind.None;
+            foreach (var okey in TableOkeys())
+            {
+                bool target = canTake && dragFace.HasValue && dragFace.Value == okey.Face;
+                s.Okeys.Add(new TableHud.OkeyMark { Id = okey.Id, Number = okey.Face.Number.ToString(), Color = FaceColor(okey.Face), Target = target, Invalid = okey.Id == invalidOkey });
+                if (target) s.DragBanner = T("takeOkeyBanner", FaceName(okey.Face));
+                if (okey.Id == tipOkey) { s.OkeyTipId = tipOkey; s.OkeyTip = tipTake ? T("takeOkeyHint", FaceName(okey.Face)) : T("okStandsFor", FaceName(okey.Face)); }
+            }
             // spec/17 §3: Aç / Çift aç stay pressable below the threshold (a short opening costs +101).
             s.CanOpen = CanDiscard && (s.Opened[Me] > 0 ? !s.OpenedPairs[Me] && eval.Groups.Count > 0 : true);
             s.CanPair = CanDiscard && (s.OpenedPairs[Me] ? eval.Pairs.Count > 0 : s.Opened[Me] == 0);

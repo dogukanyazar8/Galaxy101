@@ -21,7 +21,7 @@ namespace Galaxy101.Table
         [SerializeField] private TableScene table;
         [SerializeField] private TableHud hud;
 
-        private enum Kind { Rack, Deck, Side }
+        private enum Kind { Rack, Deck, Side, Okey }
 
         private sealed class Drag
         {
@@ -93,6 +93,7 @@ namespace Galaxy101.Table
                 var view = h.collider.GetComponent<TileView>(); if (view == null || h.distance >= best) continue;
                 if (game.CanArrange && view.Id >= 0 && game.Rack.TryFind(view.Id, out _)) { best = h.distance; hit = (Kind.Rack, view); }
                 else if (game.CanDrawSide && view == SideTop()) { best = h.distance; hit = (Kind.Side, view); }
+                else if (view.Id >= 0 && game.IsTableOkey(view.Id)) { best = h.distance; hit = (Kind.Okey, view); }
             }
             if (game.CanDraw && table.DeckBounds(game.Board.DeckShown).IntersectRay(ray, out float d) && d < best) hit = (Kind.Deck, null);
             return hit;
@@ -135,6 +136,7 @@ namespace Galaxy101.Table
                 return;
             }
             drag = new Drag { Kind = hit.Value.Kind, View = hit.Value.View, Start = screen };
+            if (drag.Kind == Kind.Okey) { drag.Id = drag.View.Id; drag.HoldAt = Time.unscaledTime + 0.5f; return; }
             if (drag.Kind == Kind.Rack)
             {
                 drag.Id = drag.View.Id; game.Rack.TryFind(drag.Id, out drag.From);
@@ -153,13 +155,16 @@ namespace Galaxy101.Table
             if (drag == null)
             {
                 var hit = hasRay ? Pick(ray) : null;
-                hover = hit?.View;
+                hover = hit?.Kind == Kind.Okey ? null : hit?.View;
+                if (hit?.Kind == Kind.Okey) game.ShowOkeyTip(hit.Value.View.Id, false); else game.HideOkeyTip();
                 return;
             }
+            if (drag.Kind == Kind.Okey) { if (drag.HoldAt > 0 && Time.unscaledTime >= drag.HoldAt) { drag.HoldAt = -1; game.ShowOkeyTip(drag.Id, true); } return; }
             if (!hasRay) return;
             if (!drag.Moved && Vector2.Distance(screen, drag.Start) > 5)
             {
                 drag.Moved = true; selected = -1;
+                if (drag.Kind == Kind.Rack) game.SetDragTile(drag.Id);
                 if (drag.Kind == Kind.Deck)
                 {
                     var top = table.DeckTop(game.Board.DeckShown);
@@ -220,6 +225,8 @@ namespace Galaxy101.Table
         private void OnUp(Ray ray, bool hasRay)
         {
             var d = drag; drag = null;
+            game.SetDragTile(-1);
+            if (d.Kind == Kind.Okey) return;
             if (d.Group)
             {
                 game.Board.ClearPreview(game.Rack);
@@ -246,6 +253,8 @@ namespace Galaxy101.Table
                 if (game.CanDiscard && InZone(ray)) { game.Discard(d.Id); return; }
                 // T39: the picked-up pile tile dropped back on its ring goes back.
                 if (d.Id == game.PickedTile && table.TableHit(ray, out var back) && Vector3.Distance(back, table.DiscardCenter(3)) < 0.1f) { game.PutBack(); return; }
+                var okey = target.HasValue ? null : OkeyNear(ray);
+                if (okey != null) { game.TakeOkey(d.Id, okey.Id); return; }
                 int meld = target.HasValue ? -1 : MeldNear(ray);
                 if (meld >= 0) { game.LayOff(d.Id, meld); return; }
                 if (target.HasValue && !target.Value.Equals(d.From)) game.ApplyRackPlan(game.Rack.SinglePlan(d.Id, target.Value));
@@ -255,6 +264,20 @@ namespace Galaxy101.Table
             if (d.Ghost != null) { game.Board.SpawnFrom(new Pose(d.Ghost.transform.position, d.Ghost.transform.rotation)); Destroy(d.Ghost); }
             if (d.View != null) d.View.Release(TileView.Motion.Travel);
             _ = game.Draw(d.Kind == Kind.Deck ? DrawSource.Stock : DrawSource.PreviousDiscard, target);
+        }
+
+        /// <summary>An okey on the table within 4 cm of the drop point (closer than any other meld tile counts as aiming at it).</summary>
+        private TileView OkeyNear(Ray ray)
+        {
+            if (!game.CanDiscard || !table.TableHit(ray, out var p)) return null;
+            TileView best = null; float distance = 0.04f;
+            foreach (var v in game.Board.MeldViews)
+            {
+                if (v.Id < 0 || !game.IsTableOkey(v.Id)) continue;
+                float d = Vector3.Distance(v.transform.position, p);
+                if (d < distance) { distance = d; best = v; }
+            }
+            return best;
         }
 
         /// <summary>A table meld tile within 7.5 cm of the drop point (only when laying off is possible).</summary>

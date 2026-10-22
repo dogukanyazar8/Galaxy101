@@ -43,7 +43,14 @@ namespace Galaxy101.Table
             public int[] Penalties = new int[4];
             public int PickedTile = -1;
             public bool DeckOnly, ShowPutBack;
+            /// <summary>T33/T47–T49: every okey on the table with what it stands for, drag targets and refusals; the
+            /// tooltip under one okey; the band text while dragging a tile that can take an okey.</summary>
+            public readonly List<OkeyMark> Okeys = new List<OkeyMark>();
+            public int OkeyTipId = -1;
+            public string OkeyTip, DragBanner;
         }
+
+        public sealed class OkeyMark { public int Id; public string Number, Color; public bool Target, Invalid; }
 
         /// <summary>Message kinds (spec/17 §5, T40). Opponent events never queue: they are avatar balloons.</summary>
         public enum ToastKind { Penalty, Info, Success, Warning, Error }
@@ -258,6 +265,7 @@ namespace Galaxy101.Table
             if (state.Result != null) BuildResult(state.Result);
             if (state.ExitOpen) BuildExit();
             BuildPickedTile(state);
+            BuildOkeys(state);
             ApplyGaps(hudLayer); ApplyGaps(anchorLayer);
             RenderToasts();
             LateUpdate();
@@ -587,7 +595,8 @@ namespace Galaxy101.Table
         {
             string text = null, bg = null, fg = null;
             if (toasts.Count > 0) return;
-            if (s.Phase == "draw" && s.Active == 0 && s.DeckOnly) { text = TableStrings.Get("drawDeckOnly", Lang); bg = "linear-gradient(var(--a1),var(--a2))"; fg = "var(--aT)"; }
+            if (s.DragBanner != null) { text = s.DragBanner; bg = "linear-gradient(var(--a1),var(--a2))"; fg = "var(--aT)"; }
+            else if (s.Phase == "draw" && s.Active == 0 && s.DeckOnly) { text = TableStrings.Get("drawDeckOnly", Lang); bg = "linear-gradient(var(--a1),var(--a2))"; fg = "var(--aT)"; }
             else if (s.Phase == "discard" && s.Active == 0 && s.ShowPutBack) { text = TableStrings.Get("putBackHint", Lang); bg = "rgba(5,8,22,.75)"; fg = "var(--ic)"; }
             else if (s.Phase == "deal") { text = L("Taşlar dağıtılıyor…", "Dealing tiles…"); bg = "rgba(5,8,22,.75)"; fg = "var(--ic)"; }
             else if (s.Phase == "draw" && s.Active == 0) { string n = FirstName(3); text = L("Sıra sende · desteden ya da " + n + "'ın taşından çek", "Your turn · draw from the deck or " + n + "'s tile"); bg = "linear-gradient(var(--a1),var(--a2))"; fg = "var(--aT)"; }
@@ -722,6 +731,41 @@ namespace Galaxy101.Table
             var circle = new VisualElement { name = "putback-ring", pickingMode = PickingMode.Position }; circle.style.width = circle.style.height = 74; circle.style.marginTop = 6;
             var dashed = new CssDashedCircle(74, 2, view.C("var(--a1)")); MenuView.Place(dashed, 0, 0, 74, 74); circle.Add(dashed);
             box.Add(Clickable(circle, "putback"));
+        }
+
+        /// <summary>
+        /// Okeys on the table (T33): a white pill with a gold edge at the tile's top-right showing the number it stands for,
+        /// in that colour; while dragging the matching real tile the okey glows (T47); a refused drop frames it red (T49).
+        /// </summary>
+        private void BuildOkeys(State s)
+        {
+            if (TilePosition == null) return;
+            foreach (var okey in s.Okeys)
+            {
+                int id = okey.Id;
+                var anchor = Anchor("okey-" + id, () => TilePosition(id));
+                if (okey.Target || okey.Invalid)
+                {
+                    var frame = new VisualElement { name = (okey.Invalid ? "okey-invalid-" : "okey-target-") + id, pickingMode = PickingMode.Ignore };
+                    MenuView.Place(frame, -15, -19, 30, 38);
+                    frame.style.borderTopLeftRadius = frame.style.borderTopRightRadius = frame.style.borderBottomLeftRadius = frame.style.borderBottomRightRadius = 6;
+                    Border(frame, 3, view.C(okey.Invalid ? "#FF5E6C" : "var(--a1)"));
+                    if (okey.Target)
+                        // 0 0 0 3px --a1, 0 0 22px --gl, pulsing over 1.1 s.
+                        motions.Add(t => GalaxyFilters.Shadow(frame, 0, 0, 6 + 5 * (0.5f + 0.5f * Mathf.Sin(t * Mathf.PI * 2 / 1.1f)), view.C("var(--gl)")));
+                    anchor.Add(frame);
+                }
+                var pill = Text(okey.Number, "Montserrat-800", 11, okey.Color); pill.name = "okey-badge-" + id;
+                pill.style.position = Position.Absolute; pill.style.left = 6; pill.style.top = -26; pill.style.minWidth = 17; pill.style.height = 17;
+                pill.style.unityTextAlign = TextAnchor.MiddleCenter; Pad(pill, 0, 3, 0, 3); view.Decorate(pill, "#FFFFFF", 9); Border(pill, 2, view.C("#E8B730"));
+                anchor.Add(pill);
+                if (s.OkeyTipId == id && s.OkeyTip != null)
+                {
+                    var tip = Text(s.OkeyTip, "Baloo2-800", 12, "#F4F1E8"); tip.name = "okey-tip";
+                    Pad(tip, 6, 11, 6, 11); view.Decorate(tip, "rgba(5,8,22,.88)", 10); GalaxyFilters.Shadow(tip, 0, 6, 9, new Color(0, 0, 0, .35f));
+                    Centered(anchor, -64, false).Add(tip);
+                }
+            }
         }
 
         // ---------- my panel ----------

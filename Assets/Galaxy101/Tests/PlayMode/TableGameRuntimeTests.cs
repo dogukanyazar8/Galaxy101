@@ -161,7 +161,7 @@ namespace Galaxy101.Tests
             Assert.That(game.Rack.Count, Is.EqualTo(22));
             Assert.That(game.LastDrawn, Is.GreaterThanOrEqualTo(0));
             game.Discard(game.LastDrawn);
-            yield return Until(() => game.Current == TableGame.Phase.Opponent || game.HudState().Flash != null, 10, "the second discard");
+            yield return Until(() => game.Current == TableGame.Phase.Opponent || hudOwner.GetComponent<TableHud>().ActiveToast != null, 10, "the second discard");
             if (game.Current != TableGame.Phase.Opponent)
             {
                 // Rule corner (e.g. a laid-off-able joker): any other tile is fine.
@@ -218,6 +218,61 @@ namespace Galaxy101.Tests
             yield return Pointer(c, false); yield return Pointer(c, true); yield return Pointer(c, false); yield return Pointer(c, true); yield return Pointer(c, false);
             yield return Until(() => !game.Rack.Tiles.Contains(victim), 10, "the double-click discard");
             Assert.That(game.Session.GetView(TableGame.Me).Discards[0].Last().Value, Is.EqualTo(victim));
+        }
+
+        [UnityTest]
+        [Timeout(240000)]
+        public IEnumerator ShortOpeningPenaltyAndPileTileCanBePutBack()
+        {
+            var game = Build(TableGame.Me, 5151, true);
+            game.Configure(TableGame.Me, 5151, 30, false);
+            var hud = hudOwner.GetComponent<TableHud>();
+            Time.timeScale = 3;
+            yield return Until(() => game.CanDiscard && game.SyncedVersion == game.Session.GetView(TableGame.Me).Version, 40, "my first turn");
+
+            // T35: Aç below 101 is a short opening: +101, the tiles stay, a Penalty toast and my badge.
+            Assert.That(HandEvaluation.Of(game.Rack, game.Indicator).Sum, Is.LessThan(101), "a freshly dealt rack is unsorted");
+            int tiles = game.Rack.Count;
+            hud.Press("open");
+            yield return Until(() => game.Session.GetView(TableGame.Me).OwnPenalties == 101, 10, "the short opening penalty");
+            yield return null;
+            Assert.That(game.Rack.Count, Is.EqualTo(tiles));
+            Assert.That(hud.ActiveToast, Does.StartWith("Eksik açılış").Or.StartWith("Short opening"));
+            Assert.That(hud.Canvas.Q<VisualElement>("penalty-badge-0"), Is.Not.Null);
+            Assert.That(game.PenaltyReasons(TableGame.Me).Single().Amount, Is.EqualTo(101));
+            string penaltyCapture = Environment.GetEnvironmentVariable("GALAXY_TABLE_PENALTY_CAPTURE");
+            if (!string.IsNullOrEmpty(penaltyCapture)) { Time.timeScale = 0.2f; yield return Capture(hudOwner.GetComponent<UIDocument>(), penaltyCapture); Time.timeScale = 3; }
+
+            game.Discard(game.Rack.Tiles.First());
+            yield return Until(() => game.CanDraw, 120, "my draw turn");
+            var view = game.Session.GetView(TableGame.Me);
+            if (view.Discards[3].Count == 0) Assert.Inconclusive("Burak's pile is empty this time.");
+
+            // T38: the pile tile can always be taken; it is marked and cannot be thrown at the next player.
+            int pile = view.Discards[3].Last().Value;
+            var draw = game.Draw(DrawSource.PreviousDiscard, null);
+            yield return Until(() => draw.IsCompleted, 10, "the pile draw");
+            Assert.That(draw.Result, Is.True);
+            Assert.That(game.PickedTile, Is.EqualTo(pile));
+            yield return null;
+            Assert.That(hud.Canvas.Q<VisualElement>("picked-tag"), Is.Not.Null);
+            Assert.That(hud.Canvas.Q<VisualElement>("putback-ring"), Is.Not.Null);
+            string pileCapture = Environment.GetEnvironmentVariable("GALAXY_TABLE_PILE_CAPTURE");
+            if (!string.IsNullOrEmpty(pileCapture)) { Time.timeScale = 0.2f; yield return Capture(hudOwner.GetComponent<UIDocument>(), pileCapture); Time.timeScale = 3; }
+            game.Discard(pile);
+            yield return null;
+            Assert.That(hud.ActiveToast, Does.StartWith("Yerden aldığın taşı atamazsın").Or.StartWith("You can't discard"));
+            Assert.That(game.Rack.Tiles.Contains(pile), Is.True);
+
+            // T39: put it back, then only the deck is left.
+            game.PutBack();
+            yield return Until(() => game.CanDraw, 10, "the put back");
+            Assert.That(game.CanDrawSide, Is.False);
+            Assert.That(game.Session.GetView(TableGame.Me).Discards[3].Last().Value, Is.EqualTo(pile));
+            Assert.That(game.Rack.Tiles.Contains(pile), Is.False);
+            var stock = game.Draw(DrawSource.Stock, null);
+            yield return Until(() => stock.IsCompleted, 10, "the deck draw");
+            Assert.That(stock.Result, Is.True);
         }
 
         [UnityTest]

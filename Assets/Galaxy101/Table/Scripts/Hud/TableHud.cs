@@ -28,10 +28,9 @@ namespace Galaxy101.Table
             /// <summary>Opened total (series) or pair count per seat; 0 = not opened.</summary>
             public int[] Opened = { 0, 0, 117, 0 };
             public bool[] OpenedPairs = new bool[4];
-            public bool TurnHint = true, ShowIndicator = true, Warn, FirstTurn, CanOpen, CanPair, FlashBad;
+            public bool TurnHint = true, ShowIndicator = true, Warn, FirstTurn, CanOpen, CanPair;
             /// <summary>Time.realtimeSinceStartup when the active turn began (the ring counts down from it); -1 = HUD build time.</summary>
             public float TurnStartedAt = -1;
-            public string Flash, ResultLine;
             /// <summary>Faz 4: seats filled while waiting, 3-2-1 countdown, finish banner, hand result, leave card.</summary>
             public bool[] Seated = { true, true, true, true };
             public int Countdown, Hand = 1;
@@ -39,6 +38,73 @@ namespace Galaxy101.Table
             public bool ExitOpen;
             public MomentInfo Moment;
             public ResultInfo Result;
+            /// <summary>spec/17: this hand's penalty total per seat (badges), the tile taken from the pile (YERDEN) and
+            /// whether only the deck is left after putting it back.</summary>
+            public int[] Penalties = new int[4];
+            public int PickedTile = -1;
+            public bool DeckOnly, ShowPutBack;
+        }
+
+        /// <summary>Message kinds (spec/17 §5, T40). Opponent events never queue: they are avatar balloons.</summary>
+        public enum ToastKind { Penalty, Info, Success, Warning, Error }
+
+        private sealed class Toast { public ToastKind Kind; public string Text, Sub; public int Amount; public float Duration, Until, ShownAt; public bool Sticky; }
+        private sealed class BalloonInfo { public string Text; public bool Danger; public float Until, ShownAt; }
+        private readonly List<Toast> toasts = new List<Toast>();
+        private readonly Dictionary<int, BalloonInfo> balloons = new Dictionary<int, BalloonInfo>();
+        private readonly int[] shownPenalty = new int[4];
+        private readonly float[] penaltyChangedAt = { -10, -10, -10, -10 };
+        private VisualElement toastLayer;
+
+        /// <summary>World position of a tile view (the board's), for labels that follow a tile.</summary>
+        public Func<int, Vector3?> TilePosition;
+
+        /// <summary>Front message text (tests, diagnostics).</summary>
+        public string ActiveToast => toasts.Count > 0 ? toasts[0].Text : null;
+
+        /// <summary>
+        /// Queue a message (§5): one shows at a time, the next waits smaller behind it with a "+n" count; penalties and
+        /// errors jump the queue; the same text again restarts its time. Sticky messages stay until dismissed.
+        /// </summary>
+        public void Post(ToastKind kind, string text, string sub = null, int amount = 0, bool sticky = false)
+        {
+            float duration = kind == ToastKind.Penalty || kind == ToastKind.Warning ? 3.5f : kind == ToastKind.Error ? 3f : kind == ToastKind.Info ? 2.5f : 2f;
+            float now = Time.realtimeSinceStartup;
+            var same = toasts.Find(t => t.Text == text);
+            if (same != null) { same.Until = now + same.Duration; same.ShownAt = now; RenderToasts(); return; }
+            var toast = new Toast { Kind = kind, Text = text, Sub = sub, Amount = amount, Duration = duration, Sticky = sticky };
+            if (kind == ToastKind.Penalty || kind == ToastKind.Error) toasts.Insert(0, toast); else toasts.Add(toast);
+            if (toasts[0] == toast || toasts.Count == 1) { toast.Until = now + duration; toast.ShownAt = now; }
+            RenderToasts();
+        }
+
+        public void Dismiss(string text)
+        {
+            int index = toasts.FindIndex(t => t.Text == text); if (index < 0) return;
+            toasts.RemoveAt(index); if (index == 0 && toasts.Count > 0) { toasts[0].Until = Time.realtimeSinceStartup + toasts[0].Duration; toasts[0].ShownAt = Time.realtimeSinceStartup; }
+            RenderToasts();
+        }
+
+        /// <summary>Avatar balloon (2.5 s): white for events, danger gradient for an opponent's penalty.</summary>
+        public void Balloon(int seat, string text, bool danger)
+        {
+            float now = Time.realtimeSinceStartup;
+            balloons[seat] = new BalloonInfo { Text = text, Danger = danger, Until = now + 2.5f, ShownAt = now };
+            if (view != null) Render(Current);
+        }
+
+        private void Update()
+        {
+            if (view == null) return;
+            float now = Time.realtimeSinceStartup; bool dirty = false;
+            if (toasts.Count > 0 && !toasts[0].Sticky && now > toasts[0].Until)
+            {
+                toasts.RemoveAt(0);
+                if (toasts.Count > 0) { toasts[0].Until = now + toasts[0].Duration; toasts[0].ShownAt = now; }
+                RenderToasts();
+            }
+            foreach (var seat in new List<int>(balloons.Keys)) if (now > balloons[seat].Until) { balloons.Remove(seat); dirty = true; }
+            if (dirty) Render(Current);
         }
 
         /// <summary>Finish banner (spec/10 §7–§8): seat −1 = no avatar (TAŞ BİTTİ).</summary>
@@ -57,6 +123,9 @@ namespace Galaxy101.Table
 
         /// <summary>HUD buttons: exit, settings, chat, gift, sort-run, sort-pair, open, pairs.</summary>
         public event Action<string> Command;
+
+        /// <summary>Act as if a HUD button with this command was pressed (keyboard shortcuts, tests).</summary>
+        public void Press(string command) => Command?.Invoke(command);
 
         [SerializeField] private TableScene table;
 
@@ -119,6 +188,7 @@ namespace Galaxy101.Table
             var shade = Layer("table-top-shade"); shade.style.bottom = StyleKeyword.Auto; shade.style.height = 120; canvas.Add(shade);
             view.Decorate(shade, "linear-gradient(rgba(3,5,14,.78) 0%,rgba(3,5,14,.5) 45%,transparent)");
             hudLayer = Layer("table-hud"); canvas.Add(hudLayer);
+            toastLayer = Layer("table-toasts"); canvas.Add(toastLayer);
 
             turnStarted = Time.realtimeSinceStartup;
             Render(Current);
@@ -154,7 +224,9 @@ namespace Galaxy101.Table
             var cam = table.CameraRig.Camera;
             foreach (var pair in anchors)
             {
-                var vp = cam.WorldToViewportPoint(table.AnchorWorld(pair.Key));
+                Vector3? world = dynamicAnchors.TryGetValue(pair.Key, out var follow) ? follow() : table.AnchorWorld(pair.Key);
+                if (!world.HasValue) { pair.Value.style.visibility = Visibility.Hidden; continue; }
+                var vp = cam.WorldToViewportPoint(world.Value);
                 float x = vp.x * Width, y = (1 - vp.y) * Height;
                 // clampA(): avatars stay inside the HUD-free band.
                 if (pair.Key[0] == 'a') { x = Mathf.Clamp(x, 84, Width - 84); y = Mathf.Clamp(y, 150, Height - 140); }
@@ -171,7 +243,7 @@ namespace Galaxy101.Table
         {
             Current = state ?? throw new ArgumentNullException(nameof(state));
             if (view == null) return; // rendered once Initialize runs
-            motions.Clear(); anchors.Clear(); anchorLayer.Clear(); hudLayer.Clear();
+            motions.Clear(); anchors.Clear(); dynamicAnchors.Clear(); anchorLayer.Clear(); hudLayer.Clear();
             for (int k = 1; k <= 3; k++) BuildOpponent(k, state);
             bool myTurn = state.Active == 0;
             if (myTurn && state.Phase == "discard" && state.TurnHint) BuildDiscardLabel();
@@ -185,8 +257,17 @@ namespace Galaxy101.Table
             if (state.Moment != null) BuildMoment(state.Moment);
             if (state.Result != null) BuildResult(state.Result);
             if (state.ExitOpen) BuildExit();
+            BuildPickedTile(state);
             ApplyGaps(hudLayer); ApplyGaps(anchorLayer);
+            RenderToasts();
             LateUpdate();
+        }
+
+        private readonly Dictionary<string, Func<Vector3?>> dynamicAnchors = new Dictionary<string, Func<Vector3?>>();
+
+        private VisualElement Anchor(string key, Func<Vector3?> world)
+        {
+            var anchor = Anchor(key); dynamicAnchors[key] = world; return anchor;
         }
 
         private VisualElement Anchor(string key)
@@ -210,6 +291,8 @@ namespace Galaxy101.Table
             if (!s.Seated[k]) { BuildEmptySeat(column, k); return; }
             var avatar = Avatar(Seat(k), 62, k == s.Active && s.Phase == "opp", 4, false);
             avatar.name = "opponent-" + k; column.Add(avatar);
+            PenaltyBadge(avatar, k, s, false);
+            if (balloons.TryGetValue(k, out var balloon)) column.Add(BalloonElement(k, balloon));
             var plate = new VisualElement { pickingMode = PickingMode.Ignore }; plate.style.marginTop = 6; plate.style.alignItems = Align.Center;
             Pad(plate, 4, 12, 5, 12); view.Decorate(plate, "rgba(5,8,22,.66)", 12); Border(plate, 1, new Color(1, 1, 1, .08f)); GalaxyFilters.BackdropBlur(plate, 6);
             plate.Add(Text((string)Seat(k)["name"], "Montserrat-700", 14, "#F4F1E8"));
@@ -503,8 +586,10 @@ namespace Galaxy101.Table
         private void BuildToast(State s)
         {
             string text = null, bg = null, fg = null;
-            if (s.Phase == "deal") { text = L("Taşlar dağıtılıyor…", "Dealing tiles…"); bg = "rgba(5,8,22,.75)"; fg = "var(--ic)"; }
-            else if (s.Phase == "fin" && s.ResultLine != null) { text = s.ResultLine; bg = "linear-gradient(var(--a1),var(--a2))"; fg = "var(--aT)"; }
+            if (toasts.Count > 0) return;
+            if (s.Phase == "draw" && s.Active == 0 && s.DeckOnly) { text = TableStrings.Get("drawDeckOnly", Lang); bg = "linear-gradient(var(--a1),var(--a2))"; fg = "var(--aT)"; }
+            else if (s.Phase == "discard" && s.Active == 0 && s.ShowPutBack) { text = TableStrings.Get("putBackHint", Lang); bg = "rgba(5,8,22,.75)"; fg = "var(--ic)"; }
+            else if (s.Phase == "deal") { text = L("Taşlar dağıtılıyor…", "Dealing tiles…"); bg = "rgba(5,8,22,.75)"; fg = "var(--ic)"; }
             else if (s.Phase == "draw" && s.Active == 0) { string n = FirstName(3); text = L("Sıra sende · desteden ya da " + n + "'ın taşından çek", "Your turn · draw from the deck or " + n + "'s tile"); bg = "linear-gradient(var(--a1),var(--a2))"; fg = "var(--aT)"; }
             else if (s.Phase == "discard" && s.Active == 0)
             {
@@ -514,8 +599,6 @@ namespace Galaxy101.Table
             else if (s.Active > 0) { string n = FirstName(s.Active); text = L(n + " oynuyor…", n + " is playing…"); bg = "rgba(5,8,22,.75)"; fg = "var(--ic)"; }
             if (!s.TurnHint && s.Phase != "deal" && s.Phase != "fin") text = null;
             // Overrides: the time warning, then one-off messages (rule hints and refusals).
-            if (s.Warn && s.Active == 0 && s.Phase != "fin") { text = L("Süren bitiyor!", "Time is running out!"); bg = "linear-gradient(#FF7A86,#E8455A)"; fg = "#fff"; }
-            if (s.Flash != null) { text = s.Flash; bg = s.FlashBad ? "linear-gradient(#FF7A86,#E8455A)" : "#3CCB6E"; fg = s.FlashBad ? "#fff" : "#062B14"; }
             if (text == null) return;
 
             var row = new VisualElement { name = "table-toast-row", pickingMode = PickingMode.Ignore };
@@ -529,12 +612,125 @@ namespace Galaxy101.Table
             row.Add(toast); hudLayer.Add(row);
         }
 
+        private string Lang => loc != null ? loc.Language : "tr";
+
+        // ---------- messages (spec/17 §5) ----------
+        private void RenderToasts()
+        {
+            if (toastLayer == null) return;
+            toastLayer.Clear();
+            if (toasts.Count > 1) toastLayer.Add(ToastElement(toasts[1], true, 0));
+            if (toasts.Count > 0) toastLayer.Add(ToastElement(toasts[0], false, toasts.Count - 1));
+            if (hudLayer != null && view != null) { var band = hudLayer.Q<VisualElement>("table-toast-row"); if (band != null) band.style.display = toasts.Count > 0 ? DisplayStyle.None : DisplayStyle.Flex; }
+        }
+
+        private VisualElement ToastElement(Toast t, bool behind, int waiting)
+        {
+            var row = FullRow(behind ? 46 : 16); row.name = behind ? "table-message-next" : "table-message-row";
+            string bg, fg, iconBg, iconFg, glyph;
+            switch (t.Kind)
+            {
+                case ToastKind.Penalty: bg = "linear-gradient(#3A0A14,#22060B)"; fg = "#FFFFFF"; iconBg = "#FF5E6C"; iconFg = "#fff"; glyph = "!"; break;
+                case ToastKind.Success: bg = "linear-gradient(#6BE8B0,#2FBF7E)"; fg = "#06301C"; iconBg = "rgba(0,0,0,.18)"; iconFg = "#06301C"; glyph = "tick"; break;
+                case ToastKind.Warning: bg = "rgba(5,8,22,.82)"; fg = "#FFB13D"; iconBg = "#FFB13D"; iconFg = "#3A2604"; glyph = "!"; break;
+                case ToastKind.Error: bg = "linear-gradient(#FF7A86,#E8455A)"; fg = "#FFFFFF"; iconBg = "rgba(0,0,0,.2)"; iconFg = "#fff"; glyph = "close"; break;
+                default: bg = "rgba(5,8,22,.82)"; fg = "#F4F1E8"; iconBg = "var(--a1)"; iconFg = "var(--aT)"; glyph = "i"; break;
+            }
+            var toast = Row(10); toast.name = behind ? "table-message-behind" : "table-message"; Pad(toast, 8, t.Amount > 0 ? 8 : 18, 8, 9);
+            view.Decorate(toast, bg, 24); GalaxyFilters.Shadow(toast, 0, 8, 12, new Color(0, 0, 0, .35f));
+            if (t.Kind == ToastKind.Penalty) Border(toast, 2, view.C("#FF5E6C"));
+            else if (t.Kind == ToastKind.Warning) Border(toast, 2, view.C("#FFB13D"));
+            else if (t.Kind == ToastKind.Info) Border(toast, 1, new Color(1, 1, 1, .12f));
+            var icon = new VisualElement { pickingMode = PickingMode.Ignore }; icon.style.width = icon.style.height = 24; icon.style.alignItems = Align.Center; icon.style.justifyContent = Justify.Center;
+            view.Decorate(icon, iconBg, 12);
+            if (glyph == "tick" || glyph == "close") icon.Add(view.Icon(glyph, 14, iconFg)); else icon.Add(Text(glyph, "Montserrat-800", 14, iconFg));
+            toast.Add(icon);
+            var texts = new VisualElement { pickingMode = PickingMode.Ignore };
+            texts.Add(Text(t.Text, "Baloo2-800", 14, fg));
+            if (!string.IsNullOrEmpty(t.Sub)) { var sub = Text(t.Sub, "Baloo2-700", 11, t.Kind == ToastKind.Penalty ? "#FF8A95" : fg); sub.style.marginTop = -2; texts.Add(sub); }
+            toast.Add(texts);
+            if (t.Amount > 0) toast.Add(AmountPill("+" + view.N(t.Amount), 14));
+            if (!behind && waiting > 0)
+            {
+                var count = Text("+" + waiting, "Montserrat-800", 11, "var(--aT)"); count.name = "table-message-count"; count.style.position = Position.Absolute; count.style.top = -8; count.style.right = -8;
+                Pad(count, 1, 6, 1, 6); view.Decorate(count, "var(--a1)", 9); toast.Add(count);
+            }
+            if (behind) { toast.style.scale = new Scale(Vector2.one * .88f); toast.style.opacity = .6f; }
+            else
+            {
+                float began = t.ShownAt; bool shake = t.Kind == ToastKind.Error;
+                // toastIn .3s (y −14 → 0); errors shake ±6 px twice.
+                motions.Add(now =>
+                {
+                    float u = Mathf.Clamp01((now - began) / .3f);
+                    float dx = shake && now - began < .4f ? Mathf.Sin((now - began) / .4f * Mathf.PI * 4) * 6 : 0;
+                    toast.style.translate = new Translate(dx, -14 * (1 - TableConstants.EaseOutCubic(u))); toast.style.opacity = u;
+                });
+            }
+            row.Add(toast); return row;
+        }
+
+        /// <summary>Penalty pill (tehlike degradesi, Montserrat 800, hard #9E1F33 shadow).</summary>
+        private VisualElement AmountPill(string text, int size)
+        {
+            var pill = Text(text, "Montserrat-800", size, "#fff"); Pad(pill, 2, 9, 2, 9);
+            view.Decorate(pill, "linear-gradient(#FF7A86,#E8455A)", 12, 3, "#9E1F33"); return pill;
+        }
+
+        /// <summary>This hand's penalty total on the avatar (me: top centre, opponents: top right), popping when it changes.</summary>
+        private void PenaltyBadge(VisualElement avatar, int seat, State s, bool me)
+        {
+            int amount = s.Penalties != null && seat < s.Penalties.Length ? s.Penalties[seat] : 0;
+            if (amount != shownPenalty[seat]) { shownPenalty[seat] = amount; penaltyChangedAt[seat] = Time.realtimeSinceStartup; }
+            if (amount <= 0) return;
+            var pill = AmountPill("+" + view.N(amount), 12); pill.name = "penalty-badge-" + seat; pill.style.position = Position.Absolute;
+            if (me) { pill.style.top = -14; pill.style.left = 0; pill.style.right = 0; pill.style.alignSelf = Align.Center; pill.style.unityTextAlign = TextAnchor.MiddleCenter; pill.style.marginLeft = pill.style.marginRight = 14; }
+            else { pill.style.top = -8; pill.style.right = -22; }
+            float began = penaltyChangedAt[seat];
+            motions.Add(t => { float u = Mathf.Clamp01((t - began) / .5f); float k = u < .6f ? Mathf.Lerp(0, 1.1f, TableConstants.EaseOutCubic(u / .6f)) : Mathf.Lerp(1.1f, 1, (u - .6f) / .4f); pill.style.scale = new Scale(Vector2.one * k); });
+            avatar.Add(pill);
+        }
+
+        private VisualElement BalloonElement(int seat, BalloonInfo b)
+        {
+            var bubble = Text(b.Text, "Baloo2-800", 13, b.Danger ? "#fff" : "#14183A"); bubble.name = "balloon-" + seat;
+            bubble.style.position = Position.Absolute; bubble.style.bottom = Length.Percent(100); bubble.style.marginBottom = 6; Pad(bubble, 7, 13, 7, 13);
+            view.Decorate(bubble, b.Danger ? "linear-gradient(#FF7A86,#E8455A)" : "#fff", 14); GalaxyFilters.Shadow(bubble, 0, 6, 9, new Color(0, 0, 0, .35f));
+            float began = b.ShownAt;
+            // bubble 2.5s: appear 12 %, hold, rise and fade over the last 15 %.
+            motions.Add(t => { float u = Mathf.Clamp01((t - began) / 2.5f); bubble.style.opacity = u < .12f ? u / .12f : u > .85f ? (1 - u) / .15f : 1; bubble.style.translate = new Translate(0, u > .85f ? -10 * (u - .85f) / .15f : 0); });
+            return bubble;
+        }
+
+        /// <summary>Tile taken from the pile (T38–T39): YERDEN over it, and the emptied ring with GERİ BIRAK.</summary>
+        private void BuildPickedTile(State s)
+        {
+            if (s.PickedTile < 0 || TilePosition == null) return;
+            int id = s.PickedTile;
+            var tag = Anchor("picked", () => TilePosition(id));
+            var frame = new VisualElement { name = "picked-frame", pickingMode = PickingMode.Ignore }; MenuView.Place(frame, -26, -36, 52, 72);
+            Border(frame, 3, view.C("var(--a1)")); frame.style.borderTopLeftRadius = frame.style.borderTopRightRadius = frame.style.borderBottomLeftRadius = frame.style.borderBottomRightRadius = 8;
+            tag.Add(frame);
+            var label = Text(TableStrings.Get("pileTag", Lang), "Baloo2-800", 9, "var(--aT)"); MenuView.Tracking(label, 1.2f, 9); label.name = "picked-tag";
+            Pad(label, 2, 7, 2, 7); view.Decorate(label, "var(--a1)", 6);
+            Centered(tag, -56, false).Add(label);
+            if (!s.ShowPutBack) return;
+            var ring = Anchor("putback");
+            var box = Centered(ring); box.style.alignItems = Align.Center;
+            var put = Text(TableStrings.Get("putBack", Lang), "Baloo2-800", 9, "var(--aT)"); MenuView.Tracking(put, 1.2f, 9); put.name = "putback-label";
+            Pad(put, 3, 8, 3, 8); view.Decorate(put, "var(--a1)", 7, 3, "var(--aS)"); box.Add(put);
+            var circle = new VisualElement { name = "putback-ring", pickingMode = PickingMode.Position }; circle.style.width = circle.style.height = 74; circle.style.marginTop = 6;
+            var dashed = new CssDashedCircle(74, 2, view.C("var(--a1)")); MenuView.Place(dashed, 0, 0, 74, 74); circle.Add(dashed);
+            box.Add(Clickable(circle, "putback"));
+        }
+
         // ---------- my panel ----------
         private void BuildMe(State s)
         {
             var panel = Row(12); panel.name = "table-me"; panel.style.position = Position.Absolute; panel.style.left = 18; panel.style.bottom = 16;
             bool active = s.Active == 0 && (s.Phase == "draw" || s.Phase == "discard");
-            panel.Add(Avatar(Seat(0), 74, active, s.TurnSeconds, s.Warn));
+            var me = Avatar(Seat(0), 74, active, s.TurnSeconds, s.Warn); panel.Add(me);
+            PenaltyBadge(me, 0, s, true);
             var column = new VisualElement { pickingMode = PickingMode.Ignore };
             column.Add(Text((string)Seat(0)["name"], "Montserrat-700", 16, "#F4F1E8"));
             var status = Text(Status(0, s, true), "Baloo2-800", 12, s.Opened[0] > 0 ? "#8EF0B0" : "var(--mt)"); status.style.marginTop = 1; column.Add(status);
@@ -613,7 +809,7 @@ namespace Galaxy101.Table
             view.Decorate(meter, "rgba(5,8,22,.62)", 22); Border(meter, 1, new Color(1, 1, 1, .08f)); GalaxyFilters.BackdropBlur(meter, 6);
             var gauge = new VisualElement { pickingMode = PickingMode.Ignore }; gauge.style.width = gauge.style.height = 62;
             bool opened = s.Opened[0] > 0;
-            var arc = new ArcRing(view.C(s.OpenSum >= 101 ? "#3CCB6E" : "var(--a1)"), new Color(1, 1, 1, .1f)) { Fraction = Mathf.Min(100, Mathf.Round(s.OpenSum / 101f * 100)) / 100f };
+            var arc = new ArcRing(view.C(s.OpenSum >= 101 || opened ? "#3CCB6E" : "#FF5E6C"), new Color(1, 1, 1, .1f)) { Fraction = Mathf.Min(100, Mathf.Round(s.OpenSum / 101f * 100)) / 100f };
             MenuView.Place(arc, 0, 0, 62, 62); gauge.Add(arc);
             var dial = new VisualElement { pickingMode = PickingMode.Ignore }; MenuView.Place(dial, 6, 6, 50, 50); dial.style.alignItems = Align.Center; dial.style.justifyContent = Justify.Center;
             view.Decorate(dial, "var(--dp)", 25);

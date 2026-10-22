@@ -23,9 +23,13 @@ namespace Galaxy101.Table.EditorTools
             var catalog = TableAssetCatalog.Load();
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             Directory.CreateDirectory(Folder);
+            // three.js (physically correct lights) divides Lambert by π; URP does not, so the reference intensities are scaled by 1/π.
+            const float ToUrp = 1 / Mathf.PI;
             RenderSettings.ambientMode = AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = Color.white * 1.1f; RenderSettings.ambientEquatorColor = Color.Lerp(Color.white, Hex("#30344a"), .5f) * 1.1f; RenderSettings.ambientGroundColor = Hex("#30344a") * 1.1f;
-            var key = new GameObject("key").AddComponent<Light>(); key.type = LightType.Directional; key.color = Hex("#fff4e2"); key.intensity = 2.4f;
+            // The studio environment (buildEnv, intensity 0.9) adds diffuse light of its own: the hemisphere is doubled for it.
+            const float Hemi = 1.1f * ToUrp * 2;
+            RenderSettings.ambientSkyColor = Color.white * Hemi; RenderSettings.ambientEquatorColor = Color.Lerp(Color.white, Hex("#30344a"), .5f) * Hemi; RenderSettings.ambientGroundColor = Hex("#30344a") * Hemi;
+            var key = new GameObject("key").AddComponent<Light>(); key.type = LightType.Directional; key.color = Hex("#fff4e2"); key.intensity = 2.4f * ToUrp;
             key.transform.rotation = Quaternion.LookRotation(-ThreeSpace.ToUnity(new Vector3(1, 2, 1.6f)).normalized);
             var cam = new GameObject("thumb camera").AddComponent<Camera>();
             cam.fieldOfView = 30; cam.nearClipPlane = 0.01f; cam.farClipPlane = 10; cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = Color.clear; cam.allowHDR = false;

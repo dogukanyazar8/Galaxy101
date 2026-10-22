@@ -75,7 +75,7 @@ namespace Galaxy101.Tests
             {
                 if (string.IsNullOrEmpty(label.text) || label.resolvedStyle.display == DisplayStyle.None || label.resolvedStyle.visibility == Visibility.Hidden || label.resolvedStyle.opacity <= 0.01f) return;
                 ScrollView scroll = null;
-                for (var e = label.parent; e != null && e != canvas; e = e.parent) { if (e.resolvedStyle.display == DisplayStyle.None || e.name == "table-anchors") return; if (e is ScrollView sv && scroll == null) scroll = sv; }
+                for (var e = label.parent; e != null && e != canvas; e = e.parent) { if (e.resolvedStyle.display == DisplayStyle.None || e.name == "table-anchors") return; if (e is ScrollView sv && scroll == null) scroll = sv; if (e.parent != null && e.parent.name == "table-social" && e.resolvedStyle.translate != Vector3.zero) return; if (e.name == "table-gifts" && e.resolvedStyle.translate.x != 0) return; }
                 var r = label.worldBound;
                 // Inside a scroll list only the horizontal extent counts: rows below the fold are clipped, not overflowing.
                 var box = scroll != null ? scroll.worldBound : bounds;
@@ -614,12 +614,13 @@ namespace Galaxy101.Tests
             Assert.That(game.Rack.Tiles.Any(id => game.Board.ViewOf(id).Valid), Is.False, "no green bars once highlighting is off");
 
             // Language: the whole table switches, the window stays open.
+            string startLang = hud.Settings.Text("lang");
             Click(root, "setting-lang-en"); yield return null;
             Assert.That(hud.Settings.Text("lang"), Is.EqualTo("en"));
             Assert.That(root.Query<Label>().ToList().Any(l => l.text == "Table settings"), Is.True, "the window speaks English");
             Assert.That(root.Q<Label>("deck-count").parent.Query<Label>().ToList().Any(l => l.text == "Deck"), Is.True, "the top bar speaks English");
             yield return null; AssertNoOverflow(root, "settings · game (en)");
-            Click(root, "setting-lang-tr"); yield return null;
+            Click(root, "setting-lang-" + startLang); yield return null;
 
             // T17: Ses — sliders keep the value, toggles flip.
             hud.Press("settings-tab:1"); yield return null;
@@ -687,6 +688,7 @@ namespace Galaxy101.Tests
         {
             var game = Build(TableGame.Me, 8080, true);
             game.Configure(TableGame.Me, 8080, 90, false);
+            game.DemoGifts = false; // the demo treats would interleave with the chat lines checked below
             string dir = Environment.GetEnvironmentVariable("GALAXY_TABLE_SOCIAL_CAPTURE_DIR");
             var hud = hudOwner.GetComponent<TableHud>(); var document = hudOwner.GetComponent<UIDocument>(); var root = hud.Canvas;
             hud.SocialRandom = new System.Random(4);
@@ -701,14 +703,14 @@ namespace Galaxy101.Tests
             Assert.That(root.Q<VisualElement>("player-card-1"), Is.Not.Null);
             Click(root, "card-add-friend"); yield return null;
             Assert.That(hud.FriendRequested(1), Is.True);
-            Assert.That(root.Q<Label>("card-add-friend").text, Is.EqualTo("İstek gönderildi"));
+            Assert.That(root.Q<Label>("card-add-friend").text, Is.EqualTo(TableStrings.Get("friendSent", hud.L("tr", "en"))));
             if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "social_card.png"));
             yield return null; AssertNoOverflow(root, "player card");
             var card = root.Q<VisualElement>("player-card-1").worldBound; var avatar = root.Q<VisualElement>("opponent-1").worldBound;
             Assert.That(card.xMax, Is.LessThan(avatar.xMin), "the right seat's card opens to the left of the avatar");
             Click(root, "card-gift-tea"); yield return null;
             Assert.That(hud.Window, Is.Null, "a quick treat closes the card");
-            Assert.That(hud.Chat.Last().Seat, Is.EqualTo(-1)); Assert.That(hud.Chat.Last().Text, Is.EqualTo("Sen, Zeynep için çay ısmarladın"));
+            Assert.That(hud.Chat.Last().Seat, Is.EqualTo(-1)); Assert.That(hud.Chat.Last().Text, Is.EqualTo(hud.L("Sen, Zeynep için çay ısmarladın", "You sent Zeynep tea")));
             Assert.That(sent, Is.EqualTo(new[] { ("tea", 0, 1) }));
             yield return new WaitForSecondsRealtime(2.1f);
             Assert.That(hud.Chat.Last().Seat, Is.EqualTo(1), "Zeynep thanks me 1.9 s later");
@@ -722,7 +724,7 @@ namespace Galaxy101.Tests
             hud.Press("chat"); yield return null;
             Assert.That(hud.Window, Is.EqualTo("chat")); Assert.That(hud.Unread, Is.EqualTo(0));
             Click(root, "chat-quick-0"); yield return null;
-            Assert.That(hud.Chat.Last().Seat, Is.EqualTo(0)); Assert.That(hud.Chat.Last().Text, Is.EqualTo("Kolay gelsin"));
+            Assert.That(hud.Chat.Last().Seat, Is.EqualTo(0)); Assert.That(hud.Chat.Last().Text, Is.EqualTo(TableStrings.Get("quick.0", hud.L("tr", "en"))));
             Assert.That(root.Q<Label>("balloon-0"), Is.Not.Null, "my bubble next to my avatar");
             hud.BotReplyChance = 1;
             root.Q<TextField>("chat-input").value = new string('a', 79) + "bc";
@@ -740,10 +742,10 @@ namespace Galaxy101.Tests
             // T08–T10: the gift drawer: KİME, tabs, free items, Gönder.
             hud.Press("gift"); yield return null;
             Assert.That(hud.Window, Is.EqualTo("gift")); Assert.That(hud.GiftTarget, Is.EqualTo("2"), "Ayşe by default");
-            Assert.That(root.Q<Label>("gift-send").text, Is.EqualTo("Bir şey seç"));
+            Assert.That(root.Q<Label>("gift-send").text, Is.EqualTo(TableStrings.Get("pick", hud.L("tr", "en"))));
             Click(root, "gift-item-tea"); yield return null;
-            Assert.That(hud.GiftSelection, Is.EqualTo("tea")); Assert.That(root.Q<Label>("gift-send").text, Is.EqualTo("Gönder"), "free on a bot table");
-            Assert.That(root.Q<VisualElement>("table-gifts").Query<Label>().ToList().Any(l => l.text == "BAKİYE"), Is.False, "no balance row on a bot table");
+            Assert.That(hud.GiftSelection, Is.EqualTo("tea")); Assert.That(root.Q<Label>("gift-send").text, Is.EqualTo(TableStrings.Get("send", hud.L("tr", "en"))), "free on a bot table");
+            Assert.That(root.Q<VisualElement>("table-gifts").Query<Label>().ToList().Any(l => l.text == TableStrings.Get("balance", hud.L("tr", "en"))), Is.False, "no balance row on a bot table");
             if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "social_gift_treats.png"));
             yield return null; AssertNoOverflow(root, "gift drawer · treats");
             Click(root, "gift-tab-1"); yield return null;
@@ -756,7 +758,7 @@ namespace Galaxy101.Tests
             Assert.That(hud.Window, Is.Null);
             yield return new WaitForSecondsRealtime(.7f);
             Assert.That(sent.Select(x => x.To), Is.EqualTo(new[] { 1, 2, 3 }), "one cake per opponent, 180 ms apart");
-            Assert.That(hud.Chat.Last(l => l.Seat < 0).Text, Is.EqualTo("Sen herkese pasta gönderdin"));
+            Assert.That(hud.Chat.Last(l => l.Seat < 0).Text, Is.EqualTo(hud.L("Sen herkese pasta gönderdin", "You sent everyone a cake")));
             hud.Press("gift"); yield return null;
             Assert.That(hud.GiftTarget, Is.EqualTo("all"), "the drawer remembers the last recipient");
             Click(root, "gift-tab-2"); Click(root, "gift-to-3"); yield return null;
@@ -771,6 +773,77 @@ namespace Galaxy101.Tests
             hud.Say(2, "Bakalım bakalım"); yield return null;
             Assert.That(root.Query<Label>("balloon-2").ToList().Any(l => l.text == "Bakalım bakalım"), Is.False, "no chat bubble");
             Assert.That(hud.Chat.Last().Text, Is.EqualTo("Bakalım bakalım"));
+        }
+
+        [UnityTest]
+        [Timeout(300000)]
+        public IEnumerator GiftsFlyLandIdleAndLeaveWithTheHand()
+        {
+            var game = Build(TableGame.Me, 9090, true);
+            game.Configure(TableGame.Me, 9090, 90, false);
+            string dir = Environment.GetEnvironmentVariable("GALAXY_TABLE_GIFT_CAPTURE_DIR");
+            var hud = hudOwner.GetComponent<TableHud>(); var document = hudOwner.GetComponent<UIDocument>(); var root = hud.Canvas;
+            Time.timeScale = 3;
+            yield return Until(() => game.CanDiscard && game.SyncedVersion == game.Session.GetView(TableGame.Me).Version, 40, "my first turn");
+            Time.timeScale = 1;
+
+            // T06: Ayşe treats everyone to tea 1.8 s after the deal; mine lands and the notice card shows.
+            yield return Until(() => game.Gifts.Count(0) == 1 && game.Gifts.Count(1) == 1 && game.Gifts.Count(3) == 1, 6, "Ayşe's tea for everyone");
+            Assert.That(game.Gifts.Count(2), Is.EqualTo(0), "Ayşe does not treat herself");
+            Assert.That(hud.Chat.Any(l => l.Seat == 2 && l.Text == TableStrings.Get("quick.4", hud.L("tr", "en"))), Is.True);
+            Assert.That(hud.Chat.Any(l => l.Seat == -1 && l.Text == hud.L("Ayşe herkese çay ısmarladı", "Ayşe sent everyone tea")), Is.True);
+            Assert.That(game.Gifts.Flying, Is.GreaterThan(0), "the cups are still in the air");
+            yield return Until(() => hud.Notice != null, 3, "the received card");
+            Assert.That(root.Q<Label>("gift-notice-text").text, Is.EqualTo(hud.L("Ayşe sana çay ısmarladı", "Ayşe sent you tea")));
+            Assert.That(hud.Received, Is.EqualTo(new[] { "tea" }));
+            yield return new WaitForSecondsRealtime(1.2f);
+            Assert.That(game.Fx.LiveHaze, Is.GreaterThan(0), "tea steams while it stands");
+            if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "gift_notice.png"));
+            yield return null; AssertNoOverflow(root, "gift notice");
+            Click(root, "gift-notice-thanks"); yield return null;
+            Assert.That(hud.Notice, Is.Null);
+            Assert.That(hud.Chat.Last().Seat, Is.EqualTo(0)); Assert.That(hud.Chat.Last().Text, Is.EqualTo(TableStrings.Get("thanksMsg", hud.L("tr", "en"))));
+            yield return new WaitForSecondsRealtime(.45f);
+            Assert.That(hud.EmojiFlights, Is.EqualTo(1), "a 🙏 flies to Ayşe");
+            yield return new WaitForSecondsRealtime(1.8f);
+            Assert.That(hud.EmojiFlights, Is.EqualTo(0));
+
+            // T11–T12: my rocket for Zeynep tours the screen for 5.6 s with smoke, then lands with a shake.
+            hud.SendGift("rocket", "1"); yield return null;
+            Assert.That(hud.Chat.Last().Text, Is.EqualTo(hud.L("Sen, Zeynep için roket gönderdin", "You sent Zeynep a rocket")));
+            yield return new WaitForSecondsRealtime(2.4f);
+            Assert.That(game.Gifts.Flying, Is.EqualTo(1)); Assert.That(game.Fx.LiveHaze, Is.GreaterThan(10), "rocket smoke");
+            if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "gift_rocket.png"));
+            yield return Until(() => game.Gifts.Flying == 0, 6, "the rocket landing");
+            Assert.That(game.Gifts.Count(1), Is.EqualTo(2), "tea and rocket at Zeynep's corner");
+            yield return new WaitForSecondsRealtime(1.2f);
+            Assert.That(hud.Chat.Last().Seat, Is.EqualTo(1), "Zeynep thanks me 6.3 s after the rocket");
+            if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "gift_rocket_landed.png"));
+
+            // Three slots per seat: a fourth gift pushes the oldest out.
+            hud.SendGift("cake", "1"); hud.SendGift("flower", "1"); yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(game.Gifts.Count(1), Is.EqualTo(3));
+
+            // Emoji fly in the HUD layer; "Emoji efektleri" off hides them.
+            hud.SendEmoji("😂", "2"); yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(hud.EmojiFlights, Is.EqualTo(1));
+            hud.Settings.Set("emojiFx", false);
+            yield return new WaitForSecondsRealtime(1.8f);
+            hud.SendEmoji("😂", "2"); yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(hud.EmojiFlights, Is.EqualTo(0));
+
+            // "İkram bildirimleri" off: no card, the gift is still listed for the hand result.
+            hud.Settings.Set("giftNotif", false);
+            hud.BotGift(3, "simit", 0);
+            yield return new WaitForSecondsRealtime(1.6f);
+            Assert.That(hud.Notice, Is.Null); Assert.That(hud.Received, Is.EqualTo(new[] { "tea", "simit" }));
+
+            // A new hand clears the table (0.35 s shrink) and the received list.
+            game.Gifts.Clear(); hud.NewHand();
+            yield return new WaitForSecondsRealtime(.5f);
+            for (int k = 0; k < 4; k++) Assert.That(game.Gifts.Count(k), Is.EqualTo(0));
+            Assert.That(sceneOwner.GetComponentsInChildren<Transform>().Count(t => t.name.StartsWith("hediye_")), Is.EqualTo(0));
+            Assert.That(hud.Received, Is.Empty);
         }
 
         [UnityTest]

@@ -9,7 +9,10 @@ namespace Galaxy101.Table
 
         private Camera cam;
         private Vector3 fromPos, fromTarget, toPos, toTarget;
-        private float started, duration;
+        private float started, duration, shakeUntil;
+
+        /// <summary>Rocket landing: the camera jitters for <paramref name="seconds"/>, fading out (±(left·0.03) m).</summary>
+        public void Shake(float seconds) => shakeUntil = Time.time + seconds;
 
         public Camera Camera => cam;
         public View Current { get; private set; } = View.Player;
@@ -53,6 +56,7 @@ namespace Galaxy101.Table
             Evaluate(now, out var pos, out var target);
             // Breathing: x += sin(t·0.21)·0.006, y += sin(t·0.33)·0.004 (three space).
             pos.x += Mathf.Sin(now * 0.21f) * 0.006f; pos.y += Mathf.Sin(now * 0.33f) * 0.004f;
+            if (now < shakeUntil) { float k = (shakeUntil - now) * 0.03f; pos.x += (Random.value - 0.5f) * k; pos.y += (Random.value - 0.5f) * k; }
             var p = ThreeSpace.ToUnity(pos); var t = ThreeSpace.ToUnity(target);
             cam.transform.SetPositionAndRotation(p, Quaternion.LookRotation(t - p, Vector3.up));
             FitAspect();

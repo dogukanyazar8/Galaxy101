@@ -110,7 +110,124 @@ namespace Galaxy101.Table
         public void SendEmoji(string emoji, string target)
         {
             var seats = target == "all" ? new[] { 1, 2, 3 } : new[] { int.Parse(target) };
-            for (int i = 0; i < seats.Length; i++) { int to = seats[i]; After(i * .14f, () => GiftSent?.Invoke("e:" + emoji, 0, to)); }
+            for (int i = 0; i < seats.Length; i++) { int to = seats[i]; After(i * .14f, () => { FlyEmoji(0, to, emoji); GiftSent?.Invoke("e:" + emoji, 0, to); }); }
+        }
+
+        // ---------- received (T06) ----------
+        private readonly List<string> received = new List<string>();
+        private VisualElement socialLayer, notice;
+        private (string Kind, int From)? noticeInfo;
+        private float noticeUntil;
+
+        /// <summary>Treats that reached me this hand (listed on the hand result).</summary>
+        public IReadOnlyList<string> Received => received;
+        /// <summary>The open "SANA İKRAM VAR" card, if any: gift and sender.</summary>
+        public (string Kind, int From)? Notice => noticeInfo;
+        /// <summary>Emoji flights in the air (2D layer).</summary>
+        public int EmojiFlights { get; private set; }
+
+        /// <summary>New hand: gifts were cleared from the table, the received list starts again.</summary>
+        public void NewHand() { received.Clear(); CloseNotice(); }
+
+        /// <summary>A gift landed; mine are listed and, with "İkram bildirimleri" on, shown on the card for 5.2 s.</summary>
+        public void GiftLanded(string kind, int from, int to)
+        {
+            if (to != 0) return;
+            received.Add(kind);
+            if (Settings != null && !Settings.GiftNotices) return;
+            noticeInfo = (kind, from); noticeUntil = Time.realtimeSinceStartup + 5.2f;
+            BuildNotice();
+        }
+
+        /// <summary>"Teşekkür et": my bubble, then a 🙏 flies to the sender.</summary>
+        public void Thank()
+        {
+            if (noticeInfo == null) return;
+            int from = noticeInfo.Value.From; CloseNotice();
+            Say(0, S("thanksMsg"));
+            After(.3f, () => FlyEmoji(0, from, "🙏"));
+        }
+
+        private void CloseNotice() { noticeInfo = null; notice?.RemoveFromHierarchy(); notice = null; }
+
+        private void UpdateNotice() { if (noticeInfo != null && Time.realtimeSinceStartup > noticeUntil) CloseNotice(); }
+
+        /// <summary>T06: right 18, top 78 — picture, SANA İKRAM VAR, "Ayşe sana çay ısmarladı", Teşekkür et.</summary>
+        private void BuildNotice()
+        {
+            if (socialLayer == null || noticeInfo == null) return;
+            notice?.RemoveFromHierarchy();
+            var (kind, from) = noticeInfo.Value;
+            var card = Row(12); card.name = "gift-notice"; card.pickingMode = PickingMode.Position;
+            card.style.position = Position.Absolute; card.style.right = 18; card.style.top = 78; Pad(card, 8, 10, 8, 8);
+            view.Decorate(card, "var(--pn)", 20, 6, "var(--pnS)"); Border(card, 1, new Color(1, 1, 1, .1f)); GalaxyFilters.Shadow(card, 0, 18, 20, new Color(0, 0, 0, .5f));
+            var well = Box(); well.style.width = well.style.height = 56; well.style.alignItems = Align.Center; well.style.justifyContent = Justify.Center; view.Decorate(well, "var(--dp)", 14);
+            var img = Box(); img.style.width = img.style.height = 52; if (GiftThumb(kind) is Texture2D thumb) img.style.backgroundImage = thumb; well.Add(img); card.Add(well);
+            var words = Box(); words.style.maxWidth = 200; words.style.flexShrink = 1;
+            var cap = Text(S("recvTitle"), "Baloo2-800", 10, "var(--a1)"); MenuView.Tracking(cap, 1.4f, 10); words.Add(cap);
+            var line = Text(GiftSentence(from, 0, kind), "Montserrat-700", 14, "#F4F1E8"); line.name = "gift-notice-text"; line.style.whiteSpace = WhiteSpace.Normal; line.style.flexShrink = 1; line.style.marginTop = 2; words.Add(line);
+            card.Add(words);
+            var thanks = Text(S("thanks"), "Montserrat-700", 13, "var(--aT)"); thanks.name = "gift-notice-thanks"; Pad(thanks, 10, 14, 10, 14);
+            view.Decorate(thanks, "linear-gradient(var(--a1),var(--a2))", 13, 4, "var(--aS)"); Tap(thanks, Thank); card.Add(thanks);
+            ApplyGaps(card);
+            float began = Time.realtimeSinceStartup;
+            motions2.Add(t =>
+            {
+                float u = Mathf.Clamp01((t - began) / .35f), k = 1 + 2.70158f * Mathf.Pow(u - 1, 3) + 1.70158f * Mathf.Pow(u - 1, 2);
+                card.style.translate = new Translate(44 * (1 - k), 0); card.style.opacity = Mathf.Clamp01(u * 4);
+                return u < 1;
+            });
+            notice = card; socialLayer.Add(card);
+        }
+
+        // ---------- emoji flights (spec/12 §5) ----------
+        /// <summary>Animations on the social layer (notice, emoji); each returns false when finished.</summary>
+        private readonly List<Func<float, bool>> motions2 = new List<Func<float, bool>>();
+
+        /// <summary>Where a seat's avatar is on the 1280×720 canvas (the flight's start and end).</summary>
+        private Vector2 AvatarCanvasPoint(int seat)
+        {
+            VisualElement e = seat == 0 ? hudLayer.Q<VisualElement>("table-me")?.Children().FirstOrDefault() : anchorLayer.Q<VisualElement>("opponent-" + seat);
+            if (e == null) return new Vector2(Width / 2, Height / 2);
+            return canvas.WorldToLocal(e.worldBound.center);
+        }
+
+        /// <summary>1.7 s curved flight: over both avatars (−120 px), 0.4 → 1.3 (−10°) → 1.7 (+6°) → 1.35 → rises and fades.</summary>
+        public void FlyEmoji(int from, int to, string emoji)
+        {
+            if (socialLayer == null || Settings != null && !Settings.EmojiEffects) return;
+            Vector2 a = AvatarCanvasPoint(from), b = AvatarCanvasPoint(to), m = new Vector2((a.x + b.x) / 2, Mathf.Min(a.y, b.y) - 120);
+            var holder = Box("emoji-flight"); holder.style.position = Position.Absolute; holder.style.left = 0; holder.style.top = 0;
+            var label = EmojiLabel(emoji, 44); label.style.position = Position.Absolute; label.style.left = -28; label.style.top = -28; label.style.width = label.style.height = 56;
+            GalaxyFilters.Shadow(label, 0, 6, 5, new Color(0, 0, 0, .45f));
+            holder.Add(label); socialLayer.Add(holder); EmojiFlights++;
+            var keys = new[] { (0f, a, .4f, 0f, 0f), (.42f, m, 1.3f, -10f, 1f), (.7f, new Vector2(b.x, b.y - 18), 1.7f, 6f, 1f), (.82f, new Vector2(b.x, b.y - 26), 1.35f, 0f, 1f), (1f, new Vector2(b.x, b.y - 70), 1.1f, 0f, 0f) };
+            float began = Time.realtimeSinceStartup;
+            motions2.Add(t =>
+            {
+                float u = CubicBezier(.33f, .8f, .4f, 1, Mathf.Clamp01((t - began) / 1.7f));
+                int i = 0; while (i < keys.Length - 2 && u > keys[i + 1].Item1) i++;
+                var k0 = keys[i]; var k1 = keys[i + 1]; float f = Mathf.InverseLerp(k0.Item1, k1.Item1, u);
+                var p = Vector2.Lerp(k0.Item2, k1.Item2, f);
+                holder.style.translate = new Translate(p.x, p.y); holder.style.scale = new Scale(Vector2.one * Mathf.Lerp(k0.Item3, k1.Item3, f));
+                holder.style.rotate = new Rotate(Mathf.Lerp(k0.Item4, k1.Item4, f)); holder.style.opacity = Mathf.Lerp(k0.Item5, k1.Item5, f);
+                if (t - began < 1.7f) return true;
+                holder.RemoveFromHierarchy(); EmojiFlights--; return false;
+            });
+        }
+
+        /// <summary>CSS cubic-bezier(x1, y1, x2, y2) at time <paramref name="x"/> (Newton on x, then y).</summary>
+        private static float CubicBezier(float x1, float y1, float x2, float y2, float x)
+        {
+            float t = x;
+            for (int i = 0; i < 8; i++)
+            {
+                float cx = 3 * (1 - t) * (1 - t) * t * x1 + 3 * (1 - t) * t * t * x2 + t * t * t - x;
+                float dx = 3 * (1 - t) * (1 - t) * x1 + 6 * (1 - t) * t * (x2 - x1) + 3 * t * t * (1 - x2);
+                if (Mathf.Abs(cx) < 1e-4f || Mathf.Abs(dx) < 1e-5f) break;
+                t = Mathf.Clamp01(t - cx / dx);
+            }
+            return 3 * (1 - t) * (1 - t) * t * y1 + 3 * (1 - t) * t * t * y2 + t * t * t;
         }
 
         /// <summary>

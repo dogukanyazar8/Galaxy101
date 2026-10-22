@@ -41,6 +41,8 @@ namespace Galaxy101.Table
         public Vector3 Corner(int seat) => ThreeSpace.ToUnity(CornerThree(seat));
         public Vector3 AvatarPoint(int seat) => seat == 0 ? seatFrames[0].Pose(0, TY + 0.25f, 0.75f).UnityPosition : AnchorWorld("a" + seat);
         public Transform RackRoot(int seat) => rackInstances[seat].transform;
+        /// <summary>World position of seat-local three.js coordinates (poseIn(seatF[seat], x, y, z)).</summary>
+        public Vector3 SeatPoint(int seat, float x, float y, float z) => seatFrames[seat].Pose(x, y, z).UnityPosition;
         public string Planet => planet;
         public string TableSkin => tableSkin;
         public string RackSkin => rackSkin;

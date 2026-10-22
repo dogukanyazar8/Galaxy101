@@ -57,6 +57,8 @@ namespace Galaxy101.Table
         private void InitializeWindows(bool persist)
         {
             windowLayer = Layer("table-windows"); canvas.Add(windowLayer);
+            socialLayer = Layer("table-social"); canvas.Add(socialLayer);
+            canvas.schedule.Execute(() => { float now = Time.realtimeSinceStartup; for (int i = motions2.Count - 1; i >= 0; i--) if (!motions2[i](now)) motions2.RemoveAt(i); }).Every(16);
             Settings = new TableSettings(model, persist);
             ApplySceneSettings(null, 0);
             Settings.Changed += OnSettingChanged;
@@ -65,7 +67,7 @@ namespace Galaxy101.Table
         private void UpdateWindows()
         {
             if (Window != null && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) CloseWindow();
-            UpdateSocial();
+            UpdateSocial(); UpdateNotice();
         }
 
         /// <summary>Camera view and the three skins (T19–T22). The game reacts to the same event for its own state.</summary>

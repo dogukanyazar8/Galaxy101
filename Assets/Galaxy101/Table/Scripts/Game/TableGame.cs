@@ -38,6 +38,10 @@ namespace Galaxy101.Table
         public LocalSession Session { get; private set; }
         public TableBoard Board { get; private set; }
         public TableFx Fx { get; private set; }
+        public TableGifts Gifts { get; private set; }
+        /// <summary>spec/13 demo on the first hand: Ayşe treats everyone to tea, Zeynep sends me simit, Burak a rocket to Ayşe.</summary>
+        public bool DemoGifts = true;
+        private int myCommits;
         public RackGrid Rack { get; } = new RackGrid();
         public TileFace Indicator { get; private set; }
         public Phase Current { get; private set; } = Phase.Waiting;
@@ -117,6 +121,7 @@ namespace Galaxy101.Table
             Board = new TableBoard(table);
             Board.IsOkey = id => TileCatalog.IsRealJoker(new TileId(id), Indicator);
             Fx = table.gameObject.GetComponent<TableFx>() ?? table.gameObject.AddComponent<TableFx>(); Fx.Init(table); Board.Fx = Fx;
+            Gifts = table.gameObject.GetComponent<TableGifts>() ?? table.gameObject.AddComponent<TableGifts>(); Gifts.Init(table, Fx);
             Session = new LocalSession();
             life = new CancellationTokenSource();
             random = seed != 0 ? new System.Random((int)seed) : new System.Random();
@@ -124,6 +129,7 @@ namespace Galaxy101.Table
             {
                 hud.Command += OnHudCommand; hud.TilePosition = id => Board.ViewOf(id) is TileView v && v != null ? v.transform.position : (Vector3?)null;
                 hud.Initialize(); hud.Settings.Changed += OnSetting; ReadSettings();
+                hud.GiftSent += OnGiftSent; Gifts.Landed += hud.GiftLanded;
             }
             _ = Run(life.Token);
         }
@@ -139,7 +145,7 @@ namespace Galaxy101.Table
             life?.Cancel();
             foreach (var t in timers) t.Done.TrySetCanceled(); timers.Clear();
             humanDone?.TrySetCanceled();
-            if (hud != null) { hud.Command -= OnHudCommand; if (hud.Settings != null) hud.Settings.Changed -= OnSetting; }
+            if (hud != null) { hud.Command -= OnHudCommand; hud.GiftSent -= OnGiftSent; if (hud.Settings != null) hud.Settings.Changed -= OnSetting; }
             Board?.Clear();
             Session?.Dispose();
         }
@@ -182,7 +188,8 @@ namespace Galaxy101.Table
                     uint handSeed = seed != 0 ? seed + (uint)HandNumber : (uint)random.Next(1, int.MaxValue);
                     if (HandNumber == 0 && initialState != null) Session.Start(initialState);
                     else if (HandNumber == 0) Session.Start(handSeed, humanSeat == Me ? Me : (int?)null); else Session.StartNextRound(handSeed);
-                    HandNumber++; LastResult = null; staged.Clear(); LastDrawn = -1; pickedTile = -1; deckOnly = false;
+                    HandNumber++; LastResult = null; staged.Clear(); LastDrawn = -1; pickedTile = -1; deckOnly = false; myCommits = 0;
+                    Gifts.Clear(); hud?.NewHand(); // gifts stay until the hand ends
                     for (int k = 0; k < 4; k++) { handPenalties[k] = 0; penaltyReasons[k].Clear(); }
                     var view = Session.GetView(Me);
                     Indicator = TileCodes.IndicatorFace(view.Indicator);
@@ -193,6 +200,7 @@ namespace Galaxy101.Table
                     float landed = Board.Deal(BuildBoard(view), view.ActivePlayer); SyncedVersion = view.Version;
                     await Seconds(landed);
                     SyncBoard(); // a hand resumed mid-game also has melds and discards
+                    if (HandNumber == 1 && DemoGifts && hud != null) { string line = T("quick.4"); hud.After(1.8f, () => hud.BotGift(2, "tea", -1, line)); }
                     while (!token.IsCancellationRequested)
                     {
                         view = Session.GetView(Me);
@@ -542,7 +550,16 @@ namespace Galaxy101.Table
             var view = Session.GetView(Me);
             var plan = new TurnPlan(staged.ToArray(), new TileId(id), true);
             var receipt = await Execute(new CommitTurnCommand(Meta(view), plan));
-            if (receipt.Accepted) { Rack.Remove(id); AfterCommit(); return true; }
+            if (receipt.Accepted)
+            {
+                Rack.Remove(id); AfterCommit(); myCommits++;
+                if (HandNumber == 1 && DemoGifts && hud != null)
+                {
+                    if (myCommits == 2) hud.After(2.6f, () => hud.BotGift(1, "simit", Me));
+                    if (myCommits == 3) { string line = T("bot.5"); hud.After(1.2f, () => hud.BotGift(3, "rocket", 2, line)); }
+                }
+                return true;
+            }
             if (!explain) return false;
             switch (receipt.Error)
             {
@@ -830,6 +847,12 @@ namespace Galaxy101.Table
         }
 
         private string L(string tr, string en) => hud != null ? hud.L(tr, en) : tr;
+
+        /// <summary>A treat or gift leaves its sender (emoji fly in the HUD layer only).</summary>
+        private void OnGiftSent(string kind, int from, int to)
+        {
+            if (!kind.StartsWith("e:", StringComparison.Ordinal)) Gifts.Send(kind, from, to);
+        }
 
         // ---------- table settings (spec/13 §6): applied at once ----------
         private void ReadSettings()

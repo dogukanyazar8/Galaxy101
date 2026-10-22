@@ -20,7 +20,7 @@ namespace Galaxy101.Table
 
         private TableScene scene;
         private Texture2D glow;
-        private GlowPoints bursts, sparks;
+        private GlowPoints bursts, sparks, haze;
         private Mesh ringMesh, discMesh;
         private Material zoneMaterial, zoneFill, sideMaterial, deckGlowMaterial, holoMaterial;
         private Transform zone, zoneFillTransform, sideRing, deckGlow, holo, deckRoot;
@@ -36,13 +36,14 @@ namespace Galaxy101.Table
         public Transform DeckRoot => deckRoot;
         /// <summary>Live glow points and ring waves (tests, diagnostics).</summary>
         public int LivePoints => (bursts?.Count ?? 0) + (sparks?.Count ?? 0);
+        public int LiveHaze => haze?.Count ?? 0;
         public int LiveWaves => waves.Count;
         public float SpotIntensity => winSpot != null ? winSpot.intensity : 0;
         public bool DeckSpinning => Time.time - deckSpinT >= 0 && Time.time - deckSpinT <= 0.9f;
         public float DiscardRingAlpha => zoneMaterial != null ? zoneMaterial.GetColor("_BaseColor").a : 0;
         public float DeckGlowAlpha => deckGlowMaterial != null ? deckGlowMaterial.GetColor("_BaseColor").a : 0;
 
-        private static Color Hex(string hex) { ColorUtility.TryParseHtmlString(hex, out var c); return c; }
+        public static Color Hex(string hex) { ColorUtility.TryParseHtmlString(hex, out var c); return c; }
 
         public void Init(TableScene table)
         {
@@ -50,6 +51,7 @@ namespace Galaxy101.Table
             glow = GlowTexture();
             bursts = new GlowPoints(Points("Fx_Bursts"), 1.4f, false);
             sparks = new GlowPoints(Points("Fx_Sparks"), 0, true);
+            haze = new GlowPoints(Points("Fx_Duman", true), 0, false);
             ringMesh = Ring(0.85f, 1f, 56); discMesh = Disc(1f, 40);
             deckRoot = new GameObject("Deste").transform; deckRoot.SetParent(table.TilesRoot, false);
 
@@ -87,6 +89,19 @@ namespace Galaxy101.Table
                 var velocity = new Vector3(Mathf.Cos(a) * Mathf.Cos(e), Mathf.Sin(e) * 1.3f, Mathf.Sin(a) * Mathf.Cos(e)) * (speed * (0.5f + Random.value));
                 bursts.Emit(position, velocity, color, 0.022f, 0.9f);
             }
+        }
+
+        /// <summary>Rocket smoke: #C9D0E6, 1.3 s, rising 3 cm/s; 0.2 and 2 → 7 cm (the reference 0.32 / 13 cm turns into a solid band where the path passes close to the camera).</summary>
+        public void Smoke(Vector3 position)
+        {
+            var jitter = new Vector3(Random.value - 0.5f, Random.value - 0.5f, Random.value - 0.5f) * 0.02f;
+            haze.Emit(position + jitter, new Vector3(0, 0.03f, 0), new Color(0.788f, 0.816f, 0.902f, 0.2f), 0.02f, 1.3f, 0.07f, false);
+        }
+
+        /// <summary>Tea / coffee steam puff: white, 1.4 → 4.4 cm, rises 7.5 cm over a 3.1 s cycle at 0.2·sin(π·phase).</summary>
+        public void Steam(Vector3 position)
+        {
+            haze.Emit(position, new Vector3(0, 0.075f / 3.125f, 0), new Color(1, 1, 1, 0.2f), 0.014f, 3.125f, 0.044f, true);
         }
 
         public void SparkAt(Vector3 position, Color color)
@@ -156,7 +171,7 @@ namespace Galaxy101.Table
             if (scene == null) return;
             float now = Time.time, t = now;
             var cam = scene.CameraRig != null ? scene.CameraRig.Camera : null;
-            bursts.Step(Time.deltaTime, cam); sparks.Step(Time.deltaTime, cam);
+            bursts.Step(Time.deltaTime, cam); sparks.Step(Time.deltaTime, cam); haze.Step(Time.deltaTime, cam);
             for (int i = scheduled.Count - 1; i >= 0; i--) if (scheduled[i].At <= now) { var run = scheduled[i].Run; scheduled.RemoveAt(i); run(); }
             for (int i = waves.Count - 1; i >= 0; i--)
             {
@@ -217,11 +232,18 @@ namespace Galaxy101.Table
             SetAlpha(m, color, alpha); return m;
         }
 
-        private MeshFilter Points(string name)
+        private MeshFilter Points(string name, bool blended = false)
         {
             var go = new GameObject(name); go.transform.SetParent(transform, false);
             var filter = go.AddComponent<MeshFilter>(); var r = go.AddComponent<MeshRenderer>();
-            r.sharedMaterial = Additive(Color.white, 1, glow, true); r.shadowCastingMode = ShadowCastingMode.Off; r.receiveShadows = false;
+            var m = Additive(Color.white, 1, glow, true);
+            if (blended)
+            {
+                // Smoke and steam are "normal" sprites: alpha blended, coverage composited over the target's alpha.
+                m.name = "fx_duman"; m.SetFloat("_Blend", 0); m.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+                m.SetFloat("_SrcBlendAlpha", (float)BlendMode.One); m.SetFloat("_DstBlendAlpha", (float)BlendMode.OneMinusSrcAlpha);
+            }
+            r.sharedMaterial = m; r.shadowCastingMode = ShadowCastingMode.Off; r.receiveShadows = false;
             return filter;
         }
 
@@ -231,7 +253,7 @@ namespace Galaxy101.Table
         /// </summary>
         private sealed class GlowPoints
         {
-            private struct P { public Vector3 Pos, Vel; public Color Col; public float Size, Life, Age; }
+            private struct P { public Vector3 Pos, Vel; public Color Col; public float Size, SizeEnd, Life, Age; public bool Sine; }
             private readonly List<P> points = new List<P>(512);
             private readonly MeshFilter filter; private readonly Mesh mesh;
             private readonly float gravity; private readonly bool shrink;
@@ -245,9 +267,9 @@ namespace Galaxy101.Table
 
             public int Count => points.Count;
 
-            public void Emit(Vector3 pos, Vector3 vel, Color col, float size, float life)
+            public void Emit(Vector3 pos, Vector3 vel, Color col, float size, float life, float sizeEnd = -1, bool sine = false)
             {
-                if (points.Count < 2000) points.Add(new P { Pos = pos, Vel = vel, Col = col, Size = size, Life = life });
+                if (points.Count < 2000) points.Add(new P { Pos = pos, Vel = vel, Col = col, Size = size, SizeEnd = sizeEnd, Life = life, Sine = sine });
             }
 
             public void Step(float dt, Camera cam)
@@ -259,8 +281,9 @@ namespace Galaxy101.Table
                     var p = points[i]; p.Age += dt;
                     if (p.Age >= p.Life) { points.RemoveAt(i); continue; }
                     p.Vel.y -= gravity * dt; p.Pos += p.Vel * dt; points[i] = p;
-                    float u = p.Age / p.Life, half = p.Size * (shrink ? 1 - u * 0.6f : 1) * 0.5f;
-                    var col = p.Col; col.a *= 1 - u;
+                    float u = p.Age / p.Life, size = p.SizeEnd >= 0 ? Mathf.Lerp(p.Size, p.SizeEnd, p.Sine ? u : 1 - (1 - u) * (1 - u) * (1 - u)) : p.Size;
+                    float half = size * (shrink ? 1 - u * 0.6f : 1) * 0.5f;
+                    var col = p.Col; col.a *= p.Sine ? Mathf.Sin(Mathf.PI * u) : 1 - u;
                     int b = v.Count;
                     v.Add(p.Pos - right * half - up * half); v.Add(p.Pos - right * half + up * half); v.Add(p.Pos + right * half + up * half); v.Add(p.Pos + right * half - up * half);
                     c.Add(col); c.Add(col); c.Add(col); c.Add(col);

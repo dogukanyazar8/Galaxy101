@@ -536,7 +536,14 @@ namespace Galaxy101.Table
 
             var strip = Row(12); strip.style.marginTop = 14; strip.style.marginLeft = 30; strip.style.marginRight = 30; Pad(strip, 10, 14, 10, 14); view.Decorate(strip, "var(--dp)", 16);
             var gifts = Caption(L("ALDIĞIN İKRAMLAR", "TREATS RECEIVED")); strip.Add(gifts);
-            var none = Text(L("Bu elde ikram gelmedi", "No treats this hand"), "Baloo2-700", 13, "var(--mt)"); none.style.flexGrow = 1; none.style.flexShrink = 1; strip.Add(none);
+            if (received.Count == 0) { var none = Text(L("Bu elde ikram gelmedi", "No treats this hand"), "Baloo2-700", 13, "var(--mt)"); none.style.flexGrow = 1; none.style.flexShrink = 1; strip.Add(none); }
+            else
+            {
+                // spec/13 §3: the treats I received this hand, 38 px pictures.
+                var got = Row(6); got.name = "result-gifts"; got.style.flexGrow = 1; got.style.flexShrink = 1; got.style.overflow = Overflow.Hidden;
+                foreach (var kind in received) { var img = new VisualElement { pickingMode = PickingMode.Position, tooltip = GiftName(kind, false) }; img.style.width = img.style.height = 38; img.style.flexShrink = 0; if (GiftThumb(kind) is Texture2D thumb) img.style.backgroundImage = thumb; got.Add(img); }
+                strip.Add(got);
+            }
             strip.Add(Text(L("Toplam ", "Total ") + "+" + view.N(r.TotalXp) + " XP", "Baloo2-800", 13, "#6BE8B0"));
             card.Add(strip);
 

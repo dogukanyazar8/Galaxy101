@@ -60,6 +60,12 @@ namespace Galaxy101.Table.EditorTools
                 m.SetFloat("_SrcBlendAlpha", additive ? (float)BlendMode.Zero : (float)BlendMode.One); m.SetFloat("_DstBlendAlpha", additive ? (float)BlendMode.One : (float)BlendMode.OneMinusSrcAlpha);
                 m.EnableKeyword("_SURFACE_TYPE_TRANSPARENT"); m.renderQueue = (int)RenderQueue.Transparent;
                 m.SetOverrideTag("RenderType", "Transparent");
+                // three.js scales specular and reflections by the opacity too; URP's "Preserve Specular" would keep them at
+                // full strength and veil a 30 % glass (tea, cola) in white.
+                m.SetFloat("_BlendModePreserveSpecular", 0); m.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                // The reference lights glass with a dark studio box (buildEnv); Unity's default sky reflection would wash a
+                // thin glass out, so see-through surfaces keep their light highlights but skip the environment reflection.
+                if (!additive) { m.SetFloat("_EnvironmentReflections", 0); m.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF"); }
             }
             else { m.SetFloat("_Surface", 0); m.SetFloat("_ZWrite", 1); m.renderQueue = -1; m.SetOverrideTag("RenderType", "Opaque"); }
             if (Float(source, "_Cull", 2) == 0) m.SetFloat("_Cull", 0);
@@ -77,6 +83,8 @@ namespace Galaxy101.Table.EditorTools
                 var normal = Tex(source, "normalTexture");
                 if (normal != null) { m.SetTexture("_BumpMap", ExtractNormal(normal, folder + "/" + source.name + "_Normal.png")); m.SetFloat("_BumpScale", Float(source, "normalTexture_scale", 1)); m.EnableKeyword("_NORMALMAP"); }
                 var emissive = Get(source, "emissiveFactor", Color.black);
+                // Some glTFast shader variants (clearcoat liquids: tea, cola, syrup) drop emissiveFactor; read it from the GLB.
+                if (emissive.maxColorComponent <= 0 && GlbEmissive(source) is Color fromGlb) emissive = fromGlb;
                 var emissiveTex = Tex(source, "emissiveTexture");
                 if (emissive.maxColorComponent > 0 || emissiveTex != null)
                 {
@@ -96,6 +104,7 @@ namespace Galaxy101.Table.EditorTools
         }
 
         private static readonly Dictionary<string, Dictionary<string, float>> Strengths = new Dictionary<string, Dictionary<string, float>>();
+        private static readonly Dictionary<string, Dictionary<string, Color>> Emissives = new Dictionary<string, Dictionary<string, Color>>();
 
         /// <summary>KHR_materials_emissive_strength from the source GLB (glTFast keeps emissiveFactor within 0–1).</summary>
         private static float EmissiveStrength(Material source)
@@ -104,17 +113,26 @@ namespace Galaxy101.Table.EditorTools
             if (!path.EndsWith(".glb", StringComparison.OrdinalIgnoreCase)) return 1;
             if (!Strengths.TryGetValue(path, out var map))
             {
-                map = new Dictionary<string, float>();
+                map = new Dictionary<string, float>(); var emissives = new Dictionary<string, Color>();
                 var bytes = File.ReadAllBytes(path); int length = BitConverter.ToInt32(bytes, 12);
                 var json = Newtonsoft.Json.Linq.JObject.Parse(System.Text.Encoding.UTF8.GetString(bytes, 20, length));
                 foreach (var mat in json["materials"] ?? new Newtonsoft.Json.Linq.JArray())
                 {
                     var s = mat["extensions"]?["KHR_materials_emissive_strength"]?["emissiveStrength"];
                     if (s != null) map[(string)mat["name"]] = (float)s;
+                    if (mat["emissiveFactor"] is Newtonsoft.Json.Linq.JArray e && e.Count == 3) emissives[(string)mat["name"]] = new Color((float)e[0], (float)e[1], (float)e[2], 1);
                 }
-                Strengths[path] = map;
+                Strengths[path] = map; Emissives[path] = emissives;
             }
             return map.TryGetValue(source.name, out var value) ? value : 1;
+        }
+
+        /// <summary>emissiveFactor of the GLB material with the source's name, if it is not black.</summary>
+        private static Color? GlbEmissive(Material source)
+        {
+            EmissiveStrength(source);
+            string path = AssetDatabase.GetAssetPath(source);
+            return Emissives.TryGetValue(path, out var map) && map.TryGetValue(source.name, out var c) && c.maxColorComponent > 0 ? c : (Color?)null;
         }
 
         private static Color Get(Material m, string p, Color fallback) => m.HasProperty(p) ? m.GetColor(p) : fallback;

@@ -11,6 +11,10 @@ public static class Features
         services.AddSingleton<IAccountLifecycle, NoLiveState>();
         services.AddSingleton<Catalog>();
         services.AddScoped<DailyService>();
+        services.AddHttpClient(GooglePlayVerifier.HttpClientName, c => c.Timeout = TimeSpan.FromSeconds(10));
+        services.AddSingleton<GooglePlayVerifier>();
+        services.AddSingleton<AppleStoreVerifier>();
+        services.AddScoped<IStoreVerifier, StoreVerifier>();
         return services;
     }
 

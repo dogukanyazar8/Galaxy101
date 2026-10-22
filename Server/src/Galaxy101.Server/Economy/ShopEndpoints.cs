@@ -51,6 +51,50 @@ public static class ShopEndpoints
             }
             return Results.Ok(new PurchaseResponse { OfferId = skin.Id, Wallet = await ledger.DescribeAsync(me, ct) });
         });
+
+        // Real-money packs. The client calls this after the platform purchase succeeds and consumes the purchase
+        // (Unity IAP ConfirmPendingPurchase) only after a 2xx, so an unanswered call is retried and never lost.
+        shop.MapPost("/store-purchase", async (StorePurchaseRequest request, HttpContext http, GameDb db, Ledger ledger,
+            Catalog catalog, IStoreVerifier verifier, TimeProvider clock, ILogger<Catalog> log, CancellationToken ct) =>
+        {
+            var offer = catalog.ByProduct(request.ProductId ?? "");
+            if (offer is null) return Api.NotFound();
+            VerifiedPurchase? verified;
+            try { verified = await verifier.VerifyAsync(request.Platform ?? "", offer.StoreProductId, request.Receipt ?? "", ct); }
+            catch (StoreUnavailableException error)
+            {
+                log.LogWarning(error, "Store verification unavailable for {Platform}", request.Platform);
+                return Api.Error(ErrorCodes.StoreUnavailable, StatusCodes.Status503ServiceUnavailable);
+            }
+            if (verified is null) return Api.Error(ErrorCodes.ReceiptInvalid);
+
+            var me = http.User.AccountId();
+            var owner = await db.StorePurchases.Where(x => x.Platform == request.Platform && x.TransactionId == verified.TransactionId)
+                .Select(x => new { x.AccountId }).FirstOrDefaultAsync(ct);
+            if (owner is not null)
+                return owner.AccountId == me
+                    ? Results.Ok(new PurchaseResponse { OfferId = offer.Id, AlreadyProcessed = true, Wallet = await ledger.DescribeAsync(me, ct) })
+                    : Api.Conflict(ErrorCodes.ReceiptUsed);
+
+            await using var tx = await db.Database.BeginTransactionAsync(ct);
+            try
+            {
+                db.StorePurchases.Add(new StorePurchase
+                {
+                    Platform = request.Platform!, TransactionId = verified.TransactionId, AccountId = me,
+                    ProductId = offer.StoreProductId, OfferId = offer.Id, CreatedAt = clock.GetUtcNow(),
+                });
+                await db.SaveChangesAsync(ct);
+                await ledger.ApplyAsync(me, offer.Chips, offer.Gems, "store", $"store:{request.Platform}:{verified.TransactionId}", ct);
+                await tx.CommitAsync(ct);
+            }
+            catch (DbUpdateException error) when (error.IsUniqueViolation())
+            {
+                // The same receipt raced in on another request; whichever committed first granted it.
+                return Api.Conflict(ErrorCodes.ReceiptUsed);
+            }
+            return Results.Ok(new PurchaseResponse { OfferId = offer.Id, Wallet = await ledger.DescribeAsync(me, ct) });
+        });
     }
 
     private static OfferResponse Store(StoreOffer o, string kind) => new()

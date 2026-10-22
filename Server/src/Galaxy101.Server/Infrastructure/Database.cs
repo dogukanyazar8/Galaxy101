@@ -22,6 +22,8 @@ public static class Database
             Username = Uri.UnescapeDataString(credentials[0]),
             Password = credentials.Length > 1 ? Uri.UnescapeDataString(credentials[1]) : null,
             MaxPoolSize = 50,
+            // Railway Postgres authenticates with a password; skip the Kerberos probe (no libgssapi in the image).
+            GssEncryptionMode = GssEncryptionMode.Disable,
         }.ConnectionString;
     }
 }

@@ -51,6 +51,9 @@ namespace Galaxy101.Table
         public long SyncedVersion { get; private set; } = -1;
         public bool HumanTurn => humanSeat == Me && Active == Me && (Current == Phase.Draw || Current == Phase.Discard);
         public bool CanDraw => HumanTurn && Current == Phase.Draw;
+        public bool CanDrawSide => CanDraw && !deckOnly;
+        public int PickedTile => pickedTile >= 0 && Rack.TryFind(pickedTile, out _) ? pickedTile : -1;
+        public IReadOnlyList<(string Why, int Amount)> PenaltyReasons(int seat) => penaltyReasons[seat];
         public bool CanDiscard => HumanTurn && Current == Phase.Discard;
         public bool CanArrange => Current != Phase.Waiting && Current != Phase.Seating && Current != Phase.Deal;
 
@@ -77,9 +80,17 @@ namespace Galaxy101.Table
         private CancellationTokenSource life;
         private TaskCompletionSource<bool> humanDone;
         private float turnStarted, turnStartedReal;
-        private int penaltyArmed = -1;
-        private string flash; private bool flashBad; private float flashUntil;
         private bool warned;
+        // spec/17: penalties of this hand per seat with their reasons (badges, toasts, result table), the tile taken from the
+        // previous discard until it is used or put back, and "deck only" after putting it back.
+        private readonly int[] handPenalties = new int[4];
+        private readonly List<(string Why, int Amount)>[] penaltyReasons = { new List<(string, int)>(), new List<(string, int)>(), new List<(string, int)>(), new List<(string, int)>() };
+        private int pickedTile = -1;
+        private bool deckOnly;
+        // T33/T47–T49: the rack tile being dragged (okey targets), the okey under the pointer / long-pressed, a refused okey.
+        private int dragTile = -1, tipOkey = -1, invalidOkey = -1;
+        private bool tipTake;
+        private float tipUntil, invalidUntil;
         private System.Random random;
         private bool leaving;
 
@@ -98,12 +109,15 @@ namespace Galaxy101.Table
             Session = new LocalSession();
             life = new CancellationTokenSource();
             random = seed != 0 ? new System.Random((int)seed) : new System.Random();
-            if (hud != null) hud.Command += OnHudCommand;
+            if (hud != null) { hud.Command += OnHudCommand; hud.TilePosition = id => Board.ViewOf(id) is TileView v && v != null ? v.transform.position : (Vector3?)null; }
             _ = Run(life.Token);
         }
 
         /// <summary>Test hook: configure before Start (seat −1 = bots everywhere).</summary>
-        public void Configure(int human, uint fixedSeed, float seconds = 30, bool seatPlayers = true) { humanSeat = human; seed = fixedSeed; turnSeconds = seconds; seating = seatPlayers; }
+        public void Configure(int human, uint fixedSeed, float seconds = 30, bool seatPlayers = true, RoundState firstHand = null)
+        { humanSeat = human; seed = fixedSeed; turnSeconds = seconds; seating = seatPlayers; initialState = firstHand; }
+
+        private RoundState initialState;
 
         private void OnDestroy()
         {
@@ -129,11 +143,12 @@ namespace Galaxy101.Table
             if (HumanTurn)
             {
                 float left = turnSeconds - (now - turnStarted);
-                if (!warned && warnSeconds > 0 && left <= warnSeconds) { warned = true; Notify(); }
+                if (!warned && warnSeconds > 0 && left <= warnSeconds) { warned = true; hud?.Post(TableHud.ToastKind.Warning, T("msg.timeWarn"), sticky: true); Notify(); }
                 if (left <= 0) { humanDone?.TrySetResult(false); }
             }
-            if (flash != null && Time.unscaledTime > flashUntil) { flash = null; Notify(); }
             if (ExitOpen && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) CancelExit();
+            if (tipOkey >= 0 && tipTake && Time.unscaledTime > tipUntil) { tipOkey = -1; Notify(); }
+            if (invalidOkey >= 0 && Time.unscaledTime > invalidUntil) { invalidOkey = -1; Notify(); }
         }
 
         // ---------- flow ----------
@@ -144,8 +159,10 @@ namespace Galaxy101.Table
                 while (!token.IsCancellationRequested)
                 {
                     uint handSeed = seed != 0 ? seed + (uint)HandNumber : (uint)random.Next(1, int.MaxValue);
-                    if (HandNumber == 0) Session.Start(handSeed, humanSeat == Me ? Me : (int?)null); else Session.StartNextRound(handSeed);
-                    HandNumber++; LastResult = null; staged.Clear(); LastDrawn = -1;
+                    if (HandNumber == 0 && initialState != null) Session.Start(initialState);
+                    else if (HandNumber == 0) Session.Start(handSeed, humanSeat == Me ? Me : (int?)null); else Session.StartNextRound(handSeed);
+                    HandNumber++; LastResult = null; staged.Clear(); LastDrawn = -1; pickedTile = -1; deckOnly = false;
+                    for (int k = 0; k < 4; k++) { handPenalties[k] = 0; penaltyReasons[k].Clear(); }
                     var view = Session.GetView(Me);
                     Indicator = TileCodes.IndicatorFace(view.Indicator);
                     if (HandNumber == 1 && seating) await SeatPlayers();
@@ -153,6 +170,7 @@ namespace Galaxy101.Table
                     Current = Phase.Deal; Active = -1; Notify();
                     float landed = Board.Deal(BuildBoard(view), view.ActivePlayer); SyncedVersion = view.Version;
                     await Seconds(landed);
+                    SyncBoard(); // a hand resumed mid-game also has melds and discards
                     while (!token.IsCancellationRequested)
                     {
                         view = Session.GetView(Me);
@@ -204,17 +222,18 @@ namespace Galaxy101.Table
         private async Task PlayHuman(CancellationToken token)
         {
             var view = Session.GetView(Me);
-            Active = Me; staged.Clear(); penaltyArmed = -1; warned = false;
+            Active = Me; staged.Clear(); warned = false; pickedTile = -1; deckOnly = false;
             Current = view.Phase == RoundPhase.AwaitingDraw ? Phase.Draw : Phase.Discard;
             turnStarted = Time.time; turnStartedReal = Time.realtimeSinceStartup;
             humanDone = new TaskCompletionSource<bool>();
-            using (token.Register(() => humanDone.TrySetCanceled())) { Notify(); bool acted = await humanDone.Task; if (!acted) await AutoPlay(token); }
-            humanDone = null;
+            using (token.Register(() => humanDone.TrySetCanceled())) { Notify(); bool acted = await humanDone.Task; if (!acted) { await AutoPlay(token); hud?.Post(TableHud.ToastKind.Warning, T("msg.timeUp")); } }
+            humanDone = null; hud?.Dismiss(T("msg.timeWarn"));
         }
 
         /// <summary>Timeout (spec/10 §3): draw from the deck, then discard the drawn tile (else the last tile); the planner covers rule corners.</summary>
         private async Task AutoPlay(CancellationToken token)
         {
+            if (pickedTile >= 0 && Current == Phase.Discard && staged.Count == 0) await PutBackAsync();
             if (Current == Phase.Draw) { if (!await Draw(DrawSource.Stock, null)) return; await Seconds(0.7f); }
             int pick = LastDrawn >= 0 && Rack.TryFind(LastDrawn, out _) ? LastDrawn : Rack.Tiles.LastOrDefault();
             if (await TryCommit(pick, false)) return;
@@ -308,7 +327,7 @@ namespace Galaxy101.Table
 
         private async Task<CommandReceipt> Submit(GameCommand command, bool required)
         {
-            var receipt = await Session.SubmitAsync(command, life.Token);
+            var receipt = await Execute(command);
             if (receipt.Accepted) { Rack.Sync(Session.GetView(Me).OwnHand.Select(t => t.Value), TileCodes.FaceFor(Indicator), autoSort); SyncBoard(); }
             else if (required && receipt.Error != ErrorCode.Cancelled) throw new InvalidOperationException("Table command rejected: " + receipt.Error);
             return receipt;
@@ -317,50 +336,123 @@ namespace Galaxy101.Table
         /// <summary>Draw for me: from the deck or the previous player's last discard; <paramref name="slot"/> = drop target.</summary>
         public async Task<bool> Draw(DrawSource source, RackSlot? slot)
         {
-            if (!CanDraw) return false;
+            if (!CanDraw || source == DrawSource.PreviousDiscard && deckOnly) return false;
             var view = Session.GetView(Me);
             Current = Phase.Discard; // block double draws while the command runs
-            var receipt = await Session.SubmitAsync(new DrawCommand(Meta(view), source), life.Token);
-            if (!receipt.Accepted)
-            {
-                Current = Phase.Draw;
-                Flash(receipt.Error == ErrorCode.PreviousDiscardUnavailable || receipt.Error == ErrorCode.NoLegalUse || receipt.Error == ErrorCode.DiscardMustBeUsed
-                    ? L("Bu taşı bu turda kullanamazsın", "You cannot use that tile this turn") : L("Çekilemedi", "Could not draw"), true);
-                return false;
-            }
+            var receipt = await Execute(new DrawCommand(Meta(view), source));
+            if (!receipt.Accepted) { Current = Phase.Draw; Message(TableHud.ToastKind.Error, L("Çekilemedi", "Could not draw")); return false; }
             var after = Session.GetView(Me); int drawn = after.PendingDraw.Tile.Value;
             Rack.Add(drawn, TileCodes.FaceFor(Indicator), autoSort, slot); LastDrawn = drawn;
-            if (source == DrawSource.PreviousDiscard) Flash(L("Yerden aldığın taşı bu turda kullanmalısın", "Use the tile you took this turn"), false);
+            if (source == DrawSource.PreviousDiscard) { pickedTile = drawn; Message(TableHud.ToastKind.Info, T("msg.canPutBack")); }
             SyncBoard(); Notify(); return true;
+        }
+
+        /// <summary>GERİ BIRAK (T39): the unused pile tile goes back; this turn then draws from the deck only.</summary>
+        public void PutBack() { _ = PutBackAsync(); }
+
+        private async Task PutBackAsync()
+        {
+            if (!CanDiscard || PickedTile < 0) return;
+            staged.Clear();
+            var receipt = await Execute(new ReturnDiscardCommand(Meta(Session.GetView(Me))));
+            if (!receipt.Accepted) { Message(TableHud.ToastKind.Error, L("Bu hamle geçersiz", "That move is not allowed")); return; }
+            pickedTile = -1; deckOnly = true; LastDrawn = -1;
+            Rack.Sync(Session.GetView(Me).OwnHand.Select(t => t.Value), TileCodes.FaceFor(Indicator), autoSort);
+            Current = Phase.Draw; SyncBoard(); Notify();
         }
 
         public async void Discard(int id)
         {
             if (!CanDiscard || !Rack.TryFind(id, out _)) return;
+            if (id == PickedTile) { Message(TableHud.ToastKind.Error, T("msg.cantDiscardPicked")); return; }
             await TryCommit(id, true);
         }
 
+        /// <summary>spec/17 §3: no confirmation; a playable tile or the okey is thrown knowingly and the penalty is written.</summary>
         private async Task<bool> TryCommit(int id, bool explain)
         {
             var view = Session.GetView(Me);
-            var plan = new TurnPlan(staged.ToArray(), new TileId(id), penaltyArmed == id);
-            var receipt = await Session.SubmitAsync(new CommitTurnCommand(Meta(view), plan), life.Token);
+            var plan = new TurnPlan(staged.ToArray(), new TileId(id), true);
+            var receipt = await Execute(new CommitTurnCommand(Meta(view), plan));
             if (receipt.Accepted) { Rack.Remove(id); AfterCommit(); return true; }
             if (!explain) return false;
             switch (receipt.Error)
             {
-                case ErrorCode.PenaltyConfirmationRequired:
-                    penaltyArmed = id; Flash(L("Bu taş işlenebilir · yine de atarsan 101 ceza", "This tile can be laid off · discarding it costs 101"), true); break;
-                case ErrorCode.DiscardMustBeUsed: Flash(L("Yerden aldığın taşı kullanmadan atamazsın", "Use the tile you took before discarding"), true); break;
-                case ErrorCode.OpeningRequired: Flash(L("Bitirmek için önce elini açmalısın", "Open your hand before finishing"), true); break;
-                default: Flash(L("Bu hamle geçersiz", "That move is not allowed"), true); break;
+                case ErrorCode.DiscardMustBeUsed: Message(TableHud.ToastKind.Error, T("msg.cantDiscardPicked")); break;
+                case ErrorCode.OpeningRequired: Message(TableHud.ToastKind.Error, T("msg.openFirst")); break;
+                default: Message(TableHud.ToastKind.Error, L("Bu hamle geçersiz", "That move is not allowed")); break;
             }
             return false;
         }
 
+        // ---------- penalties (spec/17 §3) ----------
+        /// <summary>
+        /// Submit and explain every penalty the command caused: whoever's total grew, and why — the actor's discard
+        /// (okey or playable tile), the previous player feeding an opening (value × 10), an okey taken from its owner's
+        /// meld, or a short opening. Mine become a Penalty toast, opponents' an avatar balloon; opponents' openings an
+        /// event balloon.
+        /// </summary>
+        private async Task<CommandReceipt> Execute(GameCommand command)
+        {
+            int actor = command.Meta.Actor;
+            var before = Session.GetView(actor);
+            var penalties = before.Players.Select(p => p.Penalties).ToArray(); penalties[actor] = before.OwnPenalties;
+            var openings = before.Players.Select(p => p.Opening).ToArray(); openings[actor] = before.OwnOpening;
+            var pending = before.PendingDraw;
+            var receipt = await Session.SubmitAsync(command, life.Token);
+            if (!receipt.Accepted) return receipt;
+            var after = Session.GetView(Me);
+            for (int k = 0; k < 4; k++)
+            {
+                int now = k == Me ? after.OwnPenalties : after.Players[k].Penalties;
+                int delta = now - penalties[k];
+                if (delta > 0) ExplainPenalty(command, actor, k, delta, pending);
+                var opening = k == Me ? after.OwnOpening : after.Players[k].Opening;
+                if (k != Me && openings[k] == OpeningKind.None && opening != OpeningKind.None)
+                    hud?.Balloon(k, opening == OpeningKind.Pairs ? T("ev.pairs", FirstName(k), OpenedValue(k)) : T("ev.opened", FirstName(k), OpenedValue(k)), false);
+            }
+            return receipt;
+        }
+
+        private void ExplainPenalty(GameCommand command, int actor, int seat, int amount, DrawReceipt pending)
+        {
+            handPenalties[seat] += amount;
+            string why, mine, theirs;
+            if (command is ShortOpeningCommand shortOpening)
+            {
+                why = "why.short";
+                var eval = HandEvaluation.Of(Rack, Indicator);
+                mine = shortOpening.Opening == OpeningKind.Pairs ? T("pen.shortPairs", eval.Pairs.Count) : T("pen.short", eval.Sum);
+                theirs = T("ev.penShort", FirstName(seat));
+            }
+            else if (seat == actor && command is CommitTurnCommand commit)
+            {
+                bool okey = TileCatalog.IsRealJoker(commit.Plan.Discard, Indicator);
+                why = okey ? "why.okey" : "why.playable";
+                mine = T(okey ? "pen.okey" : "pen.playable");
+                theirs = T(okey ? "penBubbleOkey" : "penBubbleTile");
+            }
+            else if (seat == (actor + 3) % 4 && pending != null && pending.Source == DrawSource.PreviousDiscard)
+            {
+                int number = amount / 10;
+                why = "why.fed"; mine = T("pen.fed", number, FirstName(actor)); theirs = T("ev.penFed", FirstName(seat), number, amount);
+                penaltyReasons[seat].Add((T(why, number), amount));
+                Announce(seat, mine, theirs, amount, null); return;
+            }
+            else { why = "why.okeyTaken"; mine = T("pen.okeyTaken", FirstName(actor)); theirs = T("ev.penOkeyTaken"); }
+            penaltyReasons[seat].Add((T(why), amount));
+            Announce(seat, mine, theirs, amount, command is ShortOpeningCommand ? T("pen.returned") : null);
+        }
+
+        private void Announce(int seat, string mine, string theirs, int amount, string sub)
+        {
+            if (seat == Me && humanSeat == Me) hud?.Post(TableHud.ToastKind.Penalty, mine, sub, amount);
+            else hud?.Balloon(seat, theirs, true);
+        }
+
         private void AfterCommit()
         {
-            staged.Clear(); penaltyArmed = -1; LastDrawn = -1;
+            staged.Clear(); LastDrawn = -1; pickedTile = -1; deckOnly = false;
             Rack.Sync(Session.GetView(Me).OwnHand.Select(t => t.Value), TileCodes.FaceFor(Indicator), autoSort);
             Current = Phase.Opponent; Active = -1; SyncBoard(); Notify();
             humanDone?.TrySetResult(true);
@@ -371,13 +463,14 @@ namespace Galaxy101.Table
         {
             if (!CanDiscard) return;
             var eval = HandEvaluation.Of(Rack, Indicator);
-            if (eval.Groups.Count == 0) { Flash(L("Istakada geçerli per yok", "No valid set on your rack"), true); return; }
             var opening = OpenedKind(Me);
-            if (opening == OpeningKind.Pairs) { Flash(L("Çiftle açtın · yalnızca çift açabilirsin", "You opened with pairs · lay pairs only"), true); return; }
+            if (opening == OpeningKind.Pairs) { Message(TableHud.ToastKind.Error, T("msg.pairsOnly")); return; }
+            if (opening == OpeningKind.None && eval.Sum < 101) { _ = ShortOpening(OpeningKind.Series); return; }
+            if (eval.Groups.Count == 0) return;
             var actions = opening == OpeningKind.None
                 ? new List<TableAction> { new OpenGroups(OpeningKind.Series, eval.Groups) }
                 : eval.Groups.Select(g => (TableAction)new AddGroup(g)).ToList();
-            Stage(actions, eval.Groups, opening == OpeningKind.None && eval.Sum < 101 ? L("Açmak için en az 101 gerekli", "You need 101 to open") : null);
+            Stage(actions, eval.Groups);
         }
 
         /// <summary>Çift aç: at least five rack pairs (or more pairs once opened with pairs).</summary>
@@ -387,32 +480,91 @@ namespace Galaxy101.Table
             var eval = HandEvaluation.Of(Rack, Indicator);
             var opening = OpenedKind(Me);
             if (opening == OpeningKind.Series) return;
-            if (eval.Pairs.Count == 0 || opening == OpeningKind.None && eval.Pairs.Count < 5) { Flash(L("Çift açmak için 5 çift gerekli", "You need 5 pairs to open"), true); return; }
+            if (opening == OpeningKind.None && eval.Pairs.Count < 5) { _ = ShortOpening(OpeningKind.Pairs); return; }
+            if (eval.Pairs.Count == 0) return;
             var actions = opening == OpeningKind.None ? new List<TableAction> { new OpenGroups(OpeningKind.Pairs, eval.Pairs) } : eval.Pairs.Select(p => (TableAction)new AddGroup(p)).ToList();
-            Stage(actions, eval.Pairs, null);
+            Stage(actions, eval.Pairs);
         }
 
-        private void Stage(List<TableAction> actions, List<MeldProposal> groups, string hint)
+        /// <summary>Eksik açılış: the engine writes +101; the groups stay on the rack (spec/17 §3, T35).</summary>
+        private async Task ShortOpening(OpeningKind kind)
+        {
+            if (staged.Count > 0) { staged.Clear(); Rack.Sync(Session.GetView(Me).OwnHand.Select(t => t.Value), TileCodes.FaceFor(Indicator), autoSort); }
+            await Execute(new ShortOpeningCommand(Meta(Session.GetView(Me)), kind));
+            SyncBoard(); Notify();
+        }
+
+        private void Stage(List<TableAction> actions, List<MeldProposal> groups)
         {
             var next = staged.Concat(actions).ToList();
             var result = Evaluate(next);
-            if (!result.Success)
-            {
-                Flash(hint ?? (result.Error == ErrorCode.InvalidOpening ? L("Açmak için en az 101 gerekli", "You need 101 to open") : L("Bu perler açılamaz", "Those sets cannot be laid")), true);
-                return;
-            }
+            if (!result.Success) { Message(TableHud.ToastKind.Error, L("Bu perler açılamaz", "Those sets cannot be laid")); return; }
             staged.Clear(); staged.AddRange(next);
             foreach (var group in groups) foreach (var tile in group.Tiles) Rack.Remove(tile.Id.Value);
+            SyncBoard(); Notify();
+        }
+
+        // ---------- okeys on the table (spec/17 §2, §8) ----------
+        /// <summary>Every okey (real joker) in a table meld with the face it stands for, as the board shows it.</summary>
+        public List<(int Id, TileFace Face, int Meld, int Owner)> TableOkeys()
+        {
+            var list = new List<(int, TileFace, int, int)>();
+            if (Session == null || Current == Phase.Waiting || Current == Phase.Seating) return list;
+            foreach (var meld in (staged.Count > 0 && Active == Me ? Projection() : PlayerViewProjector.ForEvaluation(Session.GetView(Me)).Value).Table)
+                foreach (var tile in meld.Group.Tiles)
+                    if (TileCatalog.IsRealJoker(tile.Id, Indicator)) list.Add((tile.Id.Value, tile.RepresentedFace, meld.Id, meld.Owner));
+            return list;
+        }
+
+        public bool IsTableOkey(int id) => TableOkeys().Any(o => o.Id == id);
+
+        private string FaceName(TileFace face)
+            => T("color." + (face.Color == TileColor.Red ? "R" : face.Color == TileColor.Blue ? "B" : face.Color == TileColor.Yellow ? "Y" : "K")) + " " + face.Number;
+
+        private static string FaceColor(TileFace face)
+            => face.Color == TileColor.Red ? "#D7263D" : face.Color == TileColor.Blue ? "#1F5FBF" : face.Color == TileColor.Yellow ? "#E09A12" : "#24242C";
+
+        /// <summary>The input reports the rack tile being dragged (−1 when released): matching okeys light up (T47).</summary>
+        public void SetDragTile(int id) { if (dragTile == id) return; dragTile = id; Notify(); }
+
+        /// <summary>Hover shows what an okey stands for; a 500 ms press shows how to take it (T33, T48).</summary>
+        public void ShowOkeyTip(int id, bool take)
+        {
+            if (tipOkey == id && tipTake == take) { tipUntil = Time.unscaledTime + 2.5f; return; }
+            tipOkey = id; tipTake = take; tipUntil = Time.unscaledTime + 2.5f; Notify();
+        }
+
+        public void HideOkeyTip() { if (tipOkey < 0 || tipTake) return; tipOkey = -1; Notify(); }
+
+        /// <summary>
+        /// Take an okey from the table (§8, T47): only after opening, only with the real tile it stands for. The tile takes
+        /// the okey's place, the okey comes to my rack; whoever laid it pays +101 when the turn is committed.
+        /// </summary>
+        public void TakeOkey(int tileId, int okeyId)
+        {
+            if (!CanDiscard || !Rack.TryFind(tileId, out _)) return;
+            var okey = TableOkeys().FirstOrDefault(o => o.Id == okeyId);
+            if (okey.Id != okeyId) return;
+            if (OpenedKind(Me) == OpeningKind.None) { Message(TableHud.ToastKind.Error, T("msg.openFirst")); return; }
+            bool fits = !TileCatalog.IsRealJoker(new TileId(tileId), Indicator) && TileCatalog.GetNonJokerFace(new TileId(tileId), Indicator) == okey.Face;
+            var next = staged.Concat(new[] { (TableAction)new SwapJoker(okey.Meld, new TileId(okeyId), new TileId(tileId)) }).ToList();
+            if (!fits || !Evaluate(next).Success)
+            {
+                invalidOkey = okeyId; invalidUntil = Time.unscaledTime + 1.2f;
+                Message(TableHud.ToastKind.Error, T("msg.okeyOnlyWith", FaceName(okey.Face))); return;
+            }
+            staged.Clear(); staged.AddRange(next);
+            Rack.Remove(tileId); Rack.Add(okeyId, TileCodes.FaceFor(Indicator), autoSort);
             SyncBoard(); Notify();
         }
 
         /// <summary>İşle: drop one rack tile onto a table meld (front or back; jokers take the face that fits).</summary>
         public void LayOff(int id, int meldId)
         {
-            if (!CanMeld && !(CanDiscard && staged.OfType<OpenGroups>().Any())) { Flash(L("İşlemek için önce elini aç", "Open your hand to lay off"), true); return; }
+            if (!CanMeld && !(CanDiscard && staged.OfType<OpenGroups>().Any())) { Message(TableHud.ToastKind.Error, T("msg.openFirst")); return; }
             var state = Projection(); var meld = state.Table.FirstOrDefault(m => m.Id == meldId);
-            if (meld == null || meld.Group.Kind == MeldKind.Pair) { Flash(L("Bu taş o pere işlenemez", "That tile does not fit this set"), true); return; }
-            if (Rack.Count <= 1) { Flash(L("Son taş işlenemez", "Your last tile cannot be laid off"), true); return; }
+            if (meld == null || meld.Group.Kind == MeldKind.Pair) { Message(TableHud.ToastKind.Error, T("msg.cantIsle")); return; }
+            if (Rack.Count <= 1) { Message(TableHud.ToastKind.Error, T("msg.lastTile")); return; }
             foreach (var face in CandidateFaces(id, meld))
                 foreach (bool prepend in new[] { false, true })
                 {
@@ -420,7 +572,7 @@ namespace Galaxy101.Table
                     if (!Evaluate(next).Success) continue;
                     staged.Clear(); staged.AddRange(next); Rack.Remove(id); SyncBoard(); Notify(); return;
                 }
-            Flash(L("Bu taş o pere işlenemez", "That tile does not fit this set"), true);
+            Message(TableHud.ToastKind.Error, T("msg.cantIsle"));
         }
 
         private IEnumerable<TileFace> CandidateFaces(int id, Meld meld)
@@ -505,7 +657,9 @@ namespace Galaxy101.Table
 
         private string L(string tr, string en) => hud != null ? hud.L(tr, en) : tr;
 
-        public void Flash(string text, bool bad) { flash = text; flashBad = bad; flashUntil = Time.unscaledTime + 2.6f; Notify(); }
+        private string T(string key, params object[] args) => TableStrings.Get(key, hud != null ? hud.L("tr", "en") : "tr", args);
+
+        public void Message(TableHud.ToastKind kind, string text, string sub = null) => hud?.Post(kind, text, sub);
 
         private void OnHudCommand(string command)
         {
@@ -516,6 +670,7 @@ namespace Galaxy101.Table
                 case "sort-run": SortRack(true); break;
                 case "sort-pair": SortRack(false); break;
                 case "exit": RequestExit(); break;
+                case "putback": PutBack(); break;
                 case "exit-stay": CancelExit(); break;
                 case "exit-leave": ConfirmExit(); break;
                 case "next": NextHand(); break;
@@ -534,7 +689,7 @@ namespace Galaxy101.Table
         {
             if (leaving) return;
             leaving = true; ExitOpen = false; life?.Cancel();
-            Flash(L("Masadan kalktın · lobiye dönülüyor", "You left the table · returning to the lobby"), false);
+            Message(TableHud.ToastKind.Success, L("Masadan kalktın · lobiye dönülüyor", "You left the table · returning to the lobby"));
             Debug.Log("GALAXY101_TABLE_EXIT scene=" + menuScene);
             StartCoroutine(LeaveAfter(1.7f));
         }
@@ -560,7 +715,7 @@ namespace Galaxy101.Table
                 Phase = Current == Phase.Seating ? "seat" : Current == Phase.Deal ? "deal" : Current == Phase.Draw ? "draw" : Current == Phase.Discard ? "discard" : Current == Phase.Finished ? "fin" : "opp",
                 Active = Active, DeckCount = view.StockCount, TurnSeconds = Mathf.RoundToInt(turnSeconds), TurnStartedAt = turnStartedReal,
                 Warn = HumanTurn && warned, TurnHint = turnHint, ShowIndicator = Current != Phase.Deal && Current != Phase.Seating, FirstTurn = view.Phase == RoundPhase.PlanningTurn && view.PendingDraw == null,
-                Pairs = eval.Pairs.Count, Flash = flash, FlashBad = flashBad,
+                Pairs = eval.Pairs.Count, PickedTile = PickedTile, DeckOnly = deckOnly && HumanTurn, ShowPutBack = PickedTile >= 0 && staged.Count == 0,
                 Countdown = Countdown, CountdownAt = countdownAt, ExitOpen = ExitOpen, Hand = HandNumber,
             };
             for (int k = 0; k < 4; k++) s.Seated[k] = Current != Phase.Seating || Seated[k];
@@ -570,10 +725,21 @@ namespace Galaxy101.Table
             {
                 s.TileCounts[k] = k == Me ? Rack.Count : view.Players[k].HandCount;
                 s.Opened[k] = OpenedValue(k); s.OpenedPairs[k] = OpenedKind(k) == OpeningKind.Pairs;
+                s.Penalties[k] = k == Me ? view.OwnPenalties : view.Players[k].Penalties;
             }
             s.OpenSum = s.Opened[Me] > 0 ? s.Opened[Me] : eval.Sum;
-            s.CanOpen = CanDiscard && (s.Opened[Me] > 0 ? !s.OpenedPairs[Me] && eval.Groups.Count > 0 : eval.Sum >= 101);
-            s.CanPair = CanDiscard && (s.OpenedPairs[Me] ? eval.Pairs.Count > 0 : s.Opened[Me] == 0 && eval.Pairs.Count >= 5);
+            var dragFace = dragTile >= 0 && !TileCatalog.IsRealJoker(new TileId(dragTile), Indicator) ? TileCatalog.GetNonJokerFace(new TileId(dragTile), Indicator) : (TileFace?)null;
+            bool canTake = CanDiscard && OpenedKind(Me) != OpeningKind.None;
+            foreach (var okey in TableOkeys())
+            {
+                bool target = canTake && dragFace.HasValue && dragFace.Value == okey.Face;
+                s.Okeys.Add(new TableHud.OkeyMark { Id = okey.Id, Number = okey.Face.Number.ToString(), Color = FaceColor(okey.Face), Target = target, Invalid = okey.Id == invalidOkey });
+                if (target) s.DragBanner = T("takeOkeyBanner", FaceName(okey.Face));
+                if (okey.Id == tipOkey) { s.OkeyTipId = tipOkey; s.OkeyTip = tipTake ? T("takeOkeyHint", FaceName(okey.Face)) : T("okStandsFor", FaceName(okey.Face)); }
+            }
+            // spec/17 §3: Aç / Çift aç stay pressable below the threshold (a short opening costs +101).
+            s.CanOpen = CanDiscard && (s.Opened[Me] > 0 ? !s.OpenedPairs[Me] && eval.Groups.Count > 0 : true);
+            s.CanPair = CanDiscard && (s.OpenedPairs[Me] ? eval.Pairs.Count > 0 : s.Opened[Me] == 0);
             if (ResultOpen && LastResult != null)
             {
                 var info = LastResult.FinishInfo; int winner = HandWinner(LastResult);

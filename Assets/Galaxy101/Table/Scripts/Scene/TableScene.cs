@@ -154,6 +154,7 @@ namespace Galaxy101.Table
                 case "disc": return seatFrames[0].Pose(0.6f, TY + 0.02f, 0.6f).UnityPosition;
                 case "ind": return seatFrames[0].Pose(0, TY, 0.11f).UnityPosition;
                 case "deck": return ThreeSpace.ToUnity(0, TY + 0.13f, 0);
+                case "putback": return seatFrames[3].Pose(DiscardLocal.x, TY + 0.002f, DiscardLocal.z).UnityPosition;
                 default: throw new System.ArgumentException("Unknown table anchor: " + key, nameof(key));
             }
         }

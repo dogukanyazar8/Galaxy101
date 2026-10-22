@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Galaxy101.Table;
@@ -161,7 +162,7 @@ namespace Galaxy101.Tests
             Assert.That(game.Rack.Count, Is.EqualTo(22));
             Assert.That(game.LastDrawn, Is.GreaterThanOrEqualTo(0));
             game.Discard(game.LastDrawn);
-            yield return Until(() => game.Current == TableGame.Phase.Opponent || game.HudState().Flash != null, 10, "the second discard");
+            yield return Until(() => game.Current == TableGame.Phase.Opponent || hudOwner.GetComponent<TableHud>().ActiveToast != null, 10, "the second discard");
             if (game.Current != TableGame.Phase.Opponent)
             {
                 // Rule corner (e.g. a laid-off-able joker): any other tile is fine.
@@ -218,6 +219,131 @@ namespace Galaxy101.Tests
             yield return Pointer(c, false); yield return Pointer(c, true); yield return Pointer(c, false); yield return Pointer(c, true); yield return Pointer(c, false);
             yield return Until(() => !game.Rack.Tiles.Contains(victim), 10, "the double-click discard");
             Assert.That(game.Session.GetView(TableGame.Me).Discards[0].Last().Value, Is.EqualTo(victim));
+        }
+
+        [UnityTest]
+        [Timeout(240000)]
+        public IEnumerator ShortOpeningPenaltyAndPileTileCanBePutBack()
+        {
+            var game = Build(TableGame.Me, 5151, true);
+            game.Configure(TableGame.Me, 5151, 30, false);
+            var hud = hudOwner.GetComponent<TableHud>();
+            Time.timeScale = 3;
+            yield return Until(() => game.CanDiscard && game.SyncedVersion == game.Session.GetView(TableGame.Me).Version, 40, "my first turn");
+
+            // T35: Aç below 101 is a short opening: +101, the tiles stay, a Penalty toast and my badge.
+            Assert.That(HandEvaluation.Of(game.Rack, game.Indicator).Sum, Is.LessThan(101), "a freshly dealt rack is unsorted");
+            int tiles = game.Rack.Count;
+            hud.Press("open");
+            yield return Until(() => game.Session.GetView(TableGame.Me).OwnPenalties == 101, 10, "the short opening penalty");
+            yield return null;
+            Assert.That(game.Rack.Count, Is.EqualTo(tiles));
+            Assert.That(hud.ActiveToast, Does.StartWith("Eksik açılış").Or.StartWith("Short opening"));
+            Assert.That(hud.Canvas.Q<VisualElement>("penalty-badge-0"), Is.Not.Null);
+            Assert.That(game.PenaltyReasons(TableGame.Me).Single().Amount, Is.EqualTo(101));
+            string penaltyCapture = Environment.GetEnvironmentVariable("GALAXY_TABLE_PENALTY_CAPTURE");
+            if (!string.IsNullOrEmpty(penaltyCapture)) { Time.timeScale = 0.2f; yield return Capture(hudOwner.GetComponent<UIDocument>(), penaltyCapture); Time.timeScale = 3; }
+
+            game.Discard(game.Rack.Tiles.First());
+            yield return Until(() => game.CanDraw, 120, "my draw turn");
+            var view = game.Session.GetView(TableGame.Me);
+            if (view.Discards[3].Count == 0) Assert.Inconclusive("Burak's pile is empty this time.");
+
+            // T38: the pile tile can always be taken; it is marked and cannot be thrown at the next player.
+            int pile = view.Discards[3].Last().Value;
+            var draw = game.Draw(DrawSource.PreviousDiscard, null);
+            yield return Until(() => draw.IsCompleted, 10, "the pile draw");
+            Assert.That(draw.Result, Is.True);
+            Assert.That(game.PickedTile, Is.EqualTo(pile));
+            yield return null;
+            Assert.That(hud.Canvas.Q<VisualElement>("picked-tag"), Is.Not.Null);
+            Assert.That(hud.Canvas.Q<VisualElement>("putback-ring"), Is.Not.Null);
+            string pileCapture = Environment.GetEnvironmentVariable("GALAXY_TABLE_PILE_CAPTURE");
+            if (!string.IsNullOrEmpty(pileCapture)) { Time.timeScale = 0.2f; yield return Capture(hudOwner.GetComponent<UIDocument>(), pileCapture); Time.timeScale = 3; }
+            game.Discard(pile);
+            yield return null;
+            Assert.That(hud.ActiveToast, Does.StartWith("Yerden aldığın taşı atamazsın").Or.StartWith("You can't discard"));
+            Assert.That(game.Rack.Tiles.Contains(pile), Is.True);
+
+            // T39: put it back, then only the deck is left.
+            game.PutBack();
+            yield return Until(() => game.CanDraw, 10, "the put back");
+            Assert.That(game.CanDrawSide, Is.False);
+            Assert.That(game.Session.GetView(TableGame.Me).Discards[3].Last().Value, Is.EqualTo(pile));
+            Assert.That(game.Rack.Tiles.Contains(pile), Is.False);
+            var stock = game.Draw(DrawSource.Stock, null);
+            yield return Until(() => stock.IsCompleted, 10, "the deck draw");
+            Assert.That(stock.Result, Is.True);
+        }
+
+        /// <summary>
+        /// A hand in progress: I have opened, Zeynep (seat 1) has Blue 5 · okey · Blue 6… laid with the okey standing for
+        /// Blue 7, and Blue 7 is on my rack. Indicator Black 13, so the okey is Black 1.
+        /// </summary>
+        private static RoundState OkeyOnTheTable(out int blueSeven, out int okey, out int wrong)
+        {
+            int Id(TileColor c, int n, int copy = 0) => 2 * (13 * (int)c + n - 1) + copy;
+            var all = Enumerable.Range(0, 106).ToList();
+            int indicator = Id(TileColor.Black, 13);
+            okey = Id(TileColor.Black, 1); blueSeven = Id(TileColor.Blue, 7); wrong = Id(TileColor.Red, 7);
+            var meldTiles = new[] { Id(TileColor.Blue, 5), Id(TileColor.Blue, 6), okey };
+            var meld = new Meld(0, 1, new MeldProposal(MeldKind.Run, new[]
+            {
+                new PlacedTile(new TileId(meldTiles[0]), new TileFace(TileColor.Blue, 5)),
+                new PlacedTile(new TileId(meldTiles[1]), new TileFace(TileColor.Blue, 6)),
+                new PlacedTile(new TileId(okey), new TileFace(TileColor.Blue, 7)),
+            }));
+            var taken = new HashSet<int>(meldTiles) { indicator, blueSeven, wrong };
+            var free = new Queue<int>(all.Where(id => !taken.Contains(id)));
+            var mine = new List<int> { blueSeven, wrong }; while (mine.Count < 22) mine.Add(free.Dequeue());
+            var hands = new List<int>[] { mine, new List<int>(), new List<int>(), new List<int>() };
+            for (int k = 1; k < 4; k++) while (hands[k].Count < (k == 1 ? 18 : 21)) hands[k].Add(free.Dequeue());
+            var stock = free.Select(id => new TileId(id)).ToArray();
+            var openings = new[] { OpeningKind.Series, OpeningKind.Series, OpeningKind.None, OpeningKind.None };
+            var players = Enumerable.Range(0, 4).Select(k => new PlayerState(hands[k].Select(id => new TileId(id)).ToArray(), openings[k], 0)).ToArray();
+            var discards = Enumerable.Range(0, 4).Select(_ => (IReadOnlyList<TileId>)Array.Empty<TileId>()).ToArray();
+            return new RoundState(Guid.NewGuid(), 12, 7, 1, 0, 8, RoundPhase.PlanningTurn, new TileId(indicator), stock, players,
+                new[] { meld }, discards, new DrawReceipt(DrawSource.Stock, new TileId(mine[21]), false), OpeningKind.Series, 0, false, new long[] { 3, 3, 3, 3 });
+        }
+
+        [UnityTest]
+        [Timeout(180000)]
+        public IEnumerator OkeyOnTheTableShowsWhatItStandsForAndCanBeTaken()
+        {
+            var state = OkeyOnTheTable(out int blueSeven, out int okey, out int wrong);
+            var game = Build(TableGame.Me, 77, true);
+            game.Configure(TableGame.Me, 77, 60, false, state);
+            var hud = hudOwner.GetComponent<TableHud>();
+            Time.timeScale = 3;
+            yield return Until(() => game.CanDiscard && game.SyncedVersion == game.Session.GetView(TableGame.Me).Version, 40, "my turn in the prepared hand");
+
+            // T33: the okey carries a "7" badge in Blue.
+            var mark = game.HudState().Okeys.Single();
+            Assert.That(mark.Id, Is.EqualTo(okey)); Assert.That(mark.Number, Is.EqualTo("7")); Assert.That(mark.Color, Is.EqualTo("#1F5FBF"));
+            yield return null;
+            Assert.That(hud.Canvas.Q<VisualElement>("okey-badge-" + okey), Is.Not.Null);
+
+            // T47: dragging Blue 7 lights the okey up; T49: another tile is refused.
+            game.SetDragTile(blueSeven);
+            var dragging = game.HudState();
+            Assert.That(dragging.Okeys.Single().Target, Is.True);
+            Assert.That(dragging.DragBanner, Is.Not.Null);
+            string okeyCapture = Environment.GetEnvironmentVariable("GALAXY_TABLE_OKEY_CAPTURE");
+            if (!string.IsNullOrEmpty(okeyCapture)) { game.ShowOkeyTip(okey, false); yield return Capture(hudOwner.GetComponent<UIDocument>(), okeyCapture); }
+            game.SetDragTile(-1);
+            game.TakeOkey(wrong, okey);
+            yield return null;
+            Assert.That(hud.ActiveToast, Does.Contain("Mavi 7").Or.Contain("Blue 7"));
+            Assert.That(game.Rack.Tiles.Contains(okey), Is.False);
+
+            game.TakeOkey(blueSeven, okey);
+            Assert.That(game.Rack.Tiles.Contains(okey), Is.True, "the okey comes to my rack");
+            Assert.That(game.Rack.Tiles.Contains(blueSeven), Is.False);
+            int discard = game.Rack.Tiles.First(id => id != okey);
+            game.Discard(discard);
+            yield return Until(() => game.Current == TableGame.Phase.Opponent, 10, "the committed turn");
+            Assert.That(game.Session.GetView(TableGame.Me).Players[1].Penalties, Is.EqualTo(101), "Zeynep laid the okey: +101");
+            Assert.That(game.PenaltyReasons(1).Single().Amount, Is.EqualTo(101));
         }
 
         [UnityTest]

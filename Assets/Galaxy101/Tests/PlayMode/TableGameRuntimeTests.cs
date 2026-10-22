@@ -74,9 +74,12 @@ namespace Galaxy101.Tests
             canvas.Query<Label>().ForEach(label =>
             {
                 if (string.IsNullOrEmpty(label.text) || label.resolvedStyle.display == DisplayStyle.None || label.resolvedStyle.visibility == Visibility.Hidden || label.resolvedStyle.opacity <= 0.01f) return;
-                for (var e = label.parent; e != null && e != canvas; e = e.parent) if (e.resolvedStyle.display == DisplayStyle.None || e.name == "table-anchors") return;
+                ScrollView scroll = null;
+                for (var e = label.parent; e != null && e != canvas; e = e.parent) { if (e.resolvedStyle.display == DisplayStyle.None || e.name == "table-anchors") return; if (e is ScrollView sv && scroll == null) scroll = sv; }
                 var r = label.worldBound;
-                if (r.xMin < bounds.xMin - 1 || r.xMax > bounds.xMax + 1 || r.yMin < bounds.yMin - 1 || r.yMax > bounds.yMax + 1) problems.Add("outside canvas: '" + label.text + "' " + r);
+                // Inside a scroll list only the horizontal extent counts: rows below the fold are clipped, not overflowing.
+                var box = scroll != null ? scroll.worldBound : bounds;
+                if (r.xMin < box.xMin - 1 || r.xMax > box.xMax + 1 || scroll == null && (r.yMin < bounds.yMin - 1 || r.yMax > bounds.yMax + 1)) problems.Add("outside " + (scroll != null ? "its list" : "canvas") + ": '" + label.text + "' " + r);
                 var parent = label.parent;
                 if (parent != null && label.resolvedStyle.position != Position.Absolute && label.layout.width > parent.contentRect.width + 1.5f && parent.resolvedStyle.width > 0)
                     problems.Add("wider than its parent '" + parent.name + "': '" + label.text + "' " + label.layout.width.ToString("F0") + " > " + parent.contentRect.width.ToString("F0"));
@@ -571,6 +574,111 @@ namespace Galaxy101.Tests
                 Time.timeScale = 0.3f; game.Fx.Celebrate(table.Corner(2), game.AvatarOnScreen(2));
                 yield return Capture(document, Path.Combine(dir, "fx_celebrate.png")); Time.timeScale = 1;
             }
+        }
+
+        private static void Click(VisualElement root, string name)
+        {
+            var e = root.Q<VisualElement>(name); Assert.That(e, Is.Not.Null, "element " + name);
+            using (var evt = ClickEvent.GetPooled()) { evt.target = e; e.SendEvent(evt); }
+        }
+
+        [UnityTest]
+        [Timeout(300000)]
+        public IEnumerator SettingsWindowAppliesEveryChangeAtOnce()
+        {
+            var game = Build(TableGame.Me, 7070, true);
+            game.Configure(TableGame.Me, 7070, 60, false);
+            string dir = Environment.GetEnvironmentVariable("GALAXY_TABLE_SET_CAPTURE_DIR");
+            var hud = hudOwner.GetComponent<TableHud>(); var document = hudOwner.GetComponent<UIDocument>(); var table = sceneOwner.GetComponent<TableScene>();
+            Time.timeScale = 3;
+            yield return Until(() => game.CanDiscard && game.SyncedVersion == game.Session.GetView(TableGame.Me).Version, 40, "my first turn");
+            Time.timeScale = 1;
+
+            // T16: Oyun tab with the design defaults.
+            hud.Press("settings"); yield return null;
+            Assert.That(hud.Window, Is.EqualTo("settings"));
+            var root = hud.Canvas;
+            Assert.That(root.Q<VisualElement>("table-settings"), Is.Not.Null);
+            Assert.That(hud.Settings.AutoSort && hud.Settings.Highlight && hud.Settings.DoubleClick, Is.True);
+            Assert.That(hud.Settings.WarnSeconds, Is.EqualTo(5));
+            Assert.That(root.Q<VisualElement>("setting-warn-5").ClassListContains("selected"), Is.True);
+            if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "set_game.png"));
+            yield return null; AssertNoOverflow(root, "settings · game");
+
+            Click(root, "setting-autoSort"); Click(root, "setting-dbl"); yield return null;
+            Assert.That(hud.Settings.AutoSort, Is.False); Assert.That(game.DoubleClickDiscard, Is.False, "double-click discard follows the switch");
+            Assert.That(root.Q<VisualElement>("setting-autoSort").ClassListContains("on"), Is.False);
+            Click(root, "setting-warn-0"); yield return null;
+            Assert.That(hud.Settings.WarnSeconds, Is.EqualTo(0));
+            Click(root, "setting-highlight"); yield return null;
+            Assert.That(game.Rack.Tiles.Any(id => game.Board.ViewOf(id).Valid), Is.False, "no green bars once highlighting is off");
+
+            // Language: the whole table switches, the window stays open.
+            Click(root, "setting-lang-en"); yield return null;
+            Assert.That(hud.Settings.Text("lang"), Is.EqualTo("en"));
+            Assert.That(root.Query<Label>().ToList().Any(l => l.text == "Table settings"), Is.True, "the window speaks English");
+            Assert.That(root.Q<Label>("deck-count").parent.Query<Label>().ToList().Any(l => l.text == "Deck"), Is.True, "the top bar speaks English");
+            yield return null; AssertNoOverflow(root, "settings · game (en)");
+            Click(root, "setting-lang-tr"); yield return null;
+
+            // T17: Ses — sliders keep the value, toggles flip.
+            hud.Press("settings-tab:1"); yield return null;
+            Assert.That(root.Q<VisualElement>("setting-music"), Is.InstanceOf<GalaxySlider>());
+            hud.Settings.Set("music", 30); Assert.That(hud.Settings.Int("music"), Is.EqualTo(30));
+            Assert.That(hud.Settings.Int("master"), Is.EqualTo(80));
+            if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "set_sound.png"));
+            yield return null; AssertNoOverflow(root, "settings · sound");
+
+            // T18: Bildirimler — "Sıra ipuçları" hides the turn hints.
+            hud.Press("settings-tab:3"); yield return null;
+            Click(root, "setting-turnHint"); yield return null;
+            Assert.That(game.HudState().TurnHint, Is.False);
+            if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "set_alerts.png"));
+            yield return null; AssertNoOverflow(root, "settings · alerts");
+
+            // T15: Görünüm — cards with SEÇİLİ; T20: Hologram + Neon cam, then a new tile style.
+            hud.Press("settings-tab:2"); yield return null;
+            Assert.That(root.Q<VisualElement>("setting-tableSkin-station").Q<Label>("setting-in-use"), Is.Not.Null);
+            if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "set_look.png"));
+            yield return null; AssertNoOverflow(root, "settings · look");
+            Click(root, "setting-tableSkin-holo"); Click(root, "setting-rackSkin-neon"); yield return null;
+            Assert.That(table.TableSkin, Is.EqualTo("holo")); Assert.That(table.RackSkin, Is.EqualTo("neon"));
+            Assert.That(root.Q<VisualElement>("setting-tableSkin-holo").Q<Label>("setting-in-use"), Is.Not.Null, "the picked card shows SEÇİLİ");
+            yield return null;
+            foreach (var id in game.Rack.Tiles)
+            {
+                Assert.That(game.Rack.TryFind(id, out var slot), Is.True);
+                Assert.That(Vector3.Distance(game.Board.ViewOf(id).transform.position, game.Board.SlotPose(slot).position), Is.LessThan(0.002f), "rack tiles sit on the new rack");
+            }
+            Click(root, "setting-tileSkin-gold"); yield return null;
+            Assert.That(table.TileSkin, Is.EqualTo("gold"));
+            var sample = game.Board.ViewOf(game.Rack.Tiles.First()).transform;
+            Assert.That(sample.Find("tas_yuz").GetComponent<MeshRenderer>().sharedMaterial.name, Is.EqualTo("tas_yuz_gold"), "faces take the new atlas");
+            Assert.That(sample.GetComponentsInChildren<Transform>(true).Count(t => t.name == "tas_govde"), Is.EqualTo(1), "one body per tile after the swap");
+            hud.Press("settings-close"); yield return null;
+            Assert.That(hud.Window, Is.Null);
+            if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "set_holo_neon_gold.png"));
+
+            // T21–T22: Andromeda table and rack seen from above (1.3 s camera move).
+            hud.Settings.Set("tableSkin", "andromeda"); hud.Settings.Set("rackSkin", "andromeda"); hud.Settings.Set("tileSkin", "classic"); hud.Settings.Set("view", "top");
+            Assert.That(table.CameraRig.Current, Is.EqualTo(TableCameraRig.View.Top));
+            yield return new WaitForSecondsRealtime(1.5f);
+            if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "set_top_andromeda.png"));
+            hud.Settings.Set("tableSkin", "wood"); hud.Settings.Set("rackSkin", "walnut"); hud.Settings.Set("view", "seat");
+            yield return new WaitForSecondsRealtime(1.5f);
+            if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "set_wood_walnut.png"));
+
+            // Varsayılana dön: every value back, the scene too.
+            hud.Press("settings"); yield return null;
+            Click(root, "settings-reset"); yield return null;
+            Assert.That(hud.Settings.AutoSort && hud.Settings.DoubleClick && hud.Settings.Highlight && hud.Settings.TurnHints, Is.True);
+            Assert.That(hud.Settings.WarnSeconds, Is.EqualTo(5)); Assert.That(hud.Settings.Int("music"), Is.EqualTo(55));
+            Assert.That(table.TableSkin, Is.EqualTo("station")); Assert.That(table.RackSkin, Is.EqualTo("walnut")); Assert.That(table.TileSkin, Is.EqualTo("classic"));
+            Assert.That(table.CameraRig.Current, Is.EqualTo(TableCameraRig.View.Player));
+            Assert.Throws<ArgumentException>(() => hud.Settings.Set("warn", 7), "only 3 / 5 / 10 / off");
+            Click(root, "settings-done"); yield return null;
+            Assert.That(hud.Window, Is.Null);
+            AssertBoardMatchesEngine(game);
         }
 
         [UnityTest]

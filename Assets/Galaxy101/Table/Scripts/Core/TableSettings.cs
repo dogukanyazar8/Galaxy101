@@ -1,0 +1,126 @@
+using System;
+using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
+using UnityEngine;
+
+namespace Galaxy101.Table
+{
+    /// <summary>
+    /// Table settings (spec/13 §6, T15–T18): every change applies at once and is kept. Defaults come from
+    /// table_content.json → settingsDefaults (nulls resolved to the design's first choices). The language and the master
+    /// volume are the menu's own settings, so both screens share them; the rest lives in PlayerPrefs.
+    /// </summary>
+    public sealed class TableSettings
+    {
+        public const string PrefsKey = "galaxy101.table.settings";
+        public static readonly int[] WarnChoices = { 3, 5, 10, 0 };
+        public static readonly string[] Views = { "seat", "top" };
+
+        private readonly JObject values;
+        private readonly MenuModel menu;
+        private readonly bool persist;
+
+        /// <summary>Raised after a change with its key; null after "Varsayılana dön" (everything may have changed).</summary>
+        public event Action<string> Changed;
+
+        /// <param name="persist">false keeps the values in memory only (tests).</param>
+        public TableSettings(MenuModel menu, bool persist = true)
+        {
+            this.menu = menu; this.persist = persist;
+            values = Defaults();
+            if (!persist || !PlayerPrefs.HasKey(PrefsKey)) return;
+            try
+            {
+                var stored = JObject.Parse(PlayerPrefs.GetString(PrefsKey));
+                foreach (var property in stored.Properties())
+                    if (values[property.Name] != null && Valid(property.Name, property.Value)) values[property.Name] = property.Value;
+            }
+            catch (Exception ex) { Debug.LogWarning("Ignoring unreadable table settings: " + ex.Message); }
+        }
+
+        public static JObject Defaults()
+        {
+            var content = JObject.Parse(Resources.Load<TextAsset>("Galaxy101/Table/table_content").text);
+            var defaults = (JObject)content["settingsDefaults"].DeepClone();
+            defaults.Remove("lang"); defaults.Remove("master");
+            defaults["view"] = Views[0];
+            defaults["tableSkin"] = TableAssetCatalog.TableSkins[0];
+            defaults["rackSkin"] = TableAssetCatalog.RackSkins[0];
+            defaults["tileSkin"] = TableAssetCatalog.TileSkins[0];
+            return defaults;
+        }
+
+        public bool Bool(string key) => key == "lang" || key == "master" ? throw new ArgumentException(key) : (bool)values[key];
+        public int Int(string key) => key == "master" ? (int?)menu?.Settings["master"] ?? 80 : (int)values[key];
+        public string Text(string key) => key == "lang" ? ((string)menu?.Settings["lang"] == "en" ? "en" : "tr") : (string)values[key];
+
+        public bool AutoSort => Bool("autoSort");
+        public bool Highlight => Bool("highlight");
+        public bool DoubleClick => Bool("dbl");
+        public int WarnSeconds => Int("warn");
+        public bool Bubbles => Bool("bubbles");
+        public bool GiftNotices => Bool("giftNotif");
+        public bool EmojiEffects => Bool("emojiFx");
+        public bool TurnHints => Bool("turnHint");
+        public string View => Text("view");
+        public string TableSkin => Text("tableSkin");
+        public string RackSkin => Text("rackSkin");
+        public string TileSkin => Text("tileSkin");
+
+        public void Set(string key, JToken value)
+        {
+            if (!Valid(key, value)) throw new ArgumentException("Invalid table setting " + key + " = " + value);
+            if (key == "lang" || key == "master") { if (!SetMenu(key, value)) return; }
+            else
+            {
+                if (JToken.DeepEquals(values[key], value)) return;
+                values[key] = value; Save();
+            }
+            Changed?.Invoke(key);
+        }
+
+        /// <summary>"Varsayılana dön": every row back to the design default, the language to Türkçe and the master volume to 80.</summary>
+        public void Reset()
+        {
+            foreach (var property in Defaults().Properties()) values[property.Name] = property.Value;
+            Save(); SetMenu("lang", "tr"); SetMenu("master", 80);
+            Changed?.Invoke(null);
+        }
+
+        private bool SetMenu(string key, JToken value)
+        {
+            if (menu == null) return false;
+            if (JToken.DeepEquals(menu.Settings[key], value)) return false;
+            var previous = menu.Settings[key];
+            menu.Settings[key] = value;
+            if (!menu.Persist()) { menu.Settings[key] = previous; Debug.LogWarning("Table settings could not save " + key + ": " + menu.LastPersistenceError); return false; }
+            menu.NotifyChanged();
+            return true;
+        }
+
+        private void Save()
+        {
+            if (!persist) return;
+            PlayerPrefs.SetString(PrefsKey, values.ToString(Newtonsoft.Json.Formatting.None)); PlayerPrefs.Save();
+        }
+
+        private static readonly HashSet<string> Volumes = new HashSet<string> { "master", "music", "sfx" };
+
+        private static bool Valid(string key, JToken value)
+        {
+            if (value == null) return false;
+            switch (key)
+            {
+                case "lang": return value.Type == JTokenType.String && ((string)value == "tr" || (string)value == "en");
+                case "warn": return value.Type == JTokenType.Integer && Array.IndexOf(WarnChoices, (int)value) >= 0;
+                case "view": return value.Type == JTokenType.String && Array.IndexOf(Views, (string)value) >= 0;
+                case "tableSkin": return value.Type == JTokenType.String && Array.IndexOf(TableAssetCatalog.TableSkins, (string)value) >= 0;
+                case "rackSkin": return value.Type == JTokenType.String && Array.IndexOf(TableAssetCatalog.RackSkins, (string)value) >= 0;
+                case "tileSkin": return value.Type == JTokenType.String && Array.IndexOf(TableAssetCatalog.TileSkins, (string)value) >= 0;
+                default:
+                    if (Volumes.Contains(key)) return value.Type == JTokenType.Integer && (int)value >= 0 && (int)value <= 100;
+                    return value.Type == JTokenType.Boolean;
+            }
+        }
+    }
+}

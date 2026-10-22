@@ -47,6 +47,9 @@ namespace Galaxy101.Table
             foreach (var r in GetComponentsInChildren<Renderer>(true)) r.enabled = value;
         }
 
+        /// <summary>Re-apply the hidden state to renderers added since (tile style change).</summary>
+        public void RefreshVisibility() => SetVisible(visible);
+
         public void Snap(Pose pose)
         {
             Target = pose; HasTarget = true; overridePose = null; tween = false;

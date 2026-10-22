@@ -42,6 +42,9 @@ namespace Galaxy101.Table
         public Vector3 AvatarPoint(int seat) => seat == 0 ? seatFrames[0].Pose(0, TY + 0.25f, 0.75f).UnityPosition : AnchorWorld("a" + seat);
         public Transform RackRoot(int seat) => rackInstances[seat].transform;
         public string Planet => planet;
+        public string TableSkin => tableSkin;
+        public string RackSkin => rackSkin;
+        public string TileSkin => tileSkin;
         public SkinService Skins => skins;
         public IReadOnlyList<Transform> Seats => seats;
         public Transform Slot(int seat, int row, int index) => slots[seat][row * SlotsPerRow + index];
@@ -184,11 +187,24 @@ namespace Galaxy101.Table
             }
             SetRackSkin(rackSkin);
             tilesRoot = new GameObject("Tiles").transform; tilesRoot.SetParent(transform, false);
-            var tileSet = Instantiate(TableAssetCatalog.Find(catalog.TileSets, tileSkin), transform, false); tileSet.name = "TileSource";
-            skins.Adopt(tileSet);
-            var faces = Newtonsoft.Json.Linq.JObject.Parse(Resources.Load<TextAsset>("Galaxy101/Table/TileFaces/tile_faces").text)["skins"][tileSkin];
-            tiles = new TileFactory(tileSet, tileSkin, (float)faces["roughness"], (float)faces["emission"]);
+            SetTileSkin(tileSkin);
             BuildDiscardZone();
+        }
+
+        private GameObject tileSource;
+
+        /// <summary>
+        /// Tile style (T21): a new factory from that skin's tile-set GLB and face atlas. Tiles already on the table keep
+        /// their objects; <see cref="TileFactory.Restyle"/> swaps their body and face material.
+        /// </summary>
+        public void SetTileSkin(string skin)
+        {
+            Kill(tileSource);
+            tileSource = Instantiate(TableAssetCatalog.Find(catalog.TileSets, skin), transform, false); tileSource.name = "TileSource";
+            skins.Adopt(tileSource);
+            var faces = Newtonsoft.Json.Linq.JObject.Parse(Resources.Load<TextAsset>("Galaxy101/Table/TileFaces/tile_faces").text)["skins"][skin];
+            tiles = new TileFactory(tileSource, skin, (float)faces["roughness"], (float)faces["emission"]);
+            tileSkin = skin;
         }
 
         public void SetTableSkin(string skin)

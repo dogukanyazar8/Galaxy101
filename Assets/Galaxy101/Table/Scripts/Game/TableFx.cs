@@ -59,16 +59,23 @@ namespace Galaxy101.Table
             sideRing = Flat("yan_halka", ringMesh, sideMaterial = Additive(Accent, 0), table.DiscardCenter(3), 0.066f);
             deckGlow = Flat("deste_parilti", Quad(), deckGlowMaterial = Additive(Accent, 0, glow), new Vector3(0, TY + 0.002f, 0), 0.25f);
 
-            foreach (var r in table.GetComponentsInChildren<Renderer>(true))
+            RescanTable();
+
+            winSpot = new GameObject("Kazanan_spot").AddComponent<Light>(); winSpot.transform.SetParent(transform, false);
+            winSpot.type = LightType.Spot; winSpot.color = Hex("#FFE7A3"); winSpot.range = 5; winSpot.spotAngle = 0.32f * 2 * Mathf.Rad2Deg; winSpot.innerSpotAngle = winSpot.spotAngle * 0.4f; winSpot.intensity = 0; winSpot.shadows = LightShadows.None;
+        }
+
+        /// <summary>Find the holo ring and LED materials of the current table and rack models (again after a theme change).</summary>
+        public void RescanTable()
+        {
+            holo = null; holoMaterial = null; leds.Clear();
+            foreach (var r in scene.GetComponentsInChildren<Renderer>(true))
             {
                 if (r.name.StartsWith("holo_halka", System.StringComparison.Ordinal) && holo == null) { holo = r.transform; holoMaterial = r.sharedMaterial; if (holoMaterial.HasProperty("_BaseColor")) holoBaseAlpha = holoMaterial.GetColor("_BaseColor").a; }
                 foreach (var m in r.sharedMaterials)
                     if (m != null && (m.name.StartsWith("led", System.StringComparison.Ordinal) || m.name.Contains("_led")) && m.HasProperty("_EmissionColor") && !leds.Exists(l => l.M == m))
                         leds.Add((m, m.GetColor("_EmissionColor")));
             }
-
-            winSpot = new GameObject("Kazanan_spot").AddComponent<Light>(); winSpot.transform.SetParent(transform, false);
-            winSpot.type = LightType.Spot; winSpot.color = Hex("#FFE7A3"); winSpot.range = 5; winSpot.spotAngle = 0.32f * 2 * Mathf.Rad2Deg; winSpot.innerSpotAngle = winSpot.spotAngle * 0.4f; winSpot.intensity = 0; winSpot.shadows = LightShadows.None;
         }
 
         // ---------- primitives ----------

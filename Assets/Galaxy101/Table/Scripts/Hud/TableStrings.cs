@@ -6,8 +6,10 @@ using UnityEngine;
 namespace Galaxy101.Table
 {
     /// <summary>
-    /// Table texts from the design handoff's string table (spec/data/table_strings_ek_tr_en.csv, copied to
-    /// Resources/Galaxy101/Table/Strings). Keys with {0}…{n} placeholders are formatted with the given arguments.
+    /// Table texts from the design handoff's string tables, copied to Resources/Galaxy101/Table/Strings:
+    /// table_strings (spec/data/table_strings_tr_en.csv), table_strings_ek (the extra-states handoff, wins on a clash) and
+    /// table_strings_extra (keys the reference page only has in script: tile styles). Keys with {0}…{n} placeholders are
+    /// formatted with the given arguments.
     /// </summary>
     public static class TableStrings
     {
@@ -26,10 +28,13 @@ namespace Galaxy101.Table
         private static void Load()
         {
             if (table != null) return;
-            var asset = Resources.Load<TextAsset>("Galaxy101/Table/Strings/table_strings_ek") ?? throw new InvalidOperationException("Missing table string resource.");
             table = new Dictionary<string, (string, string)>();
-            foreach (var row in Rows(asset.text))
-                if (row.Count >= 3 && row[0] != "key") table[row[0]] = (row[1], row[2]);
+            foreach (var name in new[] { "table_strings", "table_strings_ek", "table_strings_extra" })
+            {
+                var asset = Resources.Load<TextAsset>("Galaxy101/Table/Strings/" + name) ?? throw new InvalidOperationException("Missing table string resource: " + name);
+                foreach (var row in Rows(asset.text))
+                    if (row.Count >= 3 && row[0] != "key") table[row[0]] = (row[1], row[2]);
+            }
         }
 
         /// <summary>Minimal RFC 4180 reader: quoted fields, doubled quotes, commas inside quotes.</summary>

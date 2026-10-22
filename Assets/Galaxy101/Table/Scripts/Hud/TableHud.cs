@@ -15,7 +15,7 @@ namespace Galaxy101.Table
     /// theme tokens, and the menu's gamma presenter, so both screens blend in CSS byte space.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
-    public sealed class TableHud : MonoBehaviour
+    public sealed partial class TableHud : MonoBehaviour
     {
         public const float Width = 1280, Height = 720;
 
@@ -117,6 +117,7 @@ namespace Galaxy101.Table
                 RenderToasts();
             }
             foreach (var seat in new List<int>(balloons.Keys)) if (now > balloons[seat].Until) { balloons.Remove(seat); dirty = true; }
+            UpdateWindows();
             if (dirty) Render(Current);
         }
 
@@ -163,7 +164,7 @@ namespace Galaxy101.Table
         public event Action<string> Command;
 
         /// <summary>Act as if a HUD button with this command was pressed (keyboard shortcuts, tests).</summary>
-        public void Press(string command) => Command?.Invoke(command);
+        public void Press(string command) { if (!HandleLocal(command)) Command?.Invoke(command); }
 
         [SerializeField] private TableScene table;
 
@@ -229,10 +230,11 @@ namespace Galaxy101.Table
             view.Decorate(shade, "linear-gradient(rgba(3,5,14,.78) 0%,rgba(3,5,14,.5) 45%,transparent)");
             hudLayer = Layer("table-hud"); canvas.Add(hudLayer);
             toastLayer = Layer("table-toasts"); canvas.Add(toastLayer);
+            InitializeWindows(persistencePath == null);
 
             turnStarted = Time.realtimeSinceStartup;
             Render(Current);
-            canvas.schedule.Execute(() => { float now = Time.realtimeSinceStartup; foreach (var motion in motions) motion(now); }).Every(16);
+            canvas.schedule.Execute(() => { float now = Time.realtimeSinceStartup; foreach (var motion in motions) motion(now); foreach (var motion in windowMotions) motion(now); }).Every(16);
             Debug.Log("GALAXY101_TABLE_HUD_READY theme=" + table.Planet + " language=" + loc.Language);
         }
 
@@ -1172,7 +1174,7 @@ namespace Galaxy101.Table
         private VisualElement Clickable(VisualElement element, string command)
         {
             element.pickingMode = PickingMode.Position;
-            element.RegisterCallback<ClickEvent>(_ => Command?.Invoke(command));
+            element.RegisterCallback<ClickEvent>(_ => Press(command));
             return element;
         }
 

@@ -120,7 +120,11 @@ namespace Galaxy101.Table
             Session = new LocalSession();
             life = new CancellationTokenSource();
             random = seed != 0 ? new System.Random((int)seed) : new System.Random();
-            if (hud != null) { hud.Command += OnHudCommand; hud.TilePosition = id => Board.ViewOf(id) is TileView v && v != null ? v.transform.position : (Vector3?)null; }
+            if (hud != null)
+            {
+                hud.Command += OnHudCommand; hud.TilePosition = id => Board.ViewOf(id) is TileView v && v != null ? v.transform.position : (Vector3?)null;
+                hud.Initialize(); hud.Settings.Changed += OnSetting; ReadSettings();
+            }
             _ = Run(life.Token);
         }
 
@@ -135,7 +139,7 @@ namespace Galaxy101.Table
             life?.Cancel();
             foreach (var t in timers) t.Done.TrySetCanceled(); timers.Clear();
             humanDone?.TrySetCanceled();
-            if (hud != null) hud.Command -= OnHudCommand;
+            if (hud != null) { hud.Command -= OnHudCommand; if (hud.Settings != null) hud.Settings.Changed -= OnSetting; }
             Board?.Clear();
             Session?.Dispose();
         }
@@ -283,7 +287,7 @@ namespace Galaxy101.Table
                 await Seconds(0.05f);
             }
             await Seconds(0.9f);
-            table.CameraRig.GoTo(TableCameraRig.View.Player, 3f);
+            table.CameraRig.GoTo(hud != null ? hud.PreferredView : TableCameraRig.View.Player, 3f);
             for (int n = 3; n >= 1; n--) { Countdown = n; countdownAt = Time.realtimeSinceStartup; Notify(); await Seconds(1); }
             Countdown = 0;
         }
@@ -776,11 +780,11 @@ namespace Galaxy101.Table
         public void ApplyRackPlan(IReadOnlyDictionary<int, RackSlot> plan) { Rack.Apply(plan); SyncBoard(); Notify(); }
 
         // ---------- views ----------
-        public void SyncBoard()
+        public void SyncBoard(bool instant = false)
         {
             if (Board == null || Session == null) return;
             var view = Session.GetView(Me);
-            Board.Sync(BuildBoard(view, staged.Count > 0 && Active == Me ? Projection() : null, Me));
+            Board.Sync(BuildBoard(view, staged.Count > 0 && Active == Me ? Projection() : null, Me), instant);
             Board.SetValid(highlightSets && Indicator.IsValid ? HandEvaluation.Of(Rack, Indicator).ValidTiles : null);
             SyncedVersion = view.Version;
         }
@@ -824,6 +828,25 @@ namespace Galaxy101.Table
         }
 
         private string L(string tr, string en) => hud != null ? hud.L(tr, en) : tr;
+
+        // ---------- table settings (spec/13 §6): applied at once ----------
+        private void ReadSettings()
+        {
+            var s = hud.Settings;
+            autoSort = s.AutoSort; doubleClickDiscard = s.DoubleClick; highlightSets = s.Highlight; warnSeconds = s.WarnSeconds; turnHint = s.TurnHints;
+        }
+
+        /// <summary>The HUD has already moved the camera and swapped the models; the board follows the new racks and tile style.</summary>
+        private void OnSetting(string key)
+        {
+            ReadSettings();
+            bool playing = Current != Phase.Waiting && Current != Phase.Seating && Current != Phase.Deal;
+            if (key == null || key == "tableSkin" || key == "rackSkin") Fx?.RescanTable();
+            if (key == null || key == "tileSkin") Board?.Restyle();
+            if (playing && (key == null || key == "rackSkin" || key == "highlight")) SyncBoard(key != "highlight");
+            if (key == "warn" && warnSeconds == 0 && warned) hud?.Dismiss(T("msg.timeWarn"));
+            Notify();
+        }
 
         private string T(string key, params object[] args) => TableStrings.Get(key, hud != null ? hud.L("tr", "en") : "tr", args);
 

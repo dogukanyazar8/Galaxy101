@@ -229,6 +229,14 @@ namespace Galaxy101.Table
         }
 
         /// <summary>Green bars under my rack tiles that form valid sets ("Geçerli perleri vurgula").</summary>
+        /// <summary>Tile style change: every tile object (rack, table, opponents, deck) takes the scene's new factory look.</summary>
+        public void Restyle()
+        {
+            foreach (var v in known.Values) if (v != null) { scene.Tiles.Restyle(v.gameObject); v.RefreshVisibility(); }
+            foreach (var list in hidden) foreach (var v in list) if (v != null) { scene.Tiles.Restyle(v.gameObject); v.RefreshVisibility(); }
+            foreach (var go in deckPool) if (go != null) scene.Tiles.Restyle(go);
+        }
+
         public void SetValid(ICollection<int> valid)
         {
             foreach (var pair in known) pair.Value.Valid = valid != null && valid.Contains(pair.Key);

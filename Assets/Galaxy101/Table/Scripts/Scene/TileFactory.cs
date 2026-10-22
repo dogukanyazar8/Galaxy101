@@ -63,6 +63,16 @@ namespace Galaxy101.Table
             return tile;
         }
 
+        /// <summary>Give a tile made by another factory this factory's body and face material (tile style change).</summary>
+        public void Restyle(GameObject tile)
+        {
+            var old = tile.transform.Find("tas_govde");
+            var b = UnityEngine.Object.Instantiate(body, tile.transform, false); b.name = "tas_govde";
+            b.transform.localPosition = Vector3.zero; b.transform.localRotation = Quaternion.identity; b.SetActive(true);
+            if (old != null) { b.transform.SetSiblingIndex(old.GetSiblingIndex()); old.gameObject.SetActive(false); UnityEngine.Object.Destroy(old.gameObject); }
+            var f = tile.transform.Find("tas_yuz"); if (f != null) f.GetComponent<MeshRenderer>().sharedMaterial = face;
+        }
+
         /// <summary>Show <paramref name="code"/> on the tile's face plane, or hide it (null) for a tile seen from behind.</summary>
         public void SetFace(GameObject tile, string code)
         {

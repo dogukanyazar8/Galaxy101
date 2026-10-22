@@ -19,6 +19,9 @@ namespace Galaxy101
         public string Planet { get; set; } = "Satürn";
         public long Chips { get; set; } = 125400;
         public long Gems { get; set; } = 340;
+        /// <summary>Player level and XP inside it (bot tables award XP; the level needs 500 × level XP, table_rules.json).</summary>
+        public int Level { get; set; } = 24;
+        public long Xp { get; set; } = 11200;
         public HashSet<string> Invited { get; } = new HashSet<string>(StringComparer.Ordinal);
         public HashSet<string> RequestsHandled { get; } = new HashSet<string>(StringComparer.Ordinal);
         public HashSet<string> SentRequests { get; } = new HashSet<string>(StringComparer.Ordinal);
@@ -77,7 +80,7 @@ namespace Galaxy101
                 var directory = Path.GetDirectoryName(Path.GetFullPath(persistencePath));
                 Directory.CreateDirectory(directory);
                 var state = new JObject { ["version"] = 1, ["Settings"] = Settings.DeepClone(), ["Profile"] = Profile.DeepClone(),
-                    ["SelectedMode"] = SelectedMode, ["Planet"] = Planet };
+                    ["SelectedMode"] = SelectedMode, ["Planet"] = Planet, ["Progress"] = new JObject { ["level"] = Level, ["xp"] = Xp } };
                 File.WriteAllText(temporary, state.ToString(Formatting.Indented));
                 if (File.Exists(persistencePath)) File.Replace(temporary, persistencePath, null);
                 else File.Move(temporary, persistencePath);
@@ -117,6 +120,9 @@ namespace Galaxy101
                     if (SettingsValidation.TryInteger(state["SelectedMode"], out long mode) && mode >= 0 && mode < ((JArray)Content["modes"]).Count)
                         SelectedMode = (int)mode;
                     if (state["Planet"]?.Type == JTokenType.String && Themes[(string)state["Planet"]] != null) Planet = (string)state["Planet"];
+                    if (state["Progress"] is JObject progress && SettingsValidation.TryInteger(progress["level"], out long level) && level >= 1 && level <= 999 &&
+                        SettingsValidation.TryInteger(progress["xp"], out long xp) && xp >= 0 && xp < 500L * level)
+                    { Level = (int)level; Xp = xp; }
                 }
             }
             catch (Exception ex) when (ex is JsonException || ex is IOException || ex is UnauthorizedAccessException || ex is System.Security.SecurityException)

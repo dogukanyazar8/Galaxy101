@@ -26,6 +26,7 @@ namespace Galaxy101
         private int outputWidth,outputHeight;
         private bool tableLayout;
         private Color tableHalo;
+        private Vector4 layoutShape, layoutHalo, layoutPlacement;
         private static readonly int BackdropId=Shader.PropertyToID("_Galaxy101CanvasBackdropCopy");
         public BackgroundTimeState TimeState => timeState;
         public RenderTexture Output => output;
@@ -51,7 +52,14 @@ namespace Galaxy101
         /// (closest-side, transparent at 70 %) and the planet static at (300,118) × .82, −16°, one turn per 40 s.
         /// No planet glow, rim or menu vignette.
         /// </summary>
-        public void UseTableLayout(Color halo) {tableLayout=true;tableHalo=halo;dirty=true;}
+        public void UseTableLayout(Color halo) => UseStaticLayout(new Vector4(358.4f,86.4f,1152,540),new Vector4(300,118,210,1),new Vector4(300,118,.82f,0),halo);
+        /// <summary>
+        /// A static composition (no menu glow, rim or vignette; planet at a fixed −16°, one turn per 40 s): gradient centre +
+        /// radii, a pg halo (centre, radius) and the planet (centre, scale) in 1280×720 canvas pixels. Used by the table and
+        /// the table loading screen (T50).
+        /// </summary>
+        public void UseStaticLayout(Vector4 gradient,Vector4 halo,Vector4 placement,Color haloColor)
+        {tableLayout=true;tableHalo=haloColor;layoutShape=gradient;layoutHalo=new Vector4(halo.x,halo.y,halo.z,1);layoutPlacement=placement;dirty=true;}
         public void SetFocused(bool value) {if(focused!=value) wasRunning=false;focused=value;}
         // A batch player deliberately renders into its own targets without an OS foreground window.
         private void OnApplicationFocus(bool value) => SetFocused(value||Application.isBatchMode);
@@ -123,9 +131,9 @@ namespace Galaxy101
             float angle=(tableLayout?-16:Mathf.Lerp(-16,-14,EaseInOut(phase)))*Mathf.Deg2Rad;
             gradientMaterial.SetColor("_Bg1",planet.Bg1);gradientMaterial.SetColor("_Bg2",planet.Bg2);gradientMaterial.SetColor("_Bg3",planet.Bg3);
             gradientMaterial.SetColor("_Halo",tableLayout?tableHalo:planet.Halo);
-            gradientMaterial.SetVector("_Shape",tableLayout?new Vector4(358.4f,86.4f,1152,540):new Vector4(640,252,1024,504));
-            gradientMaterial.SetVector("_HaloShape",tableLayout?new Vector4(300,118,210,1):new Vector4(640,300,231,0));
-            planetMaterial.SetVector("_Placement",tableLayout?new Vector4(300,118,.82f,0):new Vector4(640,300,1,0));gradientMaterial.SetColor("_GlowAtmosphere",planet.GlowAtmosphere);
+            gradientMaterial.SetVector("_Shape",tableLayout?layoutShape:new Vector4(640,252,1024,504));
+            gradientMaterial.SetVector("_HaloShape",tableLayout?layoutHalo:new Vector4(640,300,231,0));
+            planetMaterial.SetVector("_Placement",tableLayout?layoutPlacement:new Vector4(640,300,1,0));gradientMaterial.SetColor("_GlowAtmosphere",planet.GlowAtmosphere);
             gradientMaterial.SetFloat("_Flattening",planet.Flattening);gradientMaterial.SetFloat("_GroupAngle",angle);
             if(surface==null) surface=Resources.Load<Texture2D>("Galaxy101/Planets/"+planet.Resource);
             if(surface==null) throw new InvalidOperationException("Missing prebaked Galaxy101 planet texture: "+planet.Resource);

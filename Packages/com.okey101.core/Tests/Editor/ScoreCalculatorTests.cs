@@ -53,12 +53,13 @@ namespace Okey101.Core.Tests
             Assert.That(score.B, Is.EqualTo(226));
             Assert.That(score.P, Is.EqualTo(101));
             Assert.That(score.M, Is.EqualTo(2));
-            Assert.That(score.Total, Is.EqualTo(654));
+            // spec/17 §6: B × M + P (penalties are not multiplied): 226 × 2 + 101.
+            Assert.That(score.Total, Is.EqualTo(553));
         }
 
-        [TestCase(101, 0)]
-        [TestCase(202, 808)]
-        public void WinnerPenaltiesAreAlsoMultiplied(int penalties, int total)
+        [TestCase(101, -707)]
+        [TestCase(202, -606)]
+        public void WinnerPenaltiesAreAddedUnmultiplied(int penalties, int total)
         {
             var score = ScoreCalculator.Calculate(OpeningKind.Pairs, true, 0, 0, penalties,
                 Win(OpeningKind.Pairs, true, true));
@@ -74,7 +75,7 @@ namespace Okey101.Core.Tests
             var score = ScoreCalculator.Calculate(OpeningKind.None, false, int.MaxValue, 2, 101,
                 Win(OpeningKind.Series, false, true));
             Assert.That(score.B, Is.EqualTo(202));
-            Assert.That(score.Total, Is.EqualTo(606));
+            Assert.That(score.Total, Is.EqualTo(505)); // 202 × 2 + 101
         }
 
         [TestCase(OpeningKind.Series, 0, 0, 0)]

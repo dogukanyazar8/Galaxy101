@@ -69,6 +69,13 @@ namespace Galaxy101.Table
         private string momentTitle, momentSub; private int momentSeat = -1; private bool momentOn;
         private float countdownAt, resultAt, momentAt;
         private TaskCompletionSource<bool> nextHandSignal;
+        // Match (spec/17 §7): hands played in this match, points per hand per seat, XP snapshot at the match start.
+        public int MatchHand { get; private set; }
+        public bool MatchOpen { get; private set; }
+        private readonly List<int?>[] handScores = { new List<int?>(), new List<int?>(), new List<int?>(), new List<int?>() };
+        private int handsWon, handsOther, matchStartLevel, xpBonus, place;
+        private long matchStartXp;
+        private TaskCompletionSource<string> matchSignal;
         private bool seating = true;
         public bool IOpened => OpenedKind(Me) != OpeningKind.None;
         public bool CanMeld => CanDiscard && IOpened;
@@ -235,7 +242,9 @@ namespace Galaxy101.Table
         {
             if (pickedTile >= 0 && Current == Phase.Discard && staged.Count == 0) await PutBackAsync();
             if (Current == Phase.Draw) { if (!await Draw(DrawSource.Stock, null)) return; await Seconds(0.7f); }
-            int pick = LastDrawn >= 0 && Rack.TryFind(LastDrawn, out _) ? LastDrawn : Rack.Tiles.LastOrDefault();
+            // The drawn tile, else the rightmost one; never the okey (it would cost +101) nor the tile taken from the pile.
+            bool Throwable(int id) => id != PickedTile && !TileCatalog.IsRealJoker(new TileId(id), Indicator);
+            int pick = LastDrawn >= 0 && Rack.TryFind(LastDrawn, out _) && Throwable(LastDrawn) ? LastDrawn : Rack.Tiles.Where(Throwable).DefaultIfEmpty(Rack.Tiles.Last()).Last();
             if (await TryCommit(pick, false)) return;
             staged.Clear();
             var view = Session.GetView(Me);
@@ -284,7 +293,12 @@ namespace Galaxy101.Table
             var view = Session.GetView(Me); LastResult = view.Result;
             for (int k = 0; k < 4; k++) Totals[k] += view.Result.Scores[k].Total ?? 0;
             int winner = HandWinner(view.Result);
-            LastXp = humanSeat == Me ? (winner == Me ? 340 : 60) : 0; XpEarned += LastXp;
+            if (MatchHand == 0) SnapshotProgress();
+            MatchHand++;
+            for (int k = 0; k < 4; k++) handScores[k].Add(view.Result.Scores[k].Total);
+            var rules = TableRules.Current;
+            LastXp = humanSeat == Me ? (winner == Me ? rules.XpHandWin : rules.XpHandOther) : 0; XpEarned += LastXp; AddXp(LastXp);
+            if (winner == Me) handsWon++; else handsOther++;
             Current = Phase.Finished; Active = -1;
             var info = view.Result.FinishInfo;
             Debug.Log("GALAXY101_TABLE_HAND_END hand=" + HandNumber + " reason=" + info.Reason + " winner=" + info.Winner
@@ -303,6 +317,123 @@ namespace Galaxy101.Table
             ResultOpen = true; resultAt = Time.realtimeSinceStartup; nextHandSignal = new TaskCompletionSource<bool>(); Notify();
             await Task.WhenAny(nextHandSignal.Task, Seconds(15));
             ResultOpen = false; nextHandSignal = null; Notify();
+            if (MatchHand >= TableRules.Current.MatchHands) await ShowMatchEnd();
+        }
+
+        /// <summary>
+        /// Match end (T45–T46): lowest total wins; place bonus XP (500 / 200 / 80 / 0), then "Tekrar oyna" starts a new
+        /// match or "Lobiye dön" leaves. Waits for the player.
+        /// </summary>
+        private async Task ShowMatchEnd()
+        {
+            var order = Enumerable.Range(0, 4).OrderBy(k => Totals[k]).ThenBy(k => k).ToList();
+            place = order.IndexOf(Me) + 1;
+            xpBonus = humanSeat == Me ? TableRules.Current.XpPlace[place - 1] : 0; AddXp(xpBonus); XpEarned += xpBonus;
+            MatchOpen = true; matchStartedAt = Time.realtimeSinceStartup; matchSignal = new TaskCompletionSource<string>(); Notify();
+            Debug.Log("GALAXY101_TABLE_MATCH_END place=" + place + " totals=" + string.Join(",", Totals));
+            string choice = await matchSignal.Task;
+            MatchOpen = false; matchSignal = null;
+            if (choice == "lobby") { LeaveNow(); return; }
+            MatchHand = 0; handsWon = handsOther = 0;
+            for (int k = 0; k < 4; k++) { Totals[k] = 0; handScores[k].Clear(); }
+            Notify();
+        }
+
+        private float matchStartedAt;
+
+        /// <summary>"Tekrar oyna" / "Lobiye dön" on the match end card.</summary>
+        public void ChooseAfterMatch(string choice) => matchSignal?.TrySetResult(choice);
+
+        private void SnapshotProgress()
+        {
+            var model = hud != null ? hud.Model : null;
+            matchStartLevel = model?.Level ?? 1; matchStartXp = model?.Xp ?? 0;
+        }
+
+        /// <summary>Bot tables award XP only; it is kept in the menu profile (level needs 500 × level XP).</summary>
+        private void AddXp(long amount)
+        {
+            var model = hud != null ? hud.Model : null;
+            if (model == null || amount <= 0) return;
+            int level = model.Level; long xp = model.Xp;
+            TableRules.Current.Add(ref level, ref xp, amount);
+            model.Level = level; model.Xp = xp; model.Persist();
+        }
+
+        /// <summary>Hand result v2 (T42–T44): explained points, penalty column with reasons, multiplier badges.</summary>
+        private TableHud.ResultInfo ResultInfo(PlayerView view)
+        {
+            var info = LastResult.FinishInfo; int winner = HandWinner(LastResult);
+            var scores = LastResult.Scores;
+            var result = new TableHud.ResultInfo
+            {
+                Title = L(MatchHand + ". EL BİTTİ", "HAND " + MatchHand + " OVER"),
+                Sub = info.Winner.HasValue ? Upper(FirstName(info.Winner.Value)) + L(" BİTİRDİ", " FINISHED") : info.Reason == FinishReason.AllPairs ? Upper(T("noteFinPairs")) : L("TAŞ BİTTİ", "DECK EMPTY"),
+                Head = winner == Me ? L("Kazandın!", "You won!") : FirstName(winner) + L(" kazandı", " won"),
+                Xp = LastXp, TotalXp = XpEarned, Winner = winner, StartedAt = resultAt, Seconds = 15,
+                Multiplier = scores.Max(x => x.M), Unscored = info.Reason == FinishReason.AllPairs, LastHand = MatchHand >= TableRules.Current.MatchHands,
+            };
+            foreach (int k in Enumerable.Range(0, 4).OrderBy(k => scores[k].Total ?? 0).ThenBy(k => k))
+            {
+                var score = scores[k]; var kind = k == Me ? view.OwnOpening : view.Players[k].Opening;
+                bool finished = info.Winner == k;
+                var row = new TableHud.ResultRow
+                {
+                    Seat = k, Total = Totals[k], Penalty = score.HasScore ? score.P : 0,
+                    Hand = score.HasScore ? score.B * score.M : (int?)null,
+                    Note = finished ? L("bitirdi", "finished")
+                        : kind == OpeningKind.Pairs ? T("notePairs") : kind != OpeningKind.None ? L("açtı", "opened") : L("açmadı", "not opened"),
+                    PenaltyWhy = string.Join(", ", penaltyReasons[k].Select(r => r.Why).Distinct()),
+                };
+                if (finished && info.Reason == FinishReason.DiscardWin)
+                {
+                    if (info.DiscardedRealJoker) row.Badges.Add((T("mulOkey"), true));
+                    if (info.WinnerOpening == OpeningKind.Pairs) row.Badges.Add((T("mulPairs"), true));
+                    if (info.WinnerOpenedThisTurn) row.Badges.Add((T("mulHand"), true));
+                }
+                if (!finished && kind == OpeningKind.Pairs && score.HasScore) row.Badges.Add((T("pairsHand"), false));
+                if (score.HasScore) row.Explain = Explain(score, finished, kind);
+                result.Rows.Add(row);
+            }
+            return result;
+        }
+
+        /// <summary>"−101 × 2 = −202", "17 × 2 × 2 = 68": the base, the pairs ×2, then each finish ×2.</summary>
+        private static string Explain(ScoreBreakdown score, bool finished, OpeningKind kind)
+        {
+            int baseValue = finished ? -101 : kind == OpeningKind.None ? 202 : score.N + 101 * score.J;
+            var factors = new List<int>();
+            if (!finished && kind == OpeningKind.Pairs) factors.Add(2);
+            for (int m = score.M; m > 1; m /= 2) factors.Add(2);
+            if (factors.Count == 0) return null;
+            string Number(int v) => v < 0 ? "−" + (-v).ToString("N0", new System.Globalization.CultureInfo("tr-TR")) : v.ToString("N0", new System.Globalization.CultureInfo("tr-TR"));
+            return Number(baseValue) + string.Concat(factors.Select(f => " × " + f)) + " = " + Number(score.B * score.M);
+        }
+
+        /// <summary>Match end card data (T45–T46).</summary>
+        private TableHud.MatchInfo MatchInfo()
+        {
+            var rules = TableRules.Current; int hands = rules.MatchHands;
+            var model = hud?.Model;
+            int level = model?.Level ?? 1; long xp = model?.Xp ?? 0;
+            var order = Enumerable.Range(0, 4).OrderBy(k => Totals[k]).ThenBy(k => k).ToList();
+            int leader = order[0];
+            var m = new TableHud.MatchInfo
+            {
+                Kick = T("msKick", hands), Won = place == 1, Place = place, Hands = hands, StartedAt = matchStartedAt,
+                Head = place == 1 ? T("msWin") : T("msPlace", place),
+                Sub = place == 1 ? T("msWinSub", hands) : T("msLoseSub", FirstName(leader), Totals[Me] - Totals[leader]),
+                Xp = handsWon * rules.XpHandWin + handsOther * rules.XpHandOther + xpBonus,
+                LevelFrom = matchStartLevel, LevelTo = level, LevelUp = level > matchStartLevel,
+                FromFraction = (float)matchStartXp / rules.XpForLevel(matchStartLevel), ToFraction = (float)xp / rules.XpForLevel(level),
+                XpLeft = T("msXpLeft", (rules.XpForLevel(level) - xp).ToString("N0", new System.Globalization.CultureInfo("tr-TR"))),
+                ByHand = handScores.Select(list => list.ToArray()).ToArray(),
+            };
+            foreach (int k in order) m.Standings.Add((k, Totals[k]));
+            if (handsWon > 0) m.XpLines.Add((T("msXpWins"), handsWon + " × " + rules.XpHandWin, handsWon * rules.XpHandWin));
+            if (handsOther > 0) m.XpLines.Add((T("msXpOther"), handsOther + " × " + rules.XpHandOther, handsOther * rules.XpHandOther));
+            if (place <= 3 && xpBonus > 0) m.XpLines.Add((T("msXp" + place), "", xpBonus));
+            return m;
         }
 
         /// <summary>Lowest hand score takes the hand; a pairs finish (unscored) goes to the finisher.</summary>
@@ -674,6 +805,8 @@ namespace Galaxy101.Table
                 case "exit-stay": CancelExit(); break;
                 case "exit-leave": ConfirmExit(); break;
                 case "next": NextHand(); break;
+                case "again": ChooseAfterMatch("again"); break;
+                case "lobby": ChooseAfterMatch("lobby"); break;
                 default:
                     if (command.StartsWith("invite:", StringComparison.Ordinal) && int.TryParse(command.Substring(7), out int seat)) Invite(seat);
                     break;
@@ -692,6 +825,14 @@ namespace Galaxy101.Table
             Message(TableHud.ToastKind.Success, L("Masadan kalktın · lobiye dönülüyor", "You left the table · returning to the lobby"));
             Debug.Log("GALAXY101_TABLE_EXIT scene=" + menuScene);
             StartCoroutine(LeaveAfter(1.7f));
+        }
+
+        /// <summary>"Lobiye dön": straight to the main menu.</summary>
+        private void LeaveNow()
+        {
+            if (leaving) return;
+            leaving = true; life?.Cancel();
+            UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(menuScene, UnityEngine.SceneManagement.LoadSceneMode.Single);
         }
 
         private System.Collections.IEnumerator LeaveAfter(float seconds)
@@ -716,10 +857,12 @@ namespace Galaxy101.Table
                 Active = Active, DeckCount = view.StockCount, TurnSeconds = Mathf.RoundToInt(turnSeconds), TurnStartedAt = turnStartedReal,
                 Warn = HumanTurn && warned, TurnHint = turnHint, ShowIndicator = Current != Phase.Deal && Current != Phase.Seating, FirstTurn = view.Phase == RoundPhase.PlanningTurn && view.PendingDraw == null,
                 Pairs = eval.Pairs.Count, PickedTile = PickedTile, DeckOnly = deckOnly && HumanTurn, ShowPutBack = PickedTile >= 0 && staged.Count == 0,
-                Countdown = Countdown, CountdownAt = countdownAt, ExitOpen = ExitOpen, Hand = HandNumber,
+                Countdown = Countdown, CountdownAt = countdownAt, ExitOpen = ExitOpen,
+                Hand = Current == Phase.Finished || MatchOpen ? MatchHand : MatchHand + 1, MatchHands = TableRules.Current.MatchHands,
             };
             for (int k = 0; k < 4; k++) s.Seated[k] = Current != Phase.Seating || Seated[k];
             if (Current == Phase.Seating) s.DeckCount = 106;
+            if (hud?.Model != null) { s.Level = hud.Model.Level; s.XpInLevel = hud.Model.Xp; s.XpNeed = TableRules.Current.XpForLevel(hud.Model.Level); }
             if (momentOn) s.Moment = new TableHud.MomentInfo { Title = momentTitle, Sub = momentSub, Seat = momentSeat, StartedAt = momentAt };
             for (int k = 0; k < 4; k++)
             {
@@ -740,24 +883,8 @@ namespace Galaxy101.Table
             // spec/17 §3: Aç / Çift aç stay pressable below the threshold (a short opening costs +101).
             s.CanOpen = CanDiscard && (s.Opened[Me] > 0 ? !s.OpenedPairs[Me] && eval.Groups.Count > 0 : true);
             s.CanPair = CanDiscard && (s.OpenedPairs[Me] ? eval.Pairs.Count > 0 : s.Opened[Me] == 0);
-            if (ResultOpen && LastResult != null)
-            {
-                var info = LastResult.FinishInfo; int winner = HandWinner(LastResult);
-                var result = new TableHud.ResultInfo
-                {
-                    Title = L(HandNumber + ". EL BİTTİ", "HAND " + HandNumber + " OVER"),
-                    Sub = info.Winner.HasValue ? Upper(FirstName(info.Winner.Value)) + L(" BİTİRDİ", " FINISHED") : L("TAŞ BİTTİ", "DECK EMPTY"),
-                    Head = winner == Me ? L("Kazandın!", "You won!") : FirstName(winner) + L(" kazandı", " won"),
-                    Xp = LastXp, TotalXp = XpEarned, Winner = winner, StartedAt = resultAt, Seconds = 15,
-                };
-                foreach (int k in Enumerable.Range(0, 4).OrderBy(k => LastResult.Scores[k].Total ?? int.MaxValue).ThenBy(k => k))
-                {
-                    var kind = view.Players[k].Opening;
-                    string note = info.Winner == k ? L("bitirdi", "finished") : kind == OpeningKind.Pairs ? L("çift açtı", "opened pairs") : kind != OpeningKind.None ? L("açtı", "opened") : L("açmadı", "not opened");
-                    result.Rows.Add(new TableHud.ResultRow { Seat = k, Note = note, Hand = LastResult.Scores[k].Total, Total = Totals[k] });
-                }
-                s.Result = result;
-            }
+            if (ResultOpen && LastResult != null) s.Result = ResultInfo(view);
+            if (MatchOpen) s.Match = MatchInfo();
             return s;
         }
     }

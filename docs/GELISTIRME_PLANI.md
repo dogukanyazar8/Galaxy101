@@ -40,7 +40,7 @@ Sıra mantığı: **tasarımı hazır olan önce.** T01–T27 tasarlı; kural du
 | Faz | İçerik | Referans | Bağımlılık |
 |---|---|---|---|
 | 4 · Döngüyü kapat | El sonu tablosu + "Sonraki el · 15" (bot maçı: yalnız XP), bitiş anı şeridi (BİTİRDİN / X BİTİRDİ), TAŞ BİTTİ şeridi, masadan kalk kartı, bekleme + davet + 3-2-1 | T01, T02, T23, T24, T25 | yok |
-| 5 · Kural arayüzü | Okey seçici, ceza onayı + rozet, yerden alma kuralı görünümü, kural mesajları (TR/EN), puan dökümü çarpanları, maç sonu | **Tasarım paketi** | tasarım |
+| 5 · Kural arayüzü ✓ (22 Ekim 2026) | Okey seçici, ceza onayı + rozet, yerden alma kuralı görünümü, kural mesajları (TR/EN), puan dökümü çarpanları, maç sonu | **Tasarım paketi** | tasarım |
 | 6 · Efektler | Karma halkaları, deste dönüşü, kıvılcım/dalga, gösterge parlaması, yeni taş + geçerli per çizgileri, halka nabızları, konfeti/spot | spec/12, T03, T04, T23 | Faz 4 |
 | 7 · Masa pencereleri | Ayarlar (görünüm, oyun, ses, bildirim) + kuşbakışı kamera + masa/ıstaka/taş görünüm değişimi; rakip kartı; sohbet; ikram/hediye paneli + roket | T07–T22 | ikram fiyatı Faz S3 ekonomisine bağlanır |
 | 8 · Ses | Taş, çekme/atma, açma, bitiş, ikram, arayüz | — | ses varlıkları |

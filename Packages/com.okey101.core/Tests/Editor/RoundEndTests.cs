@@ -154,7 +154,7 @@ namespace Okey101.Core.Tests
         }
 
         [Test]
-        public void WinnerAccumulatedPenaltiesAreMultiplied()
+        public void WinnerAccumulatedPenaltiesAreAddedUnmultiplied()
         {
             var groups = Enumerable.Range(1, 5).Select(n => Pair(TileColor.Red, n)).ToArray();
             var joker = Id(TileColor.Black, 1);
@@ -163,7 +163,7 @@ namespace Okey101.Core.Tests
                 new TurnPlan(new TableAction[] { new OpenGroups(OpeningKind.Pairs, groups) }, joker, false)));
             Assert.That(result.Result.Scores[0].B, Is.EqualTo(-101));
             Assert.That(result.Result.Scores[0].P, Is.EqualTo(202));
-            Assert.That(result.Result.Scores[0].Total, Is.EqualTo(808));
+            Assert.That(result.Result.Scores[0].Total, Is.EqualTo(-606)); // −101 × 8 + 202
         }
 
         [Test]

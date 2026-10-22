@@ -347,6 +347,79 @@ namespace Galaxy101.Tests
         }
 
         [UnityTest]
+        [Timeout(600000)]
+        public IEnumerator FiveHandMatchEndsWithStandingsXpAndPlayAgain()
+        {
+            var game = Build(TableGame.Me, 2468, true);
+            game.Configure(TableGame.Me, 2468, 1.5f, false); // my turns time out: the table plays them for me
+            var hud = hudOwner.GetComponent<TableHud>();
+            int startLevel = hud.Model.Level; long startXp = hud.Model.Xp;
+            Time.timeScale = 6;
+            string resultCapture = Environment.GetEnvironmentVariable("GALAXY_TABLE_RESULT2_CAPTURE");
+            for (int hand = 1; hand <= TableRules.Current.MatchHands; hand++)
+            {
+                yield return Until(() => game.ResultOpen && game.MatchHand == hand, 240, "hand " + hand + " result");
+                yield return null;
+                Assert.That(hud.Canvas.Q<VisualElement>("table-result-card"), Is.Not.Null);
+                Assert.That(game.HudState().Result.Rows.Count, Is.EqualTo(4));
+                if (hand == 1 && !string.IsNullOrEmpty(resultCapture)) { Time.timeScale = 1; yield return Capture(hudOwner.GetComponent<UIDocument>(), resultCapture); Time.timeScale = 6; }
+                game.NextHand();
+            }
+            // T45–T46: the match end waits for the player.
+            yield return Until(() => game.MatchOpen, 30, "the match end card");
+            yield return null;
+            Assert.That(hud.Canvas.Q<VisualElement>("table-match-card"), Is.Not.Null);
+            var match = game.HudState().Match;
+            Assert.That(match.Standings.Count, Is.EqualTo(4));
+            Assert.That(match.Standings.Select(x => x.Total), Is.Ordered, "lowest total first");
+            Assert.That(match.ByHand.All(row => row.Length == TableRules.Current.MatchHands), Is.True);
+            Assert.That(match.Xp, Is.GreaterThanOrEqualTo(5 * TableRules.Current.XpHandOther));
+            long gained = (hud.Model.Level - startLevel) * 0L + (hud.Model.Xp - startXp);
+            Assert.That(hud.Model.Level > startLevel || hud.Model.Xp > startXp, Is.True, "XP is written to the profile");
+            string matchCapture = Environment.GetEnvironmentVariable("GALAXY_TABLE_MATCH_CAPTURE");
+            if (!string.IsNullOrEmpty(matchCapture)) { Time.timeScale = 1; yield return Capture(hudOwner.GetComponent<UIDocument>(), matchCapture); Time.timeScale = 6; }
+            hud.Press("again");
+            yield return Until(() => !game.MatchOpen && game.MatchHand == 0, 10, "a new match");
+            Assert.That(game.Totals.All(t => t == 0), Is.True);
+        }
+
+        [UnityTest]
+        [Timeout(120000)]
+        public IEnumerator LoadingScreenShowsProgressAndTheOpenFailedCard()
+        {
+            savedTimeScale = Time.timeScale;
+            statePath = Path.Combine(Path.GetTempPath(), "galaxy-loading-" + Guid.NewGuid().ToString("N") + ".json");
+            hudOwner = new GameObject("Menu"); hudOwner.SetActive(false);
+            var document = hudOwner.AddComponent<UIDocument>(); document.panelSettings = Resources.Load<PanelSettings>("Galaxy101/UI/PanelSettings");
+            var menu = hudOwner.AddComponent<MainMenuController>(); hudOwner.SetActive(true); menu.Initialize(statePath);
+            yield return null; yield return null;
+
+            // T50
+            var loading = new TableLoadingOverlay(menu.View, hudOwner.transform);
+            loading.Show(5); loading.SetProgress(.64f);
+            yield return null;
+            Assert.That(menu.View.Root.Q<VisualElement>("table-loading"), Is.Not.Null);
+            Assert.That(menu.View.Root.Q<Label>("table-loading-percent").text, Is.EqualTo("64%"));
+            Assert.That(menu.View.Root.Q<VisualElement>("table-loading-tip"), Is.Not.Null);
+            string capture = Environment.GetEnvironmentVariable("GALAXY_TABLE_LOADING_CAPTURE");
+            if (!string.IsNullOrEmpty(capture)) yield return Capture(document, capture);
+
+            // T51
+            bool retried = false, lobby = false;
+            loading.ShowError(() => lobby = true, () => retried = true);
+            yield return null;
+            Assert.That(menu.View.Root.Q<VisualElement>("table-loading-error-card"), Is.Not.Null);
+            string errorCapture = Environment.GetEnvironmentVariable("GALAXY_TABLE_LOADING_ERROR_CAPTURE");
+            if (!string.IsNullOrEmpty(errorCapture)) yield return Capture(document, errorCapture);
+            using (var click = NavigationSubmitEvent.GetPooled()) { var retry = menu.View.Root.Q<Button>("table-loading-retry"); click.target = retry; retry.SendEvent(click); }
+            yield return null;
+            Assert.That(retried, Is.True); Assert.That(lobby, Is.False);
+            Assert.That(loading.ErrorVisible, Is.False);
+            loading.Hide();
+            Assert.That(menu.View.Root.Q<VisualElement>("table-loading"), Is.Null);
+        }
+
+        [UnityTest]
         [Timeout(180000)]
         public IEnumerator MenuOpensTheGalaxyTableAndExitReturnsToTheMenu()
         {

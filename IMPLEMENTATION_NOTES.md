@@ -96,6 +96,33 @@ Dal `server/line`. Ayrıntı, çalıştırma, Railway ve protokol: `Server/READM
 - **Doğrulama:** `cd Server && dotnet test` → **48/48** (gerçek PostgreSQL 17 konteyneri; iki ardışık koşu). Uçtan uca: dört oyuncu kuyruktan masaya, gizli eller, yanlış oyuncu/eski sürüm/bozuk hamle reddi, boş masanın sunucu tarafından 2 el oynatılıp uzlaşması (çip korunumu, istatistik, liderlik, görev), yeniden oynatmanın aynı el ve sürümü vermesi, şifreli oda + davet. Docker imajı derlendi; konteyner Postgres'e karşı `/health` ve misafir girişiyle duman testi geçti. Railway'e dağıtım yapılmadı.
 - **Açık / yapılmadı:** Unity tarafı (`Http*Service`, async arayüz, mock yer değişimi, ağ oturumu) ayrı entegrasyon adımı. Ürün varsayılanları (maç 4 el, pot dağıtımı, LP, XP, bahisler, ligler) `Server/README.md` tablosunda, onay bekliyor. Katlamalı kural farkı tanımsız (şimdilik yalnız bahis). Gerçek mağaza/kimlik bilgileri, KVKK metni yok.
 
+## 3D oyun masası — faz 5 (ek durumlar T28–T51), 22 Ekim 2026
+
+Kaynak: `Design/galaxy101_unity_handoff/galaxy101_ek_durumlar` (spec/17, metin tablosu, T28–T51). Kararlar: maç şimdilik sabit 5 el (lobide seçici yok); XP eğrisi 500 × seviye; README açık soruları varsayılanlarla (okey atıp açtırma yalnız +101, çiftle bitiş puansız, önerilen XP değerleri); **cezalar çarpanla katlanmaz: el sonucu B × M + P** (kural belgesi R14 güncellendi). Değerler `Resources/Galaxy101/Table/table_rules.json` içinde.
+
+- Motor (`com.okey101.core`): yerden taş her zaman alınabilir, `ReturnDiscardCommand` ile geri bırakılır (sonra yalnız deste); `ShortOpeningCommand` eksik açılışta +101; attığı taşla sonraki oyuncu açarsa taş değeri × 10; masadaki okeyi başkası alırsa sahibine +101; puan B × M + P. Birim testleri `Spec17RuleTests`.
+- Mesajlar (T40–T41): 6 tür, süreler, kuyruk (+n sayaç, ceza/hata öne, aynı metin süreyi yeniler), rakip olayları avatar balonu. Metinler tasarımın CSV'sinden (`TableStrings`).
+- Cezalar (T34–T36): her komuttan sonra kimin cezası arttığı ve nedeni çıkarılır; bana ceza toast'ı (tutar hapıyla), rakibe balon, avatarda o elin toplamı rozeti.
+- Yerden alma (T38–T39): YERDEN etiketi + çerçeve, GERİ BIRAK halkası (dokun ya da sürükle), sonra "Sıra sende · desteden çek"; alınan taşı atma hatası.
+- Okey (T33, T47–T49): masadaki her okeyde temsil rozeti + "Okey · Mavi 7 yerine" ipucu; sürüklenen gerçek taşla alınabilecek okeyler parlar, bırakınca takas; yanlış taşta kırmızı çerçeve + hata; 500 ms basılı tutma ipucu.
+- Bot başlığı (T28, T30): "Botlara karşı · 101 · ANTRENMAN · Çipsiz · XP", el sayacı (nokta + "n / 5. el"), XP hapı (seviye dairesi, çubuk, XP), rakiplerde BOT etiketi, bot çıkış kartı metni.
+- El sonu v2 (T42–T44): CEZA sütunu (tutar + neden), çarpan rozetleri (okeyle / çiftle / elden ×2, çift açan "el ×2"), açıklamalı el puanı ("−101 × 2 = −202"), puansız el kutusu, yalnız XP; son elde düğme maç sonucuna götürür.
+- Maç sonu (T45–T46): sıralama (madalyalar), XP dökümü + sıra bonusu, seviye çubuğu (seviye atlamada dolar → parlar → yeni seviye + "SEVİYE ATLADIN"), el el puan tablosu, kazanınca konfeti; Lobiye dön / Tekrar oyna. XP menü profilinde kalıcı (`MenuModel.Level/Xp`); menüdeki seviye rozetleri artık bu değeri gösterir.
+- Yükleme (T50–T51): menüden masaya geçerken tam ekran yükleme (gezegen sağda, ilerleme %, rastgele ipucu); 15 sn içinde bitmezse "Masa açılamadı" kartı (Lobiye dön / Yeniden dene).
+- Ekran karşılaştırmaları: `docs/testing/faz5_*.png`. Testler: EditMode 436/436, PlayMode 114/114.
+
+Kabul listesi (spec/17):
+- [x] Bot maçında bahis/çip metni yok; XP hapı ve el sayacı (T28, T30). Sapma: el seçici yok (karar: sabit 5).
+- [x] Okey seçici yok, en yüksek değer otomatik, masada temsil rozeti (T33). Sapma: kendi ıstakamdaki okeylerde altın nokta/iç çerçeve işareti yok (3D taş yüzü değişikliği gerektiriyor).
+- [x] 5 ceza kuralı doğru tutarla, Aç 101 altında basılabiliyor, toast + rozet + balon (T34–T36). Sapma: T34'teki "ceza doğuran taşın 1.2 sn parlaması" yok.
+- [x] YERDEN etiketi, geri bırakma, sonraki oyuncuya atılamama (T38–T39). Sapma: geri dönüş uçuşu 300 ms değil, standart taş uçuşu (0.42–0.85 sn).
+- [x] 6 mesaj türü, süreler, kuyruk (T40–T41).
+- [x] El sonu v2 çarpanlar, açıklama, nedenli ceza, puansız el, XP (T42–T44). Sapma: çevrimiçi çip varyantı (T43) yok — çevrimiçi masa S8'de.
+- [x] Maç sonu sıralama, XP dökümü, seviye atlama, mini tablo (T45–T46).
+- [x] Okeyi alma: parlayan hedef, takas, ipucu, geçersiz, sahibine +101 (T47–T49). Sapma: okeyin ıstakaya dönüşü 450 ms özel yay değil, standart uçuş.
+- [x] Yükleme ve hata ekranı (T50–T51).
+- [ ] EN dilde metin taşması kontrolü yapılmadı (yalnız TR karelerle karşılaştırıldı).
+
 ## Tekrar üretim
 
 1. Unity Hub üzerinden bu kökü Unity 6000.6.6f1 ile açın; Bootstrap sahnesini çalıştırın.

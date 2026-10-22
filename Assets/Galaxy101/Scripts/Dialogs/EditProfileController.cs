@@ -56,7 +56,7 @@ namespace Galaxy101
             void Preview()
             {
                 preview.Clear(); var avatar = v.Avatar(110, draft, true);
-                var level = avatar.Q<Label>(className: "avatar-level"); if (level != null) { level.text = v.L("SV 24", "LV 24"); level.style.fontSize = 11; }
+                var level = avatar.Q<Label>(className: "avatar-level"); if (level != null) { level.text = v.L("SV " + v.Model.Level, "LV " + v.Model.Level); level.style.fontSize = 11; }
                 preview.Add(avatar);
                 foreach (var child in colors.Children()) child.EnableInClassList("selected", child.name == (string)draft["color"]);
                 for (var i = 0; i < frames.childCount; i++)

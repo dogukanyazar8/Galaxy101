@@ -54,14 +54,34 @@ namespace Galaxy101
             try{await StartLocalAsync(scene);}
             catch(Exception exception){Debug.LogException(exception);if(this!=null)View.Toast(View.L("Masa açılamadı. Yeniden deneyin.","Could not open the table. Try again."));}
         }
+        /// <summary>Seconds before the loading screen gives up and shows "Masa açılamadı" (spec/17 §9).</summary>
+        public float TableLoadTimeout {get;set;}=15;
+        public TableLoadingOverlay Loading {get;private set;}
         public async Task StartLocalAsync(string scene=GalaxyTableScene)
         {
             Initialize();if(navigating||View.Modals.Panel!=null||View.Modals.Dialog!=null)return;navigating=true;
+            bool overlay=scene==GalaxyTableScene;
             try
             {
-                View.Root.SetEnabled(false);var load=SceneManager.LoadSceneAsync(scene,LoadSceneMode.Single);
-                if(load==null)throw new InvalidOperationException(scene+" scene is missing from the Windows build.");
-                while(!load.isDone)await Task.Yield();
+                if(overlay){Loading=Loading??new TableLoadingOverlay(View,transform);Loading.Show(Galaxy101.Table.TableRules.Current.MatchHands);}
+                else View.Root.SetEnabled(false);
+                var load=SceneManager.LoadSceneAsync(scene,LoadSceneMode.Single);
+                if(load==null)
+                {
+                    if(!overlay)throw new InvalidOperationException(scene+" scene is missing from the Windows build.");
+                    Loading.ShowError(()=>Loading.Hide(),()=>{navigating=false;_=StartLocalAsync(scene);});return;
+                }
+                float deadline=Time.realtimeSinceStartup+TableLoadTimeout;
+                while(!load.isDone)
+                {
+                    if(overlay)
+                    {
+                        Loading.SetProgress(load.progress/.9f);
+                        // T51: a load that has not finished in time offers the lobby or another wait.
+                        if(Time.realtimeSinceStartup>deadline&&!Loading.ErrorVisible)Loading.ShowError(()=>Loading.Hide(),()=>deadline=Time.realtimeSinceStartup+TableLoadTimeout);
+                    }
+                    await Task.Yield();
+                }
             }
             finally{if(this!=null){navigating=false;View.Root.SetEnabled(true);}}
         }

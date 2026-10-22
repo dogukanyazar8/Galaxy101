@@ -166,7 +166,7 @@ namespace Galaxy101
                 Stud(root,size/2f-top/2,small?-4:size>=124?-6:-5,top,small?6:8);
                 if(!small){Stud(root,-5,size/2f-5,10,0);Stud(root,size-5,size/2f-5,10,0);}
             }
-            if(level){var badge=Text(L(size>62?"SEVİYE 24":"SV 24",size>62?"LEVEL 24":"LV 24"),size>62?12:10,false,"var(--aT)");badge.AddToClassList("avatar-level");Decorate(badge,"var(--a1)",7);root.Add(badge);}
+            if(level){var badge=Text(L(size>62?"SEVİYE "+Model.Level:"SV "+Model.Level,size>62?"LEVEL "+Model.Level:"LV "+Model.Level),size>62?12:10,false,"var(--aT)");badge.AddToClassList("avatar-level");Decorate(badge,"var(--a1)",7);root.Add(badge);}
             return root;
         }
         /// <summary>Rotated gold stud with its 1.5px #5A3A08 box-shadow outline and optional rgba(255,201,74,.8) glow.</summary>

@@ -1,0 +1,17 @@
+{
+  "comment": "Bot table product values (spec/17 §1, §7 and the README's open questions). Change here, not in code.",
+  "matchHands": 5,
+  "xp": {
+    "handWin": 340,
+    "handOther": 60,
+    "place": [500, 200, 80, 0]
+  },
+  "levelXpPerLevel": 500,
+  "decisions": {
+    "okeyFeedsOpening": "Only the +101 for discarding the okey; no extra x10 (README open question 1, default).",
+    "pairsFinish": "A pairs finish (all pairs) leaves the hand unscored, T44 (README open question 2, default).",
+    "xpValues": "Proposed values 340 / 60 and place bonus 500 / 200 / 80 / 0 (README open question 3, default).",
+    "penaltiesMultiplied": false,
+    "matchLength": "Fixed 5 hands for now (no lobby picker yet)."
+  }
+}

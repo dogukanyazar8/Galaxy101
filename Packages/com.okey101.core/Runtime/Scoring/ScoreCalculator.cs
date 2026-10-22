@@ -40,7 +40,8 @@ namespace Okey101.Core.Scoring
                     if (opening == OpeningKind.Pairs) baseScore *= 2;
                 }
 
-                var total = (baseScore + penalties) * multiplier;
+                // spec/17 §6 (T42): penalties are written in their own column and are not multiplied.
+                var total = baseScore * multiplier + penalties;
                 return new ScoreBreakdown(true, normalSum, realJokerCount, penalties, baseScore, multiplier, total);
             }
         }

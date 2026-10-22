@@ -1,5 +1,7 @@
 using Galaxy101.Server.Economy;
 using Galaxy101.Server.Profile;
+using Galaxy101.Server.Realtime;
+using Galaxy101.Server.Social;
 
 namespace Galaxy101.Server;
 
@@ -15,6 +17,7 @@ public static class Features
         services.AddSingleton<GooglePlayVerifier>();
         services.AddSingleton<AppleStoreVerifier>();
         services.AddScoped<IStoreVerifier, StoreVerifier>();
+        services.AddSingleton<ConnectionRegistry>();
         return services;
     }
 
@@ -23,6 +26,9 @@ public static class Features
         app.MapProfile();
         app.MapShop();
         app.MapDaily();
+        app.MapRealtime();
+        app.MapFriends();
+        app.MapLeaderboard();
         return app;
     }
 

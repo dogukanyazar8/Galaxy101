@@ -48,6 +48,11 @@ namespace Galaxy101.Table.EditorTools
                 importer.maxTextureSize = 4096; importer.alphaIsTransparency = true; importer.wrapMode = TextureWrapMode.Clamp; importer.anisoLevel = 8;
                 importer.SaveAndReimport();
             }
+            // Effects: a material asset that keeps the URP particle shader in player builds (TableFx).
+            const string fxPath = "Assets/Galaxy101/Resources/Galaxy101/Table/Fx/fx_particles.mat";
+            Directory.CreateDirectory(Path.GetDirectoryName(fxPath));
+            if (AssetDatabase.LoadAssetAtPath<Material>(fxPath) == null)
+                AssetDatabase.CreateAsset(new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit")) { name = "fx_particles" }, fxPath);
             BuildScene();
             Debug.Log("GALAXY101_TABLE_ASSETS_READY prefabs=" + Directory.GetFiles(Prefabs, "*.prefab").Length);
         }

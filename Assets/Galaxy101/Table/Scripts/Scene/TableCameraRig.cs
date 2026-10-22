@@ -30,6 +30,14 @@ namespace Galaxy101.Table
             var v = ViewOf(view); toPos = v.Position; toTarget = v.Target; started = Time.time; duration = seconds; Current = view;
         }
 
+        /// <summary>celebrate(): lean towards an opponent's corner (16 % of the way, 4 cm lower, look half way), then GoTo back.</summary>
+        public void Lean(Vector3 threeCorner, float seconds)
+        {
+            Evaluate(Time.time, out fromPos, out fromTarget);
+            toPos = Vector3.Lerp(toPos, threeCorner, 0.16f) + new Vector3(0, -0.04f, 0); toTarget = Vector3.Lerp(toTarget, threeCorner, 0.5f);
+            started = Time.time; duration = seconds;
+        }
+
         private static TableConstants.CameraView ViewOf(View v) => v == View.Top ? TableConstants.TopView : v == View.Lobby ? TableConstants.LobbyView : TableConstants.PlayerView;
 
         private void Evaluate(float now, out Vector3 pos, out Vector3 target)

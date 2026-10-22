@@ -19,6 +19,12 @@ namespace Galaxy101.Table
         public RackSlot OpponentSlot;
         public float LiftWant;
         public bool Dragged;
+        /// <summary>Effects (spec/12 §1): sparks in flight, the landing effect of this move, under-tile bars.</summary>
+        public TableFx Fx;
+        public bool Valid;
+        public float NewUntil;
+        public GameObject Bar;
+        private string landing;
 
         public Pose Target { get; private set; }
         public bool HasTarget { get; private set; }
@@ -48,12 +54,13 @@ namespace Galaxy101.Table
         }
 
         /// <summary>Retarget; a tween starts only when the target actually changed.</summary>
-        public void MoveTo(Pose pose, Motion motion, float delay = 0, float forcedDuration = 0)
+        public void MoveTo(Pose pose, Motion motion, float delay = 0, float forcedDuration = 0, string fx = null)
         {
             bool changed = !HasTarget || (Target.position - pose.position).sqrMagnitude > 1e-8f || 1 - Mathf.Abs(Quaternion.Dot(Target.rotation, pose.rotation)) > 1e-6f;
             Target = pose; HasTarget = true;
             if (!changed && overridePose == null) return;
             overridePose = null;
+            landing = motion == Motion.Deal ? "deal" : motion == Motion.Slide ? null : fx;
             if (Dragged) return;
             Begin(pose, motion, delay, forcedDuration);
         }
@@ -119,12 +126,29 @@ namespace Galaxy101.Table
                     transform.position = Vector3.Lerp(from.position, to.position, e2) + Vector3.up * (Mathf.Sin(Mathf.PI * k) * arc);
                     transform.rotation = Quaternion.Slerp(from.rotation, to.rotation, slide ? e : EaseInOutCubic(Mathf.Min(1, u * 1.15f)));
                 }
-                if (u >= 1) { tween = false; if (!slide) pop = now; }
+                if (Fx != null && k < 1)
+                {
+                    // Sparks: travels with an effect 60 % of frames (#FFE08A), the deal's swirl now and then.
+                    if (deal) { if (u < 0.85f && Random.value < 0.07f) Fx.SparkAt(transform.position, Random.value < 0.5f ? TableFx.Spark : Fx.Accent); }
+                    else if (landing != null && !slide && u < 0.92f && Random.value < 0.6f) Fx.SparkAt(transform.position, TableFx.Spark);
+                }
+                if (u >= 1)
+                {
+                    tween = false; if (!slide) pop = now;
+                    if (landing != null && Fx != null && !slide) { if (landing == "mine") NewUntil = now + 1.6f; Fx.Landed(this, landing); }
+                    landing = null;
+                }
             }
             else
             {
                 var rest = overridePose ?? Target;
                 transform.SetPositionAndRotation(rest.position, rest.rotation);
+            }
+            if (Bar != null)
+            {
+                bool isNew = NewUntil > now, show = Valid || isNew;
+                if (Bar.activeSelf != show) Bar.SetActive(show);
+                if (show) Bar.GetComponent<MeshRenderer>().sharedMaterial = isNew && !Valid ? TileFactory.NewBar : TileFactory.ValidBar;
             }
             float pv = (now - pop) / 0.28f;
             transform.localScale = Vector3.one * (pv >= 0 && pv < 1 ? 1 + Mathf.Sin(Mathf.PI * pv) * 0.07f : 1);

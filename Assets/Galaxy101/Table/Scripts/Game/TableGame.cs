@@ -29,7 +29,7 @@ namespace Galaxy101.Table
         [Tooltip("0 = random seed per hand.")]
         [SerializeField] private uint seed;
         [SerializeField] private float turnSeconds = 30, warnSeconds = 5;
-        [SerializeField] private bool autoSort = true, doubleClickDiscard = true, turnHint = true;
+        [SerializeField] private bool autoSort = true, doubleClickDiscard = true, turnHint = true, highlightSets = true;
         [Tooltip("Scene the exit button returns to (the Galaxy 101 main menu).")]
         [SerializeField] private string menuScene = "Bootstrap";
 
@@ -37,6 +37,7 @@ namespace Galaxy101.Table
 
         public LocalSession Session { get; private set; }
         public TableBoard Board { get; private set; }
+        public TableFx Fx { get; private set; }
         public RackGrid Rack { get; } = new RackGrid();
         public TileFace Indicator { get; private set; }
         public Phase Current { get; private set; } = Phase.Waiting;
@@ -115,6 +116,7 @@ namespace Galaxy101.Table
             if (table.CameraRig == null) table.Build();
             Board = new TableBoard(table);
             Board.IsOkey = id => TileCatalog.IsRealJoker(new TileId(id), Indicator);
+            Fx = table.gameObject.GetComponent<TableFx>() ?? table.gameObject.AddComponent<TableFx>(); Fx.Init(table); Board.Fx = Fx;
             Session = new LocalSession();
             life = new CancellationTokenSource();
             random = seed != 0 ? new System.Random((int)seed) : new System.Random();
@@ -149,6 +151,11 @@ namespace Galaxy101.Table
             float now = Time.time;
             for (int i = timers.Count - 1; i >= 0; i--) if (timers[i].At <= now) { var t = timers[i]; timers.RemoveAt(i); t.Done.TrySetResult(true); }
             Board?.Tick();
+            if (Fx != null && Session != null && Current != Phase.Waiting)
+            {
+                var pile = Session.GetView(Me).Discards[3];
+                Fx.SetState(CanDiscard, CanDraw, CanDrawSide && pile.Count > 0, Board.DeckShown);
+            }
             if (HumanTurn)
             {
                 float left = turnSeconds - (now - turnStarted);
@@ -178,6 +185,7 @@ namespace Galaxy101.Table
                     if (HandNumber == 1 && seating) await SeatPlayers();
                     Rack.Deal(view.OwnHand.Select(t => t.Value).ToList());
                     Current = Phase.Deal; Active = -1; Notify();
+                    Fx.DealFx(); // shuffle beat: rings, particles, deck spin
                     float landed = Board.Deal(BuildBoard(view), view.ActivePlayer); SyncedVersion = view.Version;
                     await Seconds(landed);
                     SyncBoard(); // a hand resumed mid-game also has melds and discards
@@ -315,7 +323,15 @@ namespace Galaxy101.Table
             }
             else { momentSeat = -1; momentTitle = L("TAŞ BİTTİ", "DECK EMPTY"); momentSub = L("En düşük puanlı oyuncu eli alır", "Lowest score takes the hand"); }
             momentOn = true; momentAt = Time.realtimeSinceStartup; Notify();
+            // spec/10 §7–§8: celebrate the finisher (spot, confetti, camera lean for an opponent) or shuffle on a deck out.
+            if (info.Winner.HasValue)
+            {
+                int w = info.Winner.Value; Fx.Celebrate(table.Corner(w), AvatarOnScreen(w));
+                if (w != Me) table.CameraRig.Lean(table.CornerThree(w), 1.3f);
+            }
+            else Fx.DealFx();
             await Seconds(info.Winner.HasValue ? 3.8f : 2.4f);
+            if (info.Winner.HasValue && info.Winner.Value != Me) table.CameraRig.GoTo(table.CameraRig.Current, 1.1f);
             momentOn = false;
             ResultOpen = true; resultAt = Time.realtimeSinceStartup; nextHandSignal = new TaskCompletionSource<bool>(); Notify();
             await Task.WhenAny(nextHandSignal.Task, Seconds(15));
@@ -437,6 +453,19 @@ namespace Galaxy101.Table
             if (handsOther > 0) m.XpLines.Add((T("msXpOther"), handsOther + " × " + rules.XpHandOther, handsOther * rules.XpHandOther));
             if (place <= 3 && xpBonus > 0) m.XpLines.Add((T("msXp" + place), "", xpBonus));
             return m;
+        }
+
+        /// <summary>
+        /// The confetti point: the avatar's world anchor moved to where the HUD actually draws the avatar (anchors are clamped
+        /// to x 84–1196, y 150–580 on the 1280×720 canvas), at the same depth.
+        /// </summary>
+        public Vector3 AvatarOnScreen(int seat)
+        {
+            var cam = table.CameraRig.Camera; var world = table.AvatarPoint(seat);
+            var vp = cam.WorldToViewportPoint(world);
+            if (seat == Me) return world;
+            float x = Mathf.Clamp(vp.x * TableHud.Width, 84, TableHud.Width - 84) / TableHud.Width, y = Mathf.Clamp((1 - vp.y) * TableHud.Height, 150, TableHud.Height - 140) / TableHud.Height;
+            return cam.ViewportToWorldPoint(new Vector3(x, 1 - y, vp.z));
         }
 
         /// <summary>Lowest hand score takes the hand; a pairs finish (unscored) goes to the finisher.</summary>
@@ -752,6 +781,7 @@ namespace Galaxy101.Table
             if (Board == null || Session == null) return;
             var view = Session.GetView(Me);
             Board.Sync(BuildBoard(view, staged.Count > 0 && Active == Me ? Projection() : null, Me));
+            Board.SetValid(highlightSets && Indicator.IsValid ? HandEvaluation.Of(Rack, Indicator).ValidTiles : null);
             SyncedVersion = view.Version;
         }
 

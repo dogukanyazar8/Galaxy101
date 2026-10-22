@@ -19,6 +19,9 @@ namespace Galaxy101.Table
         private readonly Material face;
         private readonly Dictionary<int, Mesh> faceMeshes = new Dictionary<int, Mesh>();
         private Material okeyGold;
+        private Mesh barMesh;
+        /// <summary>Under-tile bars (table3d.js barGeo): green = valid set, yellow = new tile (its alpha blinks, set by TableFx).</summary>
+        public static Material ValidBar, NewBar;
         private Mesh okeyFrame, okeyDot;
 
         public TileFactory(GameObject tileSetInstance, string skin, float roughness, float emission)
@@ -103,6 +106,35 @@ namespace Galaxy101.Table
                 }
             }
             mark.gameObject.SetActive(true);
+        }
+
+        /// <summary>A 0.78 TW × 3.5 mm × 1 mm bar along the tile face's bottom edge; hidden until shown.</summary>
+        public GameObject Bar(GameObject tile)
+        {
+            var bar = tile.transform.Find("tas_cubuk");
+            if (bar != null) return bar.gameObject;
+            if (ValidBar == null)
+            {
+                ValidBar = new Material(Shader.Find("Universal Render Pipeline/Unlit")) { name = "gecerli" }; ValidBar.SetColor("_BaseColor", new Color32(0x3C, 0xCB, 0x6E, 255));
+                NewBar = new Material(Shader.Find("Universal Render Pipeline/Unlit")) { name = "yeni_tas" };
+                NewBar.SetFloat("_Surface", 1); NewBar.SetFloat("_ZWrite", 0); NewBar.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha); NewBar.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+                NewBar.SetFloat("_SrcBlendAlpha", (float)BlendMode.One); NewBar.SetFloat("_DstBlendAlpha", (float)BlendMode.OneMinusSrcAlpha);
+                NewBar.EnableKeyword("_SURFACE_TYPE_TRANSPARENT"); NewBar.renderQueue = (int)RenderQueue.Transparent; NewBar.SetColor("_BaseColor", new Color32(0xFF, 0xD9, 0x64, 255));
+            }
+            if (barMesh == null)
+            {
+                var cube = GameObject.CreatePrimitive(PrimitiveType.Cube); barMesh = cube.GetComponent<MeshFilter>().sharedMesh; UnityEngine.Object.Destroy(cube);
+            }
+            bar = new GameObject("tas_cubuk").transform; bar.SetParent(tile.transform, false);
+            // table3d.js hangs the bar just under the tile; this rack's front lip would hide it there, so it underlines
+            // the face's bottom edge instead (in front of the face plane).
+            // 9 mm above the bottom edge: between the face's colour dot and the part the rack's lip covers.
+            bar.localPosition = new Vector3(0, -TableConstants.TH / 2 + 0.009f, TableConstants.TD / 2 + 0.0012f);
+            bar.localScale = new Vector3(TableConstants.TW * 0.78f, 0.0035f, 0.001f);
+            bar.gameObject.AddComponent<MeshFilter>().sharedMesh = barMesh;
+            var r = bar.gameObject.AddComponent<MeshRenderer>(); r.sharedMaterial = ValidBar; r.shadowCastingMode = ShadowCastingMode.Off;
+            bar.gameObject.SetActive(false);
+            return bar.gameObject;
         }
 
         /// <summary>Rectangular ring just inside the tile edge, ~2 px at rack size (46 px wide tile).</summary>

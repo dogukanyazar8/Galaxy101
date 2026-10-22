@@ -123,6 +123,16 @@ Kabul listesi (spec/17):
 - [x] Yükleme ve hata ekranı (T50–T51).
 - [x] TR ve EN metin taşması: masa testlerinde otomatik denetim (her görünür etiket tuval içinde ve akıştaki ebeveyninden geniş değil) T28, T30, T33/T47, T35, T38, T42, T45/T46, T50, T51 durumlarında; `GALAXY_TABLE_LANG=en` ile aynı testler İngilizce profille koşuldu, temiz. Bulunup düzeltilen: çıkış kartı başlığı TR'de 2 px taşıyordu (satır kaydırma). EN kareler: `docs/testing/faz5_EN_kareler.png`.
 
+## 3D oyun masası — faz 6 (efektler, spec/12), 22 Ekim 2026
+
+- `TableFx` (masa sahnesinde): parçacık patlamaları (n ışıltı noktası, yükseliş 0.2–1.4 rad, hız × 0.5–1.5, yerçekimi 1.4 m/s², 0.9 sn sönüm), kıvılcımlar (3 cm, 0.5 sn), keçe üstünde halka dalgaları (0.03 → 0.19, 0.7 sn). Projede Particle System modülü kapalı olduğu için tek çizimli kendi kamera-yüzlü nokta ağı (`GlowPoints`) kullanıldı; malzeme URP Particles/Unlit (Resources'taki `fx_particles` asset'i oyuncu derlemesinde gölgelendiriciyi tutar). Toplamalı malzemeler hedef alfa kanalını korur (HUD birleştirmesinde delik açmaz).
+- Taş hareketleri: uçuşta %60 kare kıvılcım, dağıtım girdabında seyrek kıvılcım; inişler: yığına altın halka + 12 parçacık, pere yeşil halka + 12 parçacık, ıstakama dışarıdan 10 parçacık + pop + 1.6 sn yanıp sönen sarı "yeni" çubuğu; gösterge açılışı 40 parçacık + `--a1` halka + beyaz parlama. Geçerli perlerin altında yeşil çubuk.
+- Nabızlar: atma halkası (atarken 0.55 + 0.45·p, ölçek 1 + 0.08·p; diğer zamanlarda 0.16) + dolgu, deste parıltısı (çekerken), önceki oyuncunun yığın halkası (alınabilirken), masa/oda LED'leri (2.2 + 0.25·sin 1.2t), holo halka dönüşü ve saydamlığı.
+- Dağıtım karması: merkezde 0/170/340 ms üç halka (altın, `--a1`, beyaz), 50 + 30 parçacık, deste 0.9 sn'de tam tur + 5 cm zıplama, holo hızlanması 2.6 sn. Taş bitince de aynı karma.
+- Bitiş: bitirenin köşesine altın spot (3.4 sn, tepe 40), 240 ms arayla 8 renkli konfeti patlaması (avatarın ekrandaki konumunda; HUD avatarları kenarlara sıkıştırıldığı için dünya noktası ekran konumuna taşınır) ve çift olanlarda halka; rakip bitirirse kamera köşesine eğilir (1.3 sn), şerit kapanınca döner.
+- Sapmalar: "yeni"/"geçerli" çubukları prototipteki gibi taşın altında değil, taş yüzünün alt kenarında (bu ıstaka modelinin önü alt 4 mm'yi örtüyor). Duman, kamera sarsıntısı ve roket/ikram efektleri ikram sistemiyle (faz 7) gelecek.
+- Kareler: `docs/testing/faz6_*.png`. Testler: EditMode 436/436, PlayMode 116/116.
+
 ## Tekrar üretim
 
 1. Unity Hub üzerinden bu kökü Unity 6000.6.6f1 ile açın; Bootstrap sahnesini çalıştırın.

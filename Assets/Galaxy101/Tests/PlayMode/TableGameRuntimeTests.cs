@@ -525,6 +525,55 @@ namespace Galaxy101.Tests
         }
 
         [UnityTest]
+        [Timeout(240000)]
+        public IEnumerator EffectsFollowTheDealTurnsAndTheFinish()
+        {
+            var game = Build(TableGame.Me, 6060, true);
+            game.Configure(TableGame.Me, 6060, 30, false);
+            string dir = Environment.GetEnvironmentVariable("GALAXY_TABLE_FX_CAPTURE_DIR");
+            var document = hudOwner.GetComponent<UIDocument>();
+            yield return Until(() => game.Current == TableGame.Phase.Deal, 20, "the deal");
+            yield return null;
+            // Shuffle beat (spec/10 §2): rings and particles, the deck spinning.
+            Assert.That(game.Fx.LiveWaves, Is.GreaterThan(0)); Assert.That(game.Fx.LivePoints, Is.GreaterThan(40));
+            Assert.That(game.Fx.DeckSpinning, Is.True, "the deck spins for 0.9 s");
+            if (!string.IsNullOrEmpty(dir)) { Time.timeScale = 0.15f; yield return Capture(document, Path.Combine(dir, "fx_deal.png")); Time.timeScale = 1; }
+
+            Time.timeScale = 3;
+            yield return Until(() => game.CanDiscard && game.SyncedVersion == game.Session.GetView(TableGame.Me).Version, 40, "my first turn");
+            yield return new WaitForSecondsRealtime(0.3f);
+            Assert.That(game.Fx.DiscardRingAlpha, Is.GreaterThan(0.3f), "the discard ring pulses while I discard");
+            Assert.That(game.Rack.Tiles.All(id => game.Board.ViewOf(id).Bar != null), Is.True, "rack tiles carry bars");
+            game.Discard(game.Rack.Tiles.First());
+            yield return Until(() => game.CanDraw, 120, "my draw turn");
+            Time.timeScale = 1;
+            yield return new WaitForSecondsRealtime(0.3f);
+            Assert.That(game.Fx.DeckGlowAlpha, Is.GreaterThan(0.2f), "the deck glows while I draw");
+            var draw = game.Draw(DrawSource.Stock, null);
+            yield return Until(() => draw.IsCompleted, 10, "the draw");
+            yield return new WaitForSecondsRealtime(1.0f);
+            var drawn = game.Board.ViewOf(game.LastDrawn);
+            Assert.That(drawn.NewUntil, Is.GreaterThan(Time.time), "a tile landing on my rack gets the blinking new bar");
+            Assert.That(drawn.Bar.activeSelf, Is.True);
+            if (!string.IsNullOrEmpty(dir)) { Time.timeScale = 0.25f; yield return Capture(document, Path.Combine(dir, "fx_new_bar.png")); Time.timeScale = 1; }
+            game.SortRack(true); yield return null;
+            Assert.That(game.Rack.Tiles.Any(id => game.Board.ViewOf(id).Valid) || HandEvaluation.Of(game.Rack, game.Indicator).ValidTiles.Count == 0, Is.True, "valid sets get green bars");
+            if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "fx_new_tile.png"));
+
+            // Finish celebration (spec/10 §7): spot light and confetti bursts.
+            var table = sceneOwner.GetComponent<TableScene>();
+            game.Fx.Celebrate(table.Corner(2), game.AvatarOnScreen(2));
+            yield return new WaitForSecondsRealtime(0.6f);
+            Assert.That(game.Fx.SpotIntensity, Is.GreaterThan(5)); Assert.That(game.Fx.LivePoints, Is.GreaterThan(30));
+            if (!string.IsNullOrEmpty(dir))
+            {
+                yield return new WaitForSecondsRealtime(3.5f);
+                Time.timeScale = 0.3f; game.Fx.Celebrate(table.Corner(2), game.AvatarOnScreen(2));
+                yield return Capture(document, Path.Combine(dir, "fx_celebrate.png")); Time.timeScale = 1;
+            }
+        }
+
+        [UnityTest]
         [Timeout(180000)]
         public IEnumerator MenuOpensTheGalaxyTableAndExitReturnsToTheMenu()
         {

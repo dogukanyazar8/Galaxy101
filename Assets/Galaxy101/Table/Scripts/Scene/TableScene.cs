@@ -34,6 +34,12 @@ namespace Galaxy101.Table
         public TableCameraRig CameraRig { get; private set; }
         public TileFactory Tiles => tiles;
         public Transform TilesRoot => tilesRoot;
+        public Transform DiscardZone { get; private set; }
+
+        /// <summary>Finish celebration points (table3d.js celebrate): the finisher's corner on the felt and above their avatar.</summary>
+        public Vector3 CornerThree(int seat) => seat == 0 ? seatFrames[0].Pose(0, TY, 0.5f).Position : seatFrames[seat].Pose(0, TY, 0.6f).Position;
+        public Vector3 Corner(int seat) => ThreeSpace.ToUnity(CornerThree(seat));
+        public Vector3 AvatarPoint(int seat) => seat == 0 ? seatFrames[0].Pose(0, TY + 0.25f, 0.75f).UnityPosition : AnchorWorld("a" + seat);
         public Transform RackRoot(int seat) => rackInstances[seat].transform;
         public string Planet => planet;
         public SkinService Skins => skins;
@@ -212,7 +218,7 @@ namespace Galaxy101.Table
         private void BuildDiscardZone()
         {
             var pose = seatFrames[0].Pose(DiscardLocal.x, TY + 0.0012f, DiscardLocal.z);
-            var zone = new GameObject("DiscardZone"); zone.transform.SetParent(transform, false);
+            var zone = new GameObject("DiscardZone"); zone.transform.SetParent(transform, false); DiscardZone = zone.transform;
             zone.transform.position = pose.UnityPosition;
             zone.AddComponent<MeshFilter>().sharedMesh = RingMesh(0.058f, 0.066f, 48);
             var mat = new Material(Shader.Find("Universal Render Pipeline/Unlit")) { name = "atma_alani" };

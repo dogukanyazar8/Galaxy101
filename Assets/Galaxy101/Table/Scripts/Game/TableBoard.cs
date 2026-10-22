@@ -37,6 +37,9 @@ namespace Galaxy101.Table
         /// <summary>Real okeys (set by the game once the indicator is known): they carry the gold okey mark.</summary>
         public System.Func<int, bool> IsOkey = _ => false;
 
+        /// <summary>Effects for landings, the deck spin and the bars.</summary>
+        public TableFx Fx;
+
         /// <summary>The next move of <paramref name="id"/> takes exactly <paramref name="seconds"/> (spec/17: put back 300 ms, taken okey 450 ms).</summary>
         public void ForceDuration(int id, float seconds) => forcedDurations[id] = seconds;
 
@@ -67,7 +70,7 @@ namespace Galaxy101.Table
         {
             var go = scene.Tiles.Create(code, scene.TilesRoot);
             go.transform.SetPositionAndRotation(at.position, at.rotation);
-            var view = go.AddComponent<TileView>(); view.Code = code; return view;
+            var view = go.AddComponent<TileView>(); view.Code = code; view.Fx = Fx; return view;
         }
 
         private void Kill(TileView view) { meldOf.Remove(view); if (view != null) Object.Destroy(view.gameObject); }
@@ -83,11 +86,13 @@ namespace Galaxy101.Table
         public void LayoutDeck(int n)
         {
             n = Mathf.Clamp(n, 0, 106); if (n == deckShown) return; deckShown = n;
-            while (deckPool.Count < n) { var go = scene.Tiles.Create(null, scene.TilesRoot); go.name = "deste_" + deckPool.Count; Object.Destroy(go.GetComponent<Collider>()); deckPool.Add(go); }
+            // Deck tiles live under the effects' deck root so the shuffle beat can spin the whole deck.
+            var parent = Fx != null && Fx.DeckRoot != null ? Fx.DeckRoot : scene.TilesRoot;
+            while (deckPool.Count < n) { var go = scene.Tiles.Create(null, parent); go.name = "deste_" + deckPool.Count; Object.Destroy(go.GetComponent<Collider>()); deckPool.Add(go); }
             for (int j = 0; j < deckPool.Count; j++)
             {
                 bool on = j < n; deckPool[j].SetActive(on);
-                if (on) { var p = scene.DeckPose(j, n); deckPool[j].transform.SetPositionAndRotation(p.position, p.rotation); }
+                if (on) { var p = scene.DeckPose(j, n); deckPool[j].transform.localPosition = p.position; deckPool[j].transform.localRotation = p.rotation; }
             }
         }
 
@@ -116,7 +121,7 @@ namespace Galaxy101.Table
                 for (int o = 0; o < 4; o++)
                 {
                     int k = (starter + o) % 4;
-                    if (k == 0) { if (mine.Count == 0) continue; int id = mine.Dequeue(); var v = Spawn(TileCodes.Code(id), deckTop); v.Id = id; known[id] = v; scene.Tiles.SetOkeyMark(v.gameObject, IsOkey(id)); v.MoveTo(RackPose(state.Rack, id), TileView.Motion.Deal, lead + index++ * step); }
+                    if (k == 0) { if (mine.Count == 0) continue; int id = mine.Dequeue(); var v = Spawn(TileCodes.Code(id), deckTop); v.Id = id; known[id] = v; scene.Tiles.SetOkeyMark(v.gameObject, IsOkey(id)); v.Bar = scene.Tiles.Bar(v.gameObject); v.MoveTo(RackPose(state.Rack, id), TileView.Motion.Deal, lead + index++ * step); }
                     else
                     {
                         if (hidden[k].Count >= state.HandCounts[k]) continue;
@@ -129,7 +134,7 @@ namespace Galaxy101.Table
             if (state.Indicator >= 0)
             {
                 var ind = Spawn(TileCodes.Code(state.Indicator), deckTop); ind.Id = state.Indicator; known[state.Indicator] = ind;
-                ind.MoveTo(scene.IndicatorPose(), TileView.Motion.Travel, dealt + 0.5f);
+                ind.MoveTo(scene.IndicatorPose(), TileView.Motion.Travel, dealt + 0.5f, 0, "reveal");
             }
             lastStock = state.Stock;
             return dealt + 1.5f;
@@ -190,7 +195,10 @@ namespace Galaxy101.Table
                 scene.Tiles.SetOkeyMark(view.gameObject, IsOkey(pair.Key));
                 bool slide = pair.Value.Rack && view.HasTarget && IsOnMyRack(view);
                 float forced = forcedDurations.TryGetValue(pair.Key, out var d) ? d : 0;
-                if (instant) view.Snap(pair.Value.Pose); else view.MoveTo(pair.Value.Pose, slide ? TileView.Motion.Slide : TileView.Motion.Travel, 0, forced);
+                // Landing effects (spec/12 §1): pile → gold ring, meld → green ring, my rack from outside → "new" bar.
+                string fx = slide ? null : pair.Value.Rack ? "mine" : pair.Value.Meld >= 0 ? "meld" : pair.Key == state.Indicator ? null : "disc";
+                if (pair.Value.Rack && view.Bar == null) view.Bar = scene.Tiles.Bar(view.gameObject);
+                if (instant) view.Snap(pair.Value.Pose); else view.MoveTo(pair.Value.Pose, slide ? TileView.Motion.Slide : TileView.Motion.Travel, 0, forced, fx);
                 view.name = pair.Value.Rack ? "tas_" + view.Code + "_rack" : "tas_" + view.Code;
             }
 
@@ -218,6 +226,12 @@ namespace Galaxy101.Table
             var rack = scene.RackRoot(0);
             var local = rack.InverseTransformPoint(view.Target.position);
             return Mathf.Abs(local.x) < 0.5f && local.y > -0.06f && local.y < 0.25f && Mathf.Abs(local.z) < 0.08f;
+        }
+
+        /// <summary>Green bars under my rack tiles that form valid sets ("Geçerli perleri vurgula").</summary>
+        public void SetValid(ICollection<int> valid)
+        {
+            foreach (var pair in known) pair.Value.Valid = valid != null && valid.Contains(pair.Key);
         }
 
         // ---------- rack preview (drag) ----------

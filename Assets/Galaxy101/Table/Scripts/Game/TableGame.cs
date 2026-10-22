@@ -331,7 +331,7 @@ namespace Galaxy101.Table
             if (info.Winner.HasValue)
             {
                 int w = info.Winner.Value; Fx.Celebrate(table.Corner(w), AvatarOnScreen(w));
-                if (w != Me) table.CameraRig.Lean(table.CornerThree(w), 1.3f);
+                if (w != Me) { table.CameraRig.Lean(table.CornerThree(w), 1.3f); string line = T("bot.5"); hud?.After(.7f, () => hud.Say(w, line)); }
             }
             else Fx.DealFx();
             await Seconds(info.Winner.HasValue ? 3.8f : 2.4f);
@@ -569,6 +569,8 @@ namespace Galaxy101.Table
             var pending = before.PendingDraw;
             var receipt = await Session.SubmitAsync(command, life.Token);
             if (!receipt.Accepted) return receipt;
+            // Bots chat now and then after their turn (reference oppDiscard: 16 %).
+            if (actor != Me && command is CommitTurnCommand) hud?.BotChatter(actor, .16f);
             var after = Session.GetView(Me);
             for (int k = 0; k < 4; k++)
             {

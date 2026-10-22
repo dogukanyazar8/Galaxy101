@@ -682,6 +682,98 @@ namespace Galaxy101.Tests
         }
 
         [UnityTest]
+        [Timeout(300000)]
+        public IEnumerator PlayerCardChatAndGiftDrawerWork()
+        {
+            var game = Build(TableGame.Me, 8080, true);
+            game.Configure(TableGame.Me, 8080, 90, false);
+            string dir = Environment.GetEnvironmentVariable("GALAXY_TABLE_SOCIAL_CAPTURE_DIR");
+            var hud = hudOwner.GetComponent<TableHud>(); var document = hudOwner.GetComponent<UIDocument>(); var root = hud.Canvas;
+            hud.SocialRandom = new System.Random(4);
+            var sent = new List<(string Kind, int From, int To)>(); hud.GiftSent += (kind, from, to) => sent.Add((kind, from, to));
+            Time.timeScale = 3;
+            yield return Until(() => game.CanDiscard && game.SyncedVersion == game.Session.GetView(TableGame.Me).Version, 40, "my first turn");
+            Time.timeScale = 1;
+
+            // T07: Zeynep's card beside her avatar, a free quick treat, a friend request.
+            Click(root, "opponent-1"); yield return null;
+            Assert.That(hud.Window, Is.EqualTo("card")); Assert.That(hud.CardSeat, Is.EqualTo(1));
+            Assert.That(root.Q<VisualElement>("player-card-1"), Is.Not.Null);
+            Click(root, "card-add-friend"); yield return null;
+            Assert.That(hud.FriendRequested(1), Is.True);
+            Assert.That(root.Q<Label>("card-add-friend").text, Is.EqualTo("İstek gönderildi"));
+            if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "social_card.png"));
+            yield return null; AssertNoOverflow(root, "player card");
+            var card = root.Q<VisualElement>("player-card-1").worldBound; var avatar = root.Q<VisualElement>("opponent-1").worldBound;
+            Assert.That(card.xMax, Is.LessThan(avatar.xMin), "the right seat's card opens to the left of the avatar");
+            Click(root, "card-gift-tea"); yield return null;
+            Assert.That(hud.Window, Is.Null, "a quick treat closes the card");
+            Assert.That(hud.Chat.Last().Seat, Is.EqualTo(-1)); Assert.That(hud.Chat.Last().Text, Is.EqualTo("Sen, Zeynep için çay ısmarladın"));
+            Assert.That(sent, Is.EqualTo(new[] { ("tea", 0, 1) }));
+            yield return new WaitForSecondsRealtime(2.1f);
+            Assert.That(hud.Chat.Last().Seat, Is.EqualTo(1), "Zeynep thanks me 1.9 s later");
+
+            // Unread count while the chat is closed.
+            hud.BotChatter(2, 1); yield return null;
+            Assert.That(hud.Unread, Is.EqualTo(2), "the thanks and the chatter are unread");
+            Assert.That(root.Q<VisualElement>("table-chat-open").Query<Label>().ToList().Any(l => l.text == "2"), Is.True, "red count on the chat button");
+
+            // T13: the chat drawer, quick phrases, typed text (80 characters at most), my bubble, a bot answer.
+            hud.Press("chat"); yield return null;
+            Assert.That(hud.Window, Is.EqualTo("chat")); Assert.That(hud.Unread, Is.EqualTo(0));
+            Click(root, "chat-quick-0"); yield return null;
+            Assert.That(hud.Chat.Last().Seat, Is.EqualTo(0)); Assert.That(hud.Chat.Last().Text, Is.EqualTo("Kolay gelsin"));
+            Assert.That(root.Q<Label>("balloon-0"), Is.Not.Null, "my bubble next to my avatar");
+            hud.BotReplyChance = 1;
+            root.Q<TextField>("chat-input").value = new string('a', 79) + "bc";
+            Click(root, "chat-send"); yield return null;
+            Assert.That(hud.Chat.Last().Text.Length, Is.EqualTo(80));
+            Assert.That(root.Q<TextField>("chat-input").value, Is.Empty);
+            yield return new WaitForSecondsRealtime(1.6f);
+            Assert.That(hud.Chat.Last().Seat, Is.InRange(1, 3), "a bot answers after 1.4 s");
+            Assert.That(root.Q<VisualElement>("table-chat-log").Query<Label>("chat-bubble").ToList().Count, Is.GreaterThanOrEqualTo(4));
+            if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "social_chat.png"));
+            yield return null; AssertNoOverflow(root, "chat");
+            hud.Press("chat"); yield return null;
+            Assert.That(hud.Window, Is.Null);
+
+            // T08–T10: the gift drawer: KİME, tabs, free items, Gönder.
+            hud.Press("gift"); yield return null;
+            Assert.That(hud.Window, Is.EqualTo("gift")); Assert.That(hud.GiftTarget, Is.EqualTo("2"), "Ayşe by default");
+            Assert.That(root.Q<Label>("gift-send").text, Is.EqualTo("Bir şey seç"));
+            Click(root, "gift-item-tea"); yield return null;
+            Assert.That(hud.GiftSelection, Is.EqualTo("tea")); Assert.That(root.Q<Label>("gift-send").text, Is.EqualTo("Gönder"), "free on a bot table");
+            Assert.That(root.Q<VisualElement>("table-gifts").Query<Label>().ToList().Any(l => l.text == "BAKİYE"), Is.False, "no balance row on a bot table");
+            if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "social_gift_treats.png"));
+            yield return null; AssertNoOverflow(root, "gift drawer · treats");
+            Click(root, "gift-tab-1"); yield return null;
+            Assert.That(hud.GiftSelection, Is.Null, "a tab change clears the pick");
+            Click(root, "gift-item-cake"); Click(root, "gift-to-all"); yield return null;
+            if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "social_gift_gifts.png"));
+            yield return null; AssertNoOverflow(root, "gift drawer · gifts");
+            sent.Clear();
+            Click(root, "gift-send"); yield return null;
+            Assert.That(hud.Window, Is.Null);
+            yield return new WaitForSecondsRealtime(.7f);
+            Assert.That(sent.Select(x => x.To), Is.EqualTo(new[] { 1, 2, 3 }), "one cake per opponent, 180 ms apart");
+            Assert.That(hud.Chat.Last(l => l.Seat < 0).Text, Is.EqualTo("Sen herkese pasta gönderdin"));
+            hud.Press("gift"); yield return null;
+            Assert.That(hud.GiftTarget, Is.EqualTo("all"), "the drawer remembers the last recipient");
+            Click(root, "gift-tab-2"); Click(root, "gift-to-3"); yield return null;
+            Click(root, "gift-item-emoji-5"); yield return null;
+            if (!string.IsNullOrEmpty(dir)) yield return Capture(document, Path.Combine(dir, "social_gift_emoji.png"));
+            yield return null; AssertNoOverflow(root, "gift drawer · emoji");
+            sent.Clear(); Click(root, "gift-send"); yield return new WaitForSecondsRealtime(.4f);
+            Assert.That(sent, Is.EqualTo(new[] { ("e:🔥", 0, 3) }));
+
+            // Settings: "Sohbet balonları" off keeps the log but drops the bubbles.
+            hud.Settings.Set("bubbles", false);
+            hud.Say(2, "Bakalım bakalım"); yield return null;
+            Assert.That(root.Query<Label>("balloon-2").ToList().Any(l => l.text == "Bakalım bakalım"), Is.False, "no chat bubble");
+            Assert.That(hud.Chat.Last().Text, Is.EqualTo("Bakalım bakalım"));
+        }
+
+        [UnityTest]
         [Timeout(180000)]
         public IEnumerator MenuOpensTheGalaxyTableAndExitReturnsToTheMenu()
         {

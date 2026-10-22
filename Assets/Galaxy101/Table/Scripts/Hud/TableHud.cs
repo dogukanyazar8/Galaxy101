@@ -62,7 +62,7 @@ namespace Galaxy101.Table
         public enum ToastKind { Penalty, Info, Success, Warning, Error }
 
         private sealed class Toast { public ToastKind Kind; public string Text, Sub; public int Amount; public float Duration, Until, ShownAt; public bool Sticky; }
-        private sealed class BalloonInfo { public string Text; public bool Danger; public float Until, ShownAt; }
+        private sealed class BalloonInfo { public string Text; public bool Danger; public float Until, ShownAt, Duration = 2.5f; }
         private readonly List<Toast> toasts = new List<Toast>();
         private readonly Dictionary<int, BalloonInfo> balloons = new Dictionary<int, BalloonInfo>();
         private readonly int[] shownPenalty = new int[4];
@@ -335,7 +335,7 @@ namespace Galaxy101.Table
             var column = Centered(anchor); column.style.alignItems = Align.Center;
             if (!s.Seated[k]) { BuildEmptySeat(column, k); return; }
             var avatar = Avatar(Seat(k), 62, k == s.Active && s.Phase == "opp", 4, false);
-            avatar.name = "opponent-" + k; column.Add(avatar);
+            avatar.name = "opponent-" + k; avatar.tooltip = (string)Seat(k)["name"]; Clickable(avatar, "card:" + k); column.Add(avatar);
             PenaltyBadge(avatar, k, s, false);
             if (balloons.TryGetValue(k, out var balloon)) column.Add(BalloonElement(k, balloon));
             var plate = new VisualElement { pickingMode = PickingMode.Ignore }; plate.style.marginTop = 6; plate.style.alignItems = Align.Center;
@@ -970,8 +970,11 @@ namespace Galaxy101.Table
             else { bubble.style.left = Length.Percent(50); bubble.style.translate = new Translate(Length.Percent(-50), 0); }
             view.Decorate(bubble, b.Danger ? "linear-gradient(#FF7A86,#E8455A)" : "#fff", 14); GalaxyFilters.Shadow(bubble, 0, 6, 9, new Color(0, 0, 0, .35f));
             float began = b.ShownAt;
-            // bubble 2.5s: appear 12 %, hold, rise and fade over the last 15 %.
-            motions.Add(t => { float u = Mathf.Clamp01((t - began) / 2.5f); bubble.style.opacity = u < .12f ? u / .12f : u > .85f ? (1 - u) / .15f : 1; bubble.style.translate = new Translate(seat == 2 ? Length.Percent(-50) : 0, u > .85f ? -10 * (u - .85f) / .15f : 0); });
+            // bubble 2.5s (chat 2.8s): appear 12 %, hold, rise and fade over the last 15 %.
+            float duration = b.Duration;
+            if (seat == 0) { bubble.style.bottom = StyleKeyword.Auto; bubble.style.left = 40; bubble.style.top = -58; bubble.style.translate = new Translate(0, 0); bubble.style.borderBottomLeftRadius = 4; }
+            motions.Add(t => { float u = Mathf.Clamp01((t - began) / duration); bubble.style.opacity = u < .12f ? u / .12f : u > .85f ? (1 - u) / .15f : 1; bubble.style.translate = new Translate(seat == 2 ? Length.Percent(-50) : 0, u > .85f ? -10 * (u - .85f) / .15f : 0); });
+            if (seat == 0) bubble.style.borderBottomLeftRadius = 4;
             return bubble;
         }
 
@@ -1050,6 +1053,7 @@ namespace Galaxy101.Table
             var panel = Row(12); panel.name = "table-me"; panel.style.position = Position.Absolute; panel.style.left = 18; panel.style.bottom = 16;
             bool active = s.Active == 0 && (s.Phase == "draw" || s.Phase == "discard");
             var me = Avatar(Seat(0), 74, active, s.TurnSeconds, s.Warn); panel.Add(me);
+            if (balloons.TryGetValue(0, out var mine)) me.Add(BalloonElement(0, mine));
             PenaltyBadge(me, 0, s, true);
             var column = new VisualElement { pickingMode = PickingMode.Ignore };
             column.Add(Text((string)Seat(0)["name"], "Montserrat-700", 16, "#F4F1E8"));
@@ -1057,9 +1061,9 @@ namespace Galaxy101.Table
             var buttons = Row(8); buttons.style.marginTop = 6; buttons.pickingMode = PickingMode.Position;
             var chat = Square("table-chat-open", "linear-gradient(160deg,#7AA6FF,#3D6BF0)", "#2448B8", L("Sohbet", "Chat"));
             chat.Add(view.Icon("table-chat", 22, "#fff"));
-            if (s.Unread > 0)
+            if (Unread > 0)
             {
-                var badge = Text(s.Unread.ToString(), "Baloo2-800", 10, "#fff"); badge.style.position = Position.Absolute; badge.style.top = -6; badge.style.right = -6;
+                var badge = Text(Unread.ToString(), "Baloo2-800", 10, "#fff"); badge.style.position = Position.Absolute; badge.style.top = -6; badge.style.right = -6;
                 badge.style.minWidth = 18; badge.style.height = 18; badge.style.unityTextAlign = TextAnchor.MiddleCenter; Pad(badge, 0, 4, 0, 4); view.Decorate(badge, "#FF5E6C", 9);
                 chat.Add(badge);
             }

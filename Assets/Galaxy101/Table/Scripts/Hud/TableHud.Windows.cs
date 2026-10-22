@@ -15,7 +15,7 @@ namespace Galaxy101.Table
         /// <summary>Table settings; every change applies at once (spec/13 §6).</summary>
         public TableSettings Settings { get; private set; }
 
-        /// <summary>Open window: null or "settings".</summary>
+        /// <summary>Open window: null, "settings", "chat", "card" (<see cref="CardSeat"/>) or "gift".</summary>
         public string Window { get; private set; }
         public int SettingsTab { get; private set; }
 
@@ -29,6 +29,7 @@ namespace Galaxy101.Table
         /// <summary>Commands the HUD answers itself (windows); the rest go to <see cref="Command"/>.</summary>
         private bool HandleLocal(string command)
         {
+            if (HandleSocial(command) || HandleGifts(command)) return true;
             switch (command)
             {
                 case "settings": OpenSettings(SettingsTab); return true;
@@ -50,7 +51,7 @@ namespace Galaxy101.Table
         public void CloseWindow()
         {
             if (Window == null) return;
-            Window = null; RenderWindows(false);
+            Window = null; CardSeat = 0; RenderWindows(false);
         }
 
         private void InitializeWindows(bool persist)
@@ -64,6 +65,7 @@ namespace Galaxy101.Table
         private void UpdateWindows()
         {
             if (Window != null && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) CloseWindow();
+            UpdateSocial();
         }
 
         /// <summary>Camera view and the three skins (T19–T22). The game reacts to the same event for its own state.</summary>
@@ -96,8 +98,11 @@ namespace Galaxy101.Table
         {
             if (windowLayer == null) return;
             if (keepScroll && settingsScroll != null) settingsScrollY = settingsScroll.scrollOffset.y;
-            windowMotions.Clear(); windowLayer.Clear(); settingsScroll = null;
+            windowMotions.Clear(); windowLayer.Clear(); settingsScroll = null; chatLog = null; chatScroll = null; chatInput = null; cardAnchor = null;
             if (Window == "settings") BuildSettings(keepScroll);
+            else if (Window == "chat") BuildChat();
+            else if (Window == "card" && CardSeat > 0) BuildCard();
+            else if (Window == "gift") BuildGifts();
             ApplyGaps(windowLayer);
         }
 

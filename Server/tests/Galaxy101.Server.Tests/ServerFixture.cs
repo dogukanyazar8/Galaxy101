@@ -26,7 +26,8 @@ public sealed class ServerFixture : WebApplicationFactory<Program>, IAsyncLifeti
         builder.UseEnvironment("Testing");
         builder.UseSetting("ConnectionStrings:Game", postgres.GetConnectionString());
         builder.UseSetting("Auth:SigningKey", Convert.ToBase64String(new byte[32]));
-        builder.UseSetting("Game:TurnSeconds", "30");
+        builder.UseSetting("RateLimits:AuthPerMinute", "100000");
+        builder.UseSetting("RateLimits:RequestBurst", "100000");
         builder.ConfigureServices(services =>
         {
             services.RemoveAll<TimeProvider>();
@@ -45,6 +46,16 @@ public sealed class ServerFixture : WebApplicationFactory<Program>, IAsyncLifeti
         var tokens = (await response.Content.ReadFromJsonAsync<TokenResponse>())!;
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokens.AccessToken);
         return (client, tokens);
+    }
+
+    /// <summary>Moves the server clock forward and renews the client's (now expired) access token.</summary>
+    public async Task<TokenResponse> AdvanceAsync(TimeSpan by, HttpClient client, TokenResponse tokens)
+    {
+        Clock.Advance(by);
+        var response = await CreateClient().PostAsJsonAsync("/v1/auth/refresh", new RefreshRequest { RefreshToken = tokens.RefreshToken });
+        var renewed = (await response.Content.ReadFromJsonAsync<TokenResponse>())!;
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", renewed.AccessToken);
+        return renewed;
     }
 }
 

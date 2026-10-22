@@ -42,7 +42,7 @@ services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme).Co
     };
 });
 services.AddAuthorization();
-services.AddGameRateLimits();
+services.AddGameRateLimits(configuration);
 services.Configure<ForwardedHeadersOptions>(o =>
 {
     // Railway terminates TLS at its edge proxy; trust exactly one hop of X-Forwarded-*.

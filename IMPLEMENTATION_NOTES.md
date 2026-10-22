@@ -113,15 +113,15 @@ Kaynak: `Design/galaxy101_unity_handoff/galaxy101_ek_durumlar` (spec/17, metin t
 
 Kabul listesi (spec/17):
 - [x] Bot maçında bahis/çip metni yok; XP hapı ve el sayacı (T28, T30). Sapma: el seçici yok (karar: sabit 5).
-- [x] Okey seçici yok, en yüksek değer otomatik, masada temsil rozeti (T33). Sapma: kendi ıstakamdaki okeylerde altın nokta/iç çerçeve işareti yok (3D taş yüzü değişikliği gerektiriyor).
-- [x] 5 ceza kuralı doğru tutarla, Aç 101 altında basılabiliyor, toast + rozet + balon (T34–T36). Sapma: T34'teki "ceza doğuran taşın 1.2 sn parlaması" yok.
-- [x] YERDEN etiketi, geri bırakma, sonraki oyuncuya atılamama (T38–T39). Sapma: geri dönüş uçuşu 300 ms değil, standart taş uçuşu (0.42–0.85 sn).
+- [x] Okey seçici yok, en yüksek değer otomatik, masada temsil rozeti (T33). Açık her okeyde (ıstaka, per, yığın) 3D taşın üstünde altın nokta (#E8B730, yüzdeki renk noktasını örter) + 2 px altın iç çerçeve (`TileFactory.SetOkeyMark`).
+- [x] 5 ceza kuralı doğru tutarla, Aç 101 altında basılabiliyor, toast + rozet + balon (T34–T36); açtıran taş açanın perinde 1.2 sn `--a1` parlıyor.
+- [x] YERDEN etiketi, geri bırakma (yığına 300 ms), sonraki oyuncuya atılamama (T38–T39).
 - [x] 6 mesaj türü, süreler, kuyruk (T40–T41).
 - [x] El sonu v2 çarpanlar, açıklama, nedenli ceza, puansız el, XP (T42–T44). Sapma: çevrimiçi çip varyantı (T43) yok — çevrimiçi masa S8'de.
 - [x] Maç sonu sıralama, XP dökümü, seviye atlama, mini tablo (T45–T46).
-- [x] Okeyi alma: parlayan hedef, takas, ipucu, geçersiz, sahibine +101 (T47–T49). Sapma: okeyin ıstakaya dönüşü 450 ms özel yay değil, standart uçuş.
+- [x] Okeyi alma: parlayan hedef, takas (okey ıstakaya 450 ms yayla), ipucu, geçersiz, sahibine +101 (T47–T49).
 - [x] Yükleme ve hata ekranı (T50–T51).
-- [ ] EN dilde metin taşması kontrolü yapılmadı (yalnız TR karelerle karşılaştırıldı).
+- [x] TR ve EN metin taşması: masa testlerinde otomatik denetim (her görünür etiket tuval içinde ve akıştaki ebeveyninden geniş değil) T28, T30, T33/T47, T35, T38, T42, T45/T46, T50, T51 durumlarında; `GALAXY_TABLE_LANG=en` ile aynı testler İngilizce profille koşuldu, temiz. Bulunup düzeltilen: çıkış kartı başlığı TR'de 2 px taşıyordu (satır kaydırma). EN kareler: `docs/testing/faz5_EN_kareler.png`.
 
 ## Tekrar üretim
 

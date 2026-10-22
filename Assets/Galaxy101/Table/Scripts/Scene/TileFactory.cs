@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -17,6 +18,8 @@ namespace Galaxy101.Table
         private readonly GameObject body;
         private readonly Material face;
         private readonly Dictionary<int, Mesh> faceMeshes = new Dictionary<int, Mesh>();
+        private Material okeyGold;
+        private Mesh okeyFrame, okeyDot;
 
         public TileFactory(GameObject tileSetInstance, string skin, float roughness, float emission)
         {
@@ -71,6 +74,67 @@ namespace Galaxy101.Table
                 var r = f.gameObject.AddComponent<MeshRenderer>(); r.sharedMaterial = face; r.shadowCastingMode = ShadowCastingMode.Off;
             }
             f.GetComponent<MeshFilter>().sharedMesh = FaceMesh(CellOf(code)); f.gameObject.SetActive(true); tile.name = "tas_" + code;
+        }
+
+        /// <summary>
+        /// Okey mark (spec/17 common rules): the tile keeps its own face; a gold dot (#E8B730) covers the face's colour dot
+        /// and a 2 px gold inner frame runs inside the tile edge. Shown on every face-up okey (rack, melds, piles).
+        /// </summary>
+        public void SetOkeyMark(GameObject tile, bool on)
+        {
+            var mark = tile.transform.Find("tas_okey");
+            if (!on) { if (mark != null) mark.gameObject.SetActive(false); return; }
+            if (mark == null)
+            {
+                if (okeyGold == null)
+                {
+                    okeyGold = new Material(Shader.Find("Universal Render Pipeline/Unlit")) { name = "tas_okey_altin" };
+                    ColorUtility.TryParseHtmlString("#E8B730", out var gold); okeyGold.SetColor("_BaseColor", gold);
+                    okeyFrame = FrameMesh(); okeyDot = DotMesh();
+                }
+                mark = new GameObject("tas_okey").transform; mark.SetParent(tile.transform, false);
+                // In front of the face plane (TD/2 + 0.6 mm) so the face's own dot is covered.
+                mark.localPosition = new Vector3(0, 0, TableConstants.TD / 2 + 0.0009f);
+                foreach (var (name, mesh) in new[] { ("tas_okey_cerceve", okeyFrame), ("tas_okey_nokta", okeyDot) })
+                {
+                    var part = new GameObject(name); part.transform.SetParent(mark, false);
+                    part.AddComponent<MeshFilter>().sharedMesh = mesh;
+                    var r = part.AddComponent<MeshRenderer>(); r.sharedMaterial = okeyGold; r.shadowCastingMode = ShadowCastingMode.Off;
+                }
+            }
+            mark.gameObject.SetActive(true);
+        }
+
+        /// <summary>Rectangular ring just inside the tile edge, ~2 px at rack size (46 px wide tile).</summary>
+        private static Mesh FrameMesh()
+        {
+            float w = TableConstants.TW / 2 * 0.95f, h = TableConstants.TH / 2 * 0.96f, t = TableConstants.TW * 2 / 46f;
+            var v = new[] { new Vector3(-w, -h), new Vector3(w, -h), new Vector3(w, h), new Vector3(-w, h), new Vector3(-w + t, -h + t), new Vector3(w - t, -h + t), new Vector3(w - t, h - t), new Vector3(-w + t, h - t) };
+            var tri = new List<int>();
+            for (int i = 0; i < 4; i++) { int n = (i + 1) % 4; tri.AddRange(new[] { i, i + 4, n, n, i + 4, n + 4 }); }
+            var mesh = new Mesh { name = "tas_okey_cerceve", vertices = v, triangles = tri.ToArray(), normals = v.Select(_ => Vector3.forward).ToArray() };
+            FaceForward(mesh); mesh.RecalculateBounds(); return mesh;
+        }
+
+        /// <summary>Disc over the face dot: canvas (64,145) r 11 of 128×180 on the 92 % face plane.</summary>
+        private static Mesh DotMesh()
+        {
+            float faceH = TableConstants.TH * 0.92f, y = faceH * (0.5f - 145f / 180f), r = 12f / 180f * faceH;
+            const int segments = 24;
+            var v = new Vector3[segments + 1]; v[0] = new Vector3(0, y);
+            for (int i = 0; i < segments; i++) { float a = i * Mathf.PI * 2 / segments; v[i + 1] = new Vector3(Mathf.Cos(a) * r, y + Mathf.Sin(a) * r); }
+            var tri = new List<int>(); for (int i = 0; i < segments; i++) tri.AddRange(new[] { 0, 1 + (i + 1) % segments, 1 + i });
+            var mesh = new Mesh { name = "tas_okey_nokta", vertices = v, triangles = tri.ToArray(), normals = v.Select(_ => Vector3.forward).ToArray() };
+            FaceForward(mesh); mesh.RecalculateBounds(); return mesh;
+        }
+
+        /// <summary>Wind every triangle like the face quad (FaceMesh: cross(v1 − v0, v2 − v0).z &gt; 0), which renders from the player side.</summary>
+        private static void FaceForward(Mesh mesh)
+        {
+            var v = mesh.vertices; var t = mesh.triangles;
+            for (int i = 0; i < t.Length; i += 3)
+                if (Vector3.Cross(v[t[i + 1]] - v[t[i]], v[t[i + 2]] - v[t[i]]).z < 0) { int s = t[i + 1]; t[i + 1] = t[i + 2]; t[i + 2] = s; }
+            mesh.triangles = t;
         }
 
         private Mesh FaceMesh(int cell)

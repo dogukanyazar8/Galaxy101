@@ -95,7 +95,8 @@ namespace Galaxy101.Table
         private int pickedTile = -1;
         private bool deckOnly;
         // T33/T47–T49: the rack tile being dragged (okey targets), the okey under the pointer / long-pressed, a refused okey.
-        private int dragTile = -1, tipOkey = -1, invalidOkey = -1;
+        private int dragTile = -1, tipOkey = -1, invalidOkey = -1, glowTile = -1;
+        private float glowUntil;
         private bool tipTake;
         private float tipUntil, invalidUntil;
         private System.Random random;
@@ -113,6 +114,7 @@ namespace Galaxy101.Table
             if (hud == null) hud = FindAnyObjectByType<TableHud>();
             if (table.CameraRig == null) table.Build();
             Board = new TableBoard(table);
+            Board.IsOkey = id => TileCatalog.IsRealJoker(new TileId(id), Indicator);
             Session = new LocalSession();
             life = new CancellationTokenSource();
             random = seed != 0 ? new System.Random((int)seed) : new System.Random();
@@ -156,6 +158,7 @@ namespace Galaxy101.Table
             if (ExitOpen && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) CancelExit();
             if (tipOkey >= 0 && tipTake && Time.unscaledTime > tipUntil) { tipOkey = -1; Notify(); }
             if (invalidOkey >= 0 && Time.unscaledTime > invalidUntil) { invalidOkey = -1; Notify(); }
+            if (glowTile >= 0 && Time.unscaledTime > glowUntil) { glowTile = -1; Notify(); }
         }
 
         // ---------- flow ----------
@@ -487,6 +490,7 @@ namespace Galaxy101.Table
             staged.Clear();
             var receipt = await Execute(new ReturnDiscardCommand(Meta(Session.GetView(Me))));
             if (!receipt.Accepted) { Message(TableHud.ToastKind.Error, L("Bu hamle geçersiz", "That move is not allowed")); return; }
+            Board.ForceDuration(pickedTile, 0.3f); // T39: back on the pile in 300 ms
             pickedTile = -1; deckOnly = true; LastDrawn = -1;
             Rack.Sync(Session.GetView(Me).OwnHand.Select(t => t.Value), TileCodes.FaceFor(Indicator), autoSort);
             Current = Phase.Draw; SyncBoard(); Notify();
@@ -566,6 +570,8 @@ namespace Galaxy101.Table
             else if (seat == (actor + 3) % 4 && pending != null && pending.Source == DrawSource.PreviousDiscard)
             {
                 int number = amount / 10;
+                // T34: the tile that fed the opening glows in the opener's meld for 1.2 s.
+                glowTile = pending.Tile.Value; glowUntil = Time.unscaledTime + 1.2f;
                 why = "why.fed"; mine = T("pen.fed", number, FirstName(actor)); theirs = T("ev.penFed", FirstName(seat), number, amount);
                 penaltyReasons[seat].Add((T(why, number), amount));
                 Announce(seat, mine, theirs, amount, null); return;
@@ -686,6 +692,7 @@ namespace Galaxy101.Table
             }
             staged.Clear(); staged.AddRange(next);
             Rack.Remove(tileId); Rack.Add(okeyId, TileCodes.FaceFor(Indicator), autoSort);
+            Board.ForceDuration(okeyId, 0.45f); // T47: the okey flies to the rack in 450 ms
             SyncBoard(); Notify();
         }
 
@@ -871,6 +878,7 @@ namespace Galaxy101.Table
                 s.Penalties[k] = k == Me ? view.OwnPenalties : view.Players[k].Penalties;
             }
             s.OpenSum = s.Opened[Me] > 0 ? s.Opened[Me] : eval.Sum;
+            s.GlowTile = glowTile;
             var dragFace = dragTile >= 0 && !TileCatalog.IsRealJoker(new TileId(dragTile), Indicator) ? TileCatalog.GetNonJokerFace(new TileId(dragTile), Indicator) : (TileFace?)null;
             bool canTake = CanDiscard && OpenedKind(Me) != OpeningKind.None;
             foreach (var okey in TableOkeys())

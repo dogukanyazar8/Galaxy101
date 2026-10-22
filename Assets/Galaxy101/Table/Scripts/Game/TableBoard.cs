@@ -32,6 +32,13 @@ namespace Galaxy101.Table
         private int deckShown = -1, lastStock;
         private float deckFrom, deckTo, deckT0, deckDuration;
         private Pose? spawnHint;
+        private readonly Dictionary<int, float> forcedDurations = new Dictionary<int, float>();
+
+        /// <summary>Real okeys (set by the game once the indicator is known): they carry the gold okey mark.</summary>
+        public System.Func<int, bool> IsOkey = _ => false;
+
+        /// <summary>The next move of <paramref name="id"/> takes exactly <paramref name="seconds"/> (spec/17: put back 300 ms, taken okey 450 ms).</summary>
+        public void ForceDuration(int id, float seconds) => forcedDurations[id] = seconds;
 
         public TableBoard(TableScene scene) { this.scene = scene; }
 
@@ -109,7 +116,7 @@ namespace Galaxy101.Table
                 for (int o = 0; o < 4; o++)
                 {
                     int k = (starter + o) % 4;
-                    if (k == 0) { if (mine.Count == 0) continue; int id = mine.Dequeue(); var v = Spawn(TileCodes.Code(id), deckTop); v.Id = id; known[id] = v; v.MoveTo(RackPose(state.Rack, id), TileView.Motion.Deal, lead + index++ * step); }
+                    if (k == 0) { if (mine.Count == 0) continue; int id = mine.Dequeue(); var v = Spawn(TileCodes.Code(id), deckTop); v.Id = id; known[id] = v; scene.Tiles.SetOkeyMark(v.gameObject, IsOkey(id)); v.MoveTo(RackPose(state.Rack, id), TileView.Motion.Deal, lead + index++ * step); }
                     else
                     {
                         if (hidden[k].Count >= state.HandCounts[k]) continue;
@@ -180,8 +187,10 @@ namespace Galaxy101.Table
                     known[pair.Key] = view;
                 }
                 if (pair.Value.Meld >= 0) meldOf[view] = pair.Value.Meld;
+                scene.Tiles.SetOkeyMark(view.gameObject, IsOkey(pair.Key));
                 bool slide = pair.Value.Rack && view.HasTarget && IsOnMyRack(view);
-                if (instant) view.Snap(pair.Value.Pose); else view.MoveTo(pair.Value.Pose, slide ? TileView.Motion.Slide : TileView.Motion.Travel);
+                float forced = forcedDurations.TryGetValue(pair.Key, out var d) ? d : 0;
+                if (instant) view.Snap(pair.Value.Pose); else view.MoveTo(pair.Value.Pose, slide ? TileView.Motion.Slide : TileView.Motion.Travel, 0, forced);
                 view.name = pair.Value.Rack ? "tas_" + view.Code + "_rack" : "tas_" + view.Code;
             }
 
@@ -193,14 +202,14 @@ namespace Galaxy101.Table
                     // Prefer a tile I just saw leave a pile (this player took the previous discard).
                     TileView view = leftovers.FirstOrDefault();
                     if (view != null) leftovers.Remove(view); else view = Spawn(null, deckTop);
-                    view.Id = -1; view.Code = null; scene.Tiles.SetFace(view.gameObject, null);
+                    view.Id = -1; view.Code = null; scene.Tiles.SetFace(view.gameObject, null); scene.Tiles.SetOkeyMark(view.gameObject, false);
                     view.Seat = k; view.OpponentSlot = FreeOpponentSlot(k); hidden[k].Add(view);
                     var pose = scene.SlotPose(k, view.OpponentSlot.Row, view.OpponentSlot.Index);
                     if (instant) view.Snap(pose); else view.MoveTo(pose, TileView.Motion.Travel);
                 }
             }
             foreach (var v in leftovers) Kill(v);
-            spawnHint = null; lastStock = state.Stock;
+            spawnHint = null; lastStock = state.Stock; forcedDurations.Clear();
             if (deckDuration <= 0) LayoutDeck(state.Stock);
         }
 

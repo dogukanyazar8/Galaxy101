@@ -34,6 +34,7 @@ namespace Galaxy101.Tests
             if (withHud)
             {
                 statePath = Path.Combine(Path.GetTempPath(), "galaxy-table-game-" + Guid.NewGuid().ToString("N") + ".json");
+                WriteLanguage(statePath);
                 hudOwner = new GameObject("TableHud"); hudOwner.SetActive(false);
                 hudOwner.AddComponent<UIDocument>().panelSettings = Resources.Load<PanelSettings>("Galaxy101/UI/PanelSettings");
                 var hud = hudOwner.AddComponent<TableHud>(); hudOwner.SetActive(true); hud.Initialize(statePath);
@@ -52,6 +53,35 @@ namespace Galaxy101.Tests
             foreach (var go in new[] { hudOwner, gameOwner, sceneOwner }) if (go != null) UnityEngine.Object.Destroy(go);
             yield return null;
             if (statePath != null && File.Exists(statePath)) File.Delete(statePath);
+        }
+
+        /// <summary>GALAXY_TABLE_LANG=en runs the table tests with an English profile (text overflow pass).</summary>
+        private static void WriteLanguage(string path)
+        {
+            string lang = Environment.GetEnvironmentVariable("GALAXY_TABLE_LANG");
+            if (string.IsNullOrEmpty(lang)) return;
+            File.WriteAllText(path, "{\"version\":1,\"Settings\":{\"lang\":\"" + lang + "\"}}");
+        }
+
+        /// <summary>
+        /// Text overflow check (TR and EN): every visible label stays inside the 1280×720 canvas and inside its in-flow
+        /// parent's width; absolutely placed badges may overhang their parent but not the canvas.
+        /// </summary>
+        private static void AssertNoOverflow(VisualElement canvas, string where)
+        {
+            var bounds = canvas.worldBound;
+            var problems = new List<string>();
+            canvas.Query<Label>().ForEach(label =>
+            {
+                if (string.IsNullOrEmpty(label.text) || label.resolvedStyle.display == DisplayStyle.None || label.resolvedStyle.visibility == Visibility.Hidden || label.resolvedStyle.opacity <= 0.01f) return;
+                for (var e = label.parent; e != null && e != canvas; e = e.parent) if (e.resolvedStyle.display == DisplayStyle.None || e.name == "table-anchors") return;
+                var r = label.worldBound;
+                if (r.xMin < bounds.xMin - 1 || r.xMax > bounds.xMax + 1 || r.yMin < bounds.yMin - 1 || r.yMax > bounds.yMax + 1) problems.Add("outside canvas: '" + label.text + "' " + r);
+                var parent = label.parent;
+                if (parent != null && label.resolvedStyle.position != Position.Absolute && label.layout.width > parent.contentRect.width + 1.5f && parent.resolvedStyle.width > 0)
+                    problems.Add("wider than its parent '" + parent.name + "': '" + label.text + "' " + label.layout.width.ToString("F0") + " > " + parent.contentRect.width.ToString("F0"));
+            });
+            Assert.That(problems, Is.Empty, where + " text overflow: " + string.Join(" | ", problems));
         }
 
         private static IEnumerator Until(Func<bool> condition, float realSeconds, string what)
@@ -151,6 +181,10 @@ namespace Galaxy101.Tests
 
             yield return Until(() => game.CanDraw, 90, "my draw turn after three bots");
             Assert.That(game.TurnsPlayed, Is.GreaterThanOrEqualTo(4), "me and three bots played");
+            AssertNoOverflow(hudOwner.GetComponent<TableHud>().Canvas, "T28 header");
+            game.RequestExit(); yield return null; yield return new WaitForSecondsRealtime(0.4f);
+            AssertNoOverflow(hudOwner.GetComponent<TableHud>().Canvas, "T30 leave card");
+            game.CancelExit();
             yield return Until(() => game.SyncedVersion == game.Session.GetView(TableGame.Me).Version, 5, "the board to reconcile");
             AssertBoardMatchesEngine(game);
             string capture = Environment.GetEnvironmentVariable("GALAXY_TABLE_GAME_CAPTURE");
@@ -239,6 +273,8 @@ namespace Galaxy101.Tests
             yield return null;
             Assert.That(game.Rack.Count, Is.EqualTo(tiles));
             Assert.That(hud.ActiveToast, Does.StartWith("Eksik açılış").Or.StartWith("Short opening"));
+            yield return new WaitForSecondsRealtime(0.4f);
+            AssertNoOverflow(hud.Canvas, "T35 short opening");
             Assert.That(hud.Canvas.Q<VisualElement>("penalty-badge-0"), Is.Not.Null);
             Assert.That(game.PenaltyReasons(TableGame.Me).Single().Amount, Is.EqualTo(101));
             string penaltyCapture = Environment.GetEnvironmentVariable("GALAXY_TABLE_PENALTY_CAPTURE");
@@ -258,16 +294,20 @@ namespace Galaxy101.Tests
             yield return null;
             Assert.That(hud.Canvas.Q<VisualElement>("picked-tag"), Is.Not.Null);
             Assert.That(hud.Canvas.Q<VisualElement>("putback-ring"), Is.Not.Null);
+            AssertNoOverflow(hud.Canvas, "T38 pile tile");
             string pileCapture = Environment.GetEnvironmentVariable("GALAXY_TABLE_PILE_CAPTURE");
             if (!string.IsNullOrEmpty(pileCapture)) { Time.timeScale = 0.2f; yield return Capture(hudOwner.GetComponent<UIDocument>(), pileCapture); Time.timeScale = 3; }
             game.Discard(pile);
             yield return null;
             Assert.That(hud.ActiveToast, Does.StartWith("Yerden aldığın taşı atamazsın").Or.StartWith("You can't discard"));
+            yield return new WaitForSecondsRealtime(0.4f); // toastIn settles
+            AssertNoOverflow(hud.Canvas, "T38 error");
             Assert.That(game.Rack.Tiles.Contains(pile), Is.True);
 
             // T39: put it back, then only the deck is left.
             game.PutBack();
             yield return Until(() => game.CanDraw, 10, "the put back");
+            Assert.That(game.Board.ViewOf(pile).Duration, Is.EqualTo(0.3f).Within(1e-4f), "T39: back on the pile in 300 ms");
             Assert.That(game.CanDrawSide, Is.False);
             Assert.That(game.Session.GetView(TableGame.Me).Discards[3].Last().Value, Is.EqualTo(pile));
             Assert.That(game.Rack.Tiles.Contains(pile), Is.False);
@@ -306,6 +346,56 @@ namespace Galaxy101.Tests
                 new[] { meld }, discards, new DrawReceipt(DrawSource.Stock, new TileId(mine[21]), false), OpeningKind.Series, 0, false, new long[] { 3, 3, 3, 3 });
         }
 
+        /// <summary>Me to draw, not opened: Red 11-13, Blue 10-11, Yellow 5-9 on hand; Burak (seat 3) threw Blue 9.</summary>
+        private static RoundState FedOpening(out int blueNine, out int[] groups, out int[] fillers)
+        {
+            int Id(TileColor c, int n, int copy = 0) => 2 * (13 * (int)c + n - 1) + copy;
+            int indicator = Id(TileColor.Black, 13);
+            blueNine = Id(TileColor.Blue, 9);
+            groups = new[] { Id(TileColor.Red, 11), Id(TileColor.Red, 12), Id(TileColor.Red, 13), Id(TileColor.Blue, 10), Id(TileColor.Blue, 11),
+                Id(TileColor.Yellow, 5), Id(TileColor.Yellow, 6), Id(TileColor.Yellow, 7), Id(TileColor.Yellow, 8), Id(TileColor.Yellow, 9) };
+            var taken = new HashSet<int>(groups) { indicator, blueNine, Id(TileColor.Black, 1), Id(TileColor.Black, 1, 1) };
+            var free = new Queue<int>(Enumerable.Range(0, 106).Where(id => !taken.Contains(id)));
+            fillers = Enumerable.Range(0, 11).Select(_ => free.Dequeue()).ToArray();
+            var hands = new List<int>[] { groups.Concat(fillers).ToList(), new List<int>(), new List<int>(), new List<int>() };
+            free = new Queue<int>(free.Concat(new[] { Id(TileColor.Black, 1), Id(TileColor.Black, 1, 1) }));
+            for (int k = 1; k < 4; k++) while (hands[k].Count < 21) hands[k].Add(free.Dequeue());
+            var players = Enumerable.Range(0, 4).Select(k => new PlayerState(hands[k].Select(id => new TileId(id)).ToArray(), OpeningKind.None, 0)).ToArray();
+            var discards = new IReadOnlyList<TileId>[] { Array.Empty<TileId>(), Array.Empty<TileId>(), Array.Empty<TileId>(), new[] { new TileId(blueNine) } };
+            return new RoundState(Guid.NewGuid(), 10, 9, 1, 0, 4, RoundPhase.AwaitingDraw, new TileId(indicator), free.Select(id => new TileId(id)).ToArray(), players,
+                Array.Empty<Meld>(), discards, null, OpeningKind.None, 0, false, new long[] { 3, 3, 3, 3 });
+        }
+
+        [UnityTest]
+        [Timeout(180000)]
+        public IEnumerator OpeningWithThePreviousDiscardFeedsItsOwnerAndTheTileGlows()
+        {
+            var state = FedOpening(out int blueNine, out int[] groups, out int[] fillers);
+            var game = Build(TableGame.Me, 88, true);
+            game.Configure(TableGame.Me, 88, 60, false, state);
+            Time.timeScale = 3;
+            yield return Until(() => game.CanDraw && game.SyncedVersion == game.Session.GetView(TableGame.Me).Version, 40, "my draw turn in the prepared hand");
+            var draw = game.Draw(DrawSource.PreviousDiscard, null);
+            yield return Until(() => draw.IsCompleted, 10, "taking Blue 9");
+            // Arrange the rack: Red 11-13 · Blue 9-11 · Yellow 5-9 on top, the rest below.
+            var plan = new Dictionary<int, RackSlot>();
+            int[] top = { groups[0], groups[1], groups[2], -1, blueNine, groups[3], groups[4], -1, groups[5], groups[6], groups[7], groups[8], groups[9] };
+            for (int i = 0; i < top.Length; i++) if (top[i] >= 0) plan[top[i]] = new RackSlot(0, i);
+            for (int i = 0; i < fillers.Length; i++) plan[fillers[i]] = new RackSlot(1, i);
+            game.ApplyRackPlan(plan);
+            Assert.That(HandEvaluation.Of(game.Rack, game.Indicator).Sum, Is.GreaterThanOrEqualTo(101));
+            game.OpenRuns();
+            Assert.That(game.Rack.Tiles.Contains(blueNine), Is.False, "Blue 9 went into the opening");
+            game.Discard(fillers[0]);
+            yield return Until(() => game.Current == TableGame.Phase.Opponent, 10, "the committed opening");
+            Assert.That(game.Session.GetView(TableGame.Me).Players[3].Penalties, Is.EqualTo(90), "Burak fed a 9: +90");
+            Assert.That(game.HudState().GlowTile, Is.EqualTo(blueNine), "T34: the feeding tile glows");
+            yield return null;
+            Assert.That(hudOwner.GetComponent<TableHud>().Canvas.Q<VisualElement>("glow-tile-" + blueNine), Is.Not.Null);
+            yield return new WaitForSecondsRealtime(1.4f);
+            Assert.That(game.HudState().GlowTile, Is.EqualTo(-1), "for 1.2 s");
+        }
+
         [UnityTest]
         [Timeout(180000)]
         public IEnumerator OkeyOnTheTableShowsWhatItStandsForAndCanBeTaken()
@@ -328,6 +418,8 @@ namespace Galaxy101.Tests
             var dragging = game.HudState();
             Assert.That(dragging.Okeys.Single().Target, Is.True);
             Assert.That(dragging.DragBanner, Is.Not.Null);
+            game.ShowOkeyTip(okey, false); yield return null;
+            AssertNoOverflow(hud.Canvas, "T33/T47 okey");
             string okeyCapture = Environment.GetEnvironmentVariable("GALAXY_TABLE_OKEY_CAPTURE");
             if (!string.IsNullOrEmpty(okeyCapture)) { game.ShowOkeyTip(okey, false); yield return Capture(hudOwner.GetComponent<UIDocument>(), okeyCapture); }
             game.SetDragTile(-1);
@@ -336,8 +428,14 @@ namespace Galaxy101.Tests
             Assert.That(hud.ActiveToast, Does.Contain("Mavi 7").Or.Contain("Blue 7"));
             Assert.That(game.Rack.Tiles.Contains(okey), Is.False);
 
+            var okeyView = game.Board.ViewOf(okey);
+            Assert.That(okeyView.transform.Find("tas_okey")?.gameObject.activeSelf, Is.True, "the okey on the table wears the gold mark");
             game.TakeOkey(blueSeven, okey);
             Assert.That(game.Rack.Tiles.Contains(okey), Is.True, "the okey comes to my rack");
+            Assert.That(okeyView.Duration, Is.EqualTo(0.45f).Within(1e-4f), "T47: 450 ms flight to the rack");
+            Assert.That(okeyView.transform.Find("tas_okey").gameObject.activeSelf, Is.True, "and keeps it on my rack");
+            string rackOkeyCapture = Environment.GetEnvironmentVariable("GALAXY_TABLE_RACKOKEY_CAPTURE");
+            if (!string.IsNullOrEmpty(rackOkeyCapture)) yield return Capture(hudOwner.GetComponent<UIDocument>(), rackOkeyCapture);
             Assert.That(game.Rack.Tiles.Contains(blueSeven), Is.False);
             int discard = game.Rack.Tiles.First(id => id != okey);
             game.Discard(discard);
@@ -362,6 +460,8 @@ namespace Galaxy101.Tests
                 yield return null;
                 Assert.That(hud.Canvas.Q<VisualElement>("table-result-card"), Is.Not.Null);
                 Assert.That(game.HudState().Result.Rows.Count, Is.EqualTo(4));
+                yield return new WaitForSecondsRealtime(0.6f); // rows slide in
+                AssertNoOverflow(hud.Canvas, "T42 hand " + hand + " result");
                 if (hand == 1 && !string.IsNullOrEmpty(resultCapture)) { Time.timeScale = 1; yield return Capture(hudOwner.GetComponent<UIDocument>(), resultCapture); Time.timeScale = 6; }
                 game.NextHand();
             }
@@ -369,6 +469,8 @@ namespace Galaxy101.Tests
             yield return Until(() => game.MatchOpen, 30, "the match end card");
             yield return null;
             Assert.That(hud.Canvas.Q<VisualElement>("table-match-card"), Is.Not.Null);
+            yield return new WaitForSecondsRealtime(0.6f);
+            AssertNoOverflow(hud.Canvas, "T45/T46 match end");
             var match = game.HudState().Match;
             Assert.That(match.Standings.Count, Is.EqualTo(4));
             Assert.That(match.Standings.Select(x => x.Total), Is.Ordered, "lowest total first");
@@ -389,6 +491,7 @@ namespace Galaxy101.Tests
         {
             savedTimeScale = Time.timeScale;
             statePath = Path.Combine(Path.GetTempPath(), "galaxy-loading-" + Guid.NewGuid().ToString("N") + ".json");
+            WriteLanguage(statePath);
             hudOwner = new GameObject("Menu"); hudOwner.SetActive(false);
             var document = hudOwner.AddComponent<UIDocument>(); document.panelSettings = Resources.Load<PanelSettings>("Galaxy101/UI/PanelSettings");
             var menu = hudOwner.AddComponent<MainMenuController>(); hudOwner.SetActive(true); menu.Initialize(statePath);
@@ -401,6 +504,7 @@ namespace Galaxy101.Tests
             Assert.That(menu.View.Root.Q<VisualElement>("table-loading"), Is.Not.Null);
             Assert.That(menu.View.Root.Q<Label>("table-loading-percent").text, Is.EqualTo("64%"));
             Assert.That(menu.View.Root.Q<VisualElement>("table-loading-tip"), Is.Not.Null);
+            AssertNoOverflow(menu.View.Root.Q<VisualElement>("galaxy-canvas"), "T50 loading");
             string capture = Environment.GetEnvironmentVariable("GALAXY_TABLE_LOADING_CAPTURE");
             if (!string.IsNullOrEmpty(capture)) yield return Capture(document, capture);
 
@@ -409,6 +513,7 @@ namespace Galaxy101.Tests
             loading.ShowError(() => lobby = true, () => retried = true);
             yield return null;
             Assert.That(menu.View.Root.Q<VisualElement>("table-loading-error-card"), Is.Not.Null);
+            AssertNoOverflow(menu.View.Root.Q<VisualElement>("galaxy-canvas"), "T51 open failed");
             string errorCapture = Environment.GetEnvironmentVariable("GALAXY_TABLE_LOADING_ERROR_CAPTURE");
             if (!string.IsNullOrEmpty(errorCapture)) yield return Capture(document, errorCapture);
             using (var click = NavigationSubmitEvent.GetPooled()) { var retry = menu.View.Root.Q<Button>("table-loading-retry"); click.target = retry; retry.SendEvent(click); }

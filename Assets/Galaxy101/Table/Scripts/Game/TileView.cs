@@ -23,6 +23,8 @@ namespace Galaxy101.Table
         public Pose Target { get; private set; }
         public bool HasTarget { get; private set; }
         public bool Tweening => tween;
+        /// <summary>Length of the current (or last) tween in seconds.</summary>
+        public float Duration => duration;
         private Pose? overridePose;
 
         private bool tween, slide, deal;

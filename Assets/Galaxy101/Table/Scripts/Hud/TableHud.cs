@@ -51,6 +51,8 @@ namespace Galaxy101.Table
             /// tooltip under one okey; the band text while dragging a tile that can take an okey.</summary>
             public readonly List<OkeyMark> Okeys = new List<OkeyMark>();
             public int OkeyTipId = -1;
+            /// <summary>T34: the tile that fed an opening, glowing for 1.2 s.</summary>
+            public int GlowTile = -1;
             public string OkeyTip, DragBanner;
         }
 
@@ -298,6 +300,7 @@ namespace Galaxy101.Table
             if (state.ExitOpen) BuildExit();
             BuildPickedTile(state);
             BuildOkeys(state);
+            BuildGlowTile(state);
             ApplyGaps(hudLayer); ApplyGaps(anchorLayer);
             RenderToasts();
             LateUpdate();
@@ -542,8 +545,9 @@ namespace Galaxy101.Table
             view.Decorate(next, "linear-gradient(var(--a1),var(--a2))", 18, 5, "var(--aS)");
             var bar = new VisualElement { pickingMode = PickingMode.Ignore }; bar.style.position = Position.Absolute; bar.style.left = 0; bar.style.top = 0; bar.style.bottom = 0; bar.style.backgroundColor = new Color(1, 1, 1, .32f);
             next.Add(bar);
-            var label = Text("", "Montserrat-800", 18, "var(--aT)"); label.name = "result-next-label"; next.Add(label);
-            float start = r.StartedAt; int total = r.Seconds; bool last = r.LastHand;
+            bool last = r.LastHand;
+            var label = Text((last ? L("Maç sonucu · ", "Match result · ") : L("Sonraki el · ", "Next hand · ")) + r.Seconds, "Montserrat-800", 18, "var(--aT)"); label.name = "result-next-label"; next.Add(label);
+            float start = r.StartedAt; int total = r.Seconds;
             // barFill 15s + the countdown in the label ("Sonraki el · 11"); the last hand leads to the match end.
             motions.Add(t =>
             {
@@ -723,7 +727,8 @@ namespace Galaxy101.Table
             var card = Card(460, 28); card.name = "table-exit-confirm"; card.style.alignItems = Align.Center; Pad(card, 28, 28, 28, 28);
             var icon = new VisualElement { pickingMode = PickingMode.Ignore }; icon.style.width = icon.style.height = 64; icon.style.alignItems = Align.Center; icon.style.justifyContent = Justify.Center;
             view.Decorate(icon, "rgba(255,94,108,.16)", 20); icon.Add(view.Icon("table-exit", 32, "#FF8A94")); card.Add(icon);
-            var title = Text(L("Masadan kalkmak istiyor musun?", "Leave the table?"), "Montserrat-700", 24, "#F4F1E8"); title.style.marginTop = 12; card.Add(title);
+            var title = Text(L("Masadan kalkmak istiyor musun?", "Leave the table?"), "Montserrat-700", 24, "#F4F1E8"); title.style.marginTop = 12;
+            title.style.whiteSpace = WhiteSpace.Normal; title.style.unityTextAlign = TextAnchor.UpperCenter; title.style.maxWidth = 404; title.style.flexShrink = 1; card.Add(title);
             var body = Text(TableStrings.Get("exitBodyBot", Lang), "Baloo2-700", 15, "var(--mt)");
             body.style.whiteSpace = WhiteSpace.Normal; body.style.maxWidth = 360; body.style.unityTextAlign = TextAnchor.UpperCenter; body.style.marginTop = 12; card.Add(body);
             var buttons = Row(10); buttons.style.alignSelf = Align.Stretch; buttons.style.marginTop = 20;
@@ -1023,6 +1028,18 @@ namespace Galaxy101.Table
                     Centered(anchor, -64, false).Add(tip);
                 }
             }
+        }
+
+        private void BuildGlowTile(State s)
+        {
+            if (s.GlowTile < 0 || TilePosition == null) return;
+            int id = s.GlowTile;
+            var frame = new VisualElement { name = "glow-tile-" + id, pickingMode = PickingMode.Ignore }; MenuView.Place(frame, -15, -19, 30, 38);
+            frame.style.borderTopLeftRadius = frame.style.borderTopRightRadius = frame.style.borderBottomLeftRadius = frame.style.borderBottomRightRadius = 6;
+            Border(frame, 3, view.C("var(--a1)"));
+            float began = Time.realtimeSinceStartup;
+            motions.Add(t => { float u = Mathf.Clamp01((t - began) / 1.2f); GalaxyFilters.Shadow(frame, 0, 0, 9 * Mathf.Sin(Mathf.PI * u) + 2, view.C("var(--gl)")); frame.style.opacity = u > .8f ? (1 - u) / .2f : 1; });
+            Anchor("glow-" + id, () => TilePosition(id)).Add(frame);
         }
 
         // ---------- my panel ----------

@@ -68,3 +68,4 @@ MonoBehaviour:
     Prefab: {fileID: 2688760131345519717, guid: 0f3e45cfacc0f484483075c80149b7ca, type: 3}
   Chair: {fileID: 5885979764039450167, guid: 91257cbb140258145be3e8ffc548a384, type: 3}
   Room: {fileID: 2151638816027519036, guid: d4242e7fcbbc63943b2fd96de24797bb, type: 3}
+  Die: {fileID: 2993321357588449710, guid: 096f7772f68dc624389782de06f02d1f, type: 3}

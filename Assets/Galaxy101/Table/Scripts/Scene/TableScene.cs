@@ -34,6 +34,8 @@ namespace Galaxy101.Table
         public TableCameraRig CameraRig { get; private set; }
         public TileFactory Tiles => tiles;
         public Transform TilesRoot => tilesRoot;
+        /// <summary>The Blender die prefab, or null when the catalog predates it.</summary>
+        public GameObject DiePrefab => catalog != null ? catalog.Die : null;
         public Transform DiscardZone { get; private set; }
 
         /// <summary>Finish celebration points (table3d.js celebrate): the finisher's corner on the felt and above their avatar.</summary>

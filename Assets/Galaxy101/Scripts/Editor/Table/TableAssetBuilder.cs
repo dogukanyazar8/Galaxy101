@@ -39,6 +39,7 @@ namespace Galaxy101.Table.EditorTools
             catalog.GiftModels = TableAssetCatalog.Gifts.Select(g => Entry(g, MakePrefab("galaxy101_" + (Array.IndexOf(TableAssetCatalog.Gifts, g) < 6 ? "ikram_" : "hediye_") + g, "Gift_" + g, false))).ToArray();
             catalog.Chair = MakePrefab("galaxy101_koltuk", "Chair", false);
             catalog.Room = MakePrefab("galaxy101_oda_istasyon", "Room", false);
+            catalog.Die = MakePrefab("galaxy101_zar", "Die", false); // tools/blender/make_die.py (spec/24)
             EditorUtility.SetDirty(catalog); AssetDatabase.SaveAssets();
             // Face atlases are 2048×2520 (8×7 cells of 256×360): keep them at full resolution with clean alpha edges.
             foreach (var path in Directory.GetFiles("Assets/Galaxy101/Resources/Galaxy101/Table/TileFaces", "*.png"))

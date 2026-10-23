@@ -33,3 +33,11 @@ Kaynak: `Design/galaxy101_unity_handoff` v3 (`spec/00`, `spec/18`–`25`, `refer
   - UI Toolkit: kaydırma alanında onlarca filtre (drop-shadow) olunca filtre dokuları kayboluyor ("texture not allocated"); lobi yüzeyleri gölgeyi alt kenarlıkla çiziyor.
 - V6 (4c50a41): dağıtım töreni (15×7 balya, iki zar, gösterge, fazla taş, 2+2+2+2+1 dağıtım, kuleler, ıstakalar), HUD dağıtım kartı + Zar at/Tekrar at; v3 atlas (yonca sahte okey), gerçek okey boş yüz, masada yatan taş yüzleri ışıksız.
 - Kalan: GLB indirme + Blender cilası (masa/ıstaka/koltuk modelleri; şu an prosedürel ve mevcut prefabrikler), V7 (orta tahta 8×20, işleme/okey alma göstergeleri, taş izi, geri topla, hatalı açma/işlek taş cezası, elden bit + nükleer, ağ oturumu, izleme/oyuna katılma), V8.
+
+## V7–V8 ve 3D varlık notları (23 Ekim 2026)
+- V7a/b (afa2bb3): orta tahta 8×20 (açılış sırasına göre 2 satır, seriler sayısına hizalı, gruplar 14+. sütun, çakışma yok), deste ve gösterge sola kayar; işleme uç yuvaları (altın "+") ve okey alma (yeşil dönen oklar), bırakınca/tıklayınca oynanır; taş izi.
+- V7c/d (beb7834): Geri topla; 101 altı Aç turuncu, basınca perler 1,5 sn masada → +101 ve süre baştan; Elden bit + nükleer iniş, "ELDEN BİTTİN!", ×2.
+- V7e (0f66b2c): 3D masa sunucu maçını oynar (NetworkTableSession, MatchWire, koltuk döndürme). Sözleşmeye DealDto ve kazananın açılış/elden bilgisi eklendi; sunucu ilk turdan önce `Game:DealSeconds` (22 sn) bekler. Lobide masa başlayınca masa sahnesi açılır, dönüşte giriş tekrarlanmaz, lobiye dönülür.
+- V8 (3f75c5e): F9 geliştirici test menüsü (spec/25 senaryoları) ve her senaryo için PlayMode testi + görüntü.
+- 3D: zar Blender'da üretildi (`tools/blender/make_die.py`, 30 mm, 5 mm köşe, gerçek çukur noktalar, kırmızı 1); masa/ıstaka/koltuk/ikram kaynakları (racks3d.js, gifts3d.js) v3'te değişmedi, mevcut cilalı GLB'ler geçerli; taş yüzleri v3'ten yeniden pişirildi.
+- Açık: izleme ve oynanan masaya katılma (sunucuda izleyici/katılma yok; lobide "bir sonraki güncelleme" tostu), Google girişi ve şifre sıfırlama yapılandırması, ürün kararları (eşli puanlama, havuz, sahip ayrılınca).

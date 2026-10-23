@@ -226,6 +226,13 @@ namespace Galaxy101.Table
 
         private GameObject BuildDie()
         {
+            if (scene.DiePrefab != null)
+            {
+                var model = UnityEngine.Object.Instantiate(scene.DiePrefab, scene.TilesRoot, false); model.name = "zar";
+                foreach (var c in model.GetComponentsInChildren<Collider>()) UnityEngine.Object.Destroy(c);
+                pieces.Add(model); return model;
+            }
+            // Fallback (catalog built before the die model): a cube with flattened sphere pips.
             var root = new GameObject("zar"); root.transform.SetParent(scene.TilesRoot, false);
             var body = GameObject.CreatePrimitive(PrimitiveType.Cube); body.name = "zar_govde"; UnityEngine.Object.Destroy(body.GetComponent<Collider>());
             body.transform.SetParent(root.transform, false); body.transform.localScale = Vector3.one * 0.03f;

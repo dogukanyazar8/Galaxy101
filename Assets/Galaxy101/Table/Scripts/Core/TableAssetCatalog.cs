@@ -19,6 +19,8 @@ namespace Galaxy101.Table
         public Entry[] TileSets = Array.Empty<Entry>();
         public Entry[] GiftModels = Array.Empty<Entry>();
         public GameObject Chair, Room;
+        /// <summary>The 30 mm die with dimpled pips (Blender, spec/24); the deal ceremony rolls it.</summary>
+        public GameObject Die;
 
         public static GameObject Find(Entry[] entries, string key)
         {

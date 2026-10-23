@@ -3,7 +3,8 @@
   "rootNamespace": "Galaxy101.Tests",
   "references": [
     "Galaxy101.Runtime",
-    "Okey101.Core"
+    "Okey101.Core",
+    "Galaxy101.Editor"
   ],
   "includePlatforms": [
     "Editor"

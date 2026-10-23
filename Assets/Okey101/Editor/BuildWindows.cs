@@ -47,6 +47,8 @@ namespace Okey101.Editor
             // UnityWebRequest needs this for the local test server (http://localhost); GalaxyApi's ServerAddress check
             // keeps every public address on HTTPS.
             PlayerSettings.insecureHttpOption = InsecureHttpOption.AlwaysAllowed;
+            // Shader variants for materials the table creates in code (see RuntimeVariantMaterials).
+            Galaxy101.Table.EditorTools.RuntimeVariantMaterials.Ensure();
             PlayerSettings.enableFrameTimingStats = true;
             var buildRoot = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../artifacts/builds"));
             var output = Argument("-okeyBuildPath") ?? Path.Combine(buildRoot, DateTime.UtcNow.ToString("yyyyMMddTHHmmssfffZ") + "-" + Guid.NewGuid().ToString("N").Substring(0, 8), "Galaxy101.exe");

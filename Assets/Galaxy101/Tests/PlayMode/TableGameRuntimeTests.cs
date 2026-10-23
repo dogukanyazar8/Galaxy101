@@ -196,10 +196,10 @@ namespace Galaxy101.Tests
             {
                 var lights = UnityEngine.Object.FindObjectsByType<Light>().Where(l => new[] { "Key", "Spot", "Back", "Fill" }.Contains(l.name)).ToArray();
                 var savedProbe = RenderSettings.ambientProbe; float refl = RenderSettings.reflectionIntensity;
-                foreach (var (name, keep) in new[] { ("env_only", ""), ("spot_only", "Spot"), ("key_only", "Key"), ("backfill_only", "Back,Fill") })
+                foreach (var (name, keep) in new[] { ("env_only", ""), ("refl_only", ""), ("spot_only", "Spot"), ("key_only", "Key"), ("backfill_only", "Back,Fill") })
                 {
                     foreach (var l in lights) l.enabled = keep.Split(',').Contains(l.name);
-                    bool env = name == "env_only"; RenderSettings.ambientProbe = env ? savedProbe : new UnityEngine.Rendering.SphericalHarmonicsL2(); RenderSettings.reflectionIntensity = env ? refl : 0;
+                    bool env = name == "env_only"; RenderSettings.ambientProbe = env ? savedProbe : new UnityEngine.Rendering.SphericalHarmonicsL2(); RenderSettings.reflectionIntensity = env || name == "refl_only" ? refl : 0;
                     yield return Capture(hudOwner.GetComponent<UIDocument>(), capture.Replace(".png", "_" + name + ".png"));
                 }
                 foreach (var l in lights) l.enabled = true; RenderSettings.ambientProbe = savedProbe; RenderSettings.reflectionIntensity = refl;

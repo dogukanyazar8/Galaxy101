@@ -86,13 +86,13 @@ namespace Galaxy101.Table
             if (demoLayout && FindAnyObjectByType<TableGame>() == null) BuildDemoLayout();
         }
 
-        private RenderTexture environment;
+        private Cubemap environment;
         private float savedShadowDistance; private int savedCascades, savedMsaa; private UniversalRenderPipelineAsset urp;
 
         private void OnDestroy()
         {
             skins.Release();
-            if (environment != null) { environment.Release(); Kill(environment); environment = null; }
+            if (environment != null) { Kill(environment); environment = null; }
             // Restore the shared URP asset (the menu and the classic table use it too).
             if (urp != null) { urp.shadowDistance = savedShadowDistance; urp.shadowCascadeCount = savedCascades; urp.msaaSampleCount = savedMsaa; }
         }
@@ -117,8 +117,8 @@ namespace Galaxy101.Table
             var theme = skins.Theme;
             var lights = new GameObject("Lighting").transform; lights.SetParent(transform, false);
             // scene.environment (buildEnv, ×0.75) and the hemisphere light (sky / #0a0a14, 0.45): ambient probe + reflections.
-            if (environment != null) environment.Release();
-            environment = ThreeEnvironment.Apply(new Color32(0xFF, 0xC9, 0x4A, 255), theme.Sky, new Color32(0x0a, 0x0a, 0x14, 255), 0.45f);
+            if (environment != null) Kill(environment);
+            environment = ThreeEnvironment.Apply(lights, new Color32(0xFF, 0xC9, 0x4A, 255), theme.Sky, new Color32(0x0a, 0x0a, 0x14, 255), 0.45f);
 
             Light Make(string name, LightType type, Color color, float intensity, Vector3 threePos, Vector3? threeTarget)
             {

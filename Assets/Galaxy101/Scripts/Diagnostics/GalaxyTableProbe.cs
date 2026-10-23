@@ -46,7 +46,13 @@ namespace Galaxy101
             if (open.IsFaulted) { Fail("table load: " + open.Exception?.GetBaseException().Message); yield break; }
             TableGame game = null;
             while ((game = FindAnyObjectByType<TableGame>()) == null || game.Current == TableGame.Phase.Waiting) { if (Time.realtimeSinceStartup > deadline) { Fail("table"); yield break; } yield return null; }
-            yield return new WaitForSecondsRealtime(6);
+            // Past the deal ceremony, into play (racks filled, gifts and steam running), unless -galaxyTableProbeEarly.
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-galaxyTableProbeEarly") < 0)
+                while (game.Current == TableGame.Phase.Seating || game.Current == TableGame.Phase.Deal) { if (Time.realtimeSinceStartup > deadline) { Fail("play"); yield break; } yield return null; }
+            int waitAt = Array.IndexOf(Environment.GetCommandLineArgs(), "-galaxyTableProbeWait");
+            float wait = waitAt >= 0 && waitAt + 1 < Environment.GetCommandLineArgs().Length && float.TryParse(Environment.GetCommandLineArgs()[waitAt + 1], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float w) ? w : 6;
+            deadline = Mathf.Max(deadline, Time.realtimeSinceStartup + wait + 30);
+            yield return new WaitForSecondsRealtime(wait);
             // End of frame = after every camera and the screen-space UI: exactly what the window presents.
             yield return new WaitForEndOfFrame();
             var frame = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);

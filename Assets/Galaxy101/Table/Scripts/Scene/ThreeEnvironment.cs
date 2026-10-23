@@ -58,15 +58,26 @@ namespace Galaxy101.Table
         /// Lights the current scene like the design: custom ambient probe and reflection cube. Returns the cube (owned by
         /// the caller; release it with the scene).
         /// </summary>
-        public static RenderTexture Apply(Color tint, Color sky, Color ground, float hemiIntensity)
+        public static Cubemap Apply(Transform parent, Color tint, Color sky, Color ground, float hemiIntensity)
         {
             var panels = Panels(tint);
             RenderSettings.ambientMode = AmbientMode.Custom;
             RenderSettings.ambientProbe = AmbientProbe(panels, sky.linear * hemiIntensity, ground.linear * hemiIntensity);
-            var cube = RenderCube(panels);
+            // URP only reflects a Cubemap (a cube RenderTexture set as the custom reflection is silently ignored): render
+            // the room, copy every face and mip into one, and hand it to an always-on probe around the table as well.
+            var rendered = RenderCube(panels);
+            var cube = new Cubemap(Size, TextureFormat.RGBAHalf, true) { name = "Galaxy101 three.js environment", hideFlags = HideFlags.DontSave };
+            for (int face = 0; face < 6; face++)
+                for (int mip = 0; mip < cube.mipmapCount; mip++)
+                    Graphics.CopyTexture(rendered, face, mip, cube, face, mip);
+            rendered.Release(); Object.DestroyImmediate(rendered);
             RenderSettings.defaultReflectionMode = DefaultReflectionMode.Custom;
             RenderSettings.customReflectionTexture = cube;
             RenderSettings.reflectionIntensity = EnvironmentIntensity;
+            var probeGo = new GameObject("three_env_probe"); probeGo.transform.SetParent(parent, false);
+            var probe = probeGo.AddComponent<ReflectionProbe>();
+            probe.mode = ReflectionProbeMode.Custom; probe.customBakedTexture = cube; probe.size = new Vector3(40, 40, 40);
+            probe.intensity = EnvironmentIntensity; probe.importance = 100; probe.boxProjection = false; probe.blendDistance = 0;
             return cube;
         }
 

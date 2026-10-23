@@ -63,9 +63,8 @@ namespace Galaxy101.Table.EditorTools
                 // three.js scales specular and reflections by the opacity too; URP's "Preserve Specular" would keep them at
                 // full strength and veil a 30 % glass (tea, cola) in white.
                 m.SetFloat("_BlendModePreserveSpecular", 0); m.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                // The reference lights glass with a dark studio box (buildEnv); Unity's default sky reflection would wash a
-                // thin glass out, so see-through surfaces keep their light highlights but skip the environment reflection.
-                if (!additive) { m.SetFloat("_EnvironmentReflections", 0); m.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF"); }
+                // Glass reflects the table's environment: the design's dark studio box (ThreeEnvironment), as in three.js.
+                m.SetFloat("_EnvironmentReflections", 1); m.DisableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
             }
             else { m.SetFloat("_Surface", 0); m.SetFloat("_ZWrite", 1); m.renderQueue = -1; m.SetOverrideTag("RenderType", "Opaque"); }
             if (Float(source, "_Cull", 2) == 0) m.SetFloat("_Cull", 0);
@@ -90,7 +89,8 @@ namespace Galaxy101.Table.EditorTools
                 {
                     float strength = EmissiveStrength(source);
                     m.SetColor("_EmissionColor", new Color(emissive.r * strength, emissive.g * strength, emissive.b * strength, 1)); if (emissiveTex != null) m.SetTexture("_EmissionMap", emissiveTex);
-                    m.EnableKeyword("_EMISSION"); m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+                    // RealtimeEmissive (not None/EmissiveIsBlack): URP's material validation keeps _EMISSION only then.
+                    m.EnableKeyword("_EMISSION"); m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
                 }
                 if (coat)
                 {

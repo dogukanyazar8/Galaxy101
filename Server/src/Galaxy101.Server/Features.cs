@@ -27,6 +27,8 @@ public static class Features
         services.AddSingleton<MatchManager>();
         services.AddSingleton<Matchmaker>();
         services.AddSingleton<PrivateRooms>();
+        services.AddSingleton<Tables>();
+        services.AddSingleton<IRealtimeHandler>(sp => sp.GetRequiredService<Tables>());
         services.AddSingleton<IRealtimeHandler>(sp => sp.GetRequiredService<MatchManager>());
         services.AddSingleton<IRealtimeHandler>(sp => sp.GetRequiredService<Matchmaker>());
         services.AddSingleton<IRealtimeHandler>(sp => sp.GetRequiredService<PrivateRooms>());

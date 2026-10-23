@@ -42,18 +42,32 @@ public sealed class MatchManager(MatchStore store, ConnectionRegistry live, Cata
     {
         var seats = accounts.ToArray();
         RandomNumberGenerator.Shuffle(seats.AsSpan());
-        var record = new MatchRecord
+        return await CreateAsync(new MatchRecord
         {
             Id = Guid.CreateVersion7(), Mode = mode, Stake = stake, Status = MatchStatus.Active, Seats = seats,
             Hands = options.Value.HandsPerMatch, FirstStarter = RandomNumberGenerator.GetInt32(4), CreatedAt = clock.GetUtcNow(),
-        };
+        });
+    }
+
+    /// <summary>
+    /// A Klasik table's match: seats as the table had them (pairs keep their partners), bots where the table put bots,
+    /// the table's hands / turn time / chat and gift rules. Returns the humans who could not pay.
+    /// </summary>
+    public async Task<IReadOnlyList<Guid>> CreateAsync(MatchRecord record)
+    {
         var unpaid = await store.CreateAsync(record, default);
-        if (unpaid.Length > 0) return [.. unpaid.Select(s => seats[s])];
+        if (unpaid.Length > 0) return [.. unpaid.Select(s => record.Seats[s])];
         var session = Register(record);
-        foreach (var account in seats) lobby.MoveToMatch(account);
+        for (var s = 0; s < 4; s++) if (!IsBot(record, s)) lobby.MoveToMatch(record.Seats[s]);
+        Started?.Invoke(session);
         await session.StartAsync();
         return [];
     }
+
+    public static bool IsBot(MatchRecord record, int seat) => (record.BotMask & (1 << seat)) != 0;
+
+    /// <summary>A match began / closed (the lobby shows "Oynanıyor · N. el", then drops the table).</summary>
+    public event Action<MatchSession>? Started, Closed;
 
     public bool Handles(string type) => type.StartsWith("match.", StringComparison.Ordinal);
 
@@ -101,7 +115,7 @@ public sealed class MatchManager(MatchStore store, ConnectionRegistry live, Cata
         {
             var session = Register(stored.Record);
             for (var s = 0; s < 4; s++)
-                if ((stored.Record.LeftMask & (1 << s)) == 0) lobby.MoveToMatch(stored.Record.Seats[s]);
+                if ((stored.Record.LeftMask & (1 << s)) == 0 && !IsBot(stored.Record, s)) lobby.MoveToMatch(stored.Record.Seats[s]);
             try { await session.RestoreAsync(stored); }
             catch (Exception error)
             {
@@ -119,7 +133,7 @@ public sealed class MatchManager(MatchStore store, ConnectionRegistry live, Cata
     {
         var session = new MatchSession(record, store, live, catalog, options.Value, clock, logs.CreateLogger<MatchSession>(), Release);
         for (var s = 0; s < 4; s++)
-            if ((record.LeftMask & (1 << s)) == 0) byAccount[record.Seats[s]] = session;
+            if ((record.LeftMask & (1 << s)) == 0 && !IsBot(record, s)) byAccount[record.Seats[s]] = session;
         return session;
     }
 
@@ -127,5 +141,6 @@ public sealed class MatchManager(MatchStore store, ConnectionRegistry live, Cata
     {
         foreach (var account in session.Seats)
             if (byAccount.TryRemove(new KeyValuePair<Guid, MatchSession>(account, session))) lobby.Exit(account, LobbyPlace.Match);
+        Closed?.Invoke(session);
     }
 }

@@ -406,6 +406,10 @@ namespace Galaxy101.Server.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<int>("BotMask")
+                        .HasColumnType("integer")
+                        .HasColumnName("bot_mask");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -432,6 +436,11 @@ namespace Galaxy101.Server.Data.Migrations
                         .HasColumnType("character varying(12)")
                         .HasColumnName("mode");
 
+                    b.Property<string>("OptionsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("options_json");
+
                     b.PrimitiveCollection<Guid[]>("Seats")
                         .IsRequired()
                         .HasColumnType("uuid[]")
@@ -446,6 +455,10 @@ namespace Galaxy101.Server.Data.Migrations
                         .HasMaxLength(12)
                         .HasColumnType("character varying(12)")
                         .HasColumnName("status");
+
+                    b.Property<int>("TurnSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("turn_seconds");
 
                     b.HasKey("Id")
                         .HasName("pk_matches");

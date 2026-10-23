@@ -58,11 +58,29 @@ public sealed class MatchSession
         TimeProvider clock, ILogger log, Action<MatchSession> onClosed)
     {
         (this.record, this.store, this.live, this.catalog, this.options, this.clock, this.log, this.onClosed) = (record, store, live, catalog, options, clock, log, onClosed);
-        for (var s = 0; s < 4; s++) if (Left(s)) status[s] = SeatStatus.Left;
+        for (var s = 0; s < 4; s++) if (Left(s)) status[s] = SeatStatus.Left; else if (Bot(s)) status[s] = SeatStatus.Auto;
+        try { rules = JsonDocument.Parse(string.IsNullOrEmpty(record.OptionsJson) ? "{}" : record.OptionsJson).RootElement.Clone(); }
+        catch (JsonException) { rules = JsonDocument.Parse("{}").RootElement.Clone(); }
         _ = Task.Run(LoopAsync);
     }
 
     public Guid Id => record.Id;
+    /// <summary>1-based hand in play (lobby list: "Oynanıyor · N. el").</summary>
+    public int HandNumber => handIndex + 1;
+    private readonly JsonElement rules;
+    private bool Bot(int seat) => MatchManager.IsBot(record, seat);
+    private int TurnSeconds => record.TurnSeconds > 0 ? record.TurnSeconds : options.TurnSeconds;
+    private string ChatRule => rules.TryGetProperty("chat", out var c) && c.ValueKind == JsonValueKind.String ? c.GetString()! : "on";
+    private bool GiftsAllowed => !rules.TryGetProperty("gifts", out var g) || g.ValueKind != JsonValueKind.False;
+
+    /// <summary>Bots of a Klasik table show as "Bot · Ayşe" etc. (no account behind them).</summary>
+    private static readonly string[] BotNames = ["Ayşe", "Zeynep", "Burak", "Deniz"];
+    private static readonly string[] BotColors = ["#3D7BFF", "#16B6A8", "#8B5CF6", "#F5A623"];
+    private void AddBotSummaries()
+    {
+        for (var s = 0; s < 4; s++)
+            if (Bot(s)) players[record.Seats[s]] = new PlayerSummary { Id = record.Seats[s], Name = "Bot · " + BotNames[s], Color = BotColors[s], Level = 1 };
+    }
     public IReadOnlyList<Guid> Seats => record.Seats;
     public int SeatOf(Guid account) => Array.IndexOf(record.Seats, account);
 
@@ -71,7 +89,8 @@ public sealed class MatchSession
     public Task StartAsync() => Run(async () =>
     {
         players = await store.SummariesAsync(record.Seats);
-        for (var s = 0; s < 4; s++) live.SetPlaying(record.Seats[s], Id);
+        AddBotSummaries();
+        for (var s = 0; s < 4; s++) if (!Bot(s)) live.SetPlaying(record.Seats[s], Id);
         await StartHandAsync(0);
         foreach (var s in Enumerable.Range(0, 4)) SendStart(s);
         Broadcast();
@@ -82,6 +101,7 @@ public sealed class MatchSession
     public Task RestoreAsync(StoredMatch stored) => Run(async () =>
     {
         players = await store.SummariesAsync(record.Seats);
+        AddBotSummaries();
         foreach (var hand in stored.Hands)
         {
             handIndex = hand.HandIndex;
@@ -98,8 +118,8 @@ public sealed class MatchSession
             }
             if (hand.Scores.Length == 4) Tally(hand.Scores);
         }
-        for (var s = 0; s < 4; s++) if (!Left(s)) status[s] = SeatStatus.Disconnected;
-        for (var s = 0; s < 4; s++) if (!Left(s)) live.SetPlaying(record.Seats[s], Id);
+        for (var s = 0; s < 4; s++) if (!Left(s)) status[s] = Bot(s) ? SeatStatus.Auto : SeatStatus.Disconnected;
+        for (var s = 0; s < 4; s++) if (!Left(s) && !Bot(s)) live.SetPlaying(record.Seats[s], Id);
         if (stored.Hands.Count == 0) await StartHandAsync(0);                       // stopped right after the stakes were taken
         else if (InPlay) { BeginTurnIfNew(); ScheduleTurn(); }
         else if (stored.Hands[^1].Scores.Length == 4) await AfterHandAsync(false);  // stopped between hands
@@ -158,6 +178,7 @@ public sealed class MatchSession
     {
         var seat = SeatOf(account);
         if (seat < 0 || status[seat] == SeatStatus.Left || !catalog.Emotes.Contains(emote)) return Task.FromResult<string?>(ErrorCodes.Validation);
+        if (ChatRule == "off") return Task.FromResult<string?>(ErrorCodes.Validation);
         var now = clock.GetUtcNow();
         if (now - lastEmote[seat] < EmoteInterval) return Task.FromResult<string?>(ErrorCodes.RateLimited);
         lastEmote[seat] = now;
@@ -170,6 +191,7 @@ public sealed class MatchSession
         var seat = SeatOf(account);
         var item = catalog.Gifts.FirstOrDefault(g => g.Id == gift);
         if (seat < 0 || status[seat] == SeatStatus.Left || item is null || target is < 0 or > 3 || target == seat) return ErrorCodes.Validation;
+        if (!GiftsAllowed) return ErrorCodes.Validation;
         // Treating the whole table costs one item per other player.
         var cost = item.Chips * (target is null ? 3 : 1);
         if (await store.ChargeAsync(account, cost, "gift") is null) return ErrorCodes.InsufficientFunds;
@@ -218,7 +240,7 @@ public sealed class MatchSession
         var key = (handIndex, state.TurnNumber, state.ActivePlayer);
         if (key == turnKey) return;
         turnKey = key;
-        deadline = clock.GetUtcNow().AddSeconds(options.TurnSeconds);
+        deadline = clock.GetUtcNow().AddSeconds(TurnSeconds);
     }
 
     /// <summary>Arms the single active timer: the turn deadline, or a short pause before the server plays a seat.</summary>
@@ -399,7 +421,7 @@ public sealed class MatchSession
 
     private void SendStart(int seat) => live.Send(record.Seats[seat], MessageTypes.MatchStart, new MatchStartMessage
     {
-        MatchId = Id, Mode = record.Mode, Stake = record.Stake, Hands = record.Hands, YourSeat = seat, TurnSeconds = options.TurnSeconds, Seats = SeatList(),
+        MatchId = Id, Mode = record.Mode, Stake = record.Stake, Hands = record.Hands, YourSeat = seat, TurnSeconds = TurnSeconds, Seats = SeatList(),
     });
 
     private void Broadcast()

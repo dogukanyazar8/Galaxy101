@@ -29,7 +29,7 @@ public sealed class MatchStore(IServiceScopeFactory scopes, GameCalendar calenda
         var unpaid = new List<int>();
         if (match.Stake > 0)
             for (var s = 0; s < 4; s++)
-                if ((await ledger.ApplyAsync(match.Seats[s], -match.Stake, 0, "stake", $"match:{match.Id}:stake", ct)).Outcome == LedgerOutcome.InsufficientFunds)
+                if ((match.BotMask & (1 << s)) == 0 && (await ledger.ApplyAsync(match.Seats[s], -match.Stake, 0, "stake", $"match:{match.Id}:stake", ct)).Outcome == LedgerOutcome.InsufficientFunds)
                     unpaid.Add(s);
         if (unpaid.Count > 0) return [.. unpaid];
         await tx.CommitAsync(ct);

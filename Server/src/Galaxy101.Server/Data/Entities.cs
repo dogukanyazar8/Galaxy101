@@ -148,6 +148,12 @@ public sealed class MatchRecord
     public int Hands { get; set; }
     public int FirstStarter { get; set; }
     public int LeftMask { get; set; }
+    /// <summary>Seats a bot holds from the start (Klasik table "Bot ekle"): no stake, no payout, the server plays them.</summary>
+    public int BotMask { get; set; }
+    /// <summary>Per-table turn time (spec/20: 15/20/30/45 s); 0 = the server default.</summary>
+    public int TurnSeconds { get; set; }
+    /// <summary>Table rules the session enforces: "chat" (on/quick/off), "gifts" (bool). JSON object.</summary>
+    public string OptionsJson { get; set; } = "{}";
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? FinishedAt { get; set; }
 }

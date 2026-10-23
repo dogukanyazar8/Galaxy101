@@ -111,3 +111,10 @@ Kimlik: `Authorization: Bearer <access>`. Hatalar `{ "code": "...", "message": "
 - Ad araması `ILIKE` ile tablo taraması yapar; oyuncu sayısı büyürse `pg_trgm` dizini eklenmeli.
 - KVKK aydınlatma metninin kendisi hukuki içerik; sunucu yalnız kabul edilen sürümü kaydeder.
 - Gerçek Google/Apple kimlik ve mağaza bilgileri olmadan bu yollar yalnız birim testleriyle (kendi ürettiğimiz sertifika zinciri, sahte doğrulayıcı) doğrulandı.
+
+
+## v3 (23 Ekim 2026)
+- **Kimlik:** `POST /v1/auth/register` (ad, e-posta, şifre ≥ 6, şartlar), `POST /v1/auth/login` (bilinmeyen e-posta 404, yanlış şifre 401 + kalan deneme, 3 yanlışta 423 kilit). Misafir girişi takma ad + avatar rengi alır. Başlangıç bakiyesi: misafir 10.000, e-posta/Google 25.000.
+- **Klasik lobi (WebSocket):** `lobby.subscribe` → `lobby.tables` (canlı liste; özel masalar listelenmez); `table.create {options}` (Tekli/Eşli, ad, açık/özel, 4 haneli PIN, 3/5/7 el, 1K–100K bahis, katlamalı, 15/20/30/45 sn, izleyici, sohbet açık/hızlı/kapalı, hediye, işleme, ceza), `table.join {tableId|code GX-XXXX, pin, seat}`, `table.leave`, `table.addBot {seat}`, `table.kick {seat}`, `table.start` → `table.state` (bekleme odası, geri sayım: dolunca 5 sn, sahip Başlat 3 sn). Maç masanın koltuk düzeni, el sayısı, tur süresi, sohbet/hediye kurallarıyla başlar; bot koltukları bahis yatırmaz ve ödeme almaz. Liste oynanan masayı "Oynanıyor · N. el" gösterir, maç kapanınca düşer.
+- **Davet:** `POST /v1/friends/{id}/invite {roomCode}` masa kodlarını da kabul eder; arkadaş ya da son 20 maçta birlikte oynanan oyuncu davet edilebilir. `GET /v1/players/recent` (Son oynadıkların).
+- Açık: izleyici modu (İzle) ve oynanan masaya katılma (Oyuna katıl) henüz yok; işleme/ceza seçenekleri kaydedilir, motor henüz uygulamaz.

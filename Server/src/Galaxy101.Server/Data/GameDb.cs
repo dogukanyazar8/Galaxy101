@@ -110,6 +110,7 @@ public sealed class GameDb(DbContextOptions<GameDb> options) : DbContext(options
             e.HasIndex(x => x.Status).HasFilter("status = 'Active'");
             e.Property(x => x.Status).HasConversion<string>().HasMaxLength(12);
             e.Property(x => x.Mode).HasMaxLength(12);
+            e.Property(x => x.OptionsJson).HasColumnType("jsonb");
         });
         b.Entity<MatchHand>(e =>
         {

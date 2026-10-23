@@ -54,6 +54,8 @@ namespace Galaxy101.Table
             /// <summary>T34: the tile that fed an opening, glowing for 1.2 s.</summary>
             public int GlowTile = -1;
             public string OkeyTip, DragBanner;
+            /// <summary>spec/21: the deal ceremony card and the "Zar at" button while dealing.</summary>
+            public DealInfoCard Deal;
         }
 
         public sealed class OkeyMark { public int Id; public string Number, Color; public bool Target, Invalid; }
@@ -295,6 +297,7 @@ namespace Galaxy101.Table
             BuildMe(state);
             BuildActions(state);
             if (state.Phase == "seat") BuildWaiting(state);
+            if (state.Phase == "deal" && state.Deal != null) BuildDeal(state.Deal);
             if (state.Countdown > 0) BuildCountdown(state);
             if (state.Moment != null) BuildMoment(state.Moment);
             if (state.Result != null) BuildResult(state.Result);

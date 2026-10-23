@@ -39,6 +39,16 @@ namespace Galaxy101.Table
         public TableBoard Board { get; private set; }
         public TableFx Fx { get; private set; }
         public TableGifts Gifts { get; private set; }
+        public TableCeremony Ceremony { get; private set; }
+        /// <summary>spec/21 deal ceremony; off = the quick v2 deal (tests that only need a hand in play).</summary>
+        public static bool CeremonyEnabled = true;
+        /// <summary>Test hook: a prepared first hand (Configure firstHand) still gets the ceremony when it is a fresh deal.</summary>
+        public bool CeremonyOnPreparedHand;
+        private TaskCompletionSource<bool> rollSignal;
+        private int rollIndex = -1;
+        private float dealStepAt;
+        private Okey101.Core.Model.DealInfo dealInfo;
+        private string dealIndicator;
         /// <summary>spec/13 demo on the first hand: Ayşe treats everyone to tea, Zeynep sends me simit, Burak a rocket to Ayşe.</summary>
         public bool DemoGifts = true;
         private int myCommits;
@@ -122,6 +132,7 @@ namespace Galaxy101.Table
             Board.IsOkey = id => TileCatalog.IsRealJoker(new TileId(id), Indicator);
             Fx = table.gameObject.GetComponent<TableFx>() ?? table.gameObject.AddComponent<TableFx>(); Fx.Init(table); Board.Fx = Fx;
             Gifts = table.gameObject.GetComponent<TableGifts>() ?? table.gameObject.AddComponent<TableGifts>(); Gifts.Init(table, Fx);
+            Ceremony = new TableCeremony(table, Fx, Seconds); Ceremony.Changed += () => { dealStepAt = Time.realtimeSinceStartup; Notify(); };
             Session = new LocalSession();
             life = new CancellationTokenSource();
             random = seed != 0 ? new System.Random((int)seed) : new System.Random();
@@ -161,6 +172,7 @@ namespace Galaxy101.Table
             float now = Time.time;
             for (int i = timers.Count - 1; i >= 0; i--) if (timers[i].At <= now) { var t = timers[i]; timers.RemoveAt(i); t.Done.TrySetResult(true); }
             Board?.Tick();
+            Ceremony?.Tick();
             if (Fx != null && Session != null && Current != Phase.Waiting)
             {
                 var pile = Session.GetView(Me).Discards[3];
@@ -196,9 +208,25 @@ namespace Galaxy101.Table
                     if (HandNumber == 1 && seating) await SeatPlayers();
                     Rack.Deal(view.OwnHand.Select(t => t.Value).ToList());
                     Current = Phase.Deal; Active = -1; Notify();
-                    Fx.DealFx(); // shuffle beat: rings, particles, deck spin
-                    float landed = Board.Deal(BuildBoard(view), view.ActivePlayer); SyncedVersion = view.Version;
-                    await Seconds(landed);
+                    dealInfo = view.Deal;
+                    if (CeremonyEnabled && dealInfo != null && !(HandNumber == 1 && initialState != null && !CeremonyOnPreparedHand))
+                    {
+                        var dealt = BuildBoard(view); dealIndicator = TileCodes.Code(dealt.Indicator);
+                        Board.Clear(); Board.LayoutDeck(0);
+                        table.CameraRig.GoTo(TableCameraRig.View.Deal, 1.2f);
+                        try { await Ceremony.Run(dealInfo, dealt, dealIndicator, RollWait, token); }
+                        finally { Board.Settle(dealt); Ceremony.Clear(); rollIndex = -1; }
+                        SyncedVersion = view.Version;
+                        table.CameraRig.GoTo(hud != null ? hud.PreferredView : TableCameraRig.View.Player, 1.4f);
+                        await Seconds(0.6f);
+                    }
+                    else
+                    {
+                        Fx.DealFx(); // shuffle beat: rings, particles, deck spin
+                        float landed = Board.Deal(BuildBoard(view), view.ActivePlayer); SyncedVersion = view.Version;
+                        await Seconds(landed);
+                    }
+                    dealInfo = null;
                     SyncBoard(); // a hand resumed mid-game also has melds and discards
                     if (HandNumber == 1 && DemoGifts && hud != null) { string line = T("quick.4"); hud.After(1.8f, () => hud.BotGift(2, "tea", -1, line)); }
                     while (!token.IsCancellationRequested)
@@ -214,6 +242,27 @@ namespace Galaxy101.Table
             }
             catch (OperationCanceledException) { }
             catch (Exception exception) { Debug.LogException(exception); }
+        }
+
+        /// <summary>spec/21 §4: my "Zar at" / "Tekrar at" (15 s, then it rolls by itself); a bot rolls after a short pause.</summary>
+        private async Task RollWait(int index)
+        {
+            if (dealInfo == null || dealInfo.Dealer != Me || humanSeat != Me) { await Seconds(index == 0 ? 0.9f : 0.6f); return; }
+            rollSignal = new TaskCompletionSource<bool>(); rollIndex = index; Notify();
+            await Task.WhenAny(rollSignal.Task, Seconds(15));
+            rollSignal = null; rollIndex = -1; Notify();
+        }
+
+        private TableHud.DealInfoCard DealCard()
+        {
+            if (dealInfo == null || Current != Phase.Deal || Ceremony == null || Ceremony.Step == null) return null;
+            string okey = null;
+            if (dealIndicator != null && dealIndicator != "joker") { int n = int.Parse(dealIndicator.Substring(1)); okey = dealIndicator.Substring(0, 1) + (n == 13 ? 1 : n + 1); }
+            return new TableHud.DealInfoCard
+            {
+                Dealer = dealInfo.Dealer, DieA = Ceremony.Dice[0], DieB = Ceremony.Dice[1], LastDie = Ceremony.LastDie, Roll = rollIndex,
+                Step = Ceremony.Step, Indicator = dealIndicator, Okey = okey, Fake = dealInfo.FakeOkeyShown, Revealed = Ceremony.Revealed, StepAt = dealStepAt,
+            };
         }
 
         private async Task PlayBot(int seat, CancellationToken token)
@@ -881,6 +930,7 @@ namespace Galaxy101.Table
         {
             switch (command)
             {
+                case "roll": rollSignal?.TrySetResult(true); break;
                 case "open": OpenRuns(); break;
                 case "pairs": OpenPairs(); break;
                 case "sort-run": SortRack(true); break;
@@ -971,6 +1021,7 @@ namespace Galaxy101.Table
             s.CanPair = CanDiscard && (s.OpenedPairs[Me] ? eval.Pairs.Count > 0 : s.Opened[Me] == 0);
             if (ResultOpen && LastResult != null) s.Result = ResultInfo(view);
             if (MatchOpen) s.Match = MatchInfo();
+            s.Deal = DealCard();
             return s;
         }
     }

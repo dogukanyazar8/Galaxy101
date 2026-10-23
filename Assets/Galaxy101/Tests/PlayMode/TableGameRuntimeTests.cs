@@ -46,7 +46,7 @@ namespace Galaxy101.Tests
         [UnityTearDown]
         public IEnumerator TearDown()
         {
-            Time.timeScale = savedTimeScale;
+            Time.timeScale = savedTimeScale; TableGame.CeremonyEnabled = true;
             if (mouse != null) { InputSystem.RemoveDevice(mouse); mouse = null; }
             if (savedBackground.HasValue) { InputSystem.settings.backgroundBehavior = savedBackground.Value; savedBackground = null; }
             if (savedBehavior.HasValue) { InputSystem.settings.editorInputBehaviorInPlayMode = savedBehavior.Value; savedBehavior = null; }
@@ -432,11 +432,11 @@ namespace Galaxy101.Tests
             Assert.That(game.Rack.Tiles.Contains(okey), Is.False);
 
             var okeyView = game.Board.ViewOf(okey);
-            Assert.That(okeyView.transform.Find("tas_okey")?.gameObject.activeSelf, Is.True, "the okey on the table wears the gold mark");
+            Assert.That(okeyView.transform.Find("tas_yuz")?.gameObject.activeSelf, Is.Not.True, "the okey on the table shows a blank face (v3)");
             game.TakeOkey(blueSeven, okey);
             Assert.That(game.Rack.Tiles.Contains(okey), Is.True, "the okey comes to my rack");
             Assert.That(okeyView.Duration, Is.EqualTo(0.45f).Within(1e-4f), "T47: 450 ms flight to the rack");
-            Assert.That(okeyView.transform.Find("tas_okey").gameObject.activeSelf, Is.True, "and keeps it on my rack");
+            Assert.That(okeyView.transform.Find("tas_yuz")?.gameObject.activeSelf, Is.Not.True, "and stays blank on my rack");
             string rackOkeyCapture = Environment.GetEnvironmentVariable("GALAXY_TABLE_RACKOKEY_CAPTURE");
             if (!string.IsNullOrEmpty(rackOkeyCapture)) yield return Capture(hudOwner.GetComponent<UIDocument>(), rackOkeyCapture);
             Assert.That(game.Rack.Tiles.Contains(blueSeven), Is.False);
@@ -531,6 +531,8 @@ namespace Galaxy101.Tests
         [Timeout(240000)]
         public IEnumerator EffectsFollowTheDealTurnsAndTheFinish()
         {
+            // The quick deal's shuffle beat (the v3 ceremony is covered by DealCeremonyTests).
+            TableGame.CeremonyEnabled = false;
             var game = Build(TableGame.Me, 6060, true);
             game.Configure(TableGame.Me, 6060, 30, false);
             string dir = Environment.GetEnvironmentVariable("GALAXY_TABLE_FX_CAPTURE_DIR");
@@ -901,7 +903,7 @@ namespace Galaxy101.Tests
             Assert.That(UnityEngine.Object.FindAnyObjectByType<TableGame>(), Is.Null);
         }
 
-        private static IEnumerator Capture(UIDocument document, string path)
+        internal static IEnumerator Capture(UIDocument document, string path)
         {
             var target = new RenderTexture(1280, 720, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
             var panel = UnityEngine.Object.Instantiate(document.panelSettings); var original = document.panelSettings;

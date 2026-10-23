@@ -16,12 +16,14 @@ namespace Galaxy101.Table
         public const int AtlasColumns = 8, AtlasRows = 7, CellWidth = 256, CellHeight = 360;
         private static readonly string[] Suits = { "R", "B", "Y", "K" };
         private readonly GameObject body;
-        private readonly Material face;
+        private readonly Material face, flatFace;
         private readonly Dictionary<int, Mesh> faceMeshes = new Dictionary<int, Mesh>();
         private Material okeyGold;
         private Mesh barMesh;
         /// <summary>Under-tile bars (table3d.js barGeo): green = valid set, yellow = new tile (its alpha blinks, set by TableFx).</summary>
         public static Material ValidBar, NewBar;
+        /// <summary>The v2 gold okey frame instead of the blank v3 face (kept for comparison captures).</summary>
+        public static bool LegacyOkeyMark;
         private Mesh okeyFrame, okeyDot;
 
         public TileFactory(GameObject tileSetInstance, string skin, float roughness, float emission)
@@ -39,6 +41,20 @@ namespace Galaxy101.Table
             face.SetInt("_SrcBlendAlpha", (int)BlendMode.One); face.SetInt("_DstBlendAlpha", (int)BlendMode.OneMinusSrcAlpha);
             face.EnableKeyword("_SURFACE_TYPE_TRANSPARENT"); face.renderQueue = (int)RenderQueue.Transparent;
             if (emission > 0) { face.EnableKeyword("_EMISSION"); face.SetTexture("_EmissionMap", atlas); face.SetColor("_EmissionColor", Color.white * emission); }
+            // spec/23: tiles lying on the felt show their faces unlit — full, crisp colours whatever the lights do.
+            flatFace = new Material(Shader.Find("Universal Render Pipeline/Unlit")) { name = "tas_yuz_isiksiz_" + skin };
+            flatFace.SetTexture("_BaseMap", atlas); flatFace.SetColor("_BaseColor", Color.white);
+            flatFace.SetFloat("_Surface", 1); flatFace.SetFloat("_Blend", 0); flatFace.SetFloat("_ZWrite", 0);
+            flatFace.SetInt("_SrcBlend", (int)BlendMode.SrcAlpha); flatFace.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha);
+            flatFace.SetInt("_SrcBlendAlpha", (int)BlendMode.One); flatFace.SetInt("_DstBlendAlpha", (int)BlendMode.OneMinusSrcAlpha);
+            flatFace.EnableKeyword("_SURFACE_TYPE_TRANSPARENT"); flatFace.renderQueue = (int)RenderQueue.Transparent;
+        }
+
+        /// <summary>Lying on the table (melds, piles, indicator, stacks) → unlit face; standing on a rack → lit PBR face.</summary>
+        public void SetLying(GameObject tile, bool lying)
+        {
+            var f = tile.transform.Find("tas_yuz"); if (f == null) return;
+            var r = f.GetComponent<MeshRenderer>(); var m = lying ? flatFace : face; if (r.sharedMaterial != m) r.sharedMaterial = m;
         }
 
         /// <summary>Atlas cell: R1…R13 = 0…12, B = 13…25, Y = 26…38, K = 39…51, fake okey = 52.</summary>
@@ -70,7 +86,7 @@ namespace Galaxy101.Table
             var b = UnityEngine.Object.Instantiate(body, tile.transform, false); b.name = "tas_govde";
             b.transform.localPosition = Vector3.zero; b.transform.localRotation = Quaternion.identity; b.SetActive(true);
             if (old != null) { b.transform.SetSiblingIndex(old.GetSiblingIndex()); old.gameObject.SetActive(false); UnityEngine.Object.Destroy(old.gameObject); }
-            var f = tile.transform.Find("tas_yuz"); if (f != null) f.GetComponent<MeshRenderer>().sharedMaterial = face;
+            var f = tile.transform.Find("tas_yuz"); if (f != null) { var r = f.GetComponent<MeshRenderer>(); r.sharedMaterial = r.sharedMaterial != null && r.sharedMaterial.name.StartsWith("tas_yuz_isiksiz") ? flatFace : face; }
         }
 
         /// <summary>Show <paramref name="code"/> on the tile's face plane, or hide it (null) for a tile seen from behind.</summary>
@@ -95,8 +111,12 @@ namespace Galaxy101.Table
         /// </summary>
         public void SetOkeyMark(GameObject tile, bool on)
         {
-            var mark = tile.transform.Find("tas_okey");
-            if (!on) { if (mark != null) mark.gameObject.SetActive(false); return; }
+            // spec/23 (v3): the real okey's face is completely blank — no number, colour or mark.
+            var face = tile.transform.Find("tas_yuz");
+            if (face != null) face.gameObject.SetActive(!on && tile.name != "tas");
+            var old = tile.transform.Find("tas_okey"); if (old != null) old.gameObject.SetActive(false);
+            if (!on || !LegacyOkeyMark) return;
+            var mark = old;
             if (mark == null)
             {
                 if (okeyGold == null)

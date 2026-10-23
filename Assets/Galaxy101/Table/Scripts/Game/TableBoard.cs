@@ -56,6 +56,8 @@ namespace Galaxy101.Table
         public void SpawnFrom(Pose pose) => spawnHint = pose;
 
         private static readonly RackSlot[] FillOrder = BuildFillOrder();
+        /// <summary>Where an opponent's n-th hidden tile sits (centre-out, bottom row first).</summary>
+        public static IReadOnlyList<RackSlot> OpponentFillOrder => FillOrder;
         private static RackSlot[] BuildFillOrder()
         {
             // oppAdd(): centre-out, bottom row before top row.
@@ -151,6 +153,17 @@ namespace Galaxy101.Table
             return new RackSlot(1, 7);
         }
 
+        /// <summary>
+        /// After the deal ceremony: the board's own objects appear exactly where the ceremony left its tiles (racks, deck,
+        /// indicator), so the hand-over is invisible.
+        /// </summary>
+        public void Settle(BoardState state)
+        {
+            Clear(); deckDuration = 0; deckShown = -1;
+            LayoutDeck(state.Stock); lastStock = state.Stock;
+            Sync(state, true);
+        }
+
         // ---------- reconcile ----------
         public void Sync(BoardState state, bool instant = false)
         {
@@ -193,6 +206,7 @@ namespace Galaxy101.Table
                 }
                 if (pair.Value.Meld >= 0) meldOf[view] = pair.Value.Meld;
                 scene.Tiles.SetOkeyMark(view.gameObject, IsOkey(pair.Key));
+                scene.Tiles.SetLying(view.gameObject, !pair.Value.Rack);
                 bool slide = pair.Value.Rack && view.HasTarget && IsOnMyRack(view);
                 float forced = forcedDurations.TryGetValue(pair.Key, out var d) ? d : 0;
                 // Landing effects (spec/12 §1): pile → gold ring, meld → green ring, my rack from outside → "new" bar.

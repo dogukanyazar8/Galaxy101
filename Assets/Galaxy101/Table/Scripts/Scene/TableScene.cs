@@ -287,6 +287,10 @@ namespace Galaxy101.Table
             return Unity(seatFrames[seat].Pose(DiscardLocal.x, TY + TD / 2 + Mathf.Min(level, 4) * TD, DiscardLocal.z, q));
         }
 
+        /// <summary>A pose in a seat's frame (three coordinates): face up readable from that seat, or face down.</summary>
+        public Pose SeatPose(int seat, float x, float y, float z, bool faceUp) => Unity(seatFrames[seat].Pose(x, y, z, faceUp ? FlatUp : FaceDown));
+        /// <summary>Unit vector on the table plane from the centre towards a seat (Unity space).</summary>
+        public Vector3 SeatDirection(int seat) { var p = seatFrames[seat].Pose(0, 0, 1).UnityPosition - seatFrames[seat].Pose(0, 0, 0).UnityPosition; p.y = 0; return p.normalized; }
         public Pose MeldPose(int seat, int column, int row) => Unity(seatFrames[seat].Pose(-0.245f + column * 0.049f, TY + TD / 2, 0.37f - row * 0.08f, FlatUp));
         public Pose IndicatorPose() => Unity(seatFrames[0].Pose(0, TY + TH / 2 * Mathf.Cos(0.42f) + 0.002f, IndicatorZ, ThreeSpace.Euler(IndicatorTilt, 0, 0)));
 

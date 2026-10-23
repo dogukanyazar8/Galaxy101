@@ -57,3 +57,6 @@ Thumbs.db
 /Shared/**/bin/
 /Shared/**/obj/
 /Server/**/TestResults/
+
+# Local server signing key (scripts/Start-LocalServer.ps1)
+/Server/.devkey

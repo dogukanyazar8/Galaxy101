@@ -42,12 +42,11 @@ namespace Galaxy101.Table
             face.EnableKeyword("_SURFACE_TYPE_TRANSPARENT"); face.renderQueue = (int)RenderQueue.Transparent;
             if (emission > 0) { face.EnableKeyword("_EMISSION"); face.SetTexture("_EmissionMap", atlas); face.SetColor("_EmissionColor", Color.white * emission); }
             // spec/23: tiles lying on the felt show their faces unlit — full, crisp colours whatever the lights do.
-            flatFace = new Material(Shader.Find("Universal Render Pipeline/Unlit")) { name = "tas_yuz_isiksiz_" + skin };
+            // table3d.js faceMatFlat is also toneMapped:false: Galaxy101/FlatFace undoes the table camera's tone mapping.
+            flatFace = new Material(Shader.Find("Galaxy101/FlatFace")) { name = "tas_yuz_isiksiz_" + skin };
             flatFace.SetTexture("_BaseMap", atlas); flatFace.SetColor("_BaseColor", Color.white);
-            flatFace.SetFloat("_Surface", 1); flatFace.SetFloat("_Blend", 0); flatFace.SetFloat("_ZWrite", 0);
-            flatFace.SetInt("_SrcBlend", (int)BlendMode.SrcAlpha); flatFace.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha);
-            flatFace.SetInt("_SrcBlendAlpha", (int)BlendMode.One); flatFace.SetInt("_DstBlendAlpha", (int)BlendMode.OneMinusSrcAlpha);
-            flatFace.EnableKeyword("_SURFACE_TYPE_TRANSPARENT"); flatFace.renderQueue = (int)RenderQueue.Transparent;
+            flatFace.SetFloat("_Galaxy101Exposure", ThreeToneMapping.DesignExposure); flatFace.SetFloat("_Galaxy101ToneMapped", 1);
+            flatFace.renderQueue = (int)RenderQueue.Transparent;
         }
 
         /// <summary>Lying on the table (melds, piles, indicator, stacks) → unlit face; standing on a rack → lit PBR face.</summary>

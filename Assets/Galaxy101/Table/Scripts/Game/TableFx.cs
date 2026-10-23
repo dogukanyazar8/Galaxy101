@@ -195,7 +195,7 @@ namespace Galaxy101.Table
             var colors = new[] { Color.white, Hex("#FFD964"), Hex("#FF8A3D") };
             for (int i = 0; i < 3; i++) { Burst(impact + Vector3.up * 0.02f, colors[i], 95, 1.1f + i * 0.35f); Wave(impact, colors[i], i * 0.18f); }
             var lightGo = new GameObject("nukleer_isik"); lightGo.transform.position = impact + Vector3.up * 0.25f;
-            var light = lightGo.AddComponent<Light>(); light.type = LightType.Point; light.color = Hex("#FFB347"); light.range = 3.5f; light.intensity = 90;
+            var light = lightGo.AddComponent<Light>(); light.type = LightType.Point; light.color = Hex("#FFB25A"); light.range = 4.5f; light.intensity = TableScene.ThreeLocalIntensity(90, 1.4f, 0.3f);
             var lying = new System.Collections.Generic.List<(Transform T, Vector3 P, float D)>();
             foreach (var view in FindObjectsByType<TileView>(FindObjectsSortMode.None))
                 if (view != null && !view.Tweening && view.transform != tile && view.transform.position.y < TY + 0.05f) lying.Add((view.transform, view.transform.position, Vector3.Distance(view.transform.position, impact)));
@@ -203,7 +203,7 @@ namespace Galaxy101.Table
             while (Time.time - t0 < 2.2f)
             {
                 float t = Time.time - t0;
-                light.intensity = 90 * Mathf.Exp(-3 * t);
+                light.intensity = TableScene.ThreeLocalIntensity(90, 1.4f, 0.3f) * Mathf.Exp(-3 * t); // three: PointLight(#FFB25A, 90, 4.5, decay 1.4), 0.3 m up
                 // The mushroom: a rising stem for 0.6 s, then the spreading cap.
                 while (puffs < 34 && puffs < t / 1.1f * 34)
                 {
@@ -280,7 +280,7 @@ namespace Galaxy101.Table
             // "New tile" bar blinks: opacity 0.55 + 0.45·sin(9t).
             if (TileFactory.NewBar != null) SetAlpha(TileFactory.NewBar, Gold, 0.55f + 0.45f * Mathf.Sin(t * 9));
             float ws = (now - winSpotT) / 3.4f;
-            winSpot.intensity = ws >= 0 && ws <= 1 ? 40 * Mathf.Sin(Mathf.PI * Mathf.Min(1, ws * 1.6f)) * (ws < 0.6f ? 1 : (1 - ws) / 0.4f) : 0;
+            winSpot.intensity = ws >= 0 && ws <= 1 ? TableScene.ThreeLocalIntensity(40, 1.4f, 1.8f) * Mathf.Sin(Mathf.PI * Mathf.Min(1, ws * 1.6f)) * (ws < 0.6f ? 1 : (1 - ws) / 0.4f) : 0;
         }
 
         // ---------- resources ----------

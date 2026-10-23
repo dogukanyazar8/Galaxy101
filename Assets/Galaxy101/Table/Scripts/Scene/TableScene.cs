@@ -53,6 +53,19 @@ namespace Galaxy101.Table
         public IReadOnlyList<Transform> Seats => seats;
         public Transform Slot(int seat, int row, int index) => slots[seat][row * SlotsPerRow + index];
 
+        /// <summary>
+        /// three.js (r155+, physically correct) lights a surface with BRDF_Lambert = albedo / π; URP's BRDF folds the π
+        /// out (diffuse = albedo). The design's light intensities land π times too bright in URP unless scaled by this.
+        /// </summary>
+        public const float ThreeToUrp = 1f / Mathf.PI;
+
+        /// <summary>
+        /// URP intensity for a three.js point / spot light of <paramref name="intensity"/> with falloff 1/d^decay (three's
+        /// getDistanceAttenuation; URP is always 1/d²), matched at <paramref name="distance"/> — where the light meets the
+        /// table. The cut-off windows are the same in both: (1 − (d/range)⁴)².
+        /// </summary>
+        public static float ThreeLocalIntensity(float intensity, float decay, float distance) => intensity * ThreeToUrp * Mathf.Pow(distance, 2 - decay);
+
         private void Awake() { if (Application.isPlaying) Build(); }
 
         /// <summary>Builds the whole scene. Called from Awake in play mode, or by editor tooling (capture) directly.</summary>
@@ -73,11 +86,13 @@ namespace Galaxy101.Table
             if (demoLayout && FindAnyObjectByType<TableGame>() == null) BuildDemoLayout();
         }
 
+        private RenderTexture environment;
         private float savedShadowDistance; private int savedCascades, savedMsaa; private UniversalRenderPipelineAsset urp;
 
         private void OnDestroy()
         {
             skins.Release();
+            if (environment != null) { environment.Release(); Kill(environment); environment = null; }
             // Restore the shared URP asset (the menu and the classic table use it too).
             if (urp != null) { urp.shadowDistance = savedShadowDistance; urp.shadowCascadeCount = savedCascades; urp.msaaSampleCount = savedMsaa; }
         }
@@ -101,16 +116,14 @@ namespace Galaxy101.Table
         {
             var theme = skins.Theme;
             var lights = new GameObject("Lighting").transform; lights.SetParent(transform, false);
-            RenderSettings.ambientMode = AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = theme.Sky * 0.45f;
-            RenderSettings.ambientEquatorColor = Color.Lerp(theme.Sky, new Color32(10, 10, 20, 255), 0.5f) * 0.45f;
-            RenderSettings.ambientGroundColor = (Color)new Color32(10, 10, 20, 255) * 0.45f;
-            RenderSettings.reflectionIntensity = 0.75f;
+            // scene.environment (buildEnv, ×0.75) and the hemisphere light (sky / #0a0a14, 0.45): ambient probe + reflections.
+            if (environment != null) environment.Release();
+            environment = ThreeEnvironment.Apply(new Color32(0xFF, 0xC9, 0x4A, 255), theme.Sky, new Color32(0x0a, 0x0a, 0x14, 255), 0.45f);
 
             Light Make(string name, LightType type, Color color, float intensity, Vector3 threePos, Vector3? threeTarget)
             {
                 var go = new GameObject(name); go.transform.SetParent(lights, false);
-                var light = go.AddComponent<Light>(); light.type = type; light.color = color; light.intensity = intensity;
+                var light = go.AddComponent<Light>(); light.type = type; light.color = color; light.intensity = intensity * ThreeToUrp;
                 go.transform.position = ThreeSpace.ToUnity(threePos);
                 if (threeTarget.HasValue) go.transform.rotation = Quaternion.LookRotation(ThreeSpace.ToUnity(threeTarget.Value) - go.transform.position);
                 return light;
@@ -120,17 +133,25 @@ namespace Galaxy101.Table
             var keyData = key.GetComponent<UniversalAdditionalLightData>() ?? key.gameObject.AddComponent<UniversalAdditionalLightData>();
             keyData.usePipelineSettings = false; key.shadowBias = 1.0f; key.shadowNormalBias = 0.8f; // URP texel-scaled biases
             var spot = Make("Spot", LightType.Spot, Color.white, 9f, new Vector3(0, 3.2f, 0.3f), new Vector3(0, TY, 0));
+            Decay(spot, 9f, 1.6f, new Vector3(0, 3.2f, 0.3f));
             spot.range = 7; spot.spotAngle = 0.62f * 2 * Mathf.Rad2Deg; spot.innerSpotAngle = spot.spotAngle * 0.3f; // penumbra 0.7
-            var back = Make("Back", LightType.Point, theme.A2, 5f, new Vector3(0, 1.5f, -2.3f), null); back.range = 7;
-            var fill = Make("Fill", LightType.Point, new Color32(0x9f, 0xb6, 0xff, 255), 1.6f, new Vector3(0, 1.6f, 2.2f), null); fill.range = 6;
+            var back = Make("Back", LightType.Point, theme.A2, 5f, new Vector3(0, 1.5f, -2.3f), null); back.range = 7; Decay(back, 5f, 1.4f, new Vector3(0, 1.5f, -2.3f));
+            var fill = Make("Fill", LightType.Point, new Color32(0x9f, 0xb6, 0xff, 255), 1.6f, new Vector3(0, 1.6f, 2.2f), null); fill.range = 6; Decay(fill, 1.6f, 1.5f, new Vector3(0, 1.6f, 2.2f));
+            // spot 9 / decay 1.6, back 5 / 1.4, fill 1.6 / 1.5 (table3d.js), matched at the felt's centre.
+            void Decay(Light light, float threeIntensity, float decay, Vector3 threePos) =>
+                light.intensity = ThreeLocalIntensity(threeIntensity, decay, Vector3.Distance(threePos, new Vector3(0, TY, 0)));
 
-            // Post: Bloom (threshold 1, intensity 0.6, scatter 0.7), ACES, exposure +0.05.
+            // Post: none. table3d.js renders with three.js ACESFilmic at exposure 1.05 and no bloom or vignette; the
+            // camera's ThreeToneMapping does exactly that, so this volume switches off what the pipeline's default
+            // profile would add (Neutral tone mapping, bloom 0.25, vignette 0.2).
             var volumeGo = new GameObject("Post"); volumeGo.transform.SetParent(lights, false);
-            var volume = volumeGo.AddComponent<Volume>(); volume.isGlobal = true;
+            var volume = volumeGo.AddComponent<Volume>(); volume.isGlobal = true; volume.priority = 100;
             var profile = ScriptableObject.CreateInstance<VolumeProfile>(); profile.name = "Table post";
-            var bloom = profile.Add<Bloom>(true); bloom.threshold.Override(1f); bloom.intensity.Override(0.6f); bloom.scatter.Override(0.7f);
-            var tone = profile.Add<Tonemapping>(true); tone.mode.Override(TonemappingMode.ACES);
-            var adjust = profile.Add<ColorAdjustments>(true); adjust.postExposure.Override(0.05f);
+            profile.Add<Tonemapping>(true).mode.Override(TonemappingMode.None);
+            profile.Add<Bloom>(true).intensity.Override(0f);
+            profile.Add<Vignette>(true).intensity.Override(0f);
+            profile.Add<ColorAdjustments>(true).postExposure.Override(0f);
+            profile.Add<MotionBlur>(true).intensity.Override(0f);
             volume.sharedProfile = profile;
         }
 
@@ -140,6 +161,7 @@ namespace Galaxy101.Table
             var cam = camGo.AddComponent<Camera>();
             cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = skins.Theme.Bg3; cam.allowHDR = true; cam.allowMSAA = true;
             var data = camGo.AddComponent<UniversalAdditionalCameraData>(); data.renderPostProcessing = true; data.antialiasing = AntialiasingMode.None;
+            camGo.AddComponent<ThreeToneMapping>();
             CameraRig = camGo.AddComponent<TableCameraRig>(); CameraRig.Initialize(cam, TableCameraRig.View.Player);
         }
 

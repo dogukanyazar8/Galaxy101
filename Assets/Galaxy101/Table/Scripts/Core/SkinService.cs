@@ -75,7 +75,22 @@ namespace Galaxy101.Table
                     SetBase(m, theme.Rim * 0.7f); break;
                 case "tas_classic":
                     SetBase(m, theme.Tile); break;
+                case "cuha":
+                    MatchThreeRoughSpecular(m); break;
             }
+        }
+
+        /// <summary>
+        /// The felt (roughness 0.96): three.js's GGX (height-correlated Smith) gives a very rough dielectric about 1.75×
+        /// the specular of URP's minimalist Cook-Torrance, a near-white sheen measurable under the spot and key light.
+        /// Specular setup with F0 0.07 (0.04 × 1.75) and the map's constant smoothness restores it.
+        /// </summary>
+        private static void MatchThreeRoughSpecular(Material m)
+        {
+            if (!m.HasProperty("_WorkflowMode")) return;
+            m.SetFloat("_WorkflowMode", 0); m.EnableKeyword("_SPECULAR_SETUP");
+            m.DisableKeyword("_METALLICSPECGLOSSMAP"); m.SetTexture("_MetallicGlossMap", null);
+            m.SetColor("_SpecColor", new Color(0.07f, 0.07f, 0.07f).gamma); m.SetFloat("_Smoothness", 0.04f);
         }
 
         private static void SetBase(Material m, Color c, bool keepAlpha = false)

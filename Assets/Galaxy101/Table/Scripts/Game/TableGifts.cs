@@ -28,6 +28,8 @@ namespace Galaxy101.Table
         {
             public string Kind; public int From, To, Slot; public GameObject Go;
             public Vector3 Start, End; public float Yaw, Scale, T0, Duration, Landed, Left, Seed, NextSteam;
+            /// <summary>Flight sparks are authored per 60 Hz frame; this carries the fraction so every frame rate emits as many per second.</summary>
+            public float EmitDue;
             public Phase Phase; public RocketPath Path;
             public Transform Sway, Spin, Flame; public List<(Transform T, float A, float R)> Bubbles = new List<(Transform, float, float)>();
             public List<GameObject> FlameParts = new List<GameObject>();
@@ -70,6 +72,7 @@ namespace Galaxy101.Table
                 Scale = GiftScale.TryGetValue(kind, out var s) ? s : 1.4f, T0 = Time.time, Duration = kind == "rocket" ? 5.6f : 1.35f, Seed = UnityEngine.Random.value * 6,
             };
             g2.Go.name = "hediye_" + kind;
+            MergeStill(kind, g2.Go);
             foreach (var t in g2.Go.GetComponentsInChildren<Transform>(true))
             {
                 if (t.name == "demet") g2.Sway = t;
@@ -88,6 +91,76 @@ namespace Galaxy101.Table
             else if (g2.Kind != "cake") foreach (var part in g2.FlameParts) part.SetActive(false);
             g2.Go.transform.position = g2.Start; g2.Go.transform.localScale = Vector3.one * 0.001f;
             list.Add(g2);
+        }
+
+        // ---------- merged still parts ----------
+        /// <summary>Parts that move on their own (bouquet sway, trophy cup, flames, cola bubbles) keep their renderers.</summary>
+        private static bool Moves(string name) => name == "demet" || name == "kupa_govde" || name.StartsWith("alev", StringComparison.Ordinal) || name.StartsWith("kabarcik", StringComparison.Ordinal);
+
+        private sealed class Merged { public int Lod; public Material Material; public Mesh Mesh; public UnityEngine.Rendering.ShadowCastingMode Shadows; public bool Receive; }
+        private readonly Dictionary<string, List<Merged>> merged = new Dictionary<string, List<Merged>>();
+
+        /// <summary>
+        /// gifts3d.js draws a simit's 240 sesame seeds as one InstancedMesh; the GLB brings each as an object of its own
+        /// (486 renderers over two LODs, 12 gifts on the table at most). Every still part of a gift is merged, per LOD and
+        /// material, into one mesh made once per kind and shared by all its copies; the LOD group gets those renderers.
+        /// </summary>
+        private void MergeStill(string kind, GameObject go)
+        {
+            var group = go.GetComponentInChildren<LODGroup>();
+            var lods = group != null ? group.GetLODs() : new[] { new LOD(0, go.GetComponentsInChildren<Renderer>(true)) };
+            var basis = go.transform.worldToLocalMatrix;
+            bool Still(Renderer r)
+            {
+                // A mesh the player cannot read (import setting) cannot be combined: it keeps its own renderer.
+                var filter = r.GetComponent<MeshFilter>();
+                if (!(r is MeshRenderer) || filter == null || filter.sharedMesh == null || !filter.sharedMesh.isReadable) return false;
+                for (var t = r.transform; t != null && t != go.transform; t = t.parent) if (Moves(t.name)) return false;
+                return true;
+            }
+            var still = lods.Select(l => l.renderers.Where(r => r != null && Still(r)).ToArray()).ToArray();
+            if (still.Sum(r => r.Length) < 2) return;
+            if (!merged.TryGetValue(kind, out var parts))
+            {
+                parts = new List<Merged>();
+                for (int lod = 0; lod < still.Length; lod++)
+                {
+                    var pieces = still[lod].SelectMany(r => Enumerable.Range(0, Mathf.Min(r.sharedMaterials.Length, r.GetComponent<MeshFilter>().sharedMesh.subMeshCount))
+                        .Select(sub => (Renderer: r, Sub: sub, Material: r.sharedMaterials[sub]))).Where(x => x.Material != null);
+                    foreach (var byMaterial in pieces.GroupBy(x => x.Material))
+                    {
+                        var instances = byMaterial.Select(x => new CombineInstance { mesh = x.Renderer.GetComponent<MeshFilter>().sharedMesh, subMeshIndex = x.Sub, transform = basis * x.Renderer.transform.localToWorldMatrix }).ToArray();
+                        var mesh = new Mesh { name = "hediye_" + kind + "_" + lod + "_" + byMaterial.Key.name };
+                        if (instances.Sum(c => c.mesh.vertexCount) > 65000) mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+                        mesh.CombineMeshes(instances, true, true);
+                        var first = byMaterial.First().Renderer;
+                        parts.Add(new Merged { Lod = lod, Material = byMaterial.Key, Mesh = mesh, Shadows = first.shadowCastingMode, Receive = first.receiveShadows });
+                    }
+                }
+                merged[kind] = parts;
+            }
+            foreach (var r in still.SelectMany(x => x))
+            {
+                if (r.transform.childCount == 0) { r.gameObject.SetActive(false); Destroy(r.gameObject); }
+                else { r.enabled = false; Destroy(r.GetComponent<MeshFilter>()); Destroy(r); }
+            }
+            var added = parts.Select(part =>
+            {
+                var piece = new GameObject(part.Mesh.name); piece.transform.SetParent(go.transform, false);
+                piece.AddComponent<MeshFilter>().sharedMesh = part.Mesh;
+                var r = piece.AddComponent<MeshRenderer>(); r.sharedMaterial = part.Material; r.shadowCastingMode = part.Shadows; r.receiveShadows = part.Receive;
+                return (part.Lod, Renderer: (Renderer)r);
+            }).ToList();
+            if (group == null) return;
+            for (int lod = 0; lod < lods.Length; lod++)
+                lods[lod].renderers = lods[lod].renderers.Where(r => r != null && !still[lod].Contains(r)).Concat(added.Where(a => a.Lod == lod).Select(a => a.Renderer)).ToArray();
+            group.SetLODs(lods); group.RecalculateBounds();
+        }
+
+        private void OnDestroy()
+        {
+            foreach (var part in merged.Values.SelectMany(x => x)) if (part.Mesh != null) Destroy(part.Mesh);
+            merged.Clear();
         }
 
         /// <summary>clearGifts(): every gift shrinks away (new hand).</summary>
@@ -115,6 +188,7 @@ namespace Galaxy101.Table
                     {
                         float u = (now - g.T0) / g.Duration;
                         tr.position = Position(g, u);
+                        g.EmitDue += dt * 60; int emits = Mathf.Min((int)g.EmitDue, 4); g.EmitDue -= emits;
                         if (g.Rocket)
                         {
                             var ahead = Position(g, Mathf.Min(1, u + 0.008f)) - tr.position;
@@ -124,16 +198,19 @@ namespace Galaxy101.Table
                                 var along = Quaternion.FromToRotation(Vector3.up, ahead.normalized) * Quaternion.AngleAxis(u * 16 * Mathf.Rad2Deg, Vector3.up);
                                 tr.rotation = Quaternion.Slerp(along, ThreeRotation(0, g.Yaw, 0), EaseOutCubic(up));
                             }
-                            fx.SparkAt(tr.position, UnityEngine.Random.value < 0.5f ? TableFx.Hex("#FFB347") : TableFx.Hex("#FF6A3D"));
-                            if (UnityEngine.Random.value < 0.5f) fx.SparkAt(tr.position, TableFx.Hex("#FFF1C0"));
-                            if (UnityEngine.Random.value < 0.55f) fx.Smoke(tr.position);
+                            for (int e = 0; e < emits; e++)
+                            {
+                                fx.SparkAt(tr.position, UnityEngine.Random.value < 0.5f ? TableFx.Hex("#FFB347") : TableFx.Hex("#FF6A3D"));
+                                if (UnityEngine.Random.value < 0.5f) fx.SparkAt(tr.position, TableFx.Hex("#FFF1C0"));
+                                if (UnityEngine.Random.value < 0.55f) fx.Smoke(tr.position);
+                            }
                             tr.localScale = Vector3.one * g.Scale * Mathf.Min(1, 0.4f + u * 6);
                         }
                         else
                         {
                             tr.rotation = ThreeRotation(0, g.Yaw + (1 - EaseIO(Mathf.Clamp01(u))) * Mathf.PI * 3, Mathf.Sin(u * Mathf.PI) * 0.25f);
                             tr.localScale = Vector3.one * g.Scale * (0.35f + 0.65f * Mathf.Min(1, u * 2.2f));
-                            if (UnityEngine.Random.value < 0.35f) fx.SparkAt(tr.position, TableFx.Spark);
+                            for (int e = 0; e < emits; e++) if (UnityEngine.Random.value < 0.35f) fx.SparkAt(tr.position, TableFx.Spark);
                         }
                         if (u >= 1) Land(g);
                     }

@@ -135,7 +135,7 @@ namespace Galaxy101
             if (planetPlaced && target == planetTo) return;
             if (!planetPlaced) { planetPlaced = true; planetFrom = planetTo = planetNow = target; ApplyPlanet(); return; }
             planetFrom = planetNow; planetTo = target; planetAt = Time.realtimeSinceStartup;
-            planetJob ??= layer?.schedule.Execute(StepPlanet).Every(16);
+            planetJob ??= layer?.schedule.Execute(StepPlanet).Every(0);
             planetJob?.Resume();
         }
 
@@ -730,7 +730,7 @@ namespace Galaxy101
         private void Animate(Action step)
         {
             motions.Add(step);
-            if (ticker == null && layer != null) ticker = layer.schedule.Execute(() => { foreach (var m in motions.ToArray()) m(); }).Every(16);
+            if (ticker == null && layer != null) ticker = layer.schedule.Execute(() => { foreach (var m in motions.ToArray()) m(); }).Every(0);
         }
 
         private VisualElement Divider(string text)

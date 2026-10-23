@@ -9,7 +9,8 @@ namespace Galaxy101.Online
     /// <summary>
     /// The signed-in session for the whole run (survives scene loads): the HTTP API, the WebSocket, the player's
     /// profile and wallet as the server last reported them, and "Beni hatırla" (spec/18): a registered account's refresh
-    /// token is kept in PlayerPrefs; a guest session is never kept (misafir ilerlemesi kaydedilmez).
+    /// token is kept in PlayerPrefs when the player asks; a guest's always is — the guest screen promises "İlerlemen bu
+    /// cihazda saklanır" and a later account link, and a guest has no other way back to their account.
     /// </summary>
     public sealed class GalaxyOnline : MonoBehaviour
     {
@@ -27,6 +28,10 @@ namespace Galaxy101.Online
         public bool SignedIn => Api != null && Api.SignedIn;
         /// <summary>Profile or wallet changed (server push or refresh).</summary>
         public event Action Changed;
+        /// <summary>The socket came back after a drop: the server forgot waiting rooms and subscriptions, so listeners
+        /// subscribe and resync again.</summary>
+        public event Action Reconnected;
+        private bool reconnecting;
 
         public static GalaxyOnline Ensure(string server = null)
         {
@@ -37,7 +42,28 @@ namespace Galaxy101.Online
             Instance.Realtime = new GalaxyRealtime(Instance.Api);
             Instance.Api.TokensChanged += Instance.Persist;
             Instance.Realtime.On<WalletResponse>(MessageTypes.Wallet, w => { Instance.Wallet = w; Instance.Changed?.Invoke(); });
+            Instance.Realtime.Closed += Instance.OnRealtimeClosed;
             return Instance;
+        }
+
+        /// <summary>A dropped socket reconnects with backoff (1, 2, 4, 8, then every 15 s) while signed in; a session
+        /// taken over by another device stays closed.</summary>
+        private async void OnRealtimeClosed(string reason)
+        {
+            if (reason == GalaxyRealtime.ReplacedReason || reconnecting) return;
+            reconnecting = true;
+            try
+            {
+                for (int attempt = 0; this != null && SignedIn && !Realtime.Connected; attempt++)
+                {
+                    await Task.Delay(Math.Min(1000 << Math.Min(attempt, 4), 15000));
+                    if (this == null || !SignedIn || Realtime.Connected) break;
+                    try { await Realtime.ConnectAsync(); }
+                    catch (Exception e) { Debug.LogWarning("Realtime reconnect failed: " + e.Message); }
+                }
+                if (this != null && Realtime.Connected) Reconnected?.Invoke();
+            }
+            finally { reconnecting = false; }
         }
 
         private void Update() => Realtime?.Pump();
@@ -55,7 +81,7 @@ namespace Galaxy101.Online
             return true;
         }
 
-        public async Task GuestAsync(string name, string color) { Guest = true; Remember = false; await Api.GuestAsync(name, color); await AfterSignInAsync(); }
+        public async Task GuestAsync(string name, string color) { Guest = true; Remember = true; await Api.GuestAsync(name, color); await AfterSignInAsync(); }
         public async Task LoginAsync(string email, string password, bool remember) { Guest = false; Remember = remember; await Api.LoginAsync(email, password); await AfterSignInAsync(); }
         public async Task RegisterAsync(RegisterRequest request) { Guest = false; Remember = true; await Api.RegisterAsync(request); await AfterSignInAsync(); }
 
@@ -84,7 +110,7 @@ namespace Galaxy101.Online
 
         private void Persist(TokenResponse tokens)
         {
-            if (tokens == null || Guest || !Remember) return;
+            if (tokens == null || !Remember) return;
             try { PlayerPrefs.SetString(SessionKey, JsonConvert.SerializeObject(new Saved { RefreshToken = tokens.RefreshToken, AccountId = tokens.AccountId.ToString(), Guest = Guest })); PlayerPrefs.Save(); }
             catch (Exception e) { Debug.LogWarning("Could not remember the session: " + e.Message); }
         }

@@ -59,6 +59,9 @@ namespace Galaxy101.Table
             }));
             subscriptions.Add(online.Realtime.On<HandEndMessage>(MessageTypes.MatchHandEnd, m => { if (m?.MatchId != MatchId) return; HandEnd = m; Changed?.Invoke(); }));
             subscriptions.Add(online.Realtime.On<MatchEndMessage>(MessageTypes.MatchEnd, m => { if (m?.MatchId != MatchId) return; End = m; Changed?.Invoke(); }));
+            // Back after a dropped socket: the match went on without us (the server played the seat), ask for the snapshot.
+            Action resync = () => { if (End == null) _ = online.Realtime.RequestAsync(MessageTypes.MatchSync, new MatchCommandMessage { MatchId = MatchId }); };
+            online.Reconnected += resync; subscriptions.Add(() => online.Reconnected -= resync);
         }
 
         /// <summary>Ask the server for the full snapshot (match.start + match.state) and wait for it.</summary>
@@ -87,9 +90,26 @@ namespace Galaxy101.Table
             long before = view.Version;
             var ack = await online.Realtime.RequestAsync(MessageTypes.MatchCommand, MatchWire.ToMessage(command, MatchId, before));
             if (!ack.Ok) return new CommandReceipt(false, MatchWire.Error(ack.Code), before, Array.Empty<VisibleEvent>());
-            float until = Time.realtimeSinceStartup + 5;
-            while (view.Version <= before && Time.realtimeSinceStartup < until && !token.IsCancellationRequested) await Task.Yield();
-            return new CommandReceipt(true, ErrorCode.None, view.Version, Array.Empty<VisibleEvent>());
+            // Accepted only once the authoritative state shows the move: the table reads the drawn tile and the new hand
+            // right after. A state that never came (dropped, or the socket blinked) is asked for once more as a snapshot.
+            if (!await StateAfter(before, 5, token) && !token.IsCancellationRequested)
+            {
+                var sync = await online.Realtime.RequestAsync(MessageTypes.MatchSync, new MatchCommandMessage { MatchId = MatchId });
+                if (sync.Ok) await StateAfter(before, 5, token);
+            }
+            return view.Version > before ? new CommandReceipt(true, ErrorCode.None, view.Version, Array.Empty<VisibleEvent>())
+                : new CommandReceipt(false, ErrorCode.Cancelled, before, Array.Empty<VisibleEvent>());
+        }
+
+        private async Task<bool> StateAfter(long version, float seconds, CancellationToken token)
+        {
+            float until = Time.realtimeSinceStartup + seconds;
+            while (view.Version <= version)
+            {
+                if (token.IsCancellationRequested || Time.realtimeSinceStartup >= until) return false;
+                await Task.Yield();
+            }
+            return true;
         }
 
         /// <summary>Masadan kalk: the seat is forfeited; the server plays it to the end.</summary>

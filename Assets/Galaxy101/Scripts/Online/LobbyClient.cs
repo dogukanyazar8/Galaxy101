@@ -40,6 +40,7 @@ namespace Galaxy101.Online
         private readonly GalaxyOnline online;
         private readonly List<Action> subscriptions = new List<Action>();
         private List<TableSummary> tables = new List<TableSummary>();
+        private bool subscribed;
 
         public LobbyClient(GalaxyOnline online)
         {
@@ -47,7 +48,19 @@ namespace Galaxy101.Online
             subscriptions.Add(online.Realtime.On<LobbyTablesMessage>(LobbyMessageTypes.Tables, m => { tables = m?.Tables ?? new List<TableSummary>(); TablesChanged?.Invoke(); }));
             subscriptions.Add(online.Realtime.On<TableStateMessage>(LobbyMessageTypes.State, m => { Room = m == null || m.Closed ? null : m; RoomChanged?.Invoke(m); }));
             online.Changed += OnChanged;
+            online.Realtime.Closed += OnClosed;
+            online.Reconnected += OnReconnected;
         }
+
+        /// <summary>The server drops a disconnected player from their waiting room: so does the client.</summary>
+        private void OnClosed(string reason)
+        {
+            if (Room == null) return;
+            Room = null;
+            RoomChanged?.Invoke(new TableStateMessage { Closed = true, Reason = "offline" });
+        }
+
+        private void OnReconnected() { if (subscribed) _ = Request(LobbyMessageTypes.Subscribe, null); }
 
         public bool Online => online != null && online.SignedIn && online.Realtime.Connected;
         public Guid Me => online.Profile?.Id ?? Guid.Empty;
@@ -62,6 +75,7 @@ namespace Galaxy101.Online
 
         public async Task<string> SubscribeAsync()
         {
+            subscribed = true;
             if (!online.Realtime.Connected)
             {
                 try { await online.Realtime.ConnectAsync(); }
@@ -70,7 +84,7 @@ namespace Galaxy101.Online
             return await Request(LobbyMessageTypes.Subscribe, null);
         }
 
-        public void Unsubscribe() { if (online.Realtime.Connected) _ = Request(LobbyMessageTypes.Unsubscribe, null); }
+        public void Unsubscribe() { subscribed = false; if (online.Realtime.Connected) _ = Request(LobbyMessageTypes.Unsubscribe, null); }
         public Task<string> CreateAsync(TableOptions options) => Request(LobbyMessageTypes.Create, new TableCreateMessage { Options = options });
         public Task<string> JoinAsync(TableJoinMessage join) => Request(LobbyMessageTypes.Join, join);
         public Task<string> LeaveAsync() => Request(LobbyMessageTypes.Leave, null);
@@ -107,7 +121,7 @@ namespace Galaxy101.Online
         {
             foreach (var off in subscriptions) off();
             subscriptions.Clear();
-            if (online != null) online.Changed -= OnChanged;
+            if (online != null) { online.Changed -= OnChanged; online.Reconnected -= OnReconnected; online.Realtime.Closed -= OnClosed; }
         }
     }
 }

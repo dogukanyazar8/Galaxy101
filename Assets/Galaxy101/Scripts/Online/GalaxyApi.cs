@@ -104,7 +104,8 @@ namespace Galaxy101.Online
                     }
                     request.downloadHandler = new DownloadHandlerBuffer();
                     request.timeout = TimeoutSeconds;
-                    if (auth && Tokens != null) request.SetRequestHeader("Authorization", "Bearer " + Tokens.AccessToken);
+                    var sent = auth ? Tokens : null;
+                    if (sent != null) request.SetRequestHeader("Authorization", "Bearer " + sent.AccessToken);
                     try { await Await(request.SendWebRequest()); }
                     catch (Exception e) when (!(e is ApiException))
                     {
@@ -115,7 +116,7 @@ namespace Galaxy101.Online
                     long status = request.responseCode;
                     string text = request.downloadHandler.text;
                     if (request.result == UnityWebRequest.Result.ConnectionError || status == 0) throw new ApiException("offline", 0);
-                    if (status == 401 && auth && attempt == 0 && Tokens != null && await ResumeAsync(Tokens.RefreshToken)) continue;
+                    if (status == 401 && sent != null && attempt == 0 && await RefreshAfter(sent)) continue;
                     if (status >= 200 && status < 300)
                     {
                         if (typeof(T) == typeof(JObject) && string.IsNullOrWhiteSpace(text)) return default;
@@ -126,6 +127,20 @@ namespace Galaxy101.Online
                     throw new ApiException((string)error?["code"] ?? "http_" + status, status, error);
                 }
             }
+        }
+
+        // Parallel requests that meet an expired access token share one refresh: the server revokes the whole token family
+        // when a refresh token is presented twice. A request sent with tokens already rotated just retries with the new ones.
+        private Task<bool> refreshing;
+        private Task<bool> RefreshAfter(TokenResponse sent)
+        {
+            if (Tokens != sent) return Task.FromResult(Tokens != null);
+            return refreshing ?? (refreshing = RefreshAsync(sent.RefreshToken));
+        }
+        private async Task<bool> RefreshAsync(string refreshToken)
+        {
+            try { return await ResumeAsync(refreshToken); }
+            finally { refreshing = null; }
         }
 
         private static Task Await(UnityWebRequestAsyncOperation operation)

@@ -105,10 +105,15 @@ namespace Galaxy101.Table
             return true;
         }
 
+        // A dragged slider changes its value every frame: the value is set each time, the disk written at most once a
+        // second (Unity writes PlayerPrefs on quit as well, so the last change is never lost).
+        private float savedAt = float.NegativeInfinity;
         private void Save()
         {
             if (!persist) return;
-            PlayerPrefs.SetString(PrefsKey, values.ToString(Newtonsoft.Json.Formatting.None)); PlayerPrefs.Save();
+            PlayerPrefs.SetString(PrefsKey, values.ToString(Newtonsoft.Json.Formatting.None));
+            if (Time.realtimeSinceStartup - savedAt < 1) return;
+            savedAt = Time.realtimeSinceStartup; PlayerPrefs.Save();
         }
 
         private static readonly HashSet<string> Volumes = new HashSet<string> { "master", "music", "sfx" };

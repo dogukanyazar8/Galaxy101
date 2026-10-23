@@ -21,7 +21,7 @@ namespace Galaxy101.Table
         private TableScene scene;
         private Texture2D glow;
         private GlowPoints bursts, sparks, haze;
-        private Mesh ringMesh, discMesh;
+        private Mesh ringMesh, discMesh, quadMesh;
         private Material zoneMaterial, zoneFill, sideMaterial, deckGlowMaterial, holoMaterial;
         private Transform zone, zoneFillTransform, sideRing, deckGlow, holo, deckRoot;
         private readonly List<(Transform T, Material M, Color C, float T0)> waves = new List<(Transform, Material, Color, float)>();
@@ -59,7 +59,7 @@ namespace Galaxy101.Table
             if (zone != null) zoneMaterial = zone.GetComponent<MeshRenderer>().sharedMaterial;
             zoneFillTransform = Flat("atma_dolgu", discMesh, zoneFill = Additive(Accent, 0), table.DiscardCenter(0) + Vector3.up * 0.0004f, 0.058f);
             sideRing = Flat("yan_halka", ringMesh, sideMaterial = Additive(Accent, 0), table.DiscardCenter(3), 0.066f);
-            deckGlow = Flat("deste_parilti", Quad(), deckGlowMaterial = Additive(Accent, 0, glow), new Vector3(0, TY + 0.002f, 0), 0.25f);
+            deckGlow = Flat("deste_parilti", quadMesh = Quad(), deckGlowMaterial = Additive(Accent, 0, glow), new Vector3(0, TY + 0.002f, 0), 0.25f);
 
             RescanTable();
 
@@ -73,7 +73,13 @@ namespace Galaxy101.Table
             holo = null; holoMaterial = null; leds.Clear();
             foreach (var r in scene.GetComponentsInChildren<Renderer>(true))
             {
-                if (r.name.StartsWith("holo_halka", System.StringComparison.Ordinal) && holo == null) { holo = r.transform; holoMaterial = r.sharedMaterial; if (holoMaterial.HasProperty("_BaseColor")) holoBaseAlpha = holoMaterial.GetColor("_BaseColor").a; }
+                if (r.name.StartsWith("holo_halka", System.StringComparison.Ordinal) && holo == null)
+                {
+                    holo = r.transform; holoMaterial = r.sharedMaterial; if (holoMaterial.HasProperty("_BaseColor")) holoBaseAlpha = holoMaterial.GetColor("_BaseColor").a;
+                    // table3d.js M.holo is AdditiveBlending (the GLB export only keeps "transparent").
+                    holoMaterial.SetFloat("_Blend", 2); holoMaterial.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha); holoMaterial.SetFloat("_DstBlend", (float)BlendMode.One);
+                    holoMaterial.SetFloat("_SrcBlendAlpha", (float)BlendMode.Zero); holoMaterial.SetFloat("_DstBlendAlpha", (float)BlendMode.One);
+                }
                 foreach (var m in r.sharedMaterials)
                     if (m != null && (m.name.StartsWith("led", System.StringComparison.Ordinal) || m.name.Contains("_led")) && m.HasProperty("_EmissionColor") && !leds.Exists(l => l.M == m))
                         leds.Add((m, m.GetColor("_EmissionColor")));
@@ -254,31 +260,31 @@ namespace Galaxy101.Table
             {
                 var w = waves[i]; float u = (now - w.T0) / 0.7f;
                 if (u >= 1) { Destroy(w.T.gameObject); Destroy(w.M); waves.RemoveAt(i); continue; }
-                w.T.localScale = Vector3.one * (0.03f + EaseOutCubic(u) * 0.16f); SetAlpha(w.M, w.C, 0.9f * (1 - u));
+                w.T.localScale = Vector3.one * (0.03f + EaseOutCubic(u) * 0.16f); SetAlpha(w.M, w.C, ThreeBlend.Additive(0.9f * (1 - u)));
             }
             float pulse = 0.5f + 0.5f * Mathf.Sin(t * 5);
             // Discard ring: hot while discarding (0.55 + 0.45 p, scale 1 + 0.08 p), quiet at 0.16.
             if (zone != null && zoneMaterial != null)
             {
-                SetAlpha(zoneMaterial, Accent, canDiscard ? 0.55f + pulse * 0.45f : 0.16f);
+                SetAlpha(zoneMaterial, Accent, ThreeBlend.Normal(canDiscard ? 0.55f + pulse * 0.45f : 0.16f));
                 zone.localScale = Vector3.one * (canDiscard ? 1 + pulse * 0.08f : 1);
-                SetAlpha(zoneFill, Accent, canDiscard ? 0.12f + pulse * 0.12f : 0);
+                SetAlpha(zoneFill, Accent, ThreeBlend.Additive(canDiscard ? 0.12f + pulse * 0.12f : 0));
             }
-            SetAlpha(deckGlowMaterial, Accent, canDraw ? 0.25f + pulse * 0.35f : 0);
+            SetAlpha(deckGlowMaterial, Accent, ThreeBlend.Additive(canDraw ? 0.25f + pulse * 0.35f : 0));
             if (deckGlow != null) { int cols = Mathf.Max(1, Mathf.CeilToInt(Mathf.CeilToInt(Mathf.Max(1, deckCount) / 5f) / (float)(deckCount > 60 ? 4 : deckCount > 25 ? 2 : 1))); deckGlow.localScale = Vector3.one * Mathf.Max(0.6f, cols * 0.18f) * 0.5f; }
-            SetAlpha(sideMaterial, Accent, canDraw && sidePulse ? 0.5f + pulse * 0.5f : 0);
+            SetAlpha(sideMaterial, Accent, ThreeBlend.Normal(canDraw && sidePulse ? 0.5f + pulse * 0.5f : 0));
             // LEDs: emissive 2.2 + 0.25·sin(1.2t) relative to their authored 2.4.
             float led = (2.2f + Mathf.Sin(t * 1.2f) * 0.25f) / 2.4f;
             foreach (var (m, c) in leds) if (m != null) m.SetColor("_EmissionColor", c * led);
             // Holo ring: 0.12 rad/s (faster while boosted), opacity 0.22 ± 0.06.
             float boost = Mathf.Max(0, holoBoostUntil - now);
             if (holo != null) holo.Rotate(Vector3.up, (0.12f + boost * 1.6f) * Time.deltaTime * Mathf.Rad2Deg, Space.World);
-            if (holoMaterial != null && holoMaterial.HasProperty("_BaseColor")) { var c = holoMaterial.GetColor("_BaseColor"); c.a = holoBaseAlpha + Mathf.Sin(t * 1.3f) * 0.06f + Mathf.Min(0.5f, boost * 0.25f); holoMaterial.SetColor("_BaseColor", c); }
+            if (holoMaterial != null && holoMaterial.HasProperty("_BaseColor")) { var c = holoMaterial.GetColor("_BaseColor"); c.a = ThreeBlend.Additive(holoBaseAlpha + Mathf.Sin(t * 1.3f) * 0.06f + Mathf.Min(0.5f, boost * 0.25f)); holoMaterial.SetColor("_BaseColor", c); }
             // Deck spin 0.9 s: one turn, 5 cm bounce.
             float ds = (now - deckSpinT) / 0.9f;
             if (deckRoot != null) { if (ds >= 0 && ds <= 1) { deckRoot.localRotation = Quaternion.AngleAxis(EaseInOutCubic(ds) * 360, Vector3.up); deckRoot.localPosition = Vector3.up * (Mathf.Sin(Mathf.PI * ds) * 0.05f); } else { deckRoot.localRotation = Quaternion.identity; deckRoot.localPosition = Vector3.zero; } }
             // "New tile" bar blinks: opacity 0.55 + 0.45·sin(9t).
-            if (TileFactory.NewBar != null) SetAlpha(TileFactory.NewBar, Gold, 0.55f + 0.45f * Mathf.Sin(t * 9));
+            if (TileFactory.NewBar != null) SetAlpha(TileFactory.NewBar, Gold, ThreeBlend.Normal(0.55f + 0.45f * Mathf.Sin(t * 9)));
             float ws = (now - winSpotT) / 3.4f;
             winSpot.intensity = ws >= 0 && ws <= 1 ? TableScene.ThreeLocalIntensity(40, 1.4f, 1.8f) * Mathf.Sin(Mathf.PI * Mathf.Min(1, ws * 1.6f)) * (ws < 0.6f ? 1 : (1 - ws) / 0.4f) : 0;
         }
@@ -334,24 +340,47 @@ namespace Galaxy101.Table
             private readonly List<P> points = new List<P>(512);
             private readonly MeshFilter filter; private readonly Mesh mesh;
             private readonly float gravity; private readonly bool shrink;
-            private readonly List<Vector3> v = new List<Vector3>(); private readonly List<Color> c = new List<Color>(); private readonly List<Vector2> uv = new List<Vector2>(); private readonly List<int> tri = new List<int>();
+            private const int Capacity = 2000;
+            // Per frame only positions and colours change; the quads' uvs and indices are built once for the capacity.
+            private readonly List<Vector3> v = new List<Vector3>(Capacity * 4); private readonly List<Color> c = new List<Color>(Capacity * 4);
+            private static List<Vector2> uv; private static List<int> tri;
+            private int shown = -1;
 
             public GlowPoints(MeshFilter filter, float gravity, bool shrink)
             {
                 this.filter = filter; this.gravity = gravity; this.shrink = shrink;
                 mesh = new Mesh { name = filter.name }; mesh.MarkDynamic(); filter.sharedMesh = mesh;
+                // The points stay around the table: fixed bounds instead of recalculating them every frame.
+                mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 8);
+                if (uv == null)
+                {
+                    uv = new List<Vector2>(Capacity * 4); tri = new List<int>(Capacity * 6);
+                    for (int q = 0; q < Capacity; q++)
+                    {
+                        int b = q * 4;
+                        uv.Add(new Vector2(0, 0)); uv.Add(new Vector2(0, 1)); uv.Add(new Vector2(1, 1)); uv.Add(new Vector2(1, 0));
+                        tri.Add(b); tri.Add(b + 1); tri.Add(b + 2); tri.Add(b); tri.Add(b + 2); tri.Add(b + 3);
+                    }
+                }
             }
 
             public int Count => points.Count;
 
+            public void Release()
+            {
+                if (mesh != null) Object.Destroy(mesh);
+                var r = filter != null ? filter.GetComponent<MeshRenderer>() : null;
+                if (r != null && r.sharedMaterial != null) Object.Destroy(r.sharedMaterial);
+            }
+
             public void Emit(Vector3 pos, Vector3 vel, Color col, float size, float life, float sizeEnd = -1, bool sine = false)
             {
-                if (points.Count < 2000) points.Add(new P { Pos = pos, Vel = vel, Col = col, Size = size, SizeEnd = sizeEnd, Life = life, Sine = sine });
+                if (points.Count < Capacity) points.Add(new P { Pos = pos, Vel = vel, Col = col, Size = size, SizeEnd = sizeEnd, Life = life, Sine = sine });
             }
 
             public void Step(float dt, Camera cam)
             {
-                v.Clear(); c.Clear(); uv.Clear(); tri.Clear();
+                v.Clear(); c.Clear();
                 Vector3 right = cam != null ? cam.transform.right : Vector3.right, up = cam != null ? cam.transform.up : Vector3.up;
                 for (int i = points.Count - 1; i >= 0; i--)
                 {
@@ -364,12 +393,20 @@ namespace Galaxy101.Table
                     int b = v.Count;
                     v.Add(p.Pos - right * half - up * half); v.Add(p.Pos - right * half + up * half); v.Add(p.Pos + right * half + up * half); v.Add(p.Pos + right * half - up * half);
                     c.Add(col); c.Add(col); c.Add(col); c.Add(col);
-                    uv.Add(new Vector2(0, 0)); uv.Add(new Vector2(0, 1)); uv.Add(new Vector2(1, 1)); uv.Add(new Vector2(1, 0));
-                    tri.Add(b); tri.Add(b + 1); tri.Add(b + 2); tri.Add(b); tri.Add(b + 2); tri.Add(b + 3);
                 }
+                int quads = v.Count / 4;
+                if (quads == shown)
+                {
+                    if (quads > 0) { mesh.SetVertices(v); mesh.SetColors(c); }
+                    return;
+                }
+                // The quad count changed: indices first go, so no index points past the new vertex count.
+                shown = quads;
                 mesh.Clear();
-                if (v.Count == 0) return;
-                mesh.SetVertices(v); mesh.SetColors(c); mesh.SetUVs(0, uv); mesh.SetTriangles(tri, 0); mesh.RecalculateBounds();
+                if (quads == 0) return;
+                mesh.SetVertices(v); mesh.SetColors(c); mesh.SetUVs(0, uv, 0, quads * 4);
+                mesh.SetTriangles(tri, 0, quads * 6, 0, false);
+                mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 8);
             }
         }
 
@@ -415,8 +452,12 @@ namespace Galaxy101.Table
 
         private void OnDestroy()
         {
-            foreach (var w in waves) if (w.M != null) Destroy(w.M);
+            foreach (var w in waves) { if (w.M != null) Destroy(w.M); if (w.T != null) Destroy(w.T.gameObject); }
             if (glow != null) Destroy(glow);
+            // Everything else this component made at runtime: meshes and materials.
+            foreach (var m in new[] { ringMesh, discMesh, quadMesh }) if (m != null) Destroy(m);
+            foreach (var p in new[] { bursts, sparks, haze }) p?.Release();
+            foreach (var m in new[] { zoneFill, sideMaterial, deckGlowMaterial }) if (m != null) Destroy(m);
         }
     }
 }

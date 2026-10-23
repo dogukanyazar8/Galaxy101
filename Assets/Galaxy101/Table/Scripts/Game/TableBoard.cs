@@ -92,9 +92,11 @@ namespace Galaxy101.Table
         }
 
         // ---------- deck ----------
+        private bool heapShown;
+
         public void LayoutDeck(int n)
         {
-            n = Mathf.Clamp(n, 0, 106); if (n == deckShown) return; deckShown = n;
+            n = Mathf.Clamp(n, 0, 106); scene.DeckCount = n; scene.DeckHeap = deckDuration > 0; if (n == deckShown && heapShown == scene.DeckHeap) return; deckShown = n; heapShown = scene.DeckHeap;
             // Deck tiles live under the effects' deck root so the shuffle beat can spin the whole deck.
             var parent = Fx != null && Fx.DeckRoot != null ? Fx.DeckRoot : scene.TilesRoot;
             while (deckPool.Count < n) { var go = scene.Tiles.Create(null, parent); go.name = "deste_" + deckPool.Count; Object.Destroy(go.GetComponent<Collider>()); deckPool.Add(go); }
@@ -118,8 +120,10 @@ namespace Galaxy101.Table
             }
             if (deckDuration <= 0) return;
             float u = Mathf.Clamp01((Time.time - deckT0) / deckDuration);
-            LayoutDeck(Mathf.RoundToInt(Mathf.Lerp(deckFrom, deckTo, u)));
             if (u >= 1) deckDuration = 0;
+            // The deal over, the stock settles into its piles (and the indicator onto the six-tile pile).
+            LayoutDeck(Mathf.RoundToInt(Mathf.Lerp(deckFrom, deckTo, u)));
+            if (deckDuration <= 0 && indicatorId >= 0 && known.TryGetValue(indicatorId, out var settled) && settled != null && !settled.Tweening) settled.Snap(scene.IndicatorPose());
         }
 
         // ---------- deal (spec/10 §2) ----------

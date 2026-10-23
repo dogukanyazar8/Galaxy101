@@ -33,6 +33,9 @@ namespace Galaxy101.Table
 
         private Drag drag;
         private TileView hover;
+        private readonly RaycastHit[] hits = new RaycastHit[64];
+        private Vector2 hoverScreen = new Vector2(float.NaN, float.NaN);
+        private float hoverAt;
         private int selected = -1, lastClickId = -1;
         private Ray? lastRay;
         private float lastClickAt;
@@ -92,8 +95,10 @@ namespace Galaxy101.Table
         {
             Physics.SyncTransforms(); // tiles move by transform every frame
             float best = float.MaxValue; (Kind, TileView)? hit = null;
-            foreach (var h in Physics.RaycastAll(ray, 10f))
+            int count = Physics.RaycastNonAlloc(ray, hits, 10f);
+            for (int i = 0; i < count; i++)
             {
+                var h = hits[i];
                 var view = h.collider.GetComponent<TileView>(); if (view == null || h.distance >= best) continue;
                 if (game.CanArrange && view.Id >= 0 && game.Rack.TryFind(view.Id, out _)) { best = h.distance; hit = (Kind.Rack, view); }
                 else if (game.CanDrawSide && view == SideTop()) { best = h.distance; hit = (Kind.Side, view); }
@@ -160,6 +165,9 @@ namespace Galaxy101.Table
         {
             if (drag == null)
             {
+                // Hover picks again when the pointer moves, else ten times a second (tiles may slide under a still pointer).
+                if (screen == hoverScreen && Time.unscaledTime < hoverAt) return;
+                hoverScreen = screen; hoverAt = Time.unscaledTime + 0.1f;
                 var hit = hasRay ? Pick(ray) : null;
                 hover = hit?.Kind == Kind.Okey ? null : hit?.View;
                 if (hit?.Kind == Kind.Okey) game.ShowOkeyTip(hit.Value.View.Id, false); else game.HideOkeyTip();

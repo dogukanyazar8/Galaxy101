@@ -33,6 +33,7 @@ namespace Galaxy101.Tests
             foreach (var go in new[] { hudOwner, gameOwner, sceneOwner }) if (go != null) UnityEngine.Object.Destroy(go);
             lobby?.Dispose();
             if (GalaxyOnline.Instance != null) UnityEngine.Object.Destroy(GalaxyOnline.Instance.gameObject);
+            GalaxyOnline.Forget(); // the test's guest session must not be resumed by the next real start
             TableGame.PendingOnline = null;
             yield return null;
             if (statePath != null && File.Exists(statePath)) File.Delete(statePath);

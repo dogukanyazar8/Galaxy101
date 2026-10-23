@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -29,8 +30,10 @@ namespace Galaxy101.Online
         private int nextId;
 
         public bool Connected => socket != null && socket.State == WebSocketState.Open;
-        /// <summary>The socket closed by itself (server gone, replaced by another device).</summary>
+        /// <summary>The socket closed by itself (server gone, network lost); the reason is "replaced" when the same
+        /// account connected from another device — then nothing should reconnect.</summary>
         public event Action<string> Closed;
+        public const string ReplacedReason = "replaced";
 
         public GalaxyRealtime(GalaxyApi api) { this.api = api; }
 
@@ -61,10 +64,15 @@ namespace Galaxy101.Online
             var id = "c" + Interlocked.Increment(ref nextId);
             var done = new TaskCompletionSource<AckMessage>(TaskCreationOptions.RunContinuationsAsynchronously);
             pending[id] = done;
-            await SendAsync(type, data, id);
-            var winner = await Task.WhenAny(done.Task, Task.Delay(TimeSpan.FromSeconds(seconds)));
-            pending.TryRemove(id, out _);
-            return winner == done.Task ? done.Task.Result : new AckMessage { Id = id, Ok = false, Code = "timeout" };
+            try
+            {
+                try { await SendAsync(type, data, id); }
+                catch (Exception e) when (e is ApiException || e is WebSocketException || e is ObjectDisposedException || e is OperationCanceledException)
+                { return new AckMessage { Id = id, Ok = false, Code = "offline" }; }
+                var winner = await Task.WhenAny(done.Task, Task.Delay(TimeSpan.FromSeconds(seconds)));
+                return winner == done.Task ? done.Task.Result : new AckMessage { Id = id, Ok = false, Code = "timeout" };
+            }
+            finally { pending.TryRemove(id, out _); }
         }
 
         public async Task SendAsync(string type, object data = null, string id = null)
@@ -92,18 +100,20 @@ namespace Galaxy101.Online
 
         private async Task ReceiveAsync(ClientWebSocket ws, CancellationToken ct)
         {
-            var buffer = new byte[64 * 1024]; var text = new StringBuilder();
+            // A frame arrives in parts that may split a multi-byte character (ş, ğ): decode the whole frame's bytes.
+            var buffer = new byte[64 * 1024]; var frameBytes = new MemoryStream();
             string reason = "closed";
             try
             {
                 while (!ct.IsCancellationRequested && ws.State == WebSocketState.Open)
                 {
                     var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), ct);
-                    if (result.MessageType == WebSocketMessageType.Close) { reason = ws.CloseStatusDescription ?? "closed"; break; }
-                    text.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
+                    if (result.MessageType == WebSocketMessageType.Close) { if (reason != ReplacedReason) reason = ws.CloseStatusDescription ?? "closed"; break; }
+                    frameBytes.Write(buffer, 0, result.Count);
                     if (!result.EndOfMessage) continue;
-                    var frame = JObject.Parse(text.ToString()); text.Clear();
+                    var frame = JObject.Parse(Encoding.UTF8.GetString(frameBytes.GetBuffer(), 0, (int)frameBytes.Length)); frameBytes.SetLength(0);
                     var type = (string)frame["type"]; var data = frame["data"];
+                    if (type == MessageTypes.Replaced) reason = ReplacedReason;
                     if (type == MessageTypes.Ack)
                     {
                         var ack = data.ToObject<AckMessage>(JsonSerializer.Create(GalaxyApi.Json));
@@ -113,9 +123,17 @@ namespace Galaxy101.Online
                     inbox.Enqueue((type, data));
                 }
             }
-            catch (OperationCanceledException) { return; }
-            catch (Exception e) { reason = e.Message; }
+            catch (OperationCanceledException) { return; } // replaced by a new socket or disposed: its requests are not ours to fail
+            catch (Exception e) { if (reason != ReplacedReason) reason = e.Message; }
+            FailPending();
             if (!ct.IsCancellationRequested) inbox.Enqueue(("__closed", reason));
+        }
+
+        /// <summary>Requests waiting on a socket that is gone answer "offline" now instead of after their timeout.</summary>
+        private void FailPending()
+        {
+            foreach (var id in pending.Keys)
+                if (pending.TryRemove(id, out var waiter)) waiter.TrySetResult(new AckMessage { Id = id, Ok = false, Code = "offline" });
         }
 
         public void Dispose()

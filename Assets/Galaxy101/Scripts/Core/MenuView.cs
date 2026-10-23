@@ -241,7 +241,7 @@ namespace Galaxy101
             {
                 float f=UnityEngine.Mathf.Clamp01((UnityEngine.Time.realtimeSinceStartup-began)/.35f),k=CssBezier(.25f,.1f,.25f,1,f);
                 pill.style.opacity=k;pill.style.translate=new Translate(Length.Percent(-50),-14*(1-k));if(f>=1)job.Pause();
-            }).Every(16);
+            }).Every(0);
             pill.style.opacity=0;pill.style.translate=new Translate(Length.Percent(-50),-14);
             pill.schedule.Execute(()=>pill.RemoveFromHierarchy()).ExecuteLater(3400);
             LastFlash=text;

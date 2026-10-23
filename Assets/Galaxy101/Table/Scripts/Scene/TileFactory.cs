@@ -11,13 +11,15 @@ namespace Galaxy101.Table
     /// face quad sampling the baked face atlas (spec/16 D4; tools/blender/bake_tile_faces.py). The per-tile face
     /// textures inside the GLBs are reference only.
     /// </summary>
-    public sealed class TileFactory
+    public sealed class TileFactory : IDisposable
     {
         public const int AtlasColumns = 8, AtlasRows = 7, CellWidth = 256, CellHeight = 360;
         private static readonly string[] Suits = { "R", "B", "Y", "K" };
         private readonly GameObject body;
         private readonly Material face, flatFace;
-        private readonly Dictionary<int, Mesh> faceMeshes = new Dictionary<int, Mesh>();
+        // A face quad's geometry depends only on the atlas cell, not the skin: shared by every factory, so tiles restyled
+        // by a later factory keep valid meshes and skin changes create none.
+        private static readonly Dictionary<int, Mesh> faceMeshes = new Dictionary<int, Mesh>();
         private Material okeyGold;
         private Mesh barMesh;
         /// <summary>Under-tile bars (table3d.js barGeo): green = valid set, yellow = new tile (its alpha blinks, set by TableFx).</summary>
@@ -47,6 +49,16 @@ namespace Galaxy101.Table
             flatFace.SetTexture("_BaseMap", atlas); flatFace.SetColor("_BaseColor", Color.white);
             flatFace.SetFloat("_Galaxy101Exposure", ThreeToneMapping.DesignExposure); flatFace.SetFloat("_Galaxy101ToneMapped", 1);
             flatFace.renderQueue = (int)RenderQueue.Transparent;
+        }
+
+        /// <summary>
+        /// Releases this factory's materials (and legacy okey meshes). The scene calls it on unload, for the current factory
+        /// and the ones tile styles replaced (tiles of a ceremony in flight may still wear those).
+        /// </summary>
+        public void Dispose()
+        {
+            foreach (UnityEngine.Object o in new UnityEngine.Object[] { face, flatFace, okeyGold, okeyFrame, okeyDot })
+                if (o != null) { if (Application.isPlaying) UnityEngine.Object.Destroy(o); else UnityEngine.Object.DestroyImmediate(o); }
         }
 
         /// <summary>Lying on the table (melds, piles, indicator, stacks) → unlit face; standing on a rack → lit PBR face.</summary>
@@ -198,9 +210,9 @@ namespace Galaxy101.Table
             mesh.triangles = t;
         }
 
-        private Mesh FaceMesh(int cell)
+        private static Mesh FaceMesh(int cell)
         {
-            if (faceMeshes.TryGetValue(cell, out var mesh)) return mesh;
+            if (faceMeshes.TryGetValue(cell, out var mesh) && mesh != null) return mesh;
             float w = TableConstants.TW * 0.92f / 2, h = TableConstants.TH * 0.92f / 2;
             int col = cell % AtlasColumns, row = cell / AtlasColumns;
             float u0 = col / (float)AtlasColumns, u1 = (col + 1) / (float)AtlasColumns;
@@ -214,7 +226,7 @@ namespace Galaxy101.Table
                 normals = new[] { Vector3.forward, Vector3.forward, Vector3.forward, Vector3.forward },
                 triangles = new[] { 0, 1, 2, 0, 2, 3 },
             };
-            mesh.RecalculateBounds(); faceMeshes.Add(cell, mesh); return mesh;
+            mesh.RecalculateBounds(); faceMeshes[cell] = mesh; return mesh;
         }
     }
 }

@@ -35,6 +35,10 @@ namespace Galaxy101.Table
 
         private bool tween, slide, deal;
         private Vector3? trailFrom;
+        private float trailDue;
+        private GameObject barOwner; private MeshRenderer barRenderer;
+        /// <summary>spec/23: the trail is authored as three points per 60 Hz frame; any frame rate emits that many per second.</summary>
+        private const float TrailPerSecond = 180;
         private Pose from, to;
         private Vector3 c1, c2;
         private float t0, duration, arc, spin, pop = -10, lift;
@@ -112,6 +116,7 @@ namespace Galaxy101.Table
                 transform.rotation = Quaternion.Slerp(transform.rotation, follow.rotation, Mathf.Min(1, dt * 14));
                 return;
             }
+            lift += (LiftWant - lift) * Mathf.Min(1, dt * 14);
             if (tween)
             {
                 float u = (now - t0) / duration;
@@ -132,11 +137,15 @@ namespace Galaxy101.Table
                 }
                 if (Fx != null && k < 1 && !slide && trailFrom.HasValue)
                 {
-                    // spec/23: a soft light trail, three points per frame along the path (gold; green when laid on a meld).
+                    // spec/23: a soft light trail along the path (gold; green when laid on a meld), spaced evenly since the last point.
                     var color = landing == "meld" ? TableFx.TrailGreen : TableFx.TrailGold;
-                    for (int i = 1; i <= 3; i++) Fx.Trail(Vector3.Lerp(trailFrom.Value, transform.position, i / 3f), color);
+                    trailDue += dt * TrailPerSecond;
+                    int n = Mathf.Min((int)trailDue, 12); trailDue -= n;
+                    for (int i = 1; i <= n; i++) Fx.Trail(Vector3.Lerp(trailFrom.Value, transform.position, i / (float)n), color);
+                    if (n > 0) trailFrom = transform.position;
                 }
-                trailFrom = k < 1 ? transform.position : (Vector3?)null;
+                else trailFrom = transform.position;
+                if (k >= 1) { trailFrom = null; trailDue = 0; }
                 if (u >= 1)
                 {
                     tween = false; if (!slide) pop = now;
@@ -146,19 +155,25 @@ namespace Galaxy101.Table
             }
             else
             {
+                // A resting tile writes its transform only when its pose or lift moved (most tiles, most frames: never).
                 var rest = overridePose ?? Target;
-                transform.SetPositionAndRotation(rest.position, rest.rotation);
+                var at = lift > 0.0002f ? rest.position + rest.rotation * Vector3.up * lift : rest.position;
+                transform.GetPositionAndRotation(out var position, out var rotation);
+                if (at != position || rest.rotation != rotation) transform.SetPositionAndRotation(at, rest.rotation);
             }
             if (Bar != null)
             {
                 bool isNew = NewUntil > now, show = Valid || isNew;
                 if (Bar.activeSelf != show) Bar.SetActive(show);
-                if (show) Bar.GetComponent<MeshRenderer>().sharedMaterial = isNew && !Valid ? TileFactory.NewBar : TileFactory.ValidBar;
+                if (show)
+                {
+                    if (barOwner != Bar) { barOwner = Bar; barRenderer = Bar.GetComponent<MeshRenderer>(); }
+                    var material = isNew && !Valid ? TileFactory.NewBar : TileFactory.ValidBar;
+                    if (barRenderer != null && barRenderer.sharedMaterial != material) barRenderer.sharedMaterial = material;
+                }
             }
-            float pv = (now - pop) / 0.28f;
-            transform.localScale = Vector3.one * (pv >= 0 && pv < 1 ? 1 + Mathf.Sin(Mathf.PI * pv) * 0.07f : 1);
-            lift += (LiftWant - lift) * Mathf.Min(1, dt * 14);
-            if (lift > 0.0002f && !tween) transform.position += transform.up * lift;
+            float pv = (now - pop) / 0.28f, scale = pv >= 0 && pv < 1 ? 1 + Mathf.Sin(Mathf.PI * pv) * 0.07f : 1;
+            if (transform.localScale.x != scale) transform.localScale = Vector3.one * scale;
         }
     }
 }

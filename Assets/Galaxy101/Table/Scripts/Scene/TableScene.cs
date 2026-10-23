@@ -66,7 +66,28 @@ namespace Galaxy101.Table
         /// </summary>
         public static float ThreeLocalIntensity(float intensity, float decay, float distance) => intensity * ThreeToUrp * Mathf.Pow(distance, 2 - decay);
 
-        private void Awake() { if (Application.isPlaying) Build(); }
+        /// <summary>Tests and tools: the planet to theme the table with instead of the player's saved menu planet.</summary>
+        public static string PlanetOverride;
+
+        private void Awake()
+        {
+            if (!Application.isPlaying) return;
+            // G101-Masa wears the player's planet (theme tokens, felt, back light, sky): the menu's saved choice.
+            planet = PlanetOverride ?? SavedPlanet() ?? planet;
+            Build();
+        }
+
+        private static string SavedPlanet()
+        {
+            try
+            {
+                var path = GalaxyPreferencesBridge.ResolveStatePath();
+                if (!System.IO.File.Exists(path)) return null;
+                var model = MenuModel.LoadResources(path);
+                return model.LastPersistenceError == null && PlanetIds.ContainsKey(model.Planet) ? model.Planet : null;
+            }
+            catch (System.Exception e) { Debug.LogWarning("Table planet: " + e.Message); return null; }
+        }
 
         /// <summary>Builds the whole scene. Called from Awake in play mode, or by editor tooling (capture) directly.</summary>
         public void Build()
@@ -86,13 +107,16 @@ namespace Galaxy101.Table
             if (demoLayout && FindAnyObjectByType<TableGame>() == null) BuildDemoLayout();
         }
 
-        private Cubemap environment;
+        
+        private readonly System.Collections.Generic.List<TileFactory> retiredTiles = new System.Collections.Generic.List<TileFactory>();
         private float savedShadowDistance; private int savedCascades, savedMsaa; private UniversalRenderPipelineAsset urp;
 
         private void OnDestroy()
         {
             skins.Release();
-            if (environment != null) { Kill(environment); environment = null; }
+            tiles?.Dispose(); tiles = null;
+            foreach (var retired in retiredTiles) retired.Dispose();
+            retiredTiles.Clear();
             // Restore the shared URP asset (the menu and the classic table use it too).
             if (urp != null) { urp.shadowDistance = savedShadowDistance; urp.shadowCascadeCount = savedCascades; urp.msaaSampleCount = savedMsaa; }
         }
@@ -117,8 +141,7 @@ namespace Galaxy101.Table
             var theme = skins.Theme;
             var lights = new GameObject("Lighting").transform; lights.SetParent(transform, false);
             // scene.environment (buildEnv, ×0.75) and the hemisphere light (sky / #0a0a14, 0.45): ambient probe + reflections.
-            if (environment != null) Kill(environment);
-            environment = ThreeEnvironment.Apply(lights, new Color32(0xFF, 0xC9, 0x4A, 255), theme.Sky, new Color32(0x0a, 0x0a, 0x14, 255), 0.45f);
+            ThreeEnvironment.Apply(lights, new Color32(0xFF, 0xC9, 0x4A, 255), theme.Sky, new Color32(0x0a, 0x0a, 0x14, 255), 0.45f);
 
             Light Make(string name, LightType type, Color color, float intensity, Vector3 threePos, Vector3? threeTarget)
             {
@@ -226,9 +249,15 @@ namespace Galaxy101.Table
         public void SetTileSkin(string skin)
         {
             Kill(tileSource);
-            tileSource = Instantiate(TableAssetCatalog.Find(catalog.TileSets, skin), transform, false); tileSource.name = "TileSource";
+            // The factory needs one tile (tas_R1's body) as its template: copy that, not the whole 53-tile set.
+            var set = TableAssetCatalog.Find(catalog.TileSets, skin);
+            var template = set.transform.Find("tas_R1") ?? throw new System.ArgumentException("Tile set lacks tas_R1: " + skin);
+            tileSource = new GameObject("TileSource"); tileSource.transform.SetParent(transform, false);
+            Instantiate(template.gameObject, tileSource.transform, false).name = "tas_R1";
             skins.Adopt(tileSource);
             var faces = Newtonsoft.Json.Linq.JObject.Parse(Resources.Load<TextAsset>("Galaxy101/Table/TileFaces/tile_faces").text)["skins"][skin];
+            // Tiles made by the previous factory (a ceremony in flight) may still wear its materials: freed with the scene.
+            if (tiles != null) retiredTiles.Add(tiles);
             tiles = new TileFactory(tileSource, skin, (float)faces["roughness"], (float)faces["emission"]);
             tileSkin = skin;
         }
@@ -238,6 +267,31 @@ namespace Galaxy101.Table
             Kill(tableInstance);
             tableInstance = Instantiate(TableAssetCatalog.Find(catalog.Tables, skin), tableRoot, false); tableInstance.name = "Table_" + skin;
             skins.Adopt(tableInstance); tableSkin = skin;
+            ApplyFelt();
+        }
+
+        private static readonly System.Collections.Generic.Dictionary<string, string> PlanetIds = new System.Collections.Generic.Dictionary<string, string>
+            { ["Satürn"] = "saturn", ["Mars"] = "mars", ["Neptün"] = "neptune", ["Jüpiter"] = "jupiter", ["Venüs"] = "venus" };
+
+        /// <summary>
+        /// table3d.js applyLook(): the felt is drawn for the planet (f1/f2 gradient, accent ring and dots) and the skin
+        /// (wood vignette and frame, holo grid, the Andromeda nebula); tools/felt_textures.py renders those canvases.
+        /// Holo and Andromeda felts also glow with their map.
+        /// </summary>
+        private void ApplyFelt()
+        {
+            if (tableInstance == null) return;
+            string name = tableSkin == "andromeda" ? "andromeda" : tableSkin + "_" + (PlanetIds.TryGetValue(planet, out var id) ? id : "saturn");
+            var felt = Resources.Load<Texture2D>("Galaxy101/Table/Felt/" + name);
+            if (felt == null) { Debug.LogWarning("Missing felt texture " + name); return; }
+            felt.anisoLevel = 8;
+            foreach (var r in tableInstance.GetComponentsInChildren<Renderer>(true))
+                foreach (var m in r.sharedMaterials)
+                {
+                    if (m == null || m.name != "cuha") continue;
+                    m.SetTexture("_BaseMap", felt);
+                    if (m.IsKeywordEnabled("_EMISSION") && m.GetTexture("_EmissionMap") != null) m.SetTexture("_EmissionMap", felt);
+                }
         }
 
         public void SetRackSkin(string skin)
@@ -316,7 +370,25 @@ namespace Galaxy101.Table
         /// <summary>Unit vector on the table plane from the centre towards a seat (Unity space).</summary>
         public Vector3 SeatDirection(int seat) { var p = seatFrames[seat].Pose(0, 0, 1).UnityPosition - seatFrames[seat].Pose(0, 0, 0).UnityPosition; p.y = 0; return p.normalized; }
         public Pose MeldPose(int seat, int column, int row) => Unity(seatFrames[seat].Pose(-0.245f + column * 0.049f, TY + TD / 2, 0.37f - row * 0.08f, FlatUp));
-        public Pose IndicatorPose() => Unity(seatFrames[0].Pose(DeckShift, TY + TH / 2 * Mathf.Cos(0.42f) + 0.002f, IndicatorZ, ThreeSpace.Euler(IndicatorTilt, 0, 0)));
+        /// <summary>
+        /// table3d.js poseFor('i'): the indicator lies face up on the six-tile pile; with six tiles or fewer left it lies
+        /// beside the piles (x +0.085, z 0.02 in the middle; z 0.115 once the deck has slid left), turned −0.22 rad.
+        /// </summary>
+        public Pose IndicatorPose()
+        {
+            float left = Mathf.Clamp01(DeckShift / DeckLeft);
+            if (DeckCount <= 6)
+                return Unity(new ThreePose(new Vector3(DeckShift + PileX0 + Mathf.Lerp(0.085f, 0, left), TY + TD / 2, Mathf.Lerp(0.02f, 0.115f, left)), ThreeSpace.AxisAngle(Vector3.up, -0.22f) * FlatUp));
+            return Unity(new ThreePose(new Vector3(DeckShift + PileX0, TY + TD / 2 + Mathf.Min(6, DeckCount) * TD, 0), ThreeSpace.AxisAngle(Vector3.up, 0.04f) * FlatUp));
+        }
+
+        /// <summary>Tiles in the deck (the board keeps it current); the indicator's pile depends on it.</summary>
+        public int DeckCount = 21;
+        /// <summary>table3d.js deckHeap: during the deal the deck stays in 5-high stacks even below 22 tiles.</summary>
+        public bool DeckHeap;
+        /// <summary>table3d.js PX0: the two piles sit ±3.6 cm either side of the deck's x.</summary>
+        public const float PileX0 = 0.036f;
+        private static bool Piles(int n, bool heap) => n <= 21 && !heap;
 
         /// <summary>spec/23: once melds are on the felt the deck and the indicator slide left (three x, eased by the board).</summary>
         public float DeckShift;
@@ -327,8 +399,18 @@ namespace Galaxy101.Table
         /// <summary>Row-start marker spot (x −0.505) for a board row.</summary>
         public Vector3 BoardRowStart(int row) => seatFrames[0].Pose(-0.505f, TY + 0.0012f, -0.30f + row * 0.0857f).UnityPosition;
 
+        /// <summary>
+        /// table3d.js layoutDeck: up to 21 tiles (outside the deal) stand in two piles — the first six under the indicator at
+        /// x +PX0, the rest at −PX0 — otherwise in 5-high stacks on a grid.
+        /// </summary>
         public Pose DeckPose(int j, int n)
         {
+            if (Piles(n, DeckHeap))
+            {
+                bool under = j < 6;
+                var q = new Vector3(DeckShift + (under ? PileX0 : -PileX0), TY + TD / 2 + (under ? j : j - 6) * TD, 0);
+                return Unity(new ThreePose(q, ThreeSpace.AxisAngle(Vector3.up, ((j * 0.37f) % 1 - 0.5f) * 0.05f) * FaceDown));
+            }
             int stacks = Mathf.CeilToInt(n / 5f), rows = n > 60 ? 4 : n > 25 ? 2 : 1, cols = Mathf.Max(1, Mathf.CeilToInt(stacks / (float)rows));
             int s = j / 5, lv = j % 5, col = s / rows, row = s % rows;
             var p = new Vector3(DeckShift + (col - (cols - 1) / 2f) * (TW + 0.006f), TY + TD / 2 + lv * TD, (row - (rows - 1) / 2f) * (TH + 0.006f));
@@ -338,13 +420,14 @@ namespace Galaxy101.Table
         /// <summary>Where a tile leaves (or rejoins) the deck: one tile height above the stack of <paramref name="n"/>.</summary>
         public Pose DeckTop(int n)
         {
-            if (n <= 0) return Unity(new ThreePose(new Vector3(DeckShift, TY + TD, 0), FaceDown));
+            if (n <= 0) return Unity(new ThreePose(new Vector3(DeckShift + (DeckHeap ? 0 : PileX0), TY + TD, 0), FaceDown));
             var top = DeckPose(n - 1, n); top.position += Vector3.up * TD; return top;
         }
 
         /// <summary>The deck's pick box (spec/11: deckHit = stacks + 4 cm, 12 cm high).</summary>
         public Bounds DeckBounds(int n)
         {
+            if (Piles(n, DeckHeap)) return new Bounds(new Vector3(-DeckShift, TY + 0.1f, 0), new Vector3(0.2f, 0.26f, 0.15f)); // deckHit (piles)
             int stacks = Mathf.CeilToInt(Mathf.Max(1, n) / 5f), rows = n > 60 ? 4 : n > 25 ? 2 : 1, cols = Mathf.Max(1, Mathf.CeilToInt(stacks / (float)rows));
             return new Bounds(new Vector3(-DeckShift, TY + 0.06f, 0), new Vector3(cols * (TW + 0.006f) + 0.04f, 0.12f, rows * (TH + 0.006f) + 0.04f));
         }

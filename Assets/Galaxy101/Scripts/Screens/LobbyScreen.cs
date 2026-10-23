@@ -117,6 +117,7 @@ namespace Galaxy101
                     case "kicked": Flash(L("Oda sahibi seni masadan çıkardı", "The host removed you from the table"), "bad"); break;
                     case "insufficient_funds": Flash(L("Bakiyen yetmediği için masadan kalktın", "You left the table: not enough chips"), "bad"); break;
                     case "left": if (!leaving) Flash(L("Masa kapandı", "The table closed"), "bad"); break;
+                    case "offline": Flash(L("Bağlantı koptu, masadan kalktın", "Connection lost: you left the table"), "bad"); break;
                 }
                 leaving = false; Render(); return;
             }
@@ -262,7 +263,7 @@ namespace Galaxy101
                     if (done) return;
                     float u = Mathf.Clamp01((Time.realtimeSinceStartup - began) / .5f), k = Ease(u); done = u >= 1;
                     card.style.opacity = k; card.style.translate = new Translate(0, 14 * (1 - k) + hoverLift(card));
-                });
+                }, card);
             }
             Hover(card);
 
@@ -570,7 +571,7 @@ namespace Galaxy101
                 float p = Mathf.Repeat((Time.realtimeSinceStartup - began) / 2.4f, 1), u = p < .5f ? p * 2 : 1;
                 ring.style.opacity = 1 - u;
                 ring.style.scale = new Scale(new Vector2(1 + 24 * u / element.layout.width, 1 + 24 * u / element.layout.height));
-            });
+            }, element);
         }
 
         private readonly Dictionary<VisualElement, float> hovers = new Dictionary<VisualElement, float>();
@@ -595,26 +596,33 @@ namespace Galaxy101
                 if (!animateCards || card.style.opacity.value >= 1) card.style.translate = new Translate(0, -6 * v);
                 card.style.scale = new Scale(Vector2.one * (1 + .012f * v));
                 sheen.style.backgroundColor = new Color(1, 1, 1, .045f * v);
-            });
+            }, card);
         }
 
         private static float Ease(float u) => 1 - Mathf.Pow(1 - u, 3.2f);
 
         // ---------- animation: one scheduler for the lobby's layer ----------
-        // Element motions are dropped on every redraw; the fade-in and the toast outlive redraws.
-        private readonly List<Action> motions = new List<Action>();
+        // Element motions are dropped on every redraw; the fade-in and the toast outlive redraws. A motion owned by an
+        // element (a card) also goes when that element leaves the panel — a search or live list update redraws only the
+        // cards, and their motions and hover states must not pile up behind them.
+        private readonly List<(VisualElement Owner, Action Step)> motions = new List<(VisualElement, Action)>();
+        private readonly List<(VisualElement Owner, Action Step)> stepping = new List<(VisualElement, Action)>();
         private Action toastStep;
         private IVisualElementScheduledItem ticker;
-        private void Animate(Action step)
+        private void Animate(Action step, VisualElement owner = null)
         {
-            if (step != null) motions.Add(step);
-            if (ticker == null && layer != null) ticker = layer.schedule.Execute(Tick).Every(16);
+            if (step != null) motions.Add((owner, step));
+            if (ticker == null && layer != null) ticker = layer.schedule.Execute(Tick).Every(0); // each panel update (frame)
         }
         private void Tick()
         {
             if (layer == null) return;
             layer.style.opacity = Mathf.Clamp01((Time.realtimeSinceStartup - shownAt) / .3f);
-            foreach (var m in motions.ToArray()) m();
+            if (motions.RemoveAll(m => m.Owner != null && m.Owner.panel == null) > 0)
+                foreach (var gone in hovers.Keys.Where(e => e.panel == null).ToList()) hovers.Remove(gone);
+            // A step may redraw (and clear the list): run this tick's snapshot.
+            stepping.Clear(); stepping.AddRange(motions);
+            foreach (var m in stepping) m.Step();
             toastStep?.Invoke();
         }
 

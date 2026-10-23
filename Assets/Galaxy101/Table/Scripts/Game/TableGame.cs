@@ -725,7 +725,11 @@ namespace Galaxy101.Table
             Current = Phase.Discard; // block double draws while the command runs
             var receipt = await Execute(new DrawCommand(Meta(view), source));
             if (!receipt.Accepted) { Current = Phase.Draw; Message(TableHud.ToastKind.Error, L("Çekilemedi", "Could not draw")); return false; }
-            var after = Session.GetView(Me); int drawn = after.PendingDraw.Tile.Value;
+            var after = Session.GetView(Me);
+            // Online, the state that confirmed the draw may already be past it (the server played the timed-out turn):
+            // follow the authoritative hand instead of a draw that is not there.
+            if (after.PendingDraw == null) { Rack.Sync(after.OwnHand.Select(t => t.Value), TileCodes.FaceFor(Indicator), autoSort); SyncBoard(); Notify(); return false; }
+            int drawn = after.PendingDraw.Tile.Value;
             Rack.Add(drawn, TileCodes.FaceFor(Indicator), autoSort, slot); LastDrawn = drawn;
             if (source == DrawSource.PreviousDiscard) { pickedTile = drawn; Message(TableHud.ToastKind.Info, T("msg.canPutBack")); }
             SyncBoard(); Notify(); return true;
@@ -963,13 +967,14 @@ namespace Galaxy101.Table
         {
             var list = new List<(int, TileFace, int, int)>();
             if (Session == null || Current == Phase.Waiting || Current == Phase.Seating) return list;
-            foreach (var meld in (staged.Count > 0 && Active == Me ? Projection() : PlayerViewProjector.ForEvaluation(Session.GetView(Me)).Value).Table)
+            foreach (var meld in staged.Count > 0 && Active == Me ? Projection().Table : Session.GetView(Me).Table)
                 foreach (var tile in meld.Group.Tiles)
                     if (TileCatalog.IsRealJoker(tile.Id, Indicator)) list.Add((tile.Id.Value, tile.RepresentedFace, meld.Id, meld.Owner));
             return list;
         }
 
-        public bool IsTableOkey(int id) => TableOkeys().Any(o => o.Id == id);
+        /// <summary>Asked for every tile under the pointer: only the two okeys need the table looked at.</summary>
+        public bool IsTableOkey(int id) => id >= 0 && Indicator.IsValid && TileCatalog.IsRealJoker(new TileId(id), Indicator) && TableOkeys().Any(o => o.Id == id);
 
         private string FaceName(TileFace face)
             => T("color." + (face.Color == TileColor.Red ? "R" : face.Color == TileColor.Blue ? "B" : face.Color == TileColor.Yellow ? "Y" : "K")) + " " + face.Number;

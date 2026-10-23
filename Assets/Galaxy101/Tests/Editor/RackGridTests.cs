@@ -140,5 +140,34 @@ namespace Galaxy101.Tests
             wild.Set(new RackSlot(0, 0), Id(TileColor.Blue, 11)); wild.Set(new RackSlot(0, 1), Id(TileColor.Black, 1)); wild.Set(new RackSlot(0, 2), Id(TileColor.Blue, 13));
             Assert.That(HandEvaluation.Of(wild, indicator).Sum, Is.EqualTo(36));
         }
+
+        [Test]
+        public void OpeningMeterPicksWhatTheEngineCandidateOrderPicks()
+        {
+            // The meter builds a segment's group directly; it must equal the best whole-segment candidate of the engine's
+            // generator (same start, same okey bindings) on runs, sets, okeys, fake okeys and strays.
+            var random = new System.Random(7);
+            for (int round = 0; round < 3000; round++)
+            {
+                var indicator = new TileFace((TileColor)random.Next(4), 1 + random.Next(13));
+                var tiles = new List<int>(); int length = 3 + random.Next(random.Next(2) == 0 ? 2 : 11);
+                if (random.Next(2) == 0) { int c = random.Next(4), start = 1 + random.Next(13); for (int k = 0; k < length && start + k <= 13; k++) tiles.Add(Id((TileColor)c, start + k, random.Next(2))); }
+                else { int n = 1 + random.Next(13); foreach (var c in Enumerable.Range(0, 4).OrderBy(_ => random.Next()).Take(System.Math.Min(length, 4))) tiles.Add(Id((TileColor)c, n, random.Next(2))); }
+                var joker = Okey101.Core.Model.TileCatalog.JokerFace(indicator);
+                for (int j = random.Next(3); j > 0 && tiles.Count > 0; j--) { int wild = new[] { Id(joker.Color, joker.Number), Id(joker.Color, joker.Number, 1), 104, 105 }[random.Next(4)]; if (!tiles.Contains(wild)) tiles[random.Next(tiles.Count)] = wild; }
+                tiles = tiles.Distinct().OrderBy(_ => random.Next()).ToList(); if (tiles.Count < 3) continue;
+                var rack = new RackGrid(); for (int i = 0; i < tiles.Count; i++) rack.Set(new RackSlot(0, i), tiles[i]);
+
+                var ids = tiles.Select(t => new TileId(t)).ToArray(); MeldProposal best = null; int bestValue = -1;
+                foreach (var kind in new[] { MeldKind.Run, MeldKind.Set })
+                    if (kind == MeldKind.Run || ids.Length <= 4)
+                        foreach (var proposal in Okey101.Core.Rules.MeldCandidateGenerator.Generate(ids, indicator, kind))
+                            if (proposal.Tiles.Count == ids.Length && Okey101.Core.Rules.MeldValidator.Validate(proposal, indicator) is var v && v.Success && v.Value > bestValue) { best = proposal; bestValue = v.Value; }
+                string Key(MeldProposal g) => g == null ? "none" : g.Kind + ":" + string.Join(",", g.Tiles.Select(t => t.Id.Value + "/" + t.RepresentedFace));
+                var eval = HandEvaluation.Of(rack, indicator);
+                Assert.That(Key(eval.Groups.FirstOrDefault()), Is.EqualTo(Key(best)), string.Join(",", tiles) + " indicator " + indicator);
+                Assert.That(eval.Sum, Is.EqualTo(best == null ? 0 : bestValue));
+            }
+        }
     }
 }

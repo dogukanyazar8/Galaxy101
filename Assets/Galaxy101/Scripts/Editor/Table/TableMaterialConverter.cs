@@ -63,6 +63,8 @@ namespace Galaxy101.Table.EditorTools
                 // three.js scales specular and reflections by the opacity too; URP's "Preserve Specular" would keep them at
                 // full strength and veil a 30 % glass (tea, cola) in white.
                 m.SetFloat("_BlendModePreserveSpecular", 0); m.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                // three.js blends in sRGB after tone mapping; ThreeBlend gives the same veil in the linear HDR target.
+                if (!additive && m.name != "holo") { var c = m.GetColor("_BaseColor"); c.a = Galaxy101.Table.ThreeBlend.Normal(c.a); m.SetColor("_BaseColor", c); }
                 // Glass reflects the table's environment: the design's dark studio box (ThreeEnvironment), as in three.js.
                 m.SetFloat("_EnvironmentReflections", 1); m.DisableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
             }

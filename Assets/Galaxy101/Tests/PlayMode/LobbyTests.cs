@@ -116,6 +116,7 @@ namespace Galaxy101.Tests
             MainMenuController.LobbyBackend = null; MainMenuController.AuthOnStart = null; MainMenuController.OpenMatchTable = true;
             if (owner != null) UnityEngine.Object.Destroy(owner);
             if (GalaxyOnline.Instance != null) UnityEngine.Object.Destroy(GalaxyOnline.Instance.gameObject);
+            GalaxyOnline.Forget(); // the test's guest session must not be resumed by the next real start
             yield return null;
             if (statePath != null && File.Exists(statePath)) File.Delete(statePath);
         }

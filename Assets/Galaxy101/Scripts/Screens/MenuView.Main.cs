@@ -21,14 +21,16 @@ namespace Galaxy101
             sceneUnderlay=canvas.Q<VisualElement>("scene-underlay");dialogUnderlay=canvas.Q<VisualElement>("dialog-underlay");
             mainSignature=null;sections.Clear();mountedPanel=mountedDialog=null;panelCard=dialogCard=null;
             animationJob?.Pause();float last=Time.realtimeSinceStartup;
+            // Every panel update — each rendered frame, at 144 Hz too — rather than a fixed 16 ms that beats against the
+            // display. The main layer's own sections rest while it is hidden (lobby, a scene on top).
             animationJob=Root.schedule.Execute(()=>
             {
                 float now=Time.realtimeSinceStartup;float delta=Mathf.Clamp(now-last,0,.05f);last=now;if(!focused)return;animationTime+=delta;
                 foreach(var motion in motions)motion(animationTime);
-                foreach(var section in sections.Values)foreach(var motion in section.Motions)motion(animationTime);
+                if(mainLayer!=null&&mainLayer.resolvedStyle.display!=DisplayStyle.None)foreach(var section in sections.Values)foreach(var motion in section.Motions)motion(animationTime);
                 foreach(var motion in panelMotions)motion(animationTime);
                 foreach(var motion in dialogMotions)motion(animationTime);
-            }).Every(16);
+            }).Every(0);
             Rebuild();
         }
         private sealed class MainSection{public VisualElement Host;public string Signature;public readonly List<Action<float>> Motions=new List<Action<float>>();}
@@ -376,7 +378,7 @@ namespace Galaxy101
                 target.style.opacity=Mathf.Clamp01(k);target.style.scale=new Scale(Vector2.one*(1.05f-.05f*k));
                 GalaxyFilters.Blur(target,f<.6f?12*(1-CssBezier(.16f,1,.3f,1,f/.6f)):0);
                 if(f>=1){target.style.opacity=StyleKeyword.Null;target.style.scale=StyleKeyword.Null;target.style.filter=StyleKeyword.Null;job.Pause();}
-            }).Every(16);
+            }).Every(0);
         }
 
         internal static float CssBezier(float x1,float y1,float x2,float y2,float x)

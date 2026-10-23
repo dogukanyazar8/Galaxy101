@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace Galaxy101
@@ -23,7 +24,38 @@ namespace Galaxy101
         public JObject GetStats() => (JObject)content["stats"].DeepClone();
         public JArray GetBadges() => (JArray)content["badges"].DeepClone();
         public JArray GetHistory() => (JArray)content["history"].DeepClone();
-        public bool Logout() { if (LoggedOut) return false; LoggedOut = true; model.NotifyChanged(); return true; }
-        public bool RequestDelete() { if (DeletionRequested) return false; DeletionRequested = true; model.NotifyChanged(); return true; }
+        // Signed in to the game server, the two account actions are real requests, not local flags: "çıkış" ends the
+        // server session and forgets the remembered token; deletion asks the server to delete the account, then signs out.
+        public bool Logout()
+        {
+            if (LoggedOut) return false; LoggedOut = true;
+            var online = Online.GalaxyOnline.Instance;
+            if (online != null && online.SignedIn) _ = SignOutAsync(online);
+            model.NotifyChanged(); return true;
+        }
+        public bool RequestDelete()
+        {
+            if (DeletionRequested) return false; DeletionRequested = true;
+            var online = Online.GalaxyOnline.Instance;
+            if (online != null && online.SignedIn) _ = DeleteAsync(online);
+            model.NotifyChanged(); return true;
+        }
+
+        private static async Task SignOutAsync(Online.GalaxyOnline online)
+        {
+            try { await online.SignOutAsync(); }
+            catch (System.Exception e) { UnityEngine.Debug.LogWarning("Sign-out failed: " + e.Message); }
+        }
+
+        private async Task DeleteAsync(Online.GalaxyOnline online)
+        {
+            try { await online.Api.SendAsync<JObject>("DELETE", "/v1/account"); await online.SignOutAsync(); }
+            catch (Online.ApiException e)
+            {
+                // Nothing was deleted: the request can be made again.
+                UnityEngine.Debug.LogWarning("Account deletion failed: " + e.Code);
+                DeletionRequested = false; model.NotifyChanged();
+            }
+        }
     }
 }

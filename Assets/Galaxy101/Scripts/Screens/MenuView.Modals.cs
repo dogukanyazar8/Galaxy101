@@ -18,7 +18,7 @@ namespace Galaxy101
             {
                 float t=Mathf.Clamp01((float)(Time.realtimeSinceStartupAsDouble-began)/.14f);ghost.style.opacity=1-t;
                 if(t>=1){close.Pause();ghost.RemoveFromHierarchy();}
-            }).Every(16);
+            }).Every(0);
         }
         private void BuildPanel()
         {
@@ -120,7 +120,7 @@ namespace Galaxy101
                 float f=Mathf.Clamp01((float)(Time.realtimeSinceStartupAsDouble-began)/duration);float ease=ModalProgress(f);
                 card.style.opacity=Mathf.Clamp01(ease);card.style.scale=new Scale(new Vector3(.96f+.04f*ease,.96f+.04f*ease,1));card.style.translate=new Translate(0,14*(1-ease));
                 if(f>=1)job.Pause();
-            }).Every(16);
+            }).Every(0);
             card.schedule.Execute(()=>
             {
                 if(nested&&Modals.Dialog!=key||!nested&&(Modals.Panel!=key||Modals.Dialog!=null))return;

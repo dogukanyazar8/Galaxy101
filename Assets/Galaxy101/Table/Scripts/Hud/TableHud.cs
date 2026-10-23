@@ -185,6 +185,9 @@ namespace Galaxy101.Table
         private JArray seats;
         private readonly Dictionary<string, VisualElement> anchors = new Dictionary<string, VisualElement>();
         private readonly List<Action<float>> motions = new List<Action<float>>();
+        /// <summary>The message toasts' own motions: redrawn with the toasts, so a dismissed toast's animation goes with it.</summary>
+        private readonly List<Action<float>> toastMotions = new List<Action<float>>();
+        private int viewMsaa = 4; private float viewScaleCap = 2.2f;
         private float turnStarted;
 
         public State Current { get; private set; } = new State();
@@ -235,6 +238,10 @@ namespace Galaxy101.Table
             var backdrop = Layer("table-background"); canvas.Add(backdrop);
             background = new GameObject("Galaxy background").AddComponent<GalaxyBackground>(); background.transform.SetParent(transform, false);
             background.Initialize(backdrop); background.Configure(table.Planet, (bool?)model.Settings["motion"] ?? true, (string)model.Settings["quality"] ?? "Yüksek");
+            // Efekt kalitesi also sets the 3D view's pixel budget, the table's main GPU cost: resolution cap and MSAA.
+            string quality = ((string)model.Settings["quality"] ?? "Yüksek").ToLowerInvariant();
+            bool low = quality == "düşük" || quality == "low", medium = quality == "orta" || quality == "medium";
+            viewMsaa = low ? 1 : medium ? 2 : 4; viewScaleCap = low ? 1 : medium ? 1.5f : 2.2f;
             background.UseTableLayout(TableTheme.Load(table.Planet).Pg);
             background.SetFocused(Application.isFocused || Application.isBatchMode);
 
@@ -250,7 +257,8 @@ namespace Galaxy101.Table
 
             turnStarted = Time.realtimeSinceStartup;
             Render(Current);
-            canvas.schedule.Execute(() => { float now = Time.realtimeSinceStartup; foreach (var motion in motions) motion(now); foreach (var motion in windowMotions) motion(now); }).Every(16);
+            // Each panel update (every rendered frame), not a fixed 16 ms that beats against a 144 Hz display.
+            canvas.schedule.Execute(() => { float now = Time.realtimeSinceStartup; foreach (var motion in motions) motion(now); foreach (var motion in toastMotions) motion(now); foreach (var motion in windowMotions) motion(now); }).Every(0);
             Debug.Log("GALAXY101_TABLE_HUD_READY theme=" + table.Planet + " language=" + loc.Language);
         }
 
@@ -261,14 +269,17 @@ namespace Galaxy101.Table
             return layer;
         }
 
-        /// <summary>The 3D camera draws at the canvas' device-pixel size (same rule as the galaxy background).</summary>
+        /// <summary>
+        /// The 3D camera draws at the canvas' device-pixel size (same rule as the galaxy background), up to the effect
+        /// quality's cap (Yüksek 2.2×, Orta 1.5×, Düşük 1×) and with its MSAA (4×, 2×, off).
+        /// </summary>
         private void ResizeViewTarget()
         {
-            float scale = Mathf.Clamp(Mathf.Min(Screen.width / Width, Screen.height / Height), 1, 2.2f);
+            float scale = Mathf.Clamp(Mathf.Min(Screen.width / Width, Screen.height / Height), 1, viewScaleCap);
             int w = Mathf.RoundToInt(Width * scale), h = Mathf.RoundToInt(Height * scale);
             if (viewTarget != null && viewTarget.width == w && viewTarget.height == h) return;
             var previous = viewTarget;
-            viewTarget = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB) { name = "Galaxy101 table view", antiAliasing = 4, hideFlags = HideFlags.DontSave };
+            viewTarget = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB) { name = "Galaxy101 table view", antiAliasing = viewMsaa, hideFlags = HideFlags.DontSave };
             viewTarget.Create();
             table.RenderInto(viewTarget);
             view3d.style.backgroundImage = Background.FromRenderTexture(viewTarget);
@@ -950,7 +961,7 @@ namespace Galaxy101.Table
         private void RenderToasts()
         {
             if (toastLayer == null) return;
-            toastLayer.Clear();
+            toastLayer.Clear(); toastMotions.Clear();
             if (toasts.Count > 1) toastLayer.Add(ToastElement(toasts[1], true, 0));
             if (toasts.Count > 0) toastLayer.Add(ToastElement(toasts[0], false, toasts.Count - 1));
             if (hudLayer != null && view != null) { var band = hudLayer.Q<VisualElement>("table-toast-row"); if (band != null) band.style.display = toasts.Count > 0 ? DisplayStyle.None : DisplayStyle.Flex; }
@@ -992,7 +1003,7 @@ namespace Galaxy101.Table
             {
                 float began = t.ShownAt; bool shake = t.Kind == ToastKind.Error;
                 // toastIn .3s (y −14 → 0); errors shake ±6 px twice.
-                motions.Add(now =>
+                toastMotions.Add(now =>
                 {
                     float u = Mathf.Clamp01((now - began) / .3f);
                     float dx = shake && now - began < .4f ? Mathf.Sin((now - began) / .4f * Mathf.PI * 4) * 6 : 0;

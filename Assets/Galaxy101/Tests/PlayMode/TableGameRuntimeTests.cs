@@ -565,7 +565,7 @@ namespace Galaxy101.Tests
             yield return Until(() => game.CanDraw, 120, "my draw turn");
             Time.timeScale = 1;
             yield return new WaitForSecondsRealtime(0.3f);
-            Assert.That(game.Fx.DeckGlowAlpha, Is.GreaterThan(0.2f), "the deck glows while I draw");
+            Assert.That(game.Fx.DeckGlowAlpha, Is.GreaterThan(Galaxy101.Table.ThreeBlend.Additive(0.2f)), "the deck glows while I draw (opacity in ThreeBlend terms)");
             var draw = game.Draw(DrawSource.Stock, null);
             yield return Until(() => draw.IsCompleted, 10, "the draw");
             yield return new WaitForSecondsRealtime(1.0f);

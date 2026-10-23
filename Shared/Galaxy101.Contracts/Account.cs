@@ -25,6 +25,14 @@ namespace Galaxy101.Contracts
         public const string FriendLimit = "friend_limit";
         public const string NotOnline = "not_online";
         public const string InvitesDisabled = "invites_disabled";
+        /// <summary>E-posta ile giriş (spec/18): no account for that e-mail.</summary>
+        public const string AccountNotFound = "account_not_found";
+        /// <summary>Wrong password; <see cref="LoginErrorResponse.RemainingAttempts"/> says how many tries are left.</summary>
+        public const string WrongPassword = "wrong_password";
+        /// <summary>Three wrong passwords: the e-mail is locked for a while (<see cref="LoginErrorResponse.RetryAfter"/> seconds).</summary>
+        public const string AccountLocked = "account_locked";
+        public const string EmailTaken = "email_taken";
+        public const string TermsRequired = "terms_required";
     }
 
     public sealed class ErrorResponse
@@ -38,6 +46,38 @@ namespace Galaxy101.Contracts
         /// <summary>Optional client install id, kept for support and abuse limits only.</summary>
         public string DeviceId { get; set; }
         public string Platform { get; set; }
+        /// <summary>Takma ad (spec/18 S05, at most 16 characters); empty = "Misafir####".</summary>
+        public string Name { get; set; }
+        /// <summary>One of the eight avatar colours; empty = random.</summary>
+        public string Color { get; set; }
+    }
+
+    /// <summary>Kayıt ol (spec/18 S04): ad, e-posta, şifre (≥ 6), şartlar onayı. Starts with the registered balance.</summary>
+    public sealed class RegisterRequest
+    {
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public bool AcceptTerms { get; set; }
+        public string Color { get; set; }
+        public string DeviceId { get; set; }
+        public string Platform { get; set; }
+    }
+
+    /// <summary>Giriş yap (spec/18 S03).</summary>
+    public sealed class PasswordLoginRequest
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
+    }
+
+    /// <summary>Error body of a failed password login.</summary>
+    public sealed class LoginErrorResponse
+    {
+        public string Code { get; set; }
+        public string Message { get; set; }
+        public int RemainingAttempts { get; set; }
+        public int RetryAfter { get; set; }
     }
 
     /// <summary><c>provider</c>: "google" or "apple"; the id token comes from the platform sign-in SDK.</summary>

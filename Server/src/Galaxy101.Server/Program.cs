@@ -58,6 +58,7 @@ services.AddSingleton<RealtimeTickets>();
 services.AddSingleton<IExternalIdentityValidator, OidcIdentityValidator>();
 services.AddScoped<TokenService>();
 services.AddScoped<AccountService>();
+services.AddScoped<Passwords>();
 services.AddScoped<Galaxy101.Server.Economy.Ledger>();
 services.AddGameFeatures();
 

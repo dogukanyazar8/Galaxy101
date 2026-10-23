@@ -36,7 +36,12 @@ public sealed class GameOptions
     public string TimeZone { get; set; } = "Europe/Istanbul";
     public string PrivacyPolicyVersion { get; set; } = "2026-10";
     public string PrivacyPolicyUrl { get; set; } = "https://galaxy101.app/gizlilik";
+    /// <summary>spec/18: a guest starts with 10.000 chips, an e-mail or Google account with 25.000.</summary>
     public long StartingChips { get; set; } = 10_000;
+    public long RegisteredStartingChips { get; set; } = 25_000;
+    /// <summary>Wrong passwords before an e-mail is locked, and for how long.</summary>
+    public int PasswordAttempts { get; set; } = 3;
+    public int PasswordLockSeconds { get; set; } = 300;
     public long StartingGems { get; set; } = 20;
     public int MaxFriends { get; set; } = 200;
     public int Season { get; set; } = 1;

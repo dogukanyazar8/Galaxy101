@@ -477,6 +477,45 @@ namespace Galaxy101.Server.Data.Migrations
                     b.ToTable("owned_items", (string)null);
                 });
 
+            modelBuilder.Entity("Galaxy101.Server.Data.PasswordLogin", b =>
+                {
+                    b.Property<string>("Email")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("email");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("account_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("FailedAttempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("failed_attempts");
+
+                    b.Property<string>("Hash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("hash");
+
+                    b.Property<DateTimeOffset?>("LockedUntil")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("locked_until");
+
+                    b.HasKey("Email")
+                        .HasName("pk_password_logins");
+
+                    b.HasIndex("AccountId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_password_logins_account_id");
+
+                    b.ToTable("password_logins", (string)null);
+                });
+
             modelBuilder.Entity("Galaxy101.Server.Data.PlayerStats", b =>
                 {
                     b.Property<Guid>("AccountId")
@@ -748,6 +787,16 @@ namespace Galaxy101.Server.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_owned_items_accounts_account_id");
+                });
+
+            modelBuilder.Entity("Galaxy101.Server.Data.PasswordLogin", b =>
+                {
+                    b.HasOne("Galaxy101.Server.Data.Account", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_password_logins_accounts_account_id");
                 });
 
             modelBuilder.Entity("Galaxy101.Server.Data.PlayerStats", b =>

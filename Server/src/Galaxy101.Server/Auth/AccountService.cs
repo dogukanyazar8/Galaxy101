@@ -12,10 +12,14 @@ public sealed class AccountService(GameDb db, GameCalendar calendar, IOptions<Ga
     // Letters that cannot be misread as digits (no I, O).
     private const string CodeLetters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
 
-    /// <summary>Creates a guest account with its starting wallet. Friend-code collisions are retried.</summary>
-    public async Task<Account> CreateAsync(string? platform, string? deviceId, CancellationToken ct)
+    /// <summary>
+    /// Creates an account with its starting wallet: a guest gets <see cref="GameOptions.StartingChips"/>, a registered
+    /// (e-mail or Google) account <see cref="GameOptions.RegisteredStartingChips"/>. Friend-code collisions are retried.
+    /// </summary>
+    public async Task<Account> CreateAsync(string? platform, string? deviceId, CancellationToken ct, bool registered = false, string? name = null, string? color = null)
     {
         var game = options.Value;
+        long chips = registered ? game.RegisteredStartingChips : game.StartingChips;
         for (var attempt = 0; ; attempt++)
         {
             var now = calendar.Now;
@@ -24,18 +28,18 @@ public sealed class AccountService(GameDb db, GameCalendar calendar, IOptions<Ga
             {
                 Id = Guid.CreateVersion7(),
                 FriendCode = $"{CodeLetters[RandomNumberGenerator.GetInt32(CodeLetters.Length)]}{CodeLetters[RandomNumberGenerator.GetInt32(CodeLetters.Length)]}-{digits:D4}",
-                Name = $"Oyuncu {digits:D4}",
-                Color = ProfileRules.AvatarColors[RandomNumberGenerator.GetInt32(ProfileRules.AvatarColors.Length)],
+                Name = name ?? (registered ? $"Oyuncu {digits:D4}" : $"Misafir{digits:D4}"),
+                Color = color ?? ProfileRules.AvatarColors[RandomNumberGenerator.GetInt32(ProfileRules.AvatarColors.Length)],
                 SettingsJson = ProfileRules.DefaultSettingsJson,
                 Platform = Trim(platform, 16), DeviceId = Trim(deviceId, 128),
                 PlanetsTried = ProfileRules.PlanetBit(ProfileRules.Planets[0]),
                 CreatedAt = now, LastSeenAt = now,
             };
             db.Accounts.Add(account);
-            db.Wallets.Add(new Wallet { AccountId = account.Id, Chips = game.StartingChips, Gems = game.StartingGems });
+            db.Wallets.Add(new Wallet { AccountId = account.Id, Chips = chips, Gems = game.StartingGems });
             db.Stats.Add(new PlayerStats { AccountId = account.Id });
             db.DailyStates.Add(new DailyState { AccountId = account.Id, QuestDay = calendar.Today });
-            if (game.StartingChips > 0) db.Ledger.Add(Grant(account.Id, "chips", game.StartingChips, now));
+            if (chips > 0) db.Ledger.Add(Grant(account.Id, "chips", chips, now));
             if (game.StartingGems > 0) db.Ledger.Add(Grant(account.Id, "gems", game.StartingGems, now));
             try
             {

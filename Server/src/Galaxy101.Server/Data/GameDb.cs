@@ -6,6 +6,7 @@ public sealed class GameDb(DbContextOptions<GameDb> options) : DbContext(options
 {
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<ExternalLogin> ExternalLogins => Set<ExternalLogin>();
+    public DbSet<PasswordLogin> PasswordLogins => Set<PasswordLogin>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Wallet> Wallets => Set<Wallet>();
     public DbSet<LedgerEntry> Ledger => Set<LedgerEntry>();
@@ -33,6 +34,14 @@ public sealed class GameDb(DbContextOptions<GameDb> options) : DbContext(options
             e.Property(x => x.SettingsJson).HasColumnType("jsonb");
             e.Property(x => x.DeviceId).HasMaxLength(128);
             e.Property(x => x.Platform).HasMaxLength(16);
+        });
+        b.Entity<PasswordLogin>(e =>
+        {
+            e.HasKey(x => x.Email);
+            e.Property(x => x.Email).HasMaxLength(120);
+            e.Property(x => x.Hash).HasMaxLength(200);
+            e.HasIndex(x => x.AccountId).IsUnique();
+            e.HasOne<Account>().WithMany().HasForeignKey(x => x.AccountId).OnDelete(DeleteBehavior.Cascade);
         });
         b.Entity<ExternalLogin>(e =>
         {

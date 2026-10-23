@@ -20,6 +20,18 @@ public sealed class Account
     public DateTimeOffset LastSeenAt { get; set; }
 }
 
+/// <summary>E-mail + password sign-in (spec/18). The e-mail is stored trimmed and lower-cased.</summary>
+public sealed class PasswordLogin
+{
+    public required string Email { get; set; }
+    public Guid AccountId { get; set; }
+    /// <summary>PBKDF2-SHA256: "iterations.salt.hash" (base64).</summary>
+    public required string Hash { get; set; }
+    public int FailedAttempts { get; set; }
+    public DateTimeOffset? LockedUntil { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+}
+
 public sealed class ExternalLogin
 {
     public required string Provider { get; set; }

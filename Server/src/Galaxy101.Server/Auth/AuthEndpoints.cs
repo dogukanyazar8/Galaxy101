@@ -14,10 +14,33 @@ public static class AuthEndpoints
     {
         var anonymous = app.MapGroup("/v1/auth").RequireRateLimiting(RateLimits.Auth);
 
+        // Misafir (spec/18 S05): optional nickname (≤ 16) and avatar colour; guest balance.
         anonymous.MapPost("/guest", async (GuestLoginRequest? request, AccountService accounts, TokenService tokens, CancellationToken ct) =>
         {
-            var account = await accounts.CreateAsync(request?.Platform, request?.DeviceId, ct);
+            var name = string.IsNullOrWhiteSpace(request?.Name) ? null : request!.Name.Trim();
+            if (name is not null && (name.Length > 16 || !Profile.ProfileRules.ValidName(name))) return Api.Error(ErrorCodes.Validation, StatusCodes.Status400BadRequest);
+            var color = Profile.ProfileRules.AvatarColors.Contains(request?.Color) ? request!.Color : null;
+            var account = await accounts.CreateAsync(request?.Platform, request?.DeviceId, ct, registered: false, name: name, color: color);
             return Results.Ok(await tokens.IssueAsync(account.Id, true, ct));
+        });
+
+        // Kayıt ol (spec/18 S04): registered balance.
+        anonymous.MapPost("/register", async (RegisterRequest request, Passwords passwords, TokenService tokens, CancellationToken ct) =>
+        {
+            var outcome = await passwords.RegisterAsync(request, ct);
+            return outcome.Account is { } id ? Results.Ok(await tokens.IssueAsync(id, true, ct))
+                : outcome.Error == ErrorCodes.EmailTaken ? Api.Conflict(ErrorCodes.EmailTaken)
+                : Api.Error(outcome.Error!, StatusCodes.Status400BadRequest);
+        });
+
+        // Giriş yap (spec/18 S03): unknown e-mail 404, wrong password 401 with the tries left, locked 423.
+        anonymous.MapPost("/login", async (PasswordLoginRequest request, Passwords passwords, TokenService tokens, CancellationToken ct) =>
+        {
+            var outcome = await passwords.LoginAsync(request, ct);
+            if (outcome.Account is { } id) return Results.Ok(await tokens.IssueAsync(id, false, ct));
+            int status = outcome.Error == ErrorCodes.AccountNotFound ? StatusCodes.Status404NotFound
+                : outcome.Error == ErrorCodes.AccountLocked ? StatusCodes.Status423Locked : StatusCodes.Status401Unauthorized;
+            return Results.Json(new LoginErrorResponse { Code = outcome.Error, Message = outcome.Error, RemainingAttempts = outcome.Remaining, RetryAfter = outcome.RetryAfter }, statusCode: status);
         });
 
         // Sign in on any device with a linked provider; an unknown identity creates a new linked account.
@@ -29,7 +52,7 @@ public static class AuthEndpoints
             var existing = await db.ExternalLogins.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Provider == identity.Provider && x.Subject == identity.Subject, ct);
             if (existing is not null) return Results.Ok(await tokens.IssueAsync(existing.AccountId, false, ct));
-            var account = await accounts.CreateAsync(null, null, ct);
+            var account = await accounts.CreateAsync(null, null, ct, registered: true);
             db.ExternalLogins.Add(new ExternalLogin { Provider = identity.Provider, Subject = identity.Subject, AccountId = account.Id, CreatedAt = clock.GetUtcNow() });
             await db.SaveChangesAsync(ct);
             return Results.Ok(await tokens.IssueAsync(account.Id, true, ct));

@@ -23,6 +23,7 @@ public enum SeatStatus { Connected, Disconnected, Auto, Left }
 public sealed class MatchSession
 {
     private static readonly TimeSpan AutoPlayDelay = TimeSpan.FromSeconds(1);
+    private DateTimeOffset? dealUntil;
     private static readonly TimeSpan BotThinkLimit = TimeSpan.FromSeconds(2);
     private static readonly TimeSpan EmoteInterval = TimeSpan.FromSeconds(2);
 
@@ -240,7 +241,9 @@ public sealed class MatchSession
         var key = (handIndex, state.TurnNumber, state.ActivePlayer);
         if (key == turnKey) return;
         turnKey = key;
-        deadline = clock.GetUtcNow().AddSeconds(TurnSeconds);
+        var from = clock.GetUtcNow();
+        if (dealUntil is { } dealt && dealt > from) from = dealt;
+        deadline = from.AddSeconds(TurnSeconds);
     }
 
     /// <summary>Arms the single active timer: the turn deadline, or a short pause before the server plays a seat.</summary>
@@ -249,6 +252,8 @@ public sealed class MatchSession
         var seat = state.ActivePlayer;
         var auto = status[seat] is SeatStatus.Auto or SeatStatus.Left;
         var due = auto ? AutoPlayDelay : (deadline!.Value - clock.GetUtcNow());
+        // Nobody moves while the clients deal (the ceremony): bots wait for it too.
+        if (dealUntil is { } dealt && dealt - clock.GetUtcNow() > due) due = dealt - clock.GetUtcNow();
         Arm(due < TimeSpan.Zero ? TimeSpan.Zero : due, async () =>
         {
             if (!InPlay || state.ActivePlayer != seat) return;
@@ -332,6 +337,7 @@ public sealed class MatchSession
         var roundId = Guid.CreateVersion7();
         state = RoundFactory.Create(seed, roundId, Starter(index));
         await store.StartHandAsync(Id, index, seed, roundId);
+        dealUntil = clock.GetUtcNow().AddSeconds(options.DealSeconds);
         BeginTurnIfNew();
         ScheduleTurn();
     }

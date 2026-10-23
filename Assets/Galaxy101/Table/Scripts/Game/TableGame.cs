@@ -35,7 +35,15 @@ namespace Galaxy101.Table
 
         public enum Phase { Waiting, Seating, Deal, Draw, Discard, Opponent, Finished }
 
-        public LocalSession Session { get; private set; }
+        public ITableSession Session { get; private set; }
+        private LocalTableSession local;
+        /// <summary>The server match this table plays (null offline).</summary>
+        public NetworkTableSession Online { get; private set; }
+        /// <summary>Set by the menu before loading the table scene: play this server match instead of the bots.</summary>
+        public static NetworkTableSession PendingOnline;
+        /// <summary>The lobby table's name and type for the top bar ("Gece Kuşları · Tekli").</summary>
+        public static string PendingRoom;
+        public string OnlineRoom { get; private set; }
         public TableBoard Board { get; private set; }
         public TableFx Fx { get; private set; }
         public TableGifts Gifts { get; private set; }
@@ -149,7 +157,9 @@ namespace Galaxy101.Table
             Gifts = table.gameObject.GetComponent<TableGifts>() ?? table.gameObject.AddComponent<TableGifts>(); Gifts.Init(table, Fx);
             Markers = table.gameObject.GetComponent<TableTargets>() ?? table.gameObject.AddComponent<TableTargets>(); Markers.Init(this);
             Ceremony = new TableCeremony(table, Fx, Seconds); Ceremony.Changed += () => { dealStepAt = Time.realtimeSinceStartup; Notify(); };
-            Session = new LocalSession();
+            Online = PendingOnline; PendingOnline = null; OnlineRoom = PendingRoom; PendingRoom = null;
+            if (Online != null) { Session = Online; seating = false; Online.Changed += OnOnlineChanged; }
+            else { local = new LocalTableSession(); Session = local; TableRules.Current.UseHands(null); }
             life = new CancellationTokenSource();
             random = seed != 0 ? new System.Random((int)seed) : new System.Random();
             if (hud != null)
@@ -158,7 +168,7 @@ namespace Galaxy101.Table
                 hud.Initialize(); hud.Settings.Changed += OnSetting; ReadSettings();
                 hud.GiftSent += OnGiftSent; Gifts.Landed += hud.GiftLanded;
             }
-            _ = Run(life.Token);
+            _ = Online != null ? RunOnline(life.Token) : Run(life.Token);
         }
 
         /// <summary>Test hook: configure before Start (seat −1 = bots everywhere).</summary>
@@ -214,14 +224,26 @@ namespace Galaxy101.Table
                 while (!token.IsCancellationRequested)
                 {
                     uint handSeed = seed != 0 ? seed + (uint)HandNumber : (uint)random.Next(1, int.MaxValue);
-                    if (HandNumber == 0 && initialState != null) Session.Start(initialState);
-                    else if (HandNumber == 0) Session.Start(handSeed, humanSeat == Me ? Me : (int?)null); else Session.StartNextRound(handSeed);
+                    if (HandNumber == 0 && initialState != null) local.Engine.Start(initialState);
+                    else if (HandNumber == 0) local.Engine.Start(handSeed, humanSeat == Me ? Me : (int?)null); else local.Engine.StartNextRound(handSeed);
                     HandNumber++; LastResult = null; staged.Clear(); LastDrawn = -1; pickedTile = -1; deckOnly = false; myCommits = 0;
                     Gifts.Clear(); hud?.NewHand(); // gifts stay until the hand ends
                     for (int k = 0; k < 4; k++) { handPenalties[k] = 0; penaltyReasons[k].Clear(); }
                     var view = Session.GetView(Me);
                     Indicator = TileCodes.IndicatorFace(view.Indicator);
                     if (HandNumber == 1 && seating) await SeatPlayers();
+                    await PlayHand(view, token);
+                    if (token.IsCancellationRequested) return;
+                    await ShowResult();
+                }
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception exception) { Debug.LogException(exception); }
+        }
+
+        /// <summary>One hand from the deal to its result: the ceremony (or quick deal), then turns until it finishes.</summary>
+        private async Task PlayHand(PlayerView view, CancellationToken token)
+        {
                     Rack.Deal(view.OwnHand.Select(t => t.Value).ToList());
                     Current = Phase.Deal; Active = -1; Notify();
                     dealInfo = view.Deal;
@@ -249,8 +271,59 @@ namespace Galaxy101.Table
                     {
                         view = Session.GetView(Me);
                         if (view.Result != null) break;
-                        if (view.ActivePlayer == humanSeat) await PlayHuman(token); else await PlayBot(view.ActivePlayer, token);
+                        if (view.ActivePlayer == humanSeat) await PlayHuman(token);
+                        else if (Online != null) await WatchOpponent(view, token);
+                        else await PlayBot(view.ActivePlayer, token);
                         TurnsPlayed++;
+                    }
+        }
+
+        // ---------- online (V7e) ----------
+        private TaskCompletionSource<bool> onlineSignal;
+        private void OnOnlineChanged()
+        {
+            onlineSignal?.TrySetResult(true);
+            // The server played my turn (deadline) or a move arrived out of band: my turn is over.
+            if (Online.HasView && HumanTurn && Online.GetView(Me).ActivePlayer != Me) humanDone?.TrySetResult(true);
+        }
+        private Task OnlineChange() { onlineSignal = new TaskCompletionSource<bool>(); return onlineSignal.Task; }
+
+        /// <summary>
+        /// A server match: names and seats from match.start, every hand dealt by the server (ceremony from its deal facts),
+        /// opponents' moves arriving as states, the server's results and the match end. Leaving forfeits the seat.
+        /// </summary>
+        private async Task RunOnline(CancellationToken token)
+        {
+            try
+            {
+                Current = Phase.Seating; Notify();
+                if (!await Online.ConnectAsync()) { Message(TableHud.ToastKind.Error, L("Maça bağlanılamadı", "Could not join the match")); await Seconds(2); LeaveNow(); return; }
+                var start = Online.Start;
+                turnSeconds = start.TurnSeconds; TableRules.Current.UseHands(start.Hands);
+                if (hud != null) foreach (var seat in start.Seats) if (seat.Player != null) hud.SetSeat(Online.Wire.FromSeat(seat.Seat), seat.Player.Name, seat.Player.Color, seat.Player.Level, seat.Status == "auto");
+                Guid round = Guid.Empty;
+                while (!token.IsCancellationRequested)
+                {
+                    if (Online.End != null) { await OnlineMatchEnd(); return; }
+                    var view = Online.GetView(Me);
+                    if (view.RoundId == round || view.Result != null && round != Guid.Empty) { await OnlineChange(); continue; }
+                    round = view.RoundId;
+                    HandNumber++; MatchHand = Online.HandIndex; LastResult = null; staged.Clear(); LastDrawn = -1; pickedTile = -1; deckOnly = false; myCommits = 0;
+                    Gifts.Clear(); hud?.NewHand();
+                    for (int k = 0; k < 4; k++) { handPenalties[k] = 0; penaltyReasons[k].Clear(); Seated[k] = true; }
+                    Indicator = TileCodes.IndicatorFace(view.Indicator);
+                    bool fresh = view.Table.Count == 0 && view.Discards.All(d => d.Count == 0);
+                    if (fresh) await PlayHand(view, token);
+                    else
+                    {
+                        // Joined mid-hand (reconnect): no ceremony, the board as it is.
+                        Rack.Deal(view.OwnHand.Select(t => t.Value).ToList()); SyncedVersion = view.Version;
+                        Board.Settle(BuildBoard(view)); Current = Phase.Opponent;
+                        while (!token.IsCancellationRequested)
+                        {
+                            view = Session.GetView(Me); if (view.Result != null) break;
+                            if (view.ActivePlayer == Me) await PlayHuman(token); else await WatchOpponent(view, token);
+                        }
                     }
                     if (token.IsCancellationRequested) return;
                     await ShowResult();
@@ -258,6 +331,37 @@ namespace Galaxy101.Table
             }
             catch (OperationCanceledException) { }
             catch (Exception exception) { Debug.LogException(exception); }
+        }
+
+        /// <summary>An opponent's turn online: wait for the server's next state, then show it.</summary>
+        private async Task WatchOpponent(PlayerView view, CancellationToken token)
+        {
+            Active = view.ActivePlayer; Current = Phase.Opponent; Notify();
+            var penalties = Enumerable.Range(0, 4).Select(k => k == Me ? view.OwnPenalties : view.Players[k].Penalties).ToArray();
+            long version = view.Version;
+            while (!token.IsCancellationRequested && Session.GetView(Me).Version == version && Online.End == null) await OnlineChange();
+            var after = Session.GetView(Me);
+            for (int k = 1; k < 4; k++)
+            {
+                int delta = after.Players[k].Penalties - penalties[k];
+                if (delta > 0) { handPenalties[k] += delta; penaltyReasons[k].Add((L("Ceza", "Penalty"), delta)); hud?.Balloon(k, "+" + delta, true); }
+            }
+            Rack.Sync(after.OwnHand.Select(t => t.Value), TileCodes.FaceFor(Indicator), autoSort);
+            SyncBoard(); SyncedVersion = after.Version; Notify();
+        }
+
+        /// <summary>Server match end: placements and chips; Lobiye dön / the card closes back to the menu.</summary>
+        private async Task OnlineMatchEnd()
+        {
+            var end = Online.End; var wire = Online.Wire;
+            if (end.Aborted) { Message(TableHud.ToastKind.Error, L("Maç iptal edildi · bahisler iade edildi", "Match cancelled · stakes returned")); await Seconds(2.5f); LeaveNow(); return; }
+            foreach (var p in end.Placements) Totals[wire.FromSeat(p.Seat)] = p.Total;
+            var mine = end.Placements.FirstOrDefault(p => wire.FromSeat(p.Seat) == Me);
+            place = mine?.Place ?? 4; xpBonus = 0;
+            MatchOpen = true; matchStartedAt = Time.realtimeSinceStartup; matchSignal = new TaskCompletionSource<string>(); Notify();
+            if (mine != null && mine.ChipDelta != 0) Message(mine.ChipDelta > 0 ? TableHud.ToastKind.Success : TableHud.ToastKind.Info, (mine.ChipDelta > 0 ? "+" : "") + mine.ChipDelta.ToString("N0", new System.Globalization.CultureInfo("tr-TR")) + L(" çip", " chips"));
+            await Task.WhenAny(matchSignal.Task, Seconds(30));
+            MatchOpen = false; LeaveNow();
         }
 
         /// <summary>Run or set for the board layout; a run's first number from its first real tile (okeys fill the gaps).</summary>
@@ -427,7 +531,7 @@ namespace Galaxy101.Table
             ResultOpen = true; resultAt = Time.realtimeSinceStartup; nextHandSignal = new TaskCompletionSource<bool>(); Notify();
             await Task.WhenAny(nextHandSignal.Task, Seconds(15));
             ResultOpen = false; nextHandSignal = null; Notify();
-            if (MatchHand >= TableRules.Current.MatchHands) await ShowMatchEnd();
+            if (MatchHand >= TableRules.Current.MatchHands && Online == null) await ShowMatchEnd();
         }
 
         /// <summary>
@@ -1099,6 +1203,7 @@ namespace Galaxy101.Table
         public void ConfirmExit()
         {
             if (leaving) return;
+            if (Online != null) _ = Online.LeaveAsync();
             leaving = true; ExitOpen = false; life?.Cancel();
             Message(TableHud.ToastKind.Success, L("Masadan kalktın · lobiye dönülüyor", "You left the table · returning to the lobby"));
             Debug.Log("GALAXY101_TABLE_EXIT scene=" + menuScene);
@@ -1110,6 +1215,7 @@ namespace Galaxy101.Table
         {
             if (leaving) return;
             leaving = true; life?.Cancel();
+            if (Online != null) { MainMenuController.ReturnToLobby = true; Online.Dispose(); }
             UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(menuScene, UnityEngine.SceneManagement.LoadSceneMode.Single);
         }
 
@@ -1166,6 +1272,7 @@ namespace Galaxy101.Table
             if (MatchOpen) s.Match = MatchInfo();
             s.Deal = DealCard();
             s.CanUndo = CanUndo; s.CanFromHand = CanFinishFromHand;
+            if (Online?.Start != null) { s.RoomName = OnlineRoom ?? L("Klasik", "Classic"); s.RoomStake = Online.Start.Stake; }
             s.ShortOpen = CanDiscard && OpenedKind(Me) == OpeningKind.None && eval.Sum < 101;
             return s;
         }

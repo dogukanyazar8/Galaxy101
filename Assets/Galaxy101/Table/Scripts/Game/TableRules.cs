@@ -7,7 +7,11 @@ namespace Galaxy101.Table
     /// <summary>Bot table product values from Resources/Galaxy101/Table/table_rules.json (match length, XP, level curve).</summary>
     public sealed class TableRules
     {
-        public int MatchHands { get; private set; } = 5;
+        public int MatchHands { get => onlineHands ?? hands; private set => hands = value; }
+        private int hands = 5;
+        private int? onlineHands;
+        /// <summary>A server match sets its own length (3 / 5 / 7); null goes back to the bot table's value.</summary>
+        public void UseHands(int? value) => onlineHands = value;
         public int XpHandWin { get; private set; } = 340;
         public int XpHandOther { get; private set; } = 60;
         public int[] XpPlace { get; private set; } = { 500, 200, 80, 0 };

@@ -45,7 +45,13 @@ namespace Galaxy101
             background.SetFocused(UnityEngine.Application.isFocused||UnityEngine.Application.isBatchMode);
             Debug.Log("GALAXY101_MENU_READY version="+UnityEngine.Application.version+" theme="+Model.Planet+" language="+(string)Model.Settings["lang"]);
             // spec/18: splash → sign-in (or a remembered account) before the menu. Batch runs (tests, captures) skip it.
-            if(AuthOnStart??!UnityEngine.Application.isBatchMode)ShowAuth();
+            if(AuthOnStart??!UnityEngine.Application.isBatchMode)
+            {
+                // Back from a table with the session still open: no splash or sign-in again.
+                var signed=Galaxy101.Online.GalaxyOnline.Instance;
+                if(signed!=null&&signed.SignedIn){ApplyOnline(signed);HookOnline(signed);if(ReturnToLobby){ReturnToLobby=false;OpenLobby();}}
+                else ShowAuth();
+            }
         }
         /// <summary>null = sign in unless running in batch mode; tests force it on or off.</summary>
         public static bool? AuthOnStart;
@@ -54,8 +60,7 @@ namespace Galaxy101
         {
             var online=Galaxy101.Online.GalaxyOnline.Ensure();
             Auth=new AuthFlow(View,transform,online);
-            Auth.Completed+=()=>{ApplyOnline(online);online.Changed+=()=>ApplyOnline(online);};
-            if(!invitesHooked){invitesHooked=true;online.Realtime.On<Galaxy101.Contracts.InviteMessage>(Galaxy101.Contracts.MessageTypes.Invite,message=>{if(this==null||Auth!=null&&Auth.Visible)return;OpenLobby();Lobby.ShowInvite(message);});}
+            Auth.Completed+=()=>{ApplyOnline(online);HookOnline(online);};
             Auth.Show();
         }
         /// <summary>The menu shows the server's name, colour and balance once signed in.</summary>
@@ -66,6 +71,15 @@ namespace Galaxy101
             View.Refresh();
         }
         private bool invitesHooked;
+        /// <summary>Set by an online table when it closes: the menu opens straight into the lobby.</summary>
+        public static bool ReturnToLobby;
+        private System.Action onlineChanged;
+        private void HookOnline(Galaxy101.Online.GalaxyOnline online)
+        {
+            if(onlineChanged==null){onlineChanged=()=>{if(this!=null)ApplyOnline(online);};online.Changed+=onlineChanged;}
+            if(!invitesHooked){invitesHooked=true;inviteOff=online.Realtime.On<Galaxy101.Contracts.InviteMessage>(Galaxy101.Contracts.MessageTypes.Invite,message=>{if(this==null||Auth!=null&&Auth.Visible)return;OpenLobby();Lobby.ShowInvite(message);});}
+        }
+        private System.Action inviteOff;
         /// <summary>The Klasik lobby (spec/20); its backend is the signed-in session unless a test supplies one.</summary>
         public LobbyScreen Lobby {get;private set;}
         public static Func<Galaxy101.Online.ILobbyBackend> LobbyBackend;
@@ -97,7 +111,13 @@ namespace Galaxy101
             Debug.Log("GALAXY101_MATCH_STARTED match="+state.MatchId+" seat="+state.YourSeat);
             if(!OpenMatchTable)return;
             Lobby?.Hide();
-            OnPlay(4,GalaxyTableScene);
+            var online=Galaxy101.Online.GalaxyOnline.Instance;
+            if(online!=null&&state.MatchId.HasValue)
+            {
+                Galaxy101.Table.TableGame.PendingOnline=new Galaxy101.Table.NetworkTableSession(online,state.MatchId.Value);
+                Galaxy101.Table.TableGame.PendingRoom=state.Table==null?null:state.Table.Name+" · "+(state.Table.Type=="pairs"?View.L("Eşli","Pairs"):View.L("Tekli","Singles"));
+            }
+            _=StartLocalAsync(GalaxyTableScene);
         }
         private void OnPlay(int mode)=>OnPlay(mode,GalaxyTableScene);
         private async void OnPlay(int mode,string scene)
@@ -152,7 +172,8 @@ namespace Galaxy101
         {
             if(Model!=null)Model.Changed-=ApplySettings;
             if(View!=null){if(background!=null)View.BackgroundChanged-=background.Configure;View.PlayRequested-=OnPlay;View.Dispose();}
-            localization?.Dispose();lobbyClient?.Dispose();
+            localization?.Dispose();lobbyClient?.Dispose();inviteOff?.Invoke();
+            var online=Galaxy101.Online.GalaxyOnline.Instance;if(online!=null&&onlineChanged!=null)online.Changed-=onlineChanged;
         }
     }
 }

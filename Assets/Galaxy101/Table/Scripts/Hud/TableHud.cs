@@ -58,6 +58,8 @@ namespace Galaxy101.Table
             public DealInfoCard Deal;
             /// <summary>spec/22: Geri topla, Elden bit, and Aç below 101 (orange: a wrong opening costs +101).</summary>
             public bool CanUndo, CanFromHand, ShortOpen;
+            /// <summary>Online: the table's name ("Gece Kuşları · Tekli") and stake for the top bar; null at a bot table.</summary>
+            public string RoomName; public long RoomStake;
         }
 
         public sealed class OkeyMark { public int Id; public string Number, Color; public bool Target, Invalid; }
@@ -195,6 +197,16 @@ namespace Galaxy101.Table
 
         public string L(string tr, string en) => view != null ? view.L(tr, en) : tr;
         public string SeatName(int k) => seats != null ? (string)Seat(k)["name"] : "";
+        /// <summary>A server match's seat: name, initials, colour, level and whether the server's bot plays it.</summary>
+        public void SetSeat(int k, string name, string color, int level, bool bot)
+        {
+            if (seats == null) return;
+            // Server bots arrive as "Bot · Ayşe": the badge says BOT, the plate the name.
+            if (bot && name != null && name.StartsWith("Bot · ")) name = name.Substring(6);
+            var seat = Seat(k); seat["name"] = name; seat["ini"] = Galaxy101.ProfileValidation.Initials(name ?? "");
+            if (!string.IsNullOrEmpty(color)) seat["color"] = color;
+            seat["lv"] = Math.Max(1, level); seat["bot"] = bot;
+        }
         public string SeatFirstName(int k) => seats != null ? FirstName(k) : "";
 
         public void Initialize(string persistencePath = null)
@@ -347,6 +359,7 @@ namespace Galaxy101.Table
             Pad(plate, 4, 12, 5, 12); view.Decorate(plate, "rgba(5,8,22,.66)", 12); Border(plate, 1, new Color(1, 1, 1, .08f)); GalaxyFilters.BackdropBlur(plate, 6);
             var nameRow = Row(5); nameRow.Add(Text((string)Seat(k)["name"], "Montserrat-700", 14, "#F4F1E8"));
             var bot = Text(TableStrings.Get("botBadge", Lang), "Baloo2-800", 8, "var(--ic)"); MenuView.Tracking(bot, 1, 8); bot.name = "bot-badge-" + k;
+            if (Seat(k)["bot"] != null && !(bool)Seat(k)["bot"]) bot.style.display = DisplayStyle.None;
             Pad(bot, 1, 5, 1, 5); view.Decorate(bot, "rgba(255,255,255,.14)", 5); nameRow.Add(bot);
             plate.Add(nameRow);
             var status = Text(Status(k, s, false), "Baloo2-800", 11, s.Opened[k] > 0 ? "#8EF0B0" : "var(--mt)"); status.style.marginTop = 1; plate.Add(status);
@@ -806,11 +819,21 @@ namespace Galaxy101.Table
             bar.Add(logo);
 
             var room = Row(8); Pad(room, 7, 13, 7, 13); view.Decorate(room, "var(--dp)", 15);
-            room.Add(Text(TableStrings.Get("botRoom", Lang), "Baloo2-800", 12, "var(--ic)"));
-            var practice = Text(TableStrings.Get("botTag", Lang), "Baloo2-800", 9, "var(--aT)"); MenuView.Tracking(practice, 1.2f, 9); practice.name = "bot-tag";
-            Pad(practice, 2, 7, 2, 7); view.Decorate(practice, "var(--a1)", 6); room.Add(practice);
-            var dot = new VisualElement { pickingMode = PickingMode.Ignore }; dot.style.width = dot.style.height = 4; view.Decorate(dot, "var(--mt)", 2); room.Add(dot);
-            room.Add(Text(TableStrings.Get("botStake", Lang), "Baloo2-800", 12, "var(--ic)"));
+            if (s.RoomName != null)
+            {
+                // A server table (G13): its name and type, then the stake.
+                room.Add(Text(s.RoomName, "Baloo2-800", 12, "var(--ic)"));
+                var dot = new VisualElement { pickingMode = PickingMode.Ignore }; dot.style.width = dot.style.height = 4; view.Decorate(dot, "var(--mt)", 2); room.Add(dot);
+                room.Add(Text(L("Bahis ", "Bet ") + view.N(s.RoomStake), "Baloo2-800", 12, "var(--ic)"));
+            }
+            else
+            {
+                room.Add(Text(TableStrings.Get("botRoom", Lang), "Baloo2-800", 12, "var(--ic)"));
+                var practice = Text(TableStrings.Get("botTag", Lang), "Baloo2-800", 9, "var(--aT)"); MenuView.Tracking(practice, 1.2f, 9); practice.name = "bot-tag";
+                Pad(practice, 2, 7, 2, 7); view.Decorate(practice, "var(--a1)", 6); room.Add(practice);
+                var dot = new VisualElement { pickingMode = PickingMode.Ignore }; dot.style.width = dot.style.height = 4; view.Decorate(dot, "var(--mt)", 2); room.Add(dot);
+                room.Add(Text(TableStrings.Get("botStake", Lang), "Baloo2-800", 12, "var(--ic)"));
+            }
             bar.Add(room);
             BuildHandCounter(s);
 

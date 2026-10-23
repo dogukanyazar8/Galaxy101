@@ -91,12 +91,18 @@ public static class Wire
         Discards = [.. v.Discards.Select(d => d.Select(t => t.Value).ToList())],
         PendingDraw = v.PendingDraw is { } d ? new DrawReceiptDto { Source = d.Source == DrawSource.Stock ? "stock" : "discard", Tile = d.Tile.Value, WasLastStock = d.WasLastStock } : null,
         SeriesTilesUsed = v.SeriesTilesUsed, Result = v.Result is { } r ? ToDto(r) : null,
+        Deal = v.Deal is { } deal ? new DealDto
+        {
+            Dealer = deal.Dealer, DieA = deal.DieA, DieB = deal.DieB, IndicatorStack = deal.IndicatorStack,
+            IndicatorPosition = deal.IndicatorPosition, FakeOkeyShown = deal.FakeOkeyShown, ExtraStack = deal.ExtraStack,
+        } : null,
     };
 
     public static RoundResultDto ToDto(RoundResult r) => new()
     {
         Reason = r.FinishInfo.Reason switch { FinishReason.DiscardWin => "discardWin", FinishReason.StockExhausted => "stockExhausted", _ => "allPairs" },
         Winner = r.FinishInfo.Winner, DiscardedRealJoker = r.FinishInfo.DiscardedRealJoker,
+        WinnerOpening = Name(r.FinishInfo.WinnerOpening), WinnerOpenedThisTurn = r.FinishInfo.WinnerOpenedThisTurn,
         Scores = [.. r.Scores.Select(s => new ScoreDto { HasScore = s.HasScore, N = s.N, J = s.J, P = s.P, B = s.B, M = s.M, Total = s.Total })],
     };
 

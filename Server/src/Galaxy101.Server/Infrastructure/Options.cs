@@ -49,6 +49,8 @@ public sealed class GameOptions
     public int HandsPerMatch { get; set; } = 4;
     public int TurnSeconds { get; set; } = 30;
     public int NextHandSeconds { get; set; } = 15;
+    /// <summary>The clients' deal ceremony (spec/21) before a hand's first turn: no one plays and no deadline runs.</summary>
+    public int DealSeconds { get; set; } = 22;
     /// <summary>Consecutive timeouts after which the server keeps playing the seat until its owner acts again.</summary>
     public int TimeoutsBeforeAuto { get; set; } = 2;
     /// <summary>House share of the pot, in percent.</summary>

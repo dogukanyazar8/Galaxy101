@@ -105,8 +105,23 @@ namespace Galaxy101.Contracts
     {
         public string Reason { get; set; }
         public int? Winner { get; set; }
+        /// <summary>The winner's opening ("series" / "pairs") and whether it was opened in the finishing turn (elden bitiş).</summary>
+        public string WinnerOpening { get; set; }
+        public bool WinnerOpenedThisTurn { get; set; }
         public bool DiscardedRealJoker { get; set; }
         public List<ScoreDto> Scores { get; set; } = new List<ScoreDto>();
+    }
+
+    /// <summary>Public facts of the deal (spec/21): dealer seat, the two dice, the indicator stack and height, the extra tile's stack.</summary>
+    public sealed class DealDto
+    {
+        public int Dealer { get; set; }
+        public int DieA { get; set; }
+        public int DieB { get; set; }
+        public int IndicatorStack { get; set; }
+        public int IndicatorPosition { get; set; }
+        public bool FakeOkeyShown { get; set; }
+        public int ExtraStack { get; set; }
     }
 
     /// <summary>One seat's private projection of the authoritative round: only its own hand is revealed.</summary>
@@ -129,6 +144,7 @@ namespace Galaxy101.Contracts
         public DrawReceiptDto PendingDraw { get; set; }
         public int SeriesTilesUsed { get; set; }
         public RoundResultDto Result { get; set; }
+        public DealDto Deal { get; set; }
     }
 
     /// <summary>

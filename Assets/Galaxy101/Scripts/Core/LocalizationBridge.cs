@@ -156,7 +156,8 @@ namespace Galaxy101
         private void ApplyLocale()
         {
             if (!Application.isPlaying || !LocalizationSettings.HasSettings) return;
-            var locale = Resources.LoadAll<Locale>("Galaxy101/Localization").FirstOrDefault(x => x.Identifier.Code == Language);
+            // By name, like the tables: a folder-wide LoadAll would deserialize every asset in it.
+            var locale = Resources.Load<Locale>("Galaxy101/Localization/Locale-" + Language);
             if (locale != null) LocalizationSettings.SelectedLocale = locale;
         }
         public void Dispose() => model.Changed -= OnModelChanged;

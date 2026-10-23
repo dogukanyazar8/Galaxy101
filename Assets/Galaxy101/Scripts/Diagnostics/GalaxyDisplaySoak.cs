@@ -41,8 +41,6 @@ namespace Galaxy101
         private void OnLog(string message, string stack, LogType type)
         {
             if (type != LogType.Error && type != LogType.Exception && type != LogType.Assert) return;
-            // Known since 21 Oct 2026, logged at player start before any scene of ours loads (docs/V3_PLANI.md, V1 notes).
-            if (message.Contains("different serialization layout") || message.Contains("referenced script")) return;
             errors.Add(type + ": " + message);
         }
 

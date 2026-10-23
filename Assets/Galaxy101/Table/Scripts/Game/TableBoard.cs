@@ -37,6 +37,13 @@ namespace Galaxy101.Table
         /// <summary>Real okeys (set by the game once the indicator is known): they carry the gold okey mark.</summary>
         public System.Func<int, bool> IsOkey = _ => false;
 
+        /// <summary>A meld's kind and, for a run, the number of its first tile (okeys take the value they stand for).</summary>
+        public System.Func<int[], (bool Run, int Start)> Classify = tiles => (false, 1);
+
+        /// <summary>Centre board layout (spec/23); reset every hand.</summary>
+        public readonly BoardLayout Layout = new BoardLayout();
+        private int indicatorId = -1;
+
         /// <summary>Effects for landings, the deck spin and the bars.</summary>
         public TableFx Fx;
 
@@ -81,7 +88,7 @@ namespace Galaxy101.Table
         {
             foreach (var v in known.Values) Kill(v); known.Clear();
             foreach (var h in hidden) { foreach (var v in h) Kill(v); h.Clear(); }
-            meldOf.Clear(); spawnHint = null;
+            meldOf.Clear(); spawnHint = null; Layout.Reset(); indicatorId = -1;
         }
 
         // ---------- deck ----------
@@ -98,9 +105,17 @@ namespace Galaxy101.Table
             }
         }
 
-        /// <summary>Per-frame: the deal counts the deck down linearly (106 → stock).</summary>
+        /// <summary>Per-frame: the deal counts the deck down linearly (106 → stock); the deck eases left once melds are down.</summary>
         public void Tick()
         {
+            float target = Layout.Count > 0 ? TableScene.DeckLeft : 0;
+            if (Mathf.Abs(scene.DeckShift - target) > 0.0005f)
+            {
+                scene.DeckShift = Mathf.Lerp(scene.DeckShift, target, 1 - Mathf.Exp(-3.2f * Time.deltaTime));
+                if (Mathf.Abs(scene.DeckShift - target) <= 0.0005f) scene.DeckShift = target;
+                int shown = deckShown; deckShown = -1; LayoutDeck(shown);
+                if (indicatorId >= 0 && known.TryGetValue(indicatorId, out var ind) && ind != null && !ind.Tweening) ind.Snap(scene.IndicatorPose());
+            }
             if (deckDuration <= 0) return;
             float u = Mathf.Clamp01((Time.time - deckT0) / deckDuration);
             LayoutDeck(Mathf.RoundToInt(Mathf.Lerp(deckFrom, deckTo, u)));
@@ -175,16 +190,14 @@ namespace Galaxy101.Table
                     int id = state.Discards[k][j];
                     desired[id] = (scene.DiscardPose(k, j, id.ToString()), k, false, -1);
                 }
-            foreach (var group in state.Melds.GroupBy(m => m.Owner))
+            Layout.Retain(state.Melds.Select(m => m.Id));
+            foreach (var meld in state.Melds)
             {
-                int column = 0, row = 0;
-                foreach (var meld in group)
-                {
-                    if (column + meld.Tiles.Length > 11) { column = 0; row++; }
-                    foreach (var id in meld.Tiles) desired[id] = (scene.MeldPose(group.Key, column++, row), group.Key, false, meld.Id);
-                    column++;
-                }
+                var (run, start) = Classify(meld.Tiles);
+                var (row, column) = Layout.Place(meld.Id, meld.Owner, run, start, meld.Tiles.Length);
+                for (int t = 0; t < meld.Tiles.Length; t++) desired[meld.Tiles[t]] = (scene.BoardPose(Mathf.Min(column + t, BoardLayout.Columns - 1), row), meld.Owner, false, meld.Id);
             }
+            indicatorId = state.Indicator;
             if (state.Indicator >= 0) desired[state.Indicator] = (scene.IndicatorPose(), 0, false, -1);
 
             // Tiles I knew that are no longer visible went into an opponent's hand (taken from a discard pile).
@@ -270,5 +283,81 @@ namespace Galaxy101.Table
         public void ClearPreview(RackGrid rack) => PreviewRack(rack, null, null);
 
         public Pose SlotPose(RackSlot slot) => scene.SlotPose(0, slot.Row, slot.Index);
+    }
+}
+
+namespace Galaxy101.Table
+{
+    /// <summary>
+    /// The shared centre board (spec/23, layoutBoard): 8 rows × 20 columns. Each player gets two rows in the order they
+    /// opened. Runs sit on their numbers (n → column n−1) and keep one free column at each end for laying off; sets and
+    /// pairs take 4 / 2 columns from column 14 on. Melds never overlap and keep their place; a meld that grows into a
+    /// neighbour moves alone — to its owner's other row, an empty row, then any row.
+    /// </summary>
+    public sealed class BoardLayout
+    {
+        public const int Rows = 8, Columns = 20;
+        private readonly List<int> order = new List<int>();
+        private readonly Dictionary<int, (int Owner, int Row, int Column, int Length)> placed = new Dictionary<int, (int, int, int, int)>();
+
+        public int Count => placed.Count;
+        public IReadOnlyList<int> OpeningOrder => order;
+        public bool TryGet(int meld, out (int Owner, int Row, int Column, int Length) at) => placed.TryGetValue(meld, out at);
+
+        public void Reset() { order.Clear(); placed.Clear(); }
+
+        /// <summary>Forget melds no longer on the table (undo, new hand).</summary>
+        public void Retain(IEnumerable<int> melds)
+        {
+            var keep = new HashSet<int>(melds);
+            foreach (var id in placed.Keys.Where(k => !keep.Contains(k)).ToList()) placed.Remove(id);
+            if (placed.Count == 0) order.Clear();
+        }
+
+        public (int Row, int Column) Place(int meld, int owner, bool run, int start, int length)
+        {
+            if (!order.Contains(owner)) order.Add(owner);
+            length = Mathf.Clamp(length, 1, Columns);
+            int wanted = run ? Mathf.Clamp(start - 1, 0, Columns - length) : -1;
+            if (placed.TryGetValue(meld, out var at))
+            {
+                // Same place if it still fits (a run growing to the left moves its first column).
+                int column = run ? wanted : at.Column;
+                if (column + length > Columns) column = Columns - length;
+                if (Free(at.Row, column, length, meld)) { placed[meld] = (owner, at.Row, column, length); return (at.Row, column); }
+            }
+            int k = order.IndexOf(owner);
+            var rows = new List<int>();
+            if (k < 4) { rows.Add(k * 2); rows.Add(k * 2 + 1); }
+            for (int r = 0; r < Rows; r++) if (!rows.Contains(r) && !placed.Values.Any(p => p.Row == r)) rows.Add(r);
+            for (int r = 0; r < Rows; r++) if (!rows.Contains(r)) rows.Add(r);
+            // Column first, then row: runs keep their numbers, sets keep to column 14+, both in the owner's rows first.
+            foreach (int column in Candidates(run, wanted, length))
+                foreach (int r in rows)
+                    if (Free(r, column, length, meld)) { placed[meld] = (owner, r, column, length); return (r, column); }
+            // Board full: overlap in the owner's first row rather than lose the meld.
+            int fallback = rows[0]; int c = Mathf.Max(0, wanted);
+            placed[meld] = (owner, fallback, c, length); return (fallback, c);
+        }
+
+        private static IEnumerable<int> Candidates(bool run, int wanted, int length)
+        {
+            if (run) { yield return wanted; for (int d = 1; d < Columns; d++) { if (wanted + d + length <= Columns) yield return wanted + d; if (wanted - d >= 0) yield return wanted - d; } yield break; }
+            for (int c = 14; c + length <= Columns; c++) yield return c;
+            for (int c = 0; c + length <= Columns && c < 14; c++) yield return c;
+        }
+
+        /// <summary>Free when no other meld in the row is within one column (the laying-off margin).</summary>
+        private bool Free(int row, int column, int length, int self)
+        {
+            if (column < 0 || column + length > Columns) return false;
+            foreach (var pair in placed)
+            {
+                if (pair.Key == self || pair.Value.Row != row) continue;
+                int a0 = column - 1, a1 = column + length, b0 = pair.Value.Column, b1 = pair.Value.Column + pair.Value.Length - 1;
+                if (a0 <= b1 && b0 <= a1) return false;
+            }
+            return true;
+        }
     }
 }

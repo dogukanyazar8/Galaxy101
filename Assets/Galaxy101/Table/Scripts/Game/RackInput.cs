@@ -34,6 +34,7 @@ namespace Galaxy101.Table
         private Drag drag;
         private TileView hover;
         private int selected = -1, lastClickId = -1;
+        private Ray? lastRay;
         private float lastClickAt;
 
         private void Awake()
@@ -50,7 +51,7 @@ namespace Galaxy101.Table
             if (pointer == null || game == null || game.Board == null || table.CameraRig == null) return;
             Vector2 screen = pointer.position.ReadValue();
             bool down = pointer.press.wasPressedThisFrame, up = pointer.press.wasReleasedThisFrame;
-            bool hasRay = TryRay(screen, out var ray);
+            bool hasRay = TryRay(screen, out var ray); lastRay = hasRay ? ray : (Ray?)null;
             if (down && (OverUi(screen) || !hasRay)) return;
             if (drag == null && down) OnDown(ray, screen);
             else if (drag != null && up) OnUp(ray, hasRay);
@@ -135,7 +136,9 @@ namespace Galaxy101.Table
             var hit = Pick(ray);
             if (hit == null)
             {
-                if (selected >= 0 && game.CanDiscard && InZone(ray)) { int id = selected; selected = -1; game.Discard(id); }
+                if (selected >= 0 && game.CanDiscard && InZone(ray)) { int id = selected; selected = -1; game.Discard(id); return; }
+                // A click on a lay-off / okey marker plays the selected tile there.
+                if (selected >= 0 && game.Markers != null && table.TableHit(ray, out var felt)) { int t = game.Markers.Nearest(felt, 0.045f); if (t >= 0) { int id = selected; selected = -1; game.SetSelected(-1); game.UseTarget(id, game.Targets[t]); } }
                 return;
             }
             drag = new Drag { Kind = hit.Value.Kind, View = hit.Value.View, Start = screen };
@@ -256,6 +259,9 @@ namespace Galaxy101.Table
                 if (game.CanDiscard && InZone(ray)) { game.Discard(d.Id); return; }
                 // T39: the picked-up pile tile dropped back on its ring goes back.
                 if (d.Id == game.PickedTile && table.TableHit(ray, out var back) && Vector3.Distance(back, table.DiscardCenter(3)) < 0.1f) { game.PutBack(); return; }
+                if (game.Markers != null) game.Markers.Hot = -1;
+                // A marker within 6 cm takes the tile (spec/23: snaps on approach).
+                if (!target.HasValue && game.Markers != null && table.TableHit(ray, out var drop)) { int t = game.Markers.Nearest(drop, 0.06f); if (t >= 0) { game.UseTarget(d.Id, game.Targets[t]); return; } }
                 var okey = target.HasValue ? null : OkeyNear(ray);
                 if (okey != null) { game.TakeOkey(d.Id, okey.Id); return; }
                 int meld = target.HasValue ? -1 : MeldNear(ray);
@@ -298,6 +304,8 @@ namespace Galaxy101.Table
 
         private void UpdateLift()
         {
+            game.SetSelected(drag == null ? selected : -1);
+            if (drag != null && drag.Moved && drag.Kind == Kind.Rack && game.Markers != null && lastRay.HasValue && table.TableHit(lastRay.Value, out var over)) game.Markers.Hot = game.Markers.Nearest(over, 0.06f);
             foreach (var id in game.Rack.Tiles)
             {
                 var v = game.Board.ViewOf(id); if (v == null) continue;

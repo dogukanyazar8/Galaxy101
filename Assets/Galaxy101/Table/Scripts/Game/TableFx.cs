@@ -104,6 +104,13 @@ namespace Galaxy101.Table
             haze.Emit(position, new Vector3(0, 0.075f / 3.125f, 0), new Color(1, 1, 1, 0.2f), 0.014f, 3.125f, 0.044f, true);
         }
 
+        /// <summary>spec/23 taş izi: one soft glow (50 mm → 35 %, 0.38 s, opacity 0.14·sin(πu)), additive, no sparks.</summary>
+        public void Trail(Vector3 position, Color color)
+        {
+            sparks.Emit(position, Vector3.zero, new Color(color.r, color.g, color.b, 0.14f), 0.05f, 0.38f, 0.0175f, true);
+        }
+        public static readonly Color TrailGold = new Color32(0xFF, 0xD9, 0x8A, 255), TrailGreen = new Color32(0x8E, 0xF0, 0xB0, 255);
+
         public void SparkAt(Vector3 position, Color color)
         {
             sparks.Emit(position, Vector3.zero, new Color(color.r, color.g, color.b, 0.8f), 0.03f, 0.5f);

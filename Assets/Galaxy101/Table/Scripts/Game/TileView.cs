@@ -34,6 +34,7 @@ namespace Galaxy101.Table
         private Pose? overridePose;
 
         private bool tween, slide, deal;
+        private Vector3? trailFrom;
         private Pose from, to;
         private Vector3 c1, c2;
         private float t0, duration, arc, spin, pop = -10, lift;
@@ -129,12 +130,13 @@ namespace Galaxy101.Table
                     transform.position = Vector3.Lerp(from.position, to.position, e2) + Vector3.up * (Mathf.Sin(Mathf.PI * k) * arc);
                     transform.rotation = Quaternion.Slerp(from.rotation, to.rotation, slide ? e : EaseInOutCubic(Mathf.Min(1, u * 1.15f)));
                 }
-                if (Fx != null && k < 1)
+                if (Fx != null && k < 1 && !slide && trailFrom.HasValue)
                 {
-                    // Sparks: travels with an effect 60 % of frames (#FFE08A), the deal's swirl now and then.
-                    if (deal) { if (u < 0.85f && Random.value < 0.07f) Fx.SparkAt(transform.position, Random.value < 0.5f ? TableFx.Spark : Fx.Accent); }
-                    else if (landing != null && !slide && u < 0.92f && Random.value < 0.6f) Fx.SparkAt(transform.position, TableFx.Spark);
+                    // spec/23: a soft light trail, three points per frame along the path (gold; green when laid on a meld).
+                    var color = landing == "meld" ? TableFx.TrailGreen : TableFx.TrailGold;
+                    for (int i = 1; i <= 3; i++) Fx.Trail(Vector3.Lerp(trailFrom.Value, transform.position, i / 3f), color);
                 }
+                trailFrom = k < 1 ? transform.position : (Vector3?)null;
                 if (u >= 1)
                 {
                     tween = false; if (!slide) pop = now;

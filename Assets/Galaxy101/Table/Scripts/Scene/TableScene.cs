@@ -163,7 +163,7 @@ namespace Galaxy101.Table
                 case "a2": return (top ? seatFrames[2].Pose(0.56f, 0.86f, 0.98f) : seatFrames[2].Pose(0, 1.16f, 1.14f)).UnityPosition;
                 case "a3": return (top ? seatFrames[3].Pose(0, 0.8f, 1.22f) : seatFrames[3].Pose(0, 0.86f, 0.98f)).UnityPosition;
                 case "disc": return seatFrames[0].Pose(0.6f, TY + 0.02f, 0.6f).UnityPosition;
-                case "ind": return seatFrames[0].Pose(0, TY, 0.11f).UnityPosition;
+                case "ind": return seatFrames[0].Pose(DeckShift, TY, 0.11f).UnityPosition;
                 case "deck": return ThreeSpace.ToUnity(0, TY + 0.13f, 0);
                 case "putback": return seatFrames[3].Pose(DiscardLocal.x, TY + 0.002f, DiscardLocal.z).UnityPosition;
                 default: throw new System.ArgumentException("Unknown table anchor: " + key, nameof(key));
@@ -292,20 +292,29 @@ namespace Galaxy101.Table
         /// <summary>Unit vector on the table plane from the centre towards a seat (Unity space).</summary>
         public Vector3 SeatDirection(int seat) { var p = seatFrames[seat].Pose(0, 0, 1).UnityPosition - seatFrames[seat].Pose(0, 0, 0).UnityPosition; p.y = 0; return p.normalized; }
         public Pose MeldPose(int seat, int column, int row) => Unity(seatFrames[seat].Pose(-0.245f + column * 0.049f, TY + TD / 2, 0.37f - row * 0.08f, FlatUp));
-        public Pose IndicatorPose() => Unity(seatFrames[0].Pose(0, TY + TH / 2 * Mathf.Cos(0.42f) + 0.002f, IndicatorZ, ThreeSpace.Euler(IndicatorTilt, 0, 0)));
+        public Pose IndicatorPose() => Unity(seatFrames[0].Pose(DeckShift, TY + TH / 2 * Mathf.Cos(0.42f) + 0.002f, IndicatorZ, ThreeSpace.Euler(IndicatorTilt, 0, 0)));
+
+        /// <summary>spec/23: once melds are on the felt the deck and the indicator slide left (three x, eased by the board).</summary>
+        public float DeckShift;
+        public const float DeckLeft = -0.62f;
+
+        /// <summary>Centre board cell (spec/23): 8 rows × 20 columns in my frame, face up, readable by me.</summary>
+        public Pose BoardPose(int column, int row) => Unity(seatFrames[0].Pose(-0.465f + column * 0.049f, TY + TD / 2, -0.30f + row * 0.0857f, FlatUp));
+        /// <summary>Row-start marker spot (x −0.505) for a board row.</summary>
+        public Vector3 BoardRowStart(int row) => seatFrames[0].Pose(-0.505f, TY + 0.0012f, -0.30f + row * 0.0857f).UnityPosition;
 
         public Pose DeckPose(int j, int n)
         {
             int stacks = Mathf.CeilToInt(n / 5f), rows = n > 60 ? 4 : n > 25 ? 2 : 1, cols = Mathf.Max(1, Mathf.CeilToInt(stacks / (float)rows));
             int s = j / 5, lv = j % 5, col = s / rows, row = s % rows;
-            var p = new Vector3((col - (cols - 1) / 2f) * (TW + 0.006f), TY + TD / 2 + lv * TD, (row - (rows - 1) / 2f) * (TH + 0.006f));
+            var p = new Vector3(DeckShift + (col - (cols - 1) / 2f) * (TW + 0.006f), TY + TD / 2 + lv * TD, (row - (rows - 1) / 2f) * (TH + 0.006f));
             return Unity(new ThreePose(p, ThreeSpace.AxisAngle(Vector3.up, ((j * 0.37f) % 1 - 0.5f) * 0.06f) * FaceDown));
         }
 
         /// <summary>Where a tile leaves (or rejoins) the deck: one tile height above the stack of <paramref name="n"/>.</summary>
         public Pose DeckTop(int n)
         {
-            if (n <= 0) return Unity(new ThreePose(new Vector3(0, TY + TD, 0), FaceDown));
+            if (n <= 0) return Unity(new ThreePose(new Vector3(DeckShift, TY + TD, 0), FaceDown));
             var top = DeckPose(n - 1, n); top.position += Vector3.up * TD; return top;
         }
 
@@ -313,7 +322,7 @@ namespace Galaxy101.Table
         public Bounds DeckBounds(int n)
         {
             int stacks = Mathf.CeilToInt(Mathf.Max(1, n) / 5f), rows = n > 60 ? 4 : n > 25 ? 2 : 1, cols = Mathf.Max(1, Mathf.CeilToInt(stacks / (float)rows));
-            return new Bounds(new Vector3(0, TY + 0.06f, 0), new Vector3(cols * (TW + 0.006f) + 0.04f, 0.12f, rows * (TH + 0.006f) + 0.04f));
+            return new Bounds(new Vector3(-DeckShift, TY + 0.06f, 0), new Vector3(cols * (TW + 0.006f) + 0.04f, 0.12f, rows * (TH + 0.006f) + 0.04f));
         }
 
         public Vector3 DiscardCenter(int seat) => seatFrames[seat].Pose(DiscardLocal.x, TY + 0.0012f, DiscardLocal.z).UnityPosition;

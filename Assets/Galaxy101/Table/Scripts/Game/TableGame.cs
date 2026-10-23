@@ -40,6 +40,7 @@ namespace Galaxy101.Table
         public TableFx Fx { get; private set; }
         public TableGifts Gifts { get; private set; }
         public TableCeremony Ceremony { get; private set; }
+        public TableTargets Markers { get; private set; }
         /// <summary>spec/21 deal ceremony; off = the quick v2 deal (tests that only need a hand in play).</summary>
         public static bool CeremonyEnabled = true;
         /// <summary>Test hook: a prepared first hand (Configure firstHand) still gets the ceremony when it is a fresh deal.</summary>
@@ -130,8 +131,10 @@ namespace Galaxy101.Table
             if (table.CameraRig == null) table.Build();
             Board = new TableBoard(table);
             Board.IsOkey = id => TileCatalog.IsRealJoker(new TileId(id), Indicator);
+            Board.Classify = ClassifyMeld;
             Fx = table.gameObject.GetComponent<TableFx>() ?? table.gameObject.AddComponent<TableFx>(); Fx.Init(table); Board.Fx = Fx;
             Gifts = table.gameObject.GetComponent<TableGifts>() ?? table.gameObject.AddComponent<TableGifts>(); Gifts.Init(table, Fx);
+            Markers = table.gameObject.GetComponent<TableTargets>() ?? table.gameObject.AddComponent<TableTargets>(); Markers.Init(this);
             Ceremony = new TableCeremony(table, Fx, Seconds); Ceremony.Changed += () => { dealStepAt = Time.realtimeSinceStartup; Notify(); };
             Session = new LocalSession();
             life = new CancellationTokenSource();
@@ -242,6 +245,17 @@ namespace Galaxy101.Table
             }
             catch (OperationCanceledException) { }
             catch (Exception exception) { Debug.LogException(exception); }
+        }
+
+        /// <summary>Run or set for the board layout; a run's first number from its first real tile (okeys fill the gaps).</summary>
+        private (bool Run, int Start) ClassifyMeld(int[] tiles)
+        {
+            var faces = new List<(int Index, TileFace Face)>();
+            for (int i = 0; i < tiles.Length; i++) if (!TileCatalog.IsRealJoker(new TileId(tiles[i]), Indicator)) faces.Add((i, TileCatalog.GetNonJokerFace(new TileId(tiles[i]), Indicator)));
+            if (faces.Count == 0 || tiles.Length <= 2) return (false, 1);
+            bool sameNumber = faces.All(f => f.Face.Number == faces[0].Face.Number);
+            if (sameNumber && faces.Count > 1) return (false, faces[0].Face.Number);
+            return (true, faces[0].Face.Number - faces[0].Index);
         }
 
         /// <summary>spec/21 §4: my "Zar at" / "Tekrar at" (15 s, then it rolls by itself); a bot rolls after a short pause.</summary>
@@ -763,7 +777,63 @@ namespace Galaxy101.Table
             => face.Color == TileColor.Red ? "#D7263D" : face.Color == TileColor.Blue ? "#1F5FBF" : face.Color == TileColor.Yellow ? "#E09A12" : "#24242C";
 
         /// <summary>The input reports the rack tile being dragged (−1 when released): matching okeys light up (T47).</summary>
-        public void SetDragTile(int id) { if (dragTile == id) return; dragTile = id; Notify(); }
+        public void SetDragTile(int id) { if (dragTile == id) return; dragTile = id; targetsFor = -2; Notify(); }
+
+        // ---------- laying-off targets (spec/23 işleme göstergeleri) ----------
+        public sealed class LayTarget { public int Meld = -1, Okey = -1; public bool Prepend; public Pose Pose; }
+        private int selectedTile = -1, targetsFor = -2, targetsStaged = -1;
+        private long targetsVersion = -1;
+        private readonly List<LayTarget> targets = new List<LayTarget>();
+        /// <summary>The rack tile picked by a click (RackInput); its targets show like a dragged tile's.</summary>
+        public void SetSelected(int id) { if (selectedTile == id) return; selectedTile = id; targetsFor = -2; }
+        public int FocusTile => dragTile >= 0 ? dragTile : selectedTile;
+
+        /// <summary>Every valid lay-off end and okey swap for the focused rack tile (≤ 48), in world space.</summary>
+        public IReadOnlyList<LayTarget> Targets
+        {
+            get
+            {
+                int id = FocusTile; long version = Session?.GetView(Me).Version ?? -1;
+                if (id == targetsFor && version == targetsVersion && staged.Count == targetsStaged) return targets;
+                targetsFor = id; targetsVersion = version; targetsStaged = staged.Count; targets.Clear();
+                if (id < 0 || !CanDiscard || !Rack.TryFind(id, out _) || Rack.Count <= 1) return targets;
+                bool opened = OpenedKind(Me) != OpeningKind.None || staged.OfType<OpenGroups>().Any();
+                if (!opened) return targets;
+                var state = Projection();
+                foreach (var meld in state.Table)
+                {
+                    if (meld.Group.Kind == MeldKind.Pair || !Board.Layout.TryGet(meld.Id, out var at)) continue;
+                    foreach (bool prepend in new[] { true, false })
+                    {
+                        if (meld.Group.Kind == MeldKind.Set && prepend) continue; // a set grows at its end only
+                        bool ok = CandidateFaces(id, meld).Any(face => Evaluate(staged.Concat(new[] { (TableAction)new ExtendMeld(meld.Id, prepend, new[] { new PlacedTile(new TileId(id), face) }) }).ToList()).Success);
+                        if (!ok) continue;
+                        int column = prepend ? at.Column - 1 : at.Column + at.Length;
+                        if (column < 0 || column >= BoardLayout.Columns) column = Mathf.Clamp(column, 0, BoardLayout.Columns - 1);
+                        targets.Add(new LayTarget { Meld = meld.Id, Prepend = prepend, Pose = table.BoardPose(column, at.Row) });
+                        if (targets.Count >= 48) return targets;
+                    }
+                }
+                if (!TileCatalog.IsRealJoker(new TileId(id), Indicator))
+                {
+                    var face = TileCatalog.GetNonJokerFace(new TileId(id), Indicator);
+                    foreach (var okey in TableOkeys())
+                    {
+                        if (okey.Face != face || Board.ViewOf(okey.Id) is not TileView v || v == null) continue;
+                        var next = staged.Concat(new[] { (TableAction)new SwapJoker(okey.Meld, new TileId(okey.Id), new TileId(id)) }).ToList();
+                        if (Evaluate(next).Success) targets.Add(new LayTarget { Okey = okey.Id, Meld = okey.Meld, Pose = new Pose(v.Target.position, v.Target.rotation) });
+                    }
+                }
+                return targets;
+            }
+        }
+
+        /// <summary>Act on a target with the focused tile (drop or click on the marker).</summary>
+        public void UseTarget(int id, LayTarget target)
+        {
+            if (target.Okey >= 0) TakeOkey(id, target.Okey); else LayOff(id, target.Meld, target.Prepend);
+            selectedTile = -1; targetsFor = -2;
+        }
 
         /// <summary>Hover shows what an okey stands for; a 500 ms press shows how to take it (T33, T48).</summary>
         public void ShowOkeyTip(int id, bool take)
@@ -798,14 +868,14 @@ namespace Galaxy101.Table
         }
 
         /// <summary>İşle: drop one rack tile onto a table meld (front or back; jokers take the face that fits).</summary>
-        public void LayOff(int id, int meldId)
+        public void LayOff(int id, int meldId, bool? side = null)
         {
             if (!CanMeld && !(CanDiscard && staged.OfType<OpenGroups>().Any())) { Message(TableHud.ToastKind.Error, T("msg.openFirst")); return; }
             var state = Projection(); var meld = state.Table.FirstOrDefault(m => m.Id == meldId);
             if (meld == null || meld.Group.Kind == MeldKind.Pair) { Message(TableHud.ToastKind.Error, T("msg.cantIsle")); return; }
             if (Rack.Count <= 1) { Message(TableHud.ToastKind.Error, T("msg.lastTile")); return; }
             foreach (var face in CandidateFaces(id, meld))
-                foreach (bool prepend in new[] { false, true })
+                foreach (bool prepend in side.HasValue ? new[] { side.Value } : new[] { false, true })
                 {
                     var next = staged.Concat(new[] { (TableAction)new ExtendMeld(meldId, prepend, new[] { new PlacedTile(new TileId(id), face) }) }).ToList();
                     if (!Evaluate(next).Success) continue;

@@ -354,6 +354,18 @@ namespace Galaxy101.Tests
             Assert.That(menu.Lobby.DialogKind, Is.Null);
         }
 
+        [UnityTest]
+        public IEnumerator TheDeveloperMenuListsTheSpec25Scenarios()
+        {
+            var menu = Menu(); var root = menu.View.Root; yield return null;
+            string picked = null;
+            var dev = new DevTestMenu(menu.View, key => picked = key); dev.Show(); yield return null;
+            Assert.That(root.Query<VisualElement>(className: null).ToList().Count(e => e.name != null && e.name.StartsWith("dev-scenario-")), Is.EqualTo(DevTestMenu.Scenarios.Length));
+            Click(root, "dev-scenario-processing"); yield return null;
+            Assert.That(picked, Is.EqualTo("processing")); Assert.That(dev.Visible, Is.False);
+            foreach (var name in Galaxy101.Table.TableScenarios.Names) Assert.That(Galaxy101.Table.TableScenarios.Create(name), Is.Not.Null, name);
+        }
+
         // ---------- the real server ----------
         [UnityTest]
         public IEnumerator LiveServer()

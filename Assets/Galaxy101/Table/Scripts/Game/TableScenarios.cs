@@ -11,7 +11,7 @@ namespace Galaxy101.Table
     /// </summary>
     public static class TableScenarios
     {
-        public static readonly string[] Names = { "processing", "shortOpening", "fromHand" };
+        public static readonly string[] Names = { "processing", "shortOpening", "fromHand", "opening" };
 
         public static RoundState Create(string name)
         {
@@ -20,6 +20,7 @@ namespace Galaxy101.Table
                 case "processing": return Processing();
                 case "shortOpening": return ShortOpening();
                 case "fromHand": return FromHand();
+                case "opening": return Opening();
                 default: throw new ArgumentException("Unknown scenario: " + name, nameof(name));
             }
         }
@@ -107,6 +108,18 @@ namespace Galaxy101.Table
             int[] Hidden(int n) => Enumerable.Range(0, n).Select(_ => rest.Dequeue()).ToArray();
             var hands = new[] { mine, Hidden(21), Hidden(21), Hidden(21) };
             return b.State(hands, Enumerable.Repeat(OpeningKind.None, 4).ToArray(), 0, RoundPhase.AwaitingDraw, rest);
+        }
+
+        /// <summary>El açma: my first turn with 22 tiles, R10-13 · 11s · Y7-9 = 103 ready to open.</summary>
+        private static RoundState Opening()
+        {
+            var b = new Builder(K, 4);
+            var mine = b.Hand((R, 10), (R, 11), (R, 12), (R, 13), (K, 11), (B, 11), (Y, 11), (Y, 7), (Y, 8), (Y, 9),
+                (B, 2), (K, 7), (R, 3), (Y, 1), (B, 6), (K, 9), (R, 6), (B, 13), (Y, 4), (K, 1), (B, 8), (R, 8));
+            var rest = b.Rest(101);
+            int[] Hidden(int n) => Enumerable.Range(0, n).Select(_ => rest.Dequeue()).ToArray();
+            var hands = new[] { mine, Hidden(21), Hidden(21), Hidden(21) };
+            return b.State(hands, Enumerable.Repeat(OpeningKind.None, 4).ToArray(), 0, RoundPhase.PlanningTurn, rest, initial: true);
         }
 
         /// <summary>Elden bitiş: I start with 22, never opened; 21 sit in sets and K8 is the spare — Elden bit.</summary>

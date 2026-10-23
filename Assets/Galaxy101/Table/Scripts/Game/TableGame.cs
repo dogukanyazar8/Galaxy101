@@ -41,6 +41,12 @@ namespace Galaxy101.Table
         public NetworkTableSession Online { get; private set; }
         /// <summary>Set by the menu before loading the table scene: play this server match instead of the bots.</summary>
         public static NetworkTableSession PendingOnline;
+        /// <summary>Developer test menu (spec/25): the table opens straight into this scenario.</summary>
+        public static string PendingScenario;
+        /// <summary>İşlek taş testi: bots throw a playable tile 60 % of the time (and take the +101).</summary>
+        public bool PlayableBots;
+        private bool quickDeal;
+        public string Scenario { get; private set; }
         /// <summary>The lobby table's name and type for the top bar ("Gece Kuşları · Tekli").</summary>
         public static string PendingRoom;
         public string OnlineRoom { get; private set; }
@@ -160,6 +166,7 @@ namespace Galaxy101.Table
             Online = PendingOnline; PendingOnline = null; OnlineRoom = PendingRoom; PendingRoom = null;
             if (Online != null) { Session = Online; seating = false; Online.Changed += OnOnlineChanged; }
             else { local = new LocalTableSession(); Session = local; TableRules.Current.UseHands(null); }
+            if (Online == null && PendingScenario != null) { Scenario = PendingScenario; PendingScenario = null; ApplyScenario(Scenario); }
             life = new CancellationTokenSource();
             random = seed != 0 ? new System.Random((int)seed) : new System.Random();
             if (hud != null)
@@ -247,7 +254,7 @@ namespace Galaxy101.Table
                     Rack.Deal(view.OwnHand.Select(t => t.Value).ToList());
                     Current = Phase.Deal; Active = -1; Notify();
                     dealInfo = view.Deal;
-                    if (CeremonyEnabled && dealInfo != null && !(HandNumber == 1 && initialState != null && !CeremonyOnPreparedHand))
+                    if (CeremonyEnabled && !quickDeal && dealInfo != null && !(HandNumber == 1 && initialState != null && !CeremonyOnPreparedHand))
                     {
                         var dealt = BuildBoard(view); dealIndicator = TileCodes.Code(dealt.Indicator);
                         Board.Clear(); Board.LayoutDeck(0);
@@ -364,6 +371,18 @@ namespace Galaxy101.Table
             MatchOpen = false; LeaveNow();
         }
 
+        private void ApplyScenario(string name)
+        {
+            switch (name)
+            {
+                case "seat": seating = true; break;
+                case "deal": seating = false; break;
+                case "play": seating = false; quickDeal = true; break;
+                case "playable": seating = false; initialState = TableScenarios.Create("processing"); PlayableBots = true; break;
+                default: seating = false; initialState = TableScenarios.Create(name); break;
+            }
+        }
+
         /// <summary>Run or set for the board layout; a run's first number from its first real tile (okeys fill the gaps).</summary>
         private (bool Run, int Start) ClassifyMeld(int[] tiles)
         {
@@ -417,6 +436,13 @@ namespace Galaxy101.Table
                 var projected = TableEvaluator.Evaluate(PlayerViewProjector.ForEvaluation(view).Value, plan.Actions);
                 if (projected.Success) { Board.Sync(BuildBoard(Session.GetView(Me), projected.Value, seat)); Notify(); }
                 await Seconds(0.65f);
+            }
+            if (PlayableBots && random.NextDouble() < 0.6)
+            {
+                // İşlek taş testi: instead of laying it off, throw a tile that fits a meld on the table (the engine writes +101).
+                var before = PlayerViewProjector.ForEvaluation(view).Value;
+                var playable = before.Players[seat].Hand.Where(t => !TileCatalog.IsRealJoker(t, Indicator) && PenaltyEvaluator.GetDiscardPenalty(before, t, false) > 0).Take(1).ToList();
+                if (playable.Count > 0 && before.Players[seat].Hand.Count > 1) plan = new TurnPlan(Array.Empty<TableAction>(), playable[0], true);
             }
             var receipt = await Submit(new CommitTurnCommand(Meta(view), plan), false);
             if (!receipt.Accepted)

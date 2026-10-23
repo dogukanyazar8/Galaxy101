@@ -71,6 +71,19 @@ namespace Galaxy101
             View.Refresh();
         }
         private bool invitesHooked;
+        public DevTestMenu DevMenu {get;private set;}
+        /// <summary>spec/25: open the 3D table straight into a test scenario (developer menu).</summary>
+        public void StartScenario(string key)
+        {
+            Galaxy101.Table.TableGame.PendingScenario=key;
+            _=StartLocalAsync(GalaxyTableScene);
+        }
+        private void Update()
+        {
+            if(!DevTestMenu.Available||View==null)return;
+            var keyboard=UnityEngine.InputSystem.Keyboard.current;
+            if(keyboard!=null&&keyboard.f9Key.wasPressedThisFrame){DevMenu=DevMenu??new DevTestMenu(View,StartScenario);DevMenu.Toggle();}
+        }
         /// <summary>Set by an online table when it closes: the menu opens straight into the lobby.</summary>
         public static bool ReturnToLobby;
         private System.Action onlineChanged;

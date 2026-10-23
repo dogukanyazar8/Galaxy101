@@ -24,6 +24,7 @@ namespace Galaxy101.Tests
         public IEnumerator TearDown()
         {
             Time.timeScale = 1;
+            TableGame.PendingScenario = null;
             foreach (var go in new[] { hudOwner, gameOwner, sceneOwner }) if (go != null) UnityEngine.Object.Destroy(go);
             yield return null;
             if (statePath != null && File.Exists(statePath)) File.Delete(statePath);
@@ -176,6 +177,63 @@ namespace Galaxy101.Tests
             yield return Until(() => game.HudState().Moment != null, 10, "the finish banner");
             Assert.That(game.HudState().Moment.Title, Does.Contain("ELDEN").Or.Contain("FROM THE HAND"));
             yield return new WaitForSeconds(.8f); yield return Shot("G28_elden_bittin.png");
+        }
+
+        private TableGame ScenarioTable(string key)
+        {
+            TableGame.PendingScenario = key;
+            gameOwner = new GameObject("TableGame"); var game = gameOwner.AddComponent<TableGame>();
+            sceneOwner = new GameObject("GalaxyTable"); sceneOwner.AddComponent<TableScene>();
+            statePath = Path.Combine(Path.GetTempPath(), "galaxy-v3-" + Guid.NewGuid().ToString("N") + ".json");
+            hudOwner = new GameObject("TableHud"); hudOwner.SetActive(false);
+            hudOwner.AddComponent<UIDocument>().panelSettings = Resources.Load<PanelSettings>("Galaxy101/UI/PanelSettings");
+            hudOwner.AddComponent<TableHud>(); hudOwner.SetActive(true); Hud.Initialize(statePath);
+            return game;
+        }
+
+        [UnityTest]
+        [Timeout(120000)]
+        public IEnumerator TheOpeningScenarioOpensOnTheCentreBoard()
+        {
+            var game = ScenarioTable("opening");
+            yield return Until(() => game.CanDiscard, 30, "my first turn");
+            Assert.That(game.Scenario, Is.EqualTo("opening"));
+            int I(TileColor c, int n) => TableScenarios.Id(c, n);
+            const TileColor R = TileColor.Red, Y = TileColor.Yellow, B = TileColor.Blue, K = TileColor.Black;
+            int[] top = { I(R, 10), I(R, 11), I(R, 12), I(R, 13), -1, I(K, 11), I(B, 11), I(Y, 11), -1, I(Y, 7), I(Y, 8), I(Y, 9) };
+            var plan = new System.Collections.Generic.Dictionary<int, RackSlot>();
+            for (int i = 0; i < top.Length; i++) if (top[i] >= 0) plan[top[i]] = new RackSlot(0, i);
+            int col = 0; foreach (var id in game.Rack.Tiles.Where(id => !top.Contains(id)).ToList()) plan[id] = new RackSlot(1, col++);
+            game.ApplyRackPlan(plan); yield return null;
+            Assert.That(game.HudState().ShortOpen, Is.False, "103 is enough");
+            game.OpenRuns(); yield return null;
+            Assert.That(game.Board.Layout.Count, Is.GreaterThanOrEqualTo(3));
+            yield return new WaitForSeconds(1.2f);
+            Assert.That(sceneOwner.GetComponent<TableScene>().DeckShift, Is.LessThan(-0.3f), "the deck is sliding left");
+            yield return Shot("G13_opening.png");
+        }
+
+        [UnityTest]
+        [Timeout(240000)]
+        public IEnumerator ThePlayableTileScenarioPenalisesBotsThatThrowAPlayableTile()
+        {
+            var game = ScenarioTable("playable");
+            Time.timeScale = 4;
+            yield return Until(() => game.CanDraw, 30, "my draw turn");
+            Assert.That(game.PlayableBots, Is.True);
+            float until = Time.realtimeSinceStartup + 120; bool penalised = false;
+            while (!penalised && Time.realtimeSinceStartup < until)
+            {
+                var view = game.Session.GetView(TableGame.Me);
+                if (view.Result != null) break;
+                penalised = view.Players.Skip(1).Any(p => p.Penalties >= 101);
+                if (game.CanDraw) { var d = game.Draw(DrawSource.Stock, null); yield return Until(() => d.IsCompleted, 10, "draw"); continue; }
+                if (game.CanDiscard) { int tile = game.Rack.Tiles.First(id => game.Session.GetView(TableGame.Me).Table.All(m => true)); game.Discard(game.LastDrawn >= 0 && game.Rack.Tiles.Contains(game.LastDrawn) ? game.LastDrawn : tile); yield return Until(() => !game.CanDiscard, 10, "discard"); continue; }
+                yield return null;
+            }
+            Assert.That(penalised, Is.True, "a bot threw a playable tile and took +101");
+            Time.timeScale = 1; yield return new WaitForSeconds(.5f);
+            yield return Shot("G24_islek_tas_ceza.png");
         }
     }
 }

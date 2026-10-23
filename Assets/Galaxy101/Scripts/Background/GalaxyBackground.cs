@@ -60,6 +60,8 @@ namespace Galaxy101
         /// </summary>
         public void UseStaticLayout(Vector4 gradient,Vector4 halo,Vector4 placement,Color haloColor)
         {tableLayout=true;tableHalo=haloColor;layoutShape=gradient;layoutHalo=new Vector4(halo.x,halo.y,halo.z,1);layoutPlacement=placement;dirty=true;}
+        /// <summary>Back to the menu composition (glow, rim, vignette, the planet behind the logo).</summary>
+        public void UseMenuLayout() {if(!tableLayout)return;tableLayout=false;dirty=true;}
         public void SetFocused(bool value) {if(focused!=value) wasRunning=false;focused=value;}
         // A batch player deliberately renders into its own targets without an OS foreground window.
         private void OnApplicationFocus(bool value) => SetFocused(value||Application.isBatchMode);

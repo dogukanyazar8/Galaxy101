@@ -55,6 +55,7 @@ namespace Galaxy101
             var online=Galaxy101.Online.GalaxyOnline.Ensure();
             Auth=new AuthFlow(View,transform,online);
             Auth.Completed+=()=>{ApplyOnline(online);online.Changed+=()=>ApplyOnline(online);};
+            if(!invitesHooked){invitesHooked=true;online.Realtime.On<Galaxy101.Contracts.InviteMessage>(Galaxy101.Contracts.MessageTypes.Invite,message=>{if(this==null||Auth!=null&&Auth.Visible)return;OpenLobby();Lobby.ShowInvite(message);});}
             Auth.Show();
         }
         /// <summary>The menu shows the server's name, colour and balance once signed in.</summary>
@@ -64,10 +65,45 @@ namespace Galaxy101
             if(online.Wallet!=null){Model.Chips=online.Wallet.Chips;Model.Gems=online.Wallet.Gems;}
             View.Refresh();
         }
+        private bool invitesHooked;
+        /// <summary>The Klasik lobby (spec/20); its backend is the signed-in session unless a test supplies one.</summary>
+        public LobbyScreen Lobby {get;private set;}
+        public static Func<Galaxy101.Online.ILobbyBackend> LobbyBackend;
+        /// <summary>Tests keep the lobby on screen when a match starts.</summary>
+        public static bool OpenMatchTable=true;
+        private Galaxy101.Online.LobbyClient lobbyClient;
+        public void OpenLobby()
+        {
+            Initialize();if(Lobby!=null&&Lobby.Visible)return;
+            if(Lobby==null)
+            {
+                Galaxy101.Online.ILobbyBackend backend=LobbyBackend?.Invoke();
+                if(backend==null){lobbyClient=new Galaxy101.Online.LobbyClient(Galaxy101.Online.GalaxyOnline.Ensure());backend=lobbyClient;}
+                Lobby=new LobbyScreen(View,backend);
+                Lobby.BuyRequested+=()=>View.OpenPanel("shop");
+                Lobby.Closed+=()=>background?.UseMenuLayout();
+                Lobby.MatchStarted+=OnMatchStarted;
+            }
+            // S09: the planet rises to the top-right corner behind the lobby.
+            background?.UseStaticLayout(new Vector4(900,120,1300,760),new Vector4(1215,60,300,1),new Vector4(1215,60,.95f,0),View.C("var(--pg)"));
+            Lobby.Show();
+        }
+        /// <summary>
+        /// A lobby table became a match. Until the networked table lands (V7) the 3D table opens with the same options
+        /// against the local engine, so the flow from lobby to table is complete.
+        /// </summary>
+        private void OnMatchStarted(Galaxy101.Contracts.TableStateMessage state)
+        {
+            Debug.Log("GALAXY101_MATCH_STARTED match="+state.MatchId+" seat="+state.YourSeat);
+            if(!OpenMatchTable)return;
+            Lobby?.Hide();
+            OnPlay(4,GalaxyTableScene);
+        }
         private void OnPlay(int mode)=>OnPlay(mode,GalaxyTableScene);
         private async void OnPlay(int mode,string scene)
         {
             PlayRequested?.Invoke(mode);Debug.Log("GALAXY101_PLAY_REQUESTED mode="+mode);
+            if(mode==0){OpenLobby();return;}
             if(mode!=4||navigating)return;
             try{await StartLocalAsync(scene);}
             catch(Exception exception){Debug.LogException(exception);if(this!=null)View.Toast(View.L("Masa açılamadı. Yeniden deneyin.","Could not open the table. Try again."));}
@@ -116,7 +152,7 @@ namespace Galaxy101
         {
             if(Model!=null)Model.Changed-=ApplySettings;
             if(View!=null){if(background!=null)View.BackgroundChanged-=background.Configure;View.PlayRequested-=OnPlay;View.Dispose();}
-            localization?.Dispose();
+            localization?.Dispose();lobbyClient?.Dispose();
         }
     }
 }

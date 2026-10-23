@@ -70,7 +70,20 @@ namespace Galaxy101.Table
         public bool CanDrawSide => CanDraw && !deckOnly;
         public int PickedTile => pickedTile >= 0 && Rack.TryFind(pickedTile, out _) ? pickedTile : -1;
         public IReadOnlyList<(string Why, int Amount)> PenaltyReasons(int seat) => penaltyReasons[seat];
-        public bool CanDiscard => HumanTurn && Current == Phase.Discard;
+        public bool CanDiscard => HumanTurn && Current == Phase.Discard && !shortShowing;
+        private bool shortShowing;
+        /// <summary>Geri topla (spec/22): something staged this turn that can be taken back before the discard.</summary>
+        public bool CanUndo => CanDiscard && staged.Count > 0;
+        /// <summary>Elden bit (spec/22): never opened, 15+ tiles, every tile but one in the rack's valid sets.</summary>
+        public bool CanFinishFromHand
+        {
+            get
+            {
+                if (!CanDiscard || OpenedKind(Me) != OpeningKind.None || staged.Count > 0 || Rack.Count < 15) return false;
+                var eval = HandEvaluation.Of(Rack, Indicator);
+                return eval.Groups.Sum(g => g.Tiles.Count) == Rack.Count - 1;
+            }
+        }
         public bool CanArrange => Current != Phase.Waiting && Current != Phase.Seating && Current != Phase.Deal;
 
         // ---------- Faz 4: seating, finish moment, hand result, leave card ----------
@@ -392,11 +405,14 @@ namespace Galaxy101.Table
             if (info.Winner.HasValue)
             {
                 int w = info.Winner.Value; momentSeat = w;
-                momentTitle = w == Me ? L("BİTİRDİN!", "YOU FINISHED!") : Upper(Name(w)) + L(" BİTİRDİ!", " FINISHED!");
+                bool fromHand = info.WinnerOpenedThisTurn && FinishingFromHand;
+                momentTitle = fromHand && w == Me ? L("ELDEN BİTTİN!", "FINISHED FROM THE HAND!") : w == Me ? L("BİTİRDİN!", "YOU FINISHED!") : Upper(Name(w)) + L(" BİTİRDİ!", " FINISHED!");
                 momentSub = info.Reason == FinishReason.AllPairs ? L("Çiftle bitirdi · el puanlanmadı", "Finished with pairs · hand not scored")
                     : L("Son taşını desteye kapattı · ", "Closed the last tile on the deck · ") + Signed(view.Result.Scores[w].Total ?? -101) + L(" puan", " points");
             }
             else { momentSeat = -1; momentTitle = L("TAŞ BİTTİ", "DECK EMPTY"); momentSub = L("En düşük puanlı oyuncu eli alır", "Lowest score takes the hand"); }
+            if (FinishingFromHand && info.Winner == Me) momentSub = L("Rakiplerin puanı ×2 · ", "Opponents score ×2 · ") + Signed(view.Result.Scores[Me].Total ?? -202) + L(" puan", " points");
+            FinishingFromHand = false;
             momentOn = true; momentAt = Time.realtimeSinceStartup; Notify();
             // spec/10 §7–§8: celebrate the finisher (spot, confetti, camera lean for an opponent) or shuffle on a deck out.
             if (info.Winner.HasValue)
@@ -610,6 +626,15 @@ namespace Galaxy101.Table
         /// <summary>spec/17 §3: no confirmation; a playable tile or the okey is thrown knowingly and the penalty is written.</summary>
         private async Task<bool> TryCommit(int id, bool explain)
         {
+            if (FinishingFromHand && Board.ViewOf(id) is TileView bomb && bomb != null)
+            {
+                // spec/23: the last tile is launched into the deck with the nuclear landing, then the turn commits.
+                bomb.enabled = false;
+                var impact = table.DeckTop(Board.DeckShown).position;
+                float wait = Fx.Nuclear(bomb.transform, impact, table.CameraRig, () => hud?.NuclearFlash());
+                await Seconds(wait + 0.9f);
+                bomb.enabled = true;
+            }
             var view = Session.GetView(Me);
             var plan = new TurnPlan(staged.ToArray(), new TileId(id), true);
             var receipt = await Execute(new CommitTurnCommand(Meta(view), plan));
@@ -739,12 +764,58 @@ namespace Galaxy101.Table
         }
 
         /// <summary>Eksik açılış: the engine writes +101; the groups stay on the rack (spec/17 §3, T35).</summary>
+        /// <summary>
+        /// Hatalı açma (spec/22): the sets go down on the board for 1.5 s, then back to the rack with +101 and a fresh turn
+        /// clock.
+        /// </summary>
         private async Task ShortOpening(OpeningKind kind)
         {
             if (staged.Count > 0) { staged.Clear(); Rack.Sync(Session.GetView(Me).OwnHand.Select(t => t.Value), TileCodes.FaceFor(Indicator), autoSort); }
+            var eval = HandEvaluation.Of(Rack, Indicator);
+            var groups = kind == OpeningKind.Pairs ? eval.Pairs : eval.Groups;
+            if (groups.Count > 0)
+            {
+                shortShowing = true;
+                try
+                {
+                    var shown = groups.Select(g => g.Tiles.Select(t => t.Id.Value).ToArray()).ToList();
+                    foreach (var ids in shown) foreach (var id in ids) Rack.Remove(id);
+                    var state = BuildBoard(Session.GetView(Me));
+                    for (int i = 0; i < shown.Count; i++) state.Melds.Add((9000 + i, Me, shown[i]));
+                    Board.Sync(state); Notify();
+                    await Seconds(1.5f);
+                }
+                finally { shortShowing = false; }
+            }
             await Execute(new ShortOpeningCommand(Meta(Session.GetView(Me)), kind));
+            Rack.Sync(Session.GetView(Me).OwnHand.Select(t => t.Value), TileCodes.FaceFor(Indicator), autoSort);
+            turnStarted = Time.time; turnStartedReal = Time.realtimeSinceStartup; warned = false;
             SyncBoard(); Notify();
         }
+
+        /// <summary>Geri topla: everything staged this turn returns (no penalty for taking back a valid opening).</summary>
+        public void Undo()
+        {
+            if (!CanUndo) return;
+            staged.Clear(); Rack.Sync(Session.GetView(Me).OwnHand.Select(t => t.Value), TileCodes.FaceFor(Indicator), autoSort);
+            targetsFor = -2; SyncBoard(); Notify();
+            Message(TableHud.ToastKind.Info, L("Taşlar ıstakana döndü", "Tiles back on your rack"));
+        }
+
+        /// <summary>Elden bit: the sets go down and the spare tile is the finishing discard (×2 scoring by the engine).</summary>
+        public void FinishFromHand()
+        {
+            if (!CanFinishFromHand) return;
+            var eval = HandEvaluation.Of(Rack, Indicator);
+            var used = new HashSet<int>(eval.Groups.SelectMany(g => g.Tiles.Select(t => t.Id.Value)));
+            int spare = Rack.Tiles.First(id => !used.Contains(id));
+            Stage(new List<TableAction> { new OpenGroups(OpeningKind.Series, eval.Groups) }, eval.Groups);
+            if (staged.Count == 0) return;
+            FinishingFromHand = true;
+            Discard(spare);
+        }
+        /// <summary>The current discard finishes from the hand (the nuclear landing plays).</summary>
+        public bool FinishingFromHand { get; private set; }
 
         private void Stage(List<TableAction> actions, List<MeldProposal> groups)
         {
@@ -1001,6 +1072,8 @@ namespace Galaxy101.Table
             switch (command)
             {
                 case "roll": rollSignal?.TrySetResult(true); break;
+                case "undo": Undo(); break;
+                case "fromhand": FinishFromHand(); break;
                 case "open": OpenRuns(); break;
                 case "pairs": OpenPairs(); break;
                 case "sort-run": SortRack(true); break;
@@ -1092,6 +1165,8 @@ namespace Galaxy101.Table
             if (ResultOpen && LastResult != null) s.Result = ResultInfo(view);
             if (MatchOpen) s.Match = MatchInfo();
             s.Deal = DealCard();
+            s.CanUndo = CanUndo; s.CanFromHand = CanFinishFromHand;
+            s.ShortOpen = CanDiscard && OpenedKind(Me) == OpeningKind.None && eval.Sum < 101;
             return s;
         }
     }

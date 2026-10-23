@@ -155,6 +155,76 @@ namespace Galaxy101.Table
         /// Finish (spec/10 §7): gold spot over the finisher's corner (3.4 s sine envelope, peak 40), eight confetti bursts
         /// 240 ms apart over the avatar with rings on every other one.
         /// </summary>
+        /// <summary>
+        /// Elden bitiş (spec/23): the tile rises 0.58 m (0–46 %), trembles while growing ×1.15 → 1.4 with sparks, then
+        /// accelerates (cubic) into <paramref name="impact"/> trailing smoke. On impact: white / gold / orange light spheres,
+        /// three shock rings, 280 particles, a mushroom cloud of 34 puffs (stem, then cap, orange to grey), a point light
+        /// 90 → 0 (e^−3t), a 1.2 s camera shake and every lying tile hopping by distance. Returns seconds to impact.
+        /// </summary>
+        public float Nuclear(Transform tile, Vector3 impact, TableCameraRig rig, System.Action onImpact)
+        {
+            StartCoroutine(NuclearRun(tile, impact, rig, onImpact));
+            return 1.25f;
+        }
+
+        private System.Collections.IEnumerator NuclearRun(Transform tile, Vector3 impact, TableCameraRig rig, System.Action onImpact)
+        {
+            Vector3 start = tile.position, top = start + Vector3.up * 0.58f; var startScale = tile.localScale; var rotation = tile.rotation;
+            float t0 = Time.time;
+            while (Time.time - t0 < 0.8f)
+            {
+                float u = (Time.time - t0) / 0.8f, rise = Mathf.Clamp01(u / 0.46f), k = 1 - Mathf.Pow(1 - rise, 3);
+                float tremble = u > 0.46f ? 0.006f * (u - 0.46f) / 0.54f : 0;
+                tile.position = Vector3.Lerp(start, top, k) + new Vector3(Random.Range(-tremble, tremble), Random.Range(-tremble, tremble), Random.Range(-tremble, tremble));
+                tile.localScale = startScale * Mathf.Lerp(1.15f, 1.4f, u);
+                tile.rotation = rotation * Quaternion.AngleAxis(u * 25, Vector3.right);
+                if (u > 0.46f && Random.value < 0.5f) SparkAt(tile.position + Random.insideUnitSphere * 0.03f, Hex("#FFC94A"));
+                yield return null;
+            }
+            t0 = Time.time; var from = tile.position;
+            while (Time.time - t0 < 0.45f)
+            {
+                float u = (Time.time - t0) / 0.45f, k = u * u * u;
+                tile.position = Vector3.Lerp(from, impact, k); tile.Rotate(Vector3.up, 900 * Time.deltaTime, Space.World);
+                Smoke(tile.position);
+                yield return null;
+            }
+            tile.position = impact; tile.localScale = startScale;
+            onImpact?.Invoke();
+            rig?.Shake(1.2f);
+            var colors = new[] { Color.white, Hex("#FFD964"), Hex("#FF8A3D") };
+            for (int i = 0; i < 3; i++) { Burst(impact + Vector3.up * 0.02f, colors[i], 95, 1.1f + i * 0.35f); Wave(impact, colors[i], i * 0.18f); }
+            var lightGo = new GameObject("nukleer_isik"); lightGo.transform.position = impact + Vector3.up * 0.25f;
+            var light = lightGo.AddComponent<Light>(); light.type = LightType.Point; light.color = Hex("#FFB347"); light.range = 3.5f; light.intensity = 90;
+            var lying = new System.Collections.Generic.List<(Transform T, Vector3 P, float D)>();
+            foreach (var view in FindObjectsByType<TileView>(FindObjectsSortMode.None))
+                if (view != null && !view.Tweening && view.transform != tile && view.transform.position.y < TY + 0.05f) lying.Add((view.transform, view.transform.position, Vector3.Distance(view.transform.position, impact)));
+            t0 = Time.time; int puffs = 0;
+            while (Time.time - t0 < 2.2f)
+            {
+                float t = Time.time - t0;
+                light.intensity = 90 * Mathf.Exp(-3 * t);
+                // The mushroom: a rising stem for 0.6 s, then the spreading cap.
+                while (puffs < 34 && puffs < t / 1.1f * 34)
+                {
+                    bool cap = puffs >= 12; float a = Random.value * 6.283f, r = cap ? 0.06f + Random.value * 0.14f : Random.value * 0.03f;
+                    var at = impact + new Vector3(Mathf.Cos(a) * r, cap ? 0.32f + Random.value * 0.08f : 0.03f + puffs * 0.025f, Mathf.Sin(a) * r);
+                    var tone = Color.Lerp(Hex("#FF8A3D"), Hex("#8A8E9C"), puffs / 34f); tone.a = 0.45f;
+                    haze.Emit(at, new Vector3(0, cap ? 0.03f : 0.12f, 0), tone, 0.06f, 2.4f - t * 0.6f, cap ? 0.24f : 0.12f, false);
+                    puffs++;
+                }
+                foreach (var (tr, p, d) in lying)
+                {
+                    if (tr == null) continue;
+                    float delay = d * 0.6f, u = Mathf.Clamp01((t - delay) / 0.45f), hop = u <= 0 || u >= 1 ? 0 : Mathf.Sin(u * Mathf.PI) * 0.035f / (1 + d * 3);
+                    tr.position = p + Vector3.up * hop;
+                }
+                yield return null;
+            }
+            foreach (var (tr, p, _) in lying) if (tr != null) tr.position = p;
+            Destroy(lightGo);
+        }
+
         public void Celebrate(Vector3 tablePoint, Vector3 avatarPoint)
         {
             winSpot.transform.position = tablePoint + Vector3.up * 1.8f; winSpot.transform.rotation = Quaternion.LookRotation(Vector3.down, Vector3.forward); winSpotT = Time.time;

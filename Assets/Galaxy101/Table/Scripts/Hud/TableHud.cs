@@ -56,6 +56,8 @@ namespace Galaxy101.Table
             public string OkeyTip, DragBanner;
             /// <summary>spec/21: the deal ceremony card and the "Zar at" button while dealing.</summary>
             public DealInfoCard Deal;
+            /// <summary>spec/22: Geri topla, Elden bit, and Aç below 101 (orange: a wrong opening costs +101).</summary>
+            public bool CanUndo, CanFromHand, ShortOpen;
         }
 
         public sealed class OkeyMark { public int Id; public string Number, Color; public bool Target, Invalid; }
@@ -1160,9 +1162,38 @@ namespace Galaxy101.Table
                 MenuView.Tracking(line, 1.2f, 10); info.Add(line); info.style.marginBottom = 6; column.Add(info);
             }
             var buttons = Row(6);
+            if (s.CanUndo)
+            {
+                var undo = Row(6); undo.name = "table-undo"; undo.focusable = true; Pad(undo, 12, 14, 12, 12);
+                view.Decorate(undo, "#3D7BFF", 15, 5, "#2148B0"); GalaxyFilters.HoverBrightness(undo, 1.1f);
+                undo.Add(Text("↓", "Montserrat-800", 15, "#fff")); undo.Add(Text(L("Geri topla", "Take back"), "Montserrat-800", 14, "#fff"));
+                buttons.Add(Clickable(undo, "undo"));
+            }
+            if (s.CanFromHand)
+            {
+                var bomb = Row(6); bomb.name = "table-fromhand"; bomb.focusable = true; Pad(bomb, 12, 16, 12, 12);
+                view.Decorate(bomb, "linear-gradient(#FF6B5E,#D9343F)", 15, 5, "#8E1A24"); GalaxyFilters.HoverBrightness(bomb, 1.1f);
+                // The bomb: a dark round body with a gold fuse spark; it wobbles every 1.4 s.
+                var icon = new VisualElement { pickingMode = PickingMode.Ignore }; icon.style.width = icon.style.height = 18;
+                view.Decorate(icon, "#2A1A1E", 9); var spark = new VisualElement { pickingMode = PickingMode.Ignore }; MenuView.Place(spark, 12, -3, 6, 6); view.Decorate(spark, "#FFC94A", 3); icon.Add(spark);
+                bomb.Add(icon); bomb.Add(Text(L("Elden bit", "Finish from hand"), "Montserrat-800", 15, "#fff"));
+                motions.Add(t => icon.style.rotate = new Rotate(12 * Mathf.Sin(t * 9) * (Mathf.Repeat(t, 1.4f) < .5f ? 1 : 0)));
+                buttons.Add(Clickable(bomb, "fromhand"));
+            }
             if (!opened && s.Pairs >= 3 || s.OpenedPairs[0])
                 buttons.Add(ActionButton("table-pairs", L("Çift aç · " + s.Pairs + "/5", "Open pairs · " + s.Pairs + "/5"), s.CanPair, false, 14, "pairs"));
-            if (!s.OpenedPairs[0]) buttons.Add(ActionButton("table-open", opened ? L("Yere aç", "Lay down") : L("Aç", "Open"), s.CanOpen, true, 17, "open"));
+            if (!s.OpenedPairs[0])
+            {
+                var open = ActionButton("table-open", opened ? L("Yere aç", "Lay down") : L("Aç", "Open"), s.CanOpen, true, 17, "open");
+                if (s.ShortOpen && s.CanOpen)
+                {
+                    // Hatalı açma: orange-red, with the warning as its tooltip.
+                    view.Decorate(open, "linear-gradient(#FF9A4D,#E8573A)", 15, 5, "#9E3418"); open.style.color = view.C("#fff");
+                    open.tooltip = L("Sayı yetmiyor · açarsan hatalı açma cezası alırsın", "Not enough points · opening now costs a wrong-opening penalty");
+                    open.EnableInClassList("short", true);
+                }
+                buttons.Add(open);
+            }
             column.Add(buttons); meter.Add(column);
             actions.Add(meter);
             hudLayer.Add(actions);

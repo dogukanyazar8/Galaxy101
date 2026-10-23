@@ -111,6 +111,17 @@ namespace Galaxy101.Table
             return die;
         }
 
+        /// <summary>Nuclear impact: a radial white → orange flash over the whole view for 1.3 s.</summary>
+        public void NuclearFlash()
+        {
+            if (canvas == null) return;
+            var flash = new VisualElement { name = "nuclear-flash", pickingMode = PickingMode.Ignore }; MenuView.Place(flash, 0, 0, Width, Height);
+            view.Decorate(flash, "radial-gradient(circle at 50% 45%,rgba(255,255,255,.95),rgba(255,180,90,.75) 40%,rgba(255,110,40,0) 80%)", 0);
+            canvas.Add(flash);
+            float began = Time.realtimeSinceStartup;
+            flash.schedule.Execute(() => { float u = (Time.realtimeSinceStartup - began) / 1.3f; flash.style.opacity = Mathf.Clamp01(1 - u * u); if (u >= 1) flash.RemoveFromHierarchy(); }).Every(16).Until(() => flash.parent == null);
+        }
+
         private VisualElement MiniTile(string code, bool okey)
         {
             var tile = new VisualElement { pickingMode = PickingMode.Ignore }; tile.style.width = 26; tile.style.height = 36; tile.style.flexShrink = 0;

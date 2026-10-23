@@ -104,5 +104,78 @@ namespace Galaxy101.Tests
             Assert.That(game.Rack.Tiles.Contains(y8), Is.False);
             Assert.That(game.Board.Layout.TryGet(yellowRun.Id, out var at) && at.Length == 4, Is.True, "the run grew on the board");
         }
+
+        [UnityTest]
+        [Timeout(120000)]
+        public IEnumerator UndoTakesBackALayOff()
+        {
+            var game = Table("processing");
+            yield return Until(() => game.CanDraw, 30, "my draw turn");
+            var draw = game.Draw(DrawSource.Stock, null); yield return Until(() => draw.IsCompleted && game.CanDiscard, 10, "the draw");
+            int y8 = TableScenarios.Id(TileColor.Yellow, 8), count = game.Rack.Count;
+            game.SetDragTile(y8); yield return null; var target = game.Targets.First(t => t.Okey < 0); game.SetDragTile(-1);
+            game.UseTarget(y8, target); yield return null;
+            Assert.That(game.CanUndo, Is.True); Assert.That(game.HudState().CanUndo, Is.True);
+            yield return null;
+            Assert.That(Hud.Canvas.Q<VisualElement>("table-undo"), Is.Not.Null);
+            yield return Shot("G18_geri_topla.png");
+            Hud.Press("undo"); yield return null;
+            Assert.That(game.Rack.Count, Is.EqualTo(count)); Assert.That(game.Rack.Tiles.Contains(y8), Is.True); Assert.That(game.CanUndo, Is.False);
+        }
+
+        [UnityTest]
+        [Timeout(120000)]
+        public IEnumerator AShortOpeningShowsTheSetsThenCostsAHundredAndOne()
+        {
+            var game = Table("shortOpening");
+            yield return Until(() => game.CanDraw, 30, "my draw turn");
+            var draw = game.Draw(DrawSource.Stock, null); yield return Until(() => draw.IsCompleted && game.CanDiscard, 10, "the draw");
+            game.SortRack(true); yield return null;
+            var state = game.HudState();
+            Assert.That(state.ShortOpen, Is.True); Assert.That(state.CanOpen, Is.True);
+            yield return null;
+            Assert.That(Hud.Canvas.Q<VisualElement>("table-open").ClassListContains("short"), Is.True, "Aç is orange below 101");
+            yield return Shot("G20_short_open_button.png");
+            int count = game.Rack.Count;
+            game.OpenRuns(); yield return new WaitForSeconds(.5f);
+            Assert.That(game.Rack.Count, Is.LessThan(count), "the sets are on the board for a moment");
+            yield return Shot("G21_short_open_table.png");
+            yield return Until(() => game.Rack.Count == count, 5, "the tiles coming back");
+            Assert.That(game.Session.GetView(TableGame.Me).OwnPenalties, Is.EqualTo(101));
+            yield return new WaitForSeconds(.4f);
+            yield return Shot("G22_short_open_penalty.png");
+        }
+
+        [UnityTest]
+        [Timeout(120000)]
+        public IEnumerator FinishingFromTheHandWinsTheHandAtDoubleScore()
+        {
+            var game = Table("fromHand");
+            yield return Until(() => game.CanDiscard, 30, "my first turn (22 tiles)");
+            int I(TileColor c, int n) => TableScenarios.Id(c, n);
+            const TileColor R = TileColor.Red, Y = TileColor.Yellow, B = TileColor.Blue, K = TileColor.Black;
+            int[][] rows =
+            {
+                new[] { I(R, 1), I(R, 2), I(R, 3), -1, I(Y, 6), I(Y, 7), I(Y, 8), I(Y, 9), -1, I(B, 9), I(B, 10), I(B, 11), I(B, 12) },
+                new[] { I(K, 5), I(R, 5), I(Y, 5), I(B, 5), -1, I(B, 13), I(K, 13), I(R, 13), -1, I(Y, 1), I(Y, 2), I(Y, 3), -1, I(K, 8) },
+            };
+            var plan = new System.Collections.Generic.Dictionary<int, RackSlot>();
+            for (int r = 0; r < 2; r++) for (int i = 0; i < rows[r].Length; i++) if (rows[r][i] >= 0) plan[rows[r][i]] = new RackSlot(r, i);
+            game.ApplyRackPlan(plan); yield return null;
+            Assert.That(game.CanFinishFromHand, Is.True, "21 tiles in sets, one spare");
+            yield return null;
+            Assert.That(Hud.Canvas.Q<VisualElement>("table-fromhand"), Is.Not.Null);
+            yield return Shot("G25_elden_bit.png");
+            Hud.Press("fromhand");
+            yield return new WaitForSeconds(.6f); yield return Shot("G26_launch.png");
+            yield return new WaitForSeconds(.75f); yield return Shot("G27_nuclear.png");
+            yield return Until(() => game.Session.GetView(TableGame.Me).Result != null, 20, "the finished hand");
+            var result = game.Session.GetView(TableGame.Me).Result;
+            Assert.That(result.FinishInfo.Winner, Is.EqualTo(TableGame.Me)); Assert.That(result.FinishInfo.WinnerOpenedThisTurn, Is.True);
+            Assert.That(result.Scores[1].M, Is.GreaterThanOrEqualTo(2), "opponents pay double");
+            yield return Until(() => game.HudState().Moment != null, 10, "the finish banner");
+            Assert.That(game.HudState().Moment.Title, Does.Contain("ELDEN").Or.Contain("FROM THE HAND"));
+            yield return new WaitForSeconds(.8f); yield return Shot("G28_elden_bittin.png");
+        }
     }
 }

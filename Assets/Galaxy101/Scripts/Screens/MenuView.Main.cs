@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -17,16 +19,35 @@ namespace Galaxy101
             var canvas=Root.Q<VisualElement>("galaxy-canvas")??throw new InvalidOperationException("MainMenu UXML lacks galaxy-canvas.");
             BackgroundTarget=canvas.Q<VisualElement>("background");mainLayer=canvas.Q<VisualElement>("main-layer");panelLayer=canvas.Q<VisualElement>("modal-layer");dialogLayer=canvas.Q<VisualElement>("dialog-layer");toastLayer=canvas.Q<VisualElement>("toast-layer");
             sceneUnderlay=canvas.Q<VisualElement>("scene-underlay");dialogUnderlay=canvas.Q<VisualElement>("dialog-underlay");
-            mainSignature=null;mountedPanel=mountedDialog=null;panelCard=dialogCard=null;
+            mainSignature=null;sections.Clear();mountedPanel=mountedDialog=null;panelCard=dialogCard=null;
             animationJob?.Pause();float last=Time.realtimeSinceStartup;
             animationJob=Root.schedule.Execute(()=>
             {
                 float now=Time.realtimeSinceStartup;float delta=Mathf.Clamp(now-last,0,.05f);last=now;if(!focused)return;animationTime+=delta;
                 foreach(var motion in motions)motion(animationTime);
+                foreach(var section in sections.Values)foreach(var motion in section.Motions)motion(animationTime);
                 foreach(var motion in panelMotions)motion(animationTime);
                 foreach(var motion in dialogMotions)motion(animationTime);
             }).Every(16);
             Rebuild();
+        }
+        private sealed class MainSection{public VisualElement Host;public string Signature;public readonly List<Action<float>> Motions=new List<Action<float>>();}
+        private readonly Dictionary<string,MainSection> sections=new Dictionary<string,MainSection>();
+        private VisualElement sectionHost;
+        private void AddMain(VisualElement element)=>(sectionHost??mainLayer).Add(element);
+        /// <summary>
+        /// (Re)builds one part of the main layer, in its place, only when its signature changes.
+        /// </summary>
+        private void Section(string key,string signature,Action build)
+        {
+            if(!sections.TryGetValue(key,out var section))sections.Add(key,section=new MainSection());
+            if(section.Signature==signature&&section.Host!=null&&section.Host.parent==mainLayer)return;
+            var old=section.Host;var host=new VisualElement{name="main-"+key,pickingMode=PickingMode.Ignore};host.AddToClassList("fill");
+            if(old!=null&&old.parent==mainLayer)mainLayer.Insert(mainLayer.IndexOf(old),host);else mainLayer.Add(host);
+            section.Motions.Clear();var previousTarget=buildingMotions;buildingMotions=section.Motions;sectionHost=host;
+            try{build();}finally{sectionHost=null;buildingMotions=previousTarget;}
+            section.Host=host;section.Signature=signature;
+            old?.RemoveFromHierarchy();
         }
         private void Rebuild()
         {
@@ -38,11 +59,16 @@ namespace Galaxy101
             {
                 int planetIndex=Array.IndexOf(PlanetNames,Model.Planet);if(planetIndex<0)planetIndex=0;
                 if(lastTheme!=null)Root.RemoveFromClassList("theme-"+lastTheme);lastTheme=PlanetIds[planetIndex];Root.AddToClassList("theme-"+lastTheme);
-                string signature=Model.Planet+"|"+Loc.Language+"|"+Model.SelectedMode+"|"+Model.Chips+"|"+Model.Gems+"|"+Model.Profile.ToString(Newtonsoft.Json.Formatting.None);
-                if(mainSignature!=signature)
-                {
-                    motions.Clear();buildingMotions=motions;mainLayer.Clear();BuildTopBar();BuildLogo(planetIndex);BuildPlay();BuildModes();BuildFooter();mainSignature=signature;
-                }
+                // Each part of the menu is rebuilt only when what it shows changed: picking a mode must not recreate the
+                // top bar, logo or footer (their filtered shadows would blink for a frame).
+                string common=Model.Planet+"|"+Loc.Language;
+                Section("top",common+"|"+Model.Chips+"|"+Model.Gems+"|"+Model.Profile.ToString(Newtonsoft.Json.Formatting.None),BuildTopBar);
+                Section("logo",common,()=>BuildLogo(planetIndex));
+                Section("play",common,BuildPlay);
+                Section("modes",common,BuildModes);
+                ApplyModes();
+                Section("footer",common+"|"+Model.DayClaimed+"|"+Services.Friends.GetFriends(true).Count,BuildFooter);
+                mainSignature=common;
                 mainLayer.EnableInClassList("main-blocked",Modals.Panel!=null||Modals.Dialog!=null);mainLayer.SetEnabled(Modals.Panel==null&&Modals.Dialog==null);
                 mainLayer.pickingMode=Modals.Panel==null&&Modals.Dialog==null?PickingMode.Position:PickingMode.Ignore;
                 panelLayer.pickingMode=Modals.Panel!=null?PickingMode.Position:PickingMode.Ignore;
@@ -78,7 +104,7 @@ namespace Galaxy101
         }
         private void BuildTopBar()
         {
-            var top=Box("top-bar");mainLayer.Add(top);
+            var top=Box("top-bar");AddMain(top);
             var avatar=Avatar(62,level:true);GalaxyFilters.HoverBrightness(avatar,1.1f);avatar.name="profile-open";avatar.AddToClassList("avatar-button");avatar.focusable=true;avatar.RegisterCallback<ClickEvent>(_=>OpenPanel("me"));avatar.RegisterCallback<NavigationSubmitEvent>(evt=>{OpenPanel("me");evt.StopImmediatePropagation();});top.Add(avatar);
             var name=Column(Text((string)Model.Profile["name"],18,true),Row(RankDiamond(18),Text(L("Altın II","Gold II"),14,true,"#FFC94A")));name.AddToClassList("top-name");top.Add(name);
             var spacer=Box();spacer.style.flexGrow=1;top.Add(spacer);
@@ -110,14 +136,14 @@ namespace Galaxy101
         {
             var logo=Resources.Load<Texture2D>("Galaxy101/Artwork/logo-"+PlanetIds[planet]);
             if(logo==null)throw new InvalidOperationException("Missing Galaxy logo artwork.");
-            var image=new Image{image=logo,pickingMode=PickingMode.Ignore};image.name="galaxy-logo";image.style.position=Position.Absolute;image.style.width=logo.width*.5f;image.style.height=logo.height*.5f;image.style.left=640-logo.width*.25f;image.style.top=44;mainLayer.Add(image);
+            var image=new Image{image=logo,pickingMode=PickingMode.Ignore};image.name="galaxy-logo";image.style.position=Position.Absolute;image.style.width=logo.width*.5f;image.style.height=logo.height*.5f;image.style.left=640-logo.width*.25f;image.style.top=44;AddMain(image);
             float[] x={506,596,696},y={191.6f,177.6f,191.6f};int[] w={78,88,78},h={108,122,108};float[] rotation={-10,2,10};string[] tint={"t1","t2","t3"};
             for(int i=0;i<3;i++)
             {
                 int index=i;var tile=Box("logo-tile");tile.name="logo-tile-"+i;Place(tile,x[i],y[i],w[i],h[i]);tile.style.rotate=new Rotate(rotation[i]);
                 Decorate(tile,"linear-gradient(var(--tf1),var(--tf2))",i==1?13:12,i==1?6:5,"var(--te2)");tile.style.borderBottomWidth=i==1?8:7;tile.style.borderBottomColor=C("var(--te)");
                 var number=Text(i==1?"0":"1",i==1?74:64,true,"var(--"+tint[i]+")");number.style.height=i==1?74:64;number.style.unityTextAlign=TextAnchor.MiddleCenter;tile.Add(number);
-                var dot=Box();dot.style.width=dot.style.height=i==1?16:14;dot.style.marginTop=3;Decorate(dot,"var(--"+tint[i]+")",99);tile.Add(dot);mainLayer.Add(tile);
+                var dot=Box();dot.style.width=dot.style.height=i==1?16:14;dot.style.marginTop=3;Decorate(dot,"var(--"+tint[i]+")",99);tile.Add(dot);AddMain(tile);
                 // floatA 3.2s ease-in-out, staggered .4s: 0 → -14px → 0.
                 Animate(t=>{float f=Mathf.Repeat(t-index*.4f,3.2f)/3.2f;tile.style.translate=new Translate(0,-14*(f<.5f?CssBezier(.42f,0,.58f,1,f*2):1-CssBezier(.42f,0,.58f,1,f*2-1)));});
             }
@@ -125,7 +151,7 @@ namespace Galaxy101
         private void BuildPlay()
         {
             // The host carries the hover/active transform so the whole CSS box-shadow stack moves with the button.
-            var host=Box("play-host");host.name="play-host";Place(host,460,352,360,86);mainLayer.Add(host);
+            var host=Box("play-host");host.name="play-host";Place(host,460,352,360,86);AddMain(host);
             // box-shadow: 0 7px 0 aS (top) · pulsing 0 0 0 0..16px gl ring · 0 14px 26px rgba(0,0,0,.4) (bottom).
             var caster=Box("play-shadow");caster.pickingMode=PickingMode.Ignore;Place(caster,0,7,360,86);Decorate(caster,"var(--aS)",24);GalaxyFilters.Shadow(caster,0,7,13,new Color(0,0,0,.4f));host.Add(caster);
             var pulse=Box("play-pulse");pulse.pickingMode=PickingMode.Ignore;Decorate(pulse,"var(--gl)",24);host.Add(pulse);
@@ -141,7 +167,7 @@ namespace Galaxy101
             play.RegisterCallback<PointerUpEvent>(_=>host.RemoveFromClassList("pressed"),TrickleDown.TrickleDown);
             play.RegisterCallback<PointerCaptureOutEvent>(_=>host.RemoveFromClassList("pressed"));
             Shine(play,2.8f,0,false);var title=Text(L("HEMEN OYNA","PLAY NOW"),34,true,"var(--aT)");Tracking(title,1,34);title.style.whiteSpace=WhiteSpace.NoWrap;title.style.height=36;play.Add(title);
-            string playSub=Model.SelectedMode==3?L("Dereceli · yakında açılıyor","Ranked · coming soon"):Model.SelectedMode==4?L("Botlara karşı · yakında açılıyor","Vs bots · coming soon"):L("Klasik · Tekli / Eşli · masalar","Classic · Singles / Pairs · tables");var subtitle=Text(playSub,13,false,"var(--aT)");subtitle.style.unityFont=Font("Baloo2-800");subtitle.style.marginTop=4;subtitle.style.opacity=.8f;play.Add(subtitle);host.Add(play);
+            var subtitle=Text(PlaySubtitle(),13,false,"var(--aT)");playSubtitle=subtitle;subtitle.name="play-subtitle";subtitle.style.unityFont=Font("Baloo2-800");subtitle.style.marginTop=4;subtitle.style.opacity=.8f;play.Add(subtitle);host.Add(play);
         }
         /// <summary>
         /// v3 modes (spec/20, S06): Klasik (Tekli / Eşli tables in the lobby), Dereceli and Botlara karşı marked YAKINDA.
@@ -151,35 +177,87 @@ namespace Galaxy101
         public static bool IsSoon(int mode) => mode != 0;
         private void BuildModes()
         {
-            var strip=Box("mode-strip");Place(strip,0,474,1280,90);strip.style.flexDirection=FlexDirection.Row;strip.style.justifyContent=Justify.Center;mainLayer.Add(strip);
+            var strip=Box("mode-strip");Place(strip,0,474,1280,90);strip.style.flexDirection=FlexDirection.Row;strip.style.justifyContent=Justify.Center;AddMain(strip);
             string[] names={L("Klasik","Classic"),L("Dereceli","Ranked"),L("Botlara karşı","Vs bots")},glyphs={"101","II","•"},colors={"#3D7BFF","#16B6A8","#3CCB6E"},shades={"#2148B0","#0C7F75","#22914A"};
             string[] online={N(14233),N(5630),L("Çevrimdışı","Offline")};
-            int selectedCard=Mathf.Max(0,Array.IndexOf(V3Modes,Model.SelectedMode));
+            modeCards.Clear();
             for(int i=0;i<3;i++)
             {
-                int index=V3Modes[i];bool selected=i==selectedCard;string color=colors[i],shade=shades[i];
+                int index=V3Modes[i];string color=colors[i],shade=shades[i];
                 var slot=Box("mode-slot");slot.style.width=208;slot.style.height=78;slot.style.marginRight=i==2?0:12;
-                var card=Button("",()=>{int previous=Model.SelectedMode;Model.SelectedMode=index;if(!Model.Persist()){Model.SelectedMode=previous;Toast(L("Değişiklikler kaydedilemedi. Tekrar dene.","Could not save changes. Try again."));}Refresh();},"mode-card");
-                card.name="mode-"+index;card.EnableInClassList("selected",selected);Place(card,0,0,208,78);Decorate(card,color,18,5,shade);
+                var card=Button("",()=>PickMode(index),"mode-card");
+                card.name="mode-"+index;Place(card,0,0,208,78);Decorate(card,color,18,5,shade);
                 card.style.flexDirection=FlexDirection.Column;card.style.justifyContent=Justify.Center;card.style.alignItems=Align.FlexStart;card.style.paddingLeft=card.style.paddingRight=14;card.style.overflow=Overflow.Hidden;
-                Color glow=C(color);glow.a=.6f;if(selected){GalaxyFilters.Shadow(card,0,14,16,glow);card.style.translate=new Translate(0,-6);}
-                GalaxyFilters.SaturationAndBrightness(card,selected?1:.7f,selected?1:.78f);
-                if(selected)
-                {
-                    var ring=Box("mode-selection-ring");Place(ring,-8.5f,-12-6,225,95);Decorate(ring,"#fff",26);slot.Add(ring);
-                    var gap=Box("mode-selection-gap");Place(gap,-5.5f,-9-6,219,89);Decorate(gap,"var(--bg3)",23);slot.Add(gap);
-                }
-                card.RegisterCallback<PointerEnterEvent>(_=>{GalaxyFilters.SaturationAndBrightness(card,1,1);card.style.translate=new Translate(0,-7);card.style.scale=new Scale(Vector2.one*1.04f);});
-                card.RegisterCallback<PointerLeaveEvent>(_=>{GalaxyFilters.SaturationAndBrightness(card,selected?1:.7f,selected?1:.78f);card.style.translate=new Translate(0,selected?-6:0);card.style.scale=new Scale(Vector2.one);});
+                // box-shadow "0 2.5px 0 5px #fff" ring around the selected (and hovered) card, over the page colour gap.
+                var ring=Box("mode-selection-ring");ring.pickingMode=PickingMode.Ignore;Place(ring,-8.5f,-12-6,225,95);Decorate(ring,"#fff",26);
+                var gap=Box("mode-selection-gap");gap.pickingMode=PickingMode.Ignore;Place(gap,-5.5f,-9-6,219,89);Decorate(gap,"var(--bg3)",23);
                 var glyph=Text(glyphs[i],58,true,"rgba(255,255,255,.16)");glyph.pickingMode=PickingMode.Ignore;glyph.style.position=Position.Absolute;glyph.style.right=-4;glyph.style.bottom=-14;card.Add(glyph);
                 var gloss=Box();Place(gloss,0,0,208,39);gloss.pickingMode=PickingMode.Ignore;Decorate(gloss,"linear-gradient(rgba(255,255,255,.18),transparent)",18);card.Add(gloss);
                 var title=Text(names[i],18,true,"#fff");title.pickingMode=PickingMode.Ignore;card.Add(title);
                 var line=Row();line.pickingMode=PickingMode.Ignore;line.style.marginTop=4;var dot=Box();dot.style.width=dot.style.height=6;dot.style.marginRight=5;Decorate(dot,"#8EF0B0",3);GalaxyFilters.Shadow(dot,0,0,3,C("#8EF0B0"));line.Add(dot);
                 var count=Text(online[i],11,false,"rgba(255,255,255,.9)");count.style.unityFont=Font("Baloo2-800");line.Add(count);card.Add(line);
                 if(IsSoon(index)){var soon=Text(L("YAKINDA","SOON"),9,false,"#fff");soon.name="mode-soon-"+index;soon.style.unityFont=Font("Baloo2-800");Tracking(soon,1.2f,9);soon.style.position=Position.Absolute;soon.style.right=10;soon.style.bottom=9;soon.style.paddingTop=soon.style.paddingBottom=3;soon.style.paddingLeft=soon.style.paddingRight=7;Decorate(soon,"rgba(0,0,0,.32)",6);card.Add(soon);}
-                if(selected){var tick=Box("mode-tick");tick.style.position=Position.Absolute;tick.style.right=8;tick.style.top=8;tick.style.width=tick.style.height=22;tick.style.alignItems=Align.Center;tick.style.justifyContent=Justify.Center;Decorate(tick,"#fff",99);tick.Add(Icon("tick",13,"#1B2440"));card.Add(tick);}
+                var tick=Box("mode-tick");tick.pickingMode=PickingMode.Ignore;tick.style.position=Position.Absolute;tick.style.right=8;tick.style.top=8;tick.style.width=tick.style.height=22;tick.style.alignItems=Align.Center;tick.style.justifyContent=Justify.Center;Decorate(tick,"#fff",99);tick.Add(Icon("tick",13,"#1B2440"));card.Add(tick);
+                Color glow=C(color);glow.a=.6f;
+                var state=new ModeCard{Index=index,Card=card,Slot=slot,Ring=ring,Gap=gap,Tick=tick,Glow=glow};modeCards.Add(state);
+                card.RegisterCallback<PointerEnterEvent>(_=>{state.Hover=true;ApplyModes();});
+                card.RegisterCallback<PointerLeaveEvent>(_=>{state.Hover=false;ApplyModes();});
+                card.RegisterCallback<FocusInEvent>(_=>{state.Focused=card.panel?.focusController?.focusedElement==card&&Root.ClassListContains("keyboard-navigation");ApplyModes();});
+                card.RegisterCallback<FocusOutEvent>(_=>{state.Focused=false;ApplyModes();});
                 slot.Add(card);strip.Add(slot);
             }
+            ApplyModes(instant:true);
+            Animate(t=>{foreach(var m in modeCards)m.Step(t);});
+        }
+        /// <summary>One mode card's look, eased like the design's CSS (transform .2s cubic-bezier(.3,1.5,.6,1); filter, box-shadow .2s).</summary>
+        private sealed class ModeCard
+        {
+            public int Index;public Button Card;public VisualElement Slot,Ring,Gap,Tick;public Color Glow;public bool Hover,Focused,On;
+            private float lift,scale=1,saturation=.7f,brightness=.78f,ring;
+            private float fromLift,fromScale,fromSaturation,fromBrightness,fromRing,toLift=float.NaN,toScale,toSaturation,toBrightness,toRing,began=-9;
+            private bool settled;
+            public void Target(bool on,float now,bool instant)
+            {
+                On=on;Card.EnableInClassList("selected",on);
+                float l=Hover?-7:on?-6:0,sc=Hover?1.04f:1,sa=Hover||on?1:.7f,br=Hover||on?1:.78f,r=Hover||on||Focused?1:0;
+                if(!instant&&l==toLift&&sc==toScale&&sa==toSaturation&&br==toBrightness&&r==toRing)return;
+                fromLift=instant?l:lift;fromScale=instant?sc:scale;fromSaturation=instant?sa:saturation;fromBrightness=instant?br:brightness;fromRing=instant?r:ring;
+                toLift=l;toScale=sc;toSaturation=sa;toBrightness=br;toRing=r;began=instant?-9:now;settled=false;Step(now);
+            }
+            public void Step(float now)
+            {
+                if(settled)return;
+                // Never restyle filters inside a hidden menu (the lobby covers it): the compositor asserts on those.
+                for(var up=Card.parent;up!=null;up=up.parent)if(up.resolvedStyle.display==DisplayStyle.None){began=-9;return;}
+                float f=Mathf.Clamp01((now-began)/.2f),k=CssBezier(.3f,1.5f,.6f,1,f),e=CssBezier(.25f,.1f,.25f,1,f);
+                lift=Mathf.LerpUnclamped(fromLift,toLift,k);scale=Mathf.LerpUnclamped(fromScale,toScale,k);
+                saturation=Mathf.Lerp(fromSaturation,toSaturation,e);brightness=Mathf.Lerp(fromBrightness,toBrightness,e);ring=Mathf.Lerp(fromRing,toRing,e);
+                Card.style.translate=new Translate(0,lift);Card.style.scale=new Scale(Vector2.one*scale);
+                var glow=Glow;glow.a*=ring;GalaxyFilters.StableLook(Card,saturation,brightness,0,14,16,glow);
+                // The ring pair lives in the slot only while it shows (an element at opacity 0 has empty draw bounds).
+                if(ring>.01f){if(Ring.parent==null){Slot.Insert(0,Gap);Slot.Insert(0,Ring);}Ring.style.opacity=Gap.style.opacity=ring;}
+                else if(Ring.parent!=null){Ring.RemoveFromHierarchy();Gap.RemoveFromHierarchy();}
+                // The tick never leaves the filtered card (changing a filtered element's children or their visibility trips
+                // UI Toolkit's render-tree compositor); unselected, it waits outside the card's clip.
+                Tick.style.translate=new Translate(On?0:80,0);
+                settled=f>=1;
+            }
+        }
+        private readonly List<ModeCard> modeCards=new List<ModeCard>();
+        private Label playSubtitle;
+        private void ApplyModes(bool instant=false)
+        {
+            int selected=Array.IndexOf(V3Modes,Model.SelectedMode)<0?V3Modes[0]:Model.SelectedMode;
+            foreach(var m in modeCards)m.Target(m.Index==selected,animationTime,instant);
+            if(playSubtitle!=null)playSubtitle.text=PlaySubtitle();
+        }
+        private string PlaySubtitle()=>Model.SelectedMode==3?L("Dereceli · yakında açılıyor","Ranked · coming soon"):Model.SelectedMode==4?L("Botlara karşı · yakında açılıyor","Vs bots · coming soon"):L("Klasik · Tekli / Eşli · masalar","Classic · Singles / Pairs · tables");
+        /// <summary>A mode card: saved, then the cards and HEMEN OYNA's subtitle change in place — nothing is rebuilt.</summary>
+        private void PickMode(int index)
+        {
+            int previous=Model.SelectedMode;Model.SelectedMode=index;
+            if(!Model.Persist()){Model.SelectedMode=previous;Toast(L("Değişiklikler kaydedilemedi. Tekrar dene.","Could not save changes. Try again."));}
+            ApplyModes();
         }
         /// <summary>HEMEN OYNA: Klasik opens the lobby; a YAKINDA mode only says so.</summary>
         private void Play()
@@ -189,12 +267,12 @@ namespace Galaxy101
         }
         private void BuildFooter()
         {
-            var shade=Box();Place(shade,0,610,1280,110);shade.pickingMode=PickingMode.Ignore;Decorate(shade,"linear-gradient(transparent,rgba(0,0,0,.55))");mainLayer.Add(shade);
+            var shade=Box();Place(shade,0,610,1280,110);shade.pickingMode=PickingMode.Ignore;Decorate(shade,"linear-gradient(transparent,rgba(0,0,0,.55))");AddMain(shade);
             string[] keys={"shop","friends","leader","daily","rules"},tr={"Mağaza","Arkadaşlar","Liderlik","Günlük ödül","Kurallar"},en={"Shop","Friends","Leaderboard","Daily reward","Rules"};
             string[] backgrounds={"linear-gradient(160deg,var(--a1),var(--a2))","linear-gradient(160deg,#7AA6FF,#3D6BF0)","linear-gradient(160deg,#C2A4FF,#7C4DEB)","linear-gradient(160deg,#4FDB80,#25A857)","linear-gradient(160deg,#5BE6D6,#14A596)"};
             string[] shadows={"var(--aS)","#2448B8","#5530B0","#18793F","#0C746A"},labels={"var(--a1)","#A9C4FF","#D4C2FF","#8EF0B0","#9AF2E8"};
             string[] glows={"var(--gl)","rgba(80,130,255,.4)","rgba(150,110,255,.4)","rgba(60,203,110,.4)","rgba(40,210,190,.4)"};
-            var nav=Box("footer-navigation");Place(nav,440,622,400,84);mainLayer.Add(nav);
+            var nav=Box("footer-navigation");Place(nav,440,622,400,84);AddMain(nav);
             for(int i=0;i<keys.Length;i++)
             {
                 string key=keys[i];var item=Button("",()=>OpenPanel(key),"plain nav-button");item.name="nav-"+key;if(i==keys.Length-1)item.style.marginRight=0;
@@ -214,7 +292,7 @@ namespace Galaxy101
             // Baloo 2 sits ~1px higher than Montserrat at these sizes; drop GAMES onto the CDX baseline.
             var games=Text("GAMES",11,false,"var(--mt)");Tracking(games,1.5f,11);games.style.translate=new Translate(0,1);studio.Add(games);brand.Add(studio);
             var separator=Box();separator.style.width=1;separator.style.height=10;separator.style.marginRight=8;separator.style.backgroundColor=C("var(--mt)");separator.style.opacity=.4f;brand.Add(separator);
-            var version=Text("v0.2.0",11,false,"var(--mt)");version.style.letterSpacing=0;version.style.opacity=.6f;brand.Add(version);mainLayer.Add(brand);
+            var version=Text("v0.2.0",11,false,"var(--mt)");version.style.letterSpacing=0;version.style.opacity=.6f;brand.Add(version);AddMain(brand);
         }
         private void BuildPlanetPicker()
         {
@@ -236,7 +314,7 @@ namespace Galaxy101
             }
             var theme=Model.Themes[Model.Planet];var title=Text((string)theme[Loc.Language=="en"?"name_en":"name_tr"],15,true,"var(--a1)");title.style.height=16.5f;title.style.flexShrink=0;title.style.whiteSpace=WhiteSpace.NoWrap;
             var description=Text((string)theme[Loc.Language=="en"?"desc_en":"desc_tr"],10,false,"var(--mt)");description.style.whiteSpace=WhiteSpace.NoWrap;
-            var names=Column(title,description);names.style.minWidth=64;pill.Add(names);picker.Add(pill);mainLayer.Add(picker);
+            var names=Column(title,description);names.style.minWidth=64;pill.Add(names);picker.Add(pill);AddMain(picker);
         }
         /// <summary>Planet orb with the reference rings: selected "0 0 0 2px #0008, 0 0 0 4px a1, 0 0 14px gl", else "0 0 0 1px rgba(255,255,255,.15)".</summary>
         public VisualElement PlanetOrb(string planet,int size,bool selected)

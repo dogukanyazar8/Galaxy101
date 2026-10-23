@@ -38,6 +38,19 @@ namespace Galaxy101
             filters.Add(Function(FilterFunctionType.DropShadow,new FilterParameter(x),new FilterParameter(y),new FilterParameter(sigma),new FilterParameter(color)));
             element.style.filter=new StyleList<FilterFunction>(filters);
         }
+        /// <summary>
+        /// Grayscale, tint and a soft drop shadow that are always present, only their amounts changing: UI Toolkit's
+        /// render-tree compositor asserts when an on-screen element's filter list changes shape (a shadow added or removed).
+        /// </summary>
+        public static void StableLook(VisualElement element,float saturation,float brightness,float x,float y,float sigma,Color shadow)
+        {
+            var filters=element.style.filter.value==null?new List<FilterFunction>():new List<FilterFunction>(element.style.filter.value);
+            filters.RemoveAll(f=>f.type==FilterFunctionType.Grayscale||f.type==FilterFunctionType.Tint||f.type==FilterFunctionType.DropShadow&&f.parameterCount>=3&&f.GetParameter(2).floatValue>0);
+            filters.Add(Function(FilterFunctionType.Grayscale,new FilterParameter(Mathf.Clamp01(1-saturation))));
+            filters.Add(Function(FilterFunctionType.Tint,new FilterParameter(new Color(brightness,brightness,brightness,1))));
+            filters.Add(Function(FilterFunctionType.DropShadow,new FilterParameter(x),new FilterParameter(y),new FilterParameter(sigma),new FilterParameter(shadow)));
+            element.style.filter=new StyleList<FilterFunction>(filters);
+        }
         public static void ClearSoftShadow(VisualElement element)
         {
             var filters=element.style.filter.value==null?new List<FilterFunction>():new List<FilterFunction>(element.style.filter.value);

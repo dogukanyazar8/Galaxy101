@@ -40,9 +40,12 @@
 .galaxy-button.play-button:hover, .galaxy-button.play-button:active { translate: 0 0; scale: 1 1; }
 .mode-strip { flex-direction: row; }
 .mode-slot { position: relative; flex-shrink: 0; }
-.mode-card { position: absolute; left: 0; top: 0; padding: 0 14px; align-items: flex-start; overflow: hidden; transition-duration: .2s; transition-timing-function: ease-out-back; }
-.mode-card.selected { translate: 0 -6px; }
-.mode-card:hover { translate: 0 -7px; scale: 1.04 1.04;  }
+/* Lift, scale, filters and ring are eased by MenuView.ModeCard (CSS: transform .2s cubic-bezier(.3,1.5,.6,1)); a USS
+   transition here would also tween the filter list, which UI Toolkit's compositor cannot do. */
+.mode-card { position: absolute; left: 0; top: 0; padding: 0 14px; align-items: flex-start; overflow: hidden; }
+.galaxy-button.mode-card { transition-duration: 0s; }
+/* Keyboard focus shows the card's own white ring (MenuView.ModeCard), not a border on the filtered card. */
+.keyboard-navigation .galaxy-button.mode-card:focus { border-width: 0; }
 .mode-glyph { position: absolute; right: -4px; bottom: -14px; }
 .mode-tick { position: absolute; right: 8px; top: 8px; width: 22px; height: 22px; align-items: center; justify-content: center; }
 .footer-navigation { flex-direction: row; align-items: flex-end; justify-content: center; }

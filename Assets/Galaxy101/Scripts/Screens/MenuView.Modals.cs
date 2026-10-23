@@ -60,20 +60,55 @@ namespace Galaxy101
             int width=key=="profile"?720:key=="add"?560:key=="share"?640:key=="bye"?420:480;
             AddModal(dialogLayer,content,width,0,true);
         }
+        /// <summary>The card's content moved into one page element, so a refresh can replace it as a whole.</summary>
+        private static VisualElement Page(VisualElement card)
+        {
+            // The page lays its children out as the card would have (some cards are rows).
+            var page=new VisualElement{name="modal-page",pickingMode=PickingMode.Ignore};page.style.flexGrow=1;page.style.minHeight=0;page.style.minWidth=0;
+            page.style.flexDirection=card.style.flexDirection.keyword==StyleKeyword.Undefined?card.style.flexDirection:FlexDirection.Column;
+            if(card.style.alignItems.keyword==StyleKeyword.Undefined)page.style.alignItems=card.style.alignItems;
+            if(card.style.justifyContent.keyword==StyleKeyword.Undefined)page.style.justifyContent=card.style.justifyContent;
+            if(card.style.flexWrap.keyword==StyleKeyword.Undefined)page.style.flexWrap=card.style.flexWrap;
+            if(card.ClassListContains("g-settings"))page.style.flexDirection=FlexDirection.Row; // Panels.uss .g-settings
+            if(card.ClassListContains("row")||card.ClassListContains("g-panel-row")){page.style.flexDirection=FlexDirection.Row;page.style.alignItems=Align.Center;}
+            foreach(var child in card.Children().ToArray())page.Add(child);
+            return page;
+        }
+        /// <summary>
+        /// A refreshed modal: the new page replaces the old one in place and, within the same tab, takes over its scroll
+        /// offsets — no jump to the top. (Old and new are never on screen together: overlapping filtered subtrees trip
+        /// UI Toolkit's render-tree compositor.)
+        /// </summary>
+        private static void SwapPage(VisualElement card,VisualElement page,bool keepScroll)
+        {
+            var old=card.Children().FirstOrDefault(c=>c.name=="modal-page");
+            card.Insert(0,page);
+            if(old==null)return;
+            var offsets=keepScroll?old.Query<ScrollView>().ToList().Select(v=>v.scrollOffset).ToList():new System.Collections.Generic.List<Vector2>();
+            old.RemoveFromHierarchy();
+            var scrolls=page.Query<ScrollView>().ToList();
+            for(int i=0;i<scrolls.Count&&i<offsets.Count;i++)
+            {
+                var view=scrolls[i];var offset=offsets[i];view.scrollOffset=offset;
+                EventCallback<GeometryChangedEvent> restore=null;restore=_=>{view.scrollOffset=offset;view.contentContainer.UnregisterCallback(restore);};view.contentContainer.RegisterCallback(restore);
+            }
+        }
         private void AddModal(VisualElement layer,VisualElement card,int width,int height,bool nested)
         {
             string key=nested?Modals.Dialog:Modals.Panel;
             var mounted=nested?dialogCard:panelCard;
             if(mounted!=null&&mounted.parent!=null&&(nested?mountedDialog:mountedPanel)==key)
             {
-                mounted.Clear();foreach(var child in card.Children().ToArray())mounted.Add(child);
-                Decorate(mounted,"pn",nested?26:28,10,"pnS");GalaxyFilters.Shadow(mounted,0,40,45,new Color(0,0,0,.6f));
+                // Scroll positions carry over only within the same tab; a new tab starts at the top.
+                string view=key+"|"+Tab(key);bool sameView=mounted.userData as string==view;mounted.userData=view;
+                SwapPage(mounted,Page(card),sameView);
                 return;
             }
             layer.Clear();
             var dim=Box("modal-backdrop");dim.name=nested?"dialog-backdrop":"panel-backdrop";Decorate(dim,nested?"rgba(0,0,0,.5)":"rgba(0,0,0,.55)");
             dim.RegisterCallback<PointerDownEvent>(evt=>{if(evt.target!=dim)return;CloseTop();evt.StopImmediatePropagation();});layer.Add(dim);
             var center=Box("modal-center");center.pickingMode=PickingMode.Ignore;center.style.width=Length.Percent(100);center.style.height=Length.Percent(100);layer.Add(center);
+            card.Add(Page(card));card.userData=key+"|"+Tab(key);
             card.style.width=width;if(height>0)card.style.height=height;card.style.flexShrink=0;card.AddToClassList(nested?"dialog-card":"panel-card");
             Decorate(card,"pn",nested?26:28,10,"pnS");GalaxyFilters.Shadow(card,0,40,45,new Color(0,0,0,.6f));card.style.overflow=Overflow.Hidden;card.focusable=true;card.pickingMode=PickingMode.Position;center.Add(card);
             if(nested){dialogCard=card;mountedDialog=key;}else{panelCard=card;mountedPanel=key;}

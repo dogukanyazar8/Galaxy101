@@ -12,7 +12,7 @@ Kaynak: `Design/galaxy101_unity_handoff` v3 (`spec/00`, `spec/18`–`25`, `refer
 | # | Kapsam | Belgeler | Durum |
 |---|---|---|---|
 | V1 ✓ | Görüntü: görüntü modu (Tam ekran / Çerçevesiz / Pencere), monitöre göre çözünürlük, kare hızı; değişimde menü, lobi, 3D masa, yükleme ekranı bozulmaz (RT yeniden boyut, UI ölçek, kamera oranı) | 19, 18 | |
-| V2 | Kural motoru v3: okey iki uca işleme, okey alma, hatalı açma +101, işlek taş +101, geri topla, soldan alınan taşı geri bırak, elden bitiş (×2), süre sıfırlama, el puanı; NUnit | 22 | |
+| V2 ✓ | Kural motoru v3: okey iki uca işleme, okey alma, hatalı açma +101, işlek taş +101, geri topla, soldan alınan taşı geri bırak, elden bitiş (×2), süre sıfırlama, el puanı; NUnit | 22 | |
 | V3 | Sunucu: e-posta/şifre kayıt-giriş (kilit), başlangıç bakiyeleri (misafir 10.000, kayıtlı 25.000), Klasik lobi (canlı masa listesi), masa aç (tür, ad, görünürlük, PIN, el, bahis, katlamalı, tur süresi, kurallar), kodla katıl, bekleme odası (bot ekle, çıkar, başlat, geri sayım), davet; v3 kurallarıyla maç | 18, 20, 22 | |
 | V4 | İstemci: açılış (S01), giriş seçimi/giriş/kayıt/misafir (S02–S05), ana menü v3 (S06, Klasik + YAKINDA), ayarlar (S07–S08); `Http*Service` + WebSocket, mock'lar testte | 18, 19 | |
 | V5 | Lobi (S09), masa aç (S10), PIN (S11), kodla katıl (S12), bekleme odası (S13), davet (S14–S15), bağlanıyor/doldu/kapandı | 20 | |

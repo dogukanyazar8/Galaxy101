@@ -36,12 +36,14 @@ namespace Okey101.Core.Model
         public DrawReceipt PendingDraw { get; }
         public int SeriesTilesUsed { get; }
         public RoundResult Result { get; }
+        /// <summary>Public deal facts (dealer, dice, stacks) for the deal ceremony; null for hand-made test states.</summary>
+        public DealInfo Deal { get; }
 
         public PlayerView(Guid roundId, long version, int actor, int activePlayer, RoundPhase phase,
             IReadOnlyList<TileId> ownHand, OpeningKind ownOpening, int ownPenalties,
             long ownLastSequence, TileId indicator, int stockCount, IReadOnlyList<PublicPlayerInfo> players,
             IReadOnlyList<Meld> table, IReadOnlyList<IReadOnlyList<TileId>> discards,
-            DrawReceipt pendingDraw, int seriesTilesUsed, RoundResult result = null)
+            DrawReceipt pendingDraw, int seriesTilesUsed, RoundResult result = null, DealInfo deal = null)
         {
             if (roundId == Guid.Empty) throw new ArgumentException("A round identity is required.", nameof(roundId));
             if (version < 0 || ownLastSequence < 0) throw new ArgumentOutOfRangeException(nameof(version));
@@ -56,7 +58,7 @@ namespace Okey101.Core.Model
             StockCount = stockCount; Players = Immutable.Copy(players, nameof(players));
             Table = Immutable.Copy(table, nameof(table)); Discards = Immutable.CopyNested(discards, nameof(discards));
             if (Players.Count != 4 || Discards.Count != 4) throw new ArgumentException("Four public player entries and discard piles are required.");
-            PendingDraw = pendingDraw; SeriesTilesUsed = seriesTilesUsed; Result = result;
+            PendingDraw = pendingDraw; SeriesTilesUsed = seriesTilesUsed; Result = result; Deal = deal;
         }
     }
 }

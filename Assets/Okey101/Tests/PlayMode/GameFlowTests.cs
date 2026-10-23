@@ -152,7 +152,7 @@ namespace Okey101.PlayMode.Tests
                 yield return null;
                 var games=UnityEngine.Object.FindObjectsByType<GameBootstrap>(FindObjectsSortMode.None).Where(g=>g.Session!=null).ToArray();
                 Assert.That(games,Has.Length.EqualTo(1));var game=games[0];game.SetPaused(false);
-                var deadline=Time.realtimeSinceStartup+15;
+                var deadline=Time.realtimeSinceStartup+30; // three bot turns; the starter depends on the deal
                 while(game.BotThinking||game.Session.GetView(0).ActivePlayer!=0)
                 {Assert.That(Time.realtimeSinceStartup,Is.LessThan(deadline));yield return null;}
                 Assert.That(game.GetComponentsInChildren<Camera>().Length,Is.EqualTo(1));

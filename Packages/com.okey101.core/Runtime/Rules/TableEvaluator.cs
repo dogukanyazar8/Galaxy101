@@ -86,7 +86,10 @@ namespace Okey101.Core.Rules
                         if (!hand.Contains(tile.Id) || !selected.Add(tile.Id)) return ErrorCode.InvalidTile;
                     total += validation.Value;
                 }
-                if (opening == OpeningKind.None &&
+                // spec/22 elden bitiş: a player who has not opened may lay everything but the last tile without reaching
+                // 101 / 5 pairs and finish with that discard (the ×2 "opened this turn" finish).
+                bool finishingFromHand = hand.Count >= 15 && hand.Count - selected.Count == 1;
+                if (opening == OpeningKind.None && !finishingFromHand &&
                     (action.Opening == OpeningKind.Series ? total < 101 : action.Groups.Count < 5))
                     return ErrorCode.InvalidOpening;
                 if (nextMeldId + action.Groups.Count - 1 > int.MaxValue) return ErrorCode.InvalidState;

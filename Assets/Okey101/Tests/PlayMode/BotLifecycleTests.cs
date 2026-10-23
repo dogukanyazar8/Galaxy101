@@ -55,7 +55,8 @@ namespace Okey101.PlayMode.Tests
                 session.SetPaused(false);
                 yield return Await(Task.WhenAll(runner.RunOneTurnAsync(1, CancellationToken.None), runner.RunOneTurnAsync(1, CancellationToken.None)));
                 Assert.That(session.GetView(1).Version, Is.EqualTo(version + 2), "Exactly one draw and one commit.");
-                Assert.That(session.GetView(1).StockCount, Is.EqualTo(19));
+                // One draw: from the stock (19 left) or the previous player's discard (20 left), depending on the deal.
+                Assert.That(session.GetView(1).StockCount, Is.InRange(19, 20));
                 Assert.That(session.GetView(1).ActivePlayer, Is.EqualTo(2));
             }
         }

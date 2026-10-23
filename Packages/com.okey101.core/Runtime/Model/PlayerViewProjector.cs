@@ -20,7 +20,7 @@ namespace Okey101.Core.Model
             return new PlayerView(state.RoundId, state.Version, actor, state.ActivePlayer, state.Phase,
                 own.Hand, own.Opening, own.Penalties, state.LastAcceptedSequences[actor], state.Indicator,
                 state.Stock.Count, players, state.Table, state.Discards,
-                actor == state.ActivePlayer ? state.PendingDraw : null, state.SeriesTilesUsed, state.Result);
+                actor == state.ActivePlayer ? state.PendingDraw : null, state.SeriesTilesUsed, state.Result, Turns.DealCeremony.Describe(state));
         }
 
         public static RuleResult<RoundState> ForEvaluation(PlayerView snapshot)

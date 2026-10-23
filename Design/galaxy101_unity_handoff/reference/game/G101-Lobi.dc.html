@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+@keyframes lbFade{from{opacity:0}to{opacity:1}}
+@keyframes lbCard{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes lbModal{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes lbSpin{to{transform:rotate(360deg)}}
+@keyframes lbShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+@keyframes lbPop{0%{opacity:0;transform:scale(.5)}70%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+@keyframes lbPulse{0%,100%{box-shadow:0 5px 0 var(--aS),0 0 0 0 var(--gl)}50%{box-shadow:0 5px 0 var(--aS),0 0 0 12px transparent}}
+@keyframes lbToast{from{opacity:0;transform:translate(-50%,-12px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes lbDots{0%,100%{opacity:.25}50%{opacity:1}}
+</style>
+</helmet>
+
+<div data-screen-label="Lobi" style="position:relative;width:1280px;height:720px;overflow:hidden;font-family:var(--fB);color:#F4F1E8;background:linear-gradient(180deg,rgba(5,8,22,.15),rgba(5,8,22,.5))">
+
+  <sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;gap:14px;padding:0 28px;box-sizing:border-box">
+      <div onClick="{{ back }}" title="{{ L.back }}" style="flex:none;width:46px;height:46px;border-radius:14px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);display:grid;place-items:center;cursor:pointer;transition:filter .15s,transform .12s" style-hover="filter:brightness(1.25)" style-active="transform:translateY(3px)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--ic)"><path d="M15 5l-7 7 7 7"></path></svg></div>
+      <div style="position:relative;overflow:hidden;flex:none;width:52px;height:52px;border-radius:16px;background:#3D7BFF;box-shadow:0 4px 0 #2148B0,inset 0 1px 0 rgba(255,255,255,.35);display:grid;place-items:center;font:800 17px var(--fH);color:#fff">101</div>
+      <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+        <div style="font:700 26px/1.1 var(--fH)">{{ L.classic }}</div>
+        <div style="font:700 13px var(--fB);color:var(--mt);white-space:nowrap">{{ L.classicSub }}</div>
+      </div>
+      <div style="flex:1"></div>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--dp);border-radius:999px;padding:5px 5px 5px 6px;box-shadow:inset 0 2px 0 rgba(0,0,0,.3)">
+        <div style="width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box"></div>
+        <div style="font:700 17px var(--fH);min-width:78px;font-variant-numeric:tabular-nums">{{ chipsLabel }}</div>
+        <div onClick="{{ buy }}" title="{{ L.buy }}" style="width:28px;height:28px;border-radius:50%;background:#3CCB6E;box-shadow:0 3px 0 #22914A;display:grid;place-items:center;font:700 20px var(--fH);color:#fff;cursor:pointer" style-hover="filter:brightness(1.12)" style-active="transform:translateY(2px)">+</div>
+      </div>
+      <div onClick="{{ openCode }}" style="flex:none;display:flex;align-items:center;gap:8px;height:46px;padding:0 18px;border-radius:14px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);font:700 15px var(--fH);cursor:pointer;white-space:nowrap" style-hover="filter:brightness(1.2)" style-active="transform:translateY(3px)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--ic)"><circle cx="8" cy="15" r="4"></circle><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"></path></svg>{{ L.joinCode }}
+      </div>
+      <div onClick="{{ openCreate }}" style="position:relative;overflow:hidden;flex:none;display:flex;align-items:center;gap:8px;height:46px;padding:0 20px;border-radius:14px;background:linear-gradient(var(--a1),var(--a2));box-shadow:0 5px 0 var(--aS);color:var(--aT);font:800 16px var(--fH);cursor:pointer;white-space:nowrap;animation:lbPulse 2.4s infinite" style-hover="filter:brightness(1.07)" style-active="transform:translateY(3px)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" style="stroke:var(--aT)"><path d="M12 5v14M5 12h14"></path></svg>{{ L.create }}
+      </div>
+    </div>
+
+    <div style="position:absolute;left:0;right:0;top:86px;height:54px;display:flex;align-items:center;gap:10px;padding:0 28px;box-sizing:border-box">
+      <div style="display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--dp)">
+        <sc-for list="{{ typeTabs }}" as="o" hint-placeholder-count="3">
+          <div onClick="{{ o.pick }}" style="display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:10px;font:700 14px var(--fH);background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.sh }};cursor:pointer;white-space:nowrap;transition:background .15s">{{ o.label }}<div style="min-width:14px;text-align:center;font:800 11px var(--fB);padding:1px 6px;border-radius:7px;background:rgba(0,0,0,.2);font-variant-numeric:tabular-nums">{{ o.n }}</div></div>
+        </sc-for>
+      </div>
+      <div onClick="{{ chFree.toggle }}" style="display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:12px;background:{{ chFree.bg }};box-shadow:{{ chFree.ring }};color:{{ chFree.fg }};font:700 14px var(--fH);cursor:pointer;white-space:nowrap;transition:background .15s">
+        <div style="width:8px;height:8px;border-radius:50%;background:#3CCB6E;box-shadow:0 0 6px #3CCB6E"></div>{{ L.fFree }}
+      </div>
+      <div onClick="{{ chKat.toggle }}" style="display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:12px;background:{{ chKat.bg }};box-shadow:{{ chKat.ring }};color:{{ chKat.fg }};font:700 14px var(--fH);cursor:pointer;white-space:nowrap;transition:background .15s">
+        <div style="font:800 12px var(--fH);color:#C2A4FF">×2</div>{{ L.fKat }}
+      </div>
+      <div style="display:flex;gap:3px;padding:4px;border-radius:14px;background:var(--dp)">
+        <sc-for list="{{ betTabs }}" as="o" hint-placeholder-count="6">
+          <div onClick="{{ o.pick }}" style="padding:8px 11px;border-radius:10px;font:700 13px var(--fH);background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.sh }};cursor:pointer;white-space:nowrap;transition:background .15s">{{ o.label }}</div>
+        </sc-for>
+      </div>
+      <div style="flex:1"></div>
+      <div style="flex:none;display:flex;align-items:center;gap:8px;width:210px;height:42px;padding:0 6px 0 12px;border-radius:13px;background:var(--dp);box-shadow:{{ qRing }};box-sizing:border-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" style="stroke:var(--mt)"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg>
+        <input value="{{ q }}" onChange="{{ onQ }}" onFocus="{{ qFocus }}" onBlur="{{ qBlur }}" placeholder="{{ L.search }}" spellCheck="false" style="flex:1;min-width:0;background:transparent;border:0;outline:none;font:700 14px var(--fB);color:#F4F1E8;padding:0">
+        <sc-if value="{{ hasQ }}" hint-placeholder-val="{{ false }}"><div onClick="{{ clearQ }}" style="flex:none;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;cursor:pointer" style-hover="background:var(--pnH)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" style="stroke:var(--ic)"><path d="M6 6l12 12M18 6L6 18"></path></svg></div></sc-if>
+      </div>
+    </div>
+
+    <div style="position:absolute;left:0;right:0;top:146px;bottom:0;overflow-x:hidden;overflow-y:scroll;scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:var(--bd) transparent;padding:6px 22px 26px 28px;box-sizing:border-box">
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+        <sc-for list="{{ cards }}" as="t" hint-placeholder-count="6">
+          <div style="position:relative;display:flex;flex-direction:column;gap:11px;padding:15px 16px 14px;border-radius:20px;background:var(--pn);box-shadow:0 6px 0 var(--pnS),{{ t.ring }};translate:0 0;scale:1;filter:brightness(1);transition:translate .55s cubic-bezier(.22,1,.36,1),scale .55s cubic-bezier(.22,1,.36,1),filter .45s ease,background-color .45s ease;will-change:translate;animation:lbCard .5s {{ t.delay }} cubic-bezier(.22,1,.36,1) backwards" style-hover="translate:0 -6px;scale:1.012;filter:brightness(1.08) drop-shadow(0 14px 18px rgba(0,0,0,.28))">
+            <div style="display:flex;align-items:center;gap:8px;min-width:0">
+              <div style="font:700 17px/1.2 var(--fH);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ t.name }}</div>
+              <sc-if value="{{ t.lock }}" hint-placeholder-val="{{ false }}"><div title="{{ L.locked }}" style="flex:none;width:22px;height:22px;border-radius:7px;background:rgba(255,201,74,.16);display:grid;place-items:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--a1)"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></div></sc-if>
+              <div style="flex:1"></div>
+              <div style="flex:none;display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:{{ t.stBg }};color:{{ t.stFg }};font:800 12px var(--fB);white-space:nowrap"><div style="width:7px;height:7px;border-radius:50%;background:{{ t.stFg }}"></div>{{ t.stText }}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box;flex:none"></div>
+              <div style="font:700 23px/1 var(--fH);font-variant-numeric:tabular-nums">{{ t.bet }}</div>
+              <div style="font:700 13px var(--fB);color:var(--mt);white-space:nowrap">{{ t.meta }}</div>
+              <div style="flex:1"></div>
+              <div style="flex:none;padding:4px 10px;border-radius:9px;background:{{ t.typeBg }};font:800 12px var(--fH);color:#fff">{{ t.typeLabel }}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <sc-for list="{{ t.seats }}" as="z" hint-placeholder-count="4">
+                <div title="{{ z.title }}" style="position:relative;flex:none;width:36px;height:36px;border-radius:50%;background:{{ z.bg }};border:2px {{ z.bs }} {{ z.bd }};box-sizing:border-box;display:grid;place-items:center;font:700 12px var(--fH);color:{{ z.fg }}">{{ z.ini }}</div>
+              </sc-for>
+              <div style="font:800 13px var(--fB);color:var(--mt);margin-left:4px;font-variant-numeric:tabular-nums">{{ t.occ }}</div>
+              <div style="flex:1"></div>
+              <sc-for list="{{ t.btns }}" as="b" hint-placeholder-count="1">
+                <div onClick="{{ b.go }}" style="flex:none;display:flex;align-items:center;gap:6px;padding:9px 15px;border-radius:12px;background:{{ b.bg }};color:{{ b.fg }};box-shadow:0 4px 0 {{ b.sh }};font:800 14px var(--fH);cursor:{{ b.cur }};white-space:nowrap;transition:filter .15s,transform .12s" style-hover="filter:brightness(1.1)" style-active="transform:translateY(3px)">
+                  <sc-if value="{{ b.eye }}" hint-placeholder-val="{{ false }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="stroke:currentColor"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg></sc-if>
+                  {{ b.label }}
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:5px;overflow:hidden;height:22px">
+              <sc-for list="{{ t.badges }}" as="g" hint-placeholder-count="3">
+                <div style="flex:none;padding:3px 8px;border-radius:7px;background:{{ g.bg }};color:{{ g.fg }};font:800 11px/16px var(--fB);white-space:nowrap">{{ g.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ noCards }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:90px 0;text-align:center;animation:lbFade .3s both">
+          <div style="width:64px;height:64px;border-radius:20px;background:var(--pn);box-shadow:0 5px 0 var(--pnS);display:grid;place-items:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" style="stroke:var(--mt)"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg></div>
+          <div style="font:700 22px var(--fH)">{{ L.emptyT }}</div>
+          <div style="font:700 14px var(--fB);color:var(--mt);max-width:380px">{{ L.emptyB }}</div>
+          <div style="display:flex;gap:10px;margin-top:6px">
+            <div onClick="{{ resetFilters }}" style="padding:11px 18px;border-radius:13px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);font:700 15px var(--fH);cursor:pointer" style-active="transform:translateY(3px)">{{ L.clearF }}</div>
+            <div onClick="{{ openCreate }}" style="padding:11px 20px;border-radius:13px;background:linear-gradient(var(--a1),var(--a2));box-shadow:0 4px 0 var(--aS);color:var(--aT);font:800 15px var(--fH);cursor:pointer" style-active="transform:translateY(3px)">{{ L.create }}</div>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isWait }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Bekleme odası" style="position:absolute;inset:0;animation:lbFade .3s both">
+      <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;gap:14px;padding:0 28px;box-sizing:border-box">
+        <div onClick="{{ w.leave }}" title="{{ L.leaveRoom }}" style="flex:none;display:flex;align-items:center;gap:8px;height:46px;padding:0 16px 0 12px;border-radius:14px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);cursor:pointer;font:700 15px var(--fH)" style-hover="filter:brightness(1.25)" style-active="transform:translateY(3px)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--ic)"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"></path><path d="M10 17l-5-5 5-5"></path><path d="M5 12h11"></path></svg>{{ L.leaveRoom }}</div>
+        <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+          <div style="display:flex;align-items:center;gap:10px"><div style="font:900 11px var(--fB);letter-spacing:1.8px;color:var(--a1)">{{ L.waitRoom }}</div><sc-if value="{{ w.isOwner }}" hint-placeholder-val="{{ true }}"><div style="font:800 11px var(--fB);padding:2px 8px;border-radius:7px;background:rgba(255,201,74,.16);color:var(--a1)">{{ L.youOwn }}</div></sc-if></div>
+          <div style="font:700 24px/1.1 var(--fH);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:520px">{{ w.name }}</div>
+        </div>
+        <div style="flex:1"></div>
+        <sc-if value="{{ w.canInv }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ w.openInv }}" style="flex:none;display:flex;align-items:center;gap:8px;height:46px;padding:0 18px 0 14px;border-radius:14px;background:linear-gradient(var(--a1),var(--a2));box-shadow:0 4px 0 var(--aS);color:var(--aT);cursor:pointer;font:800 15px var(--fH)" style-hover="filter:brightness(1.08)" style-active="transform:translateY(3px)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="stroke:currentColor"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"></path><path d="M19 8v6M16 11h6"></path></svg>{{ L.invite }}<sc-if value="{{ w.hasPend }}" hint-placeholder-val="{{ false }}"><div style="min-width:20px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:10px;background:var(--aT);color:var(--a1);font:900 11px/20px var(--fB);text-align:center">{{ w.pendN }}</div></sc-if></div>
+        </sc-if>
+        <sc-if value="{{ w.hasCode }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:10px;height:46px;padding:0 6px 0 16px;border-radius:14px;border:1px dashed var(--bd);background:rgba(0,0,0,.2)">
+            <div style="font:800 12px var(--fB);color:var(--mt)">{{ L.code }}</div>
+            <div style="font:700 18px var(--fL);letter-spacing:3px;color:var(--a1)">{{ w.code }}</div>
+            <div onClick="{{ w.copy }}" style="display:flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:10px;background:var(--pnH);box-shadow:0 3px 0 var(--pnS);font:700 13px var(--fH);cursor:pointer" style-active="transform:translateY(2px)">{{ w.copyLabel }}</div>
+            <div onClick="{{ w.share }}" title="{{ L.share }}" style="width:34px;height:34px;border-radius:10px;background:var(--pnH);box-shadow:0 3px 0 var(--pnS);display:grid;place-items:center;cursor:pointer" style-active="transform:translateY(2px)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--ic)"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"></path></svg></div>
+          </div>
+        </sc-if>
+        <div style="display:flex;align-items:center;gap:8px;background:var(--dp);border-radius:999px;padding:5px 14px 5px 6px;box-shadow:inset 0 2px 0 rgba(0,0,0,.3)">
+          <div style="width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box"></div>
+          <div style="font:700 17px var(--fH);font-variant-numeric:tabular-nums">{{ chipsLabel }}</div>
+        </div>
+      </div>
+
+      <div style="position:absolute;left:28px;top:100px;width:872px;height:592px">
+        <div style="position:absolute;left:156px;top:176px;width:560px;height:264px;border-radius:132px;background:radial-gradient(ellipse at 50% 40%,var(--pnH),var(--sd) 75%);box-shadow:inset 0 0 0 3px rgba(255,255,255,.08),inset 0 0 0 10px var(--dp),inset 0 0 0 12px var(--a2),0 0 60px var(--gl),0 24px 50px rgba(0,0,0,.45)"></div>
+        <div style="position:absolute;left:156px;top:176px;width:560px;height:264px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+          <div style="font:800 22px/1 var(--fL);letter-spacing:4px;background:linear-gradient(180deg,var(--lg1),var(--a1) 50%,var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent">GALAXY 101</div>
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(0,0,0,.28)"><div style="width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)"></div><div style="font:800 13px var(--fB);color:var(--mt)">{{ L.pool }}</div><div style="font:700 17px var(--fH)">{{ w.pool }}</div></div>
+          <div style="display:flex;align-items:center;gap:8px;font:800 14px var(--fB);color:{{ w.stC }}">{{ w.status }}</div>
+          <div style="display:flex;gap:6px">
+            <sc-for list="{{ w.dots }}" as="d" hint-placeholder-count="4"><div style="width:10px;height:10px;border-radius:50%;background:{{ d.c }};transition:background .3s"></div></sc-for>
+          </div>
+        </div>
+        <sc-for list="{{ w.seats }}" as="z" hint-placeholder-count="4">
+          <div style="position:absolute;left:{{ z.x }};top:{{ z.y }};transform:translate(-50%,-50%);width:200px;display:flex;flex-direction:column;align-items:center;gap:6px">
+            <sc-if value="{{ z.filled }}" hint-placeholder-val="{{ true }}">
+              <div key="{{ z.key }}" style="position:relative;width:76px;height:76px;animation:lbPop .4s both">
+                <div style="position:absolute;inset:0;border-radius:50%;background:{{ z.color }};border:3px solid {{ z.ring }};box-sizing:border-box;box-shadow:0 0 0 3px var(--pnS),0 10px 24px rgba(0,0,0,.4);display:grid;place-items:center;font:700 24px var(--fH);color:#fff">{{ z.ini }}</div>
+                <sc-if value="{{ z.owner }}" hint-placeholder-val="{{ false }}"><div title="{{ L.ownerT }}" style="position:absolute;left:50%;top:-14px;transform:translateX(-50%);width:28px;height:20px;display:grid;place-items:center"><svg width="26" height="20" viewBox="0 0 26 20"><path d="M2 17L4 5l5 5 4-8 4 8 5-5 2 12z" fill="#FFD964" stroke="#8A4E06" stroke-width="1.5" stroke-linejoin="round"></path></svg></div></sc-if>
+                <sc-if value="{{ z.canKick }}" hint-placeholder-val="{{ false }}"><div onClick="{{ z.kick }}" title="{{ L.kick }}" style="position:absolute;right:-6px;top:-4px;width:26px;height:26px;border-radius:50%;background:#FF5E6C;box-shadow:0 3px 0 #C23E4A;display:grid;place-items:center;cursor:pointer" style-hover="filter:brightness(1.1)" style-active="transform:translateY(2px)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></div></sc-if>
+                <div style="position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:{{ z.tagBg }};color:{{ z.tagFg }};font:900 10px var(--fB);padding:1px 8px;border-radius:7px;white-space:nowrap">{{ z.tag }}</div>
+              </div>
+              <div style="font:700 16px var(--fH);white-space:nowrap;margin-top:6px">{{ z.name }}</div>
+              <sc-if value="{{ z.hasTeam }}" hint-placeholder-val="{{ false }}"><div style="font:800 11px var(--fB);padding:2px 9px;border-radius:7px;background:{{ z.teamBg }};color:#fff">{{ z.team }}</div></sc-if>
+            </sc-if>
+            <sc-if value="{{ z.empty }}" hint-placeholder-val="{{ false }}">
+              <div style="width:76px;height:76px;border-radius:50%;border:2px dashed var(--bd);box-sizing:border-box;background:rgba(0,0,0,.18);display:grid;place-items:center"><div style="display:flex;gap:4px"><div style="width:6px;height:6px;border-radius:50%;background:var(--mt);animation:lbDots 1.2s infinite"></div><div style="width:6px;height:6px;border-radius:50%;background:var(--mt);animation:lbDots 1.2s .2s infinite"></div><div style="width:6px;height:6px;border-radius:50%;background:var(--mt);animation:lbDots 1.2s .4s infinite"></div></div></div>
+              <div style="font:700 14px var(--fB);color:var(--mt)">{{ L.emptySeat }}</div>
+              <div style="display:flex;gap:6px">
+              <sc-if value="{{ z.canInv }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ z.invite }}" style="display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:11px;background:linear-gradient(var(--a1),var(--a2));box-shadow:0 3px 0 var(--aS);color:var(--aT);font:800 13px var(--fH);cursor:pointer" style-hover="filter:brightness(1.08)" style-active="transform:translateY(2px)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="stroke:currentColor"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"></path><path d="M19 8v6M14 11h6"></path></svg>{{ L.inviteS }}</div>
+              </sc-if>
+              <sc-if value="{{ z.canBot }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ z.addBot }}" style="display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:11px;background:var(--pnH);box-shadow:0 3px 0 var(--pnS);font:700 13px var(--fH);cursor:pointer" style-hover="filter:brightness(1.2)" style-active="transform:translateY(2px)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--ic)"><rect x="5" y="8" width="14" height="11" rx="3"></rect><path d="M12 4v4M9 13h.01M15 13h.01M2 13v2M22 13v2"></path></svg>{{ L.addBot }}</div>
+              </sc-if>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="position:absolute;right:28px;top:100px;width:330px;bottom:28px;display:flex;flex-direction:column;gap:14px;padding:20px;box-sizing:border-box;border-radius:24px;background:var(--pn);border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 0 var(--pnS)">
+        <div style="font:900 11px var(--fB);letter-spacing:1.8px;color:var(--mt)">{{ L.summary }}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <sc-for list="{{ w.sum.rows }}" as="r" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:14px;background:var(--sd)"><div style="font:900 10px var(--fB);letter-spacing:1.2px;color:var(--mt)">{{ r.k }}</div><div style="font:700 16px/1.2 var(--fH);white-space:nowrap">{{ r.v }}</div></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <sc-for list="{{ w.sum.badges }}" as="g" hint-placeholder-count="4"><div style="padding:4px 9px;border-radius:8px;background:{{ g.bg }};color:{{ g.fg }};font:800 12px var(--fB);white-space:nowrap">{{ g.label }}</div></sc-for>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(255,201,74,.1);box-shadow:inset 0 0 0 1px rgba(255,201,74,.22)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--a1);flex:none"><path d="M7 3.5h10v5.5a5 5 0 0 1-10 0z"></path><path d="M12 14v3.5M8.5 20.5h7"></path></svg>
+          <div style="font:700 13px/1.35 var(--fB);color:var(--ic)">{{ w.sum.prize }}</div>
+        </div>
+        <div style="flex:1"></div>
+        <div style="font:700 13px/1.4 var(--fB);color:var(--mt);text-align:center;text-wrap:pretty">{{ w.hint }}</div>
+        <div onClick="{{ w.start }}" style="position:relative;overflow:hidden;height:62px;border-radius:18px;background:{{ w.stBg }};box-shadow:0 5px 0 {{ w.stSh }};color:{{ w.stFg }};display:flex;align-items:center;justify-content:center;gap:10px;font:800 20px var(--fH);cursor:{{ w.stCur }};animation:{{ w.stAnim }};transition:background .2s" style-active="transform:translateY(3px)">
+          <sc-if value="{{ w.spin }}" hint-placeholder-val="{{ false }}"><div style="width:18px;height:18px;border-radius:50%;border:3px solid currentColor;border-top-color:transparent;animation:lbSpin .8s linear infinite;box-sizing:border-box"></div></sc-if>
+          {{ w.startLabel }}
+        </div>
+      </div>
+
+      <sc-if value="{{ iv.open }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Arkadaş davet et" style="position:absolute;inset:0;z-index:25;display:grid;place-items:center;animation:lbFade .2s both">
+          <div onClick="{{ iv.close }}" style="position:absolute;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px)"></div>
+          <div style="position:relative;width:900px;height:580px;display:grid;grid-template-columns:minmax(0,1fr) 290px;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:28px;box-shadow:0 10px 0 var(--pnS),0 40px 90px rgba(0,0,0,.6);overflow:hidden;animation:lbModal .32s cubic-bezier(.22,1,.36,1) both">
+            <div style="display:flex;flex-direction:column;min-width:0;min-height:0;padding:22px 22px 0 28px;gap:14px">
+              <div style="display:flex;align-items:center;gap:14px;flex:none">
+                <div style="flex:none;width:50px;height:50px;border-radius:16px;background:linear-gradient(160deg,var(--a1),var(--a2));box-shadow:0 4px 0 var(--aS);display:grid;place-items:center;color:var(--aT)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="stroke:currentColor"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"></path><path d="M19 8v6M24 11h6"></path></svg></div>
+                <div style="min-width:0"><div style="font:700 26px/1.1 var(--fH)">{{ L.invT }}</div><div style="font:700 13px var(--fB);color:var(--mt);margin-top:3px">{{ iv.sub }}</div></div>
+              </div>
+              <div style="display:flex;gap:10px;flex:none">
+                <div style="display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--dp);box-shadow:inset 0 2px 0 rgba(0,0,0,.3)">
+                  <sc-for list="{{ iv.tabs }}" as="b" hint-placeholder-count="2"><div onClick="{{ b.pick }}" style="display:flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:10px;background:{{ b.bg }};color:{{ b.fg }};box-shadow:{{ b.sh }};font:800 14px var(--fH);cursor:pointer;white-space:nowrap;transition:background .2s,color .2s">{{ b.label }}<div style="font:900 11px var(--fB);opacity:.75">{{ b.n }}</div></div></sc-for>
+                </div>
+                <div style="flex:1;display:flex;align-items:center;gap:8px;height:44px;padding:0 14px;border-radius:14px;background:var(--dp);box-shadow:{{ iv.qRing }};transition:box-shadow .2s">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" style="stroke:var(--mt);flex:none"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg>
+                  <input value="{{ iv.q }}" onInput="{{ iv.onQ }}" onFocus="{{ iv.qFocus }}" onBlur="{{ iv.qBlur }}" placeholder="{{ L.invSearch }}" style="flex:1;min-width:0;background:none;border:0;outline:0;color:#F4F1E8;font:700 14px var(--fB)"></input>
+                </div>
+              </div>
+              <div style="flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bd) transparent;display:flex;flex-direction:column;gap:8px;padding:2px 6px 20px 0">
+                <sc-for list="{{ iv.rows }}" as="r" hint-placeholder-count="6">
+                  <div key="{{ r.name }}" style="flex:none;display:flex;align-items:center;gap:14px;padding:10px 12px 10px 10px;border-radius:16px;background:var(--sd);opacity:{{ r.op }};box-shadow:{{ r.ring }};transition:box-shadow .3s,opacity .3s">
+                    <div style="position:relative;flex:none;width:46px;height:46px">
+                      <div style="width:46px;height:46px;border-radius:50%;background:{{ r.color }};border:2px solid rgba(255,255,255,.8);box-sizing:border-box;display:grid;place-items:center;font:700 16px var(--fH);color:#fff">{{ r.ini }}</div>
+                      <div style="position:absolute;right:-1px;bottom:-1px;width:14px;height:14px;border-radius:50%;background:{{ r.dot }};border:3px solid var(--sd)"></div>
+                    </div>
+                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                      <div style="display:flex;align-items:center;gap:8px"><div style="font:700 17px/1.2 var(--fH);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</div><div style="flex:none;font:900 10px var(--fB);padding:1px 7px;border-radius:6px;background:var(--pnH);color:var(--ic)">{{ r.lv }}</div></div>
+                      <div style="font:700 12px var(--fB);color:{{ r.subC }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.sub }}</div>
+                    </div>
+                    <div onClick="{{ r.go }}" title="{{ r.title }}" style="flex:none;position:relative;overflow:hidden;min-width:136px;height:40px;padding:0 14px;box-sizing:border-box;border-radius:12px;background:{{ r.bg }};color:{{ r.fg }};box-shadow:0 4px 0 {{ r.sh }};display:flex;align-items:center;justify-content:center;gap:8px;font:800 14px var(--fH);cursor:{{ r.cur }};white-space:nowrap;transition:background .25s,color .25s,box-shadow .25s" style-active="transform:translateY(2px)">
+                      <sc-if value="{{ r.pend }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:0;bottom:0;height:3px;width:{{ r.pw }};background:var(--a1);transition:width 1s linear"></div><div style="width:14px;height:14px;border-radius:50%;border:2.5px solid currentColor;border-top-color:transparent;animation:lbSpin .8s linear infinite;box-sizing:border-box"></div></sc-if>
+                      <sc-if value="{{ r.check }}" hint-placeholder-val="{{ false }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+                      {{ r.label }}
+                    </div>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ iv.none }}" hint-placeholder-val="{{ false }}"><div style="padding:40px 0;text-align:center;font:700 14px var(--fB);color:var(--mt)">{{ L.invNone }}</div></sc-if>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:14px;padding:22px 22px 22px;background:var(--sd);border-left:1px solid rgba(255,255,255,.06)">
+              <div style="display:flex;justify-content:flex-end"><div onClick="{{ iv.close }}" title="{{ L.close }}" style="width:40px;height:40px;border-radius:12px;background:var(--pnH);box-shadow:0 3px 0 var(--pnS);display:grid;place-items:center;cursor:pointer" style-hover="filter:brightness(1.2)" style-active="transform:translateY(2px)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" style="stroke:var(--ic)"><path d="M6 6l12 12M18 6L6 18"></path></svg></div></div>
+              <div style="font:900 11px var(--fB);letter-spacing:1.8px;color:var(--mt)">{{ L.invSeats }}</div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+                <sc-for list="{{ iv.seats }}" as="z" hint-placeholder-count="4">
+                  <div style="aspect-ratio:1;border-radius:50%;background:{{ z.bg }};border:2px {{ z.bs }} {{ z.bd }};box-sizing:border-box;display:grid;place-items:center;font:700 14px var(--fH);color:{{ z.fg }};transition:background .3s" title="{{ z.title }}">{{ z.ini }}</div>
+                </sc-for>
+              </div>
+              <div style="font:700 13px/1.4 var(--fB);color:var(--ic)">{{ iv.seatLine }}</div>
+              <div style="height:1px;background:rgba(255,255,255,.07);margin:4px 0"></div>
+              <sc-if value="{{ w.hasCode }}" hint-placeholder-val="{{ false }}">
+                <div style="font:900 11px var(--fB);letter-spacing:1.8px;color:var(--mt)">{{ L.invByCode }}</div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 0;border-radius:18px;border:2px dashed var(--bd);background:rgba(0,0,0,.18)">
+                  <div style="font:800 30px/1.1 var(--fL);letter-spacing:5px;background:linear-gradient(180deg,var(--lg1),var(--a1) 50%,var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent">{{ w.code }}</div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                  <div onClick="{{ w.copy }}" style="display:flex;align-items:center;justify-content:center;height:42px;border-radius:13px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);font:700 14px var(--fH);cursor:pointer" style-active="transform:translateY(2px)">{{ w.copyLabel }}</div>
+                  <div onClick="{{ w.share }}" style="display:flex;align-items:center;justify-content:center;height:42px;border-radius:13px;background:#3D7BFF;box-shadow:0 4px 0 #2148B0;color:#fff;font:700 14px var(--fH);cursor:pointer" style-active="transform:translateY(2px)">{{ L.share }}</div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ iv.openTbl }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.04)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" style="stroke:var(--mt);flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg><div style="font:700 13px/1.4 var(--fB);color:var(--mt);text-wrap:pretty">{{ L.invOpen }}</div></div>
+              </sc-if>
+              <div style="flex:1"></div>
+              <div style="font:700 12px/1.4 var(--fB);color:var(--mt);text-align:center;text-wrap:pretty">{{ L.invNote }}</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ createOpen }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Masa aç" style="position:absolute;inset:0;z-index:20;display:grid;place-items:center;animation:lbFade .2s both">
+      <div onClick="{{ closeCreate }}" style="position:absolute;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px)"></div>
+      <div style="position:relative;width:1060px;height:650px;display:grid;grid-template-columns:minmax(0,1fr) 330px;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:28px;box-shadow:0 10px 0 var(--pnS),0 40px 90px rgba(0,0,0,.6);overflow:hidden;animation:lbModal .3s cubic-bezier(.2,1.2,.4,1) both">
+        <div style="display:flex;flex-direction:column;min-width:0;min-height:0">
+          <div style="display:flex;align-items:center;gap:14px;padding:22px 28px 10px;flex:none">
+            <div style="flex:none;width:50px;height:50px;border-radius:16px;background:linear-gradient(160deg,var(--a1),var(--a2));box-shadow:0 4px 0 var(--aS);display:grid;place-items:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" style="stroke:var(--aT)"><path d="M12 5v14M5 12h14"></path></svg></div>
+            <div><div style="font:700 26px/1.1 var(--fH)">{{ L.createT }}</div><div style="font:700 13px var(--fB);color:var(--mt);margin-top:2px">{{ L.createS }}</div></div>
+          </div>
+          <div style="flex:1;min-height:0;overflow-x:hidden;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bd) transparent;padding:0 22px 18px 28px">
+
+            <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.07)">
+              <div style="flex:1;min-width:0"><div style="font:700 16px/1.25 var(--fH)">{{ L.rMode }}</div><div style="font:700 12.5px var(--fB);color:var(--mt)">{{ L.rModeD }}</div></div>
+              <div style="flex:none;display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:12px;background:var(--sd);font:700 14px var(--fH)"><div style="width:22px;height:22px;border-radius:7px;background:#3D7BFF;display:grid;place-items:center;font:800 8px var(--fH);color:#fff">101</div>{{ L.classic }}</div>
+              <div style="flex:none;display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--dp)">
+                <sc-for list="{{ cf.typeSegs }}" as="o" hint-placeholder-count="2"><div onClick="{{ o.pick }}" style="padding:8px 16px;border-radius:10px;font:700 14px var(--fH);background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.sh }};cursor:pointer;white-space:nowrap">{{ o.label }}</div></sc-for>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.07)">
+              <div style="flex:1;min-width:0"><div style="font:700 16px/1.25 var(--fH)">{{ L.rName }}</div><div style="font:700 12.5px var(--fB);color:{{ cf.nameDc }}">{{ cf.nameD }}</div></div>
+              <div style="flex:none;display:flex;align-items:center;gap:10px;width:320px;height:46px;padding:0 14px;border-radius:14px;background:var(--dp);box-shadow:{{ cf.nameRing }};box-sizing:border-box">
+                <input value="{{ cf.name }}" onChange="{{ cf.onName }}" onFocus="{{ cf.nameFocus }}" onBlur="{{ cf.nameBlur }}" maxLength="24" spellCheck="false" style="flex:1;min-width:0;background:transparent;border:0;outline:none;font:700 16px var(--fB);color:#F4F1E8;padding:0">
+                <div style="font:800 12px var(--fB);color:var(--mt);font-variant-numeric:tabular-nums">{{ cf.nameCount }}</div>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.07)">
+              <div style="flex:1;min-width:0"><div style="font:700 16px/1.25 var(--fH)">{{ L.rVis }}</div><div style="font:700 12.5px var(--fB);color:var(--mt)">{{ cf.visD }}</div></div>
+              <div style="flex:none;display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--dp)">
+                <sc-for list="{{ cf.visSegs }}" as="o" hint-placeholder-count="2"><div onClick="{{ o.pick }}" style="padding:8px 16px;border-radius:10px;font:700 14px var(--fH);background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.sh }};cursor:pointer;white-space:nowrap">{{ o.label }}</div></sc-for>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.07)">
+              <div style="flex:1;min-width:0"><div style="font:700 16px/1.25 var(--fH)">{{ L.rPass }}</div><div style="font:700 12.5px var(--fB);color:{{ cf.passDc }}">{{ cf.passD }}</div></div>
+              <sc-if value="{{ cf.passOn }}" hint-placeholder-val="{{ false }}">
+                <div style="flex:none;display:flex;align-items:center;gap:8px;width:150px;height:44px;padding:0 12px;border-radius:13px;background:var(--dp);box-shadow:{{ cf.passRing }};box-sizing:border-box">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--a1);flex:none"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+                  <input value="{{ cf.pass }}" onChange="{{ cf.onPass }}" inputMode="numeric" maxLength="4" placeholder="••••" style="flex:1;min-width:0;background:transparent;border:0;outline:none;font:700 18px var(--fH);letter-spacing:6px;color:#F4F1E8;padding:0">
+                </div>
+              </sc-if>
+              <div onClick="{{ cf.passT.flip }}" style="flex:none;width:56px;height:32px;border-radius:16px;background:{{ cf.passT.bg }};box-shadow:inset 0 2px 0 rgba(0,0,0,.25);position:relative;cursor:pointer;transition:background .2s"><div style="position:absolute;top:3px;left:{{ cf.passT.x }};width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 2px 0 rgba(0,0,0,.25);transition:left .22s cubic-bezier(.3,1.5,.5,1)"></div></div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.07)">
+              <div style="flex:1;min-width:0"><div style="font:700 16px/1.25 var(--fH)">{{ L.rHands }}</div><div style="font:700 12.5px var(--fB);color:var(--mt)">{{ L.rHandsD }}</div></div>
+              <div style="flex:none;display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--dp)">
+                <sc-for list="{{ cf.handSegs }}" as="o" hint-placeholder-count="3"><div onClick="{{ o.pick }}" style="min-width:44px;text-align:center;padding:8px 12px;border-radius:10px;font:700 14px var(--fH);background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.sh }};cursor:pointer;white-space:nowrap">{{ o.label }}</div></sc-for>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:10px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.07)">
+              <div style="display:flex;align-items:baseline;gap:10px"><div style="font:700 16px/1.25 var(--fH)">{{ L.rBet }}</div><div style="font:700 12.5px var(--fB);color:var(--mt)">{{ cf.balLine }}</div></div>
+              <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px">
+                <sc-for list="{{ cf.tiers }}" as="b" hint-placeholder-count="5">
+                  <div onClick="{{ b.pick }}" style="position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 6px 10px;border-radius:16px;background:{{ b.bg }};box-shadow:{{ b.ring }};opacity:{{ b.op }};cursor:pointer;transition:background .15s,box-shadow .15s" style-hover="background:var(--pnH)">
+                    <div style="display:flex;align-items:center;gap:6px"><div style="width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)"></div><div style="font:700 18px var(--fH);font-variant-numeric:tabular-nums">{{ b.label }}</div></div>
+                    <div style="display:flex;align-items:center;gap:4px;font:800 11px var(--fB);color:{{ b.subC }}">
+                      <sc-if value="{{ b.locked }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="stroke:#FF9AA3"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></sc-if>
+                      {{ b.sub }}
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <sc-if value="{{ cf.warn }}" hint-placeholder-val="{{ false }}">
+                <div key="{{ cf.warnKey }}" style="display:flex;align-items:center;gap:12px;padding:12px 12px 12px 14px;border-radius:14px;background:rgba(255,94,108,.12);box-shadow:inset 0 0 0 1px rgba(255,94,108,.35);animation:lbShake .4s both">
+                  <div style="flex:none;width:30px;height:30px;border-radius:10px;background:#FF5E6C;display:grid;place-items:center;font:900 15px var(--fH);color:#fff">!</div>
+                  <div style="flex:1;min-width:0"><div style="font:700 14px var(--fH);color:#FFC2C8">{{ L.lowT }}</div><div style="font:700 13px var(--fB);color:#FFC2C8;opacity:.85">{{ cf.warnText }}</div></div>
+                  <div onClick="{{ buy }}" style="flex:none;padding:9px 14px;border-radius:12px;background:#3CCB6E;box-shadow:0 3px 0 #22914A;font:800 14px var(--fH);color:#fff;cursor:pointer;white-space:nowrap" style-active="transform:translateY(2px)">{{ L.buyChips }}</div>
+                </div>
+              </sc-if>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.07)">
+              <div style="flex:1;min-width:0"><div style="font:700 16px/1.25 var(--fH)">{{ L.rPrize }}</div><div style="font:700 12.5px var(--fB);color:var(--mt)">{{ cf.prizeD }}</div></div>
+              <div style="flex:none;display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:14px;background:var(--sd)">
+                <div style="font:800 12px var(--fB);color:var(--mt)">{{ L.pool }}</div>
+                <div style="width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)"></div>
+                <div style="font:700 20px var(--fH);color:var(--a1);font-variant-numeric:tabular-nums">{{ cf.pool }}</div>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.07)">
+              <div style="flex:1;min-width:0"><div style="font:700 16px/1.25 var(--fH)">{{ L.rKat }}</div><div style="font:700 12.5px var(--fB);color:var(--mt)">{{ L.rKatD }}</div></div>
+              <div onClick="{{ cf.katT.flip }}" style="flex:none;width:56px;height:32px;border-radius:16px;background:{{ cf.katT.bg }};box-shadow:inset 0 2px 0 rgba(0,0,0,.25);position:relative;cursor:pointer;transition:background .2s"><div style="position:absolute;top:3px;left:{{ cf.katT.x }};width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 2px 0 rgba(0,0,0,.25);transition:left .22s cubic-bezier(.3,1.5,.5,1)"></div></div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.07)">
+              <div style="flex:1;min-width:0"><div style="font:700 16px/1.25 var(--fH)">{{ L.rTurn }}</div><div style="font:700 12.5px var(--fB);color:var(--mt)">{{ L.rTurnD }}</div></div>
+              <div style="flex:none;display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--dp)">
+                <sc-for list="{{ cf.turnSegs }}" as="o" hint-placeholder-count="4"><div onClick="{{ o.pick }}" style="padding:8px 12px;border-radius:10px;font:700 14px var(--fH);background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.sh }};cursor:pointer;white-space:nowrap">{{ o.label }}</div></sc-for>
+              </div>
+            </div>
+
+            <div onClick="{{ cf.toggleRules }}" style="display:flex;align-items:center;gap:14px;padding:14px 0;cursor:pointer">
+              <div style="flex:none;width:36px;height:36px;border-radius:11px;background:var(--sd);display:grid;place-items:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" style="stroke:var(--ic)"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg></div>
+              <div style="flex:1;min-width:0"><div style="font:700 16px/1.25 var(--fH)">{{ L.rRules }}</div><div style="font:700 12.5px var(--fB);color:var(--mt)">{{ cf.rulesSum }}</div></div>
+              <div style="flex:none;width:30px;height:30px;border-radius:10px;background:var(--pnH);display:grid;place-items:center;transform:{{ cf.chev }};transition:transform .2s"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--ic)"><path d="M6 9l6 6 6-6"></path></svg></div>
+            </div>
+            <sc-if value="{{ cf.rulesOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;padding:2px 16px;margin-bottom:6px;border-radius:18px;background:var(--sd);animation:lbFade .2s both">
+                <sc-for list="{{ cf.ruleToggles }}" as="r" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:center;gap:16px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.06)">
+                    <div style="flex:1;min-width:0"><div style="font:700 15px/1.25 var(--fH)">{{ r.name }}</div><div style="font:700 12px var(--fB);color:var(--mt)">{{ r.desc }}</div></div>
+                    <div onClick="{{ r.flip }}" style="flex:none;width:52px;height:30px;border-radius:15px;background:{{ r.bg }};box-shadow:inset 0 2px 0 rgba(0,0,0,.25);position:relative;cursor:pointer;transition:background .2s"><div style="position:absolute;top:3px;left:{{ r.x }};width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 0 rgba(0,0,0,.25);transition:left .22s cubic-bezier(.3,1.5,.5,1)"></div></div>
+                  </div>
+                </sc-for>
+                <sc-for list="{{ cf.ruleSegs }}" as="g" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:16px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.06)">
+                    <div style="flex:1;min-width:0"><div style="font:700 15px/1.25 var(--fH)">{{ g.name }}</div><div style="font:700 12px var(--fB);color:var(--mt)">{{ g.desc }}</div></div>
+                    <div style="flex:none;display:flex;gap:4px;padding:4px;border-radius:13px;background:var(--dp)">
+                      <sc-for list="{{ g.opts }}" as="o" hint-placeholder-count="2"><div onClick="{{ o.pick }}" style="padding:7px 12px;border-radius:9px;font:700 13px var(--fH);background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.sh }};cursor:pointer;white-space:nowrap">{{ o.label }}</div></sc-for>
+                    </div>
+                  </div>
+                </sc-for>
+                <div onClick="{{ cf.resetRules }}" style="align-self:flex-start;padding:11px 0;font:800 13px var(--fB);color:var(--mt);cursor:pointer" style-hover="color:#F4F1E8">{{ L.resetRules }}</div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;padding:22px 22px 22px;background:var(--sd);border-left:1px solid rgba(255,255,255,.06);min-height:0">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="font:900 11px var(--fB);letter-spacing:1.8px;color:var(--mt)">{{ L.summary }}</div>
+            <div onClick="{{ closeCreate }}" title="{{ L.close }}" style="width:38px;height:38px;border-radius:12px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);display:grid;place-items:center;cursor:pointer" style-hover="filter:brightness(1.25)" style-active="transform:translateY(3px)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.8" stroke-linecap="round" style="stroke:var(--ic)"><path d="M6 6l12 12M18 6L6 18"></path></svg></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font:700 22px/1.15 var(--fH);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ cs.name }}</div>
+            <div style="display:flex;align-items:center;gap:6px;font:800 13px var(--fB);color:var(--mt)"><sc-if value="{{ cs.priv }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--a1)"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></sc-if>{{ cs.mode }}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <sc-for list="{{ cs.rows }}" as="r" hint-placeholder-count="4">
+              <div style="display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:14px;background:var(--pn)"><div style="font:900 10px var(--fB);letter-spacing:1.2px;color:var(--mt)">{{ r.k }}</div><div style="font:700 16px/1.2 var(--fH);white-space:nowrap">{{ r.v }}</div></div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ cs.badges }}" as="g" hint-placeholder-count="4"><div style="padding:4px 9px;border-radius:8px;background:{{ g.bg }};color:{{ g.fg }};font:800 12px var(--fB);white-space:nowrap">{{ g.label }}</div></sc-for>
+          </div>
+          <div style="flex:1"></div>
+          <div style="display:flex;justify-content:space-between;font:800 13px var(--fB);color:var(--mt)"><div>{{ L.balance }}</div><div style="color:{{ cs.balC }};font-variant-numeric:tabular-nums">{{ cs.bal }}</div></div>
+          <div onClick="{{ cf.create }}" style="position:relative;overflow:hidden;height:62px;border-radius:18px;background:{{ cf.ctaBg }};box-shadow:0 5px 0 {{ cf.ctaSh }};color:{{ cf.ctaFg }};display:flex;align-items:center;justify-content:center;font:800 19px var(--fH);cursor:{{ cf.ctaCur }};white-space:nowrap;transition:background .2s" style-active="transform:translateY(3px)">{{ cf.cta }}</div>
+          <div onClick="{{ closeCreate }}" style="align-self:center;font:800 14px var(--fB);color:var(--mt);cursor:pointer" style-hover="color:#F4F1E8">{{ L.cancel }}</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ dlgOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:30;display:grid;place-items:center;animation:lbFade .18s both">
+      <div onClick="{{ closeDlg }}" style="position:absolute;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px)"></div>
+
+      <sc-if value="{{ d.isConnect }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;width:380px;display:flex;flex-direction:column;align-items:center;gap:12px;padding:30px;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:26px;box-shadow:0 10px 0 var(--pnS),0 40px 90px rgba(0,0,0,.6);animation:lbModal .25s both">
+          <div style="width:44px;height:44px;border-radius:50%;border:4px solid var(--a1);border-top-color:transparent;animation:lbSpin .8s linear infinite;box-sizing:border-box"></div>
+          <div style="font:700 20px var(--fH)">{{ d.title }}</div>
+          <div style="font:700 14px var(--fB);color:var(--mt)">{{ d.body }}</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ d.isPass }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;width:440px;display:flex;flex-direction:column;align-items:center;gap:12px;padding:30px 30px 24px;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:26px;box-shadow:0 10px 0 var(--pnS),0 40px 90px rgba(0,0,0,.6);text-align:center;animation:lbModal .25s both">
+          <div style="width:68px;height:68px;border-radius:22px;background:linear-gradient(160deg,var(--a1),var(--a2));box-shadow:0 5px 0 var(--aS),0 0 30px var(--gl);display:grid;place-items:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--aT)"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></div>
+          <div style="font:700 24px/1.2 var(--fH)">{{ L.passT }}</div>
+          <div style="font:700 14px var(--fB);color:var(--mt)">{{ d.body }}</div>
+          <div key="{{ d.pinKey }}" style="position:relative;display:flex;gap:10px;margin:8px 0 2px;animation:{{ d.pinAnim }}">
+            <sc-for list="{{ d.pins }}" as="p" hint-placeholder-count="4">
+              <div style="width:58px;height:66px;border-radius:16px;background:var(--dp);box-shadow:{{ p.ring }};display:grid;place-items:center;font:700 30px var(--fH);color:#F4F1E8;transition:box-shadow .15s">{{ p.ch }}</div>
+            </sc-for>
+            <input value="{{ d.pin }}" onChange="{{ d.onPin }}" onKeyDown="{{ d.pinKeyDown }}" inputMode="numeric" maxLength="4" autoFocus="{{ true }}" autoComplete="off" style="position:absolute;inset:0;opacity:0;font-size:16px;cursor:text;width:100%;height:100%;border:0;padding:0">
+          </div>
+          <div style="min-height:20px;font:800 14px var(--fB);color:#FF8A94">{{ d.pinErr }}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%">
+            <div onClick="{{ closeDlg }}" style="font:700 16px var(--fH);padding:14px;border-radius:16px;background:var(--pnH);box-shadow:0 5px 0 var(--pnS);cursor:pointer" style-active="transform:translateY(3px)">{{ L.cancel }}</div>
+            <div onClick="{{ d.submitPin }}" style="font:800 16px var(--fH);padding:14px;border-radius:16px;background:{{ d.pinBg }};color:{{ d.pinFg }};box-shadow:0 5px 0 {{ d.pinSh }};cursor:pointer" style-active="transform:translateY(3px)">{{ L.enter }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ d.isCode }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;width:480px;display:flex;flex-direction:column;gap:14px;padding:26px 28px 24px;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:26px;box-shadow:0 10px 0 var(--pnS),0 40px 90px rgba(0,0,0,.6);animation:lbModal .25s both">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:46px;height:46px;border-radius:14px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);display:grid;place-items:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--a1)"><circle cx="8" cy="15" r="4"></circle><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"></path></svg></div>
+            <div><div style="font:700 22px/1.15 var(--fH)">{{ L.codeT }}</div><div style="font:700 13px var(--fB);color:var(--mt)">{{ L.codeS }}</div></div>
+          </div>
+          <div key="{{ d.codeKey }}" style="display:flex;align-items:center;gap:10px;height:62px;padding:0 18px;border-radius:16px;background:var(--dp);box-shadow:{{ d.codeRing }};animation:{{ d.codeAnim }}">
+            <input value="{{ d.code }}" onChange="{{ d.onCode }}" onKeyDown="{{ d.codeKeyDown }}" autoFocus="{{ true }}" maxLength="8" placeholder="GX-0000" spellCheck="false" autoComplete="off" style="flex:1;min-width:0;background:transparent;border:0;outline:none;font:700 26px var(--fL);letter-spacing:5px;text-transform:uppercase;color:var(--a1);padding:0">
+          </div>
+          <div style="min-height:18px;font:800 13px var(--fB);color:#FF8A94">{{ d.codeErr }}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div onClick="{{ closeDlg }}" style="text-align:center;font:700 16px var(--fH);padding:14px;border-radius:16px;background:var(--pnH);box-shadow:0 5px 0 var(--pnS);cursor:pointer" style-active="transform:translateY(3px)">{{ L.cancel }}</div>
+            <div onClick="{{ d.submitCode }}" style="text-align:center;font:800 16px var(--fH);padding:14px;border-radius:16px;background:linear-gradient(var(--a1),var(--a2));color:var(--aT);box-shadow:0 5px 0 var(--aS);cursor:pointer" style-active="transform:translateY(3px)">{{ L.join }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ d.isErr }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;width:450px;display:flex;flex-direction:column;align-items:center;gap:10px;padding:30px 30px 24px;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:26px;box-shadow:0 10px 0 var(--pnS),0 40px 90px rgba(0,0,0,.6);text-align:center;animation:lbModal .25s both">
+          <div style="width:68px;height:68px;border-radius:22px;background:linear-gradient(#FF7A86,#E8455A);box-shadow:0 5px 0 #9E1F33;display:grid;place-items:center">
+            <sc-if value="{{ d.isFull }}" hint-placeholder-val="{{ false }}"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20a6.5 6.5 0 0 1 13 0"></path><circle cx="17" cy="8.5" r="2.6"></circle><path d="M15.6 14.2a5 5 0 0 1 6 5.3"></path></svg></sc-if>
+            <sc-if value="{{ d.isClosed }}" hint-placeholder-val="{{ false }}"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17"></path><path d="M2 21h16"></path><path d="M12 12h.01"></path><path d="M19 8l3 3-3 3"></path></svg></sc-if>
+          </div>
+          <div style="font:700 24px/1.2 var(--fH);margin-top:4px">{{ d.title }}</div>
+          <div style="font:700 15px/1.45 var(--fB);color:var(--mt);text-wrap:pretty;max-width:360px">{{ d.body }}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:10px">
+            <div onClick="{{ closeDlg }}" style="font:700 16px var(--fH);padding:14px;border-radius:16px;background:var(--pnH);box-shadow:0 5px 0 var(--pnS);cursor:pointer" style-active="transform:translateY(3px)">{{ L.ok }}</div>
+            <div onClick="{{ d.alt }}" style="font:800 16px var(--fH);padding:14px;border-radius:16px;background:linear-gradient(var(--a1),var(--a2));color:var(--aT);box-shadow:0 5px 0 var(--aS);cursor:pointer;white-space:nowrap" style-active="transform:translateY(3px)">{{ d.altLabel }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ d.isShare }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;width:520px;display:flex;flex-direction:column;align-items:center;gap:12px;padding:30px 30px 24px;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:26px;box-shadow:0 10px 0 var(--pnS),0 40px 90px rgba(0,0,0,.6);text-align:center;animation:lbModal .3s cubic-bezier(.2,1.2,.4,1) both">
+          <div style="width:64px;height:64px;border-radius:50%;background:#3CCB6E;box-shadow:0 5px 0 #22914A,0 0 30px rgba(60,203,110,.5);display:grid;place-items:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+          <div style="font:700 24px/1.2 var(--fH)">{{ L.shareT }}</div>
+          <div style="font:700 14px/1.45 var(--fB);color:var(--mt);max-width:400px;text-wrap:pretty">{{ L.shareS }}</div>
+          <div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 0 16px;margin-top:4px;border-radius:20px;border:2px dashed var(--bd);background:rgba(0,0,0,.18)">
+            <div style="font:900 11px var(--fB);letter-spacing:1.8px;color:var(--mt)">{{ L.inviteCode }}</div>
+            <div style="font:800 44px/1.1 var(--fL);letter-spacing:8px;background:linear-gradient(180deg,var(--lg1),var(--a1) 50%,var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent">{{ d.code }}</div>
+            <sc-if value="{{ d.hasPass }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:8px;padding:5px 12px;border-radius:10px;background:var(--dp);font:800 13px var(--fB);color:var(--ic)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--a1)"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>{{ L.passLbl }}<div style="font:700 15px var(--fH);letter-spacing:4px;color:#F4F1E8">{{ d.pass }}</div></div>
+            </sc-if>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%">
+            <div onClick="{{ d.copy }}" style="display:flex;align-items:center;justify-content:center;gap:8px;font:700 16px var(--fH);padding:13px;border-radius:16px;background:{{ d.copyBg }};color:{{ d.copyFg }};box-shadow:0 5px 0 {{ d.copySh }};cursor:pointer;transition:background .2s" style-active="transform:translateY(3px)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:currentColor"><rect x="8" y="8" width="12" height="12" rx="2.5"></rect><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"></path></svg>{{ d.copyLabel }}</div>
+            <div onClick="{{ d.share }}" style="display:flex;align-items:center;justify-content:center;gap:8px;font:700 16px var(--fH);padding:13px;border-radius:16px;background:#3D7BFF;box-shadow:0 5px 0 #2148B0;color:#fff;cursor:pointer" style-active="transform:translateY(3px)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"></path></svg>{{ d.shareLabel }}</div>
+          </div>
+          <div onClick="{{ d.toRoom }}" style="width:100%;font:800 17px var(--fH);padding:15px 0;border-radius:16px;background:linear-gradient(var(--a1),var(--a2));color:var(--aT);box-shadow:0 5px 0 var(--aS);cursor:pointer;margin-top:4px" style-active="transform:translateY(3px)">{{ d.roomLabel }}</div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div key="{{ toast.key }}" style="position:absolute;left:50%;top:18px;z-index:50;display:flex;align-items:center;gap:10px;padding:9px 18px 9px 10px;border-radius:999px;background:{{ toast.bg }};color:{{ toast.fg }};font:800 14px var(--fB);box-shadow:0 10px 30px rgba(0,0,0,.4);white-space:nowrap;animation:lbToast .3s both;pointer-events:none">
+      <div style="width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.18);display:grid;place-items:center"><div style="width:8px;height:8px;border-radius:2px;transform:rotate(45deg);background:currentColor"></div></div>
+      {{ toast.text }}
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:720}}">
+const NAMES = [['Zeynep E.', '#16B6A8', 31], ['Ayşe Y.', '#3D7BFF', 42], ['Burak C.', '#8B5CF6', 18], ['Selin A.', '#FF6B6B', 52], ['Hakan T.', '#3D7BFF', 27], ['Derya K.', '#8B5CF6', 35], ['Emre B.', '#3CCB6E', 19], ['Okeyci_34', '#16B6A8', 61], ['Mert K.', '#E8A317', 22], ['Elif S.', '#E05FA8', 29], ['Can Ö.', '#FF8A5B', 33], ['Gizem T.', '#16B6A8', 24], ['Kaan D.', '#3D7BFF', 40], ['Nazlı R.', '#FF6B6B', 17], ['Oğuz P.', '#8B5CF6', 45], ['Ece M.', '#3CCB6E', 26], ['Tolga A.', '#E8A317', 38], ['Pelin Ş.', '#E05FA8', 21], ['Serkan Y.', '#FF8A5B', 49], ['İrem B.', '#3D7BFF', 30]];
+const P = (i) => ({ name: NAMES[i][0], color: NAMES[i][1], lv: NAMES[i][2] });
+const FRIENDS = [
+  { name: 'Mert K.', color: '#16B6A8', lv: 38, st: 'on', fr: true, r: 0.9 }, { name: 'Elif S.', color: '#FF6B6B', lv: 44, st: 'on', fr: true, r: 0.7 },
+  { name: 'Can D.', color: '#8B5CF6', lv: 21, st: 'on', fr: true, r: 0.35 }, { name: 'Ece T.', color: '#3D7BFF', lv: 29, st: 'game', fr: true },
+  { name: 'Kaan Y.', color: '#F5A623', lv: 56, st: 'on', fr: true, r: 0.55 }, { name: 'Naz B.', color: '#16B6A8', lv: 17, st: 'off', fr: true, seen: ['2 sa', '2 h'] },
+  { name: 'Oğuz A.', color: '#3D7BFF', lv: 33, st: 'game', fr: true }, { name: 'Defne Ç.', color: '#FF6B6B', lv: 25, st: 'off', fr: true, seen: ['dün', 'yesterday'] },
+  { name: 'Berk U.', color: '#8B5CF6', lv: 40, st: 'on', fr: false, r: 0.6, ago: ['bugün', 'today'] }, { name: 'İrem G.', color: '#F5A623', lv: 19, st: 'on', fr: false, r: 0.4, ago: ['dün', 'yesterday'] },
+  { name: 'Tolga F.', color: '#16B6A8', lv: 47, st: 'off', fr: false, seen: ['3 gün', '3 days'], ago: ['3 gün önce', '3 days ago'] }, { name: 'Sena M.', color: '#3D7BFF', lv: 31, st: 'game', fr: false, ago: ['bugün', 'today'] },
+];
+const BOTS = ['Nova', 'Orion', 'Vega', 'Lyra', 'Atlas', 'Rigel'];
+const R0 = { okey: true, isle: true, spec: true, chat: 'on', gifts: true };
+const TIERS = [1000, 5000, 10000, 50000, 100000];
+const TABLE_NAMES = ['Ay Işığı', 'Kuyruklu Yıldız', 'Boğaz Esintisi', 'Pazar Keyfi', 'Okey Dostları', 'Galaksi Turu', 'Meteor', 'Kahve Molası'];
+const mk = (id, name, type, bet, hands, turn, kat, players, status, hand, extra) => ({ id, name, type, bet, hands, turn, kat, pass: null, vis: 'open', code: null, rules: { ...R0 }, players, owner: 0, status, hand, ...(extra || {}) });
+const SEED = () => [
+  mk('t1', 'Gece Kuşları', 'tekli', 5000, 5, 30, false, [P(0), P(2), P(4), null], 'waiting', 0, { race: 'full' }),
+  mk('t2', 'Akşam Keyfi', 'esli', 10000, 7, 45, true, [P(5), P(9), null, null], 'waiting', 0, { race: 'closed' }),
+  mk('t3', 'Hızlı Eller', 'tekli', 1000, 3, 15, false, [P(6), null, null, null], 'waiting', 0, { rules: { ...R0, isle: false } }),
+  mk('t4', 'Usta Masası', 'tekli', 50000, 5, 30, false, [P(7), P(3), P(14), P(18)], 'playing', 3),
+  mk('t5', 'Kadıköy 101', 'esli', 5000, 5, 30, true, [P(10), null, P(12), P(16)], 'playing', 2),
+  mk('t6', 'Şifreli Salon', 'tekli', 10000, 5, 20, false, [P(1), P(11), null, null], 'waiting', 0, { pass: '1234' }),
+  mk('t7', 'Yıldız Tozu', 'tekli', 100000, 7, 45, false, [P(18), P(7), P(3), P(14)], 'playing', 5, { rules: { ...R0, spec: false } }),
+  mk('t8', 'Çay Ocağı', 'tekli', 1000, 5, 30, false, [P(13), P(15), P(17), null], 'waiting', 0, { rules: { ...R0, chat: 'quick' } }),
+  mk('t9', 'Takım Ruhu', 'esli', 1000, 3, 20, false, [P(8), null, null, null], 'waiting', 0, { rules: { ...R0, gifts: false } }),
+  mk('t10', 'Satürn Halkası', 'tekli', 5000, 3, 30, false, [P(4), P(19), P(0), P(6)], 'playing', 1),
+  mk('t11', 'Gece Yarısı', 'esli', 50000, 5, 30, false, [P(16), P(12), P(1), P(5)], 'playing', 4, { pass: '1234' }),
+  mk('t12', 'Sabah Sporu', 'tekli', 5000, 7, 20, false, [P(2), P(9), P(11), P(13)], 'waiting', 0, { rules: { ...R0, okey: false } }),
+];
+const HIDDEN = () => [mk('h1', 'Ayşe’nin masası', 'tekli', 5000, 5, 30, false, [P(1), P(8), null, null], 'waiting', 0, { vis: 'private', code: 'GX7Q2M' })];
+const STR = {
+  tr: {
+    back: 'Ana menü', classic: 'Klasik', classicSub: 'Tekli ve eşli masalar · 101 Okey', buy: 'Çip satın al', joinCode: 'Kodla katıl', create: 'Masa aç',
+    all: 'Tümü', tekli: 'Tekli', esli: 'Eşli', fFree: 'Boş yer var', fKat: 'Katlamalı', allBets: 'Tümü', search: 'Masa ara', locked: 'Şifreli masa',
+    sWait: 'Bekliyor', sFull: 'Dolu · başlıyor', sPlay: (h, n) => `Oyunda · El ${h}/${n}`, meta: (h, t) => `· ${h} el · ${t} sn`,
+    sit: 'Otur', joinRun: 'Katıl', watch: 'İzle', full: 'Dolu', bot: 'BOT', emptyT: 'Bu filtrelere uygun masa yok', emptyB: 'Filtreleri temizle ya da kendi masanı aç; açık masalar lobide hemen listelenir.', clearF: 'Filtreleri temizle',
+    bKat: '×2 Katlamalı', bHands: (n) => `${n} el`, bTurn: (n) => `${n} sn`, bOkey: 'Okey +101', bIsle: 'İşlek +101', bNoSpec: 'İzleyici yok', bSpec: 'İzleyici açık', bQuick: 'Hazır sohbet', bChatOff: 'Sohbet kapalı', bNoGift: 'Hediye kapalı', bPriv: 'Özel', bPass: 'Şifreli',
+    createT: 'Masa aç', createS: 'Klasik · 101 · masayı açınca otomatik oturursun', rMode: 'Oyun modu', rModeD: 'Girdiğin moda göre; tip seçebilirsin',
+    rName: 'Masa adı', rNameD: 'Lobide ve davette görünür', rNameErr: 'Masa adı boş olamaz', rVis: 'Görünürlük', visOpen: 'Açık', visPriv: 'Özel', visOpenD: 'Lobide listelenir, herkes oturabilir', visPrivD: 'Lobide görünmez, davet koduyla girilir',
+    rPass: 'Şifre', passOffD: 'İsteğe bağlı · 4 haneli', passOnD: 'Girenler bu şifreyi yazacak', passErr: '4 rakam gir',
+    rHands: 'El sayısı', rHandsD: 'Maç bu kadar el sürer, en düşük toplam kazanır', rBet: 'Bahis', bal: (b) => `Bakiyen ${b}`,
+    lowT: 'Bakiyen yetersiz', lowB: (t, n) => `${t} bahis için ${n} çip daha gerekiyor.`, lowAll: (n) => `En düşük bahis için ${n} çip daha gerekiyor.`, buyChips: 'Çip al', tierLocked: 'Yetersiz', tierOk: 'Uygun',
+    rPrize: 'Ödül', prizeT: 'Kazanan alır · masadaki tüm bahisler', prizeE: 'Kazanan takım alır · kişi başı yarısı', pool: 'Toplam havuz',
+    rKat: 'Katlamalı', rKatD: 'Okeyle ya da çiftle bitişte puanlar katlanır', rTurn: 'Tur süresi', rTurnD: 'Süre dolunca otomatik oynanır',
+    rRules: 'Kural özelleştirme', rulesDef: 'Varsayılan kurallar', rulesCh: (n) => `${n} kural değişti`, resetRules: 'Varsayılana dön',
+    rOkey: 'Okey atma cezası (+101)', rOkeyD: 'Okeyi yere atan +101 yazar', rIsle: 'İşlek taş atma cezası (+101)', rIsleD: 'Masadaki pere işlenebilen taşı atan +101 yazar',
+    rSpec: 'İzleyici', rSpecD: 'Oyun sürerken başkaları izleyebilsin', allow: 'İzin ver', deny: 'Verme', rChat: 'Sohbet', rChatD: 'Masa içi yazışma', chOn: 'Açık', chQuick: 'Yalnız hazır cümleler', chOff: 'Kapalı',
+    rGift: 'İkram ve hediye', rGiftD: 'Oyuncular birbirine ikram gönderebilsin', on: 'Açık', off: 'Kapalı',
+    summary: 'ÖZET', kBet: 'BAHİS', kHands: 'EL', kTurn: 'TUR SÜRESİ', kPool: 'HAVUZ', balance: 'Bakiyen', ctaCreate: (b) => `Masayı oluştur · ${b}`, ctaLow: 'Yetersiz bakiye', ctaFix: 'Eksikleri tamamla', cancel: 'Vazgeç', close: 'Kapat',
+    modeLine: (t, v) => `Klasik · ${t} · ${v}`, open: 'Açık', priv: 'Özel',
+    passT: 'Şifreli masa', enter: 'Gir', wrongPass: 'Yanlış şifre. Tekrar dene.', passBody: (n, b) => `${n} · ${b} bahis`,
+    codeT: 'Kodla katıl', codeS: 'Özel masalar lobide görünmez; arkadaşından aldığın kodu yaz.', codeErr: 'Bu koda ait açık bir masa bulunamadı.', codeShort: 'Kod 6 karakter olmalı', join: 'Katıl',
+    connT: 'Masaya bağlanılıyor…', fullT: 'Masa doldu', fullB: 'Son koltuk sen bağlanırken doldu.', closedT: 'Masa kapandı', closedB: 'Oda sahibi masayı kapattı.', similar: 'Benzer masa bul', watchIt: 'İzle', noSimilar: 'Şu an benzer boş masa yok', ok: 'Tamam',
+    shareT: 'Özel masan hazır', shareS: 'Masa lobide listelenmez. Kodu arkadaşlarına gönder, kodla katılsınlar.', inviteCode: 'DAVET KODU', passLbl: 'Şifre', copy: 'Kodu kopyala', copied: 'Kopyalandı', share: 'Paylaş', shared: 'Davet metni kopyalandı', toRoom: 'Bekleme odasına geç', back2: 'Odaya dön',
+    shareText: (n, c, p) => `Galaxy 101'de "${n}" masasına gel! Kod: ${c}${p ? ` · Şifre: ${p}` : ''}`,
+    waitRoom: 'BEKLEME ODASI', youOwn: 'Oda sahibi sensin', leaveRoom: 'Ayrıl', code: 'Kod', kick: 'Masadan çıkar', addBot: 'Bot ekle', emptySeat: 'Boş koltuk', ownerT: 'Oda sahibi', teamA: 'Takım A', teamB: 'Takım B', you: 'SEN',
+    waitN: (n) => `Oyuncular bekleniyor · ${n}/4`, ready: 'Masa hazır', start: 'Başlat', startN: (n) => `Başlat · ${n}/4`, hintOwner: 'Dört koltuk dolunca başlatabilirsin. Boş koltuğa bot ekleyebilirsin.', hintReady: 'Herkes yerinde, oyunu başlat.',
+    hintGuest: 'Oda sahibi oyunu başlatınca masa açılır.', guestWait: 'Oda sahibi bekleniyor', starting: (n) => `Oyun başlıyor · ${n}`,
+    joined: (n) => `${n} masaya oturdu`, kicked: (n) => `${n} masadan çıkarıldı`, botAdded: 'Bot koltuğa oturdu', closedMine: 'Masan kapatıldı', leftRoom: 'Bekleme odasından ayrıldın',
+    invite: 'Davet et', inviteS: 'Davet', invT: 'Arkadaşlarını davet et', invSub: (n) => n ? `${n} boş koltuk · davet 30 sn geçerli` : 'Masa dolu · davet gönderilemez', tabFr: 'Arkadaşlar', tabRe: 'Son oynadıkların', invSearch: 'Oyuncu ara', invNone: 'Bu isimde oyuncu yok', invSeats: 'KOLTUKLAR', invSeatLine: (n, p) => `${4 - n}/4 dolu${p ? ` · ${p} davet bekliyor` : ''}`, invByCode: 'KODLA DAVET', invOpen: 'Açık masa lobide listelenir; davet edilen arkadaşın doğrudan boş koltuğa oturur.', invNote: 'Kabul eden arkadaşın boş koltuğa otomatik oturur.', close: 'Kapat',
+    stOn: 'Çevrimiçi', stGame: 'Oyunda', stOff: (h) => `Son görülme ${h}`, stRecent: (h) => `Birlikte oynadınız · ${h}`,
+    bInv: 'Davet et', bPend: (n) => `Bekleniyor ${n}`, bCancel: 'İptal etmek için tıkla', bIn: 'Masada', bNo: 'Reddetti', bExp: 'Tekrar davet', bGame: 'Oyunda', bOff: 'Çevrimdışı', bFull: 'Masa dolu', invSent: (n) => `${n} davet edildi`, invNo: (n) => `${n} daveti reddetti`, invExp: (n) => `${n} yanıt vermedi`,
+    prizeSum: (p) => `Kazanan ${p} çipin tamamını alır.`, prizeSumE: (p, h) => `Kazanan takım ${p} çipi alır; kişi başı ${h}.`,
+  },
+  en: {
+    back: 'Main menu', classic: 'Classic', classicSub: 'Singles and pairs tables · 101 Okey', buy: 'Buy chips', joinCode: 'Join by code', create: 'Open table',
+    all: 'All', tekli: 'Singles', esli: 'Pairs', fFree: 'Has free seat', fKat: 'Doubling', allBets: 'All', search: 'Search tables', locked: 'Password protected',
+    sWait: 'Waiting', sFull: 'Full · starting', sPlay: (h, n) => `Playing · Hand ${h}/${n}`, meta: (h, t) => `· ${h} hands · ${t}s`,
+    sit: 'Sit', joinRun: 'Join', watch: 'Watch', full: 'Full', bot: 'BOT', emptyT: 'No tables match these filters', emptyB: 'Clear the filters or open your own table; open tables show up in the lobby right away.', clearF: 'Clear filters',
+    bKat: '×2 Doubling', bHands: (n) => `${n} hands`, bTurn: (n) => `${n}s`, bOkey: 'Okey +101', bIsle: 'Playable +101', bNoSpec: 'No spectators', bSpec: 'Spectators on', bQuick: 'Quick chat', bChatOff: 'Chat off', bNoGift: 'Gifts off', bPriv: 'Private', bPass: 'Password',
+    createT: 'Open a table', createS: 'Classic · 101 · you sit down automatically', rMode: 'Game mode', rModeD: 'Set by the mode you entered; pick a type',
+    rName: 'Table name', rNameD: 'Shown in the lobby and invites', rNameErr: 'Table name can’t be empty', rVis: 'Visibility', visOpen: 'Open', visPriv: 'Private', visOpenD: 'Listed in the lobby, anyone can sit', visPrivD: 'Hidden from the lobby, join by invite code',
+    rPass: 'Password', passOffD: 'Optional · 4 digits', passOnD: 'Players must enter this password', passErr: 'Enter 4 digits',
+    rHands: 'Hands', rHandsD: 'The match lasts this many hands; lowest total wins', rBet: 'Bet', bal: (b) => `Balance ${b}`,
+    lowT: 'Not enough chips', lowB: (t, n) => `You need ${n} more chips for a ${t} bet.`, lowAll: (n) => `You need ${n} more chips for the lowest bet.`, buyChips: 'Get chips', tierLocked: 'Too high', tierOk: 'Available',
+    rPrize: 'Prize', prizeT: 'Winner takes all bets at the table', prizeE: 'Winning team takes it · half each', pool: 'Total pool',
+    rKat: 'Doubling', rKatD: 'Scores double when finishing with okey or pairs', rTurn: 'Turn time', rTurnD: 'Auto-plays when time runs out',
+    rRules: 'Customize rules', rulesDef: 'Default rules', rulesCh: (n) => `${n} rules changed`, resetRules: 'Reset to default',
+    rOkey: 'Okey discard penalty (+101)', rOkeyD: 'Discarding the okey costs +101', rIsle: 'Playable tile penalty (+101)', rIsleD: 'Discarding a tile that fits a set on the table costs +101',
+    rSpec: 'Spectators', rSpecD: 'Others can watch while you play', allow: 'Allow', deny: 'Don’t allow', rChat: 'Chat', rChatD: 'Table messages', chOn: 'On', chQuick: 'Quick phrases only', chOff: 'Off',
+    rGift: 'Treats and gifts', rGiftD: 'Players can send each other treats', on: 'On', off: 'Off',
+    summary: 'SUMMARY', kBet: 'BET', kHands: 'HANDS', kTurn: 'TURN TIME', kPool: 'POOL', balance: 'Balance', ctaCreate: (b) => `Create table · ${b}`, ctaLow: 'Not enough chips', ctaFix: 'Fix the highlighted fields', cancel: 'Cancel', close: 'Close',
+    modeLine: (t, v) => `Classic · ${t} · ${v}`, open: 'Open', priv: 'Private',
+    passT: 'Password protected', enter: 'Enter', wrongPass: 'Wrong password. Try again.', passBody: (n, b) => `${n} · ${b} bet`,
+    codeT: 'Join by code', codeS: 'Private tables are hidden from the lobby; type the code a friend sent you.', codeErr: 'No open table found for this code.', codeShort: 'The code has 6 characters', join: 'Join',
+    connT: 'Connecting to the table…', fullT: 'Table is full', fullB: 'The last seat was taken while you were connecting.', closedT: 'Table closed', closedB: 'The host closed the table.', similar: 'Find a similar table', watchIt: 'Watch', noSimilar: 'No similar free table right now', ok: 'OK',
+    shareT: 'Your private table is ready', shareS: 'It isn’t listed in the lobby. Send the code to friends so they can join.', inviteCode: 'INVITE CODE', passLbl: 'Password', copy: 'Copy code', copied: 'Copied', share: 'Share', shared: 'Invite text copied', toRoom: 'Go to waiting room', back2: 'Back to room',
+    shareText: (n, c, p) => `Join my "${n}" table on Galaxy 101! Code: ${c}${p ? ` · Password: ${p}` : ''}`,
+    waitRoom: 'WAITING ROOM', youOwn: 'You are the host', leaveRoom: 'Leave', code: 'Code', kick: 'Remove from table', addBot: 'Add bot', emptySeat: 'Empty seat', ownerT: 'Host', teamA: 'Team A', teamB: 'Team B', you: 'YOU',
+    waitN: (n) => `Waiting for players · ${n}/4`, ready: 'Table is ready', start: 'Start', startN: (n) => `Start · ${n}/4`, hintOwner: 'You can start once all four seats are taken. Add bots to empty seats.', hintReady: 'Everyone is seated, start the game.',
+    hintGuest: 'The table opens when the host starts the game.', guestWait: 'Waiting for the host', starting: (n) => `Starting · ${n}`,
+    joined: (n) => `${n} sat down`, kicked: (n) => `${n} was removed`, botAdded: 'A bot took the seat', closedMine: 'Your table was closed', leftRoom: 'You left the waiting room',
+    invite: 'Invite', inviteS: 'Invite', invT: 'Invite friends', invSub: (n) => n ? `${n} empty ${n > 1 ? 'seats' : 'seat'} · invites last 30 s` : 'Table is full · no invites', tabFr: 'Friends', tabRe: 'Recent players', invSearch: 'Search players', invNone: 'No player with that name', invSeats: 'SEATS', invSeatLine: (n, p) => `${4 - n}/4 taken${p ? ` · ${p} pending` : ''}`, invByCode: 'INVITE BY CODE', invOpen: 'Open tables are listed in the lobby; invited friends sit straight into an empty seat.', invNote: 'Friends who accept take an empty seat automatically.', close: 'Close',
+    stOn: 'Online', stGame: 'In a game', stOff: (h) => `Last seen ${h}`, stRecent: (h) => `Played together · ${h}`,
+    bInv: 'Invite', bPend: (n) => `Waiting ${n}`, bCancel: 'Click to cancel', bIn: 'Seated', bNo: 'Declined', bExp: 'Invite again', bGame: 'In a game', bOff: 'Offline', bFull: 'Table full', invSent: (n) => `${n} invited`, invNo: (n) => `${n} declined`, invExp: (n) => `${n} didn’t respond`,
+    prizeSum: (p) => `The winner takes all ${p} chips.`, prizeSumE: (p, h) => `The winning team takes ${p} chips; ${h} each.`,
+  },
+};
+const ini = (n) => { const w = String(n || '?').replace(/^Bot · /, '').trim().split(/\s+/).filter(Boolean); const s = w.length > 1 ? w[0][0] + w[1][0] : (w[0] || '?').slice(0, 2); return s.toLocaleUpperCase('tr-TR'); };
+const genTR = (word) => {
+  const w = word.trim(), m = w.toLocaleLowerCase('tr-TR').match(/[aeıioöuü](?=[^aeıioöuü]*$)/), v = m ? m[0] : 'a';
+  const s = { a: 'ın', ı: 'ın', e: 'in', i: 'in', o: 'un', u: 'un', ö: 'ün', ü: 'ün' }[v];
+  return w + '’' + (/[aeıioöuü]$/i.test(w) ? 'n' : '') + s;
+};
+const mkCode = () => { const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let c = 'GX'; for (let i = 0; i < 4; i++) c += A[Math.floor(Math.random() * A.length)]; return c; };
+const fmtCode = (c) => (c ? c.slice(0, 2) + '-' + c.slice(2) : '');
+
+class Component extends DCLogic {
+  state = { view: 'list', tables: SEED(), hidden: HIDDEN(), filt: { type: 'all', free: false, kat: false, bet: 0 }, q: '', qF: false, create: null, dlg: null, wait: null, toast: null, uid: 0 };
+  get en() { return this.props.lang === 'en'; }
+  get L() { return STR[this.en ? 'en' : 'tr']; }
+  fmt(n) { return Math.round(n).toLocaleString(this.en ? 'en-US' : 'tr-TR'); }
+  short(n) { return n >= 1000 ? (n / 1000) + 'K' : String(n); }
+  get me() { const u = this.props.user || {}; return { name: u.name || 'Oyuncu', color: u.color || '#FF8A5B', lv: 24, me: true }; }
+  get chips() { return this.props.chips ?? 25000; }
+  componentDidMount() {
+    this._sim = setInterval(() => this.tick(), 3200);
+    this._key = (e) => { if (e.key === 'Escape') { if (this.state.dlg && this.state.dlg.kind !== 'connect' && this.state.dlg.kind !== 'share') this.setState({ dlg: null }); else if (this.state.create && !this.state.dlg) this.setState({ create: null }); } };
+    window.addEventListener('keydown', this._key);
+  }
+  componentWillUnmount() { this.clearInv(); clearInterval(this._sim); clearInterval(this._wsim); clearTimeout(this._toT); clearTimeout(this._conT); clearTimeout(this._cdT); window.removeEventListener('keydown', this._key); }
+  flash(text, kind) {
+    const C = { ok: ['#3CCB6E', '#062B14'], bad: ['linear-gradient(#FF7A86,#E8455A)', '#fff'], info: ['rgba(5,8,22,.85)', '#F4F1E8'] }[kind || 'info'];
+    clearTimeout(this._toT); this.setState((s) => ({ toast: { text, bg: C[0], fg: C[1], key: (s.toast ? s.toast.key : 0) + 1 } }));
+    this._toT = setTimeout(() => this.setState({ toast: null }), 2800);
+  }
+  randPlayer(exclude) { const used = new Set(exclude.filter(Boolean).map((p) => p.name)); const pool = NAMES.map((_, i) => P(i)).filter((p) => !used.has(p.name)); return pool[Math.floor(Math.random() * pool.length)]; }
+  tick() {
+    const s = this.state, lock = new Set([s.dlg && s.dlg.table && s.dlg.table.id, s.wait && s.wait.id].filter(Boolean));
+    const tables = s.tables.map((t) => ({ ...t, players: t.players.slice() }));
+    const pool = tables.filter((t) => !lock.has(t.id) && !t.race && !t.mine);
+    for (let q = 0; q < 1 + (Math.random() < 0.45 ? 1 : 0); q++) {
+      const t = pool[Math.floor(Math.random() * pool.length)]; if (!t) break;
+      const free = t.players.filter((p) => !p).length;
+      if (t.status === 'waiting') {
+        if (!free) { t.status = 'playing'; t.hand = 1; }
+        else if (Math.random() < 0.6) { const i = t.players.indexOf(null); t.players[i] = this.randPlayer(t.players); }
+      } else {
+        const r = Math.random();
+        if (r < 0.3) { t.hand += 1; if (t.hand > t.hands) { t.status = 'waiting'; t.hand = 0; t.players = [t.players[0], null, null, null]; } }
+        else if (r < 0.4 && !free) { const i = 1 + Math.floor(Math.random() * 3); t.players[i] = null; }
+        else if (r < 0.55 && free) { const i = t.players.indexOf(null); t.players[i] = this.randPlayer(t.players); }
+      }
+    }
+    if (tables.length < 14 && Math.random() < 0.18) {
+      const id = 'n' + Date.now().toString(36), type = Math.random() < 0.6 ? 'tekli' : 'esli';
+      tables.push(mk(id, TABLE_NAMES[Math.floor(Math.random() * TABLE_NAMES.length)], type, TIERS[Math.floor(Math.random() * 3)], [3, 5, 7][Math.floor(Math.random() * 3)], [20, 30, 45][Math.floor(Math.random() * 3)], Math.random() < 0.3, [this.randPlayer([]), null, null, null], 'waiting', 0, { fresh: true }));
+    }
+    this.setState({ tables });
+  }
+  findT(id) { return this.state.tables.find((t) => t.id === id) || this.state.hidden.find((t) => t.id === id); }
+  upT(id, fn) { this.setState((s) => ({ tables: s.tables.map((t) => (t.id === id ? fn({ ...t, players: t.players.slice() }) : t)), hidden: s.hidden.map((t) => (t.id === id ? fn({ ...t, players: t.players.slice() }) : t)) })); }
+
+  // join flow
+  attempt(t, act) {
+    if (t.pass && act !== 'watchFree') return this.setState({ dlg: { kind: 'pass', table: t, act, pin: '', err: false, key: 0 } });
+    this.connect(t, act);
+  }
+  connect(t, act) {
+    this.setState({ dlg: { kind: 'connect', table: t, act } });
+    clearTimeout(this._conT);
+    this._conT = setTimeout(() => {
+      const live = this.findT(t.id);
+      if (!live || live.race === 'closed') { this.setState((s) => ({ tables: s.tables.filter((x) => x.id !== t.id), dlg: { kind: 'closed', table: t, act } })); return; }
+      if (act !== 'watch' && (live.race === 'full' || !live.players.includes(null))) {
+        this.upT(t.id, (x) => { const i = x.players.indexOf(null); if (i >= 0) x.players[i] = this.randPlayer(x.players); delete x.race; return x; });
+        this.setState({ dlg: { kind: 'full', table: { ...live, status: live.status }, act } }); return;
+      }
+      this.setState({ dlg: null });
+      if (act === 'watch') return this.props.onStart && this.props.onStart({ table: live, seats: live.players, spectate: true, startHand: live.hand || 1 });
+      const j = live.players.indexOf(null), pl = live.players.slice(); pl[j] = this.me;
+      const rot = [0, 1, 2, 3].map((k) => pl[(j + k) % 4]), owner = (live.owner - j + 4) % 4;
+      this.upT(t.id, (x) => { x.players = pl; return x; });
+      if (act === 'join') return this.props.onStart && this.props.onStart({ table: live, seats: rot, startHand: live.hand || 1 });
+      this.enterWait({ ...live, players: rot, owner }, false);
+    }, 850);
+  }
+  similar(t) {
+    const c = this.state.tables.filter((x) => x.id !== t.id && x.type === t.type && x.status === 'waiting' && x.players.includes(null) && !x.pass && !x.race && x.bet <= this.chips).sort((a, b) => Math.abs(a.bet - t.bet) - Math.abs(b.bet - t.bet));
+    if (!c.length) { this.setState({ dlg: null }); return this.flash(this.L.noSimilar, 'info'); }
+    this.connect(c[0], 'sit');
+  }
+
+  // waiting room
+  enterWait(table, owner) {
+    clearInterval(this._wsim); clearTimeout(this._cdT);
+    this.setState({ view: 'wait', create: null, wait: { id: table.id, table, owner, t0: Date.now(), friend: false, cd: 0, keys: [1, 1, 1, 1] } });
+    this._wsim = setInterval(() => this.waitTick(), 2600);
+  }
+  waitTick() {
+    const s = this.state, w = s.wait; if (!w || w.cd) return;
+    const t = { ...w.table, players: w.table.players.slice() }, free = t.players.map((p, i) => (p ? -1 : i)).filter((i) => i >= 0);
+    if (!free.length) { if (!w.owner) this.guestCountdown(); return; }
+    const priv = t.vis === 'private';
+    let add = null;
+    if (!w.owner) add = Math.random() < 0.7;
+    else if (!priv) add = Math.random() < 0.5;
+    else if (!w.friend && Date.now() - w.t0 > 4200) add = true;
+    if (!add) return;
+    const i = free[Math.floor(Math.random() * free.length)], p = priv && w.owner ? P(1) : this.randPlayer(t.players);
+    if (t.players.some((x) => x && x.name === p.name)) return;
+    t.players[i] = p;
+    const keys = w.keys.slice(); keys[i]++;
+    this.setState({ wait: { ...w, table: t, friend: w.friend || priv, keys } });
+    this.flash(this.L.joined(p.name), 'ok');
+    if (!w.owner && !t.players.includes(null)) setTimeout(() => this.guestCountdown(), 900);
+  }
+  upW(fn) { this.setState((s) => (s.wait ? { wait: { ...s.wait, ...fn(s.wait) } } : null)); }
+  clearInv() { (this._invT || []).forEach(clearTimeout); this._invT = []; clearInterval(this._invI); this._invI = null; }
+  sendInvite(fr) {
+    const L = this.L; this._invT = this._invT || [];
+    this.upW((w) => ({ sent: { ...(w.sent || {}), [fr.name]: { st: 'pend', t0: Date.now() } } }));
+    this.flash(L.invSent(fr.name), 'info');
+    if (!this._invI) this._invI = setInterval(() => {
+      const w = this.state.wait; if (!w) return this.clearInv();
+      const sent = { ...(w.sent || {}) }; let ch = false, any = false;
+      for (const k in sent) if (sent[k].st === 'pend') { any = true; if (Date.now() - sent[k].t0 >= 30000) { sent[k] = { st: 'exp' }; ch = true; this.flash(L.invExp(k), 'info'); } }
+      this.upW(() => ({ sent, tick: Date.now() }));
+      if (!any) { clearInterval(this._invI); this._invI = null; }
+    }, 1000);
+    const roll = Math.random(), ok = roll < (fr.r || 0.5), no = !ok && roll < (fr.r || 0.5) + 0.25;
+    if (!ok && !no) return;
+    this._invT.push(setTimeout(() => {
+      const w = this.state.wait; if (!w || !w.sent || !w.sent[fr.name] || w.sent[fr.name].st !== 'pend' || w.cd) return;
+      if (no) { this.upW((ww) => ({ sent: { ...ww.sent, [fr.name]: { st: 'no' } } })); return this.flash(L.invNo(fr.name), 'bad'); }
+      const t = { ...w.table, players: w.table.players.slice() }, pref = w.inv && w.inv.seat;
+      let i = pref != null && !t.players[pref] ? pref : t.players.indexOf(null);
+      if (i < 0) { this.upW((ww) => ({ sent: { ...ww.sent, [fr.name]: { st: 'exp' } } })); return; }
+      t.players[i] = { name: fr.name, color: fr.color, lv: fr.lv };
+      const keys = w.keys.slice(); keys[i]++;
+      const sent = { ...w.sent }; delete sent[fr.name];
+      this.setState({ wait: { ...w, table: t, keys, sent, friend: true, inv: w.inv ? { ...w.inv, seat: null } : null } });
+      this.flash(L.joined(fr.name), 'ok');
+      if (!w.owner && !t.players.includes(null)) setTimeout(() => this.guestCountdown(), 900);
+    }, ok ? 2200 + Math.random() * 3500 : 3500 + Math.random() * 4000));
+  }
+  invVals(w, t, n) {
+    const L = this.L, I = w.inv, en = this.en;
+    if (!I) return { open: false, rows: [], tabs: [], seats: [] };
+    const sent = w.sent || {}, free = 4 - n, q = (I.q || '').trim().toLocaleLowerCase('tr-TR');
+    const pendN = Object.values(sent).filter((x) => x.st === 'pend').length;
+    const ORD = { on: 0, game: 1, off: 2 };
+    const pool = FRIENDS.filter((x) => (I.tab === 'recent' ? !x.fr : x.fr));
+    const gold = { bg: 'linear-gradient(var(--a1),var(--a2))', fg: 'var(--aT)', sh: 'var(--aS)' }, off = { bg: 'var(--dp)', fg: 'var(--mt)', sh: 'rgba(0,0,0,.25)' }, sec = { bg: 'var(--pnH)', fg: '#F4F1E8', sh: 'var(--pnS)' };
+    const rows = pool.filter((x) => !q || x.name.toLocaleLowerCase('tr-TR').includes(q)).sort((a, b) => ORD[a.st] - ORD[b.st]).map((x) => {
+      const seated = t.players.some((p) => p && p.name === x.name), sx = sent[x.name];
+      const st = seated ? 'in' : sx ? sx.st : x.st === 'on' ? 'can' : x.st;
+      const nop = () => {};
+      let b;
+      if (st === 'in') b = { bg: 'rgba(60,203,110,.16)', fg: '#8EF0B0', sh: 'transparent', label: L.bIn, check: true, cur: 'default', go: nop };
+      else if (st === 'pend') { const left = Math.max(0, 30 - Math.floor((Date.now() - sx.t0) / 1000)); b = { ...sec, label: L.bPend(left), pend: true, pw: (left / 30 * 100) + '%', cur: 'pointer', title: L.bCancel, go: () => this.upW((ww) => { const s2 = { ...ww.sent }; delete s2[x.name]; return { sent: s2 }; }) }; }
+      else if (st === 'no') b = { bg: 'rgba(255,94,108,.14)', fg: '#FF9AA3', sh: 'transparent', label: L.bNo, cur: 'default', go: nop };
+      else if (st === 'game') b = { ...off, label: L.bGame, cur: 'not-allowed', go: nop };
+      else if (st === 'off') b = { ...off, label: L.bOff, cur: 'not-allowed', go: nop };
+      else if (!free || w.cd) b = { ...off, label: L.bFull, cur: 'not-allowed', go: nop };
+      else b = { ...(st === 'exp' ? sec : gold), label: st === 'exp' ? L.bExp : L.bInv, cur: 'pointer', go: () => this.sendInvite(x) };
+      const sub = x.st === 'on' ? L.stOn : x.st === 'game' ? L.stGame : L.stOff(x.seen ? x.seen[en ? 1 : 0] : '');
+      return { name: x.name, ini: ini(x.name), color: x.color, lv: (en ? 'LV ' : 'SV ') + x.lv,
+        dot: x.st === 'on' ? '#3CCB6E' : x.st === 'game' ? '#FFC94A' : '#6B7199',
+        sub: !x.fr && x.ago ? sub + ' · ' + x.ago[en ? 1 : 0] : sub, subC: x.st === 'on' ? '#8EF0B0' : x.st === 'game' ? 'var(--a1)' : 'var(--mt)',
+        op: x.st === 'off' && st !== 'in' ? 0.55 : 1, ring: st === 'pend' ? 'inset 0 0 0 2px rgba(255,201,74,.45)' : st === 'in' ? 'inset 0 0 0 2px rgba(60,203,110,.4)' : 'none',
+        pend: false, pw: '0%', check: false, title: '', ...b };
+    });
+    const tab = (v, label, cnt) => { const on = (I.tab || 'fr') === v; return { label, n: cnt, bg: on ? 'linear-gradient(var(--a1),var(--a2))' : 'transparent', fg: on ? 'var(--aT)' : 'var(--mt)', sh: on ? '0 3px 0 var(--aS)' : 'none', pick: () => this.upW((ww) => ({ inv: { ...ww.inv, tab: v } })) }; };
+    return { open: true, sub: L.invSub(w.cd ? 0 : free), q: I.q || '', none: !rows.length, rows, openTbl: !t.code,
+      tabs: [tab('fr', L.tabFr, FRIENDS.filter((x) => x.fr && x.st === 'on').length + '/' + FRIENDS.filter((x) => x.fr).length), tab('recent', L.tabRe, FRIENDS.filter((x) => !x.fr).length)],
+      onQ: (e) => { const v = e.target.value; this.upW((ww) => ({ inv: { ...ww.inv, q: v } })); }, qFocus: () => this.upW((ww) => ({ inv: { ...ww.inv, qF: true } })), qBlur: () => this.upW((ww) => ({ inv: { ...ww.inv, qF: false } })),
+      qRing: I.qF ? 'inset 0 0 0 2px var(--a1)' : 'inset 0 2px 0 rgba(0,0,0,.3)',
+      seats: t.players.map((p, i) => (p ? { ini: ini(p.name), bg: p.bot ? '#5B6390' : p.color, bs: 'solid', bd: p.me ? 'var(--a1)' : 'rgba(255,255,255,.75)', fg: '#fff', title: p.name } : { ini: '+', bg: I.seat === i ? 'rgba(255,201,74,.16)' : 'rgba(0,0,0,.2)', bs: 'dashed', bd: I.seat === i ? 'var(--a1)' : 'var(--bd)', fg: 'var(--mt)', title: L.emptySeat })),
+      seatLine: L.invSeatLine(free, pendN), close: () => this.upW(() => ({ inv: null })) };
+  }
+  guestCountdown() {
+    const w = this.state.wait; if (!w || w.cd) return;
+    let n = 3; this.setState({ wait: { ...w, cd: n } });
+    const step = () => { n -= 1; if (!this.state.wait) return; if (n <= 0) return this.launch(); this.setState({ wait: { ...this.state.wait, cd: n } }); this._cdT = setTimeout(step, 1000); };
+    this._cdT = setTimeout(step, 1000);
+  }
+  launch() {
+    const w = this.state.wait; if (!w) return;
+    clearInterval(this._wsim); clearTimeout(this._cdT); this.clearInv();
+    if (this.props.onStart) this.props.onStart({ table: w.table, seats: w.table.players });
+  }
+  leaveWait() {
+    const w = this.state.wait; clearInterval(this._wsim); clearTimeout(this._cdT); this.clearInv();
+    if (!w) return this.setState({ view: 'list' });
+    if (w.owner) this.setState((s) => ({ tables: s.tables.filter((t) => t.id !== w.id), hidden: s.hidden.filter((t) => t.id !== w.id) }));
+    else this.upT(w.id, (x) => { x.players = x.players.map((p) => (p && p.me ? null : p)); return x; });
+    this.setState({ view: 'list', wait: null });
+    this.flash(w.owner ? this.L.closedMine : this.L.leftRoom, 'info');
+  }
+
+  // create
+  openCreate() {
+    const u = this.me, first = u.name.split(' ')[0];
+    const aff = TIERS.filter((b) => b <= this.chips), bet = aff.includes(5000) ? 5000 : aff.length ? aff[aff.length - 1] : 1000;
+    this.setState({ create: { type: this.state.filt.type === 'esli' ? 'esli' : 'tekli', name: this.en ? `${first}'s table` : `${genTR(first)} masası`, vis: 'open', passOn: false, pass: '', hands: 5, bet, kat: false, turn: 30, rules: { ...R0 }, rulesOpen: false, warn: aff.length ? null : 1000, warnKey: 0, tried: false, nameF: false } });
+  }
+  setC(patch) { this.setState((s) => ({ create: { ...s.create, ...patch } })); }
+  doCreate() {
+    const c = this.state.create, L = this.L;
+    const nameOk = c.name.trim().length > 0, passOk = !c.passOn || /^\d{4}$/.test(c.pass), betOk = c.bet <= this.chips;
+    if (!betOk) return this.setC({ warn: c.bet, warnKey: c.warnKey + 1 });
+    if (!nameOk || !passOk) return this.setC({ tried: true });
+    const id = 'm' + Date.now().toString(36), priv = c.vis === 'private';
+    const t = { id, name: c.name.trim(), type: c.type, bet: c.bet, hands: c.hands, turn: c.turn, kat: c.kat, pass: c.passOn ? c.pass : null, vis: c.vis, code: priv ? mkCode() : null, rules: { ...c.rules }, players: [this.me, null, null, null], owner: 0, status: 'waiting', hand: 0, mine: true };
+    if (priv) this.setState((s) => ({ hidden: [...s.hidden, t] })); else this.setState((s) => ({ tables: [t, ...s.tables] }));
+    this.enterWait(t, true);
+    if (priv) this.setState({ dlg: { kind: 'share', table: t, copied: false, shared: false, first: true } });
+  }
+  copyText(text) { try { if (navigator.clipboard) navigator.clipboard.writeText(text).catch(() => {}); } catch (e) {} }
+  shareTable(t) {
+    const L = this.L, text = L.shareText(t.name, fmtCode(t.code), t.pass);
+    if (navigator.share) { navigator.share({ title: 'Galaxy 101', text }).catch(() => {}); return false; }
+    this.copyText(text); return true;
+  }
+
+  badges(t, full) {
+    const L = this.L, out = [], nb = 'rgba(255,255,255,.08)', nf = 'var(--ic)';
+    if (full) out.push({ label: t.type === 'esli' ? L.esli : L.tekli, bg: t.type === 'esli' ? '#FF6B6B' : '#3D7BFF', fg: '#fff' });
+    if (full && t.vis === 'private') out.push({ label: L.bPriv, bg: 'rgba(255,201,74,.16)', fg: 'var(--a1)' });
+    if (full && t.pass) out.push({ label: L.bPass, bg: 'rgba(255,201,74,.16)', fg: 'var(--a1)' });
+    if (t.kat) out.push({ label: L.bKat, bg: 'rgba(139,92,246,.28)', fg: '#D9C8FF' });
+    if (full) { out.push({ label: L.bHands(t.hands), bg: nb, fg: nf }); out.push({ label: L.bTurn(t.turn), bg: nb, fg: nf }); }
+    if (t.rules.okey) out.push({ label: L.bOkey, bg: 'rgba(255,94,108,.14)', fg: '#FFB3BA' });
+    if (t.rules.isle) out.push({ label: L.bIsle, bg: 'rgba(255,94,108,.14)', fg: '#FFB3BA' });
+    out.push(t.rules.spec ? { label: L.bSpec, bg: nb, fg: nf } : { label: L.bNoSpec, bg: nb, fg: 'var(--mt)' });
+    if (t.rules.chat === 'quick') out.push({ label: L.bQuick, bg: nb, fg: nf });
+    if (t.rules.chat === 'off') out.push({ label: L.bChatOff, bg: nb, fg: 'var(--mt)' });
+    if (!t.rules.gifts) out.push({ label: L.bNoGift, bg: nb, fg: 'var(--mt)' });
+    return out;
+  }
+  summary(t) {
+    const L = this.L, pool = t.bet * 4;
+    return { name: t.name || '—', priv: t.vis === 'private', mode: L.modeLine(t.type === 'esli' ? L.esli : L.tekli, t.vis === 'private' ? L.priv : L.open),
+      rows: [{ k: L.kBet, v: this.fmt(t.bet) }, { k: L.kPool, v: this.fmt(pool) }, { k: L.kHands, v: String(t.hands) }, { k: L.kTurn, v: L.bTurn(t.turn) }],
+      badges: this.badges(t, true), prize: t.type === 'esli' ? L.prizeSumE(this.fmt(pool), this.fmt(pool / 2)) : L.prizeSum(this.fmt(pool)) };
+  }
+  seg(opts, cur, pick) { return opts.map(([v, label]) => { const on = v === cur; return { label, bg: on ? 'linear-gradient(var(--a1),var(--a2))' : 'transparent', fg: on ? 'var(--aT)' : 'var(--mt)', sh: on ? '0 3px 0 var(--aS)' : 'none', pick: () => pick(v) }; }); }
+  tog(on, flip, small) { return { bg: on ? '#3CCB6E' : 'var(--dp)', x: on ? (small ? '25px' : '27px') : '3px', flip }; }
+
+  createVals() {
+    const c = this.state.create, L = this.L; if (!c) return { cf: {}, cs: { rows: [], badges: [] } };
+    const chips = this.chips, minNeed = TIERS[0] - chips;
+    const nameBad = c.tried && !c.name.trim(), passBad = c.passOn && c.tried && !/^\d{4}$/.test(c.pass);
+    const changed = Object.keys(R0).filter((k) => c.rules[k] !== R0[k]).length;
+    const setR = (k, v) => this.setC({ rules: { ...c.rules, [k]: v } });
+    const afford = c.bet <= chips, can = afford && chips >= TIERS[0];
+    const t = { ...c, pass: c.passOn ? c.pass || '••••' : null };
+    const cf = {
+      typeSegs: this.seg([['tekli', L.tekli], ['esli', L.esli]], c.type, (v) => this.setC({ type: v })),
+      name: c.name, onName: (e) => this.setC({ name: e.target.value.slice(0, 24) }), nameCount: `${c.name.length}/24`,
+      nameFocus: () => this.setC({ nameF: true }), nameBlur: () => this.setC({ nameF: false }),
+      nameRing: nameBad ? 'inset 0 0 0 2px #FF5E6C' : c.nameF ? 'inset 0 0 0 2px var(--a1)' : 'inset 0 2px 0 rgba(0,0,0,.3)', nameD: nameBad ? L.rNameErr : L.rNameD, nameDc: nameBad ? '#FF8A94' : 'var(--mt)',
+      visSegs: this.seg([['open', L.visOpen], ['private', L.visPriv]], c.vis, (v) => this.setC({ vis: v })), visD: c.vis === 'private' ? L.visPrivD : L.visOpenD,
+      passOn: c.passOn, passT: this.tog(c.passOn, () => this.setC({ passOn: !c.passOn })), pass: c.pass, onPass: (e) => this.setC({ pass: e.target.value.replace(/\D/g, '').slice(0, 4) }),
+      passRing: passBad ? 'inset 0 0 0 2px #FF5E6C' : 'inset 0 0 0 2px var(--bd)', passD: passBad ? L.passErr : c.passOn ? L.passOnD : L.passOffD, passDc: passBad ? '#FF8A94' : 'var(--mt)',
+      handSegs: this.seg([[3, '3'], [5, '5'], [7, '7']], c.hands, (v) => this.setC({ hands: v })),
+      balLine: L.bal(this.fmt(chips)),
+      tiers: TIERS.map((b) => { const lk = b > chips, on = b === c.bet && !lk; return { label: this.short(b), locked: lk, sub: lk ? L.tierLocked : this.fmt(b * 4), subC: lk ? '#FF9AA3' : 'var(--mt)', op: lk ? 0.45 : 1,
+        bg: on ? 'var(--pnH)' : 'var(--sd)', ring: on ? 'inset 0 0 0 2px var(--a1),0 0 18px var(--gl)' : 'inset 0 0 0 1px rgba(255,255,255,.06)',
+        pick: () => (lk ? this.setC({ warn: b, warnKey: c.warnKey + 1 }) : this.setC({ bet: b, warn: null })) }; }),
+      warn: !!c.warn || chips < TIERS[0], warnKey: c.warnKey, warnText: chips < TIERS[0] ? L.lowAll(this.fmt(minNeed)) : c.warn ? L.lowB(this.fmt(c.warn), this.fmt(c.warn - chips)) : '',
+      prizeD: c.type === 'esli' ? L.prizeE : L.prizeT, pool: this.fmt(c.bet * 4),
+      katT: this.tog(c.kat, () => this.setC({ kat: !c.kat })),
+      turnSegs: this.seg([[15, '15'], [20, '20'], [30, '30'], [45, '45 sn']], c.turn, (v) => this.setC({ turn: v })),
+      rulesOpen: c.rulesOpen, toggleRules: () => this.setC({ rulesOpen: !c.rulesOpen }), chev: c.rulesOpen ? 'rotate(180deg)' : 'none', rulesSum: changed ? L.rulesCh(changed) : L.rulesDef,
+      ruleToggles: [{ name: L.rOkey, desc: L.rOkeyD, ...this.tog(c.rules.okey, () => setR('okey', !c.rules.okey), true) }, { name: L.rIsle, desc: L.rIsleD, ...this.tog(c.rules.isle, () => setR('isle', !c.rules.isle), true) }],
+      ruleSegs: [
+        { name: L.rSpec, desc: L.rSpecD, opts: this.seg([[true, L.allow], [false, L.deny]], c.rules.spec, (v) => setR('spec', v)) },
+        { name: L.rChat, desc: L.rChatD, opts: this.seg([['on', L.chOn], ['quick', L.chQuick], ['off', L.chOff]], c.rules.chat, (v) => setR('chat', v)) },
+        { name: L.rGift, desc: L.rGiftD, opts: this.seg([[true, L.on], [false, L.off]], c.rules.gifts, (v) => setR('gifts', v)) },
+      ],
+      resetRules: () => this.setC({ rules: { ...R0 } }),
+      cta: !can ? L.ctaLow : L.ctaCreate(this.fmt(c.bet)), ctaBg: can ? 'linear-gradient(var(--a1),var(--a2))' : 'var(--pnH)', ctaFg: can ? 'var(--aT)' : 'var(--mt)', ctaSh: can ? 'var(--aS)' : 'var(--pnS)', ctaCur: can ? 'pointer' : 'not-allowed',
+      create: () => this.doCreate(),
+    };
+    const cs = { ...this.summary(t), bal: afford ? `${this.fmt(chips)} → ${this.fmt(chips - c.bet)}` : this.fmt(chips), balC: afford ? '#F4F1E8' : '#FF8A94' };
+    return { cf, cs };
+  }
+  dlgVals() {
+    const s = this.state, D = s.dlg, L = this.L;
+    if (!D) return { dlgOpen: false, d: { pins: [] } };
+    const t = D.table || {}, d = { isConnect: D.kind === 'connect', isPass: D.kind === 'pass', isCode: D.kind === 'code', isErr: D.kind === 'full' || D.kind === 'closed', isFull: D.kind === 'full', isClosed: D.kind === 'closed', isShare: D.kind === 'share', pins: [] };
+    const setD = (patch) => this.setState((st) => ({ dlg: { ...st.dlg, ...patch } }));
+    if (d.isConnect) { d.title = L.connT; d.body = t.name; }
+    if (d.isPass) {
+      const pin = D.pin || '';
+      Object.assign(d, { body: L.passBody(t.name, this.fmt(t.bet || 0)), pin, pinKey: D.key, pinAnim: D.err ? 'lbShake .4s both' : 'none', pinErr: D.err ? L.wrongPass : '',
+        pins: [0, 1, 2, 3].map((i) => ({ ch: pin[i] ? '•' : '', ring: D.err ? 'inset 0 0 0 2px #FF5E6C' : i === pin.length ? 'inset 0 0 0 2px var(--a1),0 0 14px var(--gl)' : pin[i] ? 'inset 0 0 0 2px var(--bd)' : 'inset 0 2px 0 rgba(0,0,0,.3)' })),
+        onPin: (e) => setD({ pin: e.target.value.replace(/\D/g, '').slice(0, 4), err: false }),
+        pinBg: pin.length === 4 ? 'linear-gradient(var(--a1),var(--a2))' : 'var(--pnH)', pinFg: pin.length === 4 ? 'var(--aT)' : 'var(--mt)', pinSh: pin.length === 4 ? 'var(--aS)' : 'var(--pnS)' });
+      d.submitPin = () => { if (pin.length < 4) return; if (pin !== t.pass) return setD({ err: true, key: (D.key || 0) + 1, pin: '' }); this.connect(t, D.act); };
+      d.pinKeyDown = (e) => { if (e.key === 'Enter') d.submitPin(); };
+    }
+    if (d.isCode) {
+      const code = D.code || '';
+      Object.assign(d, { code, codeKey: D.key || 0, codeAnim: D.err ? 'lbShake .4s both' : 'none', codeErr: D.err || '', codeRing: D.err ? 'inset 0 0 0 2px #FF5E6C' : 'inset 0 0 0 2px var(--bd)',
+        onCode: (e) => setD({ code: e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 7), err: null }) });
+      d.submitCode = () => {
+        const raw = code.replace(/-/g, ''); if (raw.length !== 6) return setD({ err: L.codeShort, key: (D.key || 0) + 1 });
+        const hit = [...s.hidden, ...s.tables].find((x) => x.code === raw && x.status === 'waiting' && !x.mine);
+        if (!hit) return setD({ err: L.codeErr, key: (D.key || 0) + 1 });
+        this.attempt(hit, 'sit');
+      };
+      d.codeKeyDown = (e) => { if (e.key === 'Enter') d.submitCode(); };
+    }
+    if (d.isErr) {
+      d.title = d.isFull ? L.fullT : L.closedT; d.body = d.isFull ? L.fullB : L.closedB;
+      const canWatch = d.isFull && t.status === 'playing' && t.rules && t.rules.spec;
+      d.altLabel = canWatch ? L.watchIt : L.similar; d.alt = () => (canWatch ? this.connect(t, 'watch') : this.similar(t));
+    }
+    if (d.isShare) {
+      Object.assign(d, { code: fmtCode(t.code), hasPass: !!t.pass, pass: t.pass || '', copyLabel: D.copied ? L.copied : L.copy, copyBg: D.copied ? '#3CCB6E' : 'var(--pnH)', copyFg: D.copied ? '#062B14' : '#F4F1E8', copySh: D.copied ? '#22914A' : 'var(--pnS)',
+        shareLabel: D.shared ? L.shared : L.share, roomLabel: D.first ? L.toRoom : L.back2,
+        copy: () => { this.copyText(fmtCode(t.code)); setD({ copied: true }); }, share: () => { const copied = this.shareTable(t); if (copied) setD({ shared: true }); }, toRoom: () => this.setState({ dlg: null }) });
+    }
+    return { dlgOpen: true, d };
+  }
+  waitVals() {
+    const s = this.state, w = s.wait, L = this.L; if (!w) return { w: { seats: [], dots: [], sum: { rows: [], badges: [] } }, iv: { open: false, rows: [], tabs: [], seats: [] } };
+    const t = w.table, n = t.players.filter(Boolean).length, full = n === 4, esli = t.type === 'esli';
+    const POS = [[436, 520], [800, 308], [436, 92], [72, 308]];
+    const seats = t.players.map((p, i) => {
+      const base = { x: POS[i][0] + 'px', y: POS[i][1] + 'px', key: w.keys[i] };
+      if (!p) return { ...base, filled: false, empty: true, canInv: !w.cd, invite: () => this.upW(() => ({ inv: { tab: 'fr', q: '', seat: i } })), canBot: w.owner && !w.cd, addBot: () => { const tt = { ...t, players: t.players.slice() }, used = t.players.filter((x) => x && x.bot).length; tt.players[i] = { name: 'Bot · ' + BOTS[used % BOTS.length], color: '#5B6390', lv: 10, bot: true }; const keys = w.keys.slice(); keys[i]++; this.setState({ wait: { ...w, table: tt, keys } }); this.flash(L.botAdded, 'info'); } };
+      const team = i % 2 === 0;
+      return { ...base, filled: true, empty: false, ini: ini(p.name), name: p.me ? L.you === 'SEN' ? p.name : p.name : p.name, color: p.color, ring: p.me ? 'var(--a1)' : 'rgba(255,255,255,.85)', owner: i === t.owner,
+        tag: p.bot ? L.bot : p.me ? L.you : (this.en ? 'LV ' : 'SV ') + p.lv, tagBg: p.bot ? '#5B6390' : p.me ? 'var(--a1)' : 'var(--pnH)', tagFg: p.bot ? '#fff' : p.me ? 'var(--aT)' : 'var(--ic)',
+        hasTeam: esli, team: team ? L.teamA : L.teamB, teamBg: team ? '#3D7BFF' : '#FF6B6B',
+        canKick: w.owner && !p.me && !w.cd, kick: () => { const tt = { ...t, players: t.players.slice() }; tt.players[i] = null; this.setState({ wait: { ...w, table: tt } }); this.flash(L.kicked(p.name), 'bad'); } };
+    });
+    const sum = this.summary(t);
+    const ready = w.owner && full;
+    const pendN = Object.values(w.sent || {}).filter((x) => x.st === 'pend').length;
+    return { iv: this.invVals(w, t, n), w: {
+      canInv: !full && !w.cd, openInv: () => this.upW(() => ({ inv: { tab: 'fr', q: '', seat: null } })), hasPend: pendN > 0, pendN,
+      name: t.name, isOwner: w.owner, hasCode: !!t.code, code: fmtCode(t.code), copyLabel: w.copied ? L.copied : L.copy,
+      copy: () => { this.copyText(fmtCode(t.code)); this.setState({ wait: { ...w, copied: true } }); setTimeout(() => this.state.wait && this.setState({ wait: { ...this.state.wait, copied: false } }), 1600); },
+      share: () => this.setState({ dlg: { kind: 'share', table: t, copied: false, shared: false, first: false } }),
+      pool: this.fmt(t.bet * 4), status: w.cd ? L.starting(w.cd) : full ? L.ready : L.waitN(n), stC: full ? '#8EF0B0' : 'var(--ic)',
+      dots: t.players.map((p) => ({ c: p ? 'var(--a1)' : 'rgba(255,255,255,.15)' })), seats, sum,
+      hint: w.owner ? (full ? L.hintReady : L.hintOwner) : L.hintGuest,
+      startLabel: w.owner ? (full ? L.start : L.startN(n)) : w.cd ? L.starting(w.cd) : L.guestWait, spin: !w.owner,
+      stBg: ready ? 'linear-gradient(#5BE38A,#2BB45F)' : 'var(--pnH)', stFg: ready ? '#05301A' : 'var(--mt)', stSh: ready ? '#18793F' : 'var(--pnS)', stCur: ready ? 'pointer' : 'default', stAnim: ready ? 'lbPulse 2s infinite' : 'none',
+      start: () => { if (ready) this.launch(); }, leave: () => this.leaveWait(),
+    } };
+  }
+  renderVals() {
+    const s = this.state, L = this.L, f = s.filt, chips = this.chips;
+    const q = s.q.trim().toLocaleLowerCase('tr-TR');
+    const vis = s.tables.filter((t) => t.vis !== 'private');
+    const list = vis.filter((t) => (f.type === 'all' || t.type === f.type) && (!f.free || t.players.includes(null)) && (!f.kat || t.kat) && (!f.bet || t.bet === f.bet) && (!q || t.name.toLocaleLowerCase('tr-TR').includes(q)));
+    const rank = (t) => { const free = t.players.includes(null); return t.mine ? -1 : t.status === 'waiting' && free ? 0 : t.status === 'playing' && free ? 1 : t.status === 'playing' ? 2 : 3; };
+    list.sort((a, b) => rank(a) - rank(b) || a.bet - b.bet);
+    const cards = list.map((t, i) => {
+      const free = t.players.includes(null), n = t.players.filter(Boolean).length, playing = t.status === 'playing', low = t.bet > chips;
+      const st = playing ? [L.sPlay(t.hand, t.hands), 'rgba(255,201,74,.14)', 'var(--a1)'] : free ? [L.sWait, 'rgba(60,203,110,.15)', '#8EF0B0'] : [L.sFull, 'rgba(255,94,108,.14)', '#FF9AA3'];
+      const btns = [];
+      const gold = { bg: 'linear-gradient(var(--a1),var(--a2))', fg: 'var(--aT)', sh: 'var(--aS)' }, grn = { bg: '#3CCB6E', fg: '#062B14', sh: '#22914A' }, sec = { bg: 'var(--pnH)', fg: '#F4F1E8', sh: 'var(--pnS)' }, off = { bg: 'var(--dp)', fg: 'var(--mt)', sh: 'rgba(0,0,0,.25)' };
+      const lowGo = () => this.flash(L.lowB(this.fmt(t.bet), this.fmt(t.bet - chips)), 'bad');
+      if (playing && t.rules.spec) btns.push({ ...sec, label: L.watch, eye: true, cur: 'pointer', go: () => this.attempt(t, 'watch') });
+      if (t.mine) btns.push({ ...gold, label: L.back2, eye: false, cur: 'pointer', go: () => this.setState({ view: 'wait' }) });
+      else if (free && !playing) btns.push({ ...(low ? off : gold), label: L.sit, eye: false, cur: 'pointer', go: low ? lowGo : () => this.attempt(t, 'sit') });
+      else if (free && playing) btns.push({ ...(low ? off : grn), label: L.joinRun, eye: false, cur: 'pointer', go: low ? lowGo : () => this.attempt(t, 'join') });
+      else if (!btns.length) btns.push({ ...off, label: L.full, eye: false, cur: 'not-allowed', go: () => {} });
+      return { name: t.name, lock: !!t.pass, stText: st[0], stBg: st[1], stFg: st[2], bet: this.fmt(t.bet), meta: L.meta(t.hands, t.turn),
+        typeLabel: t.type === 'esli' ? L.esli : L.tekli, typeBg: t.type === 'esli' ? '#FF6B6B' : '#3D7BFF', occ: `${n}/4`,
+        seats: t.players.map((p) => (p ? { ini: ini(p.name), bg: p.bot ? '#5B6390' : p.color, bs: 'solid', bd: p.me ? 'var(--a1)' : 'rgba(255,255,255,.75)', fg: '#fff', title: p.name } : { ini: '+', bg: 'rgba(0,0,0,.2)', bs: 'dashed', bd: 'var(--bd)', fg: 'var(--mt)', title: L.emptySeat })),
+        btns, badges: this.badges(t, false), delay: Math.min(i, 10) * 35 + 'ms', ring: t.mine ? 'inset 0 0 0 2px var(--a1),0 0 24px var(--gl)' : 'inset 0 0 0 1px rgba(255,255,255,.06)' };
+    });
+    const segOf = (opts, cur, key) => opts.map(([v, label, cnt]) => { const on = v === cur; return { label, n: cnt, bg: on ? 'linear-gradient(var(--a1),var(--a2))' : 'transparent', fg: on ? 'var(--aT)' : 'var(--mt)', sh: on ? '0 3px 0 var(--aS)' : 'none', pick: () => this.setState((st) => ({ filt: { ...st.filt, [key]: v } })) }; });
+    const chip = (on, key) => ({ bg: on ? 'var(--pnH)' : 'var(--dp)', fg: on ? '#F4F1E8' : 'var(--mt)', ring: on ? 'inset 0 0 0 2px var(--a1)' : 'none', toggle: () => this.setState((st) => ({ filt: { ...st.filt, [key]: !st.filt[key] } })) });
+    return {
+      L, isList: s.view === 'list', isWait: s.view === 'wait', chipsLabel: this.fmt(chips),
+      back: () => this.props.onBack && this.props.onBack(), buy: () => this.props.onBuy && this.props.onBuy(),
+      openCreate: () => this.openCreate(), closeCreate: () => this.setState({ create: null }), createOpen: !!s.create,
+      openCode: () => this.setState({ dlg: { kind: 'code', code: '', err: null, key: 0 } }),
+      typeTabs: segOf([['all', L.all, vis.length], ['tekli', L.tekli, vis.filter((t) => t.type === 'tekli').length], ['esli', L.esli, vis.filter((t) => t.type === 'esli').length]], f.type, 'type'),
+      chFree: chip(f.free, 'free'), chKat: chip(f.kat, 'kat'),
+      betTabs: segOf([[0, L.allBets], ...TIERS.map((b) => [b, this.short(b)])], f.bet, 'bet'),
+      q: s.q, onQ: (e) => this.setState({ q: e.target.value }), clearQ: () => this.setState({ q: '' }), hasQ: !!s.q, qFocus: () => this.setState({ qF: true }), qBlur: () => this.setState({ qF: false }), qRing: s.qF ? 'inset 0 0 0 2px var(--a1)' : 'inset 0 2px 0 rgba(0,0,0,.3)',
+      cards, noCards: !cards.length, resetFilters: () => this.setState({ filt: { type: 'all', free: false, kat: false, bet: 0 }, q: '' }),
+      ...this.createVals(), ...this.dlgVals(), ...this.waitVals(),
+      closeDlg: () => { const D = s.dlg; if (D && D.kind === 'connect') return; clearTimeout(this._conT); this.setState({ dlg: null }); },
+      hasToast: !!s.toast, toast: s.toast || { text: '', bg: '', fg: '', key: 0 },
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -31,3 +31,30 @@
 | T25_cikis_onayi.jpg | Masadan kalk onayı |
 | T26_baglanti_koptu.jpg | Bağlantı koptu |
 | T27_EN_play.jpg | İngilizce arayüz, oyun sırasında |
+
+## Ek durumlar (spec/17) — her biri `_saturn.jpg` ve `_mars.jpg`
+
+| Dosya | İçerik |
+|---|---|
+| T28_bot_baslik_xp | Bot masası: XP/seviye hapı, ANTRENMAN, el sayacı, BOT etiketleri |
+| T30_bot_masadan_kalk | Masadan kalk, bot varyantı (T25 yerine) |
+| T33_okey_rozet_masada | Okey otomatik en yüksek değer; masada temsil rozeti + ipucu |
+| T34_ceza_attigin_tasla_acti | Attığın 9 ile Zeynep açtı: +90 ceza toast, rozet, parlayan 9 |
+| T35_ceza_eksik_acilis | Eksik açılış 88/101: +101, kırmızı gösterge |
+| T36_ceza_rozet_bildirim | Ayşe okeyini aldı (+101), Burak işlek taş balonu, +202 rozeti |
+| T38_yerden_alindi | Alınan taşta YERDEN, halkada GERİ BIRAK, bilgi toast |
+| T39_geri_birakma | Taş halkaya geri sürükleniyor |
+| T40_mesaj_katalogu | 6 mesaj türü (Ceza dahil), süreler, TR/EN metinler, kuyruk |
+| T41_mesaj_kuyrugu | Ceza önde, süre uyarısı arkada (+1), rakip balonu |
+| T42_el_sonu_v2_bot | El sonu v2, bot: okeyle ×2, nedenli ceza sütunu, XP |
+| T43_el_sonu_v2_cevrimici | El sonu v2, çevrimiçi: ×8, çip |
+| T44_el_sonu_puansiz | Çiftle bitti: Bu el puanlanmadı |
+| T45_mac_sonu_kazandin | Maç sonu: kupa, konfeti, XP, seviye atlama |
+| T46_mac_sonu_ikinci | Maç sonu: 2. sıra |
+| T47_okey_al_surukle | Okeyi al: Mavi 7 sürükleniyor, uygun okeyler parlıyor |
+| T48_okey_al_ipucu | Okeye uzun basma ipucu |
+| T49_okey_al_gecersiz | Yanlış taşla deneme: hata |
+| T50_yukleme | Menü → masa yükleme ekranı |
+| T51_masa_acilamadi | Masa açılamadı hatası |
+
+EN örnekleri: T28_EN, T34_EN, T38_EN, T42_EN, T45_EN. Boş numaralar (T29, T31, T32, T37) kaldırılan durumlardır.

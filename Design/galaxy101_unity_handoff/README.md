@@ -1,4 +1,30 @@
-# Galaxy 101 — Unity Teslim Paketi (Ana Menü 1a + 3D Oyun Masası)
+# Galaxy 101 — Unity Teslim Paketi (TAM OYUN · v3)
+
+> **v3 güncellemesi:** Paket artık oyunun tamamını kapsar: açılış/yükleme, giriş ve hesap, ana menü ve pencereler, ayarlar, Klasik lobi, masa açma/katılma, bekleme odası ve davet, 3D masa (gerçek dağıtım töreni, zar, gösterge/okey, orta tahta, işleme göstergeleri, okey alma, geri topla, cezalar, elden bitiş), el/maç sonu ve lobiye dönüş.
+> Önce **`spec/00_GUNCEL_DURUM_V3.md`** (belge önceliği), sonra **`PROMPT_CLAUDE_CODE.md`**.
+> Birincil çalışan prototip: **`reference/game/Galaxy 101 - Oyun.dc.html`** (yerel sunucuyla açın). Yeni ekran görüntüleri: **`screenshots/v3/`** (49 görüntü, `INDEX.md`).
+> Blender ile varlık üretimi: **`spec/24_BLENDER_VARLIK_HATTI.md`**. Test senaryoları: **`spec/25`**.
+
+## v3 dosyaları
+```
+spec/00_GUNCEL_DURUM_V3.md     ← neyin değiştiği, hangi belgenin geçerli olduğu
+spec/18_ACILIS_GIRIS_HESAP.md  ← açılış animasyonları, giriş/kayıt/misafir, bakiye, kalıcı kayıt
+spec/19_AYARLAR_GORUNTU.md     ← görüntü modu, monitöre göre çözünürlük, kare hızı
+spec/20_LOBI.md                ← Klasik lobi, filtreler, masa aç, şifre/kod, bekleme odası, davet, masadan kalk
+spec/21_DAGITIM_TORENI.md      ← dağıtan, 15×7 balya, iki zar, gösterge/okey, balya dağıtımı, zamanlamalar, HUD
+spec/22_KURAL_MOTORU.md        ← taş havuzu, per bilgisi, işleme, okey alma, açma, geri topla, cezalar, elden bitiş, puan
+spec/23_MASA_DUZENI_V3.md      ← orta tahta algoritması, deste sola, işleme göstergeleri, taş izi, yüzler, orta halkalar
+spec/24_BLENDER_VARLIK_HATTI.md← GLB → Blender (Python/MCP) → Unity
+spec/25_TEST_SENARYOLARI.md    ← geliştirici test menüsü
+reference/game/                ← GÜNCEL prototip: Galaxy 101 - Oyun.dc.html, G101-Menu, G101-Lobi, G101-Masa + 3D modüller
+screenshots/v3/                ← S01–S15 (giriş/menü/lobi), G01–G34 (masa)
+PROMPT_CLAUDE_CODE_v1_menu.md  ← eski (yalnız ana menü) görev metni
+```
+
+---
+
+## (Önceki sürümün açıklaması — hâlâ geçerli ayrıntılar için)
+
 
 Bu paket, **Galaxy 101** (101 Okey) oyununun iki ekranını Unity'de birebir yeniden oluşturmak için gereken her şeyi içerir:
 
@@ -67,6 +93,7 @@ spec/
     table_strings_tr_en.csv     ← masa: tüm TR/EN metinler (183 satır)
 screenshots/
   table/INDEX.md + T01–T27      ← masa ekran görüntüleri
+  table/T28–T51 (_saturn/_mars) ← masa ek durumları (spec/17): bot masası, okey seçici, ceza, yerden alma, mesajlar, el sonu v2, maç sonu, okeyi alma, yükleme
   INDEX.md                      ← her görüntünün açıklaması
   *.png                         ← 54 ekran görüntüsü (1280×720 tasarımın 0.72 ölçekli hali)
 reference/

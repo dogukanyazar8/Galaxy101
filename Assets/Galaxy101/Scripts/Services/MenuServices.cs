@@ -24,7 +24,7 @@ namespace Galaxy101
     }
     public interface ISettingsService
     {
-        JObject Load(); bool Save(JObject draft); JObject ResetToDefaults(); bool SetLanguage(string language); bool SetPlanet(string planet); bool SetResolution(int height); bool SetFrameRate(int choice);
+        JObject Load(); bool Save(JObject draft); JObject ResetToDefaults(); bool SetLanguage(string language); bool SetPlanet(string planet); bool SetDisplay(string mode, string resolution); bool SetFrameRate(int choice);
     }
     public interface IShareService
     {

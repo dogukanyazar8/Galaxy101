@@ -8,26 +8,33 @@ namespace Galaxy101.Tests
     /// <summary>Kare hızı rules: offered choices per monitor, VSync / targetFrameRate policy, labels and persistence.</summary>
     public sealed class FramePacingTests
     {
-        [Test] public void A60HzMonitorOffersAutoThirtySixtyAndUnlimited()
+        [Test] public void A60HzMonitorOffersAutoThirtyAndSixty()
         {
-            Assert.That(FramePacing.Options(60, false), Is.EqualTo(new[] { FramePacing.Auto, 30, 60, FramePacing.Unlimited }));
+            Assert.That(FramePacing.Options(60, false), Is.EqualTo(new[] { FramePacing.Auto, 30, 60 }));
         }
 
-        [Test] public void A144HzMonitorOffersEveryStandardRateUpToItsMaximum()
+        [Test] public void A144HzMonitorOffersTheSpecRatesBelowItThenItsMaximum()
         {
-            Assert.That(FramePacing.Options(143.856, false), Is.EqualTo(new[] { FramePacing.Auto, 30, 60, 75, 90, 100, 120, 144, FramePacing.Unlimited }));
+            Assert.That(FramePacing.Options(143.856, false), Is.EqualTo(new[] { FramePacing.Auto, 30, 60, 90, 120, 144 }));
         }
 
-        [Test] public void AnOddMaximumIsOfferedAsItIs()
+        [Test] public void AnOddMaximumEndsTheList()
         {
-            var options = FramePacing.Options(157, false);
-            Assert.That(options.Last(o => o > 0), Is.EqualTo(157));
-            Assert.That(options.Contains(165), Is.False);
+            Assert.That(FramePacing.Options(160, false), Is.EqualTo(new[] { FramePacing.Auto, 30, 60, 90, 120, 144, 160 }));
+            Assert.That(FramePacing.Options(240, false).Last(), Is.EqualTo(240));
         }
 
-        [Test] public void PhonesHaveNoUnlimitedChoice()
+        [Test] public void UnlimitedIsNoLongerOfferedButAnOldSaveStaysValid()
         {
-            Assert.That(FramePacing.Options(120, true), Is.EqualTo(new[] { FramePacing.Auto, 30, 60, 75, 90, 100, 120 }));
+            Assert.That(FramePacing.Options(240, false).Contains(FramePacing.Unlimited), Is.False);
+            Assert.That(FramePacing.IsValidChoice(FramePacing.Unlimited), Is.True);
+        }
+
+        [Test] public void DescriptionsFollowTheReference()
+        {
+            Assert.That(FramePacing.Description(FramePacing.Auto, "tr", 160), Is.EqualTo("Ekranla eşitlenir (VSync) · Monitör 160 Hz"));
+            Assert.That(FramePacing.Description(144, "tr", 160), Is.EqualTo("Sabit 144 FPS · Monitör 160 Hz"));
+            Assert.That(FramePacing.Description(144, "en", 160), Is.EqualTo("Locked to 144 FPS · Monitor 160 Hz"));
         }
 
         [Test] public void DesktopAutoSyncsToTheMonitorAndCapsTurnVSyncOff()
@@ -76,7 +83,7 @@ namespace Galaxy101.Tests
                 Assert.That((int)New().Settings["fps"], Is.EqualTo(144), "kept across launches");
 
                 // A save from before the setting existed keeps its other values and gets Otomatik.
-                File.WriteAllText(path, "{\"version\":1,\"Settings\":{\"lang\":\"en\",\"resolution\":1080}}");
+                File.WriteAllText(path, "{\"version\":1,\"Settings\":{\"lang\":\"en\",\"resolution\":1080}}"); // pre-v3 keys are ignored
                 var old = New();
                 Assert.That((string)old.Settings["lang"], Is.EqualTo("en")); Assert.That((int)old.Settings["fps"], Is.EqualTo(FramePacing.Auto));
             }

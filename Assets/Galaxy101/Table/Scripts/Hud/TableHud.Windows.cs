@@ -335,10 +335,7 @@ namespace Galaxy101.Table
             var value = Text(FramePacing.Label(current, Lang, FramePacing.CurrentHz), "Montserrat-700", 14, "var(--aT)"); value.name = "setting-fps-value";
             value.style.minWidth = 150; value.style.unityTextAlign = TextAnchor.MiddleCenter; Pad(value, 8, 10, 8, 10); view.Decorate(value, "linear-gradient(var(--a1),var(--a2))", 9);
             group.Add(Arrow("‹", "setting-fps-prev", -1)); group.Add(value); group.Add(Arrow("›", "setting-fps-next", 1));
-            string how = current == FramePacing.Auto ? L("Ekranın yenileme hızıyla eşitlenir (VSync)", "Locked to your display's refresh rate (VSync)")
-                : current == FramePacing.Unlimited ? L("VSync kapalı, sınır yok · ısı ve güç kullanımı artar", "VSync off, no limit · more heat and power use")
-                : L("VSync kapalı · en fazla " + current + " FPS", "VSync off · at most " + current + " FPS");
-            SettingRow(list, "fps", group, L("Kare hızı", "Frame rate"), how + " · " + L("Monitör en fazla ", "Display up to ") + Math.Round(FramePacing.MaxHz) + " Hz");
+            SettingRow(list, "fps", group, L("Kare hızı", "Frame rate"), FramePacing.Description(current, Lang, FramePacing.MaxHz));
         }
 
         private void OnDisplayChanged() { if (Window == "settings") RenderWindows(true); }

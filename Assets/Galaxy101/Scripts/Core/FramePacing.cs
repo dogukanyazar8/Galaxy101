@@ -22,8 +22,8 @@ namespace Galaxy101
     {
         public const int Auto = 0, Unlimited = -1, MinimumCap = 30, MaximumCap = 1000, BackgroundCap = 30;
 
-        /// <summary>Common refresh rates offered as caps, up to the monitor's maximum.</summary>
-        public static readonly int[] StandardRates = { 30, 60, 75, 90, 100, 120, 144, 165, 170, 180, 200, 240, 280, 300, 360, 480, 500 };
+        /// <summary>Caps offered below the monitor's maximum (spec/19, G101-Menu fpsOpts), then the maximum itself.</summary>
+        public static readonly int[] StandardRates = { 30, 60, 90, 120, 144, 165, 240 };
 
         /// <summary>The player's choice: <see cref="Auto"/>, <see cref="Unlimited"/> or a cap in FPS.</summary>
         public static int Choice { get; private set; } = Auto;
@@ -43,17 +43,15 @@ namespace Galaxy101
         public static bool IsValidChoice(long value) => value == Auto || value == Unlimited || value >= MinimumCap && value <= MaximumCap;
 
         /// <summary>
-        /// Choices for a monitor of <paramref name="maxHz"/>: Otomatik, the standard rates it can show, its own maximum
-        /// when that is not a standard rate (e.g. 143.9 → 144, 157 → 157), and Sınırsız on desktop.
+        /// Choices for a monitor of <paramref name="maxHz"/> (spec/19): Otomatik, the standard caps below it, and its own
+        /// maximum (e.g. 143.9 → 144, 160 → 160). Sınırsız is not offered any more; an old save holding it still works.
         /// </summary>
         public static IReadOnlyList<int> Options(double maxHz, bool mobile)
         {
             int top = Mathf.Max(MinimumCap, (int)Math.Round(maxHz));
             var list = new List<int> { Auto };
-            list.AddRange(StandardRates.Where(r => r <= top));
-            if (!list.Contains(top)) list.Add(top);
-            list.Sort((a, b) => a == Auto ? -1 : b == Auto ? 1 : a.CompareTo(b));
-            if (!mobile) list.Add(Unlimited);
+            list.AddRange(StandardRates.Where(r => r < top));
+            list.Add(top);
             return list;
         }
 
@@ -79,6 +77,18 @@ namespace Galaxy101
             Choice = choice;
             Watcher.Ensure();
             Refresh();
+        }
+
+        /// <summary>
+        /// Row texts (G101-Menu fpsRow): label "Otomatik · 144 Hz" / "120 FPS"; description "Ekranla eşitlenir (VSync) ·
+        /// Monitör 160 Hz" / "Sabit 120 FPS · Monitör 160 Hz".
+        /// </summary>
+        public static string Description(int choice, string language, double maxHz)
+        {
+            bool en = language == "en"; string monitor = (en ? "Monitor " : "Monitör ") + Math.Round(maxHz) + " Hz";
+            if (choice == Auto) return (en ? "Matches refresh rate (VSync) · " : "Ekranla eşitlenir (VSync) · ") + monitor;
+            if (choice == Unlimited) return (en ? "No limit · " : "Sınırsız · ") + monitor;
+            return (en ? "Locked to " + choice + " FPS · " : "Sabit " + choice + " FPS · ") + monitor;
         }
 
         /// <summary>Label for a choice: "Otomatik · 144 Hz", "120 FPS", "Sınırsız".</summary>
@@ -147,6 +157,7 @@ namespace Galaxy101
                 var (current, max, name) = ReadDisplay();
                 if (name == display && Math.Abs(current - CurrentHz) < 0.5 && Math.Abs(max - MaxHz) < 0.5) return;
                 display = name; CurrentHz = current; MaxHz = max;
+                GameDisplay.Refresh(); // another monitor: its own native size / fastest mode
                 Refresh();
                 Debug.Log("GALAXY101_FRAME_PACING display=" + name + " hz=" + current.ToString("0.##") + " max=" + max.ToString("0.##"));
                 DisplayChanged?.Invoke();

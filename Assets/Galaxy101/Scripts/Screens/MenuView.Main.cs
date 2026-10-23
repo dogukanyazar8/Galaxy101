@@ -12,7 +12,8 @@ namespace Galaxy101
         private IVisualElementScheduledItem animationJob;
         public void BuildMain()
         {
-            Root.Clear();var template=Template("MainMenu");template.style.flexGrow=1;Root.Add(template);
+            Root.Clear();var template=Template("MainMenu");template.style.flexGrow=1;// the 1280×720 canvas sits in the middle of any screen shape (bars around it)
+            template.style.alignSelf=Align.Stretch;template.style.alignItems=Align.Center;template.style.justifyContent=Justify.Center;Root.Add(template);
             var canvas=Root.Q<VisualElement>("galaxy-canvas")??throw new InvalidOperationException("MainMenu UXML lacks galaxy-canvas.");
             BackgroundTarget=canvas.Q<VisualElement>("background");mainLayer=canvas.Q<VisualElement>("main-layer");panelLayer=canvas.Q<VisualElement>("modal-layer");dialogLayer=canvas.Q<VisualElement>("dialog-layer");toastLayer=canvas.Q<VisualElement>("toast-layer");
             sceneUnderlay=canvas.Q<VisualElement>("scene-underlay");dialogUnderlay=canvas.Q<VisualElement>("dialog-underlay");

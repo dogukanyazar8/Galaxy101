@@ -854,6 +854,28 @@ namespace Galaxy101.Tests
         }
 
         [UnityTest]
+        [Timeout(300000)]
+        public IEnumerator TableStaysWholeAtEveryScreenShapeWithWindowsOpen()
+        {
+            var game = Build(TableGame.Me, 5151, true);
+            game.Configure(TableGame.Me, 5151, 120, false); game.DemoGifts = false;
+            var hud = hudOwner.GetComponent<TableHud>(); var document = hudOwner.GetComponent<UIDocument>();
+            string dir = Environment.GetEnvironmentVariable("GALAXY_DISPLAY_CAPTURE_DIR");
+            Time.timeScale = 3;
+            yield return Until(() => game.CanDiscard && game.SyncedVersion == game.Session.GetView(TableGame.Me).Version, 40, "my first turn");
+            Time.timeScale = 1;
+            foreach (var shape in new[] { new Vector2Int(1280, 720), new Vector2Int(1920, 1200), new Vector2Int(2560, 1080), new Vector2Int(1024, 768), new Vector2Int(3840, 2160) })
+                foreach (var window in new string[] { null, "settings", "gift" })
+                {
+                    if (window == null) hud.CloseWindow(); else hud.Press(window);
+                    yield return DisplaySettingsTests.Shot(document, shape.x, shape.y, string.IsNullOrEmpty(dir) ? null : Path.Combine(dir, "table_" + shape.x + "x" + shape.y + "_" + (window ?? "play") + ".png"),
+                        root => DisplaySettingsTests.AssertCanvasWhole(root, shape, "table " + (window ?? "play")));
+                }
+            hud.CloseWindow();
+            AssertBoardMatchesEngine(game);
+        }
+
+        [UnityTest]
         [Timeout(180000)]
         public IEnumerator MenuOpensTheGalaxyTableAndExitReturnsToTheMenu()
         {

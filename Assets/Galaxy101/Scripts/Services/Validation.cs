@@ -38,14 +38,15 @@ namespace Galaxy101
                 if (value.Type == JTokenType.Integer)
                 {
                     if (!TryInteger(value, out long number)) return false;
-                    if (p.Name == "resolution") { if (number != 720 && number != 1080 && number != 1440) return false; }
-                    else if (p.Name == "fps") { if (!FramePacing.IsValidChoice(number)) return false; }
+                    if (p.Name == "fps") { if (!FramePacing.IsValidChoice(number)) return false; }
                     else if (p.Name == "warn") { if (number < 1 || number > 10) return false; }
                     else if (number < 0 || number > 100) return false;
                 }
                 if (p.Name == "tile" && !new[] { "Küçük", "Orta", "Büyük" }.Contains((string)value)) return false;
                 if (p.Name == "quality" && !new[] { "Düşük", "Orta", "Yüksek" }.Contains((string)value)) return false;
                 if (p.Name == "lang" && (string)value != "tr" && (string)value != "en") return false;
+                if (p.Name == "wmode" && !GameDisplay.IsValidMode((string)value)) return false;
+                if (p.Name == "res" && !GameDisplay.IsValidResolution((string)value)) return false;
             }
             return true;
         }

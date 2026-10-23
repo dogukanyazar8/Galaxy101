@@ -64,10 +64,13 @@ namespace Galaxy101.Table
         {
             ray = default;
             var canvas = hud != null ? hud.Canvas : null;
+            if (!float.IsFinite(screen.x) || !float.IsFinite(screen.y)) return false;
             if (canvas?.panel == null) { ray = table.CameraRig.Camera.ScreenPointToRay(screen); return true; }
             var root = canvas.panel.visualTree;
             float scale = root.worldBound.width / Mathf.Max(1, Screen.width);
             var local = canvas.WorldToLocal(new Vector2(screen.x, Screen.height - screen.y) * scale);
+            // Before the first layout (scene just loaded, or the screen was just resized) the canvas has no size yet.
+            if (!float.IsFinite(local.x) || !float.IsFinite(local.y)) return false;
             if (local.x < 0 || local.y < 0 || local.x > TableHud.Width || local.y > TableHud.Height) return false;
             ray = table.CameraRig.Camera.ViewportPointToRay(new Vector3(local.x / TableHud.Width, 1 - local.y / TableHud.Height, 0));
             return true;

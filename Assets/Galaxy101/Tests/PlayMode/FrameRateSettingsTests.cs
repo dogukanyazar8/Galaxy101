@@ -53,14 +53,14 @@ namespace Galaxy101.Tests
             Assert.That(QualitySettings.vSyncCount, Is.EqualTo(0)); Assert.That(Application.targetFrameRate, Is.EqualTo(30));
             Assert.That(root.Q<Label>("setting-fps-value").text, Is.EqualTo("30 FPS"));
 
-            // Last choice on desktop: Sınırsız (VSync off, no cap).
+            // Last choice: the monitor's own maximum, VSync off.
             var options = FramePacing.Options(FramePacing.MaxHz, FramePacing.IsMobile);
             for (int i = 1; i < options.Count; i++) { Click(root, "setting-fps-next"); yield return null; }
             Assert.That((int)menu.Model.Settings["fps"], Is.EqualTo(options[options.Count - 1]));
             Assert.That(root.Q<VisualElement>("setting-fps-next").ClassListContains("at-end"), Is.True);
             Click(root, "setting-fps-next"); yield return null;
             Assert.That((int)menu.Model.Settings["fps"], Is.EqualTo(options[options.Count - 1]), "nothing past the last choice");
-            if (!FramePacing.IsMobile) { Assert.That(QualitySettings.vSyncCount, Is.EqualTo(0)); Assert.That(Application.targetFrameRate, Is.EqualTo(-1)); }
+            Assert.That(QualitySettings.vSyncCount, Is.EqualTo(0)); Assert.That(Application.targetFrameRate, Is.EqualTo(options[options.Count - 1]));
 
             string dir = Environment.GetEnvironmentVariable("GALAXY_FPS_CAPTURE_DIR");
             if (!string.IsNullOrEmpty(dir)) yield return Capture(owner.GetComponent<UIDocument>(), Path.Combine(dir, "settings_frame_rate.png"));

@@ -57,7 +57,8 @@ namespace Galaxy101
         public JObject DefaultSettings()
         {
             var defaults = (JObject)Content["settingsDefaults"].DeepClone();
-            defaults["resolution"] = 720;
+            defaults["wmode"] = "fullscreen"; // spec/19: Tam ekran / Çerçevesiz / Pencere
+            defaults["res"] = GameDisplay.Native; // or "1920x1080"
             defaults["fps"] = FramePacing.Auto; // Kare hızı: 0 Otomatik, −1 Sınırsız, 30–1000 üst sınır
             return defaults;
         }

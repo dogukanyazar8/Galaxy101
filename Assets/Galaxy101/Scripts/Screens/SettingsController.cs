@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -87,10 +88,11 @@ namespace Galaxy101
                     break;
                 case 2:
                     Toggle(v, scroll, "motion", v.L("Arka plan hareketi", "Background motion"), v.L("Dönen gezegen ve kayan yıldızlar", "Spinning planet and shooting stars"), true);
+                    // spec/19 (S07): görüntü modu, çözünürlük (monitöre göre), kare hızı; the planet row moved to the main menu picker.
+                    DisplayMode(v, scroll);
                     Resolution(v, scroll);
                     FrameRate(v, scroll);
                     Segment(v, scroll, "quality", v.L("Efekt kalitesi", "Effect quality"), v.L("Düşük ayar eski bilgisayarlarda akıcılığı artırır", "Lower settings run smoother on older computers"), new[] { "Düşük", "Orta", "Yüksek" });
-                    Planets(v, scroll);
                     break;
                 case 3: Languages(v, scroll); break;
                 case 4: Account(v, scroll); break;
@@ -100,7 +102,7 @@ namespace Galaxy101
             {
                 draft = v.Services.Settings.ResetToDefaults();
                 if (!v.Services.Settings.SetLanguage((string)draft["lang"])) { draft["lang"] = v.Model.Settings["lang"]; PanelUi.SaveFailure(v); }
-                if (!v.Services.Settings.SetResolution((int)draft["resolution"])) { draft["resolution"] = v.Model.Settings["resolution"]; PanelUi.SaveFailure(v); }
+                if (!v.Services.Settings.SetDisplay((string)draft["wmode"], (string)draft["res"])) { draft["wmode"] = v.Model.Settings["wmode"]; draft["res"] = v.Model.Settings["res"]; PanelUi.SaveFailure(v); }
                 if (!v.Services.Settings.SetFrameRate((int)draft["fps"])) { draft["fps"] = v.Model.Settings["fps"]; PanelUi.SaveFailure(v); }
                 v.PreviewSettings(draft); v.Refresh();
             }, "");
@@ -162,81 +164,90 @@ namespace Galaxy101
             SettingRow(v, list, title, description, group);
         }
 
-        private void Resolution(MenuView v, VisualElement list)
+        /// <summary>Görüntü modu: Tam ekran (exclusive) / Çerçevesiz / Pencere; applied and saved at once.</summary>
+        private void DisplayMode(MenuView v, VisualElement list)
         {
-            var group = v.Row(); group.AddToClassList("g-segment"); var values = new[] { 720, 1080, 1440 };
-            for (var i = 0; i < values.Length; i++)
+            var group = v.Row(); group.AddToClassList("g-segment"); group.name = "setting-wmode";
+            var labels = new[] { v.L("Tam ekran", "Fullscreen"), v.L("Çerçevesiz", "Borderless"), v.L("Pencere", "Windowed") };
+            for (var i = 0; i < GameDisplay.ModeKeys.Length; i++)
             {
-                var height = values[i]; var button = PanelUi.CustomButton(v, new[] { "720p", "1080p", "2K" }[i], () =>
+                string mode = GameDisplay.ModeKeys[i]; bool on = (string)draft["wmode"] == mode;
+                var button = PanelUi.CustomButton(v, labels[i], () =>
                 {
-                    draft["resolution"] = height;
-                    if (!v.Services.Settings.SetResolution(height)) { draft["resolution"] = v.Model.Settings["resolution"]; PanelUi.SaveFailure(v); }
+                    draft["wmode"] = mode;
+                    if (!v.Services.Settings.SetDisplay(mode, (string)draft["res"])) { draft["wmode"] = v.Model.Settings["wmode"]; PanelUi.SaveFailure(v); }
+                    v.Refresh();
                 }, "g-segment-button");
-                button.EnableInClassList("selected", (int)draft["resolution"] == height);
-                if ((int)draft["resolution"] == height) v.Decorate(button, "linear-gradient(var(--a1),var(--a2))", 10, 3, "aS");
+                button.name = "setting-wmode-" + mode; button.EnableInClassList("selected", on);
+                if (on) v.Decorate(button, "linear-gradient(var(--a1),var(--a2))", 10, 3, "aS");
                 group.Add(button);
             }
             PanelUi.Gap(group, 4);
-            SettingRow(v, list, v.L("Çözünürlük", "Resolution"), v.L("Ekran boyutu", "Screen size"), group);
+            SettingRow(v, list, v.L("Görüntü modu", "Display mode"), v.L("Tam ekran, çerçevesiz pencere veya pencere", "Fullscreen, borderless window or window"), group);
         }
 
-        /// <summary>
-        /// Kare hızı: ‹ Otomatik · 144 Hz › stepper over <see cref="FramePacing.Options"/> for the window's monitor. Applies and
-        /// saves at once (like the resolution) and follows the window to another monitor while the panel is open.
-        /// </summary>
+        /// <summary>Çözünürlük: ‹ 1920×1080 › over the standard sizes up to the monitor's native one (the default).</summary>
+        private void Resolution(MenuView v, VisualElement list)
+        {
+            var native = GameDisplay.NativeSize; var options = GameDisplay.OptionsFor((string)draft["wmode"]);
+            var current = GameDisplay.Resolve((string)draft["res"], native);
+            // Tam ekran without that mode: the size the monitor actually switches to.
+            if (!options.Contains(current)) current = options.Where(o => o.x <= current.x && o.y <= current.y).DefaultIfEmpty(native).Last();
+            int index = Mathf.Max(0, options.ToList().IndexOf(current));
+            string desc = (current == native ? v.L("Yerel · ", "Native · ") : "") + v.L("Monitör en fazla ", "Monitor max ") + GameDisplay.Label(native);
+            Stepper(v, list, "res", v.L("Çözünürlük", "Resolution"), desc, GameDisplay.Label(current), index, options.Count, next =>
+            {
+                string value = options[next] == native ? GameDisplay.Native : GameDisplay.Format(options[next]);
+                draft["res"] = value;
+                if (!v.Services.Settings.SetDisplay((string)draft["wmode"], value)) { draft["res"] = v.Model.Settings["res"]; PanelUi.SaveFailure(v); }
+            });
+        }
+
+        /// <summary>Kare hızı: ‹ Otomatik · 144 Hz › over the monitor's rates (spec/19).</summary>
         private void FrameRate(MenuView v, VisualElement list)
         {
             var options = new List<int>(FramePacing.Options(FramePacing.MaxHz, FramePacing.IsMobile));
             int current = (int)draft["fps"];
             if (!options.Contains(current)) { options.Add(current); options.Sort((a, b) => a == FramePacing.Auto ? -1 : b == FramePacing.Auto ? 1 : a == FramePacing.Unlimited ? 1 : b == FramePacing.Unlimited ? -1 : a.CompareTo(b)); }
-            int index = options.IndexOf(current);
-            void Pick(int next)
+            Stepper(v, list, "fps", v.L("Kare hızı", "Frame rate"), FramePacing.Description(current, v.Loc.Language, FramePacing.MaxHz),
+                FramePacing.Label(current, v.Loc.Language, FramePacing.CurrentHz), options.IndexOf(current), options.Count, next =>
             {
-                if (next < 0 || next >= options.Count || next == index) return;
                 int value = options[next]; draft["fps"] = value;
                 if (!v.Services.Settings.SetFrameRate(value)) { draft["fps"] = v.Model.Settings["fps"]; PanelUi.SaveFailure(v); }
-                v.Refresh();
-            }
-            var group = v.Row(); group.AddToClassList("g-segment"); group.name = "setting-fps"; group.style.alignItems = Align.Center;
+            });
+        }
+
+        /// <summary>
+        /// ‹ value › selector (G101-Menu step rows): arrows at 30 % and inert at the ends, ←/→ on the keyboard, a fixed
+        /// one-line description. Follows the window to another monitor while the panel is open.
+        /// </summary>
+        private void Stepper(MenuView v, VisualElement list, string key, string title, string description, string label, int index, int count, Action<int> pick)
+        {
+            void Go(int step) { int next = index + step; if (next < 0 || next >= count) return; pick(next); v.Refresh(); }
+            var group = v.Row(); group.AddToClassList("g-segment"); group.name = "setting-" + key; group.style.alignItems = Align.Center; group.focusable = true;
             Button Arrow(string glyph, string name, int step)
             {
-                bool enabled = index + step >= 0 && index + step < options.Count;
-                var arrow = PanelUi.CustomButton(v, glyph, () => Pick(index + step), "g-segment-button"); arrow.name = name;
-                // Stays a normal button at the ends (a disabled one would vanish in this style); it just does nothing there.
-                arrow.style.width = 38; arrow.style.minWidth = 38; arrow.style.paddingLeft = arrow.style.paddingRight = 0; arrow.EnableInClassList("at-end", !enabled); arrow.style.opacity = enabled ? 1 : .5f;
+                bool enabled = index + step >= 0 && index + step < count;
+                var arrow = PanelUi.CustomButton(v, glyph, () => Go(step), "g-segment-button"); arrow.name = name;
+                arrow.style.width = 38; arrow.style.minWidth = 38; arrow.style.paddingLeft = arrow.style.paddingRight = 0; arrow.EnableInClassList("at-end", !enabled); arrow.style.opacity = enabled ? 1 : .3f;
                 return arrow;
             }
-            var value = v.Text(FramePacing.Label(current, v.Loc.Language, FramePacing.CurrentHz), 15, true); value.name = "setting-fps-value";
+            var value = v.Text(label, 15, true); value.name = "setting-" + key + "-value";
             value.style.minWidth = 158; value.style.unityTextAlign = TextAnchor.MiddleCenter; value.style.whiteSpace = WhiteSpace.NoWrap;
-            group.Add(Arrow("‹", "setting-fps-prev", -1)); group.Add(value); group.Add(Arrow("›", "setting-fps-next", 1));
+            group.Add(Arrow("‹", "setting-" + key + "-prev", -1)); group.Add(value); group.Add(Arrow("›", "setting-" + key + "-next", 1));
+            group.RegisterCallback<KeyDownEvent>(evt =>
+            {
+                if (evt.keyCode == KeyCode.LeftArrow) { Go(-1); evt.StopPropagation(); }
+                else if (evt.keyCode == KeyCode.RightArrow) { Go(1); evt.StopPropagation(); }
+            });
             PanelUi.Gap(group, 4);
-            string how = current == FramePacing.Auto ? v.L("Ekranın yenileme hızıyla eşitlenir (VSync)", "Locked to your display's refresh rate (VSync)")
-                : current == FramePacing.Unlimited ? v.L("VSync kapalı, sınır yok · ısı ve güç kullanımı artar", "VSync off, no limit · more heat and power use")
-                : v.L("VSync kapalı · en fazla " + current + " FPS", "VSync off · at most " + current + " FPS");
-            string monitor = v.L("Monitör en fazla ", "Display up to ") + Math.Round(FramePacing.MaxHz) + " Hz";
-            var row = SettingRow(v, list, v.L("Kare hızı", "Frame rate"), how + " · " + monitor, group);
-            // The window moved to another monitor or Windows changed its refresh rate: offer that monitor's rates.
+            var row = SettingRow(v, list, title, description, group);
+            // One line, fixed height: the row never jumps when the text changes (spec/19).
+            var desc = row.Query<Label>().AtIndex(1);
+            if (desc != null) { desc.style.whiteSpace = WhiteSpace.NoWrap; desc.style.overflow = Overflow.Hidden; desc.style.textOverflow = TextOverflow.Ellipsis; }
             Action changed = () => v.Refresh();
             row.RegisterCallback<AttachToPanelEvent>(_ => FramePacing.DisplayChanged += changed);
             row.RegisterCallback<DetachFromPanelEvent>(_ => FramePacing.DisplayChanged -= changed);
-        }
-
-        private void Planets(MenuView v, VisualElement list)
-        {
-            var row = v.Row(); row.style.flexShrink = 0;
-            foreach (var property in v.Model.Themes.Properties())
-            {
-                var planet = property.Name; var data = (JObject)property.Value; var orb = (JArray)data["pickerOrb"];
-                var button = PanelUi.CustomButton(v, "", () => { if (!v.Services.Settings.SetPlanet(planet)) PanelUi.SaveFailure(v); }, "");
-                // Reference: 62px tile, padding 8px 0, gap 5; the orb carries the same rings as the main planet picker.
-                var on = planet == v.Model.Planet;
-                button.style.width = 62; button.style.minWidth = 62; button.style.height = StyleKeyword.Auto; button.style.paddingTop = button.style.paddingBottom = 8; button.style.paddingLeft = button.style.paddingRight = 0; button.style.marginRight = 8;
-                button.style.alignItems = Align.Center; button.style.justifyContent = Justify.FlexStart; v.Decorate(button, on ? "pnH" : "transparent", 14);
-                button.Add(v.PlanetOrb(planet, 30, on));
-                var name = v.Text(v.L((string)data["name_tr"], (string)data["name_en"]), 12, false, on ? "#F4F1E8" : "mt"); name.style.marginTop = 5; button.Add(name); row.Add(button);
-            }
-            row[row.childCount - 1].style.marginRight = 0;
-            SettingRow(v, list, v.L("Gezegen teması", "Planet theme"), v.L("Renkler, logo ve arka plan seçtiğin gezegene göre değişir", "Colors, logo and background follow the planet you pick"), row);
         }
 
         private void Languages(MenuView v, VisualElement list)

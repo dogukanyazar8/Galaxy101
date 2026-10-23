@@ -16,7 +16,6 @@ namespace Galaxy101
         private UIDocument document;
         private bool navigating;
         private LocalizationBridge localization;
-        private int appliedResolution;
         public event Action<int> PlayRequested;
         /// <summary>"Botlara karşı" opens the 3D Galaxy table; the legacy diagnostic probes keep the classic table.</summary>
         public const string GalaxyTableScene="GalaxyTable",LegacyTableScene="Table";
@@ -87,9 +86,9 @@ namespace Galaxy101
         }
         private void ApplySettings()
         {
-            if(Model==null)return;int height=(int)Model.Settings["resolution"];
+            if(Model==null)return;
             bool offscreen=UnityEngine.Application.isBatchMode;
-            if(!UnityEngine.Application.isEditor&&!offscreen&&height!=appliedResolution){Screen.SetResolution(height*16/9,height,FullScreenMode.Windowed);appliedResolution=height;}
+            GameDisplay.Apply((string)Model.Settings["wmode"],(string)Model.Settings["res"]);
             if(!offscreen)AudioListener.volume=(int)Model.Settings["master"]/100f;
             FramePacing.Apply((int)Model.Settings["fps"]);
         }

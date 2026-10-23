@@ -35,7 +35,8 @@ namespace Galaxy101.Tests
             Assert.That(model.Gems, Is.EqualTo(340));
             Assert.That(model.Planet, Is.EqualTo("Satürn"));
             Assert.That((string)model.Settings["lang"], Is.EqualTo("tr"));
-            Assert.That((int)model.Settings["resolution"], Is.EqualTo(720));
+            Assert.That((string)model.Settings["wmode"], Is.EqualTo("fullscreen"));
+            Assert.That((string)model.Settings["res"], Is.EqualTo(GameDisplay.Native));
             Assert.That(model.QuestsClaimed, Does.Contain(2));
         }
 

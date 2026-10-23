@@ -54,6 +54,9 @@ namespace Okey101.Editor
             if (File.Exists(output)) throw new BuildFailedException("Refusing to overwrite an existing game build.");
             Directory.CreateDirectory(Path.GetDirectoryName(output));
             IncludeDiagnosticContent=development||acceptance;
+            // First frame before the menu applies Ayarlar → Görüntü: a borderless window at the monitor's own size (spec/19),
+            // the least disruptive start for any saved görüntü modu.
+            PlayerSettings.fullScreenMode = FullScreenMode.FullScreenWindow; PlayerSettings.defaultIsNativeResolution = true; PlayerSettings.resizableWindow = true;
             BuildReport report;
             try { report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {

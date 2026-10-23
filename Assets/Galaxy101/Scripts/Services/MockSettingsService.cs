@@ -17,7 +17,6 @@ namespace Galaxy101
             var previous = model.Settings;
             model.Settings = next;
             if (!model.Persist()) { model.Settings = previous; return false; }
-            ApplyResolution((int)next["resolution"]);
             model.NotifyChanged();
             return true;
         }
@@ -34,21 +33,17 @@ namespace Galaxy101
             if (!model.Persist()) { model.Planet = previous; return false; }
             model.NotifyChanged(); return true;
         }
-        public bool SetResolution(int height)
+        /// <summary>Görüntü modu + çözünürlük apply and save at once (the controller applies them on Changed).</summary>
+        public bool SetDisplay(string mode, string resolution)
         {
-            if (height != 720 && height != 1080 && height != 1440) return false;
-            var draft = Load(); draft["resolution"] = height; return Save(draft);
+            if (!GameDisplay.IsValidMode(mode) || !GameDisplay.IsValidResolution(resolution)) return false;
+            var draft = Load(); draft["wmode"] = mode; draft["res"] = resolution; return Save(draft);
         }
         /// <summary>Kare hızı applies and is saved at once, like the resolution.</summary>
         public bool SetFrameRate(int choice)
         {
             if (!FramePacing.IsValidChoice(choice)) return false;
             var draft = Load(); draft["fps"] = choice; return Save(draft);
-        }
-        private static void ApplyResolution(int height)
-        {
-            if (Application.isPlaying && !Application.isEditor && !Application.isBatchMode && Screen.height != height)
-                Screen.SetResolution(height * 16 / 9, height, Screen.fullScreenMode);
         }
     }
 }

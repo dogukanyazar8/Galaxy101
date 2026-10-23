@@ -136,44 +136,56 @@ namespace Galaxy101
                 Place(pulse,-spread,-spread,360+spread*2,86+spread*2);pulse.style.borderTopLeftRadius=pulse.style.borderTopRightRadius=pulse.style.borderBottomLeftRadius=pulse.style.borderBottomRightRadius=24+spread;pulse.style.opacity=1-spread/16;
             });
             var depth=Box("play-depth");depth.pickingMode=PickingMode.Ignore;Place(depth,0,7,360,86);Decorate(depth,"var(--aS)",24);host.Add(depth);
-            var play=Button("",()=>PlayRequested?.Invoke(Model.SelectedMode),"primary play-button");play.name="play-now";Place(play,0,0,360,86);Decorate(play,"linear-gradient(var(--a1),var(--a2))",24);play.style.overflow=Overflow.Hidden;
+            var play=Button("",Play,"primary play-button");play.name="play-now";Place(play,0,0,360,86);Decorate(play,"linear-gradient(var(--a1),var(--a2))",24);play.style.overflow=Overflow.Hidden;
             play.RegisterCallback<PointerDownEvent>(_=>host.AddToClassList("pressed"),TrickleDown.TrickleDown);
             play.RegisterCallback<PointerUpEvent>(_=>host.RemoveFromClassList("pressed"),TrickleDown.TrickleDown);
             play.RegisterCallback<PointerCaptureOutEvent>(_=>host.RemoveFromClassList("pressed"));
             Shine(play,2.8f,0,false);var title=Text(L("HEMEN OYNA","PLAY NOW"),34,true,"var(--aT)");Tracking(title,1,34);title.style.whiteSpace=WhiteSpace.NoWrap;title.style.height=36;play.Add(title);
-            var selected=Model.Content["modes"]?[Model.SelectedMode];var subtitle=Text((string)selected?[Loc.Language=="en"?"playSub_en":"playSub_tr"],13,false,"var(--aT)");subtitle.style.unityFont=Font("Baloo2-800");subtitle.style.marginTop=4;subtitle.style.opacity=.8f;play.Add(subtitle);host.Add(play);
+            string playSub=Model.SelectedMode==3?L("Dereceli · yakında açılıyor","Ranked · coming soon"):Model.SelectedMode==4?L("Botlara karşı · yakında açılıyor","Vs bots · coming soon"):L("Klasik · Tekli / Eşli · masalar","Classic · Singles / Pairs · tables");var subtitle=Text(playSub,13,false,"var(--aT)");subtitle.style.unityFont=Font("Baloo2-800");subtitle.style.marginTop=4;subtitle.style.opacity=.8f;play.Add(subtitle);host.Add(play);
         }
+        /// <summary>
+        /// v3 modes (spec/20, S06): Klasik (Tekli / Eşli tables in the lobby), Dereceli and Botlara karşı marked YAKINDA.
+        /// Cards keep the model's mode indices (0 Klasik, 3 Dereceli, 4 Botlara karşı) so saves and tests stay valid.
+        /// </summary>
+        public static readonly int[] V3Modes = { 0, 3, 4 };
+        public static bool IsSoon(int mode) => mode != 0;
         private void BuildModes()
         {
-            var strip=Box("mode-strip");Place(strip,142,474,996,90);mainLayer.Add(strip);
-            var modes=(JArray)Model.Content["modes"];
-            for(int i=0;i<modes.Count;i++)
+            var strip=Box("mode-strip");Place(strip,0,474,1280,90);strip.style.flexDirection=FlexDirection.Row;strip.style.justifyContent=Justify.Center;mainLayer.Add(strip);
+            string[] names={L("Klasik","Classic"),L("Dereceli","Ranked"),L("Botlara karşı","Vs bots")},glyphs={"101","II","•"},colors={"#3D7BFF","#16B6A8","#3CCB6E"},shades={"#2148B0","#0C7F75","#22914A"};
+            string[] online={N(14233),N(5630),L("Çevrimdışı","Offline")};
+            int selectedCard=Mathf.Max(0,Array.IndexOf(V3Modes,Model.SelectedMode));
+            for(int i=0;i<3;i++)
             {
-                int index=i;var data=modes[i];bool selected=i==Model.SelectedMode;string color=(string)data["bg"],shade=(string)data["shadow"];
-                var slot=Box("mode-slot");slot.style.width=156;slot.style.height=74;slot.style.marginRight=i==5?0:12;
-                var card=Button("",()=>{int previous=Model.SelectedMode;Model.SelectedMode=index;if(!Model.Persist()){Model.SelectedMode=previous;Toast(L("Değişiklikler kaydedilemedi. Tekrar dene.","Could not save changes. Try again."));}Refresh();},"mode-card");card.name="mode-"+i;card.style.width=156;card.style.height=74;Decorate(card,color,18,5,shade);
-                card.EnableInClassList("selected",selected);Color glow=C(color);glow.a=.6f;if(selected)GalaxyFilters.Shadow(card,0,14,16,glow);
+                int index=V3Modes[i];bool selected=i==selectedCard;string color=colors[i],shade=shades[i];
+                var slot=Box("mode-slot");slot.style.width=208;slot.style.height=78;slot.style.marginRight=i==2?0:12;
+                var card=Button("",()=>{int previous=Model.SelectedMode;Model.SelectedMode=index;if(!Model.Persist()){Model.SelectedMode=previous;Toast(L("Değişiklikler kaydedilemedi. Tekrar dene.","Could not save changes. Try again."));}Refresh();},"mode-card");
+                card.name="mode-"+index;card.EnableInClassList("selected",selected);Place(card,0,0,208,78);Decorate(card,color,18,5,shade);
+                card.style.flexDirection=FlexDirection.Column;card.style.justifyContent=Justify.Center;card.style.alignItems=Align.FlexStart;card.style.paddingLeft=card.style.paddingRight=14;card.style.overflow=Overflow.Hidden;
+                Color glow=C(color);glow.a=.6f;if(selected){GalaxyFilters.Shadow(card,0,14,16,glow);card.style.translate=new Translate(0,-6);}
                 GalaxyFilters.SaturationAndBrightness(card,selected?1:.7f,selected?1:.78f);
                 if(selected)
                 {
-                    var ring=Box("mode-selection-ring");Place(ring,-8.5f,-12,173,91);Decorate(ring,"#fff",26);slot.Add(ring);
-                    var gap=Box("mode-selection-gap");Place(gap,-5.5f,-9,167,85);Decorate(gap,"var(--bg3)",23);slot.Add(gap);
+                    var ring=Box("mode-selection-ring");Place(ring,-8.5f,-12-6,225,95);Decorate(ring,"#fff",26);slot.Add(ring);
+                    var gap=Box("mode-selection-gap");Place(gap,-5.5f,-9-6,219,89);Decorate(gap,"var(--bg3)",23);slot.Add(gap);
                 }
-                var hoverRing=Box("mode-hover-ring");hoverRing.pickingMode=PickingMode.Ignore;Place(hoverRing,-5,-9.5f,166,84);Decorate(hoverRing,"rgba(255,255,255,.9)",23);slot.Add(hoverRing);
-                card.RegisterCallback<PointerEnterEvent>(_=>{GalaxyFilters.SaturationAndBrightness(card,1,1);Decorate(card,color,18,5,"rgba(0,0,0,.35)");GalaxyFilters.Shadow(card,0,14,14,new Color(0,0,0,.45f));});
-                card.RegisterCallback<PointerLeaveEvent>(_=>
-                {
-                    Decorate(card,color,18,5,shade);
-                    if(selected)GalaxyFilters.Shadow(card,0,14,16,glow);else GalaxyFilters.ClearSoftShadow(card);
-                    GalaxyFilters.SaturationAndBrightness(card,selected?1:.7f,selected?1:.78f);
-                });
-                var glyph=Text((string)data["glyph"],58,true,"rgba(255,255,255,.16)");glyph.AddToClassList("mode-glyph");card.Add(glyph);
-                var gloss=Box();Place(gloss,0,0,156,37);gloss.pickingMode=PickingMode.Ignore;Decorate(gloss,"linear-gradient(rgba(255,255,255,.18),transparent)",18);card.Add(gloss);
-                card.Add(Text((string)data[Loc.Language=="en"?"en":"tr"],18,true,"#fff"));
-                var online=Text(index==4?L("Çevrimdışı","Offline"):N(long.Parse(((string)data["online"]).Replace(".",""))),11,false,"rgba(255,255,255,.9)");online.style.unityFont=Font("Baloo2-800");var dot=Box();dot.style.width=dot.style.height=6;dot.style.marginRight=5;Decorate(dot,"#8EF0B0",99);GalaxyFilters.Shadow(dot,0,0,3,C("#8EF0B0"));var status=Row(dot,online);status.style.marginTop=4;card.Add(status);
-                if(selected){var tick=Box("mode-tick");Decorate(tick,"#fff",99);tick.Add(Icon("tick",13,"#1B2440"));card.Add(tick);}
+                card.RegisterCallback<PointerEnterEvent>(_=>{GalaxyFilters.SaturationAndBrightness(card,1,1);card.style.translate=new Translate(0,-7);card.style.scale=new Scale(Vector2.one*1.04f);});
+                card.RegisterCallback<PointerLeaveEvent>(_=>{GalaxyFilters.SaturationAndBrightness(card,selected?1:.7f,selected?1:.78f);card.style.translate=new Translate(0,selected?-6:0);card.style.scale=new Scale(Vector2.one);});
+                var glyph=Text(glyphs[i],58,true,"rgba(255,255,255,.16)");glyph.pickingMode=PickingMode.Ignore;glyph.style.position=Position.Absolute;glyph.style.right=-4;glyph.style.bottom=-14;card.Add(glyph);
+                var gloss=Box();Place(gloss,0,0,208,39);gloss.pickingMode=PickingMode.Ignore;Decorate(gloss,"linear-gradient(rgba(255,255,255,.18),transparent)",18);card.Add(gloss);
+                var title=Text(names[i],18,true,"#fff");title.pickingMode=PickingMode.Ignore;card.Add(title);
+                var line=Row();line.pickingMode=PickingMode.Ignore;line.style.marginTop=4;var dot=Box();dot.style.width=dot.style.height=6;dot.style.marginRight=5;Decorate(dot,"#8EF0B0",3);GalaxyFilters.Shadow(dot,0,0,3,C("#8EF0B0"));line.Add(dot);
+                var count=Text(online[i],11,false,"rgba(255,255,255,.9)");count.style.unityFont=Font("Baloo2-800");line.Add(count);card.Add(line);
+                if(IsSoon(index)){var soon=Text(L("YAKINDA","SOON"),9,false,"#fff");soon.name="mode-soon-"+index;soon.style.unityFont=Font("Baloo2-800");Tracking(soon,1.2f,9);soon.style.position=Position.Absolute;soon.style.right=10;soon.style.bottom=9;soon.style.paddingTop=soon.style.paddingBottom=3;soon.style.paddingLeft=soon.style.paddingRight=7;Decorate(soon,"rgba(0,0,0,.32)",6);card.Add(soon);}
+                if(selected){var tick=Box("mode-tick");tick.style.position=Position.Absolute;tick.style.right=8;tick.style.top=8;tick.style.width=tick.style.height=22;tick.style.alignItems=Align.Center;tick.style.justifyContent=Justify.Center;Decorate(tick,"#fff",99);tick.Add(Icon("tick",13,"#1B2440"));card.Add(tick);}
                 slot.Add(card);strip.Add(slot);
             }
+        }
+        /// <summary>HEMEN OYNA: Klasik opens the lobby; a YAKINDA mode only says so.</summary>
+        private void Play()
+        {
+            if(IsSoon(Model.SelectedMode)){Toast(Model.SelectedMode==3?L("Dereceli yakında açılıyor","Ranked is coming soon"):L("Botlara karşı yakında açılıyor","Vs bots is coming soon"));return;}
+            PlayRequested?.Invoke(Model.SelectedMode);
         }
         private void BuildFooter()
         {

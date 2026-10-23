@@ -141,7 +141,7 @@ namespace Galaxy101
             var mark = Row(); mark.style.position = Position.Absolute; mark.style.right = 20; mark.style.bottom = 14;
             var diamond = Box(); diamond.style.width = diamond.style.height = 9; diamond.style.rotate = new Rotate(45); diamond.style.marginRight = 5; view.Decorate(diamond, "linear-gradient(135deg,var(--a1),var(--a2))", 2); mark.Add(diamond);
             mark.Add(Text("CDX", 12, "Montserrat-800", "#F4F1E8")); var games = Text("GAMES", 11, "Baloo2-700", "var(--mt)"); MenuView.Tracking(games, 1.5f, 11); games.style.marginLeft = 5; mark.Add(games);
-            var bar = Box(); bar.style.width = 1; bar.style.height = 10; bar.style.marginLeft = bar.style.marginRight = 8; bar.style.backgroundColor = view.C("var(--mt)"); bar.style.opacity = .4f; mark.Add(bar);
+            var rule = Box(); rule.style.width = 1; rule.style.height = 10; rule.style.marginLeft = rule.style.marginRight = 8; rule.style.backgroundColor = view.C("var(--mt)"); rule.style.opacity = .4f; mark.Add(rule);
             var version = Text("v" + UnityEngine.Application.version, 11, "Baloo2-700", "var(--mt)"); version.style.opacity = .6f; mark.Add(version);
             body.Add(mark);
         }

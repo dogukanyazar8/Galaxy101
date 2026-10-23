@@ -40,7 +40,7 @@ namespace Galaxy101.Tests
         public IEnumerator InactiveModeCardMatchesTheSourceSaturationAndBrightnessWithoutExtraDimming()
         {
             controller.View.SetFocused(false);var root=controller.View.Root;
-            var card=root.Q<Button>("mode-1");var bounds=card.worldBound;
+            var card=root.Q<Button>("mode-3");var bounds=card.worldBound;
             var target=owner.GetComponent<MenuGammaPresenter>().Output;
             yield return null;yield return null;
             var pixels=ReadFrame(target);
@@ -50,10 +50,10 @@ namespace Galaxy101.Tests
                 int x=Mathf.RoundToInt((position.x-rootBounds.xMin)/rootBounds.width*target.width);
                 int y=target.height-1-Mathf.RoundToInt((position.y-rootBounds.yMin)/rootBounds.height*target.height);
                 var color=(Color32)pixels.GetPixel(x,y);
-                // CSS saturate(.7) brightness(.78) over the solid #FF6B6B card.
-                Assert.That((int)color.r,Is.EqualTo(172).Within(2));
-                Assert.That((int)color.g,Is.EqualTo(91).Within(2));
-                Assert.That((int)color.b,Is.EqualTo(91).Within(2));
+                // CSS saturate(.7) brightness(.78) over the solid #16B6A8 Dereceli card.
+                Assert.That((int)color.r,Is.EqualTo(46).Within(2));
+                Assert.That((int)color.g,Is.EqualTo(134).Within(2));
+                Assert.That((int)color.b,Is.EqualTo(126).Within(2));
             }
             finally{UnityEngine.Object.Destroy(pixels);}
         }
@@ -185,11 +185,16 @@ namespace Galaxy101.Tests
         public IEnumerator MainButtonsEmitSelectedModeAndRefreshWithoutLosingNativeLayout()
         {
             var view=controller.View;int? played=null;controller.PlayRequested+=mode=>played=mode;
-            var selection=view.Root.Q<Button>("mode-2");selection.Focus();yield return null;using(var evt=NavigationSubmitEvent.GetPooled())selection.SendEvent(evt);yield return null;yield return null;
-            Assert.That(controller.Model.SelectedMode,Is.EqualTo(2));
+            // v3 (S06): Dereceli is YAKINDA — selectable, but HEMEN OYNA only says so; Klasik plays.
+            var soon=view.Root.Q<Button>("mode-3");soon.Focus();yield return null;using(var evt=NavigationSubmitEvent.GetPooled())soon.SendEvent(evt);yield return null;yield return null;
+            Assert.That(controller.Model.SelectedMode,Is.EqualTo(3));Assert.That(view.Root.Q<Label>("mode-soon-3"),Is.Not.Null);
             var play=view.Root.Q<Button>("play-now");Assert.That(play.worldBound.width,Is.GreaterThan(300));
             play.Focus();yield return null;using(var evt=NavigationSubmitEvent.GetPooled())play.SendEvent(evt);yield return null;
-            Assert.That(played,Is.EqualTo(2));
+            Assert.That(played,Is.Null,"a coming-soon mode does not start");
+            var classic=view.Root.Q<Button>("mode-0");using(var evt=NavigationSubmitEvent.GetPooled()){evt.target=classic;classic.SendEvent(evt);}yield return null;yield return null;
+            play=view.Root.Q<Button>("play-now");using(var evt=NavigationSubmitEvent.GetPooled()){evt.target=play;play.SendEvent(evt);}yield return null;
+            Assert.That(played,Is.EqualTo(0));
+            Assert.That(view.Root.Query<Button>(className:"mode-card").ToList().Count,Is.EqualTo(3));
             Assert.That(controller.View,Is.Not.Null);
         }
     }

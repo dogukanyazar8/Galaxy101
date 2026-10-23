@@ -68,7 +68,10 @@ namespace Galaxy101
             bool resumed = false;
             try { resumed = resume.Result; } catch (Exception e) { Debug.LogWarning("Resume failed: " + e.Message); }
             if (layer == null) return;
-            if (resumed) { Finish(L("Tekrar hoş geldin, ", "Welcome back, ") + online.Profile?.Name + "!"); return; }
+            await SplashOut();
+            if (layer == null) return;
+            // A remembered session goes straight to the menu (menuIn), without a greeting — as the design's afterSplash().
+            if (resumed) { Finish(null, null, fromSplash: true); return; }
             Go("choice");
         }
 
@@ -83,16 +86,18 @@ namespace Galaxy101
         // a colour pick or an error line redraws the panel in place without replaying the slide-in.
         private float screenAt, sideAt;
 
-        private void Finish(string toast)
+        private void Finish(string greeting, string kind, bool fromSplash = false)
         {
             Hide();
-            if (!string.IsNullOrEmpty(toast)) view.Toast(toast);
+            if (fromSplash) view.PlayMenuIn();
+            // loginAs(): the greeting flashes 500 ms after the menu appears — gold with the welcome chips, green otherwise.
+            if (!string.IsNullOrEmpty(greeting)) view.Root.schedule.Execute(() => view.Flash(greeting, kind)).ExecuteLater(500);
             Completed?.Invoke();
         }
 
         public void Hide()
         {
-            ticker?.Pause(); ticker = null; motions.Clear();
+            ticker?.Pause(); ticker = null; motions.Clear(); planetJob?.Pause(); planetJob = null; planetPlaced = false;
             layer?.RemoveFromHierarchy(); layer = null;
             if (background != null) UnityEngine.Object.Destroy(background.gameObject); background = null;
         }
@@ -107,8 +112,7 @@ namespace Galaxy101
             body.Clear(); motions.Clear();
             bool splash = screen == "splash";
             // Planet: centred for the splash (640,330), left for the auth screens (310,340 ×1.05) — spec/18.
-            var at = splash ? new Vector4(640, 330, 1f, 0) : new Vector4(310, 340, 1.05f, 0);
-            background.UseStaticLayout(new Vector4(640, 360, 1280, 720), new Vector4(at.x, at.y, 330, 1), at, view.C("var(--pg)"));
+            PlanetTo(splash ? new Vector4(640, 330, 1f, 0) : new Vector4(310, 340, 1.05f, 0));
             if (splash) { BuildSplash(); return; }
             BuildSide();
             switch (screen)
@@ -122,11 +126,63 @@ namespace Galaxy101
                 again.schedule.Execute(() => { again.Focus(); again.SelectRange(again.value.Length, again.value.Length); });
         }
 
+        // ---------- planet and splash exit ----------
+        // The design's planet element: transition left/top/transform 1s cubic-bezier(.6,0,.2,1), opacity .8s.
+        private Vector4 planetFrom, planetTo, planetNow; private float planetAt = -9; private bool planetPlaced; private IVisualElementScheduledItem planetJob;
+
+        private void PlanetTo(Vector4 target)
+        {
+            if (planetPlaced && target == planetTo) return;
+            if (!planetPlaced) { planetPlaced = true; planetFrom = planetTo = planetNow = target; ApplyPlanet(); return; }
+            planetFrom = planetNow; planetTo = target; planetAt = Time.realtimeSinceStartup;
+            planetJob ??= layer?.schedule.Execute(StepPlanet).Every(16);
+            planetJob?.Resume();
+        }
+
+        private void StepPlanet()
+        {
+            float t = Time.realtimeSinceStartup - planetAt, f = Mathf.Clamp01(t / 1f), k = MenuView.CssBezier(.6f, 0, .2f, 1, f);
+            float o = MenuView.CssBezier(.25f, .1f, .25f, 1, Mathf.Clamp01(t / .8f));
+            planetNow = new Vector4(Mathf.Lerp(planetFrom.x, planetTo.x, k), Mathf.Lerp(planetFrom.y, planetTo.y, k), Mathf.Lerp(planetFrom.z, planetTo.z, k), Mathf.Lerp(planetFrom.w, planetTo.w, o));
+            ApplyPlanet();
+            if (f >= 1 && t >= .8f) planetJob?.Pause();
+        }
+
+        private void ApplyPlanet() =>
+            background?.UseStaticLayout(new Vector4(640, 360, 1280, 720), new Vector4(planetNow.x, planetNow.y, 330, 1), planetNow, view.C("var(--pg)"));
+
+        private VisualElement splashColumn, splashTiles, splashBar;
+
+        /// <summary>
+        /// splashOut .75s cubic-bezier(.7,0,.3,1): the splash fades, shrinks to .96 and blurs 10 px while the tiles rise 36 px
+        /// and grow 1.14×, and the planet sweeps to (640, 340) ×1.5 and fades; the next screen follows at 720 ms.
+        /// </summary>
+        private async Task SplashOut()
+        {
+            if (splashColumn == null) return;
+            PlanetTo(new Vector4(640, 340, 1.5f, 1));
+            float began = Time.realtimeSinceStartup;
+            var parts = new[] { splashColumn, splashBar };
+            while (layer != null && Time.realtimeSinceStartup - began < .72f)
+            {
+                float f = Mathf.Clamp01((Time.realtimeSinceStartup - began) / .75f), k = MenuView.CssBezier(.7f, 0, .3f, 1, f);
+                foreach (var part in parts)
+                {
+                    if (part == null) continue;
+                    part.style.opacity = 1 - k; part.style.scale = new Scale(Vector2.one * (1 - .04f * k));
+                    GalaxyFilters.Blur(part, 10 * k);
+                }
+                if (splashTiles != null) { splashTiles.style.translate = new Translate(0, -36 * k); splashTiles.style.scale = new Scale(Vector2.one * (1 + .14f * k)); }
+                await Task.Yield();
+            }
+            splashColumn = splashTiles = splashBar = null;
+        }
+
         private void BuildSplash()
         {
-            var column = Box(); MenuView.Place(column, 0, 118, 1280, 300); column.style.alignItems = Align.Center; body.Add(column);
-            column.Add(Logo(66, 8)); column.Add(Tiles(1f));
-            var bar = Box("splash-progress"); MenuView.Place(bar, 420, 478, 440, 40); body.Add(bar);
+            var column = Box(); MenuView.Place(column, 0, 118, 1280, 300); column.style.alignItems = Align.Center; body.Add(column); splashColumn = column;
+            column.Add(Logo(66, 8)); splashTiles = Tiles(1f); column.Add(splashTiles);
+            var bar = Box("splash-progress"); MenuView.Place(bar, 420, 478, 440, 40); body.Add(bar); splashBar = bar;
             var labels = Row(); labels.style.justifyContent = Justify.SpaceBetween;
             var message = Text("", 14, "Baloo2-800", "var(--ic)"); var pct = Text("0%", 14, "Baloo2-800", "var(--a1)"); pct.name = "splash-percent";
             labels.Add(message); labels.Add(pct); bar.Add(labels);
@@ -509,8 +565,9 @@ namespace Galaxy101
                 else if (screen == "register") await online.RegisterAsync(new RegisterRequest { Name = name.Trim(), Email = email.Trim(), Password = password, AcceptTerms = terms, Color = color });
                 else if (screen == "guest") await online.GuestAsync(nick.Trim(), color);
                 busy = false;
-                string who = online.Profile?.Name ?? nick;
-                Finish(screen == "login" ? L("Hoş geldin, ", "Welcome, ") + who + "!" : L("Hoş geldin, " + who + "! " + view.N(online.Wallet?.Chips ?? 0) + " çip hesabına eklendi", "Welcome, " + who + "! " + view.N(online.Wallet?.Chips ?? 0) + " chips added"));
+                string who = (online.Profile?.Name ?? nick ?? "").Trim().Split(' ')[0];
+                if (screen == "login") Finish(L("Hoş geldin, " + who + "!", "Welcome, " + who + "!"), "ok");
+                else Finish(L("Hoş geldin, " + who + "! " + view.N(online.Wallet?.Chips ?? 0) + " çip hesabına eklendi", "Welcome, " + who + "! " + view.N(online.Wallet?.Chips ?? 0) + " chips added"), "gold");
             }
             catch (ApiException e)
             {

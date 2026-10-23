@@ -219,6 +219,35 @@ namespace Galaxy101
         }
         private void UpdateBackground(){var values=preview??Model.Settings;BackgroundChanged?.Invoke(Model.Planet,(bool?)values["motion"]??true,(string)values["quality"]??"Yüksek");}
         public void Copy(string value)=>Services.Share.CopyToClipboard(value);
+        /// <summary>
+        /// The game shell's flash(text, kind): a pill at the top centre (Baloo 800 15 px, a dark disc with a diamond in the
+        /// text colour), toastIn .35s, gone after 3.4 s. Kinds: ok, gold, bad, info.
+        /// </summary>
+        public void Flash(string text,string kind="info")
+        {
+            if(toastLayer==null)return;
+            foreach(var old in toastLayer.Query<VisualElement>("shell-flash").ToList())old.RemoveFromHierarchy();
+            (string bg,string fg)=kind=="ok"?("#3CCB6E","#062B14"):kind=="bad"?("linear-gradient(#FF7A86,#E8455A)","#fff"):kind=="gold"?("linear-gradient(var(--a1),var(--a2))","var(--aT)"):("rgba(5,8,22,.85)","#F4F1E8");
+            var pill=new VisualElement{name="shell-flash",pickingMode=PickingMode.Ignore};pill.style.position=Position.Absolute;pill.style.top=22;pill.style.left=640;
+            pill.style.flexDirection=FlexDirection.Row;pill.style.alignItems=Align.Center;pill.style.paddingTop=pill.style.paddingBottom=10;pill.style.paddingLeft=10;pill.style.paddingRight=20;
+            Decorate(pill,bg,999);GalaxyFilters.Shadow(pill,0,10,15,new Color(0,0,0,.4f));
+            var disc=new VisualElement{pickingMode=PickingMode.Ignore};disc.style.width=disc.style.height=26;disc.style.marginRight=10;disc.style.alignItems=Align.Center;disc.style.justifyContent=Justify.Center;Decorate(disc,"rgba(0,0,0,.18)",13);
+            var diamond=new VisualElement{pickingMode=PickingMode.Ignore};diamond.style.width=diamond.style.height=9;diamond.style.rotate=new Rotate(45);Decorate(diamond,fg,2);disc.Add(diamond);pill.Add(disc);
+            var label=Text(text,15,false,fg);label.style.unityFont=Font("Baloo2-800");label.style.whiteSpace=WhiteSpace.NoWrap;label.style.paddingLeft=label.style.paddingRight=label.style.paddingTop=label.style.paddingBottom=0;label.style.marginLeft=label.style.marginRight=0;pill.Add(label);
+            toastLayer.Add(pill);
+            float began=UnityEngine.Time.realtimeSinceStartup;IVisualElementScheduledItem job=null;
+            // toastIn: translate(-50%,-14px) → translate(-50%,0), opacity 0 → 1 (ease).
+            job=pill.schedule.Execute(()=>
+            {
+                float f=UnityEngine.Mathf.Clamp01((UnityEngine.Time.realtimeSinceStartup-began)/.35f),k=CssBezier(.25f,.1f,.25f,1,f);
+                pill.style.opacity=k;pill.style.translate=new Translate(Length.Percent(-50),-14*(1-k));if(f>=1)job.Pause();
+            }).Every(16);
+            pill.style.opacity=0;pill.style.translate=new Translate(Length.Percent(-50),-14);
+            pill.schedule.Execute(()=>pill.RemoveFromHierarchy()).ExecuteLater(3400);
+            LastFlash=text;
+        }
+        /// <summary>The last flash's text (tests).</summary>
+        public string LastFlash{get;private set;}
         public void Toast(string text)
         {
             if(toastLayer==null)return;toastLayer.Clear();var toast=Text(text,14,true,"#fff");toast.AddToClassList("toast");Decorate(toast,"#3CCB6E",12,4,"#22914A");toastLayer.Add(toast);

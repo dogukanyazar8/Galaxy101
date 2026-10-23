@@ -93,6 +93,9 @@ namespace Galaxy101.Tests
             Assert.That(GalaxyOnline.Instance.Wallet.Chips, Is.EqualTo(10000));
             Assert.That(menu.Model.Chips, Is.EqualTo(10000), "the menu shows the server balance");
             Assert.That(PlayerPrefs.HasKey(GalaxyOnline.SessionKey), Is.False, "a guest session is not remembered");
+            yield return Until(() => menu.View.LastFlash != null, 2, "the welcome flash (500 ms after the menu)");
+            Assert.That(menu.View.LastFlash, Does.StartWith("Hoş geldin, TestMisafir").And.Contain("10.000 çip"), "loginAs(): gold greeting with the welcome chips");
+            Assert.That(menu.View.Root.Q<VisualElement>("shell-flash"), Is.Not.Null);
             yield return Until(() => GalaxyOnline.Instance.Realtime.Connected, 5, "the realtime socket");
         }
 

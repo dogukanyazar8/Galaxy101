@@ -18,7 +18,7 @@ Shader "Galaxy101/Planet"
             sampler2D _CanvasBackdrop;
             float4 _Planet; // tilt radians, flattening, limb darkening, ambient
             float4 _Atmosphere; // RGB in gamma space and strength
-            float4 _Placement; // centre in canvas px, scale
+            float4 _Placement; // centre in canvas px, scale, fade (0 = fully drawn, 1 = gone)
             float _Rings, _Rotation, _GroupAngle, _PixelScale, _SurfaceLod;
             struct Input {float4 vertex:POSITION;float2 uv:TEXCOORD0;};
             struct Varyings {float4 position:SV_POSITION;float2 local:TEXCOORD0;float2 pixelPosition:TEXCOORD1;};
@@ -69,7 +69,7 @@ Shader "Galaxy101/Planet"
                     float rim=pow(1-nz,2.4)*saturate(diff+.35)*_Atmosphere.w;
                     color=(surface*shade+_Atmosphere.rgb*rim)*(1-ring.a)+ring.rgb*ring.a;
                 }
-                float alpha=max(pa,ring.a);
+                float alpha=max(pa,ring.a)*saturate(1-_Placement.w);
                 float3 background=CanvasToGamma(tex2D(_CanvasBackdrop,CanvasUv(i.pixelPosition)).rgb);
                 return float4(CanvasToLinear(lerp(background,saturate(color),alpha)),1);
             }

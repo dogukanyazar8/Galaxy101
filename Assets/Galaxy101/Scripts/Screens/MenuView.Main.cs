@@ -361,6 +361,24 @@ namespace Galaxy101
             return Mathf.Floor(ascent*size+.5f)+Mathf.Floor(descent*size+.5f);
         }
 
+        /// <summary>
+        /// menuIn 1.2s cubic-bezier(.16,1,.3,1) after the splash: the menu fades in from 1.05× and a 12 px blur that clears
+        /// by 60 %.
+        /// </summary>
+        public void PlayMenuIn()
+        {
+            if(mainLayer==null)return;var target=mainLayer;float began=Time.realtimeSinceStartup;
+            target.style.opacity=0;target.style.scale=new Scale(Vector2.one*1.05f);GalaxyFilters.Blur(target,12);
+            IVisualElementScheduledItem job=null;
+            job=target.schedule.Execute(()=>
+            {
+                float f=Mathf.Clamp01((Time.realtimeSinceStartup-began)/1.2f),k=CssBezier(.16f,1,.3f,1,f);
+                target.style.opacity=Mathf.Clamp01(k);target.style.scale=new Scale(Vector2.one*(1.05f-.05f*k));
+                GalaxyFilters.Blur(target,f<.6f?12*(1-CssBezier(.16f,1,.3f,1,f/.6f)):0);
+                if(f>=1){target.style.opacity=StyleKeyword.Null;target.style.scale=StyleKeyword.Null;target.style.filter=StyleKeyword.Null;job.Pause();}
+            }).Every(16);
+        }
+
         internal static float CssBezier(float x1,float y1,float x2,float y2,float x)
         {
             float lo=0,hi=1,t=x;for(int i=0;i<20;i++){t=(lo+hi)/2;float q=1-t,bx=3*q*q*t*x1+3*q*t*t*x2+t*t*t;if(bx<x)lo=t;else hi=t;}

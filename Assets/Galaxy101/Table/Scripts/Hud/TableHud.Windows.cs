@@ -104,6 +104,8 @@ namespace Galaxy101.Table
         {
             if (windowLayer == null) return;
             if (keepScroll && settingsScroll != null) settingsScrollY = settingsScroll.scrollOffset.y;
+            string shown = Window == null ? null : Window + (Window == "card" ? ":" + CardSeat : "");
+            if (shown != openedWindow) { openedWindow = shown; windowOpenedAt = Time.realtimeSinceStartup; }
             windowMotions.Clear(); windowLayer.Clear(); settingsScroll = null; chatLog = null; chatScroll = null; chatInput = null; cardAnchor = null;
             if (Window == "settings") BuildSettings(keepScroll);
             else if (Window == "chat") BuildChat();
@@ -133,9 +135,12 @@ namespace Galaxy101.Table
         }
 
         /// <summary>modalIn .28s cubic-bezier(.2,1.2,.4,1): y +18 → 0, scale .95 → 1, with a small overshoot.</summary>
+        // A window redrawn in place (a skin, view or language change) keeps still: its entrance runs from when it opened.
+        private string openedWindow; private float windowOpenedAt;
+
         private void ModalIn(VisualElement card)
         {
-            float began = Time.realtimeSinceStartup;
+            float began = windowOpenedAt;
             windowMotions.Add(t =>
             {
                 float u = Mathf.Clamp01((t - began) / .28f), k = 1 + 2.70158f * Mathf.Pow(u - 1, 3) + 1.70158f * Mathf.Pow(u - 1, 2); // easeOutBack

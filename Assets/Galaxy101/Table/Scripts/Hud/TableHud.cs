@@ -57,7 +57,7 @@ namespace Galaxy101.Table
             /// <summary>spec/21: the deal ceremony card and the "Zar at" button while dealing.</summary>
             public DealInfoCard Deal;
             /// <summary>spec/22: Geri topla, Elden bit, and Aç below 101 (orange: a wrong opening costs +101).</summary>
-            public bool CanUndo, CanFromHand, ShortOpen;
+            public bool CanUndo, CanFromHand, ShortOpen, ShortPairs;
             /// <summary>Online: the table's name ("Gece Kuşları · Tekli") and stake for the top bar; null at a bot table.</summary>
             public string RoomName; public long RoomStake;
         }
@@ -297,10 +297,22 @@ namespace Galaxy101.Table
         private string FirstName(int k) => ((string)Seat(k)["name"]).Split(' ')[0];
 
         // ---------- render ----------
+        // Entrance animations of rebuilt HUD parts run from when the part first appeared (a result card re-rendered by its
+        // countdown keeps still), keyed by what the part shows; a part gone for one render starts afresh next time.
+        private readonly Dictionary<string, float> firstSeen = new Dictionary<string, float>();
+        private readonly HashSet<string> seenNow = new HashSet<string>();
+        private float Since(string key)
+        {
+            seenNow.Add(key);
+            if (!firstSeen.TryGetValue(key, out float at)) firstSeen[key] = at = Time.realtimeSinceStartup;
+            return at;
+        }
+
         public void Render(State state)
         {
             Current = state ?? throw new ArgumentNullException(nameof(state));
             if (view == null) return; // rendered once Initialize runs
+            seenNow.Clear();
             motions.Clear(); anchors.Clear(); dynamicAnchors.Clear(); anchorLayer.Clear(); hudLayer.Clear();
             for (int k = 1; k <= 3; k++) BuildOpponent(k, state);
             bool myTurn = state.Active == 0;
@@ -323,6 +335,7 @@ namespace Galaxy101.Table
             ApplyGaps(hudLayer); ApplyGaps(anchorLayer);
             RenderToasts();
             LateUpdate();
+            foreach (var key in firstSeen.Keys.Where(k => !seenNow.Contains(k)).ToList()) firstSeen.Remove(key);
         }
 
         private readonly Dictionary<string, Func<Vector3?>> dynamicAnchors = new Dictionary<string, Func<Vector3?>>();
@@ -453,12 +466,12 @@ namespace Galaxy101.Table
             layer.Add(dim); hudLayer.Add(layer); return layer;
         }
 
-        private VisualElement Card(float width, int radius)
+        private VisualElement Card(float width, int radius, string key)
         {
             var card = new VisualElement { pickingMode = PickingMode.Position }; card.style.width = width;
             view.Decorate(card, "var(--pn)", radius, 10, "var(--pnS)"); Border(card, 1, new Color(1, 1, 1, .1f));
             GalaxyFilters.Shadow(card, 0, 40, 45, new Color(0, 0, 0, .6f));
-            float began = Time.realtimeSinceStartup;
+            float began = Since(key);
             // modalIn .35s: y +18 → 0, scale .95 → 1.
             motions.Add(t => { float u = TableConstants.EaseOutCubic(Mathf.Clamp01((t - began) / .35f)); card.style.translate = new Translate(0, 18 * (1 - u)); card.style.scale = new Scale(Vector2.one * Mathf.Lerp(.95f, 1, u)); });
             return card;
@@ -471,7 +484,7 @@ namespace Galaxy101.Table
         private void BuildResult(ResultInfo r)
         {
             var layer = Backdrop("table-result", null);
-            var card = Card(900, 30); card.name = "table-result-card"; card.style.overflow = Overflow.Hidden;
+            var card = Card(900, 30, "result"); card.name = "table-result-card"; card.style.overflow = Overflow.Hidden;
             var header = Row(18); Pad(header, 22, 30, 14, 30);
             var left = new VisualElement { pickingMode = PickingMode.Ignore }; left.style.flexGrow = 1;
             var caption = Text(r.Title + " · " + r.Sub, "Baloo2-800", 11, "var(--mt)"); MenuView.Tracking(caption, 2, 11); left.Add(caption);
@@ -598,7 +611,7 @@ namespace Galaxy101.Table
         {
             var layer = Backdrop("table-match", null); layer.Q<VisualElement>("table-match-dim").style.backgroundColor = new Color(0, 0, 0, .7f);
             if (m.Won) Confetti(layer, m.StartedAt);
-            var card = Card(1060, 30); card.name = "table-match-card"; card.style.flexDirection = FlexDirection.Row; Pad(card, 24, 24, 22, 24);
+            var card = Card(1060, 30, "match"); card.name = "table-match-card"; card.style.flexDirection = FlexDirection.Row; Pad(card, 24, 24, 22, 24);
             // Left: badge, title, standings.
             var left = new VisualElement { pickingMode = PickingMode.Ignore }; left.style.width = 380; left.style.marginRight = 22;
             var top = Row(16);
@@ -751,7 +764,7 @@ namespace Galaxy101.Table
         private void BuildExit()
         {
             var layer = Backdrop("table-exit-card", "exit-stay");
-            var card = Card(460, 28); card.name = "table-exit-confirm"; card.style.alignItems = Align.Center; Pad(card, 28, 28, 28, 28);
+            var card = Card(460, 28, "exit"); card.name = "table-exit-confirm"; card.style.alignItems = Align.Center; Pad(card, 28, 28, 28, 28);
             var icon = new VisualElement { pickingMode = PickingMode.Ignore }; icon.style.width = icon.style.height = 64; icon.style.alignItems = Align.Center; icon.style.justifyContent = Justify.Center;
             view.Decorate(icon, "rgba(255,94,108,.16)", 20); icon.Add(view.Icon("table-exit", 32, "#FF8A94")); card.Add(icon);
             var title = Text(L("Masadan kalkmak istiyor musun?", "Leave the table?"), "Montserrat-700", 24, "#F4F1E8"); title.style.marginTop = 12;
@@ -766,10 +779,23 @@ namespace Galaxy101.Table
             card.Add(buttons); layer.Add(card);
         }
 
-        /// <summary>The message slot: centred on x 500–950 of the top bar.</summary>
-        private static VisualElement MessageRow(float top)
+        /// <summary>
+        /// The message slot (G101-Masa: left:0;right:0;justify-content:center): centred on the canvas. A long bot-table
+        /// header (wider than the design's "Tekli · 101 · Bahis") would sit under a wide message; only then the message
+        /// steps right of it.
+        /// </summary>
+        private VisualElement MessageRow(float top)
         {
-            var row = new VisualElement { pickingMode = PickingMode.Ignore }; row.style.position = Position.Absolute; row.style.left = 500; row.style.width = 450; row.style.top = top; row.style.alignItems = Align.Center;
+            var row = new VisualElement { pickingMode = PickingMode.Ignore }; row.style.position = Position.Absolute; row.style.left = 0; row.style.right = 0; row.style.top = top; row.style.alignItems = Align.Center;
+            row.RegisterCallback<GeometryChangedEvent>(_ =>
+            {
+                var room = hudLayer?.Q<VisualElement>("table-room"); if (room == null || row.childCount == 0) return;
+                var toast = row[0]; float scale = row.layout.width > 0 ? row.worldBound.width / row.layout.width : 1;
+                // Centred position (without this row's own shift) against the header's right edge + 12 px.
+                float left = row.worldBound.center.x - row.resolvedStyle.translate.x * scale - toast.layout.width * scale / 2, clear = room.worldBound.xMax + 12 * scale;
+                float shift = left < clear ? (clear - left) / scale : 0;
+                if (Mathf.Abs(row.resolvedStyle.translate.x - shift) > .5f) row.style.translate = new Translate(shift, 0);
+            });
             return row;
         }
 
@@ -818,7 +844,7 @@ namespace Galaxy101.Table
             logo.style.textShadow = new TextShadow { offset = new Vector2(0, 2), blurRadius = 0, color = view.C("var(--lS)") };
             bar.Add(logo);
 
-            var room = Row(8); Pad(room, 7, 13, 7, 13); view.Decorate(room, "var(--dp)", 15);
+            var room = Row(8); room.name = "table-room"; Pad(room, 7, 13, 7, 13); view.Decorate(room, "var(--dp)", 15);
             if (s.RoomName != null)
             {
                 // A server table (G13): its name and type, then the stake.
@@ -1077,7 +1103,7 @@ namespace Galaxy101.Table
             var frame = new VisualElement { name = "glow-tile-" + id, pickingMode = PickingMode.Ignore }; MenuView.Place(frame, -15, -19, 30, 38);
             frame.style.borderTopLeftRadius = frame.style.borderTopRightRadius = frame.style.borderBottomLeftRadius = frame.style.borderBottomRightRadius = 6;
             Border(frame, 3, view.C("var(--a1)"));
-            float began = Time.realtimeSinceStartup;
+            float began = Since("glow-" + id);
             motions.Add(t => { float u = Mathf.Clamp01((t - began) / 1.2f); GalaxyFilters.Shadow(frame, 0, 0, 9 * Mathf.Sin(Mathf.PI * u) + 2, view.C("var(--gl)")); frame.style.opacity = u > .8f ? (1 - u) / .2f : 1; });
             Anchor("glow-" + id, () => TilePosition(id)).Add(frame);
         }
@@ -1204,7 +1230,12 @@ namespace Galaxy101.Table
                 buttons.Add(Clickable(bomb, "fromhand"));
             }
             if (!opened && s.Pairs >= 3 || s.OpenedPairs[0])
-                buttons.Add(ActionButton("table-pairs", L("Çift aç · " + s.Pairs + "/5", "Open pairs · " + s.Pairs + "/5"), s.CanPair, false, 14, "pairs"));
+            {
+                var pairs = ActionButton("table-pairs", L("Çift aç · " + s.Pairs + "/5", "Open pairs · " + s.Pairs + "/5"), s.CanPair, false, 14, "pairs");
+                // warnB(): fewer than five pairs is a short opening — the same orange-red as Aç.
+                if (s.ShortPairs && s.CanPair) { view.Decorate(pairs, "linear-gradient(#FF9A4D,#E8573A)", 15, 5, "#9E3418"); pairs.style.color = view.C("#fff"); pairs.EnableInClassList("short", true); }
+                buttons.Add(pairs);
+            }
             if (!s.OpenedPairs[0])
             {
                 var open = ActionButton("table-open", opened ? L("Yere aç", "Lay down") : L("Aç", "Open"), s.CanOpen, true, 17, "open");

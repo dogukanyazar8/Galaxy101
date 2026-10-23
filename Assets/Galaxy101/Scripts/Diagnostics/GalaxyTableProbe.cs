@@ -31,6 +31,7 @@ namespace Galaxy101
                 panel.clearColor = true; panel.colorClearValue = new Color(0, 0, 0, 0);
                 Debug.Log("GALAXY101_TABLE_PROBE legacy panel clear enabled");
             }
+            if (Array.IndexOf(args, "-galaxyTableProbeDefaults") >= 0) TableSettings.DesignDefaultsOnly = true;
             var owner = new GameObject("Galaxy101 table probe"); DontDestroyOnLoad(owner);
             owner.AddComponent<GalaxyTableProbe>().output = args[index + 1];
         }

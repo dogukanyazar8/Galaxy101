@@ -296,7 +296,7 @@ namespace Galaxy101.Table
         /// <summary>drawerInL / drawerIn .3s: slide in 44 px from the side with the modal overshoot.</summary>
         private void DrawerIn(VisualElement panel, int side)
         {
-            float began = Time.realtimeSinceStartup;
+            float began = windowOpenedAt;
             windowMotions.Add(t =>
             {
                 float u = Mathf.Clamp01((t - began) / .3f), k = 1 + 2.70158f * Mathf.Pow(u - 1, 3) + 1.70158f * Mathf.Pow(u - 1, 2);

@@ -76,7 +76,7 @@ namespace Galaxy101.Table
                 button.Add(DieIcon(5, true, false));
                 button.Add(Text(d.Roll == 0 ? L("Zar at", "Roll") : L("Tekrar at", "Roll again"), "Montserrat-800", 22, "var(--aT)"));
                 var count = Text((d.Roll + 1) + "/2", "Baloo2-800", 12, "var(--a1)"); Pad(count, 2, 8, 2, 8); view.Decorate(count, "var(--aT)", 8); button.Add(count);
-                float shown = Time.realtimeSinceStartup;
+                float shown = Since("deal-roll");
                 motions.Add(t => { float p = Mathf.Repeat((Time.realtimeSinceStartup - shown) / 1.6f, 1); button.style.scale = new Scale(Vector2.one * (1 + .035f * Mathf.Sin(p * Mathf.PI * 2))); });
                 Clickable(button, "roll"); bottom.Add(button); hudLayer.Add(bottom);
             }

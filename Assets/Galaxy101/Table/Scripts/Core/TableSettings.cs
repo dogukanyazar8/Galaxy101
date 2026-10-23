@@ -24,8 +24,12 @@ namespace Galaxy101.Table
         public event Action<string> Changed;
 
         /// <param name="persist">false keeps the values in memory only (tests).</param>
+        /// <summary>Diagnostics (design comparisons): the design defaults, the player's saved choices neither read nor written.</summary>
+        public static bool DesignDefaultsOnly;
+
         public TableSettings(MenuModel menu, bool persist = true)
         {
+            if (DesignDefaultsOnly) persist = false;
             this.menu = menu; this.persist = persist;
             values = Defaults();
             if (!persist || !PlayerPrefs.HasKey(PrefsKey)) return;

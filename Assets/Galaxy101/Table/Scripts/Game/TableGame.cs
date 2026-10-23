@@ -1291,15 +1291,17 @@ namespace Galaxy101.Table
                 if (target) s.DragBanner = T("takeOkeyBanner", FaceName(okey.Face));
                 if (okey.Id == tipOkey) { s.OkeyTipId = tipOkey; s.OkeyTip = tipTake ? T("takeOkeyHint", FaceName(okey.Face)) : T("okStandsFor", FaceName(okey.Face)); }
             }
-            // spec/17 §3: Aç / Çift aç stay pressable below the threshold (a short opening costs +101).
-            s.CanOpen = CanDiscard && (s.Opened[Me] > 0 ? !s.OpenedPairs[Me] && eval.Groups.Count > 0 : true);
-            s.CanPair = CanDiscard && (s.OpenedPairs[Me] ? eval.Pairs.Count > 0 : s.Opened[Me] == 0);
+            // G101-Masa openVals(): Aç needs at least one valid group on the rack and Çift aç at least one pair; below the
+            // threshold they stay pressable in the warning colour (a short opening costs +101, spec/17 §3).
+            s.CanOpen = CanDiscard && eval.Groups.Count > 0 && (s.Opened[Me] == 0 || !s.OpenedPairs[Me]);
+            s.CanPair = CanDiscard && eval.Pairs.Count > 0 && (s.OpenedPairs[Me] || s.Opened[Me] == 0);
             if (ResultOpen && LastResult != null) s.Result = ResultInfo(view);
             if (MatchOpen) s.Match = MatchInfo();
             s.Deal = DealCard();
             s.CanUndo = CanUndo; s.CanFromHand = CanFinishFromHand;
             if (Online?.Start != null) { s.RoomName = OnlineRoom ?? L("Klasik", "Classic"); s.RoomStake = Online.Start.Stake; }
             s.ShortOpen = CanDiscard && OpenedKind(Me) == OpeningKind.None && eval.Sum < 101;
+            s.ShortPairs = CanDiscard && OpenedKind(Me) == OpeningKind.None && eval.Pairs.Count < 5;
             return s;
         }
     }

@@ -44,6 +44,25 @@ namespace Galaxy101
             ApplySettings();background.Configure(Model.Planet,(bool)Model.Settings["motion"],(string)Model.Settings["quality"]);
             background.SetFocused(UnityEngine.Application.isFocused||UnityEngine.Application.isBatchMode);
             Debug.Log("GALAXY101_MENU_READY version="+UnityEngine.Application.version+" theme="+Model.Planet+" language="+(string)Model.Settings["lang"]);
+            // spec/18: splash → sign-in (or a remembered account) before the menu. Batch runs (tests, captures) skip it.
+            if(AuthOnStart??!UnityEngine.Application.isBatchMode)ShowAuth();
+        }
+        /// <summary>null = sign in unless running in batch mode; tests force it on or off.</summary>
+        public static bool? AuthOnStart;
+        public AuthFlow Auth {get;private set;}
+        public void ShowAuth()
+        {
+            var online=Galaxy101.Online.GalaxyOnline.Ensure();
+            Auth=new AuthFlow(View,transform,online);
+            Auth.Completed+=()=>{ApplyOnline(online);online.Changed+=()=>ApplyOnline(online);};
+            Auth.Show();
+        }
+        /// <summary>The menu shows the server's name, colour and balance once signed in.</summary>
+        private void ApplyOnline(Galaxy101.Online.GalaxyOnline online)
+        {
+            if(online.Profile!=null){Model.Profile["name"]=online.Profile.Name;Model.Profile["color"]=online.Profile.Color;}
+            if(online.Wallet!=null){Model.Chips=online.Wallet.Chips;Model.Gems=online.Wallet.Gems;}
+            View.Refresh();
         }
         private void OnPlay(int mode)=>OnPlay(mode,GalaxyTableScene);
         private async void OnPlay(int mode,string scene)

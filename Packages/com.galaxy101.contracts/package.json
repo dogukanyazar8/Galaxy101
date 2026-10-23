@@ -1,0 +1,7 @@
+{
+  "name": "com.galaxy101.contracts",
+  "version": "1.0.0",
+  "displayName": "Galaxy 101 Contracts",
+  "description": "Wire contracts shared by the Galaxy 101 server and the Unity client (plain classes, no attributes).",
+  "unity": "6000.0"
+}

@@ -1,19 +1,20 @@
 {
-  "name": "Galaxy101.Service.Tests",
-  "references": [
-    "Galaxy101.Runtime",
-    "Unity.Localization"
-  ],
-  "includePlatforms": [
-    "Editor"
-  ],
-  "optionalUnityReferences": [
-    "TestAssemblies"
-  ],
-  "autoReferenced": false,
-  "overrideReferences": true,
-  "precompiledReferences": [
-    "Newtonsoft.Json.dll",
-    "nunit.framework.dll"
-  ]
+    "name": "Galaxy101.Service.Tests",
+    "references": [
+        "Galaxy101.Runtime",
+        "Unity.Localization",
+        "Galaxy101.Contracts"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "autoReferenced": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Newtonsoft.Json.dll",
+        "nunit.framework.dll"
+    ]
 }

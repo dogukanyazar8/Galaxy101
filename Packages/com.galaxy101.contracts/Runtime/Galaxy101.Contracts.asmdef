@@ -1,0 +1,11 @@
+{
+  "name": "Galaxy101.Contracts",
+  "rootNamespace": "Galaxy101.Contracts",
+  "references": [],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

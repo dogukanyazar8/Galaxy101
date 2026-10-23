@@ -1,19 +1,20 @@
 {
-  "name": "Galaxy101.PlayMode.Tests",
-  "references": [
-    "Galaxy101.Runtime",
-    "Unity.Localization",
-    "Okey101.Core",
-    "Okey101.Application",
-    "Unity.InputSystem"
-  ],
-  "optionalUnityReferences": [
-    "TestAssemblies"
-  ],
-  "autoReferenced": false,
-  "overrideReferences": true,
-  "precompiledReferences": [
-    "Newtonsoft.Json.dll",
-    "nunit.framework.dll"
-  ]
+    "name": "Galaxy101.PlayMode.Tests",
+    "references": [
+        "Galaxy101.Runtime",
+        "Unity.Localization",
+        "Okey101.Core",
+        "Okey101.Application",
+        "Unity.InputSystem",
+        "Galaxy101.Contracts"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "autoReferenced": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Newtonsoft.Json.dll",
+        "nunit.framework.dll"
+    ]
 }

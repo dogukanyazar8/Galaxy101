@@ -10,6 +10,7 @@ RUN dotnet restore Server/src/Galaxy101.Server/Galaxy101.Server.csproj
 COPY Packages/com.okey101.core/Runtime Packages/com.okey101.core/Runtime
 COPY Assets/Okey101/Bots/BotPlanner.cs Assets/Okey101/Bots/
 COPY Shared/Galaxy101.Contracts Shared/Galaxy101.Contracts
+COPY Packages/com.galaxy101.contracts/Runtime Packages/com.galaxy101.contracts/Runtime
 COPY Server/src Server/src
 RUN dotnet publish Server/src/Galaxy101.Server/Galaxy101.Server.csproj -c Release -o /app --no-restore
 

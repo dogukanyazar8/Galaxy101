@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "com.galaxy101.contracts": {
+      "version": "file:com.galaxy101.contracts",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.okey101.core": {
       "version": "file:com.okey101.core",
       "depth": 0,

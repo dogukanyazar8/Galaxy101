@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <!-- Wire contracts shared by the server and the Unity client: plain mutable classes so both
        System.Text.Json (server) and Newtonsoft.Json (Unity) bind them without attributes. -->
   <PropertyGroup>
@@ -7,5 +7,11 @@
     <Nullable>disable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RootNamespace>Galaxy101.Contracts</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../..'))</RepoRoot>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- The sources live in the Unity package so the client compiles the very same files. -->
+    <Compile Include="$(RepoRoot)/Packages/com.galaxy101.contracts/Runtime/**/*.cs" Link="%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
 </Project>

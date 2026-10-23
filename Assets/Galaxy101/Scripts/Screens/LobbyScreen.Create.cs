@@ -13,11 +13,11 @@ namespace Galaxy101
         public sealed class CreateDraft
         {
             public string Type = "single", Name = "", Visibility = "public", Pin = "", Chat = "on";
-            public bool PinOn, Doubling, Spectators = true, Gifts = true, Processing = true, Penalties = true, RulesOpen, Tried, Busy;
+            public bool PinOn, Doubling, Spectators = true, Gifts = true, OkeyPenalty = true, Penalties = true, RulesOpen, Tried, Busy;
             public int Hands = 5, Turn = 30;
             public long Stake = 1000, Warn;
             public float WarnAt;
-            public int Changed => (Spectators ? 0 : 1) + (Gifts ? 0 : 1) + (Processing ? 0 : 1) + (Penalties ? 0 : 1) + (Chat == "on" ? 0 : 1);
+            public int Changed => (Spectators ? 0 : 1) + (Gifts ? 0 : 1) + (OkeyPenalty ? 0 : 1) + (Penalties ? 0 : 1) + (Chat == "on" ? 0 : 1);
         }
 
         private CreateDraft create;
@@ -45,8 +45,9 @@ namespace Galaxy101
             var c = create; long chips = backend.Chips;
             var shade = Fill("create-backdrop"); shade.pickingMode = PickingMode.Position; view.Decorate(shade, "rgba(0,0,0,.55)"); Tap(shade, CloseCreate); body.Add(shade);
             var modal = Row(); modal.name = "create-modal"; modal.pickingMode = PickingMode.Position; modal.style.alignItems = Align.Stretch;
-            MenuView.Place(modal, 110, 35, 1060, 650); modal.style.overflow = Overflow.Hidden;
-            Raise(modal, "var(--pn)", 28, 10, "var(--pnS)"); Border(modal, 1, new Color(1, 1, 1, .1f)); GalaxyFilters.Shadow(modal, 0, 40, 45, new Color(0, 0, 0, .6f));
+            // CSS: a 1060×650 content box inside a 1 px border, centred (the ledge is a box-shadow below it).
+            MenuView.Place(modal, 109, 34, 1062, 652); modal.style.overflow = Overflow.Hidden;
+            Border(modal, 1, new Color(1, 1, 1, .1f)); Raise(modal, "var(--pn)", 28, 10, "var(--pnS)"); GalaxyFilters.Shadow(modal, 0, 40, 45, new Color(0, 0, 0, .6f));
             modal.RegisterCallback<ClickEvent>(e => e.StopPropagation());
             Pop(modal, createShownAt, .3f);
             body.Add(modal);
@@ -56,7 +57,7 @@ namespace Galaxy101
             var head = Row(); Pad(head, 22, 28, 10, 28);
             var icon = Box(); Square(icon, 50); Raise(icon, "linear-gradient(160deg,var(--a1),var(--a2))", 16, 4, "var(--aS)"); icon.Add(view.Icon("plus", 24, "var(--aT)")); head.Add(icon);
             var words = Box(); words.style.marginLeft = 14;
-            words.Add(Text(L("Masa aç", "Open a table"), 26, "Montserrat-700", "#F4F1E8"));
+            words.Add(Text(L("Masa aç", "Open a table"), 26, "Montserrat-700", "#F4F1E8", 1.1f));
             var sub = Text(L("Klasik · 101 · masayı açınca otomatik oturursun", "Classic · 101 · you sit down automatically"), 13, "Baloo2-700", "var(--mt)"); sub.style.marginTop = 2; words.Add(sub);
             head.Add(words); left.Add(head);
             var scroll = view.Scroll(); scroll.name = "create-scroll"; scroll.style.flexGrow = 1; scroll.contentContainer.style.paddingLeft = 28; scroll.contentContainer.style.paddingRight = 22; scroll.contentContainer.style.paddingBottom = 18;
@@ -66,7 +67,7 @@ namespace Galaxy101
 
             // Oyun modu: Klasik badge + Tekli / Eşli.
             var mode = FormRow(scroll, L("Oyun modu", "Game mode"), L("Girdiğin moda göre; tip seçebilirsin", "Set by the mode you entered; pick a type"), null);
-            var klasik = Row(); Pad(klasik, 8, 12, 8, 12); klasik.style.marginRight = 10; view.Decorate(klasik, "var(--sd)", 12);
+            var klasik = Row(); Pad(klasik, 8, 12, 8, 12); klasik.style.marginRight = 16; view.Decorate(klasik, "var(--sd)", 12);
             var mini = Text("101", 8, "Montserrat-800", "#fff"); Square(mini, 22); mini.style.unityTextAlign = TextAnchor.MiddleCenter; view.Decorate(mini, "#3D7BFF", 7); mini.style.marginRight = 6; klasik.Add(mini);
             klasik.Add(Text(L("Klasik", "Classic"), 14, "Montserrat-700", "#F4F1E8")); mode.Add(klasik);
             mode.Add(Options("create-type-", new[] { ("single", L("Tekli", "Singles")), ("pairs", L("Eşli", "Pairs")) }, c.Type, v => { c.Type = v; Render(); }, 16));
@@ -106,17 +107,18 @@ namespace Galaxy101
             // Bahis: five tiers (locked above the balance) + warning.
             var betSection = Box(); Pad(betSection, 12, 0, 12, 0); Divider(betSection); scroll.Add(betSection);
             var betHead = Row(); betHead.style.alignItems = Align.FlexEnd;
-            betHead.Add(Text(L("Bahis", "Bet"), 16, "Montserrat-700", "#F4F1E8"));
-            var bal = Text(L("Bakiyen " + view.N(chips), "Balance " + view.N(chips)), 12, "Baloo2-700", "var(--mt)"); bal.style.marginLeft = 10; betHead.Add(bal); betSection.Add(betHead);
+            betHead.Add(Text(L("Bahis", "Bet"), 16, "Montserrat-700", "#F4F1E8", 1.25f));
+            var bal = Text(L("Bakiyen " + view.N(chips), "Balance " + view.N(chips)), 12, "Baloo2-700", "var(--mt)"); bal.style.fontSize = 12.5f; bal.style.height = MenuView.CssLineHeight("Baloo2", 12.5f); bal.style.marginLeft = 10; betHead.Add(bal); betSection.Add(betHead);
             var tiers = Row(); tiers.style.marginTop = 10; tiers.style.alignItems = Align.Stretch;
             for (int i = 0; i < Stakes.Length; i++)
             {
                 long stake = Stakes[i]; bool locked = stake > chips, on = stake == c.Stake && !locked;
-                var tier = Box("create-stake-" + stake); tier.style.flexGrow = 1; tier.style.flexBasis = 0; tier.style.alignItems = Align.Center; Pad(tier, 11, 6, 10, 6); if (i < Stakes.Length - 1) tier.style.marginRight = 8;
+                float ring = on ? 2 : 1; // an inset box-shadow in CSS: the padding gives the ring's width back
+                var tier = Box("create-stake-" + stake); tier.style.flexGrow = 1; tier.style.flexBasis = 0; tier.style.alignItems = Align.Center; Pad(tier, 11 - ring, 6 - ring, 10 - ring, 6 - ring); if (i < Stakes.Length - 1) tier.style.marginRight = 8;
                 view.Decorate(tier, on ? "var(--pnH)" : "var(--sd)", 16); tier.style.opacity = locked ? .45f : 1;
-                if (on) Border(tier, 2, view.C("var(--a1)")); else Border(tier, 1, new Color(1, 1, 1, .06f));
+                Border(tier, ring, on ? view.C("var(--a1)") : new Color(1, 1, 1, .06f));
                 var top = Row(); var coin = Box(); Square(coin, 16); view.Decorate(coin, "radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)", 8); top.Add(coin);
-                var amount = Text(Short(stake), 18, "Montserrat-700", "#F4F1E8"); amount.style.marginLeft = 6; top.Add(amount); tier.Add(top);
+                var amount = Tabular(Text(Short(stake), 18, "Montserrat-700", "#F4F1E8")); amount.style.marginLeft = 6; top.Add(amount); tier.Add(top);
                 var under = Row(); under.style.marginTop = 4;
                 if (locked) { var l = view.Icon("lock", 11, "#FF9AA3"); l.style.marginRight = 4; under.Add(l); }
                 under.Add(Text(locked ? L("Yetersiz", "Too high") : view.N(stake * 4), 11, "Baloo2-800", locked ? "#FF9AA3" : "var(--mt)")); tier.Add(under);
@@ -145,7 +147,7 @@ namespace Galaxy101
             var pool = Row(); Pad(pool, 8, 14, 8, 14); view.Decorate(pool, "var(--sd)", 14);
             pool.Add(Text(L("Toplam havuz", "Total pool"), 12, "Baloo2-800", "var(--mt)"));
             var pc = Box(); Square(pc, 18); pc.style.marginLeft = 10; view.Decorate(pc, "radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)", 9); pool.Add(pc);
-            var pv = Text(view.N(c.Stake * 4), 20, "Montserrat-700", "var(--a1)"); pv.name = "create-pool"; pv.style.marginLeft = 10; pool.Add(pv); prize.Add(pool);
+            var pv = Tabular(Text(view.N(c.Stake * 4), 20, "Montserrat-700", "var(--a1)")); pv.name = "create-pool"; pv.style.marginLeft = 10; pool.Add(pv); prize.Add(pool);
 
             // Katlamalı, tur süresi.
             var kat = FormRow(scroll, L("Katlamalı", "Doubling"), L("Okeyle ya da çiftle bitişte puanlar katlanır", "Scores double when finishing with okey or pairs"), null);
@@ -157,20 +159,20 @@ namespace Galaxy101
             var rules = Row(); rules.name = "create-rules"; Pad(rules, 14, 0, 14, 0);
             var ri = Box(); Square(ri, 36); view.Decorate(ri, "var(--sd)", 11); ri.Add(view.Icon("sliders", 18, "var(--ic)")); rules.Add(ri);
             var rw = Box(); rw.style.flexGrow = 1; rw.style.marginLeft = 14;
-            rw.Add(Text(L("Kural özelleştirme", "Customize rules"), 16, "Montserrat-700", "#F4F1E8"));
-            rw.Add(Text(c.Changed > 0 ? L(c.Changed + " kural değişti", c.Changed + " rules changed") : L("Varsayılan kurallar", "Default rules"), 12, "Baloo2-700", "var(--mt)")); rules.Add(rw);
+            rw.Add(Text(L("Kural özelleştirme", "Customize rules"), 16, "Montserrat-700", "#F4F1E8", 1.25f));
+            var rs = Text(c.Changed > 0 ? L(c.Changed + " kural değişti", c.Changed + " rules changed") : L("Varsayılan kurallar", "Default rules"), 12, "Baloo2-700", "var(--mt)"); rs.style.fontSize = 12.5f; rs.style.height = MenuView.CssLineHeight("Baloo2", 12.5f); rw.Add(rs); rules.Add(rw);
             var chev = Box(); Square(chev, 30); view.Decorate(chev, "var(--pnH)", 10); chev.Add(view.Icon("chevron-down", 14, "var(--ic)")); chev.style.rotate = new Rotate(c.RulesOpen ? 180 : 0); rules.Add(chev);
             Tap(rules, () => { c.RulesOpen = !c.RulesOpen; Render(); }); scroll.Add(rules);
             if (c.RulesOpen)
             {
                 var box = Box("create-rules-box"); Pad(box, 2, 16, 2, 16); box.style.marginBottom = 6; view.Decorate(box, "var(--sd)", 18);
-                RuleSwitch(box, "create-rule-processing", L("İşleme", "Laying off"), L("Açılan perlere taş işlenebilsin", "Tiles can be laid off on opened sets"), c.Processing, () => c.Processing = !c.Processing);
-                RuleSwitch(box, "create-rule-penalties", L("Ceza kuralları (+101)", "Penalties (+101)"), L("Okey ya da işlek taş atma, hatalı açma +101 yazar", "Discarding the okey or a playable tile, or a wrong opening costs +101"), c.Penalties, () => c.Penalties = !c.Penalties);
+                RuleSwitch(box, "create-rule-okey", L("Okey atma cezası (+101)", "Okey discard penalty (+101)"), L("Okeyi yere atan +101 yazar", "Discarding the okey costs +101"), c.OkeyPenalty, () => c.OkeyPenalty = !c.OkeyPenalty);
+                RuleSwitch(box, "create-rule-penalties", L("İşlek taş atma cezası (+101)", "Playable tile penalty (+101)"), L("Masadaki pere işlenebilen taşı atan +101 yazar", "Discarding a tile that fits a set on the table costs +101"), c.Penalties, () => c.Penalties = !c.Penalties);
                 RuleOptions(box, "create-rule-spec-", L("İzleyici", "Spectators"), L("Oyun sürerken başkaları izleyebilsin", "Others can watch while you play"), new[] { ("true", L("İzin ver", "Allow")), ("false", L("Verme", "Don’t allow")) }, c.Spectators ? "true" : "false", v => c.Spectators = v == "true");
                 RuleOptions(box, "create-rule-chat-", L("Sohbet", "Chat"), L("Masa içi yazışma", "Table messages"), new[] { ("on", L("Açık", "On")), ("quick", L("Yalnız hazır cümleler", "Quick phrases only")), ("off", L("Kapalı", "Off")) }, c.Chat, v => c.Chat = v);
                 RuleOptions(box, "create-rule-gifts-", L("İkram ve hediye", "Treats and gifts"), L("Oyuncular birbirine ikram gönderebilsin", "Players can send each other treats"), new[] { ("true", L("Açık", "On")), ("false", L("Kapalı", "Off")) }, c.Gifts ? "true" : "false", v => c.Gifts = v == "true");
                 var reset = Text(L("Varsayılana dön", "Reset to default"), 13, "Baloo2-800", "var(--mt)"); reset.name = "create-rules-reset"; Pad(reset, 11, 0, 11, 0);
-                Tap(reset, () => { c.Spectators = c.Gifts = c.Processing = c.Penalties = true; c.Chat = "on"; Render(); }); box.Add(reset);
+                Tap(reset, () => { c.Spectators = c.Gifts = c.OkeyPenalty = c.Penalties = true; c.Chat = "on"; Render(); }); box.Add(reset);
                 scroll.Add(box);
             }
 
@@ -192,7 +194,7 @@ namespace Galaxy101
         {
             if (summary == null || create == null) return;
             var c = create; long chips = backend.Chips; summary.Clear();
-            var name = Text(c.Name.Trim().Length > 0 ? c.Name : L("Masa adı", "Table name"), 22, "Montserrat-700", "#F4F1E8"); name.style.marginTop = 14; name.style.overflow = Overflow.Hidden; name.style.textOverflow = TextOverflow.Ellipsis; summary.Add(name);
+            var name = Text(c.Name.Trim().Length > 0 ? c.Name : L("Masa adı", "Table name"), 22, "Montserrat-700", "#F4F1E8", 1.15f); name.style.marginTop = 14; name.style.overflow = Overflow.Hidden; name.style.textOverflow = TextOverflow.Ellipsis; summary.Add(name);
             var line = Row(); line.style.marginTop = 4;
             if (c.Visibility == "private" || c.PinOn) { var l = view.Icon("lock", 13, "var(--a1)"); l.style.marginRight = 6; line.Add(l); }
             line.Add(Text(L("Klasik · " + (c.Type == "pairs" ? "Eşli" : "Tekli") + " · " + (c.Visibility == "private" ? "Özel" : "Açık"), "Classic · " + (c.Type == "pairs" ? "Pairs" : "Singles") + " · " + (c.Visibility == "private" ? "Private" : "Open")), 13, "Baloo2-800", "var(--mt)"));
@@ -216,13 +218,13 @@ namespace Galaxy101
         private TableSummary Preview(CreateDraft c) => new TableSummary
         {
             Type = c.Type, Private = c.Visibility == "private", Locked = c.PinOn, Doubling = c.Doubling, Hands = c.Hands, TurnSeconds = c.Turn,
-            Penalties = c.Penalties, Processing = c.Processing, Spectators = c.Spectators, Chat = c.Chat, Gifts = c.Gifts,
+            Penalties = c.Penalties, OkeyPenalty = c.OkeyPenalty, Processing = true, Spectators = c.Spectators, Chat = c.Chat, Gifts = c.Gifts,
         };
 
         public TableOptions Options(CreateDraft c) => new TableOptions
         {
             Type = c.Type, Name = c.Name.Trim(), Visibility = c.Visibility, Pin = c.PinOn ? c.Pin : null, Hands = c.Hands, Stake = c.Stake,
-            Doubling = c.Doubling, TurnSeconds = c.Turn, Spectators = c.Spectators, Chat = c.Chat, Gifts = c.Gifts, Processing = c.Processing, Penalties = c.Penalties,
+            Doubling = c.Doubling, TurnSeconds = c.Turn, Spectators = c.Spectators, Chat = c.Chat, Gifts = c.Gifts, Processing = true, Penalties = c.Penalties, OkeyPenalty = c.OkeyPenalty,
         };
 
         public async System.Threading.Tasks.Task SubmitCreate()
@@ -263,8 +265,8 @@ namespace Galaxy101
         {
             var row = Row(); Pad(row, 12, 0, 12, 0); Divider(row);
             var words = Box(); words.style.flexGrow = 1; words.style.flexShrink = 1; words.style.marginRight = 16;
-            words.Add(Text(title, 16, "Montserrat-700", "#F4F1E8"));
-            var d = Text(description, 12, "Baloo2-700", descriptionColor ?? "var(--mt)"); d.style.whiteSpace = WhiteSpace.Normal; words.Add(d);
+            words.Add(Text(title, 16, "Montserrat-700", "#F4F1E8", 1.25f));
+            var d = Text(description, 12, "Baloo2-700", descriptionColor ?? "var(--mt)"); d.style.fontSize = 12.5f; Paragraph(d); words.Add(d);
             row.Add(words); scroll.Add(row); return row;
         }
 
@@ -277,7 +279,8 @@ namespace Galaxy101
             {
                 var (value, label) = options[i]; string chosen = value;
                 var option = SegmentOption(prefix + value, label, value == current, () => pick(chosen), 14, 8, padX, i < options.Length - 1 ? 4 : 0);
-                if (minWidth > 0) { option.style.minWidth = minWidth; option.style.justifyContent = Justify.Center; }
+                // CSS min-width is the content box: the padding comes on top.
+                if (minWidth > 0) { option.style.minWidth = minWidth + 2 * padX; option.style.justifyContent = Justify.Center; }
                 segment.Add(option);
             }
             return segment;
@@ -295,7 +298,7 @@ namespace Galaxy101
         {
             var row = Row(); Pad(row, 11, 0, 11, 0); row.style.borderBottomWidth = 1; row.style.borderBottomColor = new Color(1, 1, 1, .06f);
             var words = Box(); words.style.flexGrow = 1; words.style.flexShrink = 1; words.style.marginRight = 16;
-            words.Add(Text(title, 15, "Montserrat-700", "#F4F1E8")); var d = Text(description, 12, "Baloo2-700", "var(--mt)"); d.style.whiteSpace = WhiteSpace.Normal; words.Add(d); row.Add(words);
+            words.Add(Text(title, 15, "Montserrat-700", "#F4F1E8", 1.25f)); var d = Text(description, 12, "Baloo2-700", "var(--mt)"); Paragraph(d); words.Add(d); row.Add(words);
             row.Add(Switch(name, on, () => { flip(); Render(); }, 52, 30)); box.Add(row);
         }
 
@@ -303,7 +306,7 @@ namespace Galaxy101
         {
             var row = Row(); Pad(row, 11, 0, 11, 0); row.style.borderBottomWidth = 1; row.style.borderBottomColor = new Color(1, 1, 1, .06f);
             var words = Box(); words.style.flexGrow = 1; words.style.flexShrink = 1; words.style.marginRight = 16;
-            words.Add(Text(title, 15, "Montserrat-700", "#F4F1E8")); var d = Text(description, 12, "Baloo2-700", "var(--mt)"); d.style.whiteSpace = WhiteSpace.Normal; words.Add(d); row.Add(words);
+            words.Add(Text(title, 15, "Montserrat-700", "#F4F1E8", 1.25f)); var d = Text(description, 12, "Baloo2-700", "var(--mt)"); Paragraph(d); words.Add(d); row.Add(words);
             var segment = Segment(); Radius(segment, 13);
             for (int i = 0; i < options.Length; i++)
             {
@@ -316,12 +319,12 @@ namespace Galaxy101
         /// <summary>Two-column fact tiles (BAHİS / HAVUZ / EL / TUR SÜRESİ).</summary>
         private VisualElement Facts(string bg, params (string Key, string Value)[] facts)
         {
-            var grid = Box(); grid.style.flexDirection = FlexDirection.Row; grid.style.flexWrap = Wrap.Wrap; grid.style.marginTop = 14; grid.style.justifyContent = Justify.SpaceBetween;
+            var grid = Box(); grid.style.flexDirection = FlexDirection.Row; grid.style.flexWrap = Wrap.Wrap; grid.style.marginTop = 14; grid.style.marginBottom = -8; grid.style.justifyContent = Justify.SpaceBetween;
             foreach (var (key, value) in facts)
             {
                 var tile = Box(); tile.style.width = Length.Percent(48.5f); tile.style.marginBottom = 8; Pad(tile, 10, 12, 10, 12); view.Decorate(tile, bg, 14);
                 var k = Text(key, 10, "Baloo2-800", "var(--mt)"); MenuView.Tracking(k, 1.2f, 10); tile.Add(k);
-                var v = Text(value, 16, "Montserrat-700", "#F4F1E8"); v.style.marginTop = 2; tile.Add(v); grid.Add(tile);
+                var v = Text(value, 16, "Montserrat-700", "#F4F1E8", 1.2f); v.style.marginTop = 2; tile.Add(v); grid.Add(tile);
             }
             return grid;
         }

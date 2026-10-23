@@ -88,6 +88,11 @@ namespace Galaxy101.Online
 
         public async Task<T> SendAsync<T>(string method, string path, object body = null, bool auth = true)
         {
+            if (!ServerAddress.IsAllowed(BaseUrl, out var refused))
+            {
+                Debug.LogError("Galaxy 101 server address refused (" + BaseUrl + "): " + refused);
+                throw new ApiException("insecure_server", 0);
+            }
             for (int attempt = 0; ; attempt++)
             {
                 using (var request = new UnityWebRequest(BaseUrl + path, method))
@@ -100,7 +105,13 @@ namespace Galaxy101.Online
                     request.downloadHandler = new DownloadHandlerBuffer();
                     request.timeout = TimeoutSeconds;
                     if (auth && Tokens != null) request.SetRequestHeader("Authorization", "Bearer " + Tokens.AccessToken);
-                    await Await(request.SendWebRequest());
+                    try { await Await(request.SendWebRequest()); }
+                    catch (Exception e) when (!(e is ApiException))
+                    {
+                        // UnityWebRequest refuses some requests synchronously (bad URL, blocked transport): an offline answer.
+                        Debug.LogWarning("Galaxy 101 request " + method + " " + path + " failed: " + e.Message);
+                        throw new ApiException("offline", 0);
+                    }
                     long status = request.responseCode;
                     string text = request.downloadHandler.text;
                     if (request.result == UnityWebRequest.Result.ConnectionError || status == 0) throw new ApiException("offline", 0);

@@ -20,7 +20,7 @@ namespace Okey101.Core.Model
             return new PlayerView(state.RoundId, state.Version, actor, state.ActivePlayer, state.Phase,
                 own.Hand, own.Opening, own.Penalties, state.LastAcceptedSequences[actor], state.Indicator,
                 state.Stock.Count, players, state.Table, state.Discards,
-                actor == state.ActivePlayer ? state.PendingDraw : null, state.SeriesTilesUsed, state.Result, Turns.DealCeremony.Describe(state));
+                actor == state.ActivePlayer ? state.PendingDraw : null, state.SeriesTilesUsed, state.Result, Turns.DealCeremony.Describe(state), state.Options);
         }
 
         public static RuleResult<RoundState> ForEvaluation(PlayerView snapshot)
@@ -49,7 +49,7 @@ namespace Okey101.Core.Model
             var sequences = new long[4]; sequences[snapshot.Actor] = snapshot.OwnLastSequence;
             return RuleResult<RoundState>.Ok(new RoundState(snapshot.RoundId, snapshot.Version, 0, snapshot.Actor, snapshot.ActivePlayer, 0,
                 snapshot.Phase, snapshot.Indicator, unknown.Skip(cursor).ToArray(), players, snapshot.Table, snapshot.Discards,
-                snapshot.PendingDraw, snapshot.OwnOpening, snapshot.SeriesTilesUsed, snapshot.PendingDraw == null, sequences));
+                snapshot.PendingDraw, snapshot.OwnOpening, snapshot.SeriesTilesUsed, snapshot.PendingDraw == null, sequences, options: snapshot.Options));
         }
     }
 }

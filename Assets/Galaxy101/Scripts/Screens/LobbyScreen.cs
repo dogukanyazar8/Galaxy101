@@ -58,6 +58,7 @@ namespace Galaxy101
             if (modal?.parent != null) modal.parent.Insert(modal.parent.IndexOf(modal), layer); else canvas.Add(layer);
             view.Decorate(layer, "linear-gradient(180deg,rgba(5,8,22,.15),rgba(5,8,22,.5))");
             body = Fill("lobby-body"); body.pickingMode = PickingMode.Ignore; layer.Add(body);
+            cardsSeen.Clear();
             dialogLayer = Fill("lobby-dialogs"); dialogLayer.pickingMode = PickingMode.Ignore; layer.Add(dialogLayer);
             toastLayer = Fill("lobby-toasts"); toastLayer.pickingMode = PickingMode.Ignore; layer.Add(toastLayer);
             backend.TablesChanged += OnTables; backend.RoomChanged += OnRoom; backend.ChipsChanged += OnChips;
@@ -130,11 +131,33 @@ namespace Galaxy101
         private void Render()
         {
             if (body == null) return;
+            // A redraw is invisible: scroll positions and the focused text field carry over (no jump back to the top,
+            // no lost caret), entrance animations only play for things that newly appear.
+            var scrolls = new Dictionary<string, Vector2>();
+            body.Query<ScrollView>().ForEach(s => { if (!string.IsNullOrEmpty(s.name)) scrolls[s.name] = s.scrollOffset; });
+            var focused = body.panel?.focusController?.focusedElement as VisualElement;
+            string focusName = (focused as TextField)?.name ?? focused?.GetFirstAncestorOfType<TextField>()?.name;
             body.Clear(); motions.Clear(); hovers.Clear();
-            if (screen == "wait" && backend.Room != null) BuildRoom(); else { screen = "list"; BuildList(); }
+            if (screen == "wait" && backend.Room != null) BuildRoom(); else { if (screen != "list") cardsSeen.Clear(); screen = "list"; BuildList(); }
             if (create != null) BuildCreate();
             RenderDialog();
+            foreach (var pair in scrolls)
+                if (body.Q<ScrollView>(pair.Key) is ScrollView again && pair.Value != Vector2.zero) Restore(again, pair.Value);
+            if (focusName != null && body.Q<TextField>(focusName) is TextField field)
+                field.schedule.Execute(() => { field.Focus(); field.SelectRange(field.value.Length, field.value.Length); });
         }
+
+        /// <summary>Put a rebuilt scroll view back where it was as soon as its content has a size (same frame).</summary>
+        private static void Restore(ScrollView scroll, Vector2 offset)
+        {
+            scroll.scrollOffset = offset;
+            EventCallback<GeometryChangedEvent> once = null;
+            once = _ => { scroll.scrollOffset = offset; scroll.contentContainer.UnregisterCallback(once); };
+            scroll.contentContainer.RegisterCallback(once);
+        }
+
+        /// <summary>When each listed table first appeared (its lbCard entrance runs once, not on every redraw).</summary>
+        private readonly Dictionary<Guid, float> cardsSeen = new Dictionary<Guid, float>();
 
         private void BuildList()
         {
@@ -166,9 +189,11 @@ namespace Galaxy101
             {
                 string pick = value;
                 var option = SegmentOption("lobby-type-" + value, label, typeFilter == value, () => { typeFilter = pick; animateCards = true; Render(); }, 14, 8, 14);
-                var n = Text(count.ToString(), 11, "Baloo2-800", typeFilter == value ? "var(--aT)" : "var(--mt)"); n.style.marginLeft = 7; Pad(n, 1, 6, 1, 6); view.Decorate(n, "rgba(0,0,0,.2)", 7); option.Add(n);
+                var n = Tabular(Text(count.ToString(), 11, "Baloo2-800", typeFilter == value ? "var(--aT)" : "var(--mt)")); n.style.marginLeft = 7; Pad(n, 1, 6, 1, 6);
+                n.style.minWidth = 14 + 12; n.style.unityTextAlign = TextAnchor.MiddleCenter; view.Decorate(n, "rgba(0,0,0,.2)", 7); option.Add(n);
                 types.Add(option);
             }
+            if (types.childCount > 0) types[types.childCount - 1].style.marginRight = 0;
             filters.Add(types);
             filters.Add(Chip("lobby-free", freeFilter, () => { freeFilter = !freeFilter; animateCards = true; Render(); }, Dot("#3CCB6E", 8), L("Boş yer var", "Has free seat")));
             var x2 = Text("×2", 12, "Montserrat-800", "#C2A4FF");
@@ -179,6 +204,7 @@ namespace Galaxy101
                 long pick = stake;
                 stakes.Add(SegmentOption("lobby-stake-" + stake, stake == 0 ? L("Tümü", "All") : Short(stake), stakeFilter == stake, () => { stakeFilter = pick; animateCards = true; Render(); }, 13, 8, 11, 3));
             }
+            if (stakes.childCount > 0) stakes[stakes.childCount - 1].style.marginRight = 0;
             filters.Add(stakes);
             filters.Add(Grow());
             filters.Add(Search());
@@ -220,13 +246,16 @@ namespace Galaxy101
             var card = Box("lobby-card-" + t.Id); card.AddToClassList("lobby-card"); card.pickingMode = PickingMode.Position;
             var under = Box(); under.style.position = Position.Absolute; under.style.left = under.style.right = 0; under.style.top = 6; under.style.bottom = -6; view.Decorate(under, "var(--pnS)", 20); card.Add(under);
             if (mine) { var glow = Box(); glow.style.position = Position.Absolute; glow.style.left = glow.style.right = glow.style.top = glow.style.bottom = -4; Radius(glow, 24); Border(glow, 4, view.C("var(--gl)")); glow.style.opacity = .6f; card.Add(glow); }
-            var face = Box(); face.style.flexGrow = 1; Pad(face, 15, 16, 14, 16); view.Decorate(face, "var(--pn)", 20);
-            if (mine) Border(face, 2, view.C("var(--a1)")); else Border(face, 1, new Color(1, 1, 1, .06f));
+            // The ring is an inset box-shadow in CSS (no layout): the padding gives its width back.
+            float ring = mine ? 2 : 1;
+            var face = Box(); face.style.flexGrow = 1; Pad(face, 15 - ring, 16 - ring, 14 - ring, 16 - ring); view.Decorate(face, "var(--pn)", 20);
+            Border(face, ring, mine ? view.C("var(--a1)") : new Color(1, 1, 1, .06f));
             card.Add(face);
             // Entry: lbCard .5s cubic-bezier(.22,1,.36,1), 35 ms per card (max 10); hover lifts 6 px, scales 1.012, brightens 1.08.
-            if (animateCards)
+            if (!cardsSeen.TryGetValue(t.Id, out float appeared)) cardsSeen[t.Id] = appeared = Time.realtimeSinceStartup + Mathf.Min(index, 10) * .035f;
+            if (Time.realtimeSinceStartup - appeared < .5f)
             {
-                float began = Time.realtimeSinceStartup + Mathf.Min(index, 10) * .035f; card.style.opacity = 0;
+                float began = appeared; card.style.opacity = 0;
                 bool done = false;
                 Animate(() =>
                 {
@@ -238,7 +267,7 @@ namespace Galaxy101
             Hover(card);
 
             var head = Row();
-            var name = Text(t.Name, 17, "Montserrat-700", "#F4F1E8"); name.style.flexShrink = 1; name.style.overflow = Overflow.Hidden; name.style.textOverflow = TextOverflow.Ellipsis; head.Add(name);
+            var name = Text(t.Name, 17, "Montserrat-700", "#F4F1E8", 1.2f); name.style.flexShrink = 1; name.style.overflow = Overflow.Hidden; name.style.textOverflow = TextOverflow.Ellipsis; head.Add(name);
             if (t.Locked) { var lockBox = Box(); Square(lockBox, 22); lockBox.style.marginLeft = 8; view.Decorate(lockBox, "rgba(255,201,74,.16)", 7); lockBox.Add(view.Icon("lock", 12, "var(--a1)")); lockBox.tooltip = L("Şifreli masa", "Password protected"); head.Add(lockBox); }
             head.Add(Grow());
             string stText = playing ? L("Oyunda · El " + Math.Max(1, t.Hand) + "/" + t.Hands, "Playing · Hand " + Math.Max(1, t.Hand) + "/" + t.Hands) : free ? L("Bekliyor", "Waiting") : L("Dolu · başlıyor", "Full · starting");
@@ -248,7 +277,7 @@ namespace Galaxy101
 
             var money = Row(); money.style.marginTop = 11;
             money.Add(Coin(24));
-            var bet = Text(view.N(t.Stake), 23, "Montserrat-700", "#F4F1E8"); bet.style.marginLeft = 8; money.Add(bet);
+            var bet = Tabular(Text(view.N(t.Stake), 23, "Montserrat-700", "#F4F1E8", 1)); bet.style.marginLeft = 8; money.Add(bet);
             var meta = Text(L("· " + t.Hands + " el · " + t.TurnSeconds + " sn", "· " + t.Hands + " hands · " + t.TurnSeconds + "s"), 13, "Baloo2-700", "var(--mt)"); meta.style.marginLeft = 8; money.Add(meta);
             money.Add(Grow());
             var type = Text(t.Type == "pairs" ? L("Eşli", "Pairs") : L("Tekli", "Singles"), 12, "Montserrat-800", "#fff"); Pad(type, 4, 10, 4, 10); view.Decorate(type, t.Type == "pairs" ? "#FF6B6B" : "#3D7BFF", 9); money.Add(type);
@@ -291,7 +320,7 @@ namespace Galaxy101
             button.Add(Text(text, 14, "Montserrat-800", fg)); GalaxyFilters.HoverBrightness(button, 1.1f); Tap(button, go); return button;
         }
 
-        /// <summary>Table badges: ×2 Katlamalı, (full: type, Özel, Şifreli, el, sn), Ceza +101, İşleme, İzleyici, sohbet, hediye.</summary>
+        /// <summary>Table badges (G101-Lobi badges()): ×2 Katlamalı, (full: type, Özel, Şifreli, el, sn), Okey +101, İşlek +101, İzleyici, sohbet, hediye.</summary>
         private IEnumerable<VisualElement> Badges(TableSummary t, bool full)
         {
             const string nb = "rgba(255,255,255,.08)", nf = "var(--ic)";
@@ -300,8 +329,8 @@ namespace Galaxy101
             if (full && t.Locked) yield return Badge(L("Şifreli", "Password"), "rgba(255,201,74,.16)", "var(--a1)", full);
             if (t.Doubling) yield return Badge(L("×2 Katlamalı", "×2 Doubling"), "rgba(139,92,246,.28)", "#D9C8FF", full);
             if (full) { yield return Badge(L(t.Hands + " el", t.Hands + " hands"), nb, nf, full); yield return Badge(L(t.TurnSeconds + " sn", t.TurnSeconds + "s"), nb, nf, full); }
-            if (t.Penalties) yield return Badge(L("Ceza +101", "Penalties +101"), "rgba(255,94,108,.14)", "#FFB3BA", full);
-            if (!t.Processing) yield return Badge(L("İşleme yok", "No laying off"), nb, "var(--mt)", full);
+            if (t.OkeyPenalty) yield return Badge("Okey +101", "rgba(255,94,108,.14)", "#FFB3BA", full);
+            if (t.Penalties) yield return Badge(L("İşlek +101", "Playable +101"), "rgba(255,94,108,.14)", "#FFB3BA", full);
             yield return t.Spectators ? Badge(L("İzleyici açık", "Spectators on"), nb, nf, full) : Badge(L("İzleyici yok", "No spectators"), nb, "var(--mt)", full);
             if (t.Chat == "quick") yield return Badge(L("Hazır sohbet", "Quick chat"), nb, nf, full);
             if (t.Chat == "off") yield return Badge(L("Sohbet kapalı", "Chat off"), nb, "var(--mt)", full);
@@ -310,7 +339,7 @@ namespace Galaxy101
 
         private VisualElement Badge(string text, string bg, string fg, bool large)
         {
-            var badge = Text(text, large ? 12 : 11, "Baloo2-800", fg); badge.style.flexShrink = 0; badge.style.marginRight = large ? 6 : 5; badge.style.marginBottom = large ? 6 : 0;
+            var badge = Text(text, large ? 12 : 11, "Baloo2-800", fg, large ? 0 : 16f / 11); badge.style.flexShrink = 0; badge.style.marginRight = large ? 6 : 5; badge.style.marginBottom = large ? 6 : 0;
             Pad(badge, large ? 4 : 3, large ? 9 : 8, large ? 4 : 3, large ? 9 : 8); view.Decorate(badge, bg, large ? 8 : 7); return badge;
         }
 
@@ -320,7 +349,7 @@ namespace Galaxy101
             var icon = Box(); Square(icon, 64); Raise(icon, "var(--pn)", 20, 5, "var(--pnS)"); icon.Add(view.Icon("search", 28, "var(--mt)")); empty.Add(icon);
             var title = Text(L("Bu filtrelere uygun masa yok", "No tables match these filters"), 22, "Montserrat-700", "#F4F1E8"); title.style.marginTop = 12; empty.Add(title);
             var sub = Text(L("Filtreleri temizle ya da kendi masanı aç; açık masalar lobide hemen listelenir.", "Clear the filters or open your own table; open tables show up in the lobby right away."), 14, "Baloo2-700", "var(--mt)");
-            sub.style.whiteSpace = WhiteSpace.Normal; sub.style.maxWidth = 380; sub.style.unityTextAlign = TextAnchor.MiddleCenter; sub.style.marginTop = 12; empty.Add(sub);
+            Paragraph(sub); sub.style.maxWidth = 380; sub.style.unityTextAlign = TextAnchor.MiddleCenter; sub.style.marginTop = 12; empty.Add(sub);
             var buttons = Row(); buttons.style.marginTop = 18;
             var clear = Text(L("Filtreleri temizle", "Clear filters"), 15, "Montserrat-700", "#F4F1E8"); clear.name = "lobby-clear-filters"; Pad(clear, 11, 18, 11, 18); Raise(clear, "var(--pnH)", 13, 4, "var(--pnS)");
             Tap(clear, () => { typeFilter = "all"; freeFilter = doublingFilter = false; stakeFilter = 0; query = ""; animateCards = true; Render(); }); buttons.Add(clear);
@@ -443,7 +472,7 @@ namespace Galaxy101
         {
             var box = Row(); box.name = "lobby-balance"; box.style.marginLeft = 14; Pad(box, 5, plus ? 5 : 14, 5, 6); view.Decorate(box, "var(--dp)", 999);
             box.Add(Coin(26));
-            var amount = Text(view.N(chips), 17, "Montserrat-700", "#F4F1E8"); amount.style.marginLeft = 8; amount.style.minWidth = plus ? 78 : 0; box.Add(amount);
+            var amount = Tabular(Text(view.N(chips), 17, "Montserrat-700", "#F4F1E8")); amount.style.marginLeft = 8; amount.style.minWidth = plus ? 78 : 0; box.Add(amount);
             if (plus)
             {
                 var add = Text("+", 20, "Montserrat-700", "#fff"); add.name = "lobby-buy"; Square(add, 28); add.style.unityTextAlign = TextAnchor.MiddleCenter; add.style.marginLeft = 8;
@@ -489,7 +518,17 @@ namespace Galaxy101
         /// The "0 Npx 0 shade" button edge as a bottom border. Inside the scrolling card list every element stays filter-free:
         /// UI Toolkit loses filter render textures there once a few dozen are on screen.
         /// </summary>
-        private void Ledge(VisualElement e, float depth, string shade) { e.style.borderBottomWidth = depth; e.style.borderBottomColor = view.C(shade); }
+        /// <summary>
+        /// The CSS "box-shadow: 0 depth 0 shade" ledge as a bottom border. A box-shadow takes no layout, so the border is
+        /// handed back: a fixed height grows by it (UI Toolkit boxes are border-box) and the bottom margin takes it away.
+        /// </summary>
+        private void Ledge(VisualElement e, float depth, string shade)
+        {
+            var old = e.style.borderBottomWidth; float before = old.keyword == StyleKeyword.Undefined ? old.value : 0;
+            var h = e.style.height;
+            if (h.keyword == StyleKeyword.Undefined && h.value.unit == LengthUnit.Pixel && h.value.value > 0) e.style.height = h.value.value - before + depth;
+            e.style.borderBottomWidth = depth; e.style.borderBottomColor = view.C(shade); e.style.marginBottom = -depth;
+        }
         private void Raise(VisualElement e, string bg, int radius, int depth, string shade) { view.Decorate(e, bg, radius); if (depth > 0) Ledge(e, depth, shade); }
 
         private string Short(long stake) => stake >= 1000 ? stake / 1000 + "K" : stake.ToString();
@@ -524,7 +563,7 @@ namespace Galaxy101
             var glow = view.C("var(--gl)"); glow.a = Mathf.Max(glow.a, .6f); Border(ring, 3, glow);
             element.RegisterCallback<GeometryChangedEvent>(e => Radius(ring, element.resolvedStyle.borderTopLeftRadius + 3));
             element.Add(ring);
-            float began = Time.realtimeSinceStartup;
+            float began = shownAt; // one continuous pulse across redraws
             Animate(() =>
             {
                 if (element.parent == null || element.layout.width <= 0) return;
@@ -579,9 +618,48 @@ namespace Galaxy101
             toastStep?.Invoke();
         }
 
-        private Label Text(string text, int size, string font, string color)
+        /// <summary>
+        /// A CSS text line: no label padding, a box of the font's CSS line height (<see cref="MenuView.CssLineHeight"/> for
+        /// "normal", or <paramref name="lineHeight"/> em when the design sets one) with the glyphs centred in it, as a browser
+        /// lays them out. <see cref="Paragraph"/> turns it into a free-height paragraph.
+        /// </summary>
+        private Label Text(string text, int size, string font, string color, float lineHeight = 0)
         {
-            var label = view.Text(text, size, false, color); label.style.unityFont = view.Font(font); label.style.whiteSpace = WhiteSpace.NoWrap; label.pickingMode = PickingMode.Ignore; return label;
+            var label = view.Text(text, size, false, color); label.style.unityFont = view.Font(font); label.style.whiteSpace = WhiteSpace.NoWrap; label.pickingMode = PickingMode.Ignore;
+            label.style.paddingLeft = label.style.paddingRight = label.style.paddingTop = label.style.paddingBottom = 0;
+            label.style.marginLeft = label.style.marginRight = label.style.marginTop = label.style.marginBottom = 0;
+            label.style.height = lineHeight > 0 ? size * lineHeight : MenuView.CssLineHeight(font, size); label.style.unityTextAlign = TextAnchor.MiddleLeft; label.style.flexShrink = 0;
+            return label;
+        }
+
+        /// <summary>
+        /// A wrapping paragraph: as many CSS lines as the text needs at its width, each <paramref name="lineHeight"/> em
+        /// or the font's "normal" (<see cref="MenuView.CssLineHeight"/>).
+        /// </summary>
+        private static void Paragraph(Label label, float lineHeight = 0)
+        {
+            label.style.whiteSpace = WhiteSpace.Normal; label.style.height = StyleKeyword.Auto;
+            label.RegisterCallback<GeometryChangedEvent>(_ =>
+            {
+                float width = label.layout.width; if (float.IsNaN(width) || width <= 0 || string.IsNullOrEmpty(label.text)) return;
+                var font = label.resolvedStyle.unityFont; float size = label.resolvedStyle.fontSize;
+                float one = label.MeasureTextSize("Ag", 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).y;
+                float all = label.MeasureTextSize(label.text, width - label.resolvedStyle.paddingLeft - label.resolvedStyle.paddingRight, VisualElement.MeasureMode.Exactly, 0, VisualElement.MeasureMode.Undefined).y;
+                if (one <= 0) return;
+                float line = lineHeight > 0 ? size * lineHeight : MenuView.CssLineHeight(font != null ? font.name : null, size);
+                float target = Mathf.Max(1, Mathf.Round(all / one)) * line + label.resolvedStyle.paddingTop + label.resolvedStyle.paddingBottom;
+                var h = label.style.height;
+                if (h.keyword != StyleKeyword.Undefined || Mathf.Abs(h.value.value - target) > .01f) label.style.height = target;
+            });
+        }
+
+        /// <summary>font-variant-numeric: tabular-nums — every digit on the font's tabular advance (Montserrat 0.69 em, Baloo 2 0.59 em).</summary>
+        private static Label Tabular(Label label)
+        {
+            string em = label.style.unityFont.value != null && label.style.unityFont.value.name.StartsWith("Baloo") ? "0.59em" : "0.69em";
+            label.enableRichText = true;
+            label.text = System.Text.RegularExpressions.Regex.Replace(label.text, "[0-9]+", m => "<mspace=" + em + ">" + m.Value + "</mspace>");
+            return label;
         }
 
         private static VisualElement Box(string name = null) { var e = new VisualElement { pickingMode = PickingMode.Ignore }; if (name != null) e.name = name; return e; }
@@ -589,7 +667,14 @@ namespace Galaxy101
         private static VisualElement Grow() { var g = Box(); g.style.flexGrow = 1; return g; }
         private static VisualElement Fill(string name) { var e = Box(name); e.style.position = Position.Absolute; e.style.left = e.style.top = e.style.right = e.style.bottom = 0; return e; }
         private static void Square(VisualElement e, float size) { e.style.width = e.style.height = size; e.style.flexShrink = 0; e.style.alignItems = Align.Center; e.style.justifyContent = Justify.Center; }
-        private static void Pad(VisualElement e, float t, float r, float b, float l) { e.style.paddingTop = t; e.style.paddingRight = r; e.style.paddingBottom = b; e.style.paddingLeft = l; }
+        private static void Pad(VisualElement e, float t, float r, float b, float l)
+        {
+            // UI Toolkit boxes are border-box: a CSS text line (fixed height from Text) grows by its padding, as in CSS.
+            var h = e.style.height;
+            if (e is Label && h.keyword == StyleKeyword.Undefined && h.value.unit == LengthUnit.Pixel && h.value.value > 0)
+                e.style.height = h.value.value - (e.style.paddingTop.value.value + e.style.paddingBottom.value.value) + t + b;
+            e.style.paddingTop = t; e.style.paddingRight = r; e.style.paddingBottom = b; e.style.paddingLeft = l;
+        }
         private static void Radius(VisualElement e, float r) => e.style.borderTopLeftRadius = e.style.borderTopRightRadius = e.style.borderBottomLeftRadius = e.style.borderBottomRightRadius = r;
         private static void Border(VisualElement e, float w, Color c)
         {

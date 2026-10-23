@@ -38,13 +38,16 @@ namespace Okey101.Core.Model
         public RoundResult Result { get; }
         /// <summary>Public deal facts (dealer, dice, stacks) for the deal ceremony; null for hand-made test states.</summary>
         public DealInfo Deal { get; }
+        /// <summary>The room's switchable rules, public to every seat.</summary>
+        public RuleOptions Options { get; }
 
         public PlayerView(Guid roundId, long version, int actor, int activePlayer, RoundPhase phase,
             IReadOnlyList<TileId> ownHand, OpeningKind ownOpening, int ownPenalties,
             long ownLastSequence, TileId indicator, int stockCount, IReadOnlyList<PublicPlayerInfo> players,
             IReadOnlyList<Meld> table, IReadOnlyList<IReadOnlyList<TileId>> discards,
-            DrawReceipt pendingDraw, int seriesTilesUsed, RoundResult result = null, DealInfo deal = null)
+            DrawReceipt pendingDraw, int seriesTilesUsed, RoundResult result = null, DealInfo deal = null, RuleOptions options = null)
         {
+            Options = options ?? RuleOptions.Standard;
             if (roundId == Guid.Empty) throw new ArgumentException("A round identity is required.", nameof(roundId));
             if (version < 0 || ownLastSequence < 0) throw new ArgumentOutOfRangeException(nameof(version));
             if (ownPenalties < 0 || seriesTilesUsed < 0) throw new ArgumentOutOfRangeException(nameof(ownPenalties));

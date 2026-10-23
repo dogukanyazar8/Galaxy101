@@ -242,7 +242,7 @@ public sealed class Tables(MatchManager matches, Lobby lobby, ConnectionRegistry
             {
                 Id = Guid.CreateVersion7(), Mode = o.Type == "pairs" ? GameModes.Pairs : GameModes.Solo, Stake = o.Stake, Status = MatchStatus.Active,
                 Seats = [.. table.Seats.Select(s => s!.Value)], BotMask = table.BotMask, Hands = o.Hands, TurnSeconds = o.TurnSeconds,
-                OptionsJson = JsonSerializer.Serialize(new { chat = o.Chat, gifts = o.Gifts, spectators = o.Spectators, processing = o.Processing, penalties = o.Penalties, doubling = o.Doubling }),
+                OptionsJson = JsonSerializer.Serialize(new { chat = o.Chat, gifts = o.Gifts, spectators = o.Spectators, processing = o.Processing, penalties = o.Penalties, okeyPenalty = o.OkeyPenalty, doubling = o.Doubling }),
                 FirstStarter = RandomNumberGenerator.GetInt32(4), CreatedAt = clock.GetUtcNow(),
             };
         }
@@ -348,7 +348,7 @@ public sealed class Tables(MatchManager matches, Lobby lobby, ConnectionRegistry
         {
             Id = t.Id, Name = o.Name, Type = o.Type, Stake = o.Stake, Hands = o.Hands, TurnSeconds = o.TurnSeconds, Doubling = o.Doubling,
             Locked = o.Pin is not null, Private = o.Visibility == "private", Spectators = o.Spectators, Chat = o.Chat, Gifts = o.Gifts,
-            Processing = o.Processing, Penalties = o.Penalties, HostId = t.Host, CreatedAt = t.CreatedAt,
+            Processing = o.Processing, Penalties = o.Penalties, OkeyPenalty = o.OkeyPenalty, HostId = t.Host, CreatedAt = t.CreatedAt,
             Status = t.Match is not null ? "playing" : t.Full ? "full" : "waiting", Hand = t.Match?.HandNumber ?? 0,
             Seats = [.. Enumerable.Range(0, 4).Select(s => t.Seats[s] is not { } id ? null
                 : t.IsBot(s) ? new TableSeat { Bot = true, Player = new PlayerSummary { Id = id, Name = "Bot · " + BotNames[s], Level = 1 } }

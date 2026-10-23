@@ -44,6 +44,9 @@ namespace Okey101.Editor
             PlayerSettings.defaultScreenWidth = 1280; PlayerSettings.defaultScreenHeight = 720;
             PlayerSettings.fullScreenMode = FullScreenMode.Windowed; PlayerSettings.resizableWindow = true;
             PlayerSettings.runInBackground = true;
+            // UnityWebRequest needs this for the local test server (http://localhost); GalaxyApi's ServerAddress check
+            // keeps every public address on HTTPS.
+            PlayerSettings.insecureHttpOption = InsecureHttpOption.AlwaysAllowed;
             PlayerSettings.enableFrameTimingStats = true;
             var buildRoot = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../artifacts/builds"));
             var output = Argument("-okeyBuildPath") ?? Path.Combine(buildRoot, DateTime.UtcNow.ToString("yyyyMMddTHHmmssfffZ") + "-" + Guid.NewGuid().ToString("N").Substring(0, 8), "Galaxy101.exe");

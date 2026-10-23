@@ -53,8 +53,10 @@ namespace Galaxy101.Contracts
         public bool Gifts { get; set; } = true;
         /// <summary>İşleme (laying off on others' sets) allowed.</summary>
         public bool Processing { get; set; } = true;
-        /// <summary>+101 penalties (işlek taş, hatalı açma) applied.</summary>
+        /// <summary>İşlek taş atma cezası: +101 for discarding a tile that fits a meld on the table.</summary>
         public bool Penalties { get; set; } = true;
+        /// <summary>Okey atma cezası: +101 for discarding the okey.</summary>
+        public bool OkeyPenalty { get; set; } = true;
 
         public static readonly int[] HandChoices = { 3, 5, 7 };
         public static readonly long[] StakeChoices = { 1000, 5000, 10000, 50000, 100000 };
@@ -84,6 +86,7 @@ namespace Galaxy101.Contracts
         public bool Gifts { get; set; }
         public bool Processing { get; set; }
         public bool Penalties { get; set; }
+        public bool OkeyPenalty { get; set; } = true;
         /// <summary>"waiting", "full" or "playing".</summary>
         public string Status { get; set; }
         /// <summary>Hand in play (1-based) while playing.</summary>

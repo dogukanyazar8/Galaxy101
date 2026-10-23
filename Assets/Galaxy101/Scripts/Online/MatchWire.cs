@@ -74,7 +74,8 @@ namespace Galaxy101.Online
                 : new DrawReceipt(v.PendingDraw.Source == "stock" ? DrawSource.Stock : DrawSource.PreviousDiscard, new TileId(v.PendingDraw.Tile), v.PendingDraw.WasLastStock);
             DealInfo deal = v.Deal == null ? null : new DealInfo(FromSeat(v.Deal.Dealer), v.Deal.DieA, v.Deal.DieB, v.Deal.IndicatorStack, v.Deal.IndicatorPosition, v.Deal.FakeOkeyShown, v.Deal.ExtraStack);
             return new PlayerView(v.RoundId, v.Version, 0, FromSeat(v.ActiveSeat), Phase(v.Phase), v.Hand.Select(id => new TileId(id)).ToArray(), Opening(v.Opening), v.Penalties,
-                0, new TileId(v.Indicator), Math.Min(105, v.StockCount), players, table, discards, pending, v.SeriesTilesUsed, v.Result == null ? null : ToResult(v.Result), deal);
+                0, new TileId(v.Indicator), Math.Min(105, v.StockCount), players, table, discards, pending, v.SeriesTilesUsed, v.Result == null ? null : ToResult(v.Result), deal,
+                v.Rules == null ? RuleOptions.Standard : new RuleOptions(v.Rules.OkeyPenalty, v.Rules.PlayablePenalty));
         }
 
         public RoundResult ToResult(RoundResultDto r)

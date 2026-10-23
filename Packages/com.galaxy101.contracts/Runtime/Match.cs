@@ -112,6 +112,12 @@ namespace Galaxy101.Contracts
         public List<ScoreDto> Scores { get; set; } = new List<ScoreDto>();
     }
 
+    public sealed class RulesDto
+    {
+        public bool OkeyPenalty { get; set; } = true;
+        public bool PlayablePenalty { get; set; } = true;
+    }
+
     /// <summary>Public facts of the deal (spec/21): dealer seat, the two dice, the indicator stack and height, the extra tile's stack.</summary>
     public sealed class DealDto
     {
@@ -145,6 +151,8 @@ namespace Galaxy101.Contracts
         public int SeriesTilesUsed { get; set; }
         public RoundResultDto Result { get; set; }
         public DealDto Deal { get; set; }
+        /// <summary>The room's switchable rules (null = standard: both +101 penalties on).</summary>
+        public RulesDto Rules { get; set; }
     }
 
     /// <summary>

@@ -84,7 +84,7 @@ namespace Okey101.Core.Rules
             return RuleResult<RoundState>.Ok(new RoundState(view.RoundId, view.Version, 0, actor, actor, 0,
                 RoundPhase.PlanningTurn, view.Indicator, unknown.Skip(cursor).ToArray(), players, view.Table, discards,
                 new DrawReceipt(DrawSource.PreviousDiscard, picked, false), view.OwnOpening, view.SeriesTilesUsed,
-                false, sequences));
+                false, sequences, options: view.Options));
         }
 
         private sealed class Search

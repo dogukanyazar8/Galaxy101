@@ -77,7 +77,7 @@ namespace Okey101.Core.Turns
                 state.StartingPlayer, state.ActivePlayer, state.TurnNumber, RoundPhase.PlanningTurn, state.Indicator,
                 stock, players, state.Table, discards,
                 new DrawReceipt(command.Source, tile, command.Source == DrawSource.Stock && stock.Count == 0),
-                player.Opening, 0, false, AcceptedSequences(state, command.Meta)));
+                player.Opening, 0, false, AcceptedSequences(state, command.Meta), options: state.Options));
         }
 
         private static RuleResult<RoundState> ReturnDiscard(RoundState state, ReturnDiscardCommand command)
@@ -95,7 +95,7 @@ namespace Okey101.Core.Turns
             return RuleResult<RoundState>.Ok(new RoundState(state.RoundId, state.Version + 1, state.Seed,
                 state.StartingPlayer, actor, state.TurnNumber, RoundPhase.AwaitingDraw, state.Indicator, state.Stock,
                 players, state.Table, discards, null, state.OpeningAtTurnStart, 0, false,
-                AcceptedSequences(state, command.Meta), null, true));
+                AcceptedSequences(state, command.Meta), null, true, state.Options));
         }
 
         /// <summary>Eksik açılış: +101 to a player who has not opened; nothing else changes.</summary>
@@ -110,7 +110,7 @@ namespace Okey101.Core.Turns
             return RuleResult<RoundState>.Ok(new RoundState(state.RoundId, state.Version + 1, state.Seed,
                 state.StartingPlayer, actor, state.TurnNumber, state.Phase, state.Indicator, state.Stock,
                 players, state.Table, state.Discards, state.PendingDraw, state.OpeningAtTurnStart, state.SeriesTilesUsed,
-                state.IsInitialTurn, AcceptedSequences(state, command.Meta), null, state.PreviousDiscardReturned));
+                state.IsInitialTurn, AcceptedSequences(state, command.Meta), null, state.PreviousDiscardReturned, state.Options));
         }
 
         private static RuleResult<RoundState> Commit(RoundState state, CommitTurnCommand command)
@@ -159,7 +159,7 @@ namespace Okey101.Core.Turns
             return RuleResult<RoundState>.Ok(new RoundState(candidate.RoundId, state.Version + 1, candidate.Seed,
                 candidate.StartingPlayer, nextActor, turnNumber, phase, candidate.Indicator, candidate.Stock,
                 candidate.Players, candidate.Table, candidate.Discards, null, openingAtStart, 0, false,
-                AcceptedSequences(state, command.Meta), result));
+                AcceptedSequences(state, command.Meta), result, options: state.Options));
         }
 
         private static RuleResult<RoundResult> CalculateResult(RoundState state, FinishInfo finish)

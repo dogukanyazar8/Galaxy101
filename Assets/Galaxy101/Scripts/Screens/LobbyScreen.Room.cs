@@ -95,20 +95,20 @@ namespace Galaxy101
             for (int s = 0; s < 4; s++) area.Add(Seat(t, s, (s - mine + 4) % 4, host, pairs, counting > 0));
 
             // Right panel: ÖZET facts, badges, prize note, hint, Başlat.
-            var panel = Box("room-summary"); panel.style.position = Position.Absolute; panel.style.right = 28; panel.style.top = 100; panel.style.bottom = 28; panel.style.width = 330;
-            Pad(panel, 20, 20, 20, 20); Raise(panel, "var(--pn)", 24, 8, "var(--pnS)"); Border(panel, 1, new Color(1, 1, 1, .08f)); page.Add(panel);
+            var panel = Box("room-summary"); panel.style.position = Position.Absolute; panel.style.right = 28; panel.style.top = 100; panel.style.height = 720 - 100 - 28; panel.style.width = 330; // Raise hangs the 8 px ledge below it
+            Pad(panel, 20, 20, 20, 20); Border(panel, 1, new Color(1, 1, 1, .08f)); Raise(panel, "var(--pn)", 24, 8, "var(--pnS)"); page.Add(panel);
             var sc = Text(L("ÖZET", "SUMMARY"), 11, "Baloo2-800", "var(--mt)"); MenuView.Tracking(sc, 1.8f, 11); panel.Add(sc);
             panel.Add(Facts("var(--sd)", (L("BAHİS", "BET"), view.N(t.Stake)), (L("HAVUZ", "POOL"), view.N(t.Stake * 4)), (L("EL", "HANDS"), t.Hands.ToString()), (L("TUR SÜRESİ", "TURN TIME"), L(t.TurnSeconds + " sn", t.TurnSeconds + "s"))));
-            var badges = Row(); badges.style.flexWrap = Wrap.Wrap; badges.style.marginTop = 6; badges.style.flexShrink = 1;
+            var badges = Row(); badges.style.flexWrap = Wrap.Wrap; badges.style.marginTop = 14; badges.style.flexShrink = 1;
             foreach (var b in Badges(t, true)) badges.Add(b);
             panel.Add(badges);
-            var prize = Row(); prize.style.marginTop = 8; Pad(prize, 12, 14, 12, 14); view.Decorate(prize, "rgba(255,201,74,.1)", 14); Border(prize, 1, new Color(1, .79f, .29f, .22f));
+            var prize = Row(); prize.style.marginTop = 8; Pad(prize, 11, 13, 11, 13); view.Decorate(prize, "rgba(255,201,74,.1)", 14); Border(prize, 1, new Color(1, .79f, .29f, .22f)); // inset ring
             prize.Add(view.Icon("trophy", 22, "var(--a1)"));
             var pt = Text(pairs ? L("Kazanan takım " + view.N(t.Stake * 4) + " çipi alır; kişi başı " + view.N(t.Stake * 2) + ".", "The winning team takes " + view.N(t.Stake * 4) + " chips; " + view.N(t.Stake * 2) + " each.") : L("Kazanan " + view.N(t.Stake * 4) + " çipin tamamını alır.", "The winner takes all " + view.N(t.Stake * 4) + " chips."), 13, "Baloo2-700", "var(--ic)");
-            pt.style.whiteSpace = WhiteSpace.Normal; pt.style.flexShrink = 1; pt.style.marginLeft = 10; prize.Add(pt); panel.Add(prize);
+            Paragraph(pt, 1.35f); pt.style.flexShrink = 1; pt.style.marginLeft = 10; prize.Add(pt); panel.Add(prize);
             panel.Add(Grow());
             var hint = Text(host ? full ? L("Herkes yerinde, oyunu başlat.", "Everyone is seated, start the game.") : L("Dört koltuk dolunca başlatabilirsin. Boş koltuğa bot ekleyebilirsin.", "You can start once all four seats are taken. Add bots to empty seats.") : L("Oda sahibi oyunu başlatınca masa açılır.", "The table opens when the host starts the game."), 13, "Baloo2-700", "var(--mt)");
-            hint.style.whiteSpace = WhiteSpace.Normal; hint.style.unityTextAlign = TextAnchor.MiddleCenter; hint.style.marginBottom = 14; panel.Add(hint);
+            Paragraph(hint, 1.4f); hint.style.unityTextAlign = TextAnchor.MiddleCenter; hint.style.marginBottom = 14; panel.Add(hint);
             bool ready = host && full && counting == 0;
             string label = counting > 0 ? L("Oyun başlıyor · " + counting, "Starting · " + counting) : host ? full ? L("Başlat", "Start") : L("Başlat · " + seated + "/4", "Start · " + seated + "/4") : L("Oda sahibi bekleniyor", "Waiting for the host");
             var start = Row(); start.name = "room-start"; start.style.height = 62; start.style.justifyContent = Justify.Center;
@@ -128,7 +128,8 @@ namespace Galaxy101
         private VisualElement Seat(TableSummary t, int seat, int spot, bool host, bool pairs, bool counting)
         {
             var at = SeatSpots[spot];
-            var slot = Box("room-seat-" + seat); MenuView.Place(slot, at.x - 100, at.y - 60, 200, 150); slot.style.alignItems = Align.Center;
+            // CSS: translate(-50%,-50%) — the seat's content is centred on its spot, whatever its height.
+            var slot = Box("room-seat-" + seat); MenuView.Place(slot, at.x - 100, at.y - 100, 200, 200); slot.style.alignItems = Align.Center; slot.style.justifyContent = Justify.Center;
             var entry = t.Seats[seat];
             if (entry?.Player != null)
             {
@@ -263,8 +264,8 @@ namespace Galaxy101
         {
             var state = invite; int free = t.Seats.Count(s => s == null);
             var shade = Fill("invite-backdrop"); shade.pickingMode = PickingMode.Position; view.Decorate(shade, "rgba(0,0,0,.55)"); Tap(shade, CloseInvite); body.Add(shade);
-            var modal = Row(); modal.name = "invite-modal"; modal.pickingMode = PickingMode.Position; modal.style.alignItems = Align.Stretch; MenuView.Place(modal, 190, 70, 900, 580); modal.style.overflow = Overflow.Hidden;
-            Raise(modal, "var(--pn)", 28, 10, "var(--pnS)"); Border(modal, 1, new Color(1, 1, 1, .1f)); GalaxyFilters.Shadow(modal, 0, 40, 45, new Color(0, 0, 0, .6f));
+            var modal = Row(); modal.name = "invite-modal"; modal.pickingMode = PickingMode.Position; modal.style.alignItems = Align.Stretch; MenuView.Place(modal, 189, 69, 902, 582); modal.style.overflow = Overflow.Hidden;
+            Border(modal, 1, new Color(1, 1, 1, .1f)); Raise(modal, "var(--pn)", 28, 10, "var(--pnS)"); GalaxyFilters.Shadow(modal, 0, 40, 45, new Color(0, 0, 0, .6f));
             modal.RegisterCallback<ClickEvent>(e => e.StopPropagation()); Pop(modal, state.OpenedAt, .32f); body.Add(modal);
 
             var left = Box(); left.style.flexGrow = 1; left.style.flexBasis = 0; Pad(left, 22, 22, 0, 28); modal.Add(left);
@@ -338,10 +339,10 @@ namespace Galaxy101
                 var note = Row(); note.style.alignItems = Align.FlexStart; Pad(note, 12, 14, 12, 14); view.Decorate(note, "rgba(255,255,255,.04)", 14);
                 note.Add(view.Icon("info", 18, "var(--mt)"));
                 var nt = Text(L("Açık masa lobide listelenir; davet edilen arkadaşın doğrudan boş koltuğa oturur.", "Open tables are listed in the lobby; invited friends sit straight into an empty seat."), 13, "Baloo2-700", "var(--mt)");
-                nt.style.whiteSpace = WhiteSpace.Normal; nt.style.flexShrink = 1; nt.style.marginLeft = 10; note.Add(nt); right.Add(note);
+                Paragraph(nt); nt.style.flexShrink = 1; nt.style.marginLeft = 10; note.Add(nt); right.Add(note);
             }
             right.Add(Grow());
-            var foot = Text(L("Kabul eden arkadaşın boş koltuğa otomatik oturur.", "Friends who accept take an empty seat automatically."), 12, "Baloo2-700", "var(--mt)"); foot.style.whiteSpace = WhiteSpace.Normal; foot.style.unityTextAlign = TextAnchor.MiddleCenter; right.Add(foot);
+            var foot = Text(L("Kabul eden arkadaşın boş koltuğa otomatik oturur.", "Friends who accept take an empty seat automatically."), 12, "Baloo2-700", "var(--mt)"); Paragraph(foot); foot.style.unityTextAlign = TextAnchor.MiddleCenter; right.Add(foot);
         }
 
         private VisualElement InviteRow(FriendResponse f, TableSummary t, int free)
@@ -439,6 +440,10 @@ namespace Galaxy101
         private void OpenDialog(Dialog next) { next.OpenedAt = Time.realtimeSinceStartup; dialog = next; RenderDialog(); }
         private void CloseDialog() { dialog = null; RenderDialog(); }
 
+        /// <summary>A CSS content-box width: the design's "width" plus the padding and border already set on the card.</summary>
+        private static void ContentWidth(VisualElement card, float width) =>
+            card.style.width = width + card.style.paddingLeft.value.value + card.style.paddingRight.value.value + card.style.borderLeftWidth.value + card.style.borderRightWidth.value;
+
         public void OpenCode() => OpenDialog(new Dialog { Kind = "code" });
 
         /// <summary>A friend's invite (realtime <c>invite</c>): who, the stake, Katıl joins by the table code.</summary>
@@ -454,12 +459,12 @@ namespace Galaxy101
             Tap(shade, () => { if (d.Kind != "connect" && d.Kind != "offline") CloseDialog(); }); dialogLayer.Add(shade);
             var frame = Fill("dialog-frame"); frame.style.alignItems = Align.Center; frame.style.justifyContent = Justify.Center; dialogLayer.Add(frame);
             var card = Box("dialog-" + d.Kind); card.pickingMode = PickingMode.Position; card.style.alignItems = Align.Center;
-            Raise(card, "var(--pn)", 26, 10, "var(--pnS)"); Border(card, 1, new Color(1, 1, 1, .1f)); GalaxyFilters.Shadow(card, 0, 40, 45, new Color(0, 0, 0, .6f));
+            Border(card, 1, new Color(1, 1, 1, .1f)); Raise(card, "var(--pn)", 26, 10, "var(--pnS)"); GalaxyFilters.Shadow(card, 0, 40, 45, new Color(0, 0, 0, .6f));
             card.RegisterCallback<ClickEvent>(e => e.StopPropagation()); frame.Add(card); Pop(card, d.OpenedAt, .25f);
             switch (d.Kind)
             {
                 case "connect":
-                    card.style.width = 380; Pad(card, 30, 30, 30, 30);
+                    Pad(card, 30, 30, 30, 30); ContentWidth(card, 380);
                     var spin = Spinner(44, "var(--a1)"); Border(spin, 4, view.C("var(--a1)")); spin.style.borderTopColor = Color.clear; card.Add(spin);
                     var ct = Text(L("Masaya bağlanılıyor…", "Connecting to the table…"), 20, "Montserrat-700", "#F4F1E8"); ct.style.marginTop = 12; card.Add(ct);
                     if (d.Table != null) { var cb = Text(d.Table.Name + " · " + view.N(d.Table.Stake), 14, "Baloo2-700", "var(--mt)"); cb.style.marginTop = 12; card.Add(cb); }
@@ -468,26 +473,26 @@ namespace Galaxy101
                 case "code": BuildCodeDialog(card, d); break;
                 case "full":
                 case "closed":
-                    card.style.width = 450; Pad(card, 30, 30, 24, 30);
+                    Pad(card, 30, 30, 24, 30); ContentWidth(card, 450);
                     var badge = Box(); Square(badge, 68); Raise(badge, "linear-gradient(#FF7A86,#E8455A)", 22, 5, "#9E1F33"); badge.Add(view.Icon(d.Kind == "full" ? "table-full" : "table-closed", 32, "#fff")); card.Add(badge);
                     var et = Text(d.Kind == "full" ? L("Masa doldu", "Table is full") : L("Masa kapandı", "Table closed"), 24, "Montserrat-700", "#F4F1E8"); et.style.marginTop = 14; card.Add(et);
                     var eb = Text(d.Kind == "full" ? L("Son koltuk sen bağlanırken doldu.", "The last seat was taken while you were connecting.") : L("Oda sahibi masayı kapattı.", "The host closed the table."), 15, "Baloo2-700", "var(--mt)");
-                    eb.style.whiteSpace = WhiteSpace.Normal; eb.style.maxWidth = 360; eb.style.unityTextAlign = TextAnchor.MiddleCenter; eb.style.marginTop = 10; card.Add(eb);
+                    Paragraph(eb); eb.style.maxWidth = 360; eb.style.unityTextAlign = TextAnchor.MiddleCenter; eb.style.marginTop = 10; card.Add(eb);
                     card.Add(Pair(L("Tamam", "OK"), CloseDialog, L("Benzer masa bul", "Find a similar table"), () => Similar(d.Table), "dialog-ok", "dialog-alt"));
                     break;
                 case "share": BuildShare(card, d); break;
                 case "offline":
-                    card.style.width = 450; Pad(card, 30, 30, 24, 30);
+                    Pad(card, 30, 30, 24, 30); ContentWidth(card, 450);
                     var ob = Box(); Square(ob, 68); Raise(ob, "linear-gradient(#FF7A86,#E8455A)", 22, 5, "#9E1F33"); ob.Add(view.Icon("table-wifi-off", 32, "#fff")); card.Add(ob);
                     var ot = Text(L("Sunucuya bağlanılamadı", "Could not reach the server"), 24, "Montserrat-700", "#F4F1E8"); ot.style.marginTop = 14; card.Add(ot);
                     var obody = Text(L("Lobi için çevrimiçi olmalısın. Bağlantını kontrol edip yeniden dene.", "The lobby needs you online. Check your connection and try again."), 15, "Baloo2-700", "var(--mt)");
-                    obody.style.whiteSpace = WhiteSpace.Normal; obody.style.maxWidth = 360; obody.style.unityTextAlign = TextAnchor.MiddleCenter; obody.style.marginTop = 10; card.Add(obody);
+                    Paragraph(obody); obody.style.maxWidth = 360; obody.style.unityTextAlign = TextAnchor.MiddleCenter; obody.style.marginTop = 10; card.Add(obody);
                     card.Add(Pair(L("Ana menü", "Main menu"), () => { CloseDialog(); Back(); }, L("Tekrar dene", "Try again"), async () => { CloseDialog(); if (await Connect()) Render(); }, "dialog-ok", "dialog-alt"));
                     break;
                 case "invited":
-                    var m = d.Invite; card.style.width = 450; Pad(card, 30, 30, 24, 30);
+                    var m = d.Invite; Pad(card, 30, 30, 24, 30); ContentWidth(card, 450);
                     var face = Box(); Square(face, 68); view.Decorate(face, m.From?.Color ?? "#3D7BFF", 34); Border(face, 3, new Color(1, 1, 1, .85f)); face.Add(Text(Initials(m.From?.Name), 24, "Montserrat-700", "#fff")); card.Add(face);
-                    var it = Text(L((m.From?.Name ?? "Bir arkadaşın") + " seni masaya çağırıyor", (m.From?.Name ?? "A friend") + " invites you to a table"), 22, "Montserrat-700", "#F4F1E8"); it.style.marginTop = 14; it.style.whiteSpace = WhiteSpace.Normal; it.style.unityTextAlign = TextAnchor.MiddleCenter; card.Add(it);
+                    var it = Text(L((m.From?.Name ?? "Bir arkadaşın") + " seni masaya çağırıyor", (m.From?.Name ?? "A friend") + " invites you to a table"), 22, "Montserrat-700", "#F4F1E8"); it.style.marginTop = 14; Paragraph(it); it.style.unityTextAlign = TextAnchor.MiddleCenter; card.Add(it);
                     var ib = Text(L("Bahis " + view.N(m.Stake) + " · kod " + m.RoomCode, "Bet " + view.N(m.Stake) + " · code " + m.RoomCode), 15, "Baloo2-700", "var(--mt)"); ib.style.marginTop = 10; card.Add(ib);
                     card.Add(Pair(L("Sonra", "Later"), CloseDialog, L("Katıl", "Join"), () =>
                     {
@@ -500,7 +505,7 @@ namespace Galaxy101
 
         private void BuildPin(VisualElement card, Dialog d)
         {
-            card.style.width = 440; Pad(card, 30, 30, 24, 30);
+            Pad(card, 30, 30, 24, 30); ContentWidth(card, 440);
             var icon = Box(); Square(icon, 68); Raise(icon, "linear-gradient(160deg,var(--a1),var(--a2))", 22, 5, "var(--aS)"); GalaxyFilters.Shadow(icon, 0, 0, 15, view.C("var(--gl)")); icon.Add(view.Icon("lock", 30, "var(--aT)")); card.Add(icon);
             var title = Text(L("Şifreli masa", "Password protected"), 24, "Montserrat-700", "#F4F1E8"); title.style.marginTop = 12; card.Add(title);
             var sub = Text(d.Table == null ? L("Kod " + d.Code, "Code " + d.Code) : L(d.Table.Name + " · " + view.N(d.Table.Stake) + " bahis", d.Table.Name + " · " + view.N(d.Table.Stake) + " bet"), 14, "Baloo2-700", "var(--mt)"); sub.style.marginTop = 12; card.Add(sub);
@@ -539,17 +544,18 @@ namespace Galaxy101
 
         private void BuildCodeDialog(VisualElement card, Dialog d)
         {
-            card.style.width = 480; card.style.alignItems = Align.Stretch; Pad(card, 26, 28, 24, 28);
+            card.style.alignItems = Align.Stretch; Pad(card, 26, 28, 24, 28); ContentWidth(card, 480);
             var head = Row();
             var icon = Box(); Square(icon, 46); Raise(icon, "var(--pnH)", 14, 4, "var(--pnS)"); icon.Add(view.Icon("key", 22, "var(--a1)")); head.Add(icon);
             var words = Box(); words.style.marginLeft = 12; words.style.flexShrink = 1;
-            words.Add(Text(L("Kodla katıl", "Join by code"), 22, "Montserrat-700", "#F4F1E8"));
-            var s = Text(L("Özel masalar lobide görünmez; arkadaşından aldığın kodu yaz.", "Private tables are hidden from the lobby; type the code a friend sent you."), 13, "Baloo2-700", "var(--mt)"); s.style.whiteSpace = WhiteSpace.Normal; words.Add(s);
+            words.Add(Text(L("Kodla katıl", "Join by code"), 22, "Montserrat-700", "#F4F1E8", 1.15f));
+            var s = Text(L("Özel masalar lobide görünmez; arkadaşından aldığın kodu yaz.", "Private tables are hidden from the lobby; type the code a friend sent you."), 13, "Baloo2-700", "var(--mt)"); Paragraph(s); words.Add(s);
             head.Add(words); card.Add(head);
-            var box = Row(); box.name = "dialog-code-box"; box.style.height = 62; box.style.marginTop = 14; Pad(box, 0, 18, 0, 18); view.Decorate(box, "var(--dp)", 16);
-            Border(box, 2, view.C(d.Error != null ? "#FF5E6C" : "var(--a1)"));
+            // The ring is an inset box-shadow in CSS: the padding gives its 2 px back.
+            var box = Row(); box.name = "dialog-code-box"; box.style.height = 62; box.style.marginTop = 14; Pad(box, 0, 16, 0, 16); view.Decorate(box, "var(--dp)", 16);
+            Border(box, 2, view.C(d.Error != null ? "#FF5E6C" : "var(--bd)"));
             var field = Input("dialog-code", d.Code, "GX-0000", 26, "Montserrat-700", "var(--a1)", 8); field.style.flexGrow = 1; MenuView.Tracking(field, 5, 26);
-            field.RegisterValueChangedCallback(e => { string up = (e.newValue ?? "").ToUpperInvariant(); if (up != e.newValue) field.SetValueWithoutNotify(up); d.Code = up; if (d.Error != null) { d.Error = null; Border(box, 2, view.C("var(--a1)")); ErrorLine(card, d); } });
+            field.RegisterValueChangedCallback(e => { string up = (e.newValue ?? "").ToUpperInvariant(); if (up != e.newValue) field.SetValueWithoutNotify(up); d.Code = up; if (d.Error != null) { d.Error = null; Border(box, 2, view.C("var(--bd)")); ErrorLine(card, d); } });
             field.RegisterCallback<KeyDownEvent>(e => { if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter) { e.StopPropagation(); SubmitCode(d); } }, TrickleDown.TrickleDown);
             box.Add(field); card.Add(box); Shake(box, d.Shake);
             ErrorLine(card, d);
@@ -578,18 +584,24 @@ namespace Galaxy101
         private void ErrorLine(VisualElement card, Dialog d)
         {
             var line = card.Q<Label>("dialog-error");
-            if (line == null) { line = Text("", 14, "Baloo2-800", "#FF8A94"); line.name = "dialog-error"; line.style.minHeight = 20; line.style.marginTop = 10; line.style.alignSelf = Align.Center; card.Add(line); }
+            // Pin: centred 14 px line (min-height 20, gap 12); code: a 13 px line under the field (min-height 18, gap 14).
+            bool code = d.Kind == "code";
+            if (line == null)
+            {
+                line = Text("", code ? 13 : 14, "Baloo2-800", "#FF8A94"); line.name = "dialog-error"; line.style.height = StyleKeyword.Auto; line.style.minHeight = code ? 18 : 20;
+                line.style.marginTop = code ? 14 : 12; line.style.alignSelf = code ? Align.Stretch : Align.Center; card.Add(line);
+            }
             line.text = d.Error ?? "";
         }
 
         private void BuildShare(VisualElement card, Dialog d)
         {
             var room = backend.Room; string code = room?.Code ?? "";
-            card.style.width = 520; Pad(card, 30, 30, 24, 30);
+            Pad(card, 30, 30, 24, 30); ContentWidth(card, 520);
             var ok = Box(); Square(ok, 64); Raise(ok, "#3CCB6E", 32, 5, "#22914A"); GalaxyFilters.Shadow(ok, 0, 0, 15, new Color(.235f, .8f, .43f, .5f)); ok.Add(view.Icon("tick", 30, "#fff")); card.Add(ok);
             var title = Text(L("Özel masan hazır", "Your private table is ready"), 24, "Montserrat-700", "#F4F1E8"); title.style.marginTop = 12; card.Add(title);
             var sub = Text(L("Masa lobide listelenmez. Kodu arkadaşlarına gönder, kodla katılsınlar.", "It isn’t listed in the lobby. Send the code to friends so they can join."), 14, "Baloo2-700", "var(--mt)");
-            sub.style.whiteSpace = WhiteSpace.Normal; sub.style.maxWidth = 400; sub.style.unityTextAlign = TextAnchor.MiddleCenter; sub.style.marginTop = 12; card.Add(sub);
+            Paragraph(sub); sub.style.maxWidth = 400; sub.style.unityTextAlign = TextAnchor.MiddleCenter; sub.style.marginTop = 12; card.Add(sub);
             var box = Box(); box.style.alignSelf = Align.Stretch; box.style.alignItems = Align.Center; box.style.marginTop = 16; Pad(box, 18, 0, 16, 0); view.Decorate(box, "rgba(0,0,0,.18)", 20); DashedBorder(box, 2, view.C("var(--bd)"));
             var cap = Text(L("DAVET KODU", "INVITE CODE"), 11, "Baloo2-800", "var(--mt)"); MenuView.Tracking(cap, 1.8f, 11); box.Add(cap);
             var big = Text(code, 44, "Montserrat-800", "var(--a1)"); big.name = "share-code"; MenuView.Tracking(big, 8, 44); big.style.marginTop = 6; box.Add(big);

@@ -218,7 +218,7 @@ namespace Okey101.Core.Rules
                 return new RoundState(source.RoundId, source.Version, source.Seed, source.StartingPlayer,
                     source.ActivePlayer, source.TurnNumber, source.Phase, source.Indicator, source.Stock,
                     players, table, source.Discards, source.PendingDraw, source.OpeningAtTurnStart,
-                    seriesTilesUsed, source.IsInitialTurn, source.LastAcceptedSequences, source.Result);
+                    seriesTilesUsed, source.IsInitialTurn, source.LastAcceptedSequences, source.Result, options: source.Options);
             }
         }
     }

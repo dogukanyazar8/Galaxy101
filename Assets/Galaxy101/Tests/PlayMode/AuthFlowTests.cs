@@ -76,14 +76,16 @@ namespace Galaxy101.Tests
             if (!string.IsNullOrEmpty(Dir)) yield return DisplaySettingsTests.Shot(owner.GetComponent<UIDocument>(), 1280, 720, Path.Combine(Dir, "S01_splash.png"));
             yield return Until(() => menu.Auth.Screen == "choice", 10, "the choice panel");
             Assert.That(root.Q<VisualElement>("auth-guest"), Is.Not.Null);
+            if (UiDump.Dir != null) { yield return new WaitForSeconds(1f); yield return UiDump.Capture(root, "S02_choice"); }
             if (!string.IsNullOrEmpty(Dir)) yield return DisplaySettingsTests.Shot(owner.GetComponent<UIDocument>(), 1280, 720, Path.Combine(Dir, "S02_choice.png"));
 
             Click(root, "auth-guest"); yield return null;
             Assert.That(menu.Auth.Screen, Is.EqualTo("guest"));
             root.Q<TextField>("auth-nick").value = "Ab"; Click(root, "auth-submit"); yield return null;
-            Assert.That(root.Q<Label>("auth-error"), Is.Not.Null, "3–16 characters");
+            Assert.That(root.Q<Label>("auth-hint-nick"), Is.Not.Null, "3–16 characters, shown as the field's hint");
             root.Q<TextField>("auth-nick").value = "TestMisafir" + UnityEngine.Random.Range(10, 99);
             Click(root, "auth-color-8B5CF6"); yield return null;
+            if (UiDump.Dir != null) { yield return UiDump.Capture(root, "S05_guest"); }
             if (!string.IsNullOrEmpty(Dir)) yield return DisplaySettingsTests.Shot(owner.GetComponent<UIDocument>(), 1280, 720, Path.Combine(Dir, "S05_guest.png"));
             Click(root, "auth-submit");
             yield return Until(() => !menu.Auth.Visible, 15, "signing in as a guest");
@@ -107,11 +109,12 @@ namespace Galaxy101.Tests
             root.Q<TextField>("auth-password").value = "gizli123";
             root.Q<TextField>("auth-password2").value = "gizli124";
             Click(root, "auth-submit"); yield return null;
-            Assert.That(root.Q<Label>("auth-error").text, Does.Contain("aynı değil").Or.Contain("do not match"));
+            Assert.That(root.Q<Label>("auth-hint-pass2").text, Does.Contain("aynı değil").Or.Contain("match"));
             root.Q<TextField>("auth-password2").value = "gizli123";
             Click(root, "auth-submit"); yield return null;
             Assert.That(root.Q<Label>("auth-error").text, Does.Contain("koşulları").Or.Contain("terms"));
             Click(root, "auth-terms"); yield return null;
+            if (UiDump.Dir != null) { yield return UiDump.Capture(root, "S04_register"); }
             if (!string.IsNullOrEmpty(Dir)) yield return DisplaySettingsTests.Shot(owner.GetComponent<UIDocument>(), 1280, 720, Path.Combine(Dir, "S04_register.png"));
             Click(root, "auth-submit");
             yield return Until(() => !menu.Auth.Visible, 15, "registering");
@@ -123,6 +126,7 @@ namespace Galaxy101.Tests
             menu.ShowAuth(); menu.Auth.SplashSeconds = .2f;
             yield return Until(() => menu.Auth.Screen == "choice", 10, "the choice panel again");
             Click(root, "auth-login"); yield return null;
+            if (UiDump.Dir != null) { yield return UiDump.Capture(root, "S03_login"); }
             root.Q<TextField>("auth-email").value = email; root.Q<TextField>("auth-password").value = "yanlis99";
             Click(root, "auth-submit");
             yield return Until(() => root.Q<Label>("auth-error") != null, 10, "the wrong-password message");

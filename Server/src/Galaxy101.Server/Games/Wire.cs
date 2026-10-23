@@ -91,6 +91,7 @@ public static class Wire
         Discards = [.. v.Discards.Select(d => d.Select(t => t.Value).ToList())],
         PendingDraw = v.PendingDraw is { } d ? new DrawReceiptDto { Source = d.Source == DrawSource.Stock ? "stock" : "discard", Tile = d.Tile.Value, WasLastStock = d.WasLastStock } : null,
         SeriesTilesUsed = v.SeriesTilesUsed, Result = v.Result is { } r ? ToDto(r) : null,
+        Rules = v.Options.IsStandard ? null : new RulesDto { OkeyPenalty = v.Options.OkeyDiscardPenalty, PlayablePenalty = v.Options.PlayableDiscardPenalty },
         Deal = v.Deal is { } deal ? new DealDto
         {
             Dealer = deal.Dealer, DieA = deal.DieA, DieB = deal.DieB, IndicatorStack = deal.IndicatorStack,

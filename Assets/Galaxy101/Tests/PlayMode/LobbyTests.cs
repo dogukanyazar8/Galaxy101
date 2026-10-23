@@ -147,11 +147,76 @@ namespace Galaxy101.Tests
 
         private static int Cards(VisualElement root) => root.Query<VisualElement>(className: "lobby-card").ToList().Count;
 
+        // G101-Lobi SEED(): the prototype's twelve tables, so the list can be measured against the design box for box.
+        private static readonly string[] SeedNames = { "Zeynep E.", "Ayşe Y.", "Burak C.", "Selin A.", "Hakan T.", "Derya K.", "Emre B.", "Okeyci_34", "Mert K.", "Elif S.", "Can Ö.", "Gizem T.", "Kaan D.", "Nazlı R.", "Oğuz P.", "Ece M.", "Tolga A.", "Pelin Ş.", "Serkan Y.", "İrem B." };
+        private static readonly string[] SeedColors = { "#16B6A8", "#3D7BFF", "#8B5CF6", "#FF6B6B", "#3D7BFF", "#8B5CF6", "#3CCB6E", "#16B6A8", "#E8A317", "#E05FA8", "#FF8A5B", "#16B6A8", "#3D7BFF", "#FF6B6B", "#8B5CF6", "#3CCB6E", "#E8A317", "#E05FA8", "#FF8A5B", "#3D7BFF" };
+
+        private static TableSummary Seed(string name, string type, long stake, int hands, int turn, bool doubling, int[] players, string status, int hand,
+            bool locked = false, bool spec = true, string chat = "on", bool gifts = true, bool okey = true, bool isle = true)
+        {
+            var t = new TableSummary { Id = Guid.NewGuid(), Name = name, Type = type == "esli" ? "pairs" : "single", Stake = stake, Hands = hands, TurnSeconds = turn, Doubling = doubling, Status = status, Hand = hand,
+                Locked = locked, Spectators = spec, Chat = chat, Gifts = gifts, OkeyPenalty = okey, Penalties = isle, Processing = true, HostId = Guid.NewGuid(), Seats = new List<TableSeat>() };
+            foreach (int p in players) t.Seats.Add(p < 0 ? null : new TableSeat { Player = new PlayerSummary { Id = Guid.NewGuid(), Name = SeedNames[p], Color = SeedColors[p], Level = 20 } });
+            return t;
+        }
+
+        private static List<TableSummary> ReferenceSeed() => new List<TableSummary>
+        {
+            Seed("Gece Kuşları", "tekli", 5000, 5, 30, false, new[] { 0, 2, 4, -1 }, "waiting", 0),
+            Seed("Akşam Keyfi", "esli", 10000, 7, 45, true, new[] { 5, 9, -1, -1 }, "waiting", 0),
+            Seed("Hızlı Eller", "tekli", 1000, 3, 15, false, new[] { 6, -1, -1, -1 }, "waiting", 0, isle: false),
+            Seed("Usta Masası", "tekli", 50000, 5, 30, false, new[] { 7, 3, 14, 18 }, "playing", 3),
+            Seed("Kadıköy 101", "esli", 5000, 5, 30, true, new[] { 10, -1, 12, 16 }, "playing", 2),
+            Seed("Şifreli Salon", "tekli", 10000, 5, 20, false, new[] { 1, 11, -1, -1 }, "waiting", 0, locked: true),
+            Seed("Yıldız Tozu", "tekli", 100000, 7, 45, false, new[] { 18, 7, 3, 14 }, "playing", 5, spec: false),
+            Seed("Çay Ocağı", "tekli", 1000, 5, 30, false, new[] { 13, 15, 17, -1 }, "waiting", 0, chat: "quick"),
+            Seed("Takım Ruhu", "esli", 1000, 3, 20, false, new[] { 8, -1, -1, -1 }, "waiting", 0, gifts: false),
+            Seed("Satürn Halkası", "tekli", 5000, 3, 30, false, new[] { 4, 19, 0, 6 }, "playing", 1),
+            Seed("Gece Yarısı", "esli", 50000, 5, 30, false, new[] { 16, 12, 1, 5 }, "playing", 4, locked: true),
+            Seed("Sabah Sporu", "tekli", 5000, 7, 20, false, new[] { 2, 9, 11, 13 }, "waiting", 0, okey: false),
+        };
+
+        /// <summary>The list with the design's own tables, dumped for tools/compare_ui.py (only with GALAXY_UI_DUMP_DIR).</summary>
+        [UnityTest]
+        public IEnumerator ReferenceListLayout()
+        {
+            fake.List = ReferenceSeed(); fake.Chips = 10000;
+            var menu = Menu(); var root = menu.View.Root; yield return null;
+            menu.Model.Profile["name"] = "Misafir1549";
+            var play = root.Q<Button>("play-now"); using (var evt = NavigationSubmitEvent.GetPooled()) { evt.target = play; play.SendEvent(evt); }
+            yield return null; yield return null;
+            Assert.That(Cards(root), Is.EqualTo(12));
+            var order = menu.Lobby.Filter(fake.List, fake.Chips).Select(t => t.Name).ToList();
+            Assert.That(order, Is.EqualTo(new[] { "Hızlı Eller", "Çay Ocağı", "Takım Ruhu", "Gece Kuşları", "Akşam Keyfi", "Şifreli Salon", "Kadıköy 101", "Satürn Halkası", "Usta Masası", "Gece Yarısı", "Yıldız Tozu", "Sabah Sporu" }),
+                "G101-Lobi rank: waiting with a seat, playing with a seat, playing, full; cheaper first");
+            yield return new WaitForSeconds(1.2f);
+            yield return Shot("S09_seed.png");
+            yield return UiDump.Capture(root, "S09_lobby");
+            if (UiDump.Dir == null) yield break;
+
+            // The rest of tools/ref_capture.py's walk: Masa aç, Kodla katıl (+ a wrong code), then a new open table's room.
+            Click(root, "lobby-create"); yield return new WaitForSeconds(.6f);
+            yield return UiDump.Capture(root, "S10_create");
+            Click(root, "create-cancel"); yield return new WaitForSeconds(.4f);
+            Click(root, "lobby-code"); yield return new WaitForSeconds(.6f);
+            yield return UiDump.Capture(root, "S12_code");
+            fake.JoinAnswer = TableErrors.Closed;
+            root.Q<TextField>("dialog-code").value = "GX-ZZ99"; Click(root, "dialog-submit");
+            yield return Until(() => root.Q<Label>("dialog-error") != null, 3, "the wrong-code error");
+            yield return UiDump.Capture(root, "S12_code_error");
+            Click(root, "dialog-cancel"); fake.JoinAnswer = null; yield return new WaitForSeconds(.4f);
+            Click(root, "lobby-create"); yield return null; Click(root, "create-submit");
+            yield return Until(() => menu.Lobby.Screen == "wait", 3, "the waiting room");
+            yield return new WaitForSeconds(1.2f);
+            yield return UiDump.Capture(root, "S13_room");
+        }
+
         [UnityTest]
         public IEnumerator HemenOynaOpensTheListWithFiltersSearchAndBalanceRules()
         {
             var menu = Menu(); var root = menu.View.Root; yield return null;
             menu.Model.SelectedMode = 0;
+            if (UiDump.Dir != null) { yield return new WaitForSeconds(1f); yield return UiDump.Capture(root, "S06_menu"); }
             var play = root.Q<Button>("play-now"); using (var evt = NavigationSubmitEvent.GetPooled()) { evt.target = play; play.SendEvent(evt); }
             yield return null; yield return null;
             Assert.That(menu.Lobby, Is.Not.Null); Assert.That(menu.Lobby.Visible, Is.True); Assert.That(fake.Subscribes, Is.GreaterThan(0));
@@ -297,14 +362,14 @@ namespace Galaxy101.Tests
             Assert.That(menu.Lobby.Draft.Pin, Is.EqualTo("123"), "digits only");
             root.Q<TextField>("create-pin").value = "1234"; yield return null;
             Click(root, "create-rules"); yield return null;
-            Click(root, "create-rule-chat-quick"); Click(root, "create-rule-processing"); yield return null;
+            Click(root, "create-rule-chat-quick"); Click(root, "create-rule-okey"); yield return null;
             Click(root, "create-submit"); yield return null; yield return null;
             Assert.That(fake.Created, Is.Not.Null);
             Assert.That(fake.Created.Name, Is.EqualTo("Gece Kuşları"));
             Assert.That(fake.Created.Type, Is.EqualTo("pairs")); Assert.That(fake.Created.Stake, Is.EqualTo(10000));
             Assert.That(fake.Created.Hands, Is.EqualTo(7)); Assert.That(fake.Created.TurnSeconds, Is.EqualTo(45)); Assert.That(fake.Created.Doubling, Is.True);
             Assert.That(fake.Created.Visibility, Is.EqualTo("private")); Assert.That(fake.Created.Pin, Is.EqualTo("1234"));
-            Assert.That(fake.Created.Chat, Is.EqualTo("quick")); Assert.That(fake.Created.Processing, Is.False); Assert.That(fake.Created.Penalties, Is.True);
+            Assert.That(fake.Created.Chat, Is.EqualTo("quick")); Assert.That(fake.Created.OkeyPenalty, Is.False); Assert.That(fake.Created.Penalties, Is.True); Assert.That(fake.Created.Processing, Is.True);
             Assert.That(menu.Lobby.Screen, Is.EqualTo("wait"));
             Assert.That(menu.Lobby.DialogKind, Is.EqualTo("share"), "a private table shows its code first");
             Assert.That(root.Q<Label>("share-code").text, Is.EqualTo("GX-AB12"));

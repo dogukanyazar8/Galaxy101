@@ -18,7 +18,7 @@ public sealed class LobbyTests(ServerFixture server)
 
     private static TableOptions Options(string name, string visibility = "public", string? pin = null, long stake = 1000) => new()
     {
-        Type = "pairs", Name = name, Visibility = visibility, Pin = pin, Hands = 3, Stake = stake, TurnSeconds = 15, Chat = "off", Gifts = false,
+        Type = "pairs", Name = name, Visibility = visibility, Pin = pin, Hands = 3, Stake = stake, TurnSeconds = 15, Chat = "off", Gifts = false, OkeyPenalty = false,
     };
 
     [Fact]
@@ -40,6 +40,7 @@ public sealed class LobbyTests(ServerFixture server)
             var listed = await watcher.Live.WaitAsync<LobbyTablesMessage>(LobbyMessageTypes.Tables, m => m.Tables.Any(t => t.Id == room.Table.Id));
             var card = listed.Tables.Single(t => t.Id == room.Table.Id);
             Assert.Equal("waiting", card.Status); Assert.Equal(1000, card.Stake); Assert.Equal(3, card.Hands); Assert.Equal(15, card.TurnSeconds); Assert.Equal("pairs", card.Type);
+            Assert.False(card.OkeyPenalty); Assert.True(card.Penalties);
 
             Assert.Equal(TableErrors.WrongPin, (await guest.Live.RequestAsync(LobbyMessageTypes.Join, new TableJoinMessage { TableId = room.Table.Id, Pin = "0000" })).Code);
             Assert.True((await guest.Live.RequestAsync(LobbyMessageTypes.Join, new TableJoinMessage { TableId = room.Table.Id, Pin = "1234", Seat = 2 })).Ok);
@@ -68,6 +69,9 @@ public sealed class LobbyTests(ServerFixture server)
             Assert.Equal(GameModes.Pairs, starts[0].Mode); Assert.Equal(3, starts[0].Hands); Assert.Equal(15, starts[0].TurnSeconds);
             Assert.Equal(0, starts[0].YourSeat); Assert.Equal(2, starts[1].YourSeat);
             Assert.StartsWith("Bot · ", starts[0].Seats[1].Player.Name);
+            // The room's penalty switches reach the engine and every seat's view.
+            var view = await host.Live.WaitAsync<MatchStateMessage>(MessageTypes.MatchState, null, 15);
+            Assert.NotNull(view.View.Rules); Assert.False(view.View.Rules!.OkeyPenalty); Assert.True(view.View.Rules.PlayablePenalty);
             // The table's rules: chat and gifts off.
             Assert.Equal(ErrorCodes.Validation, (await host.Live.RequestAsync(MessageTypes.MatchEmote, new EmoteMessage { MatchId = starts[0].MatchId, Emote = "😂" })).Code);
             var listedPlaying = await watcher.Live.WaitAsync<LobbyTablesMessage>(LobbyMessageTypes.Tables, m => m.Tables.Any(t => t.Id == room.Table.Id && t.Status == "playing"));

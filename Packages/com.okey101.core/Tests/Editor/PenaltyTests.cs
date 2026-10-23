@@ -17,6 +17,21 @@ namespace Okey101.Core.Tests
             Assert.That(PenaltyEvaluator.GetDiscardPenalty(state, joker, false), Is.EqualTo(101));
         }
 
+        [TestCase(true, true, 101, 101)]
+        [TestCase(false, true, 0, 101)]
+        [TestCase(true, false, 101, 0)]
+        [TestCase(false, false, 0, 0)]
+        public void RoomRulesSwitchEachPenaltyOff(bool okey, bool playable, int okeyPenalty, int playablePenalty)
+        {
+            var joker = Id(TileColor.Black, 1);
+            var rules = new RuleOptions(okey, playable);
+            var withJoker = Builder(new[] { joker, Spare }, OpeningKind.Series).WithRules(rules).Build();
+            Assert.That(PenaltyEvaluator.GetDiscardPenalty(withJoker, joker, false), Is.EqualTo(okeyPenalty), "okey atma cezası");
+            var fits = Builder(new[] { Id(TileColor.Red, 4), Spare }, OpeningKind.Series).WithRules(rules)
+                .WithTable(new Meld(0, 0, Run(TileColor.Red, 1, 2, 3))).Build();
+            Assert.That(PenaltyEvaluator.GetDiscardPenalty(fits, Id(TileColor.Red, 4), false), Is.EqualTo(playablePenalty), "işlek taş cezası");
+        }
+
         [TestCase(OpeningKind.None, 0, 0)]
         [TestCase(OpeningKind.Series, 0, 101)]
         [TestCase(OpeningKind.Series, 4, 101)]

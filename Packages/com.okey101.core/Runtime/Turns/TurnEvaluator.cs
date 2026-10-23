@@ -68,7 +68,7 @@ namespace Okey101.Core.Turns
             return RuleResult<RoundState>.Ok(new RoundState(candidate.RoundId, candidate.Version, candidate.Seed,
                 candidate.StartingPlayer, actor, candidate.TurnNumber, candidate.Phase, candidate.Indicator,
                 candidate.Stock, players, candidate.Table, discards, candidate.PendingDraw, candidate.OpeningAtTurnStart,
-                candidate.SeriesTilesUsed, candidate.IsInitialTurn, candidate.LastAcceptedSequences, candidate.Result));
+                candidate.SeriesTilesUsed, candidate.IsInitialTurn, candidate.LastAcceptedSequences, candidate.Result, options: candidate.Options));
         }
 
         private static bool FirstOpeningContains(TurnPlan plan, TileId tile)

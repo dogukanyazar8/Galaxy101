@@ -59,7 +59,10 @@ namespace Galaxy101
         /// the table loading screen (T50).
         /// </summary>
         public void UseStaticLayout(Vector4 gradient,Vector4 halo,Vector4 placement,Color haloColor)
-        {tableLayout=true;tableHalo=haloColor;layoutShape=gradient;layoutHalo=new Vector4(halo.x,halo.y,halo.z,1);layoutPlacement=placement;dirty=true;}
+        {
+            // Same composition again (a screen redrawing itself): nothing to re-render.
+            if(tableLayout&&tableHalo==haloColor&&layoutShape==gradient&&layoutHalo==new Vector4(halo.x,halo.y,halo.z,1)&&layoutPlacement==placement)return;
+            tableLayout=true;tableHalo=haloColor;layoutShape=gradient;layoutHalo=new Vector4(halo.x,halo.y,halo.z,1);layoutPlacement=placement;dirty=true;}
         /// <summary>Back to the menu composition (glow, rim, vignette, the planet behind the logo).</summary>
         public void UseMenuLayout() {if(!tableLayout)return;tableLayout=false;dirty=true;}
         public void SetFocused(bool value) {if(focused!=value) wasRunning=false;focused=value;}

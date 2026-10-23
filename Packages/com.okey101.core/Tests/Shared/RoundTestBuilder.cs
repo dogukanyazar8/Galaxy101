@@ -34,6 +34,9 @@ namespace Okey101.TestSupport
         {
             CheckPlayer(actor); activePlayer = actor; phase = roundPhase; return this;
         }
+        private RuleOptions options;
+        public RoundTestBuilder WithRules(RuleOptions rules) { options = rules; return this; }
+
         public RoundState Build()
         {
             var occupied = new[] { indicator }.Concat(hands.SelectMany(h => h))
@@ -45,7 +48,7 @@ namespace Okey101.TestSupport
             var players = Enumerable.Range(0, 4).Select(p => new PlayerState(hands[p], openings[p], 0)).ToArray();
             var state = new RoundState(Guid.NewGuid(), 0, 1, activePlayer, activePlayer, 0, phase,
                 indicator, stock, players, table, discards, null, openings[activePlayer], 0,
-                phase == RoundPhase.PlanningTurn, new long[4]);
+                phase == RoundPhase.PlanningTurn, new long[4], options: options);
             if (!StateInvariant.Validate(state).Success) throw new InvalidOperationException("Fixture violates physical tile ownership.");
             return state;
         }

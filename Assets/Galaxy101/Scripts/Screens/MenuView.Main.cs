@@ -273,6 +273,16 @@ namespace Galaxy101
         }
         private void Animate(Action<float> action){(buildingMotions??motions).Add(action);action(animationTime);}
         /// <summary>CSS cubic-bezier timing function, solved for the curve's x by bisection.</summary>
+        /// <summary>
+        /// Chrome's "line-height: normal" for the design fonts: the hhea ascent and descent, each rounded to whole pixels
+        /// (Montserrat .968 / .251 em, Baloo 2 1.078 / .524 em) — Montserrat 14 px is an 18 px line, not 17.07.
+        /// </summary>
+        public static float CssLineHeight(string font,float size)
+        {
+            bool baloo=font!=null&&font.StartsWith("Baloo");float ascent=baloo?1.078f:.968f,descent=baloo?.524f:.251f;
+            return Mathf.Floor(ascent*size+.5f)+Mathf.Floor(descent*size+.5f);
+        }
+
         internal static float CssBezier(float x1,float y1,float x2,float y2,float x)
         {
             float lo=0,hi=1,t=x;for(int i=0;i<20;i++){t=(lo+hi)/2;float q=1-t,bx=3*q*q*t*x1+3*q*t*t*x2+t*t*t;if(bx<x)lo=t;else hi=t;}

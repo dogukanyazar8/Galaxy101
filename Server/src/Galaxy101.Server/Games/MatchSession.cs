@@ -72,6 +72,9 @@ public sealed class MatchSession
     private bool Bot(int seat) => MatchManager.IsBot(record, seat);
     private int TurnSeconds => record.TurnSeconds > 0 ? record.TurnSeconds : options.TurnSeconds;
     private string ChatRule => rules.TryGetProperty("chat", out var c) && c.ValueKind == JsonValueKind.String ? c.GetString()! : "on";
+    /// <summary>The room's penalty switches for the engine (missing = on).</summary>
+    private RuleOptions Rules => new(!rules.TryGetProperty("okeyPenalty", out var o) || o.ValueKind != JsonValueKind.False,
+        !rules.TryGetProperty("penalties", out var p) || p.ValueKind != JsonValueKind.False);
     private bool GiftsAllowed => !rules.TryGetProperty("gifts", out var g) || g.ValueKind != JsonValueKind.False;
 
     /// <summary>Bots of a Klasik table show as "Bot · Ayşe" etc. (no account behind them).</summary>
@@ -107,7 +110,7 @@ public sealed class MatchSession
         {
             handIndex = hand.HandIndex;
             handCommands.Clear();
-            state = RoundFactory.Create((uint)hand.Seed, hand.RoundId, Starter(hand.HandIndex));
+            state = RoundFactory.Create((uint)hand.Seed, hand.RoundId, Starter(hand.HandIndex), Rules);
             foreach (var move in hand.Moves)
             {
                 var message = JsonSerializer.Deserialize<MatchCommandMessage>(move.Payload, Connection.Json)!;
@@ -335,7 +338,7 @@ public sealed class MatchSession
         lastEvent = null;
         var seed = BitConverter.ToUInt32(RandomNumberGenerator.GetBytes(4));
         var roundId = Guid.CreateVersion7();
-        state = RoundFactory.Create(seed, roundId, Starter(index));
+        state = RoundFactory.Create(seed, roundId, Starter(index), Rules);
         await store.StartHandAsync(Id, index, seed, roundId);
         dealUntil = clock.GetUtcNow().AddSeconds(options.DealSeconds);
         BeginTurnIfNew();

@@ -113,7 +113,14 @@ namespace Galaxy101
             this.model = model ?? throw new ArgumentNullException(nameof(model));
             rows = LocalizationCatalog.Load(model);
             byTurkish = rows.GroupBy(x => x.Tr).ToDictionary(x => x.Key, x => x.ToList(), StringComparer.Ordinal);
-            tables = Resources.LoadAll<StringTable>("Galaxy101/Localization").ToDictionary(x => x.LocaleIdentifier.Code, x => x, StringComparer.Ordinal);
+            // Load the two string tables by name: LoadAll would also deserialize the editor-only StringTableCollection in the
+            // same folder, which a player cannot read ("missing script", "different serialization layout").
+            tables = new Dictionary<string, StringTable>(StringComparer.Ordinal);
+            foreach (var code in new[] { "tr", "en" })
+            {
+                var table = Resources.Load<StringTable>("Galaxy101/Localization/" + TableName + "_" + code);
+                if (table != null) tables[table.LocaleIdentifier.Code] = table;
+            }
             previousLanguage = Language;
             model.Changed += OnModelChanged;
             ApplyLocale();

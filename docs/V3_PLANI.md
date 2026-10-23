@@ -26,3 +26,10 @@ Kaynak: `Design/galaxy101_unity_handoff` v3 (`spec/00`, `spec/18`–`25`, `refer
 - Gerçek ekran soak'u (`-galaxyDisplaySoak <dir> -galaxyMenuState <file>`, Acceptance derlemesi): menü, ayarlar paneli ve 3D masa el ortasında 13 mod/çözünürlük/FPS geçişi; 3840×2160 @160 Hz monitörde hepsi istenen boyut/modda, FPS sınırları tuttu (30/60/120/144/160), tuval tam.
 - Derlemede bulunup düzeltilenler: URP son işlem gölgelendiricileri ayıklandığı için oyuncu derlemesinde ACES/bloom hiç çalışmıyordu (ayıklama kapatıldı); editörde çalışıp derlemede yüklenemeyen SSAO kaldırıldı; masa açılırken NaN ışın hatası.
 - Bilinen: oyuncu başlangıcında "different serialization layout (44/112)" uyarısı (21 Ekim'den beri, işlevsel etkisi yok); kaynağı henüz bulunamadı.
+
+## V4b–V6 notları (23 Ekim 2026)
+- V4b (d4c8245): ana menü v3 mod şeridi — Klasik oynanır; Dereceli ve Botlara karşı YAKINDA (HEMEN OYNA yalnız tost gösterir).
+- V5 (751310a): Klasik lobi — liste/filtre/arama, Masa aç, PIN/kod/bağlanıyor/dolu/kapandı/çevrimdışı/paylaş diyalogları, bekleme odası (bot ekle, çıkar, başlat, geri sayım), arkadaş daveti (30 sn) ve gelen davet diyaloğu. Sunucu Tables işleyicisiyle `LobbyClient` üzerinden konuşur; canlı sunucu testi geçti. Maç başlayınca ağ masası gelene kadar 3D masa yerel motorla açılır.
+  - UI Toolkit: kaydırma alanında onlarca filtre (drop-shadow) olunca filtre dokuları kayboluyor ("texture not allocated"); lobi yüzeyleri gölgeyi alt kenarlıkla çiziyor.
+- V6 (4c50a41): dağıtım töreni (15×7 balya, iki zar, gösterge, fazla taş, 2+2+2+2+1 dağıtım, kuleler, ıstakalar), HUD dağıtım kartı + Zar at/Tekrar at; v3 atlas (yonca sahte okey), gerçek okey boş yüz, masada yatan taş yüzleri ışıksız.
+- Kalan: GLB indirme + Blender cilası (masa/ıstaka/koltuk modelleri; şu an prosedürel ve mevcut prefabrikler), V7 (orta tahta 8×20, işleme/okey alma göstergeleri, taş izi, geri topla, hatalı açma/işlek taş cezası, elden bit + nükleer, ağ oturumu, izleme/oyuna katılma), V8.

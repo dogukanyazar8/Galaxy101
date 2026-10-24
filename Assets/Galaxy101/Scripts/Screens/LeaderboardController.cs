@@ -43,7 +43,8 @@ namespace Galaxy101
                 step.style.alignItems = Align.Center; step.style.paddingTop = 10;
                 v.Decorate(step, "linear-gradient(" + top + "," + bottom + ")", 14);
                 step.style.borderBottomLeftRadius = step.style.borderBottomRightRadius = 0;
-                step.Add(v.Text(rank.ToString(), 42, true, "rgba(0,0,0,.32)")); column.Add(step); podium.Add(column);
+                var number = v.Text(rank.ToString(), 42, true, "rgba(0,0,0,.32)"); number.style.height = 42; number.style.unityTextAlign = UnityEngine.TextAnchor.MiddleCenter; // 700 42px/1
+                step.Add(number); column.Add(step); podium.Add(column);
             }
             var table = root.Q<VisualElement>("table");
             var heading = v.Row(PanelUi.Caption(v, v.L("SIRA", "RANK"), 11, 1.2f), PanelUi.Caption(v, v.L("OYUNCU", "PLAYER"), 11, 1.2f), PanelUi.Caption(v, v.L("LİG", "LEAGUE"), 11, 1.2f), PanelUi.Caption(v, v.L("PUAN", "POINTS"), 11, 1.2f));

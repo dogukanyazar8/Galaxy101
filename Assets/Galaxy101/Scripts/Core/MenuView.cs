@@ -47,7 +47,7 @@ namespace Galaxy101
         private List<Action<float>> buildingMotions;
         private float panelAnimationOrigin,dialogAnimationOrigin;
         private string mainSignature,mountedPanel,mountedDialog;
-        private VisualElement panelCard,dialogCard,sceneUnderlay,dialogUnderlay;
+        private VisualElement panelCard,dialogCard;
         private float animationTime;
         private bool focused=true;
         private string lastTheme;

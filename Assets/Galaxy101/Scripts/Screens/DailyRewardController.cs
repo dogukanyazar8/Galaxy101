@@ -31,7 +31,7 @@ namespace Galaxy101
                 if (today)
                 {
                     var claim = v.Button(v.L("Topla", "Collect"), () => v.Services.Rewards.ClaimDay(), "secondary");
-                    claim.name = "claim-day"; claim.style.alignSelf = Align.Stretch; claim.style.height = 30;
+                    claim.name = "claim-day"; claim.style.alignSelf = Align.Stretch; claim.style.height = 30; claim.style.fontSize = 14;
                     claim.style.paddingTop = claim.style.paddingBottom = 6; claim.style.paddingLeft = claim.style.paddingRight = 0;
                     v.Decorate(claim, "#fff", 10, 3, "#0E5A31"); claim.style.color = v.C("#146B3C"); card.Add(claim);
                 }

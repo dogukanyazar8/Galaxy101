@@ -32,11 +32,12 @@ namespace Galaxy101
             var language = v.Loc.Language == "en" ? "en" : "tr";
             var content = v.Scroll(); content.AddToClassList("g-panel-card"); PanelUi.Pad(content, 24, 28);
             root.Q<VisualElement>("content").Add(content);
-            var title = v.Text((string)data[language][0], 28, true); title.style.marginBottom = 18; content.Add(title);
+            var title = v.Text((string)data[language][0], 28, true); title.style.height = 28 * 1.15f; title.style.unityTextAlign = UnityEngine.TextAnchor.MiddleLeft; title.style.flexShrink = 0; title.style.marginBottom = 18; content.Add(title); // 700 28px/1.15
             foreach (var point in data[language][1])
             {
                 var dot = v.Box(); dot.style.width = dot.style.height = 9; dot.style.marginTop = 8; dot.style.marginRight = 14; dot.style.flexShrink = 0; dot.style.rotate = new Rotate(45); v.Decorate(dot, "a1", 2);
-                var text = PanelUi.Wrap(v, point.ToString(), 16, "#E6E8F4"); PanelUi.Grow(text); text.style.flexBasis = 0; text.style.flexShrink = 1;
+                // font: 700 16px/1.55 Baloo 2; text-wrap: pretty.
+                var text = MenuView.CssParagraph(PanelUi.Wrap(v, point.ToString(), 16, "#E6E8F4"), 16 * 1.55f, true); PanelUi.Grow(text); text.style.flexBasis = 0; text.style.flexShrink = 1;
                 var row = v.Row(dot, text); row.style.minWidth = 0; row.style.alignSelf = Align.Stretch; row.style.alignItems = Align.FlexStart; row.style.marginBottom = 12; content.Add(row);
             }
             var tiles = (JArray)data["tiles"];

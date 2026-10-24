@@ -6,8 +6,8 @@ Usage: uv run --with playwright python ref_capture.py <reference dir> <out dir> 
 import asyncio, functools, http.server, json, os, sys, threading
 from playwright.async_api import async_playwright
 
-ROOT, OUT = os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[2])
-ONLY = sys.argv[3] if len(sys.argv) > 3 else None
+ROOT, OUT = (os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[2])) if __name__ == "__main__" else (None, None)
+ONLY = sys.argv[3] if len(sys.argv) > 3 and __name__ == "__main__" else None
 DUMP = """() => { const out=[]; const walker=document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n;
  while((n=walker.nextNode())){ const t=n.textContent.trim(); if(!t) continue; const r=document.createRange(); r.selectNodeContents(n);
   const b=r.getBoundingClientRect(); if(b.width<1||b.height<1||b.right<0||b.bottom<0||b.left>1280||b.top>720) continue; let vis=true;
@@ -63,4 +63,5 @@ async def main():
         await browser.close()
     httpd.shutdown()
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())

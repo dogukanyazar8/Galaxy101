@@ -18,7 +18,6 @@ namespace Galaxy101
             template.style.alignSelf=Align.Stretch;template.style.alignItems=Align.Center;template.style.justifyContent=Justify.Center;Root.Add(template);
             var canvas=Root.Q<VisualElement>("galaxy-canvas")??throw new InvalidOperationException("MainMenu UXML lacks galaxy-canvas.");
             BackgroundTarget=canvas.Q<VisualElement>("background");mainLayer=canvas.Q<VisualElement>("main-layer");panelLayer=canvas.Q<VisualElement>("modal-layer");dialogLayer=canvas.Q<VisualElement>("dialog-layer");toastLayer=canvas.Q<VisualElement>("toast-layer");
-            sceneUnderlay=canvas.Q<VisualElement>("scene-underlay");dialogUnderlay=canvas.Q<VisualElement>("dialog-underlay");
             mainSignature=null;sections.Clear();mountedPanel=mountedDialog=null;panelCard=dialogCard=null;
             animationJob?.Pause();float last=Time.realtimeSinceStartup;
             // Every panel update — each rendered frame, at 144 Hz too — rather than a fixed 16 ms that beats against the
@@ -88,8 +87,8 @@ namespace Galaxy101
                 }
                 else{dialogLayer.Clear();dialogCard=null;mountedDialog=null;dialogMotions.Clear();}
                 buildingMotions=null;
-                GalaxyFilters.Blur(sceneUnderlay,Modals.Panel!=null?6:0);
-                GalaxyFilters.Blur(dialogUnderlay,Modals.Dialog!=null?4:0);
+                // No blur behind panels and dialogs: the design's overlay sits in a fadeIn container, which Chrome makes the
+                // backdrop root, so its backdrop-filter has nothing to blur — the menu shows through only darkened.
                 UpdateBackground();
                 if(identity!=null)
                 {
@@ -193,7 +192,7 @@ namespace Galaxy101
                 // box-shadow "0 2.5px 0 5px #fff" ring around the selected (and hovered) card, over the page colour gap.
                 var ring=Box("mode-selection-ring");ring.pickingMode=PickingMode.Ignore;Place(ring,-8.5f,-12-6,225,95);Decorate(ring,"#fff",26);
                 var gap=Box("mode-selection-gap");gap.pickingMode=PickingMode.Ignore;Place(gap,-5.5f,-9-6,219,89);Decorate(gap,"var(--bg3)",23);
-                var glyph=Text(glyphs[i],58,true,"rgba(255,255,255,.16)");glyph.pickingMode=PickingMode.Ignore;glyph.style.position=Position.Absolute;glyph.style.right=-4;glyph.style.bottom=-14;card.Add(glyph);
+                var glyph=Text(glyphs[i],58,true,"rgba(255,255,255,.16)");glyph.style.height=58;glyph.pickingMode=PickingMode.Ignore;// font: 700 58px/1glyph.style.position=Position.Absolute;glyph.style.right=-4;glyph.style.bottom=-14;card.Add(glyph);
                 var gloss=Box();Place(gloss,0,0,208,39);gloss.pickingMode=PickingMode.Ignore;Decorate(gloss,"linear-gradient(rgba(255,255,255,.18),transparent)",18);card.Add(gloss);
                 var title=Text(names[i],18,true,"#fff");title.pickingMode=PickingMode.Ignore;card.Add(title);
                 var line=Row();line.pickingMode=PickingMode.Ignore;line.style.marginTop=4;var dot=Box();dot.style.width=dot.style.height=6;dot.style.marginRight=5;Decorate(dot,"#8EF0B0",3);GalaxyFilters.Shadow(dot,0,0,3,C("#8EF0B0"));line.Add(dot);
@@ -357,6 +356,16 @@ namespace Galaxy101
         /// Chrome's "line-height: normal" for the design fonts: the hhea ascent and descent, each rounded to whole pixels
         /// (Montserrat .968 / .251 em, Baloo 2 1.078 / .524 em) — Montserrat 14 px is an 18 px line, not 17.07.
         /// </summary>
+        /// <summary>A CSS line box: <paramref name="height"/> px (or the font's "normal" line height) with the glyphs centred in it.</summary>
+        public static Label CssLine(Label label,float height=0)
+        {
+            var font=label.style.unityFont.value;
+            label.style.height=height>0?height:CssLineHeight(font!=null?font.name:null,label.style.fontSize.value.value);label.style.flexShrink=0;
+            var align=label.style.unityTextAlign.value;
+            label.style.unityTextAlign=align==TextAnchor.UpperCenter||align==TextAnchor.MiddleCenter||align==TextAnchor.LowerCenter?TextAnchor.MiddleCenter
+                :align==TextAnchor.UpperRight||align==TextAnchor.MiddleRight||align==TextAnchor.LowerRight?TextAnchor.MiddleRight:TextAnchor.MiddleLeft;
+            return label;
+        }
         public static float CssLineHeight(string font,float size)
         {
             bool baloo=font!=null&&font.StartsWith("Baloo");float ascent=baloo?1.078f:.968f,descent=baloo?.524f:.251f;
@@ -379,6 +388,59 @@ namespace Galaxy101
                 GalaxyFilters.Blur(target,f<.6f?12*(1-CssBezier(.16f,1,.3f,1,f/.6f)):0);
                 if(f>=1){target.style.opacity=StyleKeyword.Null;target.style.scale=StyleKeyword.Null;target.style.filter=StyleKeyword.Null;job.Pause();}
             }).Every(0);
+        }
+
+        /// <summary>
+        /// A CSS paragraph: n line boxes of <paramref name="lineHeight"/> px with the glyphs centred in each (rich-text
+        /// line-height between lines, a box of n × line height) and, with <paramref name="pretty"/>, text-wrap: pretty —
+        /// the last line never holds a single word: the word before it moves down with it, as Chrome balances the end of a
+        /// paragraph.
+        /// </summary>
+        public static Label CssParagraph(Label label,float lineHeight,bool pretty)
+        {
+            string plain=label.text??"";label.enableRichText=true;label.style.whiteSpace=WhiteSpace.Normal;label.style.flexShrink=0;
+            string Wrap(string body)=>"<line-height="+lineHeight.ToString("0.##",System.Globalization.CultureInfo.InvariantCulture)+"px>"+body;
+            label.text=Wrap(plain);
+            float laidFor=-1;
+            label.RegisterCallback<GeometryChangedEvent>(_=>
+            {
+                float width=label.contentRect.width;if(width<=1||Mathf.Abs(width-laidFor)<.5f)return;laidFor=width;
+                if(pretty)label.text=Wrap(Pretty(label,plain,width));
+                var align=label.resolvedStyle.unityTextAlign;
+                if(align==TextAnchor.UpperLeft)label.style.unityTextAlign=TextAnchor.MiddleLeft;
+                else if(align==TextAnchor.UpperCenter)label.style.unityTextAlign=TextAnchor.MiddleCenter;
+                else if(align==TextAnchor.UpperRight)label.style.unityTextAlign=TextAnchor.MiddleRight;
+                float one=label.MeasureTextSize("Ag",0,VisualElement.MeasureMode.Undefined,0,VisualElement.MeasureMode.Undefined).y;
+                float all=label.MeasureTextSize(label.text,width,VisualElement.MeasureMode.Exactly,0,VisualElement.MeasureMode.Undefined).y;
+                if(one<=0)return;
+                int lines=Mathf.Max(1,Mathf.RoundToInt((all-one)/lineHeight)+1);
+                label.style.height=lines*lineHeight+label.resolvedStyle.paddingTop+label.resolvedStyle.paddingBottom;
+            });
+            return label;
+        }
+        private static string Pretty(Label label,string plain,float width)
+        {
+            var words=plain.Split(' ');if(words.Length<3)return plain;
+            // Greedy lines as the label would break them.
+            var lines=new List<int>();int start=0;
+            for(int i=1;i<=words.Length;i++)
+            {
+                string candidate=string.Join(" ",words,start,i-start);
+                if(i-start>1&&label.MeasureTextSize(candidate,0,VisualElement.MeasureMode.Undefined,0,VisualElement.MeasureMode.Undefined).x>width){lines.Add(start);start=i-1;}
+            }
+            lines.Add(start);
+            if(lines.Count<2||lines[lines.Count-1]!=words.Length-1)return plain;
+            int cut=words.Length-2;
+            return string.Join(" ",words,0,cut)+"\n"+string.Join(" ",words,cut,words.Length-cut);
+        }
+
+        /// <summary>font-variant-numeric: tabular-nums — every digit on the font's tabular advance (Montserrat 0.69 em, Baloo 2 0.59 em).</summary>
+        public static Label TabularDigits(Label label)
+        {
+            string em=label.style.unityFont.value!=null&&label.style.unityFont.value.name.StartsWith("Baloo")?"0.59em":"0.69em";
+            label.enableRichText=true;
+            label.text=System.Text.RegularExpressions.Regex.Replace(label.text,"[0-9]+",m=>"<mspace="+em+">"+m.Value+"</mspace>");
+            return label;
         }
 
         internal static float CssBezier(float x1,float y1,float x2,float y2,float x)

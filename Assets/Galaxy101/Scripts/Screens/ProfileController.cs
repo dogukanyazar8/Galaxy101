@@ -19,11 +19,13 @@ namespace Galaxy101
             summary.style.paddingBottom = 18;
             v.Decorate(summary, "radial-gradient(ellipse at 50% 20%,var(--pnH),var(--sd) 70%)", 22);
             summary.Add(v.Avatar(124, null, true));
-            var name = v.Text((string)v.Model.Profile["name"], 24, true); name.style.marginTop = 18; summary.Add(name);
+            var name = v.Text((string)v.Model.Profile["name"], 24, true); name.style.marginTop = 18; name.style.height = 24 * 1.15f; name.style.unityTextAlign = TextAnchor.MiddleCenter; summary.Add(name);
             var status = (string)v.Model.Profile["status"];
             var statusLabel = PanelUi.Wrap(v, string.IsNullOrEmpty(status) ? v.L("Henüz durum mesajı yok", "No status message yet") : status, 13);
-            statusLabel.style.unityTextAlign = TextAnchor.MiddleCenter; statusLabel.style.marginTop = 10; statusLabel.style.minHeight = 18; summary.Add(statusLabel);
-            var xp = v.Row(v.Text(v.L("Seviye 25'e", "To level 25"), 12, false, "mt"), PanelUi.Spacer(v), v.Text(v.N((int)stats["xp"]) + " / " + v.N((int)stats["nextXp"]) + " XP", 12, false, "mt")); xp.style.alignSelf = Align.Stretch; xp.style.marginTop = 14; summary.Add(xp);
+            statusLabel.style.unityTextAlign = TextAnchor.MiddleCenter; statusLabel.style.marginTop = 10; statusLabel.style.minHeight = 18; MenuView.CssParagraph(statusLabel, 13 * 1.4f, false); summary.Add(statusLabel);
+            // font: 800 12px Baloo 2; the value in tabular digits.
+            Label Bold12(string text) { var label = v.Text(text, 12, false, "mt"); label.style.unityFont = v.Font("Baloo2-800"); return MenuView.CssLine(label); }
+            var xp = v.Row(Bold12(v.L("Seviye 25'e", "To level 25")), PanelUi.Spacer(v), MenuView.TabularDigits(Bold12(v.N((int)stats["xp"]) + " / " + v.N((int)stats["nextXp"]) + " XP"))); xp.style.alignSelf = Align.Stretch; xp.style.marginTop = 14; summary.Add(xp);
             var progress = v.Progress((float)stats["xp"] / (float)stats["nextXp"]); progress.style.height = 10; progress.style.alignSelf = Align.Stretch; progress.style.marginTop = 6; summary.Add(progress);
             // Reference: dashed strip, padding 10px 12px, radius 14, gap 10; code 700 16px, "Kopyala" 700 13px heading in ic.
             var code = PanelUi.CodeStrip(v, 12, 16, 14); PanelUi.Pad(code, 10, 12); PanelUi.Gap(code, 10); code.style.alignSelf = Align.Stretch; code.style.marginTop = 14; code.Add(PanelUi.Spacer(v));
@@ -70,19 +72,23 @@ namespace Galaxy101
             var gem = v.Box(); gem.style.width = gem.style.height = 52; gem.style.rotate = new Rotate(45); gem.style.alignItems = Align.Center; gem.style.justifyContent = Justify.Center; v.Decorate(gem, "linear-gradient(135deg,#FFE08A,#F5A623)", 12);
             GalaxyFilters.Shadow(gem, 0, 0, 11, v.C("rgba(255,201,74,.5)"));
             var numeral = v.Text("II", 20, true, "#3A1F00"); numeral.style.rotate = new Rotate(-45); gem.Add(numeral); diamond.Add(gem);
-            var description = v.Column(PanelUi.Caption(v, v.L("SEZON 3 · DERECELİ", "SEASON 3 · RANKED"), 10, 1.2f), v.Text(v.L("Altın II", "Gold II"), 22, true, "#FFC94A")); description.style.marginLeft = 14; PanelUi.Grow(description);
+            var description = v.Column(PanelUi.Caption(v, v.L("SEZON 3 · DERECELİ", "SEASON 3 · RANKED"), 10, 1.2f), MenuView.CssLine(v.Text(v.L("Altın II", "Gold II"), 22, true, "#FFC94A"), 22 * 1.15f)); description.style.marginLeft = 14; PanelUi.Grow(description);
             var best = v.Column(PanelUi.Caption(v, v.L("SEZON EN İYİ", "SEASON BEST"), 10, 1.2f), v.Text(v.L("Altın I", "Gold I"), 15, true)); best.style.alignItems = Align.FlexEnd;
             rank.Add(v.Row(diamond, description, best));
             var lp = v.Progress((float)stats["lp"] / (float)stats["nextLp"], "linear-gradient(90deg,#F5A623,#FFE08A)"); lp.style.marginTop = 12; lp.style.height = 10; rank.Add(lp);
-            var rankFooter = v.Row(v.Text("720 / 1000 LP", 12, false, "mt"), PanelUi.Spacer(v), v.Text(v.L("Altın I'e 280 LP", "280 LP to Gold I"), 12, false, "mt")); rankFooter.style.marginTop = 12; rank.Add(rankFooter); middle.Add(rank);
+            Label Bold12(string text) { var label = v.Text(text, 12, false, "mt"); label.style.unityFont = v.Font("Baloo2-800"); return MenuView.CssLine(label); } // 800 12px Baloo 2
+            var rankFooter = v.Row(Bold12("720 / 1000 LP"), PanelUi.Spacer(v), Bold12(v.L("Altın I'e 280 LP", "280 LP to Gold I"))); rankFooter.style.marginTop = 12; rank.Add(rankFooter); middle.Add(rank);
             var win = v.Box("g-panel-card"); win.name = "profile-mode-win-rates"; PanelUi.Pad(win, 14, 18); win.style.flexGrow = 1; win.style.flexBasis = 0; win.Add(PanelUi.Caption(v, v.L("MODLARA GÖRE KAZANMA", "WIN RATE BY MODE"), 10, 1.2f));
             var rates = (JArray)stats["modeWinRates"];
-            var modes = (JArray)v.Model.Content["modes"];
+            // G101-Menu: rows named after the v3 modes (Klasik, Dereceli, Botlara karşı; the fourth rate has no v3 mode and
+            // no name), bars in MC = #3D7BFF, #FF6B6B, #8B5CF6, #16B6A8.
+            string[] names = { v.L("Klasik", "Classic"), v.L("Dereceli", "Ranked"), v.L("Botlara karşı", "Vs bots"), "" };
+            string[] colors = { "#3D7BFF", "#FF6B6B", "#8B5CF6", "#16B6A8" };
             for (var i = 0; i < 4; i++)
             {
-                var mode = (JObject)modes[i];
-                var name = v.Text(v.L((string)mode["tr"], (string)mode["en"]), 13, true); name.style.width = 86; name.style.height = 16; name.style.unityTextAlign = TextAnchor.MiddleLeft; name.style.marginRight = 10;
-                var bar = v.Progress((float)rates[i] / 100, (string)mode["bg"]); PanelUi.Grow(bar); bar.style.height = 8; bar.style.marginRight = 10;
+                var name = v.Text(names[i], 13, true); name.style.width = 86; name.style.height = 16; name.style.unityTextAlign = TextAnchor.MiddleLeft; name.style.marginRight = 10;
+                // The fill is width: {{ m.pct }} — "%44" in Turkish is no CSS length, so the design draws every Turkish bar full.
+                var bar = v.Progress(v.Loc.Language == "en" ? (float)rates[i] / 100 : 1, colors[i]); PanelUi.Grow(bar); bar.style.height = 8; bar.style.marginRight = 10;
                 var value = v.Text(v.P((int)rates[i]), 13, true); value.style.width = 40; value.style.height = 16; value.style.unityTextAlign = TextAnchor.MiddleRight;
                 var line = v.Row(name, bar, value); line.style.marginTop = 9; win.Add(line);
             }
@@ -125,8 +131,8 @@ namespace Galaxy101
             var card = v.Box("g-profile-stat");
             card.style.paddingBottom = 12;
             var label = PanelUi.Caption(v, title, 10, 1.2f); card.Add(label);
-            var number = v.Text(value, 28, true, color); number.style.height = 30.8f; number.style.marginTop = 4; card.Add(number);
-            var description = v.Text(sub, 12, false, "mt"); description.style.marginTop = 4; card.Add(description); return card;
+            var number = MenuView.TabularDigits(v.Text(value, 28, true, color)); number.style.height = 30.8f; number.style.unityTextAlign = TextAnchor.MiddleLeft; number.style.marginTop = 4; card.Add(number);
+            var description = MenuView.CssLine(v.Text(sub, 12, false, "mt")); description.style.marginTop = 4; card.Add(description); return card;
         }
 
         private static void Badges(MenuView v, VisualElement parent)

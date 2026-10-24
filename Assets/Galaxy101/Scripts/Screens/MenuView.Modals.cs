@@ -112,6 +112,14 @@ namespace Galaxy101
             card.style.width=width;if(height>0)card.style.height=height;card.style.flexShrink=0;card.AddToClassList(nested?"dialog-card":"panel-card");
             Decorate(card,"pn",nested?26:28,10,"pnS");GalaxyFilters.Shadow(card,0,40,45,new Color(0,0,0,.6f));card.style.overflow=Overflow.Hidden;card.focusable=true;card.pickingMode=PickingMode.Position;center.Add(card);
             if(nested){dialogCard=card;mountedDialog=key;}else{panelCard=card;mountedPanel=key;}
+            // fadeIn .2s (dialogs .18s) ease-out on the whole overlay, under the card's own modalIn.
+            float fade=nested?.18f:.2f;double fadeFrom=Time.realtimeSinceStartupAsDouble;layer.style.opacity=0;
+            IVisualElementScheduledItem fader=null;
+            fader=layer.schedule.Execute(()=>
+            {
+                float f=Mathf.Clamp01((float)(Time.realtimeSinceStartupAsDouble-fadeFrom)/fade);layer.style.opacity=CssBezier(0,0,.58f,1,f);
+                if(f>=1){layer.style.opacity=StyleKeyword.Null;fader.Pause();}
+            }).Every(16);
             double began=Time.realtimeSinceStartupAsDouble;float duration=nested?.26f:.28f;
             card.style.opacity=0;card.style.scale=new Scale(new Vector3(.96f,.96f,1));card.style.translate=new Translate(0,14);
             IVisualElementScheduledItem job=null;

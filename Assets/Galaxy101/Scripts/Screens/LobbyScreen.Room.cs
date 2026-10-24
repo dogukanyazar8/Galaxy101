@@ -76,10 +76,15 @@ namespace Galaxy101
 
             // The oval table with pool, status and four seat dots; seats around it.
             var area = Box(); MenuView.Place(area, 28, 100, 872, 592); page.Add(area);
+            // box-shadow: inset 0 0 0 3px rgba(255,255,255,.08), inset 0 0 0 10px --dp, inset 0 0 0 12px --a2, 0 0 60px --gl,
+            // 0 24px 50px rgba(0,0,0,.45). The glow comes from a filled twin behind the table (a ring would glow thin).
+            var halo = Box(); MenuView.Place(halo, 156, 176, 560, 264); view.Decorate(halo, "var(--dp)", 132); GalaxyFilters.Shadow(halo, 0, 0, 30, view.C("var(--gl)")); area.Add(halo);
             var oval = Box("room-table"); MenuView.Place(oval, 156, 176, 560, 264);
             view.Decorate(oval, "radial-gradient(ellipse at 50% 40%,var(--pnH),var(--sd) 75%)", 132);
             Border(oval, 12, view.C("var(--dp)")); GalaxyFilters.Shadow(oval, 0, 24, 25, new Color(0, 0, 0, .45f)); area.Add(oval);
-            var rim = Box(); rim.style.position = Position.Absolute; rim.style.left = rim.style.top = rim.style.right = rim.style.bottom = -2; Radius(rim, 122); Border(rim, 2, view.C("var(--a2)")); GalaxyFilters.Shadow(rim, 0, 0, 30, view.C("var(--gl)")); oval.Add(rim);
+            // Absolute children start inside the 12 px border: −2 puts the gold band 10–12 px in, −12 the sheen at the edge.
+            var rim = Box(); rim.style.position = Position.Absolute; rim.style.left = rim.style.top = rim.style.right = rim.style.bottom = -2; Radius(rim, 122); Border(rim, 2, view.C("var(--a2)")); oval.Add(rim);
+            var sheen = Box(); sheen.style.position = Position.Absolute; sheen.style.left = sheen.style.top = sheen.style.right = sheen.style.bottom = -12; Radius(sheen, 132); Border(sheen, 3, new Color(1, 1, 1, .08f)); oval.Add(sheen);
             var middle = Box(); MenuView.Place(middle, 156, 176, 560, 264); middle.style.alignItems = Align.Center; middle.style.justifyContent = Justify.Center; area.Add(middle);
             var brand = Text("GALAXY 101", 22, "Montserrat-800", "var(--a1)"); MenuView.Tracking(brand, 4, 22); middle.Add(brand);
             var pool = Row(); pool.style.marginTop = 8; Pad(pool, 6, 14, 6, 14); view.Decorate(pool, "rgba(0,0,0,.28)", 999);

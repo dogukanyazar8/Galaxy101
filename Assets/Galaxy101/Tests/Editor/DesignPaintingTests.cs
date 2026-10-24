@@ -66,7 +66,9 @@ namespace Galaxy101.Tests
             int count=(int)type.GetField("Count").GetValue(layout);
             Assert.That(radius+1,Is.EqualTo(14));Assert.That(radius-1,Is.EqualTo(12));
             Assert.That(step*count,Is.EqualTo(2*Mathf.PI).Within(.0001f));
-            Assert.That(radius*step*.5f,Is.EqualTo(5.834386f).Within(.0001f));
+            // Chrome: dashes three stroke widths, gaps about two (8 dashes round a 28 px coin).
+            Assert.That(count,Is.EqualTo(8));
+            Assert.That(radius*step*.6f,Is.EqualTo(6).Within(.3f));Assert.That(radius*step*.4f,Is.EqualTo(4).Within(.3f));
         }
     }
 }

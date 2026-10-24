@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -72,6 +73,33 @@ namespace Galaxy101
             }
             if(Mathf.Approximately(ledge.Depth,depth)&&ledge.Color==color)return;
             ledge.Depth=Mathf.Max(0,depth);ledge.Color=color;element.MarkDirtyRepaint();
+        }
+        /// <summary>
+        /// CSS "box-shadow: 0 0 0 spread color" — a solid band around the element's rounded outline (pulse rings), painted
+        /// in the element's own content like <see cref="HardShadow"/>. Returns the setter (spread px, colour).
+        /// </summary>
+        public static Action<float,Color> SpreadRing(VisualElement element)
+        {
+            float spread=0;Color color=Color.clear;
+            element.generateVisualContent+=context=>
+            {
+                float w=element.layout.width,h=element.layout.height;if(spread<=.01f||color.a<=.001f||float.IsNaN(w)||w<=0||h<=0)return;
+                var style=element.resolvedStyle;float cap=Mathf.Min(w,h)*.5f;
+                float[] radii={Mathf.Min(style.borderTopLeftRadius,cap),Mathf.Min(style.borderTopRightRadius,cap),Mathf.Min(style.borderBottomRightRadius,cap),Mathf.Min(style.borderBottomLeftRadius,cap)};
+                var p=context.painter2D;p.fillColor=color;p.BeginPath();
+                RoundedRect(p,-spread,-spread,w+spread,h+spread,radii,spread);
+                RoundedRect(p,0,0,w,h,radii,0);
+                p.Fill(FillRule.OddEven);
+            };
+            return (s,c)=>{if(Mathf.Approximately(s,spread)&&c==color)return;spread=s;color=c;element.MarkDirtyRepaint();};
+        }
+        private static void RoundedRect(Painter2D p,float x0,float y0,float x1,float y1,float[] radii,float grow)
+        {
+            const float k=.5523f;float a=radii[0]+grow,b=radii[1]+grow,c=radii[2]+grow,d=radii[3]+grow;
+            p.MoveTo(new Vector2(x0+a,y0));p.LineTo(new Vector2(x1-b,y0));p.BezierCurveTo(new Vector2(x1-b+k*b,y0),new Vector2(x1,y0+b-k*b),new Vector2(x1,y0+b));
+            p.LineTo(new Vector2(x1,y1-c));p.BezierCurveTo(new Vector2(x1,y1-c+k*c),new Vector2(x1-c+k*c,y1),new Vector2(x1-c,y1));
+            p.LineTo(new Vector2(x0+d,y1));p.BezierCurveTo(new Vector2(x0+d-k*d,y1),new Vector2(x0,y1-d+k*d),new Vector2(x0,y1-d));
+            p.LineTo(new Vector2(x0,y0+a));p.BezierCurveTo(new Vector2(x0,y0+a-k*a),new Vector2(x0+a-k*a,y0),new Vector2(x0+a,y0));p.ClosePath();
         }
         /// <summary>The ledge depth <see cref="HardShadow"/> gave the element (0 when none).</summary>
         public static float LedgeDepth(VisualElement element)=>ledges.TryGetValue(element,out var ledge)?ledge.Depth:0;

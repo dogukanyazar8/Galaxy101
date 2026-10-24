@@ -83,6 +83,8 @@ namespace Galaxy101
             {
                 Directory.CreateDirectory(outputDirectory);
                 if(menu.View!=null) throw new InvalidOperationException("Capture must initialize the menu before its normal Start method to isolate persistence.");
+                // The captures are of the signed-in menu: no splash or sign-in on the way.
+                MainMenuController.AuthOnStart=false;
                 controller=menu;controller.Initialize(persistencePath);controller.View.SetFocused(false);
                 document=controller.GetComponent<UIDocument>();background=controller.GetComponentInChildren<GalaxyBackground>();background.SetFocused(false);
                 originalPanel=document.panelSettings;

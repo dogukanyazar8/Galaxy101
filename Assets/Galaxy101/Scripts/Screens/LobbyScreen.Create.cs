@@ -75,12 +75,12 @@ namespace Galaxy101
             // Masa adı.
             var nameRow = FormRow(scroll, L("Masa adı", "Table name"), nameBad ? L("Masa adı boş olamaz", "Table name can’t be empty") : L("Lobide ve davette görünür", "Shown in the lobby and invites"), nameBad ? "#FF8A94" : null);
             var nameBox = Row(); nameBox.style.width = 320; nameBox.style.height = 46; Pad(nameBox, 0, 14, 0, 14); view.Decorate(nameBox, "var(--dp)", 14);
-            if (nameBad) Border(nameBox, 2, view.C("#FF5E6C"));
+            var nameRing = FieldRing(nameBox, 14); nameRing(nameBad ? "bad" : "rest");
             var nameField = Input("create-name", c.Name, "", 16, "Baloo2-700", "#F4F1E8", 24); nameField.style.flexGrow = 1; nameBox.Add(nameField);
             var count = Text(c.Name.Length + "/24", 12, "Baloo2-800", "var(--mt)"); count.style.marginLeft = 10; nameBox.Add(count);
             nameField.RegisterValueChangedCallback(e => { c.Name = Clip(e.newValue ?? "", 24); count.text = c.Name.Length + "/24"; UpdateSummary(); });
-            nameField.RegisterCallback<FocusInEvent>(_ => { if (!nameBad) Border(nameBox, 2, view.C("var(--a1)")); });
-            nameField.RegisterCallback<FocusOutEvent>(_ => { if (!nameBad) Border(nameBox, 0, Color.clear); });
+            nameField.RegisterCallback<FocusInEvent>(_ => { if (!nameBad) nameRing("focus"); });
+            nameField.RegisterCallback<FocusOutEvent>(_ => { if (!nameBad) nameRing("rest"); });
             nameRow.Add(nameBox);
 
             // Görünürlük.
@@ -92,7 +92,7 @@ namespace Galaxy101
             if (c.PinOn)
             {
                 var pinBox = Row(); pinBox.style.width = 150; pinBox.style.height = 44; pinBox.style.marginRight = 12; Pad(pinBox, 0, 12, 0, 12); view.Decorate(pinBox, "var(--dp)", 13);
-                Border(pinBox, 2, view.C(pinBad ? "#FF5E6C" : "var(--bd)"));
+                FieldRing(pinBox, 13)(pinBad ? "bad" : "line");
                 var lockIcon = view.Icon("lock", 15, "var(--a1)"); lockIcon.style.marginRight = 8; pinBox.Add(lockIcon);
                 var pin = Input("create-pin", c.Pin, "••••", 18, "Montserrat-700", "#F4F1E8", 4); pin.style.flexGrow = 1; MenuView.Tracking(pin, 6, 18);
                 pin.RegisterValueChangedCallback(e => { string digits = Regex.Replace(e.newValue ?? "", "\\D", ""); if (digits.Length > 4) digits = digits.Substring(0, 4); if (digits != e.newValue) pin.SetValueWithoutNotify(digits); c.Pin = digits; UpdateSummary(); });
@@ -289,7 +289,10 @@ namespace Galaxy101
         private VisualElement Switch(string name, bool on, Action flip, int width = 56, int height = 32)
         {
             var track = Box(name); track.style.width = width; track.style.height = height; track.style.flexShrink = 0;
-            view.Decorate(track, on ? "#3CCB6E" : "rgba(255,255,255,.14)", height / 2);
+            // tog(): on #3CCB6E, off --dp; inset 0 2px 0 rgba(0,0,0,.25) either way.
+            view.Decorate(track, on ? "#3CCB6E" : "var(--dp)", height / 2);
+            var inset = Box(); inset.style.position = Position.Absolute; inset.style.left = inset.style.top = inset.style.right = inset.style.bottom = 0; Radius(inset, height / 2);
+            inset.style.borderTopWidth = 2; inset.style.borderTopColor = new Color(0, 0, 0, .25f); track.Add(inset);
             int knob = height - 6; var dot = Box(); MenuView.Place(dot, on ? width - knob - 3 : 3, 3, knob, knob); Raise(dot, "#fff", knob / 2, 2, "rgba(0,0,0,.25)"); track.Add(dot);
             track.EnableInClassList("on", on); Tap(track, flip); return track;
         }

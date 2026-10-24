@@ -362,16 +362,35 @@ namespace Galaxy101
         private VisualElement Search()
         {
             var box = Row(); box.style.width = 210; box.style.height = 42; Pad(box, 0, 6, 0, 12); view.Decorate(box, "var(--dp)", 13);
-            if (queryFocused) Border(box, 2, view.C("var(--a1)"));
+            var ring = FieldRing(box, 13); ring(queryFocused ? "focus" : "rest");
             box.Add(view.Icon("search", 16, "var(--mt)"));
             var field = Input("lobby-search", query, L("Masa ara", "Search tables"), 14, "Baloo2-700", "#F4F1E8", 40);
             field.style.flexGrow = 1; field.style.marginLeft = 8;
-            field.RegisterValueChangedCallback(e => { query = e.newValue; RefreshCards(); });
-            field.RegisterCallback<FocusInEvent>(_ => { queryFocused = true; Border(box, 2, view.C("var(--a1)")); });
-            field.RegisterCallback<FocusOutEvent>(_ => { queryFocused = false; Border(box, 0, Color.clear); });
-            box.Add(field);
-            if (query.Length > 0) { var clear = Box("lobby-search-clear"); Square(clear, 28); Radius(clear, 9); clear.Add(view.Icon("close", 12, "var(--ic)")); Tap(clear, () => { query = ""; Render(); }); box.Add(clear); }
+            // The clear button shows while there is text (it follows the typing, not only redraws); hover: --pnH.
+            var clear = Box("lobby-search-clear"); clear.pickingMode = PickingMode.Position; Square(clear, 28); Radius(clear, 9); clear.Add(view.Icon("close", 12, "var(--ic)"));
+            clear.RegisterCallback<PointerEnterEvent>(_ => clear.style.backgroundColor = view.C("var(--pnH)")); clear.RegisterCallback<PointerLeaveEvent>(_ => clear.style.backgroundColor = Color.clear);
+            clear.style.display = query.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            Tap(clear, () => field.value = "");
+            field.RegisterValueChangedCallback(e => { query = e.newValue ?? ""; clear.style.display = query.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None; RefreshCards(); });
+            field.RegisterCallback<FocusInEvent>(_ => { queryFocused = true; ring("focus"); });
+            field.RegisterCallback<FocusOutEvent>(_ => { queryFocused = false; ring("rest"); });
+            box.Add(field); box.Add(clear);
             return box;
+        }
+
+        /// <summary>
+        /// A field box's box-shadow ring, drawn over it without layout: "rest" inset 0 2px 0 rgba(0,0,0,.3), "focus" inset
+        /// 0 0 0 2px --a1, "bad" #FF5E6C, "line" --bd. Returns the setter.
+        /// </summary>
+        private Action<string> FieldRing(VisualElement box, float radius)
+        {
+            var ring = Box("field-ring"); ring.style.position = Position.Absolute; ring.style.left = ring.style.top = ring.style.right = ring.style.bottom = 0; Radius(ring, radius);
+            box.Add(ring);
+            return state =>
+            {
+                if (state == "rest") { Border(ring, 0, Color.clear); ring.style.borderTopWidth = 2; ring.style.borderTopColor = new Color(0, 0, 0, .3f); return; }
+                Border(ring, 2, view.C(state == "focus" ? "var(--a1)" : state == "bad" ? "#FF5E6C" : "var(--bd)"));
+            };
         }
 
         /// <summary>Typing in the search box redraws only the cards, so the field keeps focus.</summary>
@@ -541,30 +560,32 @@ namespace Galaxy101
             var field = new TextField { name = name, value = value, maxLength = maxLength };
             field.style.marginLeft = field.style.marginRight = field.style.marginTop = field.style.marginBottom = 0;
             field.textEdition.placeholder = placeholder; field.textEdition.hidePlaceholderOnFocus = false;
+            // The caret takes the text colour (caret-color: auto); a selection shows the browser's highlight.
+            Color text = view.C(color), hint = new Color(169 / 255f, 174 / 255f, 221 / 255f, .5f); // input::placeholder
+            field.textSelection.cursorColor = text; field.textSelection.selectionColor = new Color(.2f, .56f, 1f, .45f);
             var input = field.Q(className: TextField.inputUssClassName);
             if (input != null)
             {
                 input.style.backgroundColor = Color.clear; Border(input, 0, Color.clear); Pad(input, 0, 0, 0, 0);
-                input.style.unityFont = view.Font(font); input.style.fontSize = size; input.style.color = view.C(color);
+                input.style.unityFont = view.Font(font); input.style.fontSize = size;
+                void Tint() => input.style.color = string.IsNullOrEmpty(field.value) ? hint : text;
+                field.RegisterValueChangedCallback(_ => Tint()); Tint();
             }
             return field;
         }
 
         private void Pulse(VisualElement element)
         {
-            // lbPulse 2.4 s: a ring of the theme glow spreads 12 px out and fades. A bordered child scales instead of an
-            // animated drop-shadow filter, which UI Toolkit would re-allocate every frame.
-            var ring = Box("pulse"); ring.style.position = Position.Absolute; ring.style.left = ring.style.top = ring.style.right = ring.style.bottom = 0;
-            var glow = view.C("var(--gl)"); glow.a = Mathf.Max(glow.a, .6f); Border(ring, 3, glow);
-            element.RegisterCallback<GeometryChangedEvent>(e => Radius(ring, element.resolvedStyle.borderTopLeftRadius + 3));
-            element.Add(ring);
+            // lbPulse 2.4 s: box-shadow 0 0 0 0 --gl → 0 0 0 12px transparent → back (ease per half): a solid ring that
+            // spreads out fading, then closes in returning.
+            var ring = GalaxyFilters.SpreadRing(element); var glow = view.C("var(--gl)");
             float began = shownAt; // one continuous pulse across redraws
             Animate(() =>
             {
                 if (element.parent == null || element.layout.width <= 0) return;
-                float p = Mathf.Repeat((Time.realtimeSinceStartup - began) / 2.4f, 1), u = p < .5f ? p * 2 : 1;
-                ring.style.opacity = 1 - u;
-                ring.style.scale = new Scale(new Vector2(1 + 24 * u / element.layout.width, 1 + 24 * u / element.layout.height));
+                float p = Mathf.Repeat((Time.realtimeSinceStartup - began) / 2.4f, 1);
+                float f = MenuView.CssBezier(.25f, .1f, .25f, 1, p < .5f ? p * 2 : (p - .5f) * 2), out_ = p < .5f ? f : 1 - f;
+                var c = glow; c.a *= 1 - out_; ring(12 * out_, c);
             }, element);
         }
 
@@ -688,8 +709,19 @@ namespace Galaxy101
             e.style.borderTopWidth = e.style.borderRightWidth = e.style.borderBottomWidth = e.style.borderLeftWidth = w;
             e.style.borderTopColor = e.style.borderRightColor = e.style.borderBottomColor = e.style.borderLeftColor = c;
         }
-        /// <summary>UI Toolkit has no dashed borders; a thinner, fainter solid ring reads the same at chip size.</summary>
-        private static void DashedBorder(VisualElement e, float w, Color c) { c.a *= .8f; Border(e, w * .75f, c); }
+        /// <summary>
+        /// CSS "border: w dashed c" (UI Toolkit has none): a transparent border keeps the box model, dashes painted over it
+        /// (Chrome's 3w dash / 2w gap) — round boxes as a dashed circle, others along their rounded outline.
+        /// </summary>
+        private static void DashedBorder(VisualElement e, float w, Color c)
+        {
+            Border(e, w, Color.clear);
+            float radius = e.style.borderTopLeftRadius.value.value, size = e.style.width.value.value;
+            VisualElement dashes = size > 0 && radius * 2 >= size && e.style.height.value.value == size ? new CssDashedCircle(size, w, c) : new DashedOutline(radius, w, c, 3 * w, 2 * w);
+            // An absolute child sits in the padding box: reach back over the border.
+            dashes.style.left = dashes.style.top = -w; if (!(dashes is CssDashedCircle)) dashes.style.right = dashes.style.bottom = -w;
+            e.Add(dashes);
+        }
         private static void Tap(VisualElement e, Action action)
         {
             e.pickingMode = PickingMode.Position; e.focusable = true;

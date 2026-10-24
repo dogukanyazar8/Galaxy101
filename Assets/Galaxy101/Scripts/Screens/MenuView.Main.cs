@@ -189,10 +189,11 @@ namespace Galaxy101
                 var card=Button("",()=>PickMode(index),"mode-card");
                 card.name="mode-"+index;Place(card,0,0,208,78);Decorate(card,color,18,5,shade);
                 card.style.flexDirection=FlexDirection.Column;card.style.justifyContent=Justify.Center;card.style.alignItems=Align.FlexStart;card.style.paddingLeft=card.style.paddingRight=14;card.style.overflow=Overflow.Hidden;
-                // box-shadow "0 2.5px 0 5px #fff" ring around the selected (and hovered) card, over the page colour gap.
-                var ring=Box("mode-selection-ring");ring.pickingMode=PickingMode.Ignore;Place(ring,-8.5f,-12-6,225,95);Decorate(ring,"#fff",26);
-                var gap=Box("mode-selection-gap");gap.pickingMode=PickingMode.Ignore;Place(gap,-5.5f,-9-6,219,89);Decorate(gap,"var(--bg3)",23);
-                var glyph=Text(glyphs[i],58,true,"rgba(255,255,255,.16)");glyph.style.height=58;glyph.pickingMode=PickingMode.Ignore;// font: 700 58px/1glyph.style.position=Position.Absolute;glyph.style.right=-4;glyph.style.bottom=-14;card.Add(glyph);
+                // The design's white selection/hover ring (box-shadow 0 2.5px 0 5px #fff) is left out on purpose: the cards
+                // only lift, light up and glow.
+                // Mode glyph: 700 58px/1, rgba(255,255,255,.16), right -4 bottom -14, clipped by the card.
+                var glyph=Text(glyphs[i],58,true,"rgba(255,255,255,.16)");glyph.name="mode-glyph-"+index;glyph.style.height=58;glyph.style.unityTextAlign=TextAnchor.MiddleRight;glyph.pickingMode=PickingMode.Ignore;
+                glyph.style.position=Position.Absolute;glyph.style.right=-4;glyph.style.bottom=-14;card.Add(glyph);
                 var gloss=Box();Place(gloss,0,0,208,39);gloss.pickingMode=PickingMode.Ignore;Decorate(gloss,"linear-gradient(rgba(255,255,255,.18),transparent)",18);card.Add(gloss);
                 var title=Text(names[i],18,true,"#fff");title.pickingMode=PickingMode.Ignore;card.Add(title);
                 var line=Row();line.pickingMode=PickingMode.Ignore;line.style.marginTop=4;var dot=Box();dot.style.width=dot.style.height=6;dot.style.marginRight=5;Decorate(dot,"#8EF0B0",3);GalaxyFilters.Shadow(dot,0,0,3,C("#8EF0B0"));line.Add(dot);
@@ -200,7 +201,7 @@ namespace Galaxy101
                 if(IsSoon(index)){var soon=Text(L("YAKINDA","SOON"),9,false,"#fff");soon.name="mode-soon-"+index;soon.style.unityFont=Font("Baloo2-800");Tracking(soon,1.2f,9);soon.style.position=Position.Absolute;soon.style.right=10;soon.style.bottom=9;soon.style.paddingTop=soon.style.paddingBottom=3;soon.style.paddingLeft=soon.style.paddingRight=7;Decorate(soon,"rgba(0,0,0,.32)",6);card.Add(soon);}
                 var tick=Box("mode-tick");tick.pickingMode=PickingMode.Ignore;tick.style.position=Position.Absolute;tick.style.right=8;tick.style.top=8;tick.style.width=tick.style.height=22;tick.style.alignItems=Align.Center;tick.style.justifyContent=Justify.Center;Decorate(tick,"#fff",99);tick.Add(Icon("tick",13,"#1B2440"));card.Add(tick);
                 Color glow=C(color);glow.a=.6f;
-                var state=new ModeCard{Index=index,Card=card,Slot=slot,Ring=ring,Gap=gap,Tick=tick,Glow=glow};modeCards.Add(state);
+                var state=new ModeCard{Index=index,Card=card,Tick=tick,Glow=glow};modeCards.Add(state);
                 card.RegisterCallback<PointerEnterEvent>(_=>{state.Hover=true;ApplyModes();});
                 card.RegisterCallback<PointerLeaveEvent>(_=>{state.Hover=false;ApplyModes();});
                 card.RegisterCallback<FocusInEvent>(_=>{state.Focused=card.panel?.focusController?.focusedElement==card&&Root.ClassListContains("keyboard-navigation");ApplyModes();});
@@ -213,7 +214,7 @@ namespace Galaxy101
         /// <summary>One mode card's look, eased like the design's CSS (transform .2s cubic-bezier(.3,1.5,.6,1); filter, box-shadow .2s).</summary>
         private sealed class ModeCard
         {
-            public int Index;public Button Card;public VisualElement Slot,Ring,Gap,Tick;public Color Glow;public bool Hover,Focused,On;
+            public int Index;public Button Card;public VisualElement Tick;public Color Glow;public bool Hover,Focused,On;
             private float lift,scale=1,saturation=.7f,brightness=.78f,ring;
             private float fromLift,fromScale,fromSaturation,fromBrightness,fromRing,toLift=float.NaN,toScale,toSaturation,toBrightness,toRing,began=-9;
             private bool settled;
@@ -235,9 +236,6 @@ namespace Galaxy101
                 saturation=Mathf.Lerp(fromSaturation,toSaturation,e);brightness=Mathf.Lerp(fromBrightness,toBrightness,e);ring=Mathf.Lerp(fromRing,toRing,e);
                 Card.style.translate=new Translate(0,lift);Card.style.scale=new Scale(Vector2.one*scale);
                 var glow=Glow;glow.a*=ring;GalaxyFilters.StableLook(Card,saturation,brightness,0,14,16,glow);
-                // The ring pair lives in the slot only while it shows (an element at opacity 0 has empty draw bounds).
-                if(ring>.01f){if(Ring.parent==null){Slot.Insert(0,Gap);Slot.Insert(0,Ring);}Ring.style.opacity=Gap.style.opacity=ring;}
-                else if(Ring.parent!=null){Ring.RemoveFromHierarchy();Gap.RemoveFromHierarchy();}
                 // The tick never leaves the filtered card (changing a filtered element's children or their visibility trips
                 // UI Toolkit's render-tree compositor); unselected, it waits outside the card's clip.
                 Tick.style.translate=new Translate(On?0:80,0);

@@ -7,6 +7,8 @@ namespace Galaxy101
     /// <summary>Centered, closed-loop CSS dashed border; shared geometry with the shop coin artwork.</summary>
     internal sealed class CssDashedCircle : VisualElement
     {
+        /// <summary>Chrome's dashed border: dashes three stroke widths long, gaps about two, fitted to whole pairs.</summary>
+        internal const float DashFraction=.6f;
         internal readonly struct Layout
         {
             public readonly float Radius,StepRadians;
@@ -15,9 +17,7 @@ namespace Galaxy101
             {
                 if(stroke<=0||diameter<=stroke)throw new ArgumentOutOfRangeException(nameof(stroke));
                 Radius=(diameter-stroke)*.5f;
-                // A nominal dash and its gap each occupy three stroke widths. Fit whole pairs
-                // around the closed border, matching ShopArtwork.CoinPaint's existing rule.
-                Count=Mathf.Max(1,Mathf.RoundToInt(2*Mathf.PI*Radius/(6*stroke)));
+                Count=Mathf.Max(1,Mathf.RoundToInt(2*Mathf.PI*Radius/(5*stroke)));
                 StepRadians=2*Mathf.PI/Count;
             }
         }
@@ -32,7 +32,7 @@ namespace Galaxy101
                 var center=new Vector2(diameter*.5f,diameter*.5f);
                 for(int i=0;i<layout.Count;i++)
                 {
-                    painter.BeginPath();painter.Arc(center,layout.Radius,Angle.Radians(i*layout.StepRadians),Angle.Radians((i+.5f)*layout.StepRadians));painter.Stroke();
+                    painter.BeginPath();painter.Arc(center,layout.Radius,Angle.Radians(i*layout.StepRadians),Angle.Radians((i+DashFraction)*layout.StepRadians));painter.Stroke();
                 }
             };
         }

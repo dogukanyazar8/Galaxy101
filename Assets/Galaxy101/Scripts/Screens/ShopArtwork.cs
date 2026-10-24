@@ -191,8 +191,8 @@ namespace Galaxy101
                 generateVisualContent += context =>
                 {
                     var p = context.painter2D; p.strokeColor = new Color(1, 243f / 255, 200f / 255); p.lineWidth = 2; p.lineCap = LineCap.Butt;
-                    var radius = size / 2f - 1; var count = Mathf.RoundToInt(2 * Mathf.PI * radius / 12); var step = 360f / count;
-                    for (var i = 0; i < count; i++) { p.BeginPath(); p.Arc(new Vector2(size / 2f, size / 2f), radius, new Angle(i * step), new Angle((i + .5f) * step)); p.Stroke(); }
+                    var layout = new CssDashedCircle.Layout(size, 2); var step = layout.StepRadians * Mathf.Rad2Deg;
+                    for (var i = 0; i < layout.Count; i++) { p.BeginPath(); p.Arc(new Vector2(size / 2f, size / 2f), layout.Radius, new Angle(i * step), new Angle((i + CssDashedCircle.DashFraction) * step)); p.Stroke(); }
                 };
             }
         }

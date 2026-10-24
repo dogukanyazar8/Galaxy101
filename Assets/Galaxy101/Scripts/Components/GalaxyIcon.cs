@@ -44,11 +44,13 @@ namespace Galaxy101
                 else if(type=="circle")painter.Arc(new Vector2(F(shape,"cx"),F(shape,"cy"))*scale+offset,F(shape,"r")*scale,Angle.Degrees(0),Angle.Degrees(360));
                 else if(type=="rect")
                 {
-                    float x=F(shape,"x"),y=F(shape,"y"),w=F(shape,"width"),h=F(shape,"height"),r=F(shape,"rx");
-                    painter.MoveTo(new Vector2(x+r,y)*scale+offset);painter.LineTo(new Vector2(x+w-r,y)*scale+offset);painter.Arc(new Vector2(x+w-r,y+r)*scale+offset,r*scale,Angle.Degrees(-90),Angle.Degrees(0));
-                    painter.LineTo(new Vector2(x+w,y+h-r)*scale+offset);painter.Arc(new Vector2(x+w-r,y+h-r)*scale+offset,r*scale,Angle.Degrees(0),Angle.Degrees(90));
-                    painter.LineTo(new Vector2(x+r,y+h)*scale+offset);painter.Arc(new Vector2(x+r,y+h-r)*scale+offset,r*scale,Angle.Degrees(90),Angle.Degrees(180));
-                    painter.LineTo(new Vector2(x,y+r)*scale+offset);painter.Arc(new Vector2(x+r,y+r)*scale+offset,r*scale,Angle.Degrees(180),Angle.Degrees(270));painter.ClosePath();
+                    float x=F(shape,"x"),y=F(shape,"y"),w=F(shape,"width"),h=F(shape,"height"),r=Mathf.Min(F(shape,"rx"),Mathf.Min(w,h)*.5f),k=.5523f*r;
+                    // Quarter circles as cubic Béziers: Painter2D.Arc strays at small radii (a padlock grew "legs").
+                    Vector2 P(float px,float py)=>new Vector2(px,py)*scale+offset;
+                    painter.MoveTo(P(x+r,y));painter.LineTo(P(x+w-r,y));painter.BezierCurveTo(P(x+w-r+k,y),P(x+w,y+r-k),P(x+w,y+r));
+                    painter.LineTo(P(x+w,y+h-r));painter.BezierCurveTo(P(x+w,y+h-r+k),P(x+w-r+k,y+h),P(x+w-r,y+h));
+                    painter.LineTo(P(x+r,y+h));painter.BezierCurveTo(P(x+r-k,y+h),P(x,y+h-r+k),P(x,y+h-r));
+                    painter.LineTo(P(x,y+r));painter.BezierCurveTo(P(x,y+r-k),P(x+r-k,y),P(x+r,y));painter.ClosePath();
                 }
                 else continue;
                 string fill=Property(shape,"fill",Property(svg,"fill","black"));

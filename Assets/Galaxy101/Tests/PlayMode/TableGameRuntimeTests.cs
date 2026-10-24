@@ -559,7 +559,7 @@ namespace Galaxy101.Tests
             Time.timeScale = 3;
             yield return Until(() => game.CanDiscard && game.SyncedVersion == game.Session.GetView(TableGame.Me).Version, 40, "my first turn");
             yield return new WaitForSecondsRealtime(0.3f);
-            Assert.That(game.Fx.DiscardRingAlpha, Is.GreaterThan(0.3f), "the discard ring pulses while I discard");
+            Assert.That(game.Fx.DiscardRingAlpha, Is.GreaterThan(ThreeBlend.Normal(0.5f)), "the discard ring pulses while I discard (0.55–1 before the sRGB-blend remap; quiet is 0.16)");
             Assert.That(game.Rack.Tiles.All(id => game.Board.ViewOf(id).Bar != null), Is.True, "rack tiles carry bars");
             game.Discard(game.Rack.Tiles.First());
             yield return Until(() => game.CanDraw, 120, "my draw turn");

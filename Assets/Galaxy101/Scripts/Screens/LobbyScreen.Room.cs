@@ -291,7 +291,7 @@ namespace Galaxy101
             var field = Input("invite-search", state.Query, L("Oyuncu ara", "Search players"), 14, "Baloo2-700", "#F4F1E8", 24); field.style.flexGrow = 1; field.style.marginLeft = 8;
             search.Add(field); tools.Add(search); left.Add(tools);
 
-            var list = view.Scroll(); list.name = "invite-list"; list.style.flexGrow = 1; list.style.marginTop = 14; list.contentContainer.style.paddingRight = 6; list.contentContainer.style.paddingBottom = 20; left.Add(list);
+            var list = view.Scroll(false); list.name = "invite-list"; list.style.flexGrow = 1; list.style.marginTop = 14; list.contentContainer.style.paddingRight = 6; list.contentContainer.style.paddingBottom = 20; left.Add(list);
             void FillRows()
             {
                 list.Clear();

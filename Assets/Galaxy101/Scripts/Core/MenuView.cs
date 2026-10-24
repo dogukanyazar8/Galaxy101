@@ -217,10 +217,14 @@ namespace Galaxy101
         {
             var track=Box("progress-track");Decorate(track,"var(--dp)",6);var fill=Box("progress-fill");fill.style.width=Length.Percent(Mathf.Clamp01(fraction)*100);Decorate(fill,color??"linear-gradient(90deg,var(--a2),var(--a1))",6);track.Add(fill);return track;
         }
-        public ScrollView Scroll()
+        /// <summary>
+        /// overflow-y: auto with a thin scrollbar. <paramref name="stableGutter"/>: "scrollbar-gutter: stable" — the gutter
+        /// stays reserved and the thumb shows only when the content overflows; without it the bar takes room only then.
+        /// </summary>
+        public ScrollView Scroll(bool stableGutter=true)
         {
-            var scroll=new ScrollView(ScrollViewMode.Vertical){verticalScrollerVisibility=ScrollerVisibility.AlwaysVisible,horizontalScrollerVisibility=ScrollerVisibility.Hidden};scroll.AddToClassList("galaxy-scroll");
-            // Like "scrollbar-gutter: stable": the gutter stays reserved, the thumb only shows when the content overflows.
+            var scroll=new ScrollView(ScrollViewMode.Vertical){verticalScrollerVisibility=stableGutter?ScrollerVisibility.AlwaysVisible:ScrollerVisibility.Auto,horizontalScrollerVisibility=ScrollerVisibility.Hidden};scroll.AddToClassList("galaxy-scroll");
+            if(!stableGutter)return scroll;
             void Sync(GeometryChangedEvent _)=>scroll.verticalScroller.style.opacity=scroll.contentContainer.layout.height>scroll.contentViewport.layout.height+.5f?1:0;
             scroll.contentContainer.RegisterCallback<GeometryChangedEvent>(Sync);scroll.contentViewport.RegisterCallback<GeometryChangedEvent>(Sync);return scroll;
         }

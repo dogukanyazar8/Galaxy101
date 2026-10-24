@@ -60,7 +60,7 @@ namespace Galaxy101
             words.Add(Text(L("Masa aç", "Open a table"), 26, "Montserrat-700", "#F4F1E8", 1.1f));
             var sub = Text(L("Klasik · 101 · masayı açınca otomatik oturursun", "Classic · 101 · you sit down automatically"), 13, "Baloo2-700", "var(--mt)"); sub.style.marginTop = 2; words.Add(sub);
             head.Add(words); left.Add(head);
-            var scroll = view.Scroll(); scroll.name = "create-scroll"; scroll.style.flexGrow = 1; scroll.contentContainer.style.paddingLeft = 28; scroll.contentContainer.style.paddingRight = 22; scroll.contentContainer.style.paddingBottom = 18;
+            var scroll = view.Scroll(false); scroll.name = "create-scroll"; scroll.style.flexGrow = 1; scroll.contentContainer.style.paddingLeft = 28; scroll.contentContainer.style.paddingRight = 22; scroll.contentContainer.style.paddingBottom = 18;
             left.Add(scroll);
 
             bool nameBad = c.Tried && c.Name.Trim().Length == 0, pinBad = c.PinOn && c.Tried && !Regex.IsMatch(c.Pin, "^\\d{4}$");

@@ -7,6 +7,8 @@ using Galaxy101.Server.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -67,7 +69,11 @@ var app = builder.Build();
 if (configuration.GetValue("Database:MigrateOnStartup", true))
 {
     await using var scope = app.Services.CreateAsyncScope();
-    await scope.ServiceProvider.GetRequiredService<GameDb>().Database.MigrateAsync();
+    var db = scope.ServiceProvider.GetRequiredService<GameDb>();
+    // On a fresh database EF first reads the missing __EFMigrationsHistory table and logs that failed SELECT as an
+    // error before creating it; creating the history table up front keeps the first start's log clean.
+    if (await db.Database.CanConnectAsync()) await db.GetService<IHistoryRepository>().CreateIfNotExistsAsync();
+    await db.Database.MigrateAsync();
 }
 
 app.UseForwardedHeaders();

@@ -336,6 +336,33 @@ namespace Galaxy101.Tests
             Assert.That(menu.Lobby.DialogKind, Is.Null);
         }
 
+        /// <summary>GALAXY_AUDIT_DIR: every lobby state at the player's window size (2000 × 1125, 1.5625×) for review.</summary>
+        [UnityTest]
+        public IEnumerator HighDpiAuditCaptures()
+        {
+            string dir = Environment.GetEnvironmentVariable("GALAXY_AUDIT_DIR");
+            if (string.IsNullOrEmpty(dir)) { Assert.Ignore("GALAXY_AUDIT_DIR not set"); yield break; }
+            fake.List = ReferenceSeed(); fake.Chips = 10000;
+            var menu = Menu(); var root = menu.View.Root; yield return null;
+            var document = owner.GetComponent<UIDocument>();
+            IEnumerator Snap(string name) { yield return DisplaySettingsTests.Shot(document, 2000, 1125, Path.Combine(dir, name + ".png")); }
+            yield return new WaitForSeconds(1.5f); yield return Snap("A01_menu");
+            menu.OpenLobby(); yield return new WaitForSeconds(1f); yield return Snap("A02_lobby");
+            root.Q<TextField>("lobby-search").value = "Gece"; yield return new WaitForSeconds(.3f); yield return Snap("A03_search");
+            root.Q<TextField>("lobby-search").value = "zzz"; yield return new WaitForSeconds(.3f); yield return Snap("A04_empty");
+            root.Q<TextField>("lobby-search").value = ""; yield return null;
+            Click(root, "lobby-create"); yield return new WaitForSeconds(1f); yield return Snap("A05_create");
+            Click(root, "create-vis-private"); Click(root, "create-pin-toggle"); yield return null;
+            root.Q<TextField>("create-pin").value = "12"; yield return new WaitForSeconds(.3f); yield return Snap("A06_create_pin");
+            Click(root, "create-cancel"); yield return new WaitForSeconds(.4f);
+            Click(root, "lobby-code"); yield return new WaitForSeconds(.6f); yield return Snap("A07_code");
+            Click(root, "dialog-cancel"); yield return new WaitForSeconds(.4f);
+            menu.Lobby.ConnectSeconds = .3f;
+            Click(root, "lobby-sit-" + fake.List.First(t => t.Name == "Hızlı Eller").Id);
+            yield return Until(() => menu.Lobby.Screen == "wait" && menu.Lobby.DialogKind == null, 3, "the waiting room");
+            var room = fake.Room; room.Table.HostId = fake.Me; fake.Set(room); yield return new WaitForSeconds(.8f); yield return Snap("A08_room");
+        }
+
         [UnityTest]
         public IEnumerator FiltersAndCreateOptionsRedrawWithoutInterimFrames()
         {

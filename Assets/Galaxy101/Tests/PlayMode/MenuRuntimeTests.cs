@@ -152,7 +152,7 @@ namespace Galaxy101.Tests
             controller.View.Root.Q<VisualElement>("main-layer").Add(button);yield return null;yield return null;
             var caption=button.Q<Label>("button-caption");Assert.That(caption,Is.Not.Null);
             Assert.That(button.worldBound.width,Is.GreaterThanOrEqualTo(caption.worldBound.width+32),"Decorative children must not remove the text's intrinsic width or padding.");
-            Assert.That(button.style.filter.value.Any(f=>f.type==FilterFunctionType.DropShadow&&f.GetParameter(2).floatValue==0),Is.True);
+            Assert.That(GalaxyFilters.LedgeDepth(button),Is.GreaterThan(0),"the raised ledge");
             button.text="Copied successfully";yield return null;yield return null;
             Assert.That(caption.text,Is.EqualTo("Copied successfully"));Assert.That(button.worldBound.width,Is.GreaterThanOrEqualTo(caption.worldBound.width+32));
         }

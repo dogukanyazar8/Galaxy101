@@ -522,17 +522,8 @@ namespace Galaxy101
         /// The "0 Npx 0 shade" button edge as a bottom border. Inside the scrolling card list every element stays filter-free:
         /// UI Toolkit loses filter render textures there once a few dozen are on screen.
         /// </summary>
-        /// <summary>
-        /// The CSS "box-shadow: 0 depth 0 shade" ledge as a bottom border. A box-shadow takes no layout, so the border is
-        /// handed back: a fixed height grows by it (UI Toolkit boxes are border-box) and the bottom margin takes it away.
-        /// </summary>
-        private void Ledge(VisualElement e, float depth, string shade)
-        {
-            var old = e.style.borderBottomWidth; float before = old.keyword == StyleKeyword.Undefined ? old.value : 0;
-            var h = e.style.height;
-            if (h.keyword == StyleKeyword.Undefined && h.value.unit == LengthUnit.Pixel && h.value.value > 0) e.style.height = h.value.value - before + depth;
-            e.style.borderBottomWidth = depth; e.style.borderBottomColor = view.C(shade); e.style.marginBottom = -depth;
-        }
+        /// <summary>The CSS "box-shadow: 0 depth 0 shade" ledge (<see cref="GalaxyFilters.HardShadow"/>: no layout).</summary>
+        private void Ledge(VisualElement e, float depth, string shade) => GalaxyFilters.HardShadow(e, depth, view.C(shade));
         private void Raise(VisualElement e, string bg, int radius, int depth, string shade) { view.Decorate(e, bg, radius); if (depth > 0) Ledge(e, depth, shade); }
 
         private string Short(long stake) => stake >= 1000 ? stake / 1000 + "K" : stake.ToString();

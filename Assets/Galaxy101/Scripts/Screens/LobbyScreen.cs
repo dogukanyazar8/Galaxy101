@@ -452,7 +452,9 @@ namespace Galaxy101
         {
             if (toastLayer == null) return; LastToast = text;
             toastLayer.Clear();
-            string bg = kind == "bad" ? "#FF5E6C" : kind == "good" ? "#3CCB6E" : "var(--pnH)", fg = kind == "bad" || kind == "good" ? "#fff" : "#F4F1E8";
+            // G101-Lobi flash(): ok #3CCB6E / #062B14, bad linear-gradient(#FF7A86,#E8455A) / #fff, info rgba(5,8,22,.85) / #F4F1E8.
+            bool ok = kind == "good" || kind == "ok";
+            string bg = kind == "bad" ? "linear-gradient(#FF7A86,#E8455A)" : ok ? "#3CCB6E" : "rgba(5,8,22,.85)", fg = kind == "bad" ? "#fff" : ok ? "#062B14" : "#F4F1E8";
             var toast = Row(); toast.name = "lobby-toast"; toast.style.position = Position.Absolute; toast.style.top = 18; toast.style.left = 640; Pad(toast, 9, 18, 9, 10);
             view.Decorate(toast, bg, 999); GalaxyFilters.Shadow(toast, 0, 10, 15, new Color(0, 0, 0, .4f));
             var mark = Box(); Square(mark, 24); view.Decorate(mark, "rgba(0,0,0,.18)", 12); var diamond = Box(); diamond.style.width = diamond.style.height = 8; diamond.style.rotate = new Rotate(45); view.Decorate(diamond, fg, 2); mark.Add(diamond); toast.Add(mark);
@@ -461,9 +463,10 @@ namespace Galaxy101
             float began = Time.realtimeSinceStartup;
             toastStep = () =>
             {
-                float t = Time.realtimeSinceStartup - began, k = Ease(Mathf.Clamp01(t / .3f));
-                toast.style.translate = new Translate(Length.Percent(-50), -12 * (1 - k)); toast.style.opacity = t > 2.4f ? Mathf.Clamp01(1 - (t - 2.4f) / .3f) : k;
-                if (t > 2.7f) { toast.RemoveFromHierarchy(); toastStep = null; }
+                float t = Time.realtimeSinceStartup - began, k = MenuView.CssBezier(.25f, .1f, .25f, 1, Mathf.Clamp01(t / .3f)); // animation-timing-function: ease
+                // lbToast .3s, then held until the 2.8 s timeout unmounts it (no fade-out).
+                toast.style.translate = new Translate(Length.Percent(-50), -12 * (1 - k)); toast.style.opacity = k;
+                if (t > 2.8f) { toast.RemoveFromHierarchy(); toastStep = null; }
             };
             Animate(null);
         }

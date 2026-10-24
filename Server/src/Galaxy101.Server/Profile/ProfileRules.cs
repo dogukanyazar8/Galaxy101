@@ -7,7 +7,8 @@ namespace Galaxy101.Server.Profile;
 /// <summary>Server copy of the client's <c>ProfileValidation</c> / <c>SettingsValidation</c>; the server is the authority.</summary>
 public static partial class ProfileRules
 {
-    public static readonly string[] AvatarColors = ["#FF8A5B", "#FF5E6C", "#E85D9A", "#8B5CF6", "#3D7BFF", "#16B6A8", "#3CCB6E", "#F5A623"];
+    // The menu's profile palette (G101-Menu) and the sign-up screen's (the game shell's COLORS: three hues differ).
+    public static readonly string[] AvatarColors = ["#FF8A5B", "#FF5E6C", "#E85D9A", "#8B5CF6", "#3D7BFF", "#16B6A8", "#3CCB6E", "#F5A623", "#FF6B6B", "#E8A317", "#E05FA8"];
     public static readonly string[] Planets = ["Satürn", "Mars", "Neptün", "Jüpiter", "Venüs"];
     private static readonly string[] TileSizes = ["Küçük", "Orta", "Büyük"];
     private static readonly string[] Qualities = ["Düşük", "Orta", "Yüksek"];

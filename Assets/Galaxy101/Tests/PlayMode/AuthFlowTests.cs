@@ -92,7 +92,7 @@ namespace Galaxy101.Tests
             Assert.That(GalaxyOnline.Instance.SignedIn, Is.True); Assert.That(GalaxyOnline.Instance.Guest, Is.True);
             Assert.That(GalaxyOnline.Instance.Wallet.Chips, Is.EqualTo(10000));
             Assert.That(menu.Model.Chips, Is.EqualTo(10000), "the menu shows the server balance");
-            Assert.That(PlayerPrefs.HasKey(GalaxyOnline.SessionKey), Is.False, "a guest session is not remembered");
+            Assert.That(PlayerPrefs.HasKey(GalaxyOnline.SessionKey), Is.True, "a guest session is kept on this device (\"İlerlemen bu cihazda saklanır\")");
             yield return Until(() => menu.View.LastFlash != null, 2, "the welcome flash (500 ms after the menu)");
             Assert.That(menu.View.LastFlash, Does.StartWith("Hoş geldin, TestMisafir").And.Contain("10.000 çip"), "loginAs(): gold greeting with the welcome chips");
             Assert.That(menu.View.Root.Q<VisualElement>("shell-flash"), Is.Not.Null);
@@ -117,6 +117,7 @@ namespace Galaxy101.Tests
             Click(root, "auth-submit"); yield return null;
             Assert.That(root.Q<Label>("auth-error").text, Does.Contain("koşulları").Or.Contain("terms"));
             Click(root, "auth-terms"); yield return null;
+            Assert.That(root.Q<Label>("auth-error"), Is.Null, "setF(): ticking the terms clears the error");
             if (UiDump.Dir != null) { yield return UiDump.Capture(root, "S04_register"); }
             if (!string.IsNullOrEmpty(Dir)) yield return DisplaySettingsTests.Shot(owner.GetComponent<UIDocument>(), 1280, 720, Path.Combine(Dir, "S04_register.png"));
             Click(root, "auth-submit");

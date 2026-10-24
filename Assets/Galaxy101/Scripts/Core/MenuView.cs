@@ -24,6 +24,8 @@ namespace Galaxy101
         private readonly Dictionary<string,Texture2D> paints=new Dictionary<string,Texture2D>();
         private sealed class GradientPaint { public string Css; }
         private readonly ConditionalWeakTable<VisualElement,GradientPaint> gradientPaints=new ConditionalWeakTable<VisualElement,GradientPaint>();
+        private sealed class Corners{public float Radius;}
+        private readonly ConditionalWeakTable<VisualElement,Corners> corners=new ConditionalWeakTable<VisualElement,Corners>();
         private readonly SettingsController settings=new SettingsController();
         private readonly ShopController shop=new ShopController();
         private readonly FriendsController friends=new FriendsController();
@@ -114,7 +116,21 @@ namespace Galaxy101
         }
         public void Decorate(VisualElement element,string background,int radius=0,int shadow=0,string shadowColor=null)
         {
-            element.style.borderTopLeftRadius=element.style.borderTopRightRadius=element.style.borderBottomLeftRadius=element.style.borderBottomRightRadius=radius;
+            // border-radius: 999px — CSS shrinks oversized radii together, so a pill keeps half-circle ends; UI Toolkit clamps
+            // each axis on its own and draws an ellipse. Pill radii follow half the shorter side.
+            float applied=radius;
+            if(corners.TryGetValue(element,out var held))held.Radius=radius;
+            else if(radius>=999)
+            {
+                var pill=new Corners{Radius=radius};corners.Add(element,pill);
+                element.RegisterCallback<GeometryChangedEvent>(evt=>
+                {
+                    if(pill.Radius<999)return;float r=Mathf.Min(evt.newRect.width,evt.newRect.height)/2;if(r<=0)return;
+                    element.style.borderTopLeftRadius=element.style.borderTopRightRadius=element.style.borderBottomLeftRadius=element.style.borderBottomRightRadius=r;
+                });
+            }
+            if(radius>=999&&element.layout.width>0&&element.layout.height>0)applied=Mathf.Min(element.layout.width,element.layout.height)/2;
+            element.style.borderTopLeftRadius=element.style.borderTopRightRadius=element.style.borderBottomLeftRadius=element.style.borderBottomRightRadius=applied;
             if(!string.IsNullOrEmpty(background)&&background.Contains("gradient"))
             {
                 if(!gradientPaints.TryGetValue(element,out var paint))

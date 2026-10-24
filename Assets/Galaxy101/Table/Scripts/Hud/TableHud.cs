@@ -64,12 +64,12 @@ namespace Galaxy101.Table
 
         public sealed class OkeyMark { public int Id; public string Number, Color; public bool Target, Invalid; }
 
-        /// <summary>Message kinds (spec/17 §5, T40). Opponent events never queue: they are avatar balloons.</summary>
+        /// <summary>Message kinds (spec/17 §5). Penalties, errors and warnings flash red, the rest green.</summary>
         public enum ToastKind { Penalty, Info, Success, Warning, Error }
 
-        private sealed class Toast { public ToastKind Kind; public string Text, Sub; public int Amount; public float Duration, Until, ShownAt; public bool Sticky; }
+        private sealed class Toast { public ToastKind Kind; public string Text; public float Until, ShownAt; public bool Sticky; }
         private sealed class BalloonInfo { public string Text; public bool Danger; public float Until, ShownAt, Duration = 2.5f; }
-        private readonly List<Toast> toasts = new List<Toast>();
+        private Toast flash;
         private readonly Dictionary<int, BalloonInfo> balloons = new Dictionary<int, BalloonInfo>();
         private readonly int[] shownPenalty = new int[4];
         private readonly float[] penaltyChangedAt = { -10, -10, -10, -10 };
@@ -78,30 +78,26 @@ namespace Galaxy101.Table
         /// <summary>World position of a tile view (the board's), for labels that follow a tile.</summary>
         public Func<int, Vector3?> TilePosition;
 
-        /// <summary>Front message text (tests, diagnostics).</summary>
-        public string ActiveToast => toasts.Count > 0 ? toasts[0].Text : null;
+        /// <summary>The flashed message's text (tests, diagnostics).</summary>
+        public string ActiveToast => flash?.Text;
 
         /// <summary>
-        /// Queue a message (§5): one shows at a time, the next waits smaller behind it with a "+n" count; penalties and
-        /// errors jump the queue; the same text again restarts its time. Sticky messages stay until dismissed.
+        /// G101-Masa flash(text, bad): one pill under the top bar (top 132) for 2.6 s; a new message replaces the text and
+        /// restarts the time without replaying the entrance. Sticky messages stay until dismissed.
         /// </summary>
         public void Post(ToastKind kind, string text, string sub = null, int amount = 0, bool sticky = false)
         {
-            float duration = kind == ToastKind.Penalty || kind == ToastKind.Warning ? 3.5f : kind == ToastKind.Error ? 3f : kind == ToastKind.Info ? 2.5f : 2f;
             float now = Time.realtimeSinceStartup;
-            var same = toasts.Find(t => t.Text == text);
-            if (same != null) { same.Until = now + same.Duration; same.ShownAt = now; RenderToasts(); return; }
-            var toast = new Toast { Kind = kind, Text = text, Sub = sub, Amount = amount, Duration = duration, Sticky = sticky };
-            if (kind == ToastKind.Penalty || kind == ToastKind.Error) toasts.Insert(0, toast); else toasts.Add(toast);
-            if (toasts[0] == toast || toasts.Count == 1) { toast.Until = now + duration; toast.ShownAt = now; }
+            if (amount > 0) text += " · +" + view?.N(amount) + L(" ceza", " penalty");
+            if (!string.IsNullOrEmpty(sub)) text += " · " + sub;
+            flash = new Toast { Kind = kind, Text = text, Until = now + 2.6f, ShownAt = flash != null ? flash.ShownAt : now, Sticky = sticky };
             RenderToasts();
         }
 
         public void Dismiss(string text)
         {
-            int index = toasts.FindIndex(t => t.Text == text); if (index < 0) return;
-            toasts.RemoveAt(index); if (index == 0 && toasts.Count > 0) { toasts[0].Until = Time.realtimeSinceStartup + toasts[0].Duration; toasts[0].ShownAt = Time.realtimeSinceStartup; }
-            RenderToasts();
+            if (flash == null || !flash.Text.StartsWith(text, StringComparison.Ordinal)) return;
+            flash = null; RenderToasts();
         }
 
         /// <summary>Avatar balloon (2.5 s): white for events, danger gradient for an opponent's penalty.</summary>
@@ -116,12 +112,7 @@ namespace Galaxy101.Table
         {
             if (view == null) return;
             float now = Time.realtimeSinceStartup; bool dirty = false;
-            if (toasts.Count > 0 && !toasts[0].Sticky && now > toasts[0].Until)
-            {
-                toasts.RemoveAt(0);
-                if (toasts.Count > 0) { toasts[0].Until = now + toasts[0].Duration; toasts[0].ShownAt = now; }
-                RenderToasts();
-            }
+            if (flash != null && !flash.Sticky && now > flash.Until) { flash = null; RenderToasts(); }
             foreach (var seat in new List<int>(balloons.Keys)) if (now > balloons[seat].Until) { balloons.Remove(seat); dirty = true; }
             UpdateWindows();
             if (dirty) Render(Current);
@@ -929,7 +920,6 @@ namespace Galaxy101.Table
         private void BuildToast(State s)
         {
             string text = null, bg = null, fg = null;
-            if (toasts.Count > 0) return;
             if (s.DragBanner != null) { text = s.DragBanner; bg = "linear-gradient(var(--a1),var(--a2))"; fg = "var(--aT)"; }
             else if (s.Phase == "draw" && s.Active == 0 && s.DeckOnly) { text = TableStrings.Get("drawDeckOnly", Lang); bg = "linear-gradient(var(--a1),var(--a2))"; fg = "var(--aT)"; }
             else if (s.Phase == "discard" && s.Active == 0 && s.ShowPutBack) { text = TableStrings.Get("putBackHint", Lang); bg = "rgba(5,8,22,.75)"; fg = "var(--ic)"; }
@@ -942,7 +932,9 @@ namespace Galaxy101.Table
             }
             else if (s.Active > 0) { string n = FirstName(s.Active); text = L(n + " oynuyor…", n + " is playing…"); bg = "rgba(5,8,22,.75)"; fg = "var(--ic)"; }
             if (!s.TurnHint && s.Phase != "deal" && s.Phase != "fin") text = null;
-            // Overrides: the time warning, then one-off messages (rule hints and refusals).
+            // G101-Masa: the time warning overrides it on my turn; a table moment and the deal ceremony hide it.
+            if (s.Warn && s.Active == 0 && s.Phase != "deal") { text = L("Süren bitiyor!", "Time is running out!"); bg = "linear-gradient(#FF7A86,#E8455A)"; fg = "#fff"; }
+            if (s.Moment != null || s.Deal != null) text = null;
             if (text == null) return;
 
             var row = MessageRow(16); row.name = "table-toast-row";
@@ -952,65 +944,35 @@ namespace Galaxy101.Table
             var diamond = new VisualElement { pickingMode = PickingMode.Ignore }; diamond.style.width = diamond.style.height = 8; diamond.style.rotate = new Rotate(45); view.Decorate(diamond, fg, 2);
             bullet.Add(diamond); toast.Add(bullet);
             var label = Text(text, "Baloo2-800", 14, fg); label.name = "table-toast"; toast.Add(label);
+            // toastIn .3s (ease) when the band appears; the design keeps the element while its text changes, so a new
+            // message does not replay it.
+            float began = Since("turn-toast");
+            motions.Add(now => { float k = MenuView.CssBezier(.25f, .1f, .25f, 1, Mathf.Clamp01((now - began) / .3f)); toast.style.opacity = k; toast.style.translate = new Translate(0, -14 * (1 - k)); });
             row.Add(toast); hudLayer.Add(row);
         }
 
         private string Lang => loc != null ? loc.Language : "tr";
 
-        // ---------- messages (spec/17 §5) ----------
+        // ---------- messages: G101-Masa flash ----------
         private void RenderToasts()
         {
             if (toastLayer == null) return;
             toastLayer.Clear(); toastMotions.Clear();
-            if (toasts.Count > 1) toastLayer.Add(ToastElement(toasts[1], true, 0));
-            if (toasts.Count > 0) toastLayer.Add(ToastElement(toasts[0], false, toasts.Count - 1));
-            if (hudLayer != null && view != null) { var band = hudLayer.Q<VisualElement>("table-toast-row"); if (band != null) band.style.display = toasts.Count > 0 ? DisplayStyle.None : DisplayStyle.Flex; }
-        }
-
-        private VisualElement ToastElement(Toast t, bool behind, int waiting)
-        {
-            var row = MessageRow(behind ? 46 : 16); row.name = behind ? "table-message-next" : "table-message-row";
-            string bg, fg, iconBg, iconFg, glyph;
-            switch (t.Kind)
-            {
-                case ToastKind.Penalty: bg = "linear-gradient(#3A0A14,#22060B)"; fg = "#FFFFFF"; iconBg = "#FF5E6C"; iconFg = "#fff"; glyph = "!"; break;
-                case ToastKind.Success: bg = "linear-gradient(#6BE8B0,#2FBF7E)"; fg = "#06301C"; iconBg = "rgba(0,0,0,.18)"; iconFg = "#06301C"; glyph = "tick"; break;
-                case ToastKind.Warning: bg = "rgba(5,8,22,.82)"; fg = "#FFB13D"; iconBg = "#FFB13D"; iconFg = "#3A2604"; glyph = "!"; break;
-                case ToastKind.Error: bg = "linear-gradient(#FF7A86,#E8455A)"; fg = "#FFFFFF"; iconBg = "rgba(0,0,0,.2)"; iconFg = "#fff"; glyph = "close"; break;
-                default: bg = "rgba(5,8,22,.82)"; fg = "#F4F1E8"; iconBg = "var(--a1)"; iconFg = "var(--aT)"; glyph = "i"; break;
-            }
-            var toast = Row(10); toast.name = behind ? "table-message-behind" : "table-message"; Pad(toast, 8, t.Amount > 0 ? 8 : 18, 8, 9);
-            view.Decorate(toast, bg, 24); GalaxyFilters.Shadow(toast, 0, 8, 12, new Color(0, 0, 0, .35f));
-            if (t.Kind == ToastKind.Penalty) Border(toast, 2, view.C("#FF5E6C"));
-            else if (t.Kind == ToastKind.Warning) Border(toast, 2, view.C("#FFB13D"));
-            else if (t.Kind == ToastKind.Info) Border(toast, 1, new Color(1, 1, 1, .12f));
-            var icon = new VisualElement { pickingMode = PickingMode.Ignore }; icon.style.width = icon.style.height = 24; icon.style.alignItems = Align.Center; icon.style.justifyContent = Justify.Center;
-            view.Decorate(icon, iconBg, 12);
-            if (glyph == "tick" || glyph == "close") icon.Add(view.Icon(glyph, 14, iconFg)); else icon.Add(Text(glyph, "Montserrat-800", 14, iconFg));
-            toast.Add(icon);
-            var texts = new VisualElement { pickingMode = PickingMode.Ignore };
-            texts.Add(Text(t.Text, "Baloo2-800", 14, fg));
-            if (!string.IsNullOrEmpty(t.Sub)) { var sub = Text(t.Sub, "Baloo2-700", 11, t.Kind == ToastKind.Penalty ? "#FF8A95" : fg); sub.style.marginTop = -2; texts.Add(sub); }
-            toast.Add(texts);
-            if (t.Amount > 0) toast.Add(AmountPill("+" + view.N(t.Amount), 14));
-            if (!behind && waiting > 0)
-            {
-                var count = Text("+" + waiting, "Montserrat-800", 11, "var(--aT)"); count.name = "table-message-count"; count.style.position = Position.Absolute; count.style.top = -8; count.style.right = -8;
-                Pad(count, 1, 6, 1, 6); view.Decorate(count, "var(--a1)", 9); toast.Add(count);
-            }
-            if (behind) { toast.style.scale = new Scale(Vector2.one * .88f); toast.style.opacity = .6f; }
-            else
-            {
-                float began = t.ShownAt; bool shake = t.Kind == ToastKind.Error;
-                // toastIn .3s (y −14 → 0); errors shake ±6 px twice.
-                toastMotions.Add(now =>
-                {
-                    float u = Mathf.Clamp01((now - began) / .3f);
-                    float dx = shake && now - began < .4f ? Mathf.Sin((now - began) / .4f * Mathf.PI * 4) * 6 : 0;
-                    toast.style.translate = new Translate(dx, -14 * (1 - TableConstants.EaseOutCubic(u))); toast.style.opacity = u;
-                });
-            }
-            row.Add(toast); return row;
+            if (flash == null || view == null) return;
+            // top 132, centred; padding 10 18 10 12, gap 10, a check mark in the text colour, 800 14px Baloo 2, shadow
+            // 0 8px 24px rgba(0,0,0,.35); bad: danger gradient / #fff, otherwise #3CCB6E / #062B14.
+            bool bad = flash.Kind == ToastKind.Penalty || flash.Kind == ToastKind.Error || flash.Kind == ToastKind.Warning;
+            string bg = bad ? "linear-gradient(#FF7A86,#E8455A)" : "#3CCB6E", fg = bad ? "#fff" : "#062B14";
+            var row = new VisualElement { name = "table-message-row", pickingMode = PickingMode.Ignore };
+            row.style.position = Position.Absolute; row.style.left = 0; row.style.right = 0; row.style.top = 132; row.style.flexDirection = FlexDirection.Row; row.style.justifyContent = Justify.Center;
+            var toast = Row(10); toast.name = "table-message"; Pad(toast, 10, 18, 10, 12);
+            view.Decorate(toast, bg, 999); GalaxyFilters.Shadow(toast, 0, 8, 12, new Color(0, 0, 0, .35f));
+            toast.Add(view.Icon("tick", 18, fg));
+            toast.Add(Text(flash.Text, "Baloo2-800", 14, fg));
+            float began = flash.ShownAt;
+            // toastIn .3s ease.
+            toastMotions.Add(now => { float k = MenuView.CssBezier(.25f, .1f, .25f, 1, Mathf.Clamp01((now - began) / .3f)); toast.style.opacity = k; toast.style.translate = new Translate(0, -14 * (1 - k)); });
+            row.Add(toast); toastLayer.Add(row);
         }
 
         /// <summary>Penalty pill (tehlike degradesi, Montserrat 800, hard #9E1F33 shadow).</summary>

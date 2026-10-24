@@ -22,7 +22,8 @@ namespace Galaxy101
     /// </summary>
     public sealed class AuthFlow
     {
-        private static readonly string[] Colors = { "#FF8A5B", "#FF5E6C", "#E85D9A", "#8B5CF6", "#3D7BFF", "#16B6A8", "#3CCB6E", "#F5A623" };
+        // The game shell's COLORS, in its order (a 4 × 2 grid).
+        private static readonly string[] Colors = { "#FF8A5B", "#3D7BFF", "#16B6A8", "#8B5CF6", "#FF6B6B", "#3CCB6E", "#E8A317", "#E05FA8" };
         private readonly MenuView view;
         private readonly Transform owner;
         private readonly GalaxyOnline online;
@@ -370,8 +371,10 @@ namespace Galaxy101
             field.RegisterValueChangedCallback(evt =>
             {
                 changed(evt.newValue);
-                // After a tried submit the hints follow the typing (the box redraws only when an error appears or clears).
-                if (tried.Contains(screen) && (FieldErrors().ContainsKey(key) != (hint != null))) Render();
+                // setF(): any edit clears the banner error; after a tried submit the hints follow the typing (the box
+                // redraws only when an error appears or clears).
+                if (error != null) { error = null; Render(); }
+                else if (tried.Contains(screen) && (FieldErrors().ContainsKey(key) != (hint != null))) Render();
             });
             field.RegisterCallback<FocusInEvent>(_ => Ring(true));
             field.RegisterCallback<FocusOutEvent>(_ => Ring(false));
@@ -382,7 +385,7 @@ namespace Galaxy101
                 var eye = Box("auth-eye"); eye.style.width = eye.style.height = 34; eye.style.flexShrink = 0; eye.style.alignItems = Align.Center; eye.style.justifyContent = Justify.Center; Radius(eye, 10);
                 eye.style.opacity = showPassword ? 1 : .55f; eye.Add(view.Icon("eye", 18, "var(--ic)")); eye.tooltip = showPassword ? L("Gizle", "Hide") : L("Göster", "Show");
                 eye.RegisterCallback<PointerEnterEvent>(_ => eye.style.backgroundColor = view.C("var(--pnH)")); eye.RegisterCallback<PointerLeaveEvent>(_ => eye.style.backgroundColor = Color.clear);
-                Tap(eye, () => { showPassword = !showPassword; Render(); }); boxRow.Add(eye);
+                Tap(eye, () => { showPassword = !showPassword; error = null; Render(); }); boxRow.Add(eye);
             }
             if (ok)
             {
@@ -451,7 +454,7 @@ namespace Galaxy101
             Field(panel, "email", L("E-POSTA", "EMAIL"), "auth-email", email, "ornek@mail.com", false, v => email = v);
             Field(panel, "pass", L("ŞİFRE", "PASSWORD"), "auth-password", password, L("En az 6 karakter", "At least 6 characters"), true, v => password = v, 40);
             var options = Row();
-            options.Add(Switch42("auth-remember", remember, L("Beni hatırla", "Remember me"), () => { remember = !remember; Render(); }));
+            options.Add(Switch42("auth-remember", remember, L("Beni hatırla", "Remember me"), () => { remember = !remember; error = null; Render(); }));
             options.Add(Grow());
             var forgot = Text(L("Şifremi unuttum", "Forgot password"), 14, "Baloo2-800", "var(--a1)"); forgot.name = "auth-forgot";
             Tap(forgot, () => { error = Regex.IsMatch(email.Trim(), "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$") ? L("Şifre sıfırlama bu sürümde henüz yok; destekle iletişime geç.", "Password reset is not available yet; contact support.") : L("Sıfırlama için önce e-postanı yaz.", "Type your email first to reset."); Render(); });
@@ -478,9 +481,9 @@ namespace Galaxy101
             if (!terms) Border(check, 2, view.C(tried.Contains("register") ? "#FF5E6C" : "var(--bd)")); else check.Add(view.Icon("tick", 13, "var(--aT)"));
             agree.Add(check);
             var agreeText = Text(L("Kullanım Koşulları’nı ve Gizlilik Politikası’nı okudum, kabul ediyorum.", "I have read and accept the Terms of Use and Privacy Policy."), 13, "Baloo2-700", terms ? "var(--ic)" : "var(--mt)");
-            // text-wrap: pretty breaks this sentence in two balanced lines (≈ 300 px) in the design.
-            agreeText.style.whiteSpace = WhiteSpace.Normal; agreeText.style.flexShrink = 1; agreeText.style.maxWidth = 300; agreeText.style.marginLeft = 10; agree.Add(agreeText);
-            Tap(agree, () => { terms = !terms; Render(); }); Add(panel, agree);
+            // 700 13px/1.45, text-wrap: pretty (the last line never holds one word alone).
+            MenuView.CssParagraph(agreeText, 13 * 1.45f, true); agreeText.style.flexGrow = 1; agreeText.style.flexShrink = 1; agreeText.style.flexBasis = 0; agreeText.style.marginLeft = 10; agree.Add(agreeText);
+            Tap(agree, () => { terms = !terms; error = null; Render(); }); Add(panel, agree);
             AddError(panel);
             Spacer(panel);
             Add(panel, Cta("auth-submit", L("Hesabı oluştur", "Create account")));
@@ -499,31 +502,38 @@ namespace Galaxy101
         private void BuildGuest()
         {
             var panel = FormPanel(L("Misafir girişi", "Guest login"), L("İlerlemen bu cihazda saklanır", "Your progress is saved on this device"));
-            Field(panel, "nick", L("TAKMA AD", "NICKNAME"), "auth-nick", nick, L("Masada görünecek adın", "Name shown at the table"), false, v => { nick = v; var ini = panel.Q<Label>("auth-avatar-ini"); if (ini != null) ini.text = ProfileValidation.Initials(nick); }, 16);
+            Field(panel, "nick", L("TAKMA AD", "NICKNAME"), "auth-nick", nick, L("Masada görünecek adın", "Name shown at the table"), false, v => { nick = v; var ini = panel.Q<Label>("auth-avatar-ini"); if (ini != null) ini.text = LobbyScreen.Initials(nick); }, 16);
             var section = Box(); section.name = "auth-colors";
             var cap = Text(L("AVATAR RENGİ", "AVATAR COLOR"), 12, "Baloo2-800", "var(--mt)"); MenuView.Tracking(cap, 0.6f, 12); section.Add(cap);
             var row = Row(); row.style.marginTop = 8;
-            var avatar = Box("auth-avatar"); avatar.style.width = avatar.style.height = 74; avatar.style.flexShrink = 0; avatar.style.alignItems = Align.Center; avatar.style.justifyContent = Justify.Center; avatar.style.marginRight = 16;
-            view.Decorate(avatar, color, 37); Border(avatar, 3, view.C("var(--a1)")); GalaxyFilters.Shadow(avatar, 0, 0, 11, view.C("var(--gl)"));
-            var ini = Text(ProfileValidation.Initials(nick), 26, "Montserrat-700", "#fff"); ini.name = "auth-avatar-ini"; avatar.Add(ini); row.Add(avatar);
+            // 74 px content + 3 px gold border (content-box: 80 px), a 3 px --pnS ring and a 22 px --gl glow outside it.
+            var holder = Box(); holder.style.width = holder.style.height = 80; holder.style.flexShrink = 0; holder.style.marginRight = 16;
+            var halo = Box(); halo.style.position = Position.Absolute; halo.style.left = halo.style.top = -3; halo.style.width = halo.style.height = 86;
+            view.Decorate(halo, "var(--pnS)", 43); GalaxyFilters.Shadow(halo, 0, 0, 11, view.C("var(--gl)")); holder.Add(halo);
+            var avatar = Box("auth-avatar"); avatar.style.position = Position.Absolute; avatar.style.left = avatar.style.top = 0; avatar.style.width = avatar.style.height = 80; avatar.style.alignItems = Align.Center; avatar.style.justifyContent = Justify.Center;
+            view.Decorate(avatar, color, 40); Border(avatar, 3, view.C("var(--a1)"));
+            var ini = Text(LobbyScreen.Initials(nick), 26, "Montserrat-700", "#fff"); ini.name = "auth-avatar-ini"; avatar.Add(ini); holder.Add(avatar); row.Add(holder);
             var grid = Box(); grid.style.flexDirection = FlexDirection.Row; grid.style.flexWrap = Wrap.Wrap; grid.style.width = 4 * 30 + 3 * 10;
             for (int k = 0; k < Colors.Length; k++)
             {
                 string pick = Colors[k]; bool on = pick == color;
-                var dot = Box("auth-color-" + pick.Substring(1)); dot.style.width = dot.style.height = 30; dot.style.flexShrink = 0;
+                var dot = Box("auth-color-" + pick.Substring(1)); dot.pickingMode = PickingMode.Position; dot.style.width = dot.style.height = 30; dot.style.flexShrink = 0;
                 if (k % 4 != 3) dot.style.marginRight = 10; if (k >= 4) dot.style.marginTop = 10;
-                view.Decorate(dot, pick, 15); if (on) { Border(dot, 3, view.C("#fff")); GalaxyFilters.Shadow(dot, 0, 0, 5, view.C(pick)); }
+                // box-shadow rings: picked "0 0 0 3px --pn, 0 0 0 5px --a1", others "0 0 0 1px rgba(255,255,255,.15)".
+                VisualElement Ring(float spread, string fill) { var r = Box(); r.style.position = Position.Absolute; r.style.left = r.style.top = -spread; r.style.width = r.style.height = 30 + 2 * spread; view.Decorate(r, fill, Mathf.RoundToInt(15 + spread)); return r; }
+                if (on) { dot.Add(Ring(5, "var(--a1)")); dot.Add(Ring(3, "var(--pn)")); } else dot.Add(Ring(1, "rgba(255,255,255,.15)"));
+                var fill = Box(); fill.style.position = Position.Absolute; fill.style.left = fill.style.top = 0; fill.style.width = fill.style.height = 30; view.Decorate(fill, pick, 15); dot.Add(fill);
                 dot.RegisterCallback<PointerEnterEvent>(_ => dot.style.scale = new Scale(Vector2.one * 1.12f)); dot.RegisterCallback<PointerLeaveEvent>(_ => dot.style.scale = new Scale(Vector2.one));
-                Tap(dot, () => { color = pick; Render(); }); grid.Add(dot);
+                Tap(dot, () => { color = pick; error = null; Render(); }); grid.Add(dot);
             }
             row.Add(grid); section.Add(row);
             var notes = Box(); notes.style.marginTop = 10 + 8; Pad(notes, 14, 16, 14, 16); view.Decorate(notes, "var(--sd)", 16);
             var chips = Row(); chips.style.alignItems = Align.Center;
             var coin = Box(); coin.style.width = coin.style.height = 22; coin.style.flexShrink = 0; coin.style.marginRight = 10; view.Decorate(coin, "radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)", 11); chips.Add(coin);
-            var c1 = Text(L("Başlangıçta 10.000 çip hesabına yüklenir.", "You start with 10,000 chips."), 14, "Baloo2-700", "var(--ic)"); c1.style.whiteSpace = WhiteSpace.Normal; c1.style.flexShrink = 1; chips.Add(c1); notes.Add(chips);
+            var c1 = Text(L("Başlangıçta 10.000 çip hesabına yüklenir.", "You start with 10,000 chips."), 14, "Baloo2-700", "var(--ic)"); MenuView.CssParagraph(c1, 14 * 1.35f, false); c1.style.flexShrink = 1; chips.Add(c1); notes.Add(chips); // 700 14px/1.35
             var device = Row(); device.style.marginTop = 10;
             var phone = view.Icon("phone", 22, "var(--mt)"); phone.style.marginRight = 10; device.Add(phone);
-            var c2 = Text(L("Uygulamayı silersen ya da cihaz değiştirirsen ilerlemen kaybolur.", "If you delete the app or switch devices, your progress is lost."), 14, "Baloo2-700", "var(--ic)"); c2.style.whiteSpace = WhiteSpace.Normal; c2.style.flexShrink = 1; device.Add(c2);
+            var c2 = Text(L("Uygulamayı silersen ya da cihaz değiştirirsen ilerlemen kaybolur.", "If you delete the app or switch devices, your progress is lost."), 14, "Baloo2-700", "var(--ic)"); MenuView.CssParagraph(c2, 14 * 1.35f, false); c2.style.flexShrink = 1; device.Add(c2); // 700 14px/1.35
             notes.Add(device); section.Add(notes);
             Add(panel, section);
             AddError(panel);

@@ -36,6 +36,10 @@ namespace Galaxy101.Tests
             var menu = owner.AddComponent<MainMenuController>(); owner.SetActive(true); menu.Initialize(statePath);
             yield return null; yield return null;
             var view = menu.View; var root = view.Root;
+            // The guest greeting as the shell flashes it (tools/ref_capture.py S06_menu carries the same pill).
+            view.Flash("Hoş geldin, Misafir9369! 10.000 çip hesabına eklendi", "gold"); yield return new WaitForSeconds(.8f);
+            Assert.That(root.Q<VisualElement>("shell-flash"), Is.Not.Null);
+            yield return UiDump.Capture(root, "M00_flash");
             foreach (var (step, key) in new[] { ("M01_settings", "settings"), ("M02_shop", "shop"), ("M03_friends", "friends"), ("M04_leader", "leader"), ("M05_daily", "daily"), ("M06_rules", "rules"), ("M07_profile", "me") })
             {
                 view.OpenPanel(key, 0); yield return new WaitForSeconds(.5f);

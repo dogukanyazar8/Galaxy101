@@ -60,6 +60,13 @@ namespace Galaxy101.Tests
             Assert.That(X("a1"), Is.GreaterThan(1000f)); Assert.That(X("a3"), Is.LessThan(280f));
             Assert.That(X("ind"), Is.InRange(560f, 720f));
 
+            // G101-Masa flash: one pill at top 132 under the turn band, which stays.
+            hud.Post(TableHud.ToastKind.Penalty, "Eksik açılış · 88 / 101", amount: 101);
+            yield return new WaitForSecondsRealtime(.5f);
+            Assert.That(canvas.Q<VisualElement>("table-message-row").resolvedStyle.top, Is.EqualTo(132f));
+            Assert.That(canvas.Q<VisualElement>("table-toast-row").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+            Assert.That(hud.ActiveToast, Does.StartWith("Eksik açılış · 88 / 101 · +101"));
+
             var previous = RenderTexture.active; RenderTexture.active = framebuffer;
             var pixels = new Texture2D(1280, 720, TextureFormat.RGBA32, false); pixels.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0); pixels.Apply();
             RenderTexture.active = previous;

@@ -214,7 +214,7 @@ namespace Galaxy101.Table
             if (HumanTurn)
             {
                 float left = turnSeconds - (now - turnStarted);
-                if (!warned && warnSeconds > 0 && left <= warnSeconds) { warned = true; hud?.Post(TableHud.ToastKind.Warning, T("msg.timeWarn"), sticky: true); Notify(); }
+                if (!warned && warnSeconds > 0 && left <= warnSeconds) { warned = true; Notify(); } // the turn band turns into "Süren bitiyor!"
                 if (left <= 0) { humanDone?.TrySetResult(false); }
             }
             if (ExitOpen && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) CancelExit();
@@ -463,7 +463,7 @@ namespace Galaxy101.Table
             turnStarted = Time.time; turnStartedReal = Time.realtimeSinceStartup;
             humanDone = new TaskCompletionSource<bool>();
             using (token.Register(() => humanDone.TrySetCanceled())) { Notify(); bool acted = await humanDone.Task; if (!acted) { await AutoPlay(token); hud?.Post(TableHud.ToastKind.Warning, T("msg.timeUp")); } }
-            humanDone = null; hud?.Dismiss(T("msg.timeWarn"));
+            humanDone = null;
         }
 
         /// <summary>Timeout (spec/10 §3): draw from the deck, then discard the drawn tile (else the last tile); the planner covers rule corners.</summary>
@@ -1194,7 +1194,6 @@ namespace Galaxy101.Table
             if (key == null || key == "tableSkin" || key == "rackSkin") Fx?.RescanTable();
             if (key == null || key == "tileSkin") Board?.Restyle();
             if (playing && (key == null || key == "rackSkin" || key == "highlight")) SyncBoard(key != "highlight");
-            if (key == "warn" && warnSeconds == 0 && warned) hud?.Dismiss(T("msg.timeWarn"));
             Notify();
         }
 

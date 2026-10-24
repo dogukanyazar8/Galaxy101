@@ -19,7 +19,7 @@ namespace Galaxy101
             ("play", "Oyun", "Play", "Ortada el, hızlı dağıtım"),
             ("opening", "El açma", "Opening", "Hazır açılabilir el · per ortaya, deste sola"),
             ("processing", "İşleme testi", "Laying off", "Herkes açmış, 15 per · işle, okey al, bitir"),
-            ("shortOpening", "Hatalı açma cezası", "Wrong opening", "Perler 66 · Aç turuncu, +101"),
+            ("shortOpening", "Hatalı açma cezası", "Wrong opening", "Perler 69 · Aç turuncu, +101"),
             ("playable", "İşlek taş cezası", "Playable tile", "İşleme masası · işlek atan +101"),
             ("fromHand", "Elden bitiş", "Finish from hand", "Açılmamış, 21 taş perde + 1 · Elden bit"),
         };

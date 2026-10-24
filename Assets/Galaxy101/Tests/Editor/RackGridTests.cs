@@ -105,13 +105,15 @@ namespace Galaxy101.Tests
         }
 
         [Test]
-        public void SortRunsGroupsByColourWithGaps()
+        public void SortLaysTheBestSetsOutWithTheRestBelow()
         {
             var rack = new RackGrid();
             var faces = new Dictionary<int, (int, int)?> { [1] = (1, 3), [2] = (0, 2), [3] = (0, 3), [4] = (1, 4), [5] = null };
             for (int i = 0; i < 5; i++) rack.Set(new RackSlot(1, i * 2), i + 1);
             rack.Sort(true, id => faces[id]);
-            Assert.That(Enumerable.Range(0, 7).Select(i => rack[0, i]).ToArray(), Is.EqualTo(new[] { 2, 3, -1, 1, 4, -1, 5 }));
+            // The okey (5) completes B3 B4 as B5 (12, more than R2 R3 + R4 or the 3s); R2 R3 go to the bottom row.
+            Assert.That(Enumerable.Range(0, 4).Select(i => rack[0, i]).ToArray(), Is.EqualTo(new[] { 1, 4, 5, -1 }));
+            Assert.That(Enumerable.Range(0, 3).Select(i => rack[1, i]).ToArray(), Is.EqualTo(new[] { 2, 3, -1 }));
         }
 
         // Engine ids: 2 × (13 × colour + number − 1) + copy, colours Red, Yellow, Blue, Black.

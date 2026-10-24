@@ -99,11 +99,11 @@ namespace Galaxy101.Table
             return b.State(hands, Enumerable.Repeat(OpeningKind.Series, 4).ToArray(), 0, RoundPhase.AwaitingDraw, rest);
         }
 
-        /// <summary>Hatalı açma cezası: my sets add up to 66 (R3-5, 7s, B10-12) — Aç glows orange, pressing it costs +101.</summary>
+        /// <summary>Hatalı açma cezası: my best sets add up to 69 (R3-5, 7s, 12s) and stay under 101 whatever I draw — Aç glows orange, pressing it costs +101.</summary>
         private static RoundState ShortOpening()
         {
             var b = new Builder(K, 1);
-            var mine = b.Hand((R, 3), (R, 4), (R, 5), (K, 7), (B, 7), (Y, 7), (B, 10), (B, 11), (B, 12), (Y, 1), (K, 9), (R, 13), (Y, 12), (B, 2), (K, 4), (Y, 9), (R, 8), (B, 5), (K, 12), (Y, 3), (R, 1));
+            var mine = b.Hand((R, 3), (R, 4), (R, 5), (K, 7), (B, 7), (Y, 7), (B, 10), (K, 6), (B, 12), (Y, 1), (K, 9), (R, 13), (Y, 12), (B, 2), (K, 4), (Y, 9), (R, 8), (B, 5), (K, 12), (Y, 3), (R, 1));
             var rest = b.Rest(66);
             int[] Hidden(int n) => Enumerable.Range(0, n).Select(_ => rest.Dequeue()).ToArray();
             var hands = new[] { mine, Hidden(21), Hidden(21), Hidden(21) };

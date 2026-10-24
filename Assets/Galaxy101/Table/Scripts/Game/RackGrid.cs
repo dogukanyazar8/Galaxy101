@@ -231,27 +231,11 @@ namespace Galaxy101.Table
             return list;
         }
 
-        /// <summary>sortBy(): runs = colour then number, pairs = number then colour; a gap between breaks, jokers last.</summary>
+        /// <summary>"Seri diz" (<paramref name="runs"/>) or "Çift diz": the whole rack re-laid by <see cref="RackArranger"/>.</summary>
         public void Sort(bool runs, FaceOf face)
         {
-            var tiles = Tiles.ToList();
-            int Key(int id, bool primaryColour) { var f = face(id); if (!f.HasValue) return 1000; return primaryColour ? f.Value.Color * 100 + f.Value.Number : f.Value.Number * 10 + f.Value.Color; }
-            tiles = tiles.OrderBy(t => Key(t, runs)).ThenBy(t => t).ToList();
-            var output = new List<int>();
-            for (int x = 0; x < tiles.Count; x++)
-            {
-                if (x > 0)
-                {
-                    var p = face(tiles[x - 1]); var c = face(tiles[x]);
-                    bool brk = !p.HasValue || !c.HasValue ? p.HasValue != c.HasValue
-                        : runs ? p.Value.Color != c.Value.Color || c.Value.Number != p.Value.Number + 1 : p.Value.Number != c.Value.Number;
-                    if (brk) output.Add(Empty);
-                }
-                output.Add(tiles[x]);
-            }
-            while (output.Count > 2 * Columns) { int ix = output.LastIndexOf(Empty); if (ix < 0) break; output.RemoveAt(ix); }
-            while (output.Count < 2 * Columns) output.Add(Empty);
-            for (int k = 0; k < 2 * Columns; k++) rows[k / Columns][k % Columns] = output[k];
+            var layout = RackArranger.Arrange(Tiles.ToList(), face, runs);
+            for (int r = 0; r < 2; r++) Array.Copy(layout[r], rows[r], Columns);
         }
     }
 

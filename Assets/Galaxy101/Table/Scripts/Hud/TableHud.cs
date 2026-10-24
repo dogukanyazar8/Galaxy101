@@ -1245,7 +1245,7 @@ namespace Galaxy101.Table
 
         private VisualElement Clickable(VisualElement element, string command)
         {
-            element.pickingMode = PickingMode.Position;
+            element.pickingMode = PickingMode.Position; GalaxyFilters.PressSink(element);
             element.RegisterCallback<ClickEvent>(_ => Press(command));
             return element;
         }

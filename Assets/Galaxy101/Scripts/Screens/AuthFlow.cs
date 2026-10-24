@@ -778,7 +778,7 @@ namespace Galaxy101
         }
         private static void Tap(VisualElement e, Action action)
         {
-            e.pickingMode = PickingMode.Position; e.focusable = true;
+            e.pickingMode = PickingMode.Position; e.focusable = true; GalaxyFilters.PressSink(e);
             e.RegisterCallback<ClickEvent>(evt => { action(); evt.StopPropagation(); });
         }
     }

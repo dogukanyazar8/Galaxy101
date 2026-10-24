@@ -103,7 +103,8 @@ namespace Galaxy101
             string bg=classes.Contains("danger")?"#FF5E6C":classes.Contains("success")?"#3CCB6E":classes.Contains("secondary")?"var(--pnH)":classes.Contains("plain")?"transparent":"linear-gradient(var(--a1),var(--a2))";
             string shade=classes.Contains("danger")?"#C23E4A":classes.Contains("success")?"#22914A":classes.Contains("secondary")?"var(--pnS)":"var(--aS)";
             Decorate(button,bg,14,classes.Contains("plain")?0:4,shade);
-            float brightness=classes.Contains("mode-card")?1:classes.Contains("settings-button")?1.25f:classes.Contains("nav-button")?1.12f:1.08f;
+            // style-hover: brightness 1.25 on panel-coloured (secondary) controls, 1.12 on green and nav buttons, 1.08 on gold.
+            float brightness=classes.Contains("mode-card")?1:classes.Contains("settings-button")||classes.Contains("secondary")?1.25f:classes.Contains("nav-button")||classes.Contains("success")?1.12f:1.08f;
             if(brightness>1)GalaxyFilters.HoverBrightness(button,brightness);return button;
         }
         public VisualElement Row(params VisualElement[] children){var row=Box("row");foreach(var child in children)if(child!=null)row.Add(child);return row;}

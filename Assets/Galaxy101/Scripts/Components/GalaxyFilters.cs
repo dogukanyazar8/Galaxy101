@@ -87,20 +87,23 @@ namespace Galaxy101
                 this.owner=owner;name="ledge";pickingMode=PickingMode.Ignore;style.position=Position.Absolute;
                 generateVisualContent+=Paint;
                 owner.RegisterCallback<GeometryChangedEvent>(_=>Fit());
-                owner.Insert(0,this);
+                if(!Beside())owner.Insert(0,this);
             }
+            // Beside the owner instead of inside it: an owner that clips its children (overflow: hidden, set inline), or a
+            // plain text element (a label stops measuring its text once it has a child, and would shrink to its padding).
+            private bool Beside()=>owner.style.overflow.keyword==StyleKeyword.Undefined&&owner.style.overflow.value==Overflow.Hidden||owner is TextElement&&!(owner is GalaxyButton);
             public void Set(float depth,Color color)
             {
                 if(Mathf.Approximately(Depth,depth)&&Color==color)return;
                 Depth=depth;Color=color;style.display=depth>0?DisplayStyle.Flex:DisplayStyle.None;Fit();
             }
-            // Normally a child reaching below the owner's border box. An owner that clips its children (overflow: hidden)
-            // would cut it off, so there the ledge sits just under the owner as a sibling and follows its transform.
+            // Normally a child reaching below the owner's border box; beside the owner (see Beside) it sits just under it as
+            // a sibling and follows its transform, opacity and display.
             private void Fit()
             {
                 float w=owner.layout.width,h=owner.layout.height;if(float.IsNaN(w))return;
-                bool clipped=owner.style.overflow.keyword==StyleKeyword.Undefined&&owner.style.overflow.value==Overflow.Hidden&&owner.parent!=null; // clipping is set inline
-                if(!clipped)
+                bool beside=Beside();if(beside&&owner.parent==null)return;
+                if(!beside)
                 {
                     if(parent!=owner)owner.Insert(0,this);
                     follow?.Pause();style.translate=StyleKeyword.Null;style.scale=StyleKeyword.Null;style.rotate=StyleKeyword.Null;style.opacity=StyleKeyword.Null;
@@ -180,6 +183,22 @@ namespace Galaxy101
             p.LineTo(new Vector2(x1,y1-c));p.BezierCurveTo(new Vector2(x1,y1-c+k*c),new Vector2(x1-c+k*c,y1),new Vector2(x1-c,y1));
             p.LineTo(new Vector2(x0+d,y1));p.BezierCurveTo(new Vector2(x0+d-k*d,y1),new Vector2(x0,y1-d+k*d),new Vector2(x0,y1-d));
             p.LineTo(new Vector2(x0,y0+a));p.BezierCurveTo(new Vector2(x0,y0+a-k*a),new Vector2(x0+a-k*a,y0),new Vector2(x0+a,y0));p.ClosePath();
+        }
+        /// <summary>
+        /// The design's style-active="transform: translateY(3px)" on raised controls: while pressed, an element with a
+        /// ledge sinks by up to 3 px (2 px on the shallow ledges of small chips), ledge and all.
+        /// </summary>
+        public static void PressSink(VisualElement element)
+        {
+            StyleTranslate rest=default;bool down=false;
+            element.RegisterCallback<PointerDownEvent>(_=>
+            {
+                float depth=LedgeDepth(element);if(down||depth<=0||!element.enabledInHierarchy)return;
+                down=true;rest=element.style.translate;var now=element.resolvedStyle.translate;
+                element.style.translate=new Translate(now.x,now.y+Mathf.Min(3,depth-1));
+            },TrickleDown.TrickleDown);
+            void Up(){if(!down)return;down=false;element.style.translate=rest;}
+            element.RegisterCallback<PointerUpEvent>(_=>Up());element.RegisterCallback<PointerLeaveEvent>(_=>Up());element.RegisterCallback<PointerCancelEvent>(_=>Up());
         }
         public static void HoverBrightness(VisualElement element,float gain)
         {

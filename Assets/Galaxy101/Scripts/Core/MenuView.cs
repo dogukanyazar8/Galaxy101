@@ -114,6 +114,33 @@ namespace Galaxy101
             if(asset==null)throw new InvalidOperationException("Missing Galaxy UI template: "+name);
             return asset.CloneTree();
         }
+        /// <summary>
+        /// Every text input's look: the caret in the text colour (caret-color: auto), the browser's selection highlight and,
+        /// while empty, the shell's placeholder colour (input::placeholder rgba(169,174,221,.5)).
+        /// </summary>
+        public void InputLook(TextField field,string color)
+        {
+            Color text=C(color),hint=new Color(169/255f,174/255f,221/255f,.5f);
+            field.textSelection.cursorColor=text;field.textSelection.selectionColor=new Color(.2f,.56f,1f,.45f);
+            var input=field.Q(className:TextField.inputUssClassName);if(input==null)return;
+            void Tint()=>input.style.color=string.IsNullOrEmpty(field.value)?hint:text;
+            field.RegisterValueChangedCallback(_=>Tint());Tint();
+        }
+        /// <summary>
+        /// An input box's CSS inset ring, drawn over the box without layout (a border would shift the text on focus):
+        /// "rest" inset 0 2px 0 rgba(0,0,0,.3), "focus" inset 0 0 0 2px --a1, "bad" #FF5E6C, "line" --bd. Returns the setter.
+        /// </summary>
+        public Action<string> InsetRing(VisualElement box,float radius)
+        {
+            var ring=Box();ring.name="inset-ring";ring.pickingMode=PickingMode.Ignore;ring.style.position=Position.Absolute;ring.style.left=ring.style.top=ring.style.right=ring.style.bottom=0;
+            ring.style.borderTopLeftRadius=ring.style.borderTopRightRadius=ring.style.borderBottomLeftRadius=ring.style.borderBottomRightRadius=radius;box.Add(ring);
+            return state=>
+            {
+                float all=state=="rest"?0:2;Color edge=state=="focus"?C("var(--a1)"):state=="bad"?C("#FF5E6C"):C("var(--bd)");
+                ring.style.borderLeftWidth=ring.style.borderRightWidth=ring.style.borderBottomWidth=all;ring.style.borderTopWidth=2;
+                ring.style.borderLeftColor=ring.style.borderRightColor=ring.style.borderBottomColor=edge;ring.style.borderTopColor=state=="rest"?new Color(0,0,0,.3f):edge;
+            };
+        }
         public void Decorate(VisualElement element,string background,int radius=0,int shadow=0,string shadowColor=null)
         {
             // border-radius: 999px — CSS shrinks oversized radii together, so a pill keeps half-circle ends; UI Toolkit clamps

@@ -231,9 +231,8 @@ namespace Galaxy101
             if (input != null)
             {
                 input.style.unityFont = field.style.unityFont; input.style.fontSize = fontSize;
-                input.style.color=string.IsNullOrEmpty(field.value)?v.C("mt"):v.C("#F4F1E8");
-                field.RegisterValueChangedCallback(evt=>input.style.color=string.IsNullOrEmpty(evt.newValue)?v.C("mt"):v.C("#F4F1E8"));
             }
+            v.InputLook(field, "#F4F1E8");
             if (!string.IsNullOrEmpty(placeholder)) field.textEdition.placeholder = placeholder;
             return field;
         }

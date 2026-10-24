@@ -107,7 +107,7 @@ namespace Galaxy101.Table
             text = (text ?? "").Trim(); if (text.Length == 0) return;
             if (text.Length > 80) text = text.Substring(0, 80);
             Say(0, text);
-            if (SocialRandom.NextDouble() < BotReplyChance)
+            if (!OnlineTable && SocialRandom.NextDouble() < BotReplyChance) // people answer for themselves at a server table
             {
                 int seat = 1 + SocialRandom.Next(3); string reply = S("bot." + (1 + SocialRandom.Next(6)));
                 After(1.4f, () => Say(seat, reply));
@@ -171,9 +171,10 @@ namespace Galaxy101.Table
             if (field != null)
             {
                 view.Decorate(field, "var(--dp)", 14); Border(field, 0, Color.clear); Pad(field, 0, 14, 0, 14);
-                field.style.unityFont = view.Font("Baloo2-700"); field.style.fontSize = 14; field.style.color = view.C("#F4F1E8");
+                field.style.unityFont = view.Font("Baloo2-700"); field.style.fontSize = 14;
                 GalaxyFilters.Shadow(field, 0, 2, 0, new Color(0, 0, 0, .3f));
             }
+            view.InputLook(input, "#F4F1E8");
             input.RegisterValueChangedCallback(evt => chatDraft = evt.newValue);
             input.RegisterCallback<KeyDownEvent>(evt =>
             {

@@ -378,20 +378,8 @@ namespace Galaxy101
             return box;
         }
 
-        /// <summary>
-        /// A field box's box-shadow ring, drawn over it without layout: "rest" inset 0 2px 0 rgba(0,0,0,.3), "focus" inset
-        /// 0 0 0 2px --a1, "bad" #FF5E6C, "line" --bd. Returns the setter.
-        /// </summary>
-        private Action<string> FieldRing(VisualElement box, float radius)
-        {
-            var ring = Box("field-ring"); ring.style.position = Position.Absolute; ring.style.left = ring.style.top = ring.style.right = ring.style.bottom = 0; Radius(ring, radius);
-            box.Add(ring);
-            return state =>
-            {
-                if (state == "rest") { Border(ring, 0, Color.clear); ring.style.borderTopWidth = 2; ring.style.borderTopColor = new Color(0, 0, 0, .3f); return; }
-                Border(ring, 2, view.C(state == "focus" ? "var(--a1)" : state == "bad" ? "#FF5E6C" : "var(--bd)"));
-            };
-        }
+        /// <summary>A field box's inset ring (<see cref="MenuView.InsetRing"/>).</summary>
+        private Action<string> FieldRing(VisualElement box, float radius) => view.InsetRing(box, radius);
 
         /// <summary>Typing in the search box redraws only the cards, so the field keeps focus.</summary>
         private void RefreshCards()
@@ -560,17 +548,13 @@ namespace Galaxy101
             var field = new TextField { name = name, value = value, maxLength = maxLength };
             field.style.marginLeft = field.style.marginRight = field.style.marginTop = field.style.marginBottom = 0;
             field.textEdition.placeholder = placeholder; field.textEdition.hidePlaceholderOnFocus = false;
-            // The caret takes the text colour (caret-color: auto); a selection shows the browser's highlight.
-            Color text = view.C(color), hint = new Color(169 / 255f, 174 / 255f, 221 / 255f, .5f); // input::placeholder
-            field.textSelection.cursorColor = text; field.textSelection.selectionColor = new Color(.2f, .56f, 1f, .45f);
             var input = field.Q(className: TextField.inputUssClassName);
             if (input != null)
             {
                 input.style.backgroundColor = Color.clear; Border(input, 0, Color.clear); Pad(input, 0, 0, 0, 0);
                 input.style.unityFont = view.Font(font); input.style.fontSize = size;
-                void Tint() => input.style.color = string.IsNullOrEmpty(field.value) ? hint : text;
-                field.RegisterValueChangedCallback(_ => Tint()); Tint();
             }
+            view.InputLook(field, color);
             return field;
         }
 

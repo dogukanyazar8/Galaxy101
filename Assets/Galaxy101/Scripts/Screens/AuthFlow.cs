@@ -352,11 +352,12 @@ namespace Galaxy101
             if (shown != null) { var h = Text(shown, 12, "Baloo2-800", hint != null ? "#FF8A94" : "#8EF0B0"); h.name = "auth-hint-" + key; top.Add(h); }
             column.Add(top);
             var boxRow = Row(); boxRow.name = "auth-box-" + key; boxRow.style.height = 50; boxRow.style.marginTop = 6; Pad(boxRow, 0, 8, 0, 14); view.Decorate(boxRow, "var(--dp)", 14);
+            // ring: error inset 2px #FF5E6C; focus inset 2px --a1 + 0 0 0 4px rgba(255,201,74,.12); rest inset 0 2px 0 — no layout.
+            var inset = view.InsetRing(boxRow, 14); var halo = GalaxyFilters.SpreadRing(boxRow);
             void Ring(bool focus)
             {
-                if (hint != null) { Border(boxRow, 2, view.C("#FF5E6C")); GalaxyFilters.ClearSoftShadow(boxRow); }
-                else if (focus) { Border(boxRow, 2, view.C("var(--a1)")); GalaxyFilters.Shadow(boxRow, 0, 0, 2, new Color(1, .79f, .29f, .24f)); }
-                else { Border(boxRow, 0, Color.clear); GalaxyFilters.ClearSoftShadow(boxRow); boxRow.style.borderTopWidth = 2; boxRow.style.borderTopColor = new Color(0, 0, 0, .3f); }
+                inset(hint != null ? "bad" : focus ? "focus" : "rest");
+                halo(hint == null && focus ? 4 : 0, new Color(1, 201 / 255f, 74 / 255f, .12f));
             }
             Ring(false);
             var field = new TextField { name = name, value = value, maxLength = maxLength, isPasswordField = secret && !showPassword };
@@ -366,8 +367,9 @@ namespace Galaxy101
             if (input != null)
             {
                 input.style.backgroundColor = Color.clear; Border(input, 0, Color.clear); Pad(input, 0, 0, 0, 0);
-                input.style.unityFont = view.Font("Baloo2-700"); input.style.fontSize = 16; input.style.color = view.C("#F4F1E8");
+                input.style.unityFont = view.Font("Baloo2-700"); input.style.fontSize = 16;
             }
+            view.InputLook(field, "#F4F1E8");
             field.RegisterValueChangedCallback(evt =>
             {
                 changed(evt.newValue);

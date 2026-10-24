@@ -353,7 +353,7 @@ namespace Galaxy101
             column.Add(top);
             var boxRow = Row(); boxRow.name = "auth-box-" + key; boxRow.style.height = 50; boxRow.style.marginTop = 6; Pad(boxRow, 0, 8, 0, 14); view.Decorate(boxRow, "var(--dp)", 14);
             // ring: error inset 2px #FF5E6C; focus inset 2px --a1 + 0 0 0 4px rgba(255,201,74,.12); rest inset 0 2px 0 — no layout.
-            var inset = view.InsetRing(boxRow, 14); var halo = GalaxyFilters.SpreadRing(boxRow);
+            var inset = view.InsetRing(boxRow, 14); var halo = GalaxyFilters.SpreadRing(boxRow, 4);
             void Ring(bool focus)
             {
                 inset(hint != null ? "bad" : focus ? "focus" : "rest");

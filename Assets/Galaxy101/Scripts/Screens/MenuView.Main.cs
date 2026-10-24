@@ -188,18 +188,21 @@ namespace Galaxy101
                 var slot=Box("mode-slot");slot.style.width=208;slot.style.height=78;slot.style.marginRight=i==2?0:12;
                 var card=Button("",()=>PickMode(index),"mode-card");
                 card.name="mode-"+index;Place(card,0,0,208,78);Decorate(card,color,18,5,shade);
-                card.style.flexDirection=FlexDirection.Column;card.style.justifyContent=Justify.Center;card.style.alignItems=Align.FlexStart;card.style.paddingLeft=card.style.paddingRight=14;card.style.overflow=Overflow.Hidden;
+                card.style.flexDirection=FlexDirection.Column;card.style.justifyContent=Justify.Center;card.style.alignItems=Align.FlexStart;card.style.paddingLeft=card.style.paddingRight=14;
+                // overflow: hidden on an inner layer, so the card's 5 px ledge below it is not clipped with the glyph.
+                var clip=Box("mode-clip");clip.pickingMode=PickingMode.Ignore;clip.style.position=Position.Absolute;clip.style.left=clip.style.top=clip.style.right=clip.style.bottom=0;clip.style.overflow=Overflow.Hidden;
+                clip.style.borderTopLeftRadius=clip.style.borderTopRightRadius=clip.style.borderBottomLeftRadius=clip.style.borderBottomRightRadius=18;card.Add(clip);
                 // The design's white selection/hover ring (box-shadow 0 2.5px 0 5px #fff) is left out on purpose: the cards
                 // only lift, light up and glow.
                 // Mode glyph: 700 58px/1, rgba(255,255,255,.16), right -4 bottom -14, clipped by the card.
                 var glyph=Text(glyphs[i],58,true,"rgba(255,255,255,.16)");glyph.name="mode-glyph-"+index;glyph.style.height=58;glyph.style.unityTextAlign=TextAnchor.MiddleRight;glyph.pickingMode=PickingMode.Ignore;
-                glyph.style.position=Position.Absolute;glyph.style.right=-4;glyph.style.bottom=-14;card.Add(glyph);
-                var gloss=Box();Place(gloss,0,0,208,39);gloss.pickingMode=PickingMode.Ignore;Decorate(gloss,"linear-gradient(rgba(255,255,255,.18),transparent)",18);card.Add(gloss);
+                glyph.style.position=Position.Absolute;glyph.style.right=-4;glyph.style.bottom=-14;clip.Add(glyph);
+                var gloss=Box();Place(gloss,0,0,208,39);gloss.pickingMode=PickingMode.Ignore;Decorate(gloss,"linear-gradient(rgba(255,255,255,.18),transparent)",18);clip.Add(gloss);
                 var title=Text(names[i],18,true,"#fff");title.pickingMode=PickingMode.Ignore;card.Add(title);
                 var line=Row();line.pickingMode=PickingMode.Ignore;line.style.marginTop=4;var dot=Box();dot.style.width=dot.style.height=6;dot.style.marginRight=5;Decorate(dot,"#8EF0B0",3);GalaxyFilters.Shadow(dot,0,0,3,C("#8EF0B0"));line.Add(dot);
                 var count=Text(online[i],11,false,"rgba(255,255,255,.9)");count.style.unityFont=Font("Baloo2-800");line.Add(count);card.Add(line);
-                if(IsSoon(index)){var soon=Text(L("YAKINDA","SOON"),9,false,"#fff");soon.name="mode-soon-"+index;soon.style.unityFont=Font("Baloo2-800");Tracking(soon,1.2f,9);soon.style.position=Position.Absolute;soon.style.right=10;soon.style.bottom=9;soon.style.paddingTop=soon.style.paddingBottom=3;soon.style.paddingLeft=soon.style.paddingRight=7;Decorate(soon,"rgba(0,0,0,.32)",6);card.Add(soon);}
-                var tick=Box("mode-tick");tick.pickingMode=PickingMode.Ignore;tick.style.position=Position.Absolute;tick.style.right=8;tick.style.top=8;tick.style.width=tick.style.height=22;tick.style.alignItems=Align.Center;tick.style.justifyContent=Justify.Center;Decorate(tick,"#fff",99);tick.Add(Icon("tick",13,"#1B2440"));card.Add(tick);
+                if(IsSoon(index)){var soon=Text(L("YAKINDA","SOON"),9,false,"#fff");soon.name="mode-soon-"+index;soon.style.unityFont=Font("Baloo2-800");Tracking(soon,1.2f,9);soon.style.position=Position.Absolute;soon.style.right=10;soon.style.bottom=9;soon.style.paddingTop=soon.style.paddingBottom=3;soon.style.paddingLeft=soon.style.paddingRight=7;Decorate(soon,"rgba(0,0,0,.32)",6);clip.Add(soon);}
+                var tick=Box("mode-tick");tick.pickingMode=PickingMode.Ignore;tick.style.position=Position.Absolute;tick.style.right=8;tick.style.top=8;tick.style.width=tick.style.height=22;tick.style.alignItems=Align.Center;tick.style.justifyContent=Justify.Center;Decorate(tick,"#fff",99);tick.Add(Icon("tick",13,"#1B2440"));clip.Add(tick);
                 Color glow=C(color);glow.a=.6f;
                 var state=new ModeCard{Index=index,Card=card,Tick=tick,Glow=glow};modeCards.Add(state);
                 card.RegisterCallback<PointerEnterEvent>(_=>{state.Hover=true;ApplyModes();});

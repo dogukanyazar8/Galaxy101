@@ -347,6 +347,12 @@ namespace Galaxy101.Tests
             var document = owner.GetComponent<UIDocument>();
             IEnumerator Snap(string name) { yield return DisplaySettingsTests.Shot(document, 2000, 1125, Path.Combine(dir, name + ".png")); }
             yield return new WaitForSeconds(1.5f); yield return Snap("A01_menu");
+            // A hovered button keeps its ledge (hover brightness is a filter).
+            menu.View.OpenPanel("settings", 0); yield return new WaitForSeconds(.8f);
+            var close = root.Q<VisualElement>("settings-close");
+            using (var move = PointerMoveEvent.GetPooled(new Event { type = EventType.MouseMove, mousePosition = close.worldBound.center })) root.panel.visualTree.SendEvent(move);
+            yield return new WaitForSeconds(.3f); yield return Snap("A09_settings_close_hover");
+            menu.View.CloseTop(); yield return new WaitForSeconds(.5f);
             menu.OpenLobby(); yield return new WaitForSeconds(1f); yield return Snap("A02_lobby");
             root.Q<TextField>("lobby-search").value = "Gece"; yield return new WaitForSeconds(.3f); yield return Snap("A03_search");
             root.Q<TextField>("lobby-search").value = "zzz"; yield return new WaitForSeconds(.3f); yield return Snap("A04_empty");

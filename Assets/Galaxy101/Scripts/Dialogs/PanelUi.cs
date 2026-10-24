@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -27,7 +28,9 @@ namespace Galaxy101
 
         internal static void Gap(VisualElement row, int gap)
         {
-            for (var i = 0; i < row.childCount - 1; i++) row[i].style.marginRight = gap;
+            // Flow children only: ledges and rings are absolute overlays.
+            var flow = row.Children().Where(c => c.style.position.value != Position.Absolute).ToList();
+            for (var i = 0; i < flow.Count - 1; i++) flow[i].style.marginRight = gap;
         }
 
         internal static void Pad(VisualElement e, int vertical, int horizontal)

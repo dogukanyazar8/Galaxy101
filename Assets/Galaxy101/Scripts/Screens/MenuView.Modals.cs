@@ -75,6 +75,15 @@ namespace Galaxy101
             return page;
         }
         /// <summary>
+        /// The card's rounded clip lives on its page: the card itself stays unclipped so its ledge (0 10px 0 --pnS),
+        /// drawn below its box, is not cut away.
+        /// </summary>
+        private static void Clip(VisualElement page,float radius)
+        {
+            if(page==null)return;page.style.overflow=Overflow.Hidden;
+            page.style.borderTopLeftRadius=page.style.borderTopRightRadius=page.style.borderBottomLeftRadius=page.style.borderBottomRightRadius=Mathf.Max(0,radius);
+        }
+        /// <summary>
         /// A refreshed modal: the new page replaces the old one in place and, within the same tab, takes over its scroll
         /// offsets — no jump to the top. (Old and new are never on screen together: overlapping filtered subtrees trip
         /// UI Toolkit's render-tree compositor.)
@@ -82,7 +91,7 @@ namespace Galaxy101
         private static void SwapPage(VisualElement card,VisualElement page,bool keepScroll)
         {
             var old=card.Children().FirstOrDefault(c=>c.name=="modal-page");
-            card.Insert(0,page);
+            card.Insert(card.IndexOf(old)>=0?card.IndexOf(old):card.childCount,page);Clip(page,card.style.borderTopLeftRadius.value.value-1);
             if(old==null)return;
             var offsets=keepScroll?old.Query<ScrollView>().ToList().Select(v=>v.scrollOffset).ToList():new System.Collections.Generic.List<Vector2>();
             old.RemoveFromHierarchy();
@@ -110,7 +119,7 @@ namespace Galaxy101
             var center=Box("modal-center");center.pickingMode=PickingMode.Ignore;center.style.width=Length.Percent(100);center.style.height=Length.Percent(100);layer.Add(center);
             card.Add(Page(card));card.userData=key+"|"+Tab(key);
             card.style.width=width;if(height>0)card.style.height=height;card.style.flexShrink=0;card.AddToClassList(nested?"dialog-card":"panel-card");
-            Decorate(card,"pn",nested?26:28,10,"pnS");GalaxyFilters.Shadow(card,0,40,45,new Color(0,0,0,.6f));card.style.overflow=Overflow.Hidden;card.focusable=true;card.pickingMode=PickingMode.Position;center.Add(card);
+            Decorate(card,"pn",nested?26:28,10,"pnS");GalaxyFilters.Shadow(card,0,40,45,new Color(0,0,0,.6f));Clip(card.Q("modal-page"),nested?25:27);card.focusable=true;card.pickingMode=PickingMode.Position;center.Add(card);
             if(nested){dialogCard=card;mountedDialog=key;}else{panelCard=card;mountedPanel=key;}
             // fadeIn .2s (dialogs .18s) ease-out on the whole overlay, under the card's own modalIn.
             float fade=nested?.18f:.2f;double fadeFrom=Time.realtimeSinceStartupAsDouble;layer.style.opacity=0;

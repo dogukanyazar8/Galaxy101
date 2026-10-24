@@ -7,8 +7,8 @@ using UnityEngine.UIElements;
 namespace Galaxy101.Tests
 {
     /// <summary>
-    /// CSS shadow lengths are UI points: at a 2× panel a "0 20px 0" shadow must fall 40 physical pixels, as a browser
-    /// draws it at 200 % zoom (UI Toolkit filters take physical pixels, so glows shrank on large windows).
+    /// CSS shadow lengths are UI points (filters follow the panel scale, as a browser at 200 % zoom), and a button's
+    /// ledge survives a hover filter (a filtered element renders offscreen, clipped to its filter's region).
     /// </summary>
     public sealed class FilterScaleTests
     {
@@ -23,6 +23,29 @@ namespace Galaxy101.Tests
             if (panel != null) Object.Destroy(panel);
             if (target != null) { target.Release(); Object.Destroy(target); }
             yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator LedgeSurvivesAHoverFilter()
+        {
+            target = new RenderTexture(1280, 720, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+            panel = Object.Instantiate(Resources.Load<PanelSettings>("Galaxy101/UI/PanelSettings")); panel.targetTexture = target;
+            owner = new GameObject("Ledge filter"); var document = owner.AddComponent<UIDocument>(); document.panelSettings = panel;
+            yield return null;
+            var root = document.rootVisualElement; root.style.backgroundColor = Color.black;
+            var box = new VisualElement(); box.style.position = Position.Absolute; box.style.left = 100; box.style.top = 100; box.style.width = 60; box.style.height = 40;
+            box.style.backgroundColor = Color.white; foreach (var r in new[] { 14f }) box.style.borderBottomLeftRadius = box.style.borderBottomRightRadius = box.style.borderTopLeftRadius = box.style.borderTopRightRadius = r;
+            root.Add(box);
+            GalaxyFilters.HardShadow(box, 6, Color.red);
+            GalaxyFilters.SaturationAndBrightness(box, 1, 1.25f); // what a hover adds
+            for (int i = 0; i < 6; i++) yield return null;
+            var previous = RenderTexture.active; RenderTexture.active = target;
+            var pixels = new Texture2D(1280, 720, TextureFormat.RGBA32, false); pixels.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0); pixels.Apply();
+            RenderTexture.active = previous;
+            // Under the box centre (x 130): the ledge spans y 140–146.
+            int red = 0; for (int y = 139; y < 150; y++) { var c = pixels.GetPixel(130, 719 - y); if (c.r > .5f && c.g < .3f) red++; }
+            Object.Destroy(pixels);
+            Assert.That(red, Is.InRange(5, 8), "the 6 px ledge still shows under a filtered (hovered) button");
         }
 
         [UnityTest]

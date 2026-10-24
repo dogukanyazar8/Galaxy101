@@ -562,7 +562,7 @@ namespace Galaxy101
         {
             // lbPulse 2.4 s: box-shadow 0 0 0 0 --gl → 0 0 0 12px transparent → back (ease per half): a solid ring that
             // spreads out fading, then closes in returning.
-            var ring = GalaxyFilters.SpreadRing(element); var glow = view.C("var(--gl)");
+            var ring = GalaxyFilters.SpreadRing(element, 12); var glow = view.C("var(--gl)");
             float began = shownAt; // one continuous pulse across redraws
             Animate(() =>
             {

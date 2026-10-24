@@ -649,7 +649,10 @@ namespace Galaxy101
         /// </summary>
         private static void Paragraph(Label label, float lineHeight = 0)
         {
-            label.style.whiteSpace = WhiteSpace.Normal; label.style.height = StyleKeyword.Auto;
+            // A redraw lays the paragraph out at its last height at once: no frame at the single-line height first.
+            string key = label.text + "|" + label.style.fontSize.value.value + "|" + lineHeight;
+            label.style.whiteSpace = WhiteSpace.Normal;
+            if (paragraphHeights.TryGetValue(key, out float known)) label.style.height = known; else label.style.height = StyleKeyword.Auto;
             label.RegisterCallback<GeometryChangedEvent>(_ =>
             {
                 float width = label.layout.width; if (float.IsNaN(width) || width <= 0 || string.IsNullOrEmpty(label.text)) return;
@@ -659,10 +662,12 @@ namespace Galaxy101
                 if (one <= 0) return;
                 float line = lineHeight > 0 ? size * lineHeight : MenuView.CssLineHeight(font != null ? font.name : null, size);
                 float target = Mathf.Max(1, Mathf.Round(all / one)) * line + label.resolvedStyle.paddingTop + label.resolvedStyle.paddingBottom;
+                paragraphHeights[key] = target;
                 var h = label.style.height;
                 if (h.keyword != StyleKeyword.Undefined || Mathf.Abs(h.value.value - target) > .01f) label.style.height = target;
             });
         }
+        private static readonly Dictionary<string, float> paragraphHeights = new Dictionary<string, float>();
 
         /// <summary>font-variant-numeric: tabular-nums — every digit on the font's tabular advance (Montserrat 0.69 em, Baloo 2 0.59 em).</summary>
         private static Label Tabular(Label label)

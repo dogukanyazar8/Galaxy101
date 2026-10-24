@@ -391,32 +391,36 @@ namespace Galaxy101
         }
 
         /// <summary>
-        /// A CSS paragraph: n line boxes of <paramref name="lineHeight"/> px with the glyphs centred in each (rich-text
-        /// line-height between lines, a box of n × line height) and, with <paramref name="pretty"/>, text-wrap: pretty —
-        /// the last line never holds a single word: the word before it moves down with it, as Chrome balances the end of a
-        /// paragraph.
+        /// A CSS paragraph: lines <paramref name="lineHeight"/> px apart with the glyphs centred in each line box, laid out
+        /// before the first frame (no relayout): rich-text line-height between lines, and the half-leading of the first and
+        /// last line taken off the label's vertical margins (set them before calling). With <paramref name="pretty"/>,
+        /// text-wrap: pretty — the last line never holds a single word: the word before it moves down with it, as Chrome
+        /// balances the end of a paragraph; the last break found for the text is reused so a rebuild does not re-wrap.
         /// </summary>
         public static Label CssParagraph(Label label,float lineHeight,bool pretty)
         {
             string plain=label.text??"";label.enableRichText=true;label.style.whiteSpace=WhiteSpace.Normal;label.style.flexShrink=0;
             string Wrap(string body)=>"<line-height="+lineHeight.ToString("0.##",System.Globalization.CultureInfo.InvariantCulture)+"px>"+body;
-            label.text=Wrap(plain);
+            var font=label.style.unityFont.value;float size=label.style.fontSize.value.value;
+            float half=(lineHeight-NaturalLineHeight(font!=null?font.name:null,size))/2;
+            label.style.marginTop=label.style.marginTop.value.value+half;label.style.marginBottom=label.style.marginBottom.value.value+half;
+            string key=size+"|"+plain;
+            label.text=Wrap(pretty&&prettyBreaks.TryGetValue(key,out var known)?known:plain);
+            if(!pretty)return label;
             float laidFor=-1;
             label.RegisterCallback<GeometryChangedEvent>(_=>
             {
                 float width=label.contentRect.width;if(width<=1||Mathf.Abs(width-laidFor)<.5f)return;laidFor=width;
-                if(pretty)label.text=Wrap(Pretty(label,plain,width));
-                var align=label.resolvedStyle.unityTextAlign;
-                if(align==TextAnchor.UpperLeft)label.style.unityTextAlign=TextAnchor.MiddleLeft;
-                else if(align==TextAnchor.UpperCenter)label.style.unityTextAlign=TextAnchor.MiddleCenter;
-                else if(align==TextAnchor.UpperRight)label.style.unityTextAlign=TextAnchor.MiddleRight;
-                float one=label.MeasureTextSize("Ag",0,VisualElement.MeasureMode.Undefined,0,VisualElement.MeasureMode.Undefined).y;
-                float all=label.MeasureTextSize(label.text,width,VisualElement.MeasureMode.Exactly,0,VisualElement.MeasureMode.Undefined).y;
-                if(one<=0)return;
-                int lines=Mathf.Max(1,Mathf.RoundToInt((all-one)/lineHeight)+1);
-                label.style.height=lines*lineHeight+label.resolvedStyle.paddingTop+label.resolvedStyle.paddingBottom;
+                string broken=Pretty(label,plain,width);prettyBreaks[key]=broken;
+                if(label.text!=Wrap(broken))label.text=Wrap(broken);
             });
             return label;
+        }
+        private static readonly Dictionary<string,string> prettyBreaks=new Dictionary<string,string>();
+        /// <summary>A label's single-line height: the font's ascent + descent (<see cref="CssLineHeight"/>'s metrics), rounded up.</summary>
+        private static float NaturalLineHeight(string font,float size)
+        {
+            bool baloo=font!=null&&font.StartsWith("Baloo");return Mathf.Ceil(size*(baloo?1.078f+.524f:.968f+.251f)-.01f);
         }
         private static string Pretty(Label label,string plain,float width)
         {

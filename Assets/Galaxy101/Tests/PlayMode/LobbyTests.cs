@@ -337,6 +337,23 @@ namespace Galaxy101.Tests
         }
 
         [UnityTest]
+        public IEnumerator FiltersAndCreateOptionsRedrawWithoutInterimFrames()
+        {
+            var menu = Menu(); var root = menu.View.Root; yield return null;
+            menu.OpenLobby(); yield return null;
+            fake.Balance(60000); yield return null;
+            using (var watch = new FrameWatch(owner.GetComponent<UIDocument>(), new RectInt(0, 0, 1280, 720)))
+            {
+                yield return new WaitForSecondsRealtime(1f);
+                foreach (var name in new[] { "lobby-type-pairs", "lobby-doubling", "lobby-stake-5000", "lobby-free", "lobby-clear-filters" })
+                    yield return watch.Stable(() => Click(root, name), name);
+                Click(root, "lobby-create"); yield return new WaitForSecondsRealtime(1f);
+                foreach (var name in new[] { "create-type-pairs", "create-stake-10000", "create-hands-7", "create-turn-45", "create-doubling", "create-vis-private", "create-pin-toggle", "create-rules" })
+                    yield return watch.Stable(() => Click(root, name), name);
+            }
+        }
+
+        [UnityTest]
         public IEnumerator CreateFormValidatesAndSendsTheChosenOptions()
         {
             var menu = Menu(); var root = menu.View.Root; yield return null;

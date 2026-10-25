@@ -106,7 +106,8 @@ namespace Galaxy101.Audio
             {
                 var (owner, source) = screenSources[i];
                 if (owner == null) { screenSources.RemoveAt(i); continue; }
-                return source();
+                try { return source(); }
+                catch (Exception ex) { Debug.LogException(ex); screenSources.RemoveAt(i); }
             }
             return SceneManager.GetActiveScene().name == MainMenuController.GalaxyTableScene ? "game" : null;
         }

@@ -82,13 +82,14 @@ namespace Galaxy101.Audio
 
         private readonly CursorSet set;
         private readonly UiPicker picker;
+        private readonly Func<string, bool> known;
         private readonly Dictionary<string, (Texture2D texture, Vector2 hotspot)> textures = new Dictionary<string, (Texture2D, Vector2)>();
         private Vector2 lastPosition = new Vector2(float.NaN, float.NaN);
         private string resolved = CursorRules.Default, dragHold, applied;
         private int idle;
         private bool hidden;
 
-        public CursorDriver(CursorSet set, UiPicker picker) { this.set = set; this.picker = picker; }
+        public CursorDriver(CursorSet set, UiPicker picker) { this.set = set; this.picker = picker; known = set.Has; }
 
         public void Update()
         {
@@ -101,7 +102,7 @@ namespace Galaxy101.Audio
             {
                 lastPosition = position;
                 var target = picker.Pick(position);
-                resolved = target == null ? GalaxyCursor.World : CursorRules.Resolve(target, n => set.Has(n));
+                resolved = target == null ? GalaxyCursor.World : CursorRules.Resolve(target, known);
             }
             // onDown: a press on a resize cursor keeps it until release; onUp lets go.
             if (down && (resolved == CursorRules.Ew || resolved == CursorRules.Ns)) dragHold = resolved;

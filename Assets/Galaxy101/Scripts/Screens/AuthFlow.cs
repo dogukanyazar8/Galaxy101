@@ -136,6 +136,7 @@ namespace Galaxy101
                 case "guest": BuildGuest(); break;
                 case "reset": BuildReset(); break;
             }
+            AppVersionLabel.Attach(body);
             if (focusName != null && body.Q<TextField>(focusName) is TextField again)
                 again.schedule.Execute(() => { again.Focus(); again.SelectRange(again.value.Length, again.value.Length); });
         }

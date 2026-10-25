@@ -29,9 +29,8 @@ namespace Galaxy101.Diagnostics
                 {
                     var demo = new G101DemoLobby();
                     MainMenuController.LobbyBackend = () => demo;
-                    try { yield return OpenMenu(theme, lang, false); }
+                    try { yield return OpenMenu(theme, lang, false); Menu.OpenLobby(); }
                     finally { MainMenuController.LobbyBackend = null; }
-                    Menu.OpenLobby();
                     yield return Settle(.4f);
                     var lobby = Menu.Lobby ?? throw new InvalidOperationException("lobby did not open");
                     switch (id)

@@ -54,7 +54,7 @@ namespace Galaxy101
             }
             sidebar.Add(PanelUi.Spacer(v));
             // Reference: one block, padding 0 12px, 700 11px body font, muted at .7 opacity.
-            var credits = v.Column(v.Text("Galaxy 101 · v0.2.0", 11, false, "mt"), v.Text("© CDX Games", 11, false, "mt")); credits.AddToClassList("g-settings-credits"); sidebar.Add(credits);
+            var credits = v.Column(v.Text("Galaxy 101 · v" + UnityEngine.Application.version, 11, false, "mt"), v.Text("© CDX Games", 11, false, "mt")); credits.AddToClassList("g-settings-credits"); sidebar.Add(credits);
             var content = root.Q<VisualElement>("content");
             var subtitles = new[]
             {

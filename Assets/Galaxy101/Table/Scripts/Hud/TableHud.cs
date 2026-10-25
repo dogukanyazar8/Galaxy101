@@ -258,6 +258,7 @@ namespace Galaxy101.Table
             hudLayer = Layer("table-hud"); canvas.Add(hudLayer);
             toastLayer = Layer("table-toasts"); canvas.Add(toastLayer);
             InitializeWindows(persistencePath == null);
+            AppVersionLabel.Attach(canvas);
 
             turnStarted = Time.realtimeSinceStartup;
             Render(Current);

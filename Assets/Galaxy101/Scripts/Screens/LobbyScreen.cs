@@ -58,6 +58,7 @@ namespace Galaxy101
             if (modal?.parent != null) modal.parent.Insert(modal.parent.IndexOf(modal), layer); else canvas.Add(layer);
             view.Decorate(layer, "linear-gradient(180deg,rgba(5,8,22,.15),rgba(5,8,22,.5))");
             body = Fill("lobby-body"); body.pickingMode = PickingMode.Ignore; layer.Add(body);
+            AppVersionLabel.Attach(layer);
             cardsSeen.Clear();
             dialogLayer = Fill("lobby-dialogs"); dialogLayer.pickingMode = PickingMode.Ignore; layer.Add(dialogLayer);
             toastLayer = Fill("lobby-toasts"); toastLayer.pickingMode = PickingMode.Ignore; layer.Add(toastLayer);

@@ -296,7 +296,7 @@ namespace Galaxy101
             // Baloo 2 sits ~1px higher than Montserrat at these sizes; drop GAMES onto the CDX baseline.
             var games=Text("GAMES",11,false,"var(--mt)");Tracking(games,1.5f,11);games.style.translate=new Translate(0,1);studio.Add(games);brand.Add(studio);
             var separator=Box();separator.style.width=1;separator.style.height=10;separator.style.marginRight=8;separator.style.backgroundColor=C("var(--mt)");separator.style.opacity=.4f;brand.Add(separator);
-            var version=Text("v0.2.0",11,false,"var(--mt)");version.style.letterSpacing=0;version.style.opacity=.6f;brand.Add(version);AddMain(brand);
+            var version=Text("v"+UnityEngine.Application.version,11,false,"var(--mt)");version.style.letterSpacing=0;version.style.opacity=.6f;brand.Add(version);AddMain(brand);
         }
         private void BuildPlanetPicker()
         {

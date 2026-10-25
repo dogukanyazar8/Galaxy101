@@ -40,7 +40,7 @@ namespace Okey101.Editor
             PlayerSettings.SetApiCompatibilityLevel(NamedBuildTarget.Standalone, ApiCompatibilityLevel.NET_Standard);
             PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.StandaloneWindows64, false);
             PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneWindows64, new[] { GraphicsDeviceType.Direct3D11 });
-            PlayerSettings.companyName = "Okey101"; PlayerSettings.productName = "Galaxy 101"; PlayerSettings.bundleVersion="0.2.0";
+            PlayerSettings.companyName = "Okey101"; PlayerSettings.productName = "Galaxy 101"; PlayerSettings.bundleVersion="0.4.0";
             PlayerSettings.defaultScreenWidth = 1280; PlayerSettings.defaultScreenHeight = 720;
             PlayerSettings.fullScreenMode = FullScreenMode.Windowed; PlayerSettings.resizableWindow = true;
             PlayerSettings.runInBackground = true;

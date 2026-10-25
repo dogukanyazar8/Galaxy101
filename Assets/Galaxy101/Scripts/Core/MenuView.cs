@@ -219,7 +219,8 @@ namespace Galaxy101
             {
                 // SV badge: 900 10px, padding 1px 7px, radius 7, bottom -7 (62); 11px, 2px 9px, 8, -7 (104, 110); 12px, 2px 10px, 8, -8 (124).
                 bool large=size>=124;int font=size<=62?10:large?12:11;
-                var badge=Text(large?L("SEVİYE "+Level24,"LEVEL "+Level24):L("SV "+Level24,"LV "+Level24),font,false,"var(--aT)");badge.AddToClassList("avatar-level");badge.style.unityFont=Font("Baloo2-800");
+                // The top bar's badge is literal markup ("SV 24") in G101-Menu, the same in English (EKSIKLER EK-611).
+                var badge=Text(large?L("SEVİYE "+Level24,"LEVEL "+Level24):topBar?"SV "+Level24:L("SV "+Level24,"LV "+Level24),font,false,"var(--aT)");badge.AddToClassList("avatar-level");badge.style.unityFont=Font("Baloo2-800");
                 badge.style.paddingTop=badge.style.paddingBottom=size<=62?1:2;badge.style.paddingLeft=badge.style.paddingRight=size<=62?7:large?10:9;badge.style.bottom=large?-8:-7;
                 Decorate(badge,"var(--a1)",size<=62?7:8);root.Add(badge);
             }

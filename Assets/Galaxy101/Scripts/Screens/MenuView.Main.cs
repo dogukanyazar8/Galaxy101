@@ -193,7 +193,8 @@ namespace Galaxy101
         {
             var strip=Box("mode-strip");Place(strip,0,474,1280,90);strip.style.flexDirection=FlexDirection.Row;strip.style.justifyContent=Justify.Center;AddMain(strip);
             string[] names={L("Klasik","Classic"),L("Dereceli","Ranked"),L("Botlara karşı","Vs bots")},glyphs={"101","II","•"},colors={"#3D7BFF","#16B6A8","#3CCB6E"},shades={"#2148B0","#0C7F75","#22914A"};
-            string[] online={N(14233),N(5630),L("Çevrimdışı","Offline")};
+            // renderVals M[].online: the counts are literal strings ("14.233", "5.630"), unlocalised in English too (EK-611).
+            string[] online={"14.233","5.630",L("Çevrimdışı","Offline")};
             modeCards.Clear();
             for(int i=0;i<3;i++)
             {

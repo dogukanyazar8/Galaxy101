@@ -93,7 +93,7 @@ namespace Galaxy101
                     Toggle(v, scroll, "highlight", v.L("Perleri vurgula", "Highlight sets"), v.L("Geçerli perlerin çevresi yeşil yansın", "Valid sets glow green"));
                     Toggle(v, scroll, "dbl", v.L("Çift tıkla taş at", "Double-click to discard"), v.L("Sürüklemeden hızlı atış", "Discard quickly without dragging"));
                     Toggle(v, scroll, "chat", v.L("Masa sohbeti", "Table chat"), v.L("Masa içi mesaj ve emojiler görünsün", "Show messages and emojis at the table"));
-                    Slider(v, scroll, "warn", v.L("Tur süresi uyarısı", "Turn timer warning"), v.L("Süre bitmeden kaç saniye önce uyarılsın", "How many seconds before your time runs out"), 1, 10, v.L(" sn", " s"));
+                    Slider(v, scroll, "warn", v.L("Tur süresi uyarısı", "Turn timer warning"), v.L("Süre bitmeden kaç saniye önce uyarılsın", "How many seconds before your time runs out"), 1, 10, " sn"); // sl('warn', …, ' sn'): the unit is not in SET_EN, English shows "5 sn" too (EK-611)
                     Segment(v, scroll, "tile", v.L("Taş boyutu", "Tile size"), v.L("Istakadaki taşların büyüklüğü", "Size of the tiles on your rack"), new[] { "Küçük", "Orta", "Büyük" });
                     break;
                 case 1:

@@ -142,13 +142,22 @@ namespace Okey101.Application
             new DataContractJsonSerializerSettings { MaxItemsInObjectGraph = 500000 });
         internal static byte[] Encode<T>(T value)
         { using (var stream = new MemoryStream()) { Serializer(typeof(T)).WriteObject(stream, value); return stream.ToArray(); } }
-        internal static DocumentDto Decode(byte[] bytes)
+        internal static DocumentDto Decode(byte[] bytes) => DecodeAs<DocumentDto>(bytes);
+        /// <summary>K-02: the three version fields every record carries; the rest of the document is ignored here.</summary>
+        [DataContract] internal sealed class VersionDto
+        {
+            [DataMember(IsRequired=true, Order=0)] public int SchemaVersion;
+            [DataMember(IsRequired=true, Order=1)] public string RuleVersion;
+            [DataMember(IsRequired=true, Order=2)] public string ShuffleVersion;
+        }
+        internal static VersionDto Versions(byte[] bytes) => DecodeAs<VersionDto>(bytes);
+        internal static T DecodeAs<T>(byte[] bytes) where T : class
         {
             CheckSingleObject(bytes);
             var quotas = new XmlDictionaryReaderQuotas { MaxDepth = 32, MaxArrayLength = 200000, MaxStringContentLength = 4096, MaxBytesPerRead = 4096, MaxNameTableCharCount = 8192 };
             using (var reader = JsonReaderWriterFactory.CreateJsonReader(bytes, 0, bytes.Length, Encoding.UTF8, quotas, null))
             {
-                var document = (DocumentDto)Serializer(typeof(DocumentDto)).ReadObject(reader, true);
+                var document = (T)Serializer(typeof(T)).ReadObject(reader, true);
                 if (reader.Read()) throw new SerializationException("Trailing JSON is not allowed.");
                 return document ?? throw new SerializationException("A document is required.");
             }

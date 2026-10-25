@@ -1,0 +1,70 @@
+{
+ "suite": "copies",
+ "version": "0.4.0",
+ "note": "Aksi belirtilmedikçe gösterge B6a → okey B7 (B7a, B7b), sahte okey Ja/Jb = B7.",
+ "tests": [
+  {
+   "id": "COPY-01",
+   "title": "Aynı taş kimliği iki yerde olamaz (her renk-sayı en çok 2 kopya)",
+   "rules": [
+    "R-01"
+   ],
+   "call": {
+    "fn": "fromSpec",
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R5a",
+       "R5a"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "expect": {
+    "threw": "E_SPEC_DUP"
+   }
+  },
+  {
+   "id": "COPY-02",
+   "title": "Tam maç boyunca 106 taş korunur",
+   "rules": [
+    "R-01"
+   ],
+   "sim": {
+    "opts": {
+     "mode": "solo",
+     "hands": 5
+    },
+    "seed": 7
+   },
+   "expect": {
+    "state": {
+     "status": "matchOver",
+     "invariants": []
+    }
+   }
+  }
+ ]
+}

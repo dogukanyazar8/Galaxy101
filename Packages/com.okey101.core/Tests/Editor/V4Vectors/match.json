@@ -1,0 +1,717 @@
+{
+ "suite": "match",
+ "version": "0.4.0",
+ "note": "Aksi belirtilmedikçe gösterge B6a → okey B7 (B7a, B7b), sahte okey Ja/Jb = B7.",
+ "tests": [
+  {
+   "id": "MATCH-01",
+   "title": "Maç sonu sıralaması: en düşük toplam kazanır",
+   "rules": [
+    "R-59"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a"
+      ],
+      [
+       "R4a"
+      ],
+      [
+       "R5a"
+      ],
+      [
+       "R6a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      120,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "handNo": 5,
+     "opts": {
+      "hands": 5
+     },
+     "totals": [
+      100,
+      50,
+      300,
+      200
+     ]
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R3a"
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "matchEnd"
+       }
+      ],
+      "state": {
+       "status": "matchOver",
+       "totals": [
+        -1,
+        252,
+        502,
+        402
+       ],
+       "ranking": [
+        {
+         "seats": [
+          0
+         ],
+         "rank": 1
+        },
+        {
+         "seats": [
+          1
+         ],
+         "rank": 2
+        },
+        {
+         "seats": [
+          3
+         ],
+         "rank": 3
+        },
+        {
+         "seats": [
+          2
+         ],
+         "rank": 4
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "MATCH-02",
+   "title": "Berabere: eşit toplamlar aynı sırayı paylaşır (1, 1, 3, 4)",
+   "rules": [
+    "R-59"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a",
+       "R4a"
+      ],
+      [
+       "R5a"
+      ],
+      [
+       "R6a"
+      ],
+      [
+       "R7a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "handNo": 5,
+     "opts": {
+      "hands": 5
+     },
+     "totals": [
+      100,
+      100,
+      300,
+      200
+     ],
+     "deck": []
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R3a"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "status": "matchOver",
+       "ranking": [
+        {
+         "seats": [
+          0
+         ],
+         "rank": 1
+        },
+        {
+         "seats": [
+          1
+         ],
+         "rank": 1
+        },
+        {
+         "seats": [
+          3
+         ],
+         "rank": 3
+        },
+        {
+         "seats": [
+          2
+         ],
+         "rank": 4
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "LEAVE-01",
+   "title": "Masadan kalkan son sayılır; yerine bot oynar",
+   "rules": [
+    "R-60"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a"
+      ],
+      [
+       "R4a"
+      ],
+      [
+       "R5a"
+      ],
+      [
+       "R6a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      120,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "handNo": 5,
+     "opts": {
+      "hands": 5
+     },
+     "totals": [
+      100,
+      50,
+      300,
+      200
+     ]
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "leave",
+      "seat": 1
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "seatLeft",
+        "seat": 1,
+        "botTakesOver": true
+       }
+      ],
+      "state": {
+       "seats.1.left": true,
+       "seats.1.bot": true
+      }
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R3a"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "ranking": [
+        {
+         "seats": [
+          0
+         ],
+         "rank": 1
+        },
+        {
+         "seats": [
+          3
+         ],
+         "rank": 2
+        },
+        {
+         "seats": [
+          2
+         ],
+         "rank": 3
+        },
+        {
+         "seats": [
+          1
+         ],
+         "rank": 4,
+         "left": true
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "MATCH-03",
+   "title": "Eşli maç sonu: takım toplamı",
+   "rules": [
+    "R-57",
+    "R-59"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a"
+      ],
+      [
+       "R4a"
+      ],
+      [
+       "R5a"
+      ],
+      [
+       "R6a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      120,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "handNo": 5,
+     "opts": {
+      "hands": 5,
+      "mode": "pairs"
+     },
+     "totals": [
+      100,
+      50,
+      300,
+      200
+     ]
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R3a"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "totals": [
+        -1,
+        252,
+        300,
+        402
+       ],
+       "ranking": [
+        {
+         "team": 0,
+         "total": 299,
+         "rank": 1
+        },
+        {
+         "team": 1,
+         "total": 654,
+         "rank": 2
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "SIM-01",
+   "title": "Dört botla 5 elli maç, seed 42 (altın değer: referans uygulama)",
+   "rules": [
+    "R-80"
+   ],
+   "sim": {
+    "opts": {
+     "mode": "solo",
+     "hands": 5
+    },
+    "seed": 42
+   },
+   "expect": {
+    "state": {
+     "status": "matchOver",
+     "totals": [
+      199,
+      1021,
+      898,
+      385
+     ],
+     "invariants": []
+    }
+   }
+  },
+  {
+   "id": "SIM-02",
+   "title": "Dört botla eşli maç, seed 99 (altın değer)",
+   "rules": [
+    "R-80"
+   ],
+   "sim": {
+    "opts": {
+     "mode": "pairs",
+     "hands": 5
+    },
+    "seed": 99
+   },
+   "expect": {
+    "state": {
+     "status": "matchOver",
+     "totals": [
+      141,
+      65,
+      147,
+      596
+     ],
+     "invariants": []
+    }
+   }
+  },
+  {
+   "id": "TAKE-01",
+   "title": "Kalkanın koltuğunu yeni oyuncu devralır; koltuğun toplamıyla devam eder, son sayılmaz",
+   "rules": [
+    "R-65"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a"
+      ],
+      [
+       "R4a"
+      ],
+      [
+       "R5a"
+      ],
+      [
+       "R6a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      120,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "handNo": 5,
+     "opts": {
+      "hands": 5
+     },
+     "totals": [
+      100,
+      50,
+      300,
+      200
+     ]
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "takeSeat",
+      "seat": 1
+     },
+     "expect": {
+      "ok": false,
+      "error": "E_SEAT_NOT_BOT"
+     }
+    },
+    {
+     "do": {
+      "t": "leave",
+      "seat": 1
+     },
+     "expect": {
+      "ok": true
+     }
+    },
+    {
+     "do": {
+      "t": "takeSeat",
+      "seat": 1
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "seatTaken",
+        "seat": 1,
+        "total": 50
+       }
+      ],
+      "state": {
+       "seats.1.left": false,
+       "seats.1.bot": false,
+       "totals.1": 50
+      }
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R3a"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "ranking": [
+        {
+         "seats": [
+          0
+         ],
+         "rank": 1
+        },
+        {
+         "seats": [
+          1
+         ],
+         "rank": 2
+        },
+        {
+         "seats": [
+          3
+         ],
+         "rank": 3
+        },
+        {
+         "seats": [
+          2
+         ],
+         "rank": 4
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "LEAVE-02",
+   "title": "Eşlide kalkan oyuncunun takımı son sayılmaz; ortak bot ile devam eder",
+   "rules": [
+    "R-60"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a"
+      ],
+      [
+       "R4a"
+      ],
+      [
+       "R5a"
+      ],
+      [
+       "R6a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      120,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "handNo": 5,
+     "opts": {
+      "hands": 5,
+      "mode": "pairs"
+     },
+     "totals": [
+      100,
+      50,
+      300,
+      200
+     ]
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "leave",
+      "seat": 1
+     },
+     "expect": {
+      "ok": true
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R3a"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "ranking": [
+        {
+         "seats": [
+          0,
+          2
+         ],
+         "rank": 1
+        },
+        {
+         "seats": [
+          1,
+          3
+         ],
+         "rank": 2,
+         "left": false
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "SIM-03",
+   "title": "Dört botla katlamalı eşli maç, seed 21 (106 taş korunur)",
+   "rules": [
+    "R-64",
+    "R-80"
+   ],
+   "sim": {
+    "opts": {
+     "mode": "pairs",
+     "hands": 3,
+     "katlama": true,
+     "katlamaPartner": true
+    },
+    "seed": 21
+   },
+   "expect": {
+    "state": {
+     "status": "matchOver",
+     "invariants": []
+    }
+   }
+  }
+ ]
+}

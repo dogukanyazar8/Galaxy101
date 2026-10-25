@@ -47,7 +47,7 @@ namespace Okey101.Core.V4.Tests
         }
 
         [Test]
-        public void VectorCopiesAreByteIdenticalToThePackage()
+        public void VectorCopiesMatchThePackage()
         {
             var root = VectorRunner.RepoRoot();
             var package = Path.Combine(root, VectorRunner.PackageVectorsFolder);
@@ -60,7 +60,8 @@ namespace Okey101.Core.V4.Tests
             {
                 var copy = VectorRunner.VectorsPath(f);
                 Assert.That(File.Exists(copy), Is.True, "missing copy " + f);
-                Assert.That(File.ReadAllBytes(copy), Is.EqualTo(File.ReadAllBytes(Path.Combine(package, f))), f + " differs from the package");
+                // Content, not line endings: git (text=auto) may check either file out with CRLF on Windows.
+                Assert.That(File.ReadAllText(copy).Replace("\r\n", "\n"), Is.EqualTo(File.ReadAllText(Path.Combine(package, f)).Replace("\r\n", "\n")), f + " differs from the package");
             }
             var extra = Directory.GetFiles(VectorRunner.VectorsPath(), "*.json").Select(Path.GetFileName).Except(files).ToList();
             Assert.That(extra, Is.Empty, "copies that are not in the package");

@@ -49,7 +49,8 @@
       "t2": "#2B5DA8",
       "t3": "#D9951A"
     },
-    "planetFlattening": 1.1
+    "planetFlattening": 1.1,
+    "loadingRingOpacity": 0.85
   },
   "Mars": {
     "name_tr": "Mars",
@@ -101,7 +102,8 @@
       "t2": "#E0612E",
       "t3": "#6E1A10"
     },
-    "planetFlattening": 1
+    "planetFlattening": 1,
+    "loadingRingOpacity": 0
   },
   "Neptün": {
     "name_tr": "Neptün",
@@ -153,7 +155,8 @@
       "t2": "#0E9CC4",
       "t3": "#2D3B9A"
     },
-    "planetFlattening": 1.02
+    "planetFlattening": 1.02,
+    "loadingRingOpacity": 0.35
   },
   "Jüpiter": {
     "name_tr": "Jüpiter",
@@ -205,7 +208,8 @@
       "t2": "#6E4A2E",
       "t3": "#D08A3A"
     },
-    "planetFlattening": 1.07
+    "planetFlattening": 1.07,
+    "loadingRingOpacity": 0.25
   },
   "Venüs": {
     "name_tr": "Venüs",
@@ -257,6 +261,7 @@
       "t2": "#D98A2B",
       "t3": "#8E3A7A"
     },
-    "planetFlattening": 1
+    "planetFlattening": 1,
+    "loadingRingOpacity": 0
   }
 }

@@ -275,6 +275,7 @@ namespace Galaxy101
         public void Flash(string text,string kind="info")
         {
             if(toastLayer==null)return;
+            Galaxy101.Audio.GalaxyAudio.Toast(kind); // v4 audio: gold → ui.reward, bad → ui.error
             foreach(var old in toastLayer.Query<VisualElement>("shell-flash").ToList())old.RemoveFromHierarchy();
             (string bg,string fg)=kind=="ok"?("#3CCB6E","#062B14"):kind=="bad"?("linear-gradient(#FF7A86,#E8455A)","#fff"):kind=="gold"?("linear-gradient(var(--a1),var(--a2))","var(--aT)"):("rgba(5,8,22,.85)","#F4F1E8");
             var pill=new VisualElement{name="shell-flash",pickingMode=PickingMode.Ignore};pill.style.position=Position.Absolute;pill.style.top=22;pill.style.left=640;

@@ -481,6 +481,7 @@ namespace Galaxy101
         public void Flash(string text, string kind)
         {
             if (toastLayer == null) return; LastToast = text;
+            Galaxy101.Audio.GalaxyAudio.Toast(kind); // v4 audio: a red (bad) toast plays ui.error
             toastLayer.Clear();
             // G101-Lobi flash(): ok #3CCB6E / #062B14, bad linear-gradient(#FF7A86,#E8455A) / #fff, info rgba(5,8,22,.85) / #F4F1E8.
             bool ok = kind == "good" || kind == "ok";

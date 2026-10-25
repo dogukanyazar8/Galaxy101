@@ -42,6 +42,7 @@ namespace Galaxy101
             View=new MenuView(document.rootVisualElement,Model,services,loc);View.BuildMain();
             var effects=new GameObject("Galaxy background");effects.transform.SetParent(transform,false);background=effects.AddComponent<GalaxyBackground>();background.Initialize(View.BackgroundTarget);
             View.BackgroundChanged+=background.Configure;View.PlayRequested+=OnPlay;Model.Changed+=ApplySettings;
+            Galaxy101.Audio.GalaxyAudio.TrackScreens(this,()=>Auth!=null&&Auth.Visible?Auth.Screen:Lobby!=null&&Lobby.Visible?"lobby":ranked!=null&&ranked.Visible?"ranked":"menu"); // v4 audio: screen music + ui.screen
             ApplySettings();background.Configure(Model.Planet,(bool)Model.Settings["motion"],(string)Model.Settings["quality"]);
             background.SetFocused(UnityEngine.Application.isFocused||UnityEngine.Application.isBatchMode);
             Debug.Log("GALAXY101_MENU_READY version="+UnityEngine.Application.version+" theme="+Model.Planet+" language="+(string)Model.Settings["lang"]);
@@ -213,9 +214,8 @@ namespace Galaxy101
         private void ApplySettings()
         {
             if(Model==null)return;
-            bool offscreen=UnityEngine.Application.isBatchMode;
             GameDisplay.Apply((string)Model.Settings["wmode"],(string)Model.Settings["res"]);
-            if(!offscreen)AudioListener.volume=(int)Model.Settings["master"]/100f;
+            Galaxy101.Audio.GalaxyAudio.ApplySettings(Model.Settings); // v4 audio: master × music/sfx per source (was AudioListener.volume = master)
             FramePacing.Apply((int)Model.Settings["fps"]);
         }
         private void OnApplicationFocus(bool value){background?.SetFocused(value||UnityEngine.Application.isBatchMode);View?.SetFocused(value||UnityEngine.Application.isBatchMode);}

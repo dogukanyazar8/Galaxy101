@@ -1,4 +1,8 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
 
 namespace Okey101.Core.V4
 {
@@ -350,5 +354,75 @@ namespace Okey101.Core.V4
         public static List<PenaltyEntry> ClonePenalties(List<PenaltyEntry> xs) { var l = new List<PenaltyEntry>(xs.Count); foreach (var x in xs) l.Add(x.Clone()); return l; }
         public static List<string>[] CloneLists(List<string>[] xs) { var a = new List<string>[xs.Length]; for (var i = 0; i < xs.Length; i++) a[i] = new List<string>(xs[i]); return a; }
         public static List<List<string>> CloneLists(List<List<string>> xs) { var l = new List<List<string>>(xs.Count); foreach (var x in xs) l.Add(new List<string>(x)); return l; }
+
+        /// <summary>
+        /// Canonical JSON of a tree: object keys sorted ordinally, no whitespace, strings escaped as JSON.stringify does.
+        /// The same bytes rules.js gives for its own object with sorted keys, so state and event hashes compare across the two.
+        /// </summary>
+        public static string Canonical(object tree)
+        {
+            var sb = new StringBuilder();
+            WriteCanonical(sb, tree);
+            return sb.ToString();
+        }
+
+        private static void WriteCanonical(StringBuilder sb, object v)
+        {
+            switch (v)
+            {
+                case null: sb.Append("null"); return;
+                case string s: Quote(sb, s); return;
+                case bool b: sb.Append(b ? "true" : "false"); return;
+                case int i: sb.Append(i.ToString(CultureInfo.InvariantCulture)); return;
+                case long l: sb.Append(l.ToString(CultureInfo.InvariantCulture)); return;
+                case uint u: sb.Append(u.ToString(CultureInfo.InvariantCulture)); return;
+                case IDictionary<string, object> d:
+                {
+                    var keys = new List<string>(d.Keys);
+                    keys.Sort(string.CompareOrdinal);
+                    sb.Append('{');
+                    for (var k = 0; k < keys.Count; k++)
+                    {
+                        if (k > 0) sb.Append(',');
+                        Quote(sb, keys[k]);
+                        sb.Append(':');
+                        WriteCanonical(sb, d[keys[k]]);
+                    }
+                    sb.Append('}');
+                    return;
+                }
+                case IList list:
+                {
+                    sb.Append('[');
+                    for (var k = 0; k < list.Count; k++) { if (k > 0) sb.Append(','); WriteCanonical(sb, list[k]); }
+                    sb.Append(']');
+                    return;
+                }
+                default: throw new ArgumentException("Not a tree value: " + v.GetType().Name);
+            }
+        }
+
+        private static void Quote(StringBuilder sb, string s)
+        {
+            sb.Append('"');
+            foreach (var ch in s)
+            {
+                switch (ch)
+                {
+                    case '"': sb.Append("\\\""); break;
+                    case '\\': sb.Append("\\\\"); break;
+                    case '\b': sb.Append("\\b"); break;
+                    case '\f': sb.Append("\\f"); break;
+                    case '\n': sb.Append("\\n"); break;
+                    case '\r': sb.Append("\\r"); break;
+                    case '\t': sb.Append("\\t"); break;
+                    default:
+                        if (ch < ' ') sb.Append("\\u").Append(((int)ch).ToString("x4", CultureInfo.InvariantCulture));
+                        else sb.Append(ch);
+                        break;
+                }
+            }
+            sb.Append('"');
+        }
     }
 }

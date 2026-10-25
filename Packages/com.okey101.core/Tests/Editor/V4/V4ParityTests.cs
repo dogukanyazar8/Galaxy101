@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -59,51 +57,8 @@ namespace Okey101.Core.V4.Tests
             Assert.That(s.Totals, Is.EqualTo(c["totals"].Select(x => (int)x).ToArray()), "totals");
             Assert.That(steps, Is.EqualTo((int)c["steps"]), "bot actions");
             Assert.That(fails, Is.EqualTo((int)c["fails"]), "rejected bot actions");
-            Assert.That(Sha(Canon(events)), Is.EqualTo((string)c["events"]), "event stream");
-            Assert.That(Sha(Canon(s.ToTree())), Is.EqualTo((string)c["state"]), "final state");
-        }
-
-        /// <summary>Canonical JSON as gen_parity.js writes it: object keys sorted (ordinal), no whitespace.</summary>
-        public static string Canon(object v)
-        {
-            var sb = new StringBuilder();
-            Write(sb, v);
-            return sb.ToString();
-        }
-
-        private static void Write(StringBuilder sb, object v)
-        {
-            switch (v)
-            {
-                case null: sb.Append("null"); return;
-                case string s: sb.Append(JsonConvert.ToString(s)); return;
-                case bool b: sb.Append(b ? "true" : "false"); return;
-                case int _:
-                case long _:
-                case uint _: sb.Append(Convert.ToString(v, CultureInfo.InvariantCulture)); return;
-                case IDictionary<string, object> d:
-                {
-                    sb.Append('{');
-                    var first = true;
-                    foreach (var k in d.Keys.OrderBy(x => x, StringComparer.Ordinal))
-                    {
-                        if (!first) sb.Append(',');
-                        first = false;
-                        sb.Append(JsonConvert.ToString(k)).Append(':');
-                        Write(sb, d[k]);
-                    }
-                    sb.Append('}');
-                    return;
-                }
-                case IList l:
-                {
-                    sb.Append('[');
-                    for (var i = 0; i < l.Count; i++) { if (i > 0) sb.Append(','); Write(sb, l[i]); }
-                    sb.Append(']');
-                    return;
-                }
-                default: throw new InvalidOperationException("not a tree value: " + v.GetType());
-            }
+            Assert.That(Sha(V4Tree.Canonical(events)), Is.EqualTo((string)c["events"]), "event stream");
+            Assert.That(Sha(V4Tree.Canonical(s.ToTree())), Is.EqualTo((string)c["state"]), "final state");
         }
 
         private static string Sha(string s)

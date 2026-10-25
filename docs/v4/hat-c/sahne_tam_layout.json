@@ -1,0 +1,2066 @@
+{
+ "source": "saturn/galaxy101_sahne_tam_saturn.glb (layout identical in all five themes; only colours differ)",
+ "space": "gltf = three.js (right-handed, Y up, m); unity = glTFast import (x mirrored)",
+ "scene_skins": {
+  "table": "andromeda",
+  "rack": "andromeda",
+  "tiles": "marble (deste, 106 instances)",
+  "why": "Araç - 3D Varlık Dışa Aktarma.html exports sahne_tam after the table/rack/tile loops; table3d.js exportAsset('scene') clones the live scene"
+ },
+ "parts": [
+  {
+   "node": "zemin",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.0,
+     0.1
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.0,
+     0.1
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -3.5,
+     0.0,
+     -2.6
+    ],
+    "max": [
+     3.5,
+     0.0,
+     2.8
+    ],
+    "size": [
+     7.0,
+     0.0,
+     5.4
+    ],
+    "center": [
+     0.0,
+     0.0,
+     0.1
+    ]
+   }
+  },
+  {
+   "node": "pencere_esik",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.07,
+     -2.62
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.07,
+     -2.62
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -3.5,
+     0.0,
+     -2.68
+    ],
+    "max": [
+     3.5,
+     0.14,
+     -2.56
+    ],
+    "size": [
+     7.0,
+     0.14,
+     0.12
+    ],
+    "center": [
+     0.0,
+     0.07,
+     -2.62
+    ]
+   }
+  },
+  {
+   "node": "esik_led",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.142,
+     -2.57
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.142,
+     -2.57
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -3.5,
+     0.138,
+     -2.575
+    ],
+    "max": [
+     3.5,
+     0.146,
+     -2.565
+    ],
+    "size": [
+     7.0,
+     0.008,
+     0.01
+    ],
+    "center": [
+     0.0,
+     0.142,
+     -2.57
+    ]
+   }
+  },
+  {
+   "node": "dikme0",
+   "gltf": {
+    "translation": [
+     -2.35,
+     1.6,
+     -2.64
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     2.35,
+     1.6,
+     -2.64
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -2.385,
+     0.0,
+     -2.685
+    ],
+    "max": [
+     -2.315,
+     3.2,
+     -2.595
+    ],
+    "size": [
+     0.07,
+     3.2,
+     0.09
+    ],
+    "center": [
+     -2.35,
+     1.6,
+     -2.64
+    ]
+   }
+  },
+  {
+   "node": "dikme_led0",
+   "gltf": {
+    "translation": [
+     -2.35,
+     1.65,
+     -2.59
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     2.35,
+     1.65,
+     -2.59
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -2.354,
+     0.15,
+     -2.595
+    ],
+    "max": [
+     -2.346,
+     3.15,
+     -2.585
+    ],
+    "size": [
+     0.008,
+     3.0,
+     0.01
+    ],
+    "center": [
+     -2.35,
+     1.65,
+     -2.59
+    ]
+   }
+  },
+  {
+   "node": "dikme1",
+   "gltf": {
+    "translation": [
+     -1.2,
+     1.6,
+     -2.64
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     1.2,
+     1.6,
+     -2.64
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -1.235,
+     0.0,
+     -2.685
+    ],
+    "max": [
+     -1.165,
+     3.2,
+     -2.595
+    ],
+    "size": [
+     0.07,
+     3.2,
+     0.09
+    ],
+    "center": [
+     -1.2,
+     1.6,
+     -2.64
+    ]
+   }
+  },
+  {
+   "node": "dikme_led1",
+   "gltf": {
+    "translation": [
+     -1.2,
+     1.65,
+     -2.59
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     1.2,
+     1.65,
+     -2.59
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -1.204,
+     0.15,
+     -2.595
+    ],
+    "max": [
+     -1.196,
+     3.15,
+     -2.585
+    ],
+    "size": [
+     0.008,
+     3.0,
+     0.01
+    ],
+    "center": [
+     -1.2,
+     1.65,
+     -2.59
+    ]
+   }
+  },
+  {
+   "node": "dikme2",
+   "gltf": {
+    "translation": [
+     1.2,
+     1.6,
+     -2.64
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -1.2,
+     1.6,
+     -2.64
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     1.165,
+     0.0,
+     -2.685
+    ],
+    "max": [
+     1.235,
+     3.2,
+     -2.595
+    ],
+    "size": [
+     0.07,
+     3.2,
+     0.09
+    ],
+    "center": [
+     1.2,
+     1.6,
+     -2.64
+    ]
+   }
+  },
+  {
+   "node": "dikme_led2",
+   "gltf": {
+    "translation": [
+     1.2,
+     1.65,
+     -2.59
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -1.2,
+     1.65,
+     -2.59
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     1.196,
+     0.15,
+     -2.595
+    ],
+    "max": [
+     1.204,
+     3.15,
+     -2.585
+    ],
+    "size": [
+     0.008,
+     3.0,
+     0.01
+    ],
+    "center": [
+     1.2,
+     1.65,
+     -2.59
+    ]
+   }
+  },
+  {
+   "node": "dikme3",
+   "gltf": {
+    "translation": [
+     2.35,
+     1.6,
+     -2.64
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -2.35,
+     1.6,
+     -2.64
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     2.315,
+     0.0,
+     -2.685
+    ],
+    "max": [
+     2.385,
+     3.2,
+     -2.595
+    ],
+    "size": [
+     0.07,
+     3.2,
+     0.09
+    ],
+    "center": [
+     2.35,
+     1.6,
+     -2.64
+    ]
+   }
+  },
+  {
+   "node": "dikme_led3",
+   "gltf": {
+    "translation": [
+     2.35,
+     1.65,
+     -2.59
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -2.35,
+     1.65,
+     -2.59
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     2.346,
+     0.15,
+     -2.595
+    ],
+    "max": [
+     2.354,
+     3.15,
+     -2.585
+    ],
+    "size": [
+     0.008,
+     3.0,
+     0.01
+    ],
+    "center": [
+     2.35,
+     1.65,
+     -2.59
+    ]
+   }
+  },
+  {
+   "node": "duvar",
+   "gltf": {
+    "translation": [
+     -2.6,
+     1.5,
+     -0.1
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     1.5708,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     2.6,
+     1.5,
+     -0.1
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -2.6,
+     0.0,
+     -2.7
+    ],
+    "max": [
+     -2.6,
+     3.0,
+     2.5
+    ],
+    "size": [
+     0.0,
+     3.0,
+     5.2
+    ],
+    "center": [
+     -2.6,
+     1.5,
+     -0.1
+    ]
+   }
+  },
+  {
+   "node": "kose",
+   "gltf": {
+    "translation": [
+     -2.56,
+     1.6,
+     -2.6
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     2.56,
+     1.6,
+     -2.6
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -2.63,
+     0.0,
+     -2.67
+    ],
+    "max": [
+     -2.49,
+     3.2,
+     -2.53
+    ],
+    "size": [
+     0.14,
+     3.2,
+     0.14
+    ],
+    "center": [
+     -2.56,
+     1.6,
+     -2.6
+    ]
+   }
+  },
+  {
+   "node": "duvar",
+   "gltf": {
+    "translation": [
+     2.6,
+     1.5,
+     -0.1
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     -1.5708,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -2.6,
+     1.5,
+     -0.1
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     2.6,
+     0.0,
+     -2.7
+    ],
+    "max": [
+     2.6,
+     3.0,
+     2.5
+    ],
+    "size": [
+     0.0,
+     3.0,
+     5.2
+    ],
+    "center": [
+     2.6,
+     1.5,
+     -0.1
+    ]
+   }
+  },
+  {
+   "node": "kose",
+   "gltf": {
+    "translation": [
+     2.56,
+     1.6,
+     -2.6
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -2.56,
+     1.6,
+     -2.6
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     2.49,
+     0.0,
+     -2.67
+    ],
+    "max": [
+     2.63,
+     3.2,
+     -2.53
+    ],
+    "size": [
+     0.14,
+     3.2,
+     0.14
+    ],
+    "center": [
+     2.56,
+     1.6,
+     -2.6
+    ]
+   }
+  },
+  {
+   "node": "masa_hale",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.004,
+     0.0
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.004,
+     0.0
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -1.8,
+     0.004,
+     -1.8
+    ],
+    "max": [
+     1.8,
+     0.004,
+     1.8
+    ],
+    "size": [
+     3.6,
+     0.0,
+     3.6
+    ],
+    "center": [
+     0.0,
+     0.004,
+     0.0
+    ]
+   }
+  },
+  {
+   "node": "masa_govde",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.698,
+     0.0
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.698,
+     0.0
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -0.87,
+     0.688,
+     -0.87
+    ],
+    "max": [
+     0.87,
+     0.758,
+     0.87
+    ],
+    "size": [
+     1.74,
+     0.07,
+     1.74
+    ],
+    "center": [
+     0.0,
+     0.723,
+     0.0
+    ]
+   }
+  },
+  {
+   "node": "cuha",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.76,
+     0.0
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.76,
+     0.0
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -0.76,
+     0.76,
+     -0.76
+    ],
+    "max": [
+     0.76,
+     0.76,
+     0.76
+    ],
+    "size": [
+     1.52,
+     0.0,
+     1.52
+    ],
+    "center": [
+     0.0,
+     0.76,
+     0.0
+    ]
+   }
+  },
+  {
+   "node": "masa_kenar",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.754,
+     0.0
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.754,
+     0.0
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -0.867,
+     0.747,
+     -0.867
+    ],
+    "max": [
+     0.867,
+     0.787,
+     0.867
+    ],
+    "size": [
+     1.734,
+     0.04,
+     1.734
+    ],
+    "center": [
+     0.0,
+     0.767,
+     0.0
+    ]
+   }
+  },
+  {
+   "node": "masa_led",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.71,
+     0.0
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.71,
+     0.0
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -0.875,
+     0.71,
+     -0.875
+    ],
+    "max": [
+     0.875,
+     0.718,
+     0.875
+    ],
+    "size": [
+     1.75,
+     0.008,
+     1.75
+    ],
+    "center": [
+     0.0,
+     0.714,
+     0.0
+    ]
+   }
+  },
+  {
+   "node": "cuha_led",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.7608,
+     0.0
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.7608,
+     0.0
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -0.754,
+     0.7608,
+     -0.754
+    ],
+    "max": [
+     0.754,
+     0.7608,
+     0.754
+    ],
+    "size": [
+     1.508,
+     0.0,
+     1.508
+    ],
+    "center": [
+     0.0,
+     0.7608,
+     0.0
+    ]
+   }
+  },
+  {
+   "node": "ayak",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.34,
+     0.0
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.34,
+     0.0
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -0.22,
+     0.0,
+     -0.22
+    ],
+    "max": [
+     0.22,
+     0.68,
+     0.22
+    ],
+    "size": [
+     0.44,
+     0.68,
+     0.44
+    ],
+    "center": [
+     0.0,
+     0.34,
+     0.0
+    ]
+   }
+  },
+  {
+   "node": "taban",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.02,
+     0.0
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.02,
+     0.0
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -0.6,
+     0.0,
+     -0.6
+    ],
+    "max": [
+     0.6,
+     0.04,
+     0.6
+    ],
+    "size": [
+     1.2,
+     0.04,
+     1.2
+    ],
+    "center": [
+     0.0,
+     0.02,
+     0.0
+    ]
+   }
+  },
+  {
+   "node": "taban_led",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.036,
+     0.0
+    ],
+    "rotation_euler_xyz": [
+     1.5708,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.036,
+     0.0
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -0.591,
+     0.03,
+     -0.591
+    ],
+    "max": [
+     0.591,
+     0.042,
+     0.591
+    ],
+    "size": [
+     1.182,
+     0.012,
+     1.182
+    ],
+    "center": [
+     0.0,
+     0.036,
+     0.0
+    ]
+   }
+  },
+  {
+   "node": "holo_halka",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.7615,
+     0.0
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.012,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.7615,
+     0.0
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -0.25298,
+     0.7615,
+     -0.25298
+    ],
+    "max": [
+     0.25298,
+     0.7615,
+     0.25298
+    ],
+    "size": [
+     0.50596,
+     0.0,
+     0.50596
+    ],
+    "center": [
+     0.0,
+     0.7615,
+     0.0
+    ]
+   }
+  },
+  {
+   "node": "deste",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -0.1658,
+     0.76,
+     -0.1495
+    ],
+    "max": [
+     0.1658,
+     0.81,
+     0.14947
+    ],
+    "size": [
+     0.3316,
+     0.05,
+     0.29897
+    ],
+    "center": [
+     0.0,
+     0.785,
+     -1e-05
+    ]
+   }
+  },
+  {
+   "node": "deste_parilti",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.762,
+     0.0
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "scale": [
+     1.08,
+     1.08,
+     1.08
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.762,
+     0.0
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -0.27,
+     0.762,
+     -0.27
+    ],
+    "max": [
+     0.27,
+     0.762,
+     0.27
+    ],
+    "size": [
+     0.54,
+     0.0,
+     0.54
+    ],
+    "center": [
+     0.0,
+     0.762,
+     0.0
+    ]
+   }
+  },
+  {
+   "node": "atma_halka",
+   "gltf": {
+    "translation": [
+     0.6,
+     0.7612,
+     0.6
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.6,
+     0.7612,
+     0.6
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     0.534,
+     0.7612,
+     0.534
+    ],
+    "max": [
+     0.666,
+     0.7612,
+     0.666
+    ],
+    "size": [
+     0.132,
+     0.0,
+     0.132
+    ],
+    "center": [
+     0.6,
+     0.7612,
+     0.6
+    ]
+   }
+  },
+  {
+   "node": "atma_dolgu",
+   "gltf": {
+    "translation": [
+     0.6,
+     0.7612,
+     0.6
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.6,
+     0.7612,
+     0.6
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     0.542,
+     0.7612,
+     0.542
+    ],
+    "max": [
+     0.658,
+     0.7612,
+     0.658
+    ],
+    "size": [
+     0.116,
+     0.0,
+     0.116
+    ],
+    "center": [
+     0.6,
+     0.7612,
+     0.6
+    ]
+   }
+  },
+  {
+   "node": "atma_halka",
+   "gltf": {
+    "translation": [
+     -0.6,
+     0.7612,
+     0.6
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     0.6,
+     0.7612,
+     0.6
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -0.666,
+     0.7612,
+     0.534
+    ],
+    "max": [
+     -0.534,
+     0.7612,
+     0.666
+    ],
+    "size": [
+     0.132,
+     0.0,
+     0.132
+    ],
+    "center": [
+     -0.6,
+     0.7612,
+     0.6
+    ]
+   }
+  },
+  {
+   "node": "#96",
+   "gltf": {
+    "translation": [
+     -0.6,
+     0.7612,
+     0.6
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     0.6,
+     0.7612,
+     0.6
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -0.73,
+     0.7112,
+     0.47
+    ],
+    "max": [
+     -0.47,
+     0.8112,
+     0.73
+    ],
+    "size": [
+     0.26,
+     0.1,
+     0.26
+    ],
+    "center": [
+     -0.6,
+     0.7612,
+     0.6
+    ]
+   }
+  },
+  {
+   "node": "balya_isaret",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "bounds_gltf": {
+    "min": [
+     -0.055,
+     0.0,
+     -0.08
+    ],
+    "max": [
+     0.055,
+     0.0,
+     0.08
+    ],
+    "size": [
+     0.11,
+     0.0,
+     0.16
+    ],
+    "center": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  {
+   "node": "#99",
+   "gltf": {
+    "translation": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     1.0,
+     0.0
+    ]
+   },
+   "bounds_gltf": null
+  },
+  {
+   "node": "#101",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.76,
+     0.0
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.76,
+     0.0
+    ]
+   },
+   "bounds_gltf": null
+  },
+  {
+   "node": "#103",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.76,
+     0.0
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.76,
+     0.0
+    ]
+   },
+   "bounds_gltf": null
+  },
+  {
+   "node": "#107",
+   "gltf": {
+    "translation": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation_euler_xyz": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unity": {
+    "position": [
+     -0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "bounds_gltf": null
+  }
+ ],
+ "seats": [
+  {
+   "seat": 0,
+   "yaw_rad": 0.0,
+   "rack": {
+    "node": "istaka0",
+    "local_translation": [
+     0,
+     0.793,
+     0.8
+    ],
+    "local_tilt_x_rad": -0.36,
+    "world_gltf": [
+     0.0,
+     0.793,
+     0.8
+    ],
+    "world_unity": [
+     -0.0,
+     0.793,
+     0.8
+    ]
+   }
+  },
+  {
+   "seat": 1,
+   "yaw_rad": 1.5708,
+   "rack": {
+    "node": "istaka1",
+    "local_translation": [
+     0,
+     0.793,
+     0.8
+    ],
+    "local_tilt_x_rad": -0.36,
+    "world_gltf": [
+     0.8,
+     0.793,
+     0.0
+    ],
+    "world_unity": [
+     -0.8,
+     0.793,
+     0.0
+    ]
+   },
+   "chair": {
+    "node": "koltuk1",
+    "local_translation": [
+     0,
+     0,
+     1.32
+    ],
+    "world_gltf": [
+     1.32,
+     0.0,
+     0.0
+    ],
+    "world_unity": [
+     -1.32,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  {
+   "seat": 2,
+   "yaw_rad": 3.14159,
+   "rack": {
+    "node": "istaka2",
+    "local_translation": [
+     0,
+     0.793,
+     0.8
+    ],
+    "local_tilt_x_rad": -0.36,
+    "world_gltf": [
+     0.0,
+     0.793,
+     -0.8
+    ],
+    "world_unity": [
+     -0.0,
+     0.793,
+     -0.8
+    ]
+   },
+   "chair": {
+    "node": "koltuk2",
+    "local_translation": [
+     0,
+     0,
+     1.32
+    ],
+    "world_gltf": [
+     0.0,
+     0.0,
+     -1.32
+    ],
+    "world_unity": [
+     -0.0,
+     0.0,
+     -1.32
+    ]
+   }
+  },
+  {
+   "seat": 3,
+   "yaw_rad": -1.5708,
+   "rack": {
+    "node": "istaka3",
+    "local_translation": [
+     0,
+     0.793,
+     0.8
+    ],
+    "local_tilt_x_rad": -0.36,
+    "world_gltf": [
+     -0.8,
+     0.793,
+     0.0
+    ],
+    "world_unity": [
+     0.8,
+     0.793,
+     0.0
+    ]
+   },
+   "chair": {
+    "node": "koltuk3",
+    "local_translation": [
+     0,
+     0,
+     1.32
+    ],
+    "world_gltf": [
+     -1.32,
+     0.0,
+     0.0
+    ],
+    "world_unity": [
+     1.32,
+     0.0,
+     0.0
+    ]
+   }
+  }
+ ],
+ "lights": [
+  {
+   "node": "sahne_tam/#98",
+   "type": "point",
+   "gltf": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "unity": [
+    -0.0,
+    0.0,
+    0.0
+   ],
+   "forward_gltf": [
+    0.0,
+    0.0,
+    -1.0
+   ]
+  },
+  {
+   "node": "sahne_tam/#100",
+   "type": "directional",
+   "gltf": [
+    1.1,
+    4.2,
+    2.0
+   ],
+   "unity": [
+    -1.1,
+    4.2,
+    2.0
+   ],
+   "forward_gltf": [
+    0.0,
+    0.0,
+    -1.0
+   ]
+  },
+  {
+   "node": "sahne_tam/#102",
+   "type": "spot",
+   "gltf": [
+    0.0,
+    3.2,
+    0.3
+   ],
+   "unity": [
+    -0.0,
+    3.2,
+    0.3
+   ],
+   "forward_gltf": [
+    0.0,
+    0.0,
+    -1.0
+   ]
+  },
+  {
+   "node": "sahne_tam/#104",
+   "type": "point",
+   "gltf": [
+    0.0,
+    1.5,
+    -2.3
+   ],
+   "unity": [
+    -0.0,
+    1.5,
+    -2.3
+   ],
+   "forward_gltf": [
+    0.0,
+    0.0,
+    -1.0
+   ]
+  },
+  {
+   "node": "sahne_tam/#105",
+   "type": "point",
+   "gltf": [
+    0.0,
+    1.6,
+    2.2
+   ],
+   "unity": [
+    -0.0,
+    1.6,
+    2.2
+   ],
+   "forward_gltf": [
+    0.0,
+    0.0,
+    -1.0
+   ]
+  },
+  {
+   "node": "sahne_tam/#106",
+   "type": "spot",
+   "gltf": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "unity": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "forward_gltf": [
+    0.0,
+    0.0,
+    -1.0
+   ]
+  }
+ ],
+ "checks": [
+  {
+   "what": "masa yüzeyi TY (cuha y)",
+   "project": 0.76,
+   "sahne_tam": 0.76,
+   "status": "var",
+   "project_source": "TableConstants.cs:8 TY"
+  },
+  {
+   "what": "koltuk 0 yönü (SeatYaw)",
+   "project": 0,
+   "sahne_tam": 0.0,
+   "status": "var",
+   "project_source": "TableConstants.cs:10 SeatYaw"
+  },
+  {
+   "what": "ıstaka 0 RackLocal",
+   "project": [
+    0,
+    0.793,
+    0.8
+   ],
+   "sahne_tam": [
+    0,
+    0.793,
+    0.8
+   ],
+   "status": "var",
+   "project_source": "TableConstants.cs:19 RackLocal"
+  },
+  {
+   "what": "ıstaka 0 TILT",
+   "project": -0.36,
+   "sahne_tam": -0.36,
+   "status": "var",
+   "project_source": "TableConstants.cs:8 TILT"
+  },
+  {
+   "what": "koltuk 1 yönü (SeatYaw)",
+   "project": 1.5708,
+   "sahne_tam": 1.5708,
+   "status": "var",
+   "project_source": "TableConstants.cs:10 SeatYaw"
+  },
+  {
+   "what": "ıstaka 1 RackLocal",
+   "project": [
+    0,
+    0.793,
+    0.8
+   ],
+   "sahne_tam": [
+    0,
+    0.793,
+    0.8
+   ],
+   "status": "var",
+   "project_source": "TableConstants.cs:19 RackLocal"
+  },
+  {
+   "what": "ıstaka 1 TILT",
+   "project": -0.36,
+   "sahne_tam": -0.36,
+   "status": "var",
+   "project_source": "TableConstants.cs:8 TILT"
+  },
+  {
+   "what": "koltuk 1 ChairLocal",
+   "project": [
+    0,
+    0,
+    1.32
+   ],
+   "sahne_tam": [
+    0,
+    0,
+    1.32
+   ],
+   "status": "var",
+   "project_source": "TableConstants.cs:20 ChairLocal"
+  },
+  {
+   "what": "koltuk 2 yönü (SeatYaw)",
+   "project": 3.14159,
+   "sahne_tam": 3.14159,
+   "status": "var",
+   "project_source": "TableConstants.cs:10 SeatYaw"
+  },
+  {
+   "what": "ıstaka 2 RackLocal",
+   "project": [
+    0,
+    0.793,
+    0.8
+   ],
+   "sahne_tam": [
+    0,
+    0.793,
+    0.8
+   ],
+   "status": "var",
+   "project_source": "TableConstants.cs:19 RackLocal"
+  },
+  {
+   "what": "ıstaka 2 TILT",
+   "project": -0.36,
+   "sahne_tam": -0.36,
+   "status": "var",
+   "project_source": "TableConstants.cs:8 TILT"
+  },
+  {
+   "what": "koltuk 2 ChairLocal",
+   "project": [
+    0,
+    0,
+    1.32
+   ],
+   "sahne_tam": [
+    0,
+    0,
+    1.32
+   ],
+   "status": "var",
+   "project_source": "TableConstants.cs:20 ChairLocal"
+  },
+  {
+   "what": "koltuk 3 yönü (SeatYaw)",
+   "project": -1.5708,
+   "sahne_tam": -1.5708,
+   "status": "var",
+   "project_source": "TableConstants.cs:10 SeatYaw"
+  },
+  {
+   "what": "ıstaka 3 RackLocal",
+   "project": [
+    0,
+    0.793,
+    0.8
+   ],
+   "sahne_tam": [
+    0,
+    0.793,
+    0.8
+   ],
+   "status": "var",
+   "project_source": "TableConstants.cs:19 RackLocal"
+  },
+  {
+   "what": "ıstaka 3 TILT",
+   "project": -0.36,
+   "sahne_tam": -0.36,
+   "status": "var",
+   "project_source": "TableConstants.cs:8 TILT"
+  },
+  {
+   "what": "koltuk 3 ChairLocal",
+   "project": [
+    0,
+    0,
+    1.32
+   ],
+   "sahne_tam": [
+    0,
+    0,
+    1.32
+   ],
+   "status": "var",
+   "project_source": "TableConstants.cs:20 ChairLocal"
+  },
+  {
+   "what": "oyuncu koltuğu (seat 0) yok",
+   "project": "TableScene.cs:246-248 koltuk yalnız rakiplere",
+   "sahne_tam": "seat 0: yalnız ıstaka",
+   "status": "var",
+   "project_source": "TableScene.cs:246"
+  },
+  {
+   "what": "atma halkası DiscardLocal + TY+0.0012",
+   "project": [
+    0.6,
+    0.7612,
+    0.6
+   ],
+   "sahne_tam": [
+    0.6,
+    0.7612,
+    0.6
+   ],
+   "status": "var",
+   "project_source": "TableConstants.cs:21 DiscardLocal, TableScene.cs:330"
+  },
+  {
+   "what": "soldan alma halkası (seat 3 discard)",
+   "project": [
+    -0.6,
+    0.7612,
+    0.6
+   ],
+   "sahne_tam": [
+    -0.6,
+    0.7612,
+    0.6
+   ],
+   "status": "var",
+   "project_source": "TableScene.cs:450 DiscardCenter(3)"
+  }
+ ],
+ "camera": {
+  "in_glb": false,
+  "note": "sahne_tam has no camera (table3d.js camera is not a scene child); views from tween3d.json",
+  "fov": 40,
+  "views": {
+   "deal": {
+    "pos": [
+     0,
+     2.05,
+     1.62
+    ],
+    "target": [
+     0,
+     0.66,
+     -0.12
+    ]
+   },
+   "seat": {
+    "pos": [
+     0,
+     1.55,
+     1.62
+    ],
+    "target": [
+     0,
+     0.62,
+     -0.25
+    ]
+   },
+   "mid": {
+    "pos": [
+     0,
+     2.08,
+     1.62
+    ],
+    "target": [
+     0,
+     0.6,
+     -0.06
+    ]
+   },
+   "top": {
+    "pos": [
+     0,
+     2.6,
+     1.42
+    ],
+    "target": [
+     0,
+     0.58,
+     0.16
+    ]
+   },
+   "over": {
+    "pos": [
+     0,
+     3.2,
+     2.95
+    ],
+    "target": [
+     0,
+     0.45,
+     -0.3
+    ]
+   }
+  },
+  "project": {
+   "FieldOfView": 40,
+   "PlayerView": "seat",
+   "TopView": "top",
+   "DealView": "deal",
+   "LobbyView": "over",
+   "source": "TableConstants.cs:24-30",
+   "missing_in_project": [
+    "mid"
+   ]
+  }
+ }
+}

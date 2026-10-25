@@ -1,0 +1,22 @@
+{
+    "name": "Galaxy101.Table.Tests",
+    "rootNamespace": "Galaxy101.Table.Tests",
+    "references": [
+        "Galaxy101.Table.Client",
+        "Galaxy101.Table.Runtime",
+        "Okey101.Core",
+        "Galaxy101.Contracts"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "autoReferenced": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Newtonsoft.Json.dll",
+        "nunit.framework.dll"
+    ]
+}

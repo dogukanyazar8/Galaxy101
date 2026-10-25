@@ -52,6 +52,8 @@ Görev: `Design/PROMPT_v4_OTONOM_GELISTIRME.md`. Bağlam sıfırlanırsa buradan
   - Unity içe aktarma (`MenuAssetBuilder.PrepareAssets`, batch): yerelleştirme tabloları, Nunito-700, font atlasları (`3daf284`).
   - Unity EditMode: 946 test, 939 geçti, 0 kırmızı, 7 atlandı (GPU testleri; `-Graphics` koşusu ayrıca).
 
+- 23:09 Unity EditMode `-Graphics`: **946/946**. Docker: `.dockerignore`/`railway.json` paket kaynaklarını içermiyordu (imaj derlenmezdi) → düzeltildi; `docker build -f Server/Dockerfile` tamam, PostgreSQL 17 ile `/health` 200, misafir 10.000 çip / 20 elmas; `/v1/info` artık 0.4.0 / 101-v4 (`451b53d`).
+
 ## Sıradaki
 
 - Referans yakalamanın bitmesi → `capture_report.json` özetinin buraya ve DURUMLAR'a girmesi.

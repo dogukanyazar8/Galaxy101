@@ -119,7 +119,9 @@ namespace Galaxy101
             var center=Box("modal-center");center.pickingMode=PickingMode.Ignore;center.style.width=Length.Percent(100);center.style.height=Length.Percent(100);layer.Add(center);
             card.Add(Page(card));card.userData=key+"|"+Tab(key);
             card.style.width=width;if(height>0)card.style.height=height;card.style.flexShrink=0;card.AddToClassList(nested?"dialog-card":"panel-card");
-            Decorate(card,"pn",nested?26:28,10,"pnS");GalaxyFilters.Shadow(card,0,40,45,new Color(0,0,0,.6f));Clip(card.Q("modal-page"),nested?25:27);card.focusable=true;card.pickingMode=PickingMode.Position;center.Add(card);
+            // v4 settings: no border and no 10px pnS ledge, only 0 40px 90px rgba(0,0,0,.6) (G101-Menu settingsOpen card).
+            bool flat=!nested&&key=="settings";if(flat)card.style.borderTopWidth=card.style.borderRightWidth=card.style.borderBottomWidth=card.style.borderLeftWidth=0;
+            Decorate(card,"pn",nested?26:28,flat?0:10,"pnS");GalaxyFilters.Shadow(card,0,40,45,new Color(0,0,0,.6f));Clip(card.Q("modal-page"),nested?25:27);card.focusable=true;card.pickingMode=PickingMode.Position;center.Add(card);
             if(nested){dialogCard=card;mountedDialog=key;}else{panelCard=card;mountedPanel=key;}
             // fadeIn .2s (dialogs .18s) ease-out on the whole overlay, under the card's own modalIn.
             float fade=nested?.18f:.2f;double fadeFrom=Time.realtimeSinceStartupAsDouble;layer.style.opacity=0;

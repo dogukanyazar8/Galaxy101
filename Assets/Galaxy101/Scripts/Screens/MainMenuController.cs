@@ -23,6 +23,7 @@ namespace Galaxy101
         {
             Initialize();
             Galaxy101.Table.ThreeEnvironment.Prewarm(); // the table's reflection cube, on worker threads while the menu is up
+            GalaxyCursor.Apply(); // Ayarlar → Görüntü → İmleç (default Normal: the Galaxy 101 cursor)
 #if UNITY_EDITOR || OKEY_DIAGNOSTICS
             var args=Environment.GetCommandLineArgs();
             if(Array.IndexOf(args,"-okeyPractice")>=0||Array.IndexOf(args,"-okeyA3Output")>=0||Array.IndexOf(args,"-okeyA4Output")>=0)OnPlay(4,LegacyTableScene);

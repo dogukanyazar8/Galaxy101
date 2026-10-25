@@ -6,7 +6,7 @@ namespace Galaxy101
     public sealed class ModalStack
     {
         private static readonly HashSet<string> Panels=new HashSet<string>{"settings","shop","friends","leader","daily","rules","me"};
-        private static readonly HashSet<string> Dialogs=new HashSet<string>{"profile","logout","delete","bye","add","share"};
+        private static readonly HashSet<string> Dialogs=new HashSet<string>{"profile","logout","delete","quit","bye","add","share"};
         public string Panel {get;private set;}
         public string Dialog {get;private set;}
         public void OpenPanel(string panel)
@@ -20,5 +20,7 @@ namespace Galaxy101
             Dialog=dialog;
         }
         public void CloseTop(){if(Dialog!=null)Dialog=null;else Panel=null;}
+        /// <summary>Closes the panel under an open dialog (Oyundan çık: settingsOpen false under the farewell).</summary>
+        public void ClosePanel(){Panel=null;}
     }
 }

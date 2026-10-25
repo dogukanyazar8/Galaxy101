@@ -31,15 +31,15 @@ public static class ShopEndpoints
         shop.MapPost("/purchase", async (GemPurchaseRequest request, HttpContext http, GameDb db, Ledger ledger, Catalog catalog, TimeProvider clock, CancellationToken ct) =>
         {
             var skin = catalog.Skins.FirstOrDefault(x => x.Id == request.OfferId);
-            if (skin is null) return Api.NotFound();
+            if (skin is null) return Api.NotFound(V4Errors.E_SKU_UNKNOWN);
             var me = http.User.AccountId();
-            if (await db.OwnedItems.AnyAsync(x => x.AccountId == me && x.ItemId == skin.Id, ct)) return Api.Conflict(ErrorCodes.AlreadyOwned);
+            if (await db.OwnedItems.AnyAsync(x => x.AccountId == me && x.ItemId == skin.Id, ct)) return Api.Conflict(ErrorCodes.AlreadyOwned, V4Errors.E_ALREADY_OWNED);
             await using var tx = await db.Database.BeginTransactionAsync(ct);
             try
             {
                 var result = await ledger.ApplyAsync(me, 0, -skin.GemPrice, "item", "item:" + skin.Id, ct);
-                if (result.Outcome == LedgerOutcome.InsufficientFunds) return Api.Conflict(ErrorCodes.InsufficientFunds);
-                if (result.Outcome == LedgerOutcome.Duplicate) return Api.Conflict(ErrorCodes.AlreadyOwned);
+                if (result.Outcome == LedgerOutcome.InsufficientFunds) return Api.Conflict(ErrorCodes.InsufficientFunds, V4Errors.E_NO_GEMS, new { missing = skin.GemPrice - result.Gems });
+                if (result.Outcome == LedgerOutcome.Duplicate) return Api.Conflict(ErrorCodes.AlreadyOwned, V4Errors.E_ALREADY_OWNED);
                 db.OwnedItems.Add(new OwnedItem { AccountId = me, ItemId = skin.Id, AcquiredAt = clock.GetUtcNow() });
                 await db.SaveChangesAsync(ct);
                 await tx.CommitAsync(ct);
@@ -85,7 +85,9 @@ public static class ShopEndpoints
                     ProductId = offer.StoreProductId, OfferId = offer.Id, CreatedAt = clock.GetUtcNow(),
                 });
                 await db.SaveChangesAsync(ct);
-                await ledger.ApplyAsync(me, offer.Chips, offer.Gems, "store", $"store:{request.Platform}:{verified.TransactionId}", ct);
+                // D-27: the pack's bonus percent is added to the amount (250.000 +%10 = 275.000).
+                await ledger.ApplyAsync(me, Catalog.WithBonus(offer.Chips, offer.BonusPercent), Catalog.WithBonus(offer.Gems, offer.BonusPercent), "store",
+                    $"store:{request.Platform}:{verified.TransactionId}", ct);
                 await tx.CommitAsync(ct);
             }
             catch (DbUpdateException error) when (error.IsUniqueViolation())

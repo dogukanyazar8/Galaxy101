@@ -33,6 +33,9 @@ public sealed class Catalog
         if (Streak.Count != 7 || Quests.Count > 31) throw new InvalidOperationException("Catalog: seven streak days and at most 31 quests are required.");
     }
 
+    /// <summary>D-27: what a pack grants, its amount plus its bonus percent (gems.550 +%10 → 605, chips.250k +%10 → 275.000).</summary>
+    public static long WithBonus(long amount, int bonusPercent) => amount + amount * bonusPercent / 100;
+
     /// <summary>Real-money offer by store product id (chips, gems or the deal).</summary>
     public StoreOffer? ByProduct(string productId) =>
         Chips.Concat(Gems).Append(Deal).FirstOrDefault(x => x.StoreProductId == productId);

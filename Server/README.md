@@ -8,6 +8,7 @@ ASP.NET Core (.NET 10) + PostgreSQL. Menü verisi (hesap, profil, ayarlar, ekono
 |---|---|
 | `src/Galaxy101.Server` | Minimal API uç noktaları, WebSocket, maç aktörleri, EF Core şeması ve migration'lar |
 | `src/Galaxy101.Rules` | Kural motoru (`Packages/com.okey101.core/Runtime`) ve `BotPlanner.cs`, Unity kaynaklarından **kopyasız** derlenir |
+| `src/Galaxy101.Table` | v4 maç akışı (`Packages/com.galaxy101.table/Runtime`), Unity kaynağından kopyasız, C# 9 |
 | `../Shared/Galaxy101.Contracts` | netstandard2.1 DTO'lar; Unity istemcisi aynısını kullanacak |
 | `tests/Galaxy101.Server.Tests` | xUnit; gerçek PostgreSQL 17 konteyneri (Testcontainers) |
 
@@ -93,6 +94,7 @@ Dereceli LP ve lig eşikleri dereceli mod açılırken yeniden ele alınacak; Bo
 |---|---|---|
 | Maç uzunluğu | 4 el (her oyuncu bir kez başlar) | `Game:HandsPerMatch` |
 | Hamle süresi / sonraki el | 30 sn / 15 sn | `Game:TurnSeconds`, `Game:NextHandSeconds` |
+| Dağıtım töreni (eski yol bekler) | 21 686 ms | `Game:DealMilliseconds` |
 | Otomatik oynatmaya geçiş | Art arda 2 zaman aşımı | `Game:TimeoutsBeforeAuto` |
 | Pot | Tekli: kazanan alır; Eşli: kazanan takım böler; komisyon %0 | `Game:SoloPayout`, `Game:RakePercent` |
 | Masadan kalkma | Bahis potta kalır, son sıra, ödül/XP yok; koltuğu sunucu oynar. Eşli: kalkanın yerine bot geçer, oyun devam eder; takım bu yüzden son sayılmaz, takım kazanırsa ödülün tamamını masada kalan ortak alır; kalkan bireysel olarak son sıradadır (25 Ekim 2026) | — |
@@ -116,6 +118,12 @@ Dereceli LP ve lig eşikleri dereceli mod açılırken yeniden ele alınacak; Bo
 - KVKK aydınlatma metninin kendisi hukuki içerik; sunucu yalnız kabul edilen sürümü kaydeder.
 - Gerçek Google/Apple kimlik ve mağaza bilgileri olmadan bu yollar yalnız birim testleriyle (kendi ürettiğimiz sertifika zinciri, sahte doğrulayıcı) doğrulandı.
 
+
+## v4 tasarım paketi (protokol 0.4.0, 25 Ekim 2026)
+- **Yeni istemci protokolü** aynı soketten: `hello`, `tableCreate` … `g*` adım hamleleri, `chatSend`, `giftSend`, `rankedQueue` (ad ve alanlar `pkg/protocol/protocol.json`; ack `{id, ok, code, detail, at, …}`). Hesap/ekonomi/sosyal mesajları HTTP uçlarında; hata gövdesinde paket kodu `error`. Tam eşleme `docs/v4/PROTOKOL_ESLEME.md`, istemci notu `docs/v4/hat-b/ISTEMCI_NOTU.md`.
+- `src/Galaxy101.Server/V4/` — `Hub` (tek döngü, mantıksal saat) + `Store`; maç akışı `Packages/com.galaxy101.table` (`src/Galaxy101.Table` derler), kural motoru `Okey101.Core.V4`.
+- Bahis oturunca düşer, maç öncesi çıkana iade; havuz = ödenen bahisler; beraberlik ve eşli sıralar paylaşılır (en yakın tama). Dağıtım töreni sunucuda 21 686 ms (bot dağıtıcı).
+- Eski `table.*` / `match.*` / `queue.*` / `room.*` mesajları eski istemci ve eski kayıtlar için duruyor. v4 masaları yeniden başlatmada geri kurulmaz; tuttukları bahis açılışta iade edilir.
 
 ## v7 (25 Ekim 2026) — Katlamalı ve eşlide kalkma
 - **Katlamalı** (`docs/rules/101-v1.md`): bir elde sonradan açan, kendinden önce açanı geçmek zorunda — seri 101 → önceki + 1, çift 5 → önceki + 1 (üst sınır yok); seri ve çift eşikleri bağımsız, el bitince sıfırlanır. Katlamalı kuyruğu (`mode: doubling`) ve `table.create {doubling: true}` masaları bu kuralla oynar. Eşli masada `partnerRaises` (varsayılan açık; "Ortağın açılışı eşiği yükseltsin") kapalıysa yalnız rakip takımın açılışları eşiği yükseltir.

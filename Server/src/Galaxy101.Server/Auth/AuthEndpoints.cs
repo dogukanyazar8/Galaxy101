@@ -22,8 +22,8 @@ public static class AuthEndpoints
         anonymous.MapPost("/guest", async (GuestLoginRequest? request, AccountService accounts, TokenService tokens, CancellationToken ct) =>
         {
             var name = string.IsNullOrWhiteSpace(request?.Name) ? null : request!.Name.Trim();
-            if (name is not null && (name.Length > 16 || !Profile.ProfileRules.ValidName(name))) return Api.Error(ErrorCodes.Validation, StatusCodes.Status400BadRequest);
-            if (!Social.TextFilter.IsClean(name)) return Api.Error(ErrorCodes.Inappropriate, StatusCodes.Status400BadRequest);
+            if (name is not null && (name.Length > 16 || !Profile.ProfileRules.ValidName(name))) return Api.Error(ErrorCodes.Validation, error: V4Errors.E_NAME_INVALID);
+            if (!Social.TextFilter.IsClean(name)) return Api.Error(ErrorCodes.Inappropriate, error: V4Errors.E_NAME_INVALID);
             var color = Profile.ProfileRules.AvatarColors.Contains(request?.Color) ? request!.Color : null;
             var account = await accounts.CreateAsync(request?.Platform, request?.DeviceId, ct, registered: false, name: name, color: color);
             return Results.Ok(await tokens.IssueAsync(account.Id, true, ct));
@@ -34,18 +34,23 @@ public static class AuthEndpoints
         {
             var outcome = await passwords.RegisterAsync(request, ct);
             return outcome.Account is { } id ? Results.Ok(await tokens.IssueAsync(id, true, ct))
-                : outcome.Error == ErrorCodes.EmailTaken ? Api.Conflict(ErrorCodes.EmailTaken)
-                : Api.Error(outcome.Error!, StatusCodes.Status400BadRequest);
+                : outcome.Error == ErrorCodes.EmailTaken ? Api.Conflict(ErrorCodes.EmailTaken, outcome.V4)
+                : Api.Error(outcome.Error!, StatusCodes.Status400BadRequest, error: outcome.V4);
         });
 
         // Giriş yap (spec/18 S03): unknown e-mail 404, wrong password 401 with the tries left, locked 423.
-        anonymous.MapPost("/login", async (PasswordLoginRequest request, Passwords passwords, TokenService tokens, CancellationToken ct) =>
+        anonymous.MapPost("/login", async (PasswordLoginRequest request, Passwords passwords, TokenService tokens, TimeProvider clock, CancellationToken ct) =>
         {
             var outcome = await passwords.LoginAsync(request, ct);
             if (outcome.Account is { } id) return Results.Ok(await tokens.IssueAsync(id, false, ct));
             int status = outcome.Error == ErrorCodes.AccountNotFound ? StatusCodes.Status404NotFound
                 : outcome.Error == ErrorCodes.AccountLocked ? StatusCodes.Status423Locked : StatusCodes.Status401Unauthorized;
-            return Results.Json(new LoginErrorResponse { Code = outcome.Error, Message = outcome.Error, RemainingAttempts = outcome.Remaining, RetryAfter = outcome.RetryAfter }, statusCode: status);
+            object? detail = outcome.V4 == V4Errors.E_PASS_WRONG ? new { left = outcome.Remaining }
+                : outcome.V4 == V4Errors.E_ACCOUNT_LOCKED ? new { until = clock.GetUtcNow().AddSeconds(outcome.RetryAfter).ToUnixTimeMilliseconds() } : null;
+            return Results.Json(new LoginErrorResponse
+            {
+                Code = outcome.Error, Message = outcome.Error, RemainingAttempts = outcome.Remaining, RetryAfter = outcome.RetryAfter, Error = outcome.V4, Detail = detail,
+            }, statusCode: status);
         });
 
         // Sign in on any device with a linked provider; an unknown identity creates a new linked account.
@@ -53,7 +58,7 @@ public static class AuthEndpoints
             AccountService accounts, TokenService tokens, GameDb db, TimeProvider clock, CancellationToken ct) =>
         {
             var identity = await validator.ValidateAsync(request.Provider, request.IdToken, ct);
-            if (identity is null) return Api.Error(ErrorCodes.InvalidToken, StatusCodes.Status401Unauthorized);
+            if (identity is null) return Api.Error(ErrorCodes.InvalidToken, StatusCodes.Status401Unauthorized, error: V4Errors.E_OAUTH_FAILED);
             var existing = await db.ExternalLogins.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Provider == identity.Provider && x.Subject == identity.Subject, ct);
             if (existing is not null) return Results.Ok(await tokens.IssueAsync(existing.AccountId, false, ct));
@@ -68,7 +73,7 @@ public static class AuthEndpoints
         anonymous.MapPost("/refresh", async (RefreshRequest request, TokenService tokens, CancellationToken ct) =>
             await tokens.RefreshAsync(request.RefreshToken, ct) is { } response
                 ? Results.Ok(response)
-                : Api.Error(ErrorCodes.InvalidToken, StatusCodes.Status401Unauthorized));
+                : Api.Error(ErrorCodes.InvalidToken, StatusCodes.Status401Unauthorized, error: V4Errors.E_SESSION_EXPIRED));
 
         var user = app.MapGroup("/v1/auth").RequireAuthorization();
 

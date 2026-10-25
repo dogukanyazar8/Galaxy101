@@ -25,8 +25,11 @@ public static class ProfileEndpoints
 
         profile.MapPut("", async (ProfileUpdateRequest request, HttpContext http, GameDb db, GameCalendar calendar, CancellationToken ct) =>
         {
-            if (!ProfileRules.ValidProfile(request)) return Api.Error(ErrorCodes.Validation);
-            if (!Social.TextFilter.IsClean(request.Name) || !Social.TextFilter.IsClean(request.Status)) return Api.Error(ErrorCodes.Inappropriate);
+            if (!ProfileRules.ValidProfile(request))
+                return Api.Error(ErrorCodes.Validation, error: request is null ? null : !ProfileRules.ValidName(request.Name) ? V4Errors.E_NAME_INVALID
+                    : (request.Status ?? "").Length > 40 ? V4Errors.E_STATUS_LONG : request.Frame is not (0 or 1) ? V4Errors.E_FRAME_LOCKED : null);
+            if (!Social.TextFilter.IsClean(request.Name) || !Social.TextFilter.IsClean(request.Status))
+                return Api.Error(ErrorCodes.Inappropriate, error: Social.TextFilter.IsClean(request.Name) ? null : V4Errors.E_NAME_INVALID);
             var me = http.User.AccountId();
             var updated = await db.Accounts.Where(x => x.Id == me).ExecuteUpdateAsync(s => s
                 .SetProperty(x => x.Name, request.Name.Trim())

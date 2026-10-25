@@ -17,7 +17,8 @@ public sealed class Passwords(GameDb db, AccountService accounts, TimeProvider c
 {
     private const int Iterations = 120_000, SaltBytes = 16, HashBytes = 32;
 
-    public sealed record Outcome(Guid? Account, string? Error, int Remaining = 0, int RetryAfter = 0);
+    /// <param name="V4">The v4 protocol error code (register / login).</param>
+    public sealed record Outcome(Guid? Account, string? Error, int Remaining = 0, int RetryAfter = 0, string? V4 = null);
 
     public static string Normalize(string? email) => (email ?? "").Trim().ToLowerInvariant();
 
@@ -50,17 +51,19 @@ public sealed class Passwords(GameDb db, AccountService accounts, TimeProvider c
     {
         var email = Normalize(request.Email);
         var name = (request.Name ?? "").Trim();
-        if (!ProfileRules.ValidName(name) || !ValidEmail(email) || !ValidPassword(request.Password)) return new(null, ErrorCodes.Validation);
-        if (!Social.TextFilter.IsClean(name)) return new(null, ErrorCodes.Inappropriate);
+        if (!ValidEmail(email)) return new(null, ErrorCodes.Validation, V4: V4Errors.E_EMAIL_INVALID);
+        if (!ValidPassword(request.Password)) return new(null, ErrorCodes.Validation, V4: V4Errors.E_PASS_SHORT);
+        if (!ProfileRules.ValidName(name)) return new(null, ErrorCodes.Validation, V4: V4Errors.E_NAME_INVALID);
+        if (!Social.TextFilter.IsClean(name)) return new(null, ErrorCodes.Inappropriate, V4: V4Errors.E_NAME_INVALID);
         if (!request.AcceptTerms) return new(null, ErrorCodes.TermsRequired);
         var color = ProfileRules.AvatarColors.Contains(request.Color) ? request.Color : null;
-        if (await db.PasswordLogins.AnyAsync(x => x.Email == email, ct)) return new(null, ErrorCodes.EmailTaken);
+        if (await db.PasswordLogins.AnyAsync(x => x.Email == email, ct)) return new(null, ErrorCodes.EmailTaken, V4: V4Errors.E_EMAIL_EXISTS);
         // Account and login in one transaction: a lost race on the e-mail leaves no orphan account behind.
         await using var tx = await db.Database.BeginTransactionAsync(ct);
         var account = await accounts.CreateAsync(request.Platform, request.DeviceId, ct, registered: true, name: name, color: color);
         db.PasswordLogins.Add(new PasswordLogin { Email = email, AccountId = account.Id, Hash = Hash(request.Password!), CreatedAt = clock.GetUtcNow() });
         try { await db.SaveChangesAsync(ct); await tx.CommitAsync(ct); }
-        catch (DbUpdateException error) when (error.IsUniqueViolation()) { return new(null, ErrorCodes.EmailTaken); }
+        catch (DbUpdateException error) when (error.IsUniqueViolation()) { return new(null, ErrorCodes.EmailTaken, V4: V4Errors.E_EMAIL_EXISTS); }
         return new(account.Id, null);
     }
 
@@ -68,9 +71,9 @@ public sealed class Passwords(GameDb db, AccountService accounts, TimeProvider c
     {
         var email = Normalize(request.Email);
         var login = await db.PasswordLogins.FirstOrDefaultAsync(x => x.Email == email, ct);
-        if (login is null) return new(null, ErrorCodes.AccountNotFound);
+        if (login is null) return new(null, ErrorCodes.AccountNotFound, V4: V4Errors.E_ACCOUNT_UNKNOWN);
         var now = clock.GetUtcNow(); var game = options.Value;
-        if (login.LockedUntil is { } until && until > now) return new(null, ErrorCodes.AccountLocked, 0, (int)Math.Ceiling((until - now).TotalSeconds));
+        if (login.LockedUntil is { } until && until > now) return new(null, ErrorCodes.AccountLocked, 0, (int)Math.Ceiling((until - now).TotalSeconds), V4Errors.E_ACCOUNT_LOCKED);
         if (!Verify(request.Password ?? "", login.Hash))
         {
             // One atomic step per wrong password, so parallel guesses each count (no read-modify-write of the counter).
@@ -80,15 +83,15 @@ public sealed class Passwords(GameDb db, AccountService accounts, TimeProvider c
                 WHERE email = {email} AND (locked_until IS NULL OR locked_until <= {now})
                 RETURNING failed_attempts AS "Value"
                 """).ToListAsync(ct);
-            if (attempts.Count == 0) return new(null, ErrorCodes.AccountLocked, 0, game.PasswordLockSeconds); // a parallel guess locked it
+            if (attempts.Count == 0) return new(null, ErrorCodes.AccountLocked, 0, game.PasswordLockSeconds, V4Errors.E_ACCOUNT_LOCKED); // a parallel guess locked it
             if (attempts[0] >= game.PasswordAttempts)
             {
                 var lockedUntil = now.AddSeconds(game.PasswordLockSeconds);
                 await db.PasswordLogins.Where(x => x.Email == email && x.LockedUntil == null)
                     .ExecuteUpdateAsync(u => u.SetProperty(x => x.LockedUntil, lockedUntil).SetProperty(x => x.FailedAttempts, 0), ct);
-                return new(null, ErrorCodes.AccountLocked, 0, game.PasswordLockSeconds);
+                return new(null, ErrorCodes.AccountLocked, 0, game.PasswordLockSeconds, V4Errors.E_ACCOUNT_LOCKED);
             }
-            return new(null, ErrorCodes.WrongPassword, game.PasswordAttempts - attempts[0]);
+            return new(null, ErrorCodes.WrongPassword, game.PasswordAttempts - attempts[0], V4: V4Errors.E_PASS_WRONG);
         }
         login.FailedAttempts = 0; login.LockedUntil = null;
         await db.SaveChangesAsync(ct);

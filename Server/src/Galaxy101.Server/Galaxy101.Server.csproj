@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Galaxy101.Rules/Galaxy101.Rules.csproj" />
+    <ProjectReference Include="../Galaxy101.Table/Galaxy101.Table.csproj" />
     <ProjectReference Include="$(RepoRoot)/Shared/Galaxy101.Contracts/Galaxy101.Contracts.csproj" />
   </ItemGroup>
 

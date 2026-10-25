@@ -7,11 +7,13 @@ namespace Galaxy101.Server.Infrastructure;
 
 public static class Api
 {
-    public static IResult Error(string code, int status = StatusCodes.Status400BadRequest, string? message = null) =>
-        Results.Json(new ErrorResponse { Code = code, Message = message ?? code }, statusCode: status);
+    /// <param name="error">The v4 protocol error code of this failure (docs/v4/PROTOKOL_ESLEME.md).</param>
+    public static IResult Error(string code, int status = StatusCodes.Status400BadRequest, string? message = null, string? error = null, object? detail = null) =>
+        Results.Json(new ErrorResponse { Code = code, Message = message ?? code, Error = error, Detail = detail }, statusCode: status);
 
-    public static IResult NotFound() => Error(ErrorCodes.NotFound, StatusCodes.Status404NotFound);
-    public static IResult Conflict(string code = ErrorCodes.Conflict) => Error(code, StatusCodes.Status409Conflict);
+    public static IResult NotFound(string? error = null) => Error(ErrorCodes.NotFound, StatusCodes.Status404NotFound, error: error);
+    public static IResult Conflict(string code = ErrorCodes.Conflict, string? error = null, object? detail = null) =>
+        Error(code, StatusCodes.Status409Conflict, error: error, detail: detail);
 
     public static Guid AccountId(this ClaimsPrincipal user) =>
         Guid.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? throw new InvalidOperationException("Unauthenticated principal."));

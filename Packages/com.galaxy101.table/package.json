@@ -1,0 +1,8 @@
+{
+  "name": "com.galaxy101.table",
+  "version": "0.4.0",
+  "displayName": "Galaxy 101 Table Runtime",
+  "description": "Transport-free match flow of the v4 package (mockServer.js table part): deal ceremony schedule, turns, timeouts, bots, hand and match end, per-seat events with the hidden-information projection. The server wraps it with sockets, storage and economy; the client runs it offline.",
+  "unity": "6000.0",
+  "dependencies": {}
+}

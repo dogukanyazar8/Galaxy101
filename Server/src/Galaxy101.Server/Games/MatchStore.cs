@@ -237,7 +237,8 @@ public sealed class MatchStore(IServiceScopeFactory scopes, GameCalendar calenda
     {
         await using var scope = scopes.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<GameDb>();
-        var matches = await db.Matches.AsNoTracking().Where(m => m.Status == MatchStatus.Active).ToListAsync(ct);
+        // v4 tables (the hub's) are not resumed by this engine: the hub returns their stakes at start.
+        var matches = (await db.Matches.AsNoTracking().Where(m => m.Status == MatchStatus.Active).ToListAsync(ct)).Where(m => !V4.Store.IsV4(m.OptionsJson)).ToList();
         var ids = matches.Select(m => m.Id).ToList();
         // Three queries in all (not two per match), grouped in memory.
         var hands = (await db.MatchHands.AsNoTracking().Where(h => ids.Contains(h.MatchId)).OrderBy(h => h.HandIndex).ToListAsync(ct)).ToLookup(h => h.MatchId);

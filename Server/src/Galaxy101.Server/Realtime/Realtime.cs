@@ -15,6 +15,23 @@ public interface IRealtimeHandler
     Task OnDisconnectedAsync(Guid account);
 }
 
+/// <summary>
+/// The answer to a v4 message (docs/v4/KARARLAR.md K-04): the error code (package <c>error</c>, sent as the ack's <c>code</c>),
+/// its <c>detail</c>, and the message's return fields, which the ack carries next to <c>id</c> / <c>ok</c> / <c>code</c>.
+/// </summary>
+public sealed record Reply(string? Error = null, object? Detail = null, IReadOnlyDictionary<string, object?>? Data = null)
+{
+    public static readonly Reply Ok = new();
+    public static Reply Fail(string error, object? detail = null) => new(error, detail);
+    public static Reply With(params (string Key, object? Value)[] data) => new(Data: data.ToDictionary(d => d.Key, d => d.Value));
+}
+
+/// <summary>A v4 handler: every message gets exactly one ack, with the reply's detail and return fields.</summary>
+public interface IRealtimeReplyHandler : IRealtimeHandler
+{
+    Task<Reply> ReplyAsync(Connection connection, Inbound message, CancellationToken ct);
+}
+
 public static class Presence
 {
     public const string Offline = "offline", Online = "online", Playing = "playing";
@@ -87,7 +104,7 @@ public sealed class ConnectionRegistry(IServiceScopeFactory scopes, TimeProvider
 public static class RealtimeEndpoint
 {
     public static void MapRealtime(this IEndpointRouteBuilder app) => app.MapGet("/v1/ws", async (HttpContext http, RealtimeTickets tickets,
-        DeletedAccounts deleted, ConnectionRegistry registry, IEnumerable<IRealtimeHandler> handlers, IHostApplicationLifetime lifetime, ILogger<Connection> log) =>
+        DeletedAccounts deleted, ConnectionRegistry registry, IEnumerable<IRealtimeHandler> handlers, IHostApplicationLifetime lifetime, TimeProvider clock, ILogger<Connection> log) =>
     {
         if (!http.WebSockets.IsWebSocketRequest) return Results.BadRequest();
         // A ticket taken before its account was deleted is worthless afterwards.
@@ -101,7 +118,29 @@ public static class RealtimeEndpoint
         {
             await connection.RunAsync(async (c, message) =>
             {
-                if (message.Type == MessageTypes.Ping) { c.Send(MessageTypes.Pong, new { }); return; }
+                if (message.Type == MessageTypes.Ping)
+                {
+                    c.Send(MessageTypes.Pong, new { });
+                    // v4 ping: the ack carries the server time (clock sync, protocol/timings.md).
+                    if (message.Id is not null) c.SendFrame(V4Ack(message.Id, Reply.With(("serverTime", clock.GetUtcNow().ToUnixTimeMilliseconds())), clock));
+                    return;
+                }
+                if (handlers.FirstOrDefault(h => h.Handles(message.Type)) is IRealtimeReplyHandler v4)
+                {
+                    Reply reply;
+                    try { reply = await v4.ReplyAsync(c, message, c.Closing); }
+                    catch (Exception e) when (e is System.Text.Json.JsonException or InvalidOperationException or ArgumentException or FormatException or KeyNotFoundException)
+                    {
+                        reply = Reply.Fail(V4Errors.E_BAD_MESSAGE);
+                    }
+                    catch (Exception e) when (e is not OperationCanceledException)
+                    {
+                        log.LogError(e, "Realtime {Type} failed for {Account}", message.Type, c.Account);
+                        reply = Reply.Fail("server_error");
+                    }
+                    c.SendFrame(V4Ack(message.Id, reply, clock));
+                    return;
+                }
                 string? error;
                 try
                 {
@@ -130,4 +169,17 @@ public static class RealtimeEndpoint
         }
         return Results.Empty;
     });
+
+    /// <summary>A v4 ack frame: <c>{ id, ok, code, detail?, at, ...return fields }</c>.</summary>
+    public static byte[] V4Ack(string? id, Reply reply, TimeProvider clock)
+    {
+        var data = new System.Text.Json.Nodes.JsonObject
+        {
+            ["id"] = id, ["ok"] = reply.Error is null, ["code"] = reply.Error, ["at"] = clock.GetUtcNow().ToUnixTimeMilliseconds(),
+        };
+        if (reply.Detail is not null) data["detail"] = System.Text.Json.JsonSerializer.SerializeToNode(reply.Detail, Connection.Json);
+        if (reply.Data is not null)
+            foreach (var (key, value) in reply.Data) data[key] = value is null ? null : System.Text.Json.JsonSerializer.SerializeToNode(value, value.GetType(), Connection.Json);
+        return Connection.Frame(MessageTypes.Ack, data);
+    }
 }

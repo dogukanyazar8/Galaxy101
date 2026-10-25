@@ -23,7 +23,8 @@ namespace Galaxy101
 
         public void Build(MenuView v, VisualElement list)
         {
-            table = table ?? new TableSettings(v.Model); probe = probe ?? new TableSettings(null, false);
+            // Read afresh on every build: the table may have changed its settings since (both keep them in PlayerPrefs).
+            table = new TableSettings(v.Model); probe = probe ?? new TableSettings(null, false);
             bool en = v.Loc.Language == "en";
             var names = Names(en);
             string Cur(string[] keys, string[][] labels, string key) => labels[Math.Max(0, Array.IndexOf(keys, key))][0];

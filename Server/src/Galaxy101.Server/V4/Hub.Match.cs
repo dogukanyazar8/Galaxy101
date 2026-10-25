@@ -160,3 +160,22 @@ public sealed partial class Hub
         });
     }
 }
+
+/// <summary>Test seam: what a table holds right now (the package tests read mockServer _debug the same way).</summary>
+public sealed record TableProbe(string Status, string Name, bool[] SeatBot, Guid?[] SeatAccount, bool[] Left, bool[] Autoplay, bool[] Connected,
+    int[] Totals, long BetsPaid, string? MatchStatus, bool Katlama, bool KatlamaPartner, int Hand);
+
+public sealed partial class Hub
+{
+    internal Task<TableProbe?> ProbeAsync(string name) => Run(() =>
+    {
+        var t = tables.Values.LastOrDefault(x => x.Name == name && !x.Closed);
+        if (t is null) return Task.FromResult<TableProbe?>(null);
+        var s = t.Run?.Match;
+        return Task.FromResult<TableProbe?>(new TableProbe(
+            t.Status, t.Name, [.. t.Seats.Select(o => o is { IsBot: true })], [.. t.Seats.Select(o => o?.Account)],
+            [.. Enumerable.Range(0, 4).Select(k => s?.Seats[k].Left ?? false)], [.. Enumerable.Range(0, 4).Select(k => t.Run?.Autoplay[k] ?? false)],
+            [.. Enumerable.Range(0, 4).Select(k => t.Run?.Connected[k] ?? true)], s is null ? new int[4] : [.. s.Totals], t.BetsPaid, s?.Status,
+            s?.Opts.Katlama ?? t.Katlama, s?.Opts.KatlamaPartner ?? t.KatlamaPartner, s?.HandNo ?? 0));
+    });
+}

@@ -66,6 +66,9 @@ public sealed class ConnectionRegistry(IServiceScopeFactory scopes, TimeProvider
 
     public bool IsOnline(Guid account) => connections.ContainsKey(account);
 
+    /// <summary>Test seam: frames queued so far for the account's current socket (-1 when offline).</summary>
+    internal long Queued(Guid account) => connections.TryGetValue(account, out var c) ? c.Queued : -1;
+
     public string PresenceOf(Guid account) => !connections.ContainsKey(account) ? Presence.Offline : playing.ContainsKey(account) ? Presence.Playing : Presence.Online;
 
     public bool Send<T>(Guid account, string type, T data) => connections.TryGetValue(account, out var c) && c.Send(type, data);

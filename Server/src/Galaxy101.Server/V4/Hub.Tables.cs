@@ -103,7 +103,7 @@ public sealed partial class Hub
             Id = Guid.CreateVersion7(), Code = code, Name = m.Name!, Mode = m.Mode == "pairs" ? "pairs" : "solo", Private = m.Private, Pin = m.Pin,
             Hands = hands ?? m.Hands, Bet = m.Bet, Katlama = m.Katlama, KatlamaPartner = m.KatlamaPartner != false, TurnSec = turnSec ?? m.TurnSec,
             Rules = new V4TableRules { Spectate = rules.Spectate, Chat = rules.Chat ?? "open", Gifts = rules.Gifts, Isle = rules.Isle, Penalties = rules.Penalties },
-            Owner = owner, Ranked = ranked, VsBots = vsBots, ChatRng = new RngState(BitConverter.ToUInt32(RandomNumberGenerator.GetBytes(4))), Host = null!,
+            Owner = owner, Ranked = ranked, VsBots = vsBots, ChatRng = new RngState(SeedSource()), Host = null!,
         };
         table.Host = new TableHost(this, table);
         tables[table.Id] = table;

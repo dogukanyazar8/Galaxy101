@@ -34,9 +34,13 @@ public sealed class Connection(Guid account, WebSocket socket, ILogger log)
     /// <summary>A serialized frame, to send one message to many sockets without serializing it for each.</summary>
     public static byte[] Frame<T>(string type, T data) => JsonSerializer.SerializeToUtf8Bytes(new { type, data }, Json);
 
+    private long queued;
+    /// <summary>Frames queued for this socket so far (tests wait until the client has them all).</summary>
+    internal long Queued => Interlocked.Read(ref queued);
+
     public bool SendFrame(byte[] bytes)
     {
-        if (outbound.Writer.TryWrite(bytes)) return true;
+        if (outbound.Writer.TryWrite(bytes)) { Interlocked.Increment(ref queued); return true; }
         log.LogWarning("Closing slow realtime client {Account}", Account);
         Close();
         return false;

@@ -1,0 +1,765 @@
+{
+ "tool": "tools/blender/material_light_map.py",
+ "lights": [
+  {
+   "id": "lights.hemi",
+   "source": "lighting.json lights[0] (hemi)",
+   "package": {
+    "name": "hemi",
+    "type": "Hemisphere",
+    "sky": "#c9d6ff (tema sky ile değişir)",
+    "ground": "#0a0a14",
+    "intensity": 0.45,
+    "glb": "GLB'ye aktarılamaz (glTF desteklemez) → Unity: Environment Lighting · Gradient, Sky #c9d6ff, Ground #0a0a14, yoğunluk 0.45"
+   },
+   "sahne_tam": null,
+   "checks": [],
+   "status_v4": "pakette (GLB'ye aktarılamaz)",
+   "project": "TableScene.cs:157 ThreeEnvironment.Apply(..., theme.Sky, #0a0a14, 0.45): custom ambient probe (environment ×0.75 + hemisphere), not Gradient"
+  },
+  {
+   "id": "lights.key",
+   "source": "lighting.json lights[1] (key)",
+   "package": {
+    "name": "key",
+    "type": "Directional",
+    "color": "#fff4e2",
+    "intensity": 1.7,
+    "position": [
+     1.1,
+     4.2,
+     2.0
+    ],
+    "target": [
+     0,
+     0.76,
+     0
+    ],
+    "shadow": {
+     "map": 2048,
+     "ortho": [
+      -1.5,
+      1.5,
+      1.5,
+      -1.5
+     ],
+     "near": 1,
+     "far": 8,
+     "bias": -0.0004
+    }
+   },
+   "sahne_tam": {
+    "node": "sahne_tam/#100",
+    "type": "directional",
+    "color_linear": [
+     1,
+     0.90466,
+     0.76052
+    ],
+    "color_hex": "#FFF4E2",
+    "intensity": 1.7,
+    "range": null,
+    "spot": null,
+    "position": [
+     1.1,
+     4.2,
+     2.0
+    ],
+    "forward": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "color_by_theme": {
+     "jupiter": "#FFF4E2",
+     "mars": "#FFF4E2",
+     "neptun": "#FFF4E2",
+     "saturn": "#FFF4E2",
+     "venus": "#FFF4E2"
+    }
+   },
+   "checks": [
+    {
+     "prop": "color",
+     "package": "#fff4e2",
+     "glb": "#FFF4E2",
+     "status": "var"
+    },
+    {
+     "prop": "intensity",
+     "package": 1.7,
+     "glb": 1.7,
+     "status": "var"
+    },
+    {
+     "prop": "position",
+     "package": [
+      1.1,
+      4.2,
+      2.0
+     ],
+     "glb": [
+      1.1,
+      4.2,
+      2.0
+     ],
+     "status": "var"
+    },
+    {
+     "prop": "target→direction",
+     "package": [
+      0,
+      0.76,
+      0
+     ],
+     "glb": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "status": "farklı",
+     "note": "GLTFExporter keeps no target: node rotation is identity, the light points along −Z; the target is a separate empty node"
+    },
+    {
+     "prop": "shadow",
+     "package": {
+      "map": 2048,
+      "ortho": [
+       -1.5,
+       1.5,
+       1.5,
+       -1.5
+      ],
+      "near": 1,
+      "far": 8,
+      "bias": -0.0004
+     },
+     "glb": null,
+     "status": "glTF'e geçmez"
+    }
+   ],
+   "status_v4": "farklı",
+   "project": "TableScene.cs:167-170 Directional #fff4e2, 1.7×(1/π), pos (1.1,4.2,2.0) → target (0,TY,0); Soft shadows, VeryHigh, bias 1.0 / normal 0.8 (URP texel units)"
+  },
+  {
+   "id": "lights.spot",
+   "source": "lighting.json lights[2] (spot)",
+   "package": {
+    "name": "spot",
+    "type": "Spot",
+    "color": "#ffffff",
+    "intensity": 9,
+    "distance": 7,
+    "angle": 0.62,
+    "penumbra": 0.7,
+    "decay": 1.6,
+    "position": [
+     0,
+     3.2,
+     0.3
+    ],
+    "target": [
+     0,
+     0.76,
+     0
+    ]
+   },
+   "sahne_tam": {
+    "node": "sahne_tam/#102",
+    "type": "spot",
+    "color_linear": [
+     1,
+     1,
+     1
+    ],
+    "color_hex": "#FFFFFF",
+    "intensity": 9,
+    "range": 7,
+    "spot": {
+     "innerConeAngle": 0.186,
+     "outerConeAngle": 0.62
+    },
+    "position": [
+     0.0,
+     3.2,
+     0.3
+    ],
+    "forward": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "color_by_theme": {
+     "jupiter": "#FFFFFF",
+     "mars": "#FFFFFF",
+     "neptun": "#FFFFFF",
+     "saturn": "#FFFFFF",
+     "venus": "#FFFFFF"
+    }
+   },
+   "checks": [
+    {
+     "prop": "color",
+     "package": "#ffffff",
+     "glb": "#FFFFFF",
+     "status": "var"
+    },
+    {
+     "prop": "intensity",
+     "package": 9,
+     "glb": 9,
+     "status": "var"
+    },
+    {
+     "prop": "distance→range",
+     "package": 7,
+     "glb": 7,
+     "status": "var"
+    },
+    {
+     "prop": "angle→outerConeAngle",
+     "package": 0.62,
+     "glb": 0.62,
+     "status": "var"
+    },
+    {
+     "prop": "penumbra→innerConeAngle",
+     "package": "(1−0.7)·0.62 = 0.186",
+     "glb": 0.186,
+     "status": "var"
+    },
+    {
+     "prop": "decay",
+     "package": 1.6,
+     "glb": null,
+     "status": "glTF'e geçmez",
+     "note": "KHR_lights_punctual is inverse-square only"
+    },
+    {
+     "prop": "position",
+     "package": [
+      0,
+      3.2,
+      0.3
+     ],
+     "glb": [
+      0.0,
+      3.2,
+      0.3
+     ],
+     "status": "var"
+    },
+    {
+     "prop": "target→direction",
+     "package": [
+      0,
+      0.76,
+      0
+     ],
+     "glb": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "status": "farklı",
+     "note": "GLTFExporter keeps no target: node rotation is identity, the light points along −Z; the target is a separate empty node"
+    }
+   ],
+   "status_v4": "farklı",
+   "project": "TableScene.cs:171-173 Spot #ffffff, 9 decay 1.6 → URP intensity matched at the felt, range 7, angle 2·0.62 rad, inner = 0.3·outer"
+  },
+  {
+   "id": "lights.back",
+   "source": "lighting.json lights[3] (back)",
+   "package": {
+    "name": "back",
+    "type": "Point",
+    "color": "#FFC94A (tema glow ile değişir)",
+    "intensity": 5,
+    "distance": 7,
+    "decay": 1.4,
+    "position": [
+     0,
+     1.5,
+     -2.3
+    ]
+   },
+   "sahne_tam": {
+    "node": "sahne_tam/#104",
+    "type": "point",
+    "color_linear": [
+     0.9131,
+     0.38133,
+     0.01681
+    ],
+    "color_hex": "#F5A623",
+    "intensity": 5,
+    "range": 7,
+    "spot": null,
+    "position": [
+     0.0,
+     1.5,
+     -2.3
+    ],
+    "forward": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "color_by_theme": {
+     "jupiter": "#E58B45",
+     "mars": "#E8552E",
+     "neptun": "#2FB4E8",
+     "saturn": "#F5A623",
+     "venus": "#F28AA0"
+    }
+   },
+   "checks": [
+    {
+     "prop": "color",
+     "package": "#FFC94A (tema glow ile değişir)",
+     "glb": "#F5A623",
+     "status": "var",
+     "note": "Satürn glow (a2, G101-Masa.dc.html:885)"
+    },
+    {
+     "prop": "intensity",
+     "package": 5,
+     "glb": 5,
+     "status": "var"
+    },
+    {
+     "prop": "distance→range",
+     "package": 7,
+     "glb": 7,
+     "status": "var"
+    },
+    {
+     "prop": "decay",
+     "package": 1.4,
+     "glb": null,
+     "status": "glTF'e geçmez",
+     "note": "KHR_lights_punctual is inverse-square only"
+    },
+    {
+     "prop": "position",
+     "package": [
+      0,
+      1.5,
+      -2.3
+     ],
+     "glb": [
+      0.0,
+      1.5,
+      -2.3
+     ],
+     "status": "var"
+    }
+   ],
+   "status_v4": "var",
+   "project": "TableScene.cs:174 Point theme.A2, 5 decay 1.4 → matched at the felt, range 7, pos (0,1.5,-2.3)"
+  },
+  {
+   "id": "lights.fill",
+   "source": "lighting.json lights[4] (fill)",
+   "package": {
+    "name": "fill",
+    "type": "Point",
+    "color": "#9fb6ff",
+    "intensity": 1.6,
+    "distance": 6,
+    "decay": 1.5,
+    "position": [
+     0,
+     1.6,
+     2.2
+    ]
+   },
+   "sahne_tam": {
+    "node": "sahne_tam/#105",
+    "type": "point",
+    "color_linear": [
+     0.3467,
+     0.46778,
+     1
+    ],
+    "color_hex": "#9FB6FF",
+    "intensity": 1.6,
+    "range": 6,
+    "spot": null,
+    "position": [
+     0.0,
+     1.6,
+     2.2
+    ],
+    "forward": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "color_by_theme": {
+     "jupiter": "#9FB6FF",
+     "mars": "#9FB6FF",
+     "neptun": "#9FB6FF",
+     "saturn": "#9FB6FF",
+     "venus": "#9FB6FF"
+    }
+   },
+   "checks": [
+    {
+     "prop": "color",
+     "package": "#9fb6ff",
+     "glb": "#9FB6FF",
+     "status": "var"
+    },
+    {
+     "prop": "intensity",
+     "package": 1.6,
+     "glb": 1.6,
+     "status": "var"
+    },
+    {
+     "prop": "distance→range",
+     "package": 6,
+     "glb": 6,
+     "status": "var"
+    },
+    {
+     "prop": "decay",
+     "package": 1.5,
+     "glb": null,
+     "status": "glTF'e geçmez",
+     "note": "KHR_lights_punctual is inverse-square only"
+    },
+    {
+     "prop": "position",
+     "package": [
+      0,
+      1.6,
+      2.2
+     ],
+     "glb": [
+      0.0,
+      1.6,
+      2.2
+     ],
+     "status": "var"
+    }
+   ],
+   "status_v4": "var",
+   "project": "TableScene.cs:175 Point #9fb6ff, 1.6 decay 1.5 → matched at the felt, range 6, pos (0,1.6,2.2)"
+  },
+  {
+   "id": "lights.nukeLight",
+   "source": "lighting.json lights[5] (nukeLight)",
+   "package": {
+    "name": "nukeLight",
+    "type": "Point",
+    "color": "#FFB25A",
+    "intensity": "0 → 90·e^(−3t), 2 sn (okeyle/elden bitiş)",
+    "distance": 4.5,
+    "decay": 1.4,
+    "position": "iniş noktası + 0,3 m"
+   },
+   "sahne_tam": {
+    "node": "sahne_tam/#98",
+    "type": "point",
+    "color_linear": [
+     1,
+     0.4452,
+     0.10224
+    ],
+    "color_hex": "#FFB25A",
+    "intensity": 0,
+    "range": 4.5,
+    "spot": null,
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "forward": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "color_by_theme": {
+     "jupiter": "#FFB25A",
+     "mars": "#FFB25A",
+     "neptun": "#FFB25A",
+     "saturn": "#FFB25A",
+     "venus": "#FFB25A"
+    }
+   },
+   "checks": [
+    {
+     "prop": "color",
+     "package": "#FFB25A",
+     "glb": "#FFB25A",
+     "status": "var"
+    },
+    {
+     "prop": "intensity",
+     "package": "0 → 90·e^(−3t), 2 sn (okeyle/elden bitiş)",
+     "glb": 0,
+     "status": "var",
+     "note": "animated at runtime; exported at rest (0)"
+    },
+    {
+     "prop": "distance→range",
+     "package": 4.5,
+     "glb": 4.5,
+     "status": "var"
+    },
+    {
+     "prop": "decay",
+     "package": 1.4,
+     "glb": null,
+     "status": "glTF'e geçmez",
+     "note": "KHR_lights_punctual is inverse-square only"
+    },
+    {
+     "prop": "position",
+     "package": "iniş noktası + 0,3 m",
+     "glb": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "status": "çalışma anı",
+     "note": "dynamic; exported at its rest position"
+    }
+   ],
+   "status_v4": "var",
+   "project": "TableFx.cs:204-205 Point #FFB25A, range 4.5, 90·e^(−3t) (ThreeLocalIntensity(90,1.4,0.3)), position impact + 0.25 m"
+  },
+  {
+   "id": "lights.winSpot",
+   "source": "lighting.json lights[6] (winSpot)",
+   "package": {
+    "name": "winSpot",
+    "type": "Spot",
+    "color": "#FFE7A3",
+    "intensity": "0 → 40 (kutlama, 3,4 sn)",
+    "distance": 5,
+    "angle": 0.32,
+    "penumbra": 0.6,
+    "decay": 1.4,
+    "position": "kazananın 1,8 m üstü"
+   },
+   "sahne_tam": {
+    "node": "sahne_tam/#106",
+    "type": "spot",
+    "color_linear": [
+     1,
+     0.7991,
+     0.36625
+    ],
+    "color_hex": "#FFE7A3",
+    "intensity": 0,
+    "range": 5,
+    "spot": {
+     "innerConeAngle": 0.128,
+     "outerConeAngle": 0.32
+    },
+    "position": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "forward": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "color_by_theme": {
+     "jupiter": "#FFE7A3",
+     "mars": "#FFE7A3",
+     "neptun": "#FFE7A3",
+     "saturn": "#FFE7A3",
+     "venus": "#FFE7A3"
+    }
+   },
+   "checks": [
+    {
+     "prop": "color",
+     "package": "#FFE7A3",
+     "glb": "#FFE7A3",
+     "status": "var"
+    },
+    {
+     "prop": "intensity",
+     "package": "0 → 40 (kutlama, 3,4 sn)",
+     "glb": 0,
+     "status": "var",
+     "note": "animated at runtime; exported at rest (0)"
+    },
+    {
+     "prop": "distance→range",
+     "package": 5,
+     "glb": 5,
+     "status": "var"
+    },
+    {
+     "prop": "angle→outerConeAngle",
+     "package": 0.32,
+     "glb": 0.32,
+     "status": "var"
+    },
+    {
+     "prop": "penumbra→innerConeAngle",
+     "package": "(1−0.6)·0.32 = 0.128",
+     "glb": 0.128,
+     "status": "var"
+    },
+    {
+     "prop": "decay",
+     "package": 1.4,
+     "glb": null,
+     "status": "glTF'e geçmez",
+     "note": "KHR_lights_punctual is inverse-square only"
+    },
+    {
+     "prop": "position",
+     "package": "kazananın 1,8 m üstü",
+     "glb": [
+      0.0,
+      1.0,
+      0.0
+     ],
+     "status": "çalışma anı",
+     "note": "dynamic; exported at its rest position"
+    }
+   ],
+   "status_v4": "var",
+   "project": "TableFx.cs:66-67, 237, 290 Spot #FFE7A3, range 5, angle 2·0.32 rad, inner 0.4·outer, 1.8 m above, 40·sin(...) 3.4 s"
+  }
+ ],
+ "settings": [
+  {
+   "id": "renderer.toneMapping",
+   "source": "lighting.json renderer.toneMapping",
+   "package": "ACES Filmic",
+   "sahne_tam": null,
+   "status_v4": "glTF'e geçmez",
+   "project": "ThreeToneMappingFeature.cs:10-55 three.js ACESFilmic blit; TableScene.cs:183-189 URP Tonemapping None, Bloom 0, Vignette 0"
+  },
+  {
+   "id": "renderer.exposure",
+   "source": "lighting.json renderer.exposure",
+   "package": 1.05,
+   "sahne_tam": null,
+   "status_v4": "glTF'e geçmez",
+   "project": "ThreeToneMapping.cs:13 DesignExposure = 1.05"
+  },
+  {
+   "id": "renderer.outputColorSpace",
+   "source": "lighting.json renderer.outputColorSpace",
+   "package": "sRGB",
+   "sahne_tam": null,
+   "status_v4": "glTF'e geçmez",
+   "project": "Unity linear colour space, sRGB output (ProjectSettings)"
+  },
+  {
+   "id": "renderer.shadows",
+   "source": "lighting.json renderer.shadows",
+   "package": "PCF, 2048×2048 (ana ışık)",
+   "sahne_tam": null,
+   "status_v4": "glTF'e geçmez",
+   "project": "TableScene.cs:137 shadowDistance 4.5, 1 cascade, MSAA 4; Assets/Settings/PC_RPAsset.asset main light 2048 soft; Mobile_RPAsset.asset 1024, soft off"
+  },
+  {
+   "id": "renderer.pixelRatio",
+   "source": "lighting.json renderer.pixelRatio",
+   "package": "min(2, ölçek × cihaz)",
+   "sahne_tam": null,
+   "status_v4": "glTF'e geçmez",
+   "project": "not table-specific in Table/Scripts (render scale is a project setting)"
+  },
+  {
+   "id": "renderer.clear",
+   "source": "lighting.json renderer.clear",
+   "package": "şeffaf (arkada CSS gezegen/yıldız katmanı)",
+   "sahne_tam": null,
+   "status_v4": "glTF'e geçmez",
+   "project": "TableScene.cs BuildCamera: SolidColor theme.Bg3 (opaque); comment line 207: transparent mode for the galaxy background"
+  },
+  {
+   "id": "environment",
+   "source": "lighting.json environment",
+   "package": "Önizlemede stüdyo ortamı (PMREM, kutu + 3 ışıklı panel). Unity: Reflection Probe ya da HDRI ile eşdeğer.",
+   "sahne_tam": null,
+   "status_v4": "glTF'e geçmez",
+   "project": "ThreeEnvironment.cs:7-69 dark 12 m room #10131f + 4 panels, GGX-prefiltered reflection cube, intensity 0.75, ambient probe"
+  },
+  {
+   "id": "ambient.led",
+   "source": "lighting.json ambient.led",
+   "package": "emissive 2.2 + sin(t·1.2)·0.25",
+   "sahne_tam": null,
+   "status_v4": "glTF'e geçmez (animasyon)",
+   "project": "TableFx.cs:84 collects LED materials (StartsWith led / _led) and animates their emission"
+  },
+  {
+   "id": "ambient.holo",
+   "source": "lighting.json ambient.holo",
+   "package": "Y ekseninde 0.12 rad/sn dönüş, opaklık 0.34 + sin(t·0.9)·0.05",
+   "sahne_tam": null,
+   "status_v4": "glTF'e geçmez (animasyon)",
+   "project": "TableFx.cs:76-80 holo_halka renderer: rotation and opacity, additive blend"
+  },
+  {
+   "id": "ambient.cameraSway",
+   "source": "lighting.json ambient.cameraSway",
+   "package": "x += sin(t·0.21)·0.006, y += sin(t·0.33)·0.004",
+   "sahne_tam": null,
+   "status_v4": "glTF'e geçmez (animasyon)",
+   "project": "TableCameraRig.cs (idle sway; tween3d.json camera.idleSway)"
+  },
+  {
+   "id": "glbNote",
+   "source": "lighting.json glbNote",
+   "package": "sahne_tam.glb ışıkları KHR_lights_punctual olarak içerir; Hemisphere ve ışık azalma (decay) değerleri bu dosyadaki değerlerle kurulur.",
+   "sahne_tam": {
+    "lights": 6,
+    "extension": true
+   },
+   "status_v4": "var",
+   "project": null
+  }
+ ],
+ "sahne_tam_empty_nodes": [
+  {
+   "node": "sahne_tam/#99",
+   "world_pos": [
+    0.0,
+    1.0,
+    0.0
+   ]
+  },
+  {
+   "node": "sahne_tam/#101",
+   "world_pos": [
+    0.0,
+    0.76,
+    0.0
+   ]
+  },
+  {
+   "node": "sahne_tam/#103",
+   "world_pos": [
+    0.0,
+    0.76,
+    0.0
+   ]
+  },
+  {
+   "node": "sahne_tam/#107",
+   "world_pos": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  }
+ ]
+}

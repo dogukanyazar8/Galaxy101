@@ -104,7 +104,7 @@ namespace Galaxy101
             if (queryFocused || create != null || dialog != null) RefreshCards(); else Render();
         }
 
-        private void OnChips() { if (create != null) UpdateSummary(); else Render(); }
+        private void OnChips() => Render();
 
         private void OnRoom(TableStateMessage state)
         {

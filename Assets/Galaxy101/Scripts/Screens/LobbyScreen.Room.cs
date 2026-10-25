@@ -432,7 +432,7 @@ namespace Galaxy101
 
             string label, bg, fg, shade; bool can = false, check = false;
             if (st == "in") { label = S("bIn"); bg = "rgba(60,203,110,.16)"; fg = "#8EF0B0"; shade = "transparent"; check = true; }
-            else if (st == "pend") { label = S("bPend", Mathf.Max(0, Mathf.FloorToInt(left))); bg = "var(--pnH)"; fg = "#F4F1E8"; shade = "var(--pnS)"; can = true; }
+            else if (st == "pend") { label = S("bPend", Mathf.Max(0, Mathf.CeilToInt(left))); bg = "var(--pnH)"; fg = "#F4F1E8"; shade = "var(--pnS)"; can = true; }
             else if (st == "no") { label = S("bNo"); bg = "rgba(255,94,108,.14)"; fg = "#FF9AA3"; shade = "transparent"; }
             else if (st == "game") { label = S("bGame"); bg = "var(--dp)"; fg = "var(--mt)"; shade = "rgba(0,0,0,.25)"; }
             else if (st == "off") { label = S("bOff"); bg = "var(--dp)"; fg = "var(--mt)"; shade = "rgba(0,0,0,.25)"; }
@@ -452,9 +452,10 @@ namespace Galaxy101
                 Animate(() =>
                 {
                     float remaining = InviteSeconds - (Time.realtimeSinceStartup - s.At);
-                    bar.style.width = Length.Percent(Mathf.Clamp01(Mathf.Ceil(Mathf.Max(0, remaining)) / InviteSeconds) * 100);
+                    // left = 30 − whole seconds gone; the bar eases to each new value over 1 s (transition: width 1s linear).
+                    bar.style.width = Length.Percent(Mathf.Clamp01((remaining + 1) / InviteSeconds) * 100);
                     if (remaining <= 0 && s.State == "pend") { s.State = "exp"; Flash(S("invExp", who), "info"); Render(); return; }
-                    text.text = S("bPend", Mathf.Max(0, Mathf.FloorToInt(remaining)));
+                    text.text = S("bPend", Mathf.Max(0, Mathf.CeilToInt(remaining)));
                 }, button);
             }
             else

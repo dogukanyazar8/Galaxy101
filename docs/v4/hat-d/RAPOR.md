@@ -23,7 +23,7 @@ Fark matrisi: `docs/v4/matris/hat-d.md` (627 satır + 40 farklı metin eki). Tü
 | Commit | İçerik |
 |---|---|
 | `b400721` | Dönüştürücü (`scripts/import-v4-data.py`), güncellenen `scripts/import-galaxy-ui-assets.py`, matris üreticisi (`tools/v4/hat_d_matrix.py`) ve bütün `Res/` çıktıları (885 dosya, `.meta`'larla) |
-| bu raporu içeren commit | Koşullu metin düzeltmesi (`gave`/`gaveAll` masa tablosunda eski metinde), matris, RAPOR, EKSIKLER, `strings_compare.csv` (kimlik: `git log v4/data`) |
+| `338531f` | Koşullu metin düzeltmesi (`gave`/`gaveAll` masa tablosunda eski metinde), matris, RAPOR, EKSIKLER, `strings_compare.csv` |
 
 ## 3. Çıktılar ve istemcinin okuma şekli
 

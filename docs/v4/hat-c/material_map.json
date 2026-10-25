@@ -8,8 +8,8 @@
    "eksik": 12
   },
   "project": {
-   "var": 25,
-   "farklı": 5,
+   "var": 26,
+   "farklı": 4,
    "eksik": 16
   },
   "glb_names_not_in_package": 94,
@@ -2730,10 +2730,8 @@
        1
       ],
       "glb_distinct": 1,
-      "status": "farklı",
-      "differs_in": [
-       "galaxy101_masa_hologram_saturn.glb"
-      ]
+      "status": "güç renge katlanmış",
+      "differs_in": []
      },
      {
       "prop": "envMapIntensity",
@@ -2742,7 +2740,7 @@
       "status": "glTF'e geçmez"
      }
     ],
-    "status": "farklı"
+    "status": "var"
    }
   },
   {

@@ -15,3 +15,4 @@ python tools/blender/gltf_compare.py "$OUT/glb_inventory.json" "$OUT/glb_invento
 python tools/blender/material_light_map.py "$OUT/glb_inventory.json" "$OUT/glb_inventory_proje.json" "$PKG" "$OUT"
 uv run --with numpy python tools/blender/unity_contract_check.py "$OUT/glb_inventory.json" "$NEW" "$OUT/unity_contract.json"
 python tools/blender/place_v4_models.py "$NEW" . "$OUT/placement.json"
+python tools/blender/hat_c_matrix.py "$OUT" docs/v4/matris/hat-c.md

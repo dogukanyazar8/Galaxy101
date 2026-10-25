@@ -282,7 +282,8 @@ def check_material(entry, occurrences, tok):
                 st = "tema"
             elif prop in ("metalness", "roughness") and "metallicRoughnessTexture" in pbr and close(got, 1):
                 st = "doku (cila: MR haritası × 1)"
-            elif prop in ("emissive", "emissiveIntensity") and emissive_product_matches(m, entry["props"], overs if prop == "emissive" else []):
+            elif prop in ("emissive", "emissiveIntensity") and emissive_product_matches(
+                    m, entry["props"], theme_override(m.get("name"), "emissive", theme, table_skin_of(f), tok)):
                 st = "güç renge katlanmış"
             elif prop == "opacity" and f["kind"] == "scene":
                 st = "çalışma anı (sahne_tam canlı sahne kopyası)"  # e.g. table3d.js:986 zone idle opacity 0.16
@@ -307,13 +308,14 @@ def check_material(entry, occurrences, tok):
 
 def emissive_product_matches(m, props, overs):
     """Blender's exporter folds emissiveStrength into emissiveFactor: compare emissive × intensity."""
-    em = props.get("emissive")
-    if not isinstance(em, str):
+    overs = overs if isinstance(overs, list) else [overs] if overs else []
+    cands = [c for c in [props.get("emissive")] + overs if isinstance(c, str)]
+    if not cands:
         return False
     inten = props.get("emissiveIntensity", 1)
     inten = inten if isinstance(inten, (int, float)) else 1
     got = [x * g_ext(m, "KHR_materials_emissive_strength", "emissiveStrength", 1) for x in m.get("emissiveFactor", [0, 0, 0])]
-    for c in [em] + [o for o in overs if isinstance(o, str)]:
+    for c in cands:
         want = [x * inten for x in hex_to_linear(c)]
         if close(got, want):
             return True
@@ -422,13 +424,13 @@ def light_map(new_by_file, lighting, tok):
         return None
 
     project = {
-        "hemi": "TableScene.cs:157 ThreeEnvironment.Apply(..., theme.Sky, #0a0a14, 0.45): custom ambient probe (environment ×0.75 + hemisphere), not Gradient",
-        "key": "TableScene.cs:167-170 Directional #fff4e2, 1.7×(1/π), pos (1.1,4.2,2.0) → target (0,TY,0); Soft shadows, VeryHigh, bias 1.0 / normal 0.8 (URP texel units)",
-        "spot": "TableScene.cs:171-173 Spot #ffffff, 9 decay 1.6 → URP intensity matched at the felt, range 7, angle 2·0.62 rad, inner = 0.3·outer",
-        "back": "TableScene.cs:174 Point theme.A2, 5 decay 1.4 → matched at the felt, range 7, pos (0,1.5,-2.3)",
-        "fill": "TableScene.cs:175 Point #9fb6ff, 1.6 decay 1.5 → matched at the felt, range 6, pos (0,1.6,2.2)",
-        "nukeLight": "TableFx.cs:204-205 Point #FFB25A, range 4.5, 90·e^(−3t) (ThreeLocalIntensity(90,1.4,0.3)), position impact + 0.25 m",
-        "winSpot": "TableFx.cs:66-67, 237, 290 Spot #FFE7A3, range 5, angle 2·0.32 rad, inner 0.4·outer, 1.8 m above, 40·sin(...) 3.4 s",
+        "hemi": "TableScene.cs:157 ThreeEnvironment.Apply(..., theme.Sky, #0a0a14, 0.45): özel ambient probe (ortam ×0.75 + yarıküre), Gradient değil",
+        "key": "TableScene.cs:167-170 Directional #fff4e2, 1.7×(1/π), konum (1.1,4.2,2.0) → hedef (0,TY,0); yumuşak gölge, VeryHigh, bias 1.0 / normal 0.8 (URP texel birimi)",
+        "spot": "TableScene.cs:171-173 Spot #ffffff, 9 decay 1.6 → URP şiddeti çuhada eşlenir, menzil 7, açı 2·0.62 rad, iç = 0.3·dış",
+        "back": "TableScene.cs:174 Point theme.A2, 5 decay 1.4 → çuhada eşlenir, menzil 7, konum (0,1.5,-2.3)",
+        "fill": "TableScene.cs:175 Point #9fb6ff, 1.6 decay 1.5 → çuhada eşlenir, menzil 6, konum (0,1.6,2.2)",
+        "nukeLight": "TableFx.cs:204-205 Point #FFB25A, menzil 4.5, 90·e^(−3t) (ThreeLocalIntensity(90,1.4,0.3)), konum iniş + 0.25 m",
+        "winSpot": "TableFx.cs:66-67, 237, 290 Spot #FFE7A3, menzil 5, açı 2·0.32 rad, iç 0.4·dış, 1.8 m yukarıda, 40·sin(...) 3.4 sn",
     }
     rows = []
     for L in lighting["lights"]:
@@ -462,11 +464,11 @@ def light_map(new_by_file, lighting, tok):
             if hexcol:
                 base_ok = close(g["color"], hex_to_linear(hexcol.group(0)))
                 theme_ok = name == "back" and glb["color_hex"].upper() == tok["saturn"]["glow"].upper()
-                add("color", col, glb["color_hex"], base_ok or theme_ok, "Satürn glow (a2, G101-Masa.dc.html:885)" if theme_ok and not base_ok else "")
+                add("color", col, glb["color_hex"], base_ok or theme_ok, "Satürn glow (= a2, G101-Masa.dc.html:885)" if theme_ok and not base_ok else "")
             if isinstance(L.get("intensity"), (int, float)):
                 add("intensity", L["intensity"], g["intensity"], abs(L["intensity"] - g["intensity"]) < 1e-6)
             else:
-                add("intensity", L.get("intensity"), g["intensity"], g["intensity"] == 0, "animated at runtime; exported at rest (0)")
+                add("intensity", L.get("intensity"), g["intensity"], g["intensity"] == 0, "çalışma anında canlanır; dışa aktarımda dinlenme değeri (0)")
             if "distance" in L:
                 add("distance→range", L["distance"], g.get("range"), abs(L["distance"] - (g.get("range") or 0)) < 1e-6)
             if "angle" in L:
@@ -474,17 +476,17 @@ def light_map(new_by_file, lighting, tok):
                 inner = (1 - L["penumbra"]) * L["angle"]
                 add("penumbra→innerConeAngle", f"(1−{L['penumbra']})·{L['angle']} = {round(inner, 4)}", g["spot"]["innerConeAngle"], abs(inner - g["spot"]["innerConeAngle"]) < 1e-3)
             if "decay" in L:
-                checks.append({"prop": "decay", "package": L["decay"], "glb": None, "status": "glTF'e geçmez", "note": "KHR_lights_punctual is inverse-square only"})
+                checks.append({"prop": "decay", "package": L["decay"], "glb": None, "status": "glTF'e geçmez", "note": "KHR_lights_punctual yalnız ters kare azalma tanır"})
             if pos:
                 add("position", pos, g["world_pos"], max(abs(a - b) for a, b in zip(pos, g["world_pos"])) < 1e-4)
             elif "position" in L:
-                checks.append({"prop": "position", "package": L["position"], "glb": g["world_pos"], "status": "çalışma anı", "note": "dynamic; exported at its rest position"})
+                checks.append({"prop": "position", "package": L["position"], "glb": g["world_pos"], "status": "çalışma anı", "note": "dinamik; dinlenme konumunda dışa aktarılmış"})
             if "target" in L:
                 want = [L["target"][i] - (pos or g["world_pos"])[i] for i in range(3)]
                 n = math.sqrt(sum(x * x for x in want)) or 1
                 want = [x / n for x in want]
                 add("target→direction", L["target"], [round(x, 4) for x in g["forward"]], close([round(x, 3) for x in g["forward"]], [round(x, 3) for x in want]),
-                    "GLTFExporter keeps no target: node rotation is identity, the light points along −Z; the target is a separate empty node")
+                    "GLTFExporter hedefi taşımaz: düğüm dönüşü birim, ışık −Z yönüne bakar; hedef ayrı boş düğüm")
             if "shadow" in L:
                 checks.append({"prop": "shadow", "package": L["shadow"], "glb": None, "status": "glTF'e geçmez"})
         status = "pakette (GLB'ye aktarılamaz)" if L["type"] == "Hemisphere" else ("farklı" if any(c["status"] == "farklı" for c in checks) else "var") if g else "eksik"
@@ -492,16 +494,16 @@ def light_map(new_by_file, lighting, tok):
                      "sahne_tam": glb, "checks": checks, "status_v4": status, "project": project.get(name)})
     # renderer / environment / ambient
     project_settings = {
-        "renderer.toneMapping": "ThreeToneMappingFeature.cs:10-55 three.js ACESFilmic blit; TableScene.cs:183-189 URP Tonemapping None, Bloom 0, Vignette 0",
+        "renderer.toneMapping": "ThreeToneMappingFeature.cs:10-55 three.js ACESFilmic geçişi; TableScene.cs:183-189 URP Tonemapping None, Bloom 0, Vignette 0",
         "renderer.exposure": "ThreeToneMapping.cs:13 DesignExposure = 1.05",
-        "renderer.outputColorSpace": "Unity linear colour space, sRGB output (ProjectSettings)",
-        "renderer.shadows": "TableScene.cs:137 shadowDistance 4.5, 1 cascade, MSAA 4; Assets/Settings/PC_RPAsset.asset main light 2048 soft; Mobile_RPAsset.asset 1024, soft off",
-        "renderer.pixelRatio": "not table-specific in Table/Scripts (render scale is a project setting)",
-        "renderer.clear": "TableScene.cs BuildCamera: SolidColor theme.Bg3 (opaque); comment line 207: transparent mode for the galaxy background",
-        "environment": "ThreeEnvironment.cs:7-69 dark 12 m room #10131f + 4 panels, GGX-prefiltered reflection cube, intensity 0.75, ambient probe",
-        "ambient.led": "TableFx.cs:84 collects LED materials (StartsWith led / _led) and animates their emission",
-        "ambient.holo": "TableFx.cs:76-80 holo_halka renderer: rotation and opacity, additive blend",
-        "ambient.cameraSway": "TableCameraRig.cs (idle sway; tween3d.json camera.idleSway)",
+        "renderer.outputColorSpace": "Unity doğrusal renk uzayı, sRGB çıkış (ProjectSettings)",
+        "renderer.shadows": "TableScene.cs:137 shadowDistance 4.5, 1 cascade, MSAA 4; Assets/Settings/PC_RPAsset.asset ana ışık 2048 yumuşak; Mobile_RPAsset.asset 1024, yumuşak kapalı",
+        "renderer.pixelRatio": "Table/Scripts içinde masaya özel değil (render ölçeği proje ayarı)",
+        "renderer.clear": "TableScene.cs BuildCamera: SolidColor theme.Bg3 (opak); satır 207: galaksi arka planı için şeffaf mod",
+        "environment": "ThreeEnvironment.cs:7-69 koyu 12 m oda #10131f + 4 panel, GGX ön-süzgeçli yansıma küpü, yoğunluk 0.75, ambient probe",
+        "ambient.led": "TableFx.cs:84 LED malzemelerini (led* / *_led*) toplar, emisyonu canlandırır",
+        "ambient.holo": "TableFx.cs:76-80 holo_halka: dönüş ve opaklık, additive karışım",
+        "ambient.cameraSway": "TableCameraRig.cs (boşta salınım; tween3d.json camera.idleSway)",
     }
     settings = []
     for k, v in lighting["renderer"].items():

@@ -15,7 +15,7 @@
    "sahne_tam": null,
    "checks": [],
    "status_v4": "pakette (GLB'ye aktarılamaz)",
-   "project": "TableScene.cs:157 ThreeEnvironment.Apply(..., theme.Sky, #0a0a14, 0.45): custom ambient probe (environment ×0.75 + hemisphere), not Gradient"
+   "project": "TableScene.cs:157 ThreeEnvironment.Apply(..., theme.Sky, #0a0a14, 0.45): özel ambient probe (ortam ×0.75 + yarıküre), Gradient değil"
   },
   {
    "id": "lights.key",
@@ -118,7 +118,7 @@
       -1.0
      ],
      "status": "farklı",
-     "note": "GLTFExporter keeps no target: node rotation is identity, the light points along −Z; the target is a separate empty node"
+     "note": "GLTFExporter hedefi taşımaz: düğüm dönüşü birim, ışık −Z yönüne bakar; hedef ayrı boş düğüm"
     },
     {
      "prop": "shadow",
@@ -139,7 +139,7 @@
     }
    ],
    "status_v4": "farklı",
-   "project": "TableScene.cs:167-170 Directional #fff4e2, 1.7×(1/π), pos (1.1,4.2,2.0) → target (0,TY,0); Soft shadows, VeryHigh, bias 1.0 / normal 0.8 (URP texel units)"
+   "project": "TableScene.cs:167-170 Directional #fff4e2, 1.7×(1/π), konum (1.1,4.2,2.0) → hedef (0,TY,0); yumuşak gölge, VeryHigh, bias 1.0 / normal 0.8 (URP texel birimi)"
   },
   {
    "id": "lights.spot",
@@ -233,7 +233,7 @@
      "package": 1.6,
      "glb": null,
      "status": "glTF'e geçmez",
-     "note": "KHR_lights_punctual is inverse-square only"
+     "note": "KHR_lights_punctual yalnız ters kare azalma tanır"
     },
     {
      "prop": "position",
@@ -262,11 +262,11 @@
       -1.0
      ],
      "status": "farklı",
-     "note": "GLTFExporter keeps no target: node rotation is identity, the light points along −Z; the target is a separate empty node"
+     "note": "GLTFExporter hedefi taşımaz: düğüm dönüşü birim, ışık −Z yönüne bakar; hedef ayrı boş düğüm"
     }
    ],
    "status_v4": "farklı",
-   "project": "TableScene.cs:171-173 Spot #ffffff, 9 decay 1.6 → URP intensity matched at the felt, range 7, angle 2·0.62 rad, inner = 0.3·outer"
+   "project": "TableScene.cs:171-173 Spot #ffffff, 9 decay 1.6 → URP şiddeti çuhada eşlenir, menzil 7, açı 2·0.62 rad, iç = 0.3·dış"
   },
   {
    "id": "lights.back",
@@ -320,7 +320,7 @@
      "package": "#FFC94A (tema glow ile değişir)",
      "glb": "#F5A623",
      "status": "var",
-     "note": "Satürn glow (a2, G101-Masa.dc.html:885)"
+     "note": "Satürn glow (= a2, G101-Masa.dc.html:885)"
     },
     {
      "prop": "intensity",
@@ -339,7 +339,7 @@
      "package": 1.4,
      "glb": null,
      "status": "glTF'e geçmez",
-     "note": "KHR_lights_punctual is inverse-square only"
+     "note": "KHR_lights_punctual yalnız ters kare azalma tanır"
     },
     {
      "prop": "position",
@@ -357,7 +357,7 @@
     }
    ],
    "status_v4": "var",
-   "project": "TableScene.cs:174 Point theme.A2, 5 decay 1.4 → matched at the felt, range 7, pos (0,1.5,-2.3)"
+   "project": "TableScene.cs:174 Point theme.A2, 5 decay 1.4 → çuhada eşlenir, menzil 7, konum (0,1.5,-2.3)"
   },
   {
    "id": "lights.fill",
@@ -429,7 +429,7 @@
      "package": 1.5,
      "glb": null,
      "status": "glTF'e geçmez",
-     "note": "KHR_lights_punctual is inverse-square only"
+     "note": "KHR_lights_punctual yalnız ters kare azalma tanır"
     },
     {
      "prop": "position",
@@ -447,7 +447,7 @@
     }
    ],
    "status_v4": "var",
-   "project": "TableScene.cs:175 Point #9fb6ff, 1.6 decay 1.5 → matched at the felt, range 6, pos (0,1.6,2.2)"
+   "project": "TableScene.cs:175 Point #9fb6ff, 1.6 decay 1.5 → çuhada eşlenir, menzil 6, konum (0,1.6,2.2)"
   },
   {
    "id": "lights.nukeLight",
@@ -503,7 +503,7 @@
      "package": "0 → 90·e^(−3t), 2 sn (okeyle/elden bitiş)",
      "glb": 0,
      "status": "var",
-     "note": "animated at runtime; exported at rest (0)"
+     "note": "çalışma anında canlanır; dışa aktarımda dinlenme değeri (0)"
     },
     {
      "prop": "distance→range",
@@ -516,7 +516,7 @@
      "package": 1.4,
      "glb": null,
      "status": "glTF'e geçmez",
-     "note": "KHR_lights_punctual is inverse-square only"
+     "note": "KHR_lights_punctual yalnız ters kare azalma tanır"
     },
     {
      "prop": "position",
@@ -527,11 +527,11 @@
       0.0
      ],
      "status": "çalışma anı",
-     "note": "dynamic; exported at its rest position"
+     "note": "dinamik; dinlenme konumunda dışa aktarılmış"
     }
    ],
    "status_v4": "var",
-   "project": "TableFx.cs:204-205 Point #FFB25A, range 4.5, 90·e^(−3t) (ThreeLocalIntensity(90,1.4,0.3)), position impact + 0.25 m"
+   "project": "TableFx.cs:204-205 Point #FFB25A, menzil 4.5, 90·e^(−3t) (ThreeLocalIntensity(90,1.4,0.3)), konum iniş + 0.25 m"
   },
   {
    "id": "lights.winSpot",
@@ -592,7 +592,7 @@
      "package": "0 → 40 (kutlama, 3,4 sn)",
      "glb": 0,
      "status": "var",
-     "note": "animated at runtime; exported at rest (0)"
+     "note": "çalışma anında canlanır; dışa aktarımda dinlenme değeri (0)"
     },
     {
      "prop": "distance→range",
@@ -617,7 +617,7 @@
      "package": 1.4,
      "glb": null,
      "status": "glTF'e geçmez",
-     "note": "KHR_lights_punctual is inverse-square only"
+     "note": "KHR_lights_punctual yalnız ters kare azalma tanır"
     },
     {
      "prop": "position",
@@ -628,11 +628,11 @@
       0.0
      ],
      "status": "çalışma anı",
-     "note": "dynamic; exported at its rest position"
+     "note": "dinamik; dinlenme konumunda dışa aktarılmış"
     }
    ],
    "status_v4": "var",
-   "project": "TableFx.cs:66-67, 237, 290 Spot #FFE7A3, range 5, angle 2·0.32 rad, inner 0.4·outer, 1.8 m above, 40·sin(...) 3.4 s"
+   "project": "TableFx.cs:66-67, 237, 290 Spot #FFE7A3, menzil 5, açı 2·0.32 rad, iç 0.4·dış, 1.8 m yukarıda, 40·sin(...) 3.4 sn"
   }
  ],
  "settings": [
@@ -642,7 +642,7 @@
    "package": "ACES Filmic",
    "sahne_tam": null,
    "status_v4": "glTF'e geçmez",
-   "project": "ThreeToneMappingFeature.cs:10-55 three.js ACESFilmic blit; TableScene.cs:183-189 URP Tonemapping None, Bloom 0, Vignette 0"
+   "project": "ThreeToneMappingFeature.cs:10-55 three.js ACESFilmic geçişi; TableScene.cs:183-189 URP Tonemapping None, Bloom 0, Vignette 0"
   },
   {
    "id": "renderer.exposure",
@@ -658,7 +658,7 @@
    "package": "sRGB",
    "sahne_tam": null,
    "status_v4": "glTF'e geçmez",
-   "project": "Unity linear colour space, sRGB output (ProjectSettings)"
+   "project": "Unity doğrusal renk uzayı, sRGB çıkış (ProjectSettings)"
   },
   {
    "id": "renderer.shadows",
@@ -666,7 +666,7 @@
    "package": "PCF, 2048×2048 (ana ışık)",
    "sahne_tam": null,
    "status_v4": "glTF'e geçmez",
-   "project": "TableScene.cs:137 shadowDistance 4.5, 1 cascade, MSAA 4; Assets/Settings/PC_RPAsset.asset main light 2048 soft; Mobile_RPAsset.asset 1024, soft off"
+   "project": "TableScene.cs:137 shadowDistance 4.5, 1 cascade, MSAA 4; Assets/Settings/PC_RPAsset.asset ana ışık 2048 yumuşak; Mobile_RPAsset.asset 1024, yumuşak kapalı"
   },
   {
    "id": "renderer.pixelRatio",
@@ -674,7 +674,7 @@
    "package": "min(2, ölçek × cihaz)",
    "sahne_tam": null,
    "status_v4": "glTF'e geçmez",
-   "project": "not table-specific in Table/Scripts (render scale is a project setting)"
+   "project": "Table/Scripts içinde masaya özel değil (render ölçeği proje ayarı)"
   },
   {
    "id": "renderer.clear",
@@ -682,7 +682,7 @@
    "package": "şeffaf (arkada CSS gezegen/yıldız katmanı)",
    "sahne_tam": null,
    "status_v4": "glTF'e geçmez",
-   "project": "TableScene.cs BuildCamera: SolidColor theme.Bg3 (opaque); comment line 207: transparent mode for the galaxy background"
+   "project": "TableScene.cs BuildCamera: SolidColor theme.Bg3 (opak); satır 207: galaksi arka planı için şeffaf mod"
   },
   {
    "id": "environment",
@@ -690,7 +690,7 @@
    "package": "Önizlemede stüdyo ortamı (PMREM, kutu + 3 ışıklı panel). Unity: Reflection Probe ya da HDRI ile eşdeğer.",
    "sahne_tam": null,
    "status_v4": "glTF'e geçmez",
-   "project": "ThreeEnvironment.cs:7-69 dark 12 m room #10131f + 4 panels, GGX-prefiltered reflection cube, intensity 0.75, ambient probe"
+   "project": "ThreeEnvironment.cs:7-69 koyu 12 m oda #10131f + 4 panel, GGX ön-süzgeçli yansıma küpü, yoğunluk 0.75, ambient probe"
   },
   {
    "id": "ambient.led",
@@ -698,7 +698,7 @@
    "package": "emissive 2.2 + sin(t·1.2)·0.25",
    "sahne_tam": null,
    "status_v4": "glTF'e geçmez (animasyon)",
-   "project": "TableFx.cs:84 collects LED materials (StartsWith led / _led) and animates their emission"
+   "project": "TableFx.cs:84 LED malzemelerini (led* / *_led*) toplar, emisyonu canlandırır"
   },
   {
    "id": "ambient.holo",
@@ -706,7 +706,7 @@
    "package": "Y ekseninde 0.12 rad/sn dönüş, opaklık 0.34 + sin(t·0.9)·0.05",
    "sahne_tam": null,
    "status_v4": "glTF'e geçmez (animasyon)",
-   "project": "TableFx.cs:76-80 holo_halka renderer: rotation and opacity, additive blend"
+   "project": "TableFx.cs:76-80 holo_halka: dönüş ve opaklık, additive karışım"
   },
   {
    "id": "ambient.cameraSway",
@@ -714,7 +714,7 @@
    "package": "x += sin(t·0.21)·0.006, y += sin(t·0.33)·0.004",
    "sahne_tam": null,
    "status_v4": "glTF'e geçmez (animasyon)",
-   "project": "TableCameraRig.cs (idle sway; tween3d.json camera.idleSway)"
+   "project": "TableCameraRig.cs (boşta salınım; tween3d.json camera.idleSway)"
   },
   {
    "id": "glbNote",

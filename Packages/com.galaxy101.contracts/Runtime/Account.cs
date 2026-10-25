@@ -47,6 +47,10 @@ namespace Galaxy101.Contracts
     {
         public string Code { get; set; }
         public string Message { get; set; }
+        /// <summary>The v4 protocol's error code for the same failure (<see cref="V4Errors"/>), when the package has one.</summary>
+        public string Error { get; set; }
+        /// <summary>The v4 protocol's error detail (e.g. <c>{ missing }</c>).</summary>
+        public object Detail { get; set; }
     }
 
     public sealed class GuestLoginRequest
@@ -100,6 +104,9 @@ namespace Galaxy101.Contracts
         public string Message { get; set; }
         public int RemainingAttempts { get; set; }
         public int RetryAfter { get; set; }
+        /// <summary>v4: E_ACCOUNT_UNKNOWN, E_PASS_WRONG (detail.left) or E_ACCOUNT_LOCKED (detail.until, Unix ms).</summary>
+        public string Error { get; set; }
+        public object Detail { get; set; }
     }
 
     /// <summary><c>provider</c>: "google" or "apple"; the id token comes from the platform sign-in SDK.</summary>

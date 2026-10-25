@@ -1,0 +1,180 @@
+{
+ "version": "0.4.0",
+ "source": "pkg/assets/cursors.json (g101-cursor.js (canlı üretici))",
+ "size": 32,
+ "names": [
+  "default",
+  "pointer",
+  "grab",
+  "grabbing",
+  "drop",
+  "text",
+  "no",
+  "wait",
+  "progress",
+  "ew",
+  "ns"
+ ],
+ "rules": [
+  "Öğenin data-cursor özniteliği > input/textarea (text; pasifse no) > inline cursor stili > varsayılan",
+  "data-cursor-lock (ör. meşgulken wait) alt öğeleri ezer",
+  "Sürüklenen taş: grab → grabbing; bırakılabilir alan üstünde drop"
+ ],
+ "cursors": {
+  "default": {
+   "svg": "Galaxy101/Cursors/svg/default",
+   "size": 32,
+   "hotspot": [
+    4,
+    3
+   ],
+   "png": "Galaxy101/Cursors/default",
+   "png2x": "Galaxy101/Cursors/default@2x",
+   "hotspot2x": [
+    8,
+    6
+   ]
+  },
+  "pointer": {
+   "svg": "Galaxy101/Cursors/svg/pointer",
+   "size": 32,
+   "hotspot": [
+    4,
+    3
+   ],
+   "png": "Galaxy101/Cursors/pointer",
+   "png2x": "Galaxy101/Cursors/pointer@2x",
+   "hotspot2x": [
+    8,
+    6
+   ]
+  },
+  "grab": {
+   "svg": "Galaxy101/Cursors/svg/grab",
+   "size": 32,
+   "hotspot": [
+    16,
+    15
+   ],
+   "png": "Galaxy101/Cursors/grab",
+   "png2x": "Galaxy101/Cursors/grab@2x",
+   "hotspot2x": [
+    32,
+    30
+   ]
+  },
+  "grabbing": {
+   "svg": "Galaxy101/Cursors/svg/grabbing",
+   "size": 32,
+   "hotspot": [
+    16,
+    16
+   ],
+   "png": "Galaxy101/Cursors/grabbing",
+   "png2x": "Galaxy101/Cursors/grabbing@2x",
+   "hotspot2x": [
+    32,
+    32
+   ]
+  },
+  "drop": {
+   "svg": "Galaxy101/Cursors/svg/drop",
+   "size": 32,
+   "hotspot": [
+    16,
+    16
+   ],
+   "png": "Galaxy101/Cursors/drop",
+   "png2x": "Galaxy101/Cursors/drop@2x",
+   "hotspot2x": [
+    32,
+    32
+   ]
+  },
+  "text": {
+   "svg": "Galaxy101/Cursors/svg/text",
+   "size": 32,
+   "hotspot": [
+    16,
+    16
+   ],
+   "png": "Galaxy101/Cursors/text",
+   "png2x": "Galaxy101/Cursors/text@2x",
+   "hotspot2x": [
+    32,
+    32
+   ]
+  },
+  "no": {
+   "svg": "Galaxy101/Cursors/svg/no",
+   "size": 32,
+   "hotspot": [
+    4,
+    3
+   ],
+   "png": "Galaxy101/Cursors/no",
+   "png2x": "Galaxy101/Cursors/no@2x",
+   "hotspot2x": [
+    8,
+    6
+   ]
+  },
+  "wait": {
+   "svg": "Galaxy101/Cursors/svg/wait",
+   "size": 32,
+   "hotspot": [
+    16,
+    16
+   ],
+   "png": "Galaxy101/Cursors/wait",
+   "png2x": "Galaxy101/Cursors/wait@2x",
+   "hotspot2x": [
+    32,
+    32
+   ]
+  },
+  "progress": {
+   "svg": "Galaxy101/Cursors/svg/progress",
+   "size": 32,
+   "hotspot": [
+    4,
+    3
+   ],
+   "png": "Galaxy101/Cursors/progress",
+   "png2x": "Galaxy101/Cursors/progress@2x",
+   "hotspot2x": [
+    8,
+    6
+   ]
+  },
+  "ew": {
+   "svg": "Galaxy101/Cursors/svg/ew",
+   "size": 32,
+   "hotspot": [
+    16,
+    16
+   ],
+   "png": "Galaxy101/Cursors/ew",
+   "png2x": "Galaxy101/Cursors/ew@2x",
+   "hotspot2x": [
+    32,
+    32
+   ]
+  },
+  "ns": {
+   "svg": "Galaxy101/Cursors/svg/ns",
+   "size": 32,
+   "hotspot": [
+    16,
+    16
+   ],
+   "png": "Galaxy101/Cursors/ns",
+   "png2x": "Galaxy101/Cursors/ns@2x",
+   "hotspot2x": [
+    32,
+    32
+   ]
+  }
+ },
+ "unity": "Cursor.SetCursor(Resources.Load<Texture2D>(png), new Vector2(hotspot[0], hotspot[1]), CursorMode.Auto); hotspot sol üstten piksel (CSS cursor: url() x y ile aynı)."
+}

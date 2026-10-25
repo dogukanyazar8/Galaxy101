@@ -1,0 +1,3581 @@
+{
+ "version": "0.4.0",
+ "page": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+ "url": "Galaxy 101 - Gerçek Ana Oyun.dc.html?state={id}&theme=saturn&lang=tr&seed=42&ft={ms}",
+ "params": {
+  "state": "durum kimliği",
+  "theme": "saturn|mars|neptun|jupiter|venus",
+  "lang": "tr|en",
+  "seed": "tamsayı (varsayılan 42)",
+  "dump": "1 → data-g101-id yerleşim dökümü JSON indirilir",
+  "nodl": "1 → indirme yok, window.G101Dump + postMessage",
+  "ft": "durum yoluna varıldıktan sonra donma anı, ms (varsayılan: hold) (host kendi ?t belirtecini kullandığı için ft)"
+ },
+ "note": "path adımlarını g101-state.js yorumlar. removed:true olanlar kaldırılan durumlardır (REMOVED.md). holdApprox: animasyon anı yaklaşık; ft ile ince ayar.",
+ "states": [
+  {
+   "id": "01",
+   "group": "menu",
+   "title": "Ana menü, Satürn, Tekli seçili",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "sel": 0
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "02",
+   "group": "menu",
+   "title": "Ana menü · tema mars",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "sel": 0
+     }
+    }
+   ],
+   "hold": 700,
+   "theme": "mars"
+  },
+  {
+   "id": "03",
+   "group": "menu",
+   "title": "Ana menü · tema neptun",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "sel": 0
+     }
+    }
+   ],
+   "hold": 700,
+   "theme": "neptun"
+  },
+  {
+   "id": "04",
+   "group": "menu",
+   "title": "Ana menü · tema jupiter",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "sel": 0
+     }
+    }
+   ],
+   "hold": 700,
+   "theme": "jupiter"
+  },
+  {
+   "id": "05",
+   "group": "menu",
+   "title": "Ana menü · tema venus",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "sel": 0
+     }
+    }
+   ],
+   "hold": 700,
+   "theme": "venus"
+  },
+  {
+   "id": "06",
+   "group": "menu",
+   "title": "Eşli modu seçili",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "sel": 1
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "10",
+   "group": "menu",
+   "title": "Ayarlar → Oyun",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "settingsOpen": true,
+      "setTab": 0
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "11",
+   "group": "menu",
+   "title": "Ayarlar → Ses",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "settingsOpen": true,
+      "setTab": 1
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "12",
+   "group": "menu",
+   "title": "Ayarlar → Görüntü",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "settingsOpen": true,
+      "setTab": 2
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "13",
+   "group": "menu",
+   "title": "Ayarlar → Dil",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "settingsOpen": true,
+      "setTab": 3
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "14",
+   "group": "menu",
+   "title": "Ayarlar → Hesap",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "settingsOpen": true,
+      "setTab": 4
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "15",
+   "group": "menu",
+   "title": "Profili düzenle",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "settingsOpen": true,
+      "setTab": 4,
+      "dlg": "profile"
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "16",
+   "group": "menu",
+   "title": "Profili düzenle · Altın çerçeve seçili",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "settingsOpen": true,
+      "setTab": 4,
+      "dlg": "profile"
+     }
+    },
+    {
+     "click": "menu.o.pick[3]"
+    }
+   ],
+   "auto": true,
+   "hold": 700
+  },
+  {
+   "id": "17",
+   "group": "menu",
+   "title": "Profili düzenle · geçersiz ad",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "settingsOpen": true,
+      "setTab": 4,
+      "dlg": "profile"
+     }
+    },
+    {
+     "type": "menu.pf.onName",
+     "text": "A"
+    }
+   ],
+   "auto": true,
+   "hold": 700
+  },
+  {
+   "id": "18",
+   "group": "menu",
+   "title": "Ayarlar → Hesap · kaydedildi (altın çerçeve)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "settingsOpen": true,
+      "setTab": 4,
+      "dlg": "profile"
+     }
+    },
+    {
+     "click": "menu.o.pick[3]"
+    },
+    {
+     "click": "menu.pf.save"
+    }
+   ],
+   "auto": true,
+   "hold": 900
+  },
+  {
+   "id": "19",
+   "group": "menu",
+   "title": "Çıkış onayı",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "settingsOpen": true,
+      "setTab": 4,
+      "dlg": "logout"
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "20",
+   "group": "menu",
+   "title": "Çıkış yapıldı",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "settingsOpen": true,
+      "setTab": 4,
+      "dlg": "bye",
+      "byeFrom": "logout"
+     }
+    }
+   ],
+   "auto": true,
+   "hold": 700
+  },
+  {
+   "id": "21",
+   "group": "menu",
+   "title": "Hesap silme onayı (pasif)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "settingsOpen": true,
+      "setTab": 4,
+      "dlg": "delete",
+      "delTyped": ""
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "22",
+   "group": "menu",
+   "title": "SİL yazıldı (aktif)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "settingsOpen": true,
+      "setTab": 4,
+      "dlg": "delete",
+      "delTyped": "SİL"
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "30",
+   "group": "menu",
+   "title": "Mağaza → Çip",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "shop",
+      "pTab": {
+       "shop": 0
+      }
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "31",
+   "group": "menu",
+   "title": "Mağaza → Elmas",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "shop",
+      "pTab": {
+       "shop": 1
+      }
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "32",
+   "group": "menu",
+   "title": "Mağaza → Görünüm",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "shop",
+      "pTab": {
+       "shop": 2
+      }
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "40",
+   "group": "menu",
+   "title": "Arkadaşlar → Çevrimiçi",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "friends",
+      "pTab": {
+       "friends": 0
+      }
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "41",
+   "group": "menu",
+   "title": "Arkadaşlar → Tümü",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "friends",
+      "pTab": {
+       "friends": 1
+      }
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "42",
+   "group": "menu",
+   "title": "\"ay\" araması",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "friends",
+      "pTab": {
+       "friends": 1
+      },
+      "q": "ay"
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "43",
+   "group": "menu",
+   "title": "İstekler",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "friends",
+      "pTab": {
+       "friends": 2
+      }
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "44",
+   "group": "menu",
+   "title": "Arkadaş ekle — boş",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "friends",
+      "pTab": {
+       "friends": 0
+      },
+      "dlg": "add",
+      "af": {
+       "q": "",
+       "res": null,
+       "sent": {}
+      }
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "45",
+   "group": "menu",
+   "title": "Arkadaş ekle · MK-3321 bulundu",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "friends",
+      "pTab": {
+       "friends": 0
+      },
+      "dlg": "add",
+      "af": {
+       "q": "",
+       "res": null,
+       "sent": {}
+      }
+     }
+    },
+    {
+     "type": "menu.af.onQ",
+     "text": "MK-3321"
+    },
+    {
+     "click": "menu.af.find"
+    }
+   ],
+   "auto": true,
+   "hold": 700
+  },
+  {
+   "id": "46",
+   "group": "menu",
+   "title": "Arkadaş ekle · istek gönderildi",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "friends",
+      "pTab": {
+       "friends": 0
+      },
+      "dlg": "add",
+      "af": {
+       "q": "",
+       "res": null,
+       "sent": {}
+      }
+     }
+    },
+    {
+     "type": "menu.af.onQ",
+     "text": "MK-3321"
+    },
+    {
+     "click": "menu.af.find"
+    },
+    {
+     "click": "menu.af.send"
+    }
+   ],
+   "auto": true,
+   "hold": 700
+  },
+  {
+   "id": "47",
+   "group": "menu",
+   "title": "Arkadaş ekle · bulunamadı",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "friends",
+      "pTab": {
+       "friends": 0
+      },
+      "dlg": "add",
+      "af": {
+       "q": "",
+       "res": null,
+       "sent": {}
+      }
+     }
+    },
+    {
+     "type": "menu.af.onQ",
+     "text": "ZZ-0000"
+    },
+    {
+     "click": "menu.af.find"
+    }
+   ],
+   "auto": true,
+   "hold": 700
+  },
+  {
+   "id": "50",
+   "group": "menu",
+   "title": "Liderlik → Haftalık",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "leader",
+      "pTab": {
+       "leader": 0
+      }
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "51",
+   "group": "menu",
+   "title": "Liderlik → Sezon",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "leader",
+      "pTab": {
+       "leader": 1
+      }
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "52",
+   "group": "menu",
+   "title": "Liderlik → Arkadaşlar",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "leader",
+      "pTab": {
+       "leader": 2
+      }
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "60",
+   "group": "menu",
+   "title": "Günlük ödül",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "daily",
+      "pTab": {
+       "daily": 0
+      }
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "61",
+   "group": "menu",
+   "title": "Gün toplandı",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "daily",
+      "dayClaimed": true
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "70",
+   "group": "menu",
+   "title": "Kurallar 1",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "rules",
+      "rulesSec": 0
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "71",
+   "group": "menu",
+   "title": "Kurallar 2",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "rules",
+      "rulesSec": 1
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "72",
+   "group": "menu",
+   "title": "Kurallar 3",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "rules",
+      "rulesSec": 2
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "73",
+   "group": "menu",
+   "title": "Kurallar 4",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "rules",
+      "rulesSec": 3
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "74",
+   "group": "menu",
+   "title": "Kurallar 5",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "rules",
+      "rulesSec": 4
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "75",
+   "group": "menu",
+   "title": "Kurallar 6",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "rules",
+      "rulesSec": 5
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "80",
+   "group": "menu",
+   "title": "Profilim → Genel",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "me",
+      "pTab": {
+       "me": 0
+      }
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "81",
+   "group": "menu",
+   "title": "Profilim → Rozetler",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "me",
+      "pTab": {
+       "me": 1
+      }
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "82",
+   "group": "menu",
+   "title": "Profilim → Maç geçmişi",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "me",
+      "pTab": {
+       "me": 2
+      }
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "83",
+   "group": "menu",
+   "title": "Profili paylaş",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "me",
+      "dlg": "share"
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "84",
+   "group": "menu",
+   "title": "Bağlantı kopyalandı",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "me",
+      "dlg": "share",
+      "copied": true
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "90",
+   "group": "menu",
+   "title": "EN — Ayarlar → Dil",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "settingsOpen": true,
+      "setTab": 3
+     }
+    }
+   ],
+   "hold": 700,
+   "lang": "en"
+  },
+  {
+   "id": "91",
+   "group": "menu",
+   "title": "EN — Ayarlar → Oyun",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "settingsOpen": true,
+      "setTab": 0
+     }
+    }
+   ],
+   "hold": 700,
+   "lang": "en"
+  },
+  {
+   "id": "92",
+   "group": "menu",
+   "title": "EN — Ana menü, Satürn, Tekli seçili",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "sel": 0
+     }
+    }
+   ],
+   "hold": 700,
+   "lang": "en"
+  },
+  {
+   "id": "93",
+   "group": "menu",
+   "title": "EN — Mağaza → Çip",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "shop",
+      "pTab": {
+       "shop": 0
+      }
+     }
+    }
+   ],
+   "hold": 700,
+   "lang": "en"
+  },
+  {
+   "id": "94",
+   "group": "menu",
+   "title": "EN — Arkadaşlar → Çevrimiçi",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "friends",
+      "pTab": {
+       "friends": 0
+      }
+     }
+    }
+   ],
+   "hold": 700,
+   "lang": "en"
+  },
+  {
+   "id": "95",
+   "group": "menu",
+   "title": "EN — Günlük ödül",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "daily",
+      "pTab": {
+       "daily": 0
+      }
+     }
+    }
+   ],
+   "hold": 700,
+   "lang": "en"
+  },
+  {
+   "id": "96",
+   "group": "menu",
+   "title": "EN — Kurallar 1",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "rules",
+      "rulesSec": 0
+     }
+    }
+   ],
+   "hold": 700,
+   "lang": "en"
+  },
+  {
+   "id": "97",
+   "group": "menu",
+   "title": "EN — Profilim → Genel",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "panel": "me",
+      "pTab": {
+       "me": 0
+      }
+     }
+    }
+   ],
+   "hold": 700,
+   "lang": "en"
+  },
+  {
+   "id": "S01",
+   "group": "acilis",
+   "title": "Açılış / yükleme (GALAXY + 1 0 1, ilerleme)",
+   "path": [
+    {
+     "fresh": true
+    }
+   ],
+   "hold": 1800
+  },
+  {
+   "id": "S02",
+   "group": "acilis",
+   "title": "Giriş seçimi",
+   "path": [
+    {
+     "logout": true
+    },
+    {
+     "go": "auth"
+    }
+   ],
+   "hold": 900
+  },
+  {
+   "id": "S03",
+   "group": "acilis",
+   "title": "Giriş yap formu",
+   "path": [
+    {
+     "logout": true
+    },
+    {
+     "go": "login"
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "S04",
+   "group": "acilis",
+   "title": "Kayıt ol formu",
+   "path": [
+    {
+     "logout": true
+    },
+    {
+     "go": "register"
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "S05",
+   "group": "acilis",
+   "title": "Misafir girişi formu",
+   "path": [
+    {
+     "logout": true
+    },
+    {
+     "go": "guest",
+     "f": {
+      "nick": "Misafir4821",
+      "color": "#FF8A5B"
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "S06",
+   "group": "menu",
+   "title": "Ana menü",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    }
+   ],
+   "hold": 1500
+  },
+  {
+   "id": "S07",
+   "group": "menu",
+   "title": "Ayarlar → Görüntü",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "settingsOpen": true,
+      "setTab": 2
+     }
+    }
+   ],
+   "hold": 600
+  },
+  {
+   "id": "S08",
+   "group": "menu",
+   "title": "Ayarlar → Oyun",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "menu"
+    },
+    {
+     "waitFor": "Menu"
+    },
+    {
+     "set": "Menu",
+     "s": {
+      "settingsOpen": true,
+      "setTab": 0
+     }
+    }
+   ],
+   "hold": 600
+  },
+  {
+   "id": "S09",
+   "group": "lobi",
+   "title": "Lobi masa listesi",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "lobby"
+    },
+    {
+     "waitFor": "Lobi"
+    }
+   ],
+   "hold": 900
+  },
+  {
+   "id": "S10",
+   "group": "lobi",
+   "title": "Masa aç formu",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "lobby"
+    },
+    {
+     "waitFor": "Lobi"
+    },
+    {
+     "call": "Lobi",
+     "fn": "openCreate"
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "S11",
+   "group": "lobi",
+   "title": "Şifreli masa PIN",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "lobby"
+    },
+    {
+     "waitFor": "Lobi"
+    },
+    {
+     "call": "Lobi",
+     "fn": "attempt",
+     "args": [
+      "$tbl:pass",
+      "join"
+     ]
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "S12",
+   "group": "lobi",
+   "title": "Kodla katıl",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "lobby"
+    },
+    {
+     "waitFor": "Lobi"
+    },
+    {
+     "set": "Lobi",
+     "s": {
+      "dlg": {
+       "kind": "code",
+       "code": "",
+       "err": null
+      }
+     }
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "S13",
+   "group": "lobi",
+   "title": "Bekleme odası (kurucu)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "lobby"
+    },
+    {
+     "waitFor": "Lobi"
+    },
+    {
+     "call": "Lobi",
+     "fn": "enterWait",
+     "args": [
+      "$tbl:mine",
+      true
+     ]
+    }
+   ],
+   "hold": 900
+  },
+  {
+   "id": "S14",
+   "group": "lobi",
+   "title": "Bekleme odası · arkadaş davet (Arkadaşlar)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "lobby"
+    },
+    {
+     "waitFor": "Lobi"
+    },
+    {
+     "call": "Lobi",
+     "fn": "enterWait",
+     "args": [
+      "$tbl:mine",
+      true
+     ]
+    },
+    {
+     "set": "Lobi",
+     "deep": {
+      "wait": {
+       "friend": true,
+       "invTab": 0
+      }
+     }
+    }
+   ],
+   "hold": 700,
+   "note": "davet sekmesi alan adı doğrulanmalı"
+  },
+  {
+   "id": "S15",
+   "group": "lobi",
+   "title": "Bekleme odası · davet (Son oynadıkların)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "lobby"
+    },
+    {
+     "waitFor": "Lobi"
+    },
+    {
+     "call": "Lobi",
+     "fn": "enterWait",
+     "args": [
+      "$tbl:mine",
+      true
+     ]
+    },
+    {
+     "set": "Lobi",
+     "deep": {
+      "wait": {
+       "friend": true,
+       "invTab": 1
+      }
+     }
+    }
+   ],
+   "hold": 700,
+   "note": "davet sekmesi alan adı doğrulanmalı"
+  },
+  {
+   "id": "S16",
+   "group": "dereceli",
+   "title": "Dereceli ana ekran",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "go": "ranked"
+    },
+    {
+     "waitFor": "Dereceli"
+    }
+   ],
+   "hold": 900
+  },
+  {
+   "id": "G01",
+   "group": "dagitim",
+   "title": "Masa yükleniyor",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": null,
+      "noWait": true
+     }
+    }
+   ],
+   "hold": 400
+  },
+  {
+   "id": "G02",
+   "group": "dagitim",
+   "title": "Bot balyaları diziyor",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "deal"
+     }
+    }
+   ],
+   "hold": 2500,
+   "holdApprox": true
+  },
+  {
+   "id": "G03",
+   "group": "dagitim",
+   "title": "Sen diziyorsun",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "deal"
+     }
+    }
+   ],
+   "hold": 5200,
+   "holdApprox": true
+  },
+  {
+   "id": "G04",
+   "group": "dagitim",
+   "title": "Zar at düğmesi",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "deal"
+     }
+    }
+   ],
+   "hold": 9000,
+   "holdApprox": true
+  },
+  {
+   "id": "G05",
+   "group": "dagitim",
+   "title": "Zar yuvarlanıyor",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "deal"
+     }
+    },
+    {
+     "waitDeal": "dice"
+    },
+    {
+     "masa": "rollDice"
+    }
+   ],
+   "hold": 500
+  },
+  {
+   "id": "G06",
+   "group": "dagitim",
+   "title": "1. zar · Tekrar at",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "deal"
+     }
+    },
+    {
+     "waitDeal": "dice"
+    },
+    {
+     "masa": "rollDice"
+    },
+    {
+     "wait": 2200
+    }
+   ],
+   "hold": 300
+  },
+  {
+   "id": "G07",
+   "group": "dagitim",
+   "title": "Gösterge açılıyor",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "deal"
+     }
+    },
+    {
+     "waitDeal": "dice"
+    },
+    {
+     "masa": "rollDice"
+    },
+    {
+     "wait": 2200
+    },
+    {
+     "masa": "rollDice"
+    },
+    {
+     "waitDeal": "ind"
+    }
+   ],
+   "hold": 300
+  },
+  {
+   "id": "G08",
+   "group": "dagitim",
+   "title": "Gösterge → okey kartı, fazla taş",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "deal"
+     }
+    },
+    {
+     "waitDeal": "dice"
+    },
+    {
+     "masa": "rollDice"
+    },
+    {
+     "wait": 2200
+    },
+    {
+     "masa": "rollDice"
+    },
+    {
+     "waitDeal": "extra"
+    }
+   ],
+   "hold": 400
+  },
+  {
+   "id": "G09",
+   "group": "dagitim",
+   "title": "Balyalar dağıtılıyor",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "deal"
+     }
+    },
+    {
+     "waitDeal": "dice"
+    },
+    {
+     "masa": "rollDice"
+    },
+    {
+     "wait": 2200
+    },
+    {
+     "masa": "rollDice"
+    },
+    {
+     "waitDeal": "dist"
+    }
+   ],
+   "hold": 600
+  },
+  {
+   "id": "G10",
+   "group": "dagitim",
+   "title": "Kalan balyalar ortaya",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "deal"
+     }
+    },
+    {
+     "waitDeal": "dice"
+    },
+    {
+     "masa": "rollDice"
+    },
+    {
+     "wait": 2200
+    },
+    {
+     "masa": "rollDice"
+    },
+    {
+     "waitDeal": "center"
+    }
+   ],
+   "hold": 500
+  },
+  {
+   "id": "G11",
+   "group": "dagitim",
+   "title": "Istakalar doluyor",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "deal"
+     }
+    },
+    {
+     "waitDeal": "dice"
+    },
+    {
+     "masa": "rollDice"
+    },
+    {
+     "wait": 2200
+    },
+    {
+     "masa": "rollDice"
+    },
+    {
+     "waitDeal": "fill"
+    }
+   ],
+   "hold": 500
+  },
+  {
+   "id": "G12",
+   "group": "dagitim",
+   "title": "Oyun başladı (22 taş)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "deal"
+     }
+    },
+    {
+     "waitDeal": "dice"
+    },
+    {
+     "masa": "rollDice"
+    },
+    {
+     "wait": 2200
+    },
+    {
+     "masa": "rollDice"
+    },
+    {
+     "waitDeal": null
+    }
+   ],
+   "hold": 900
+  },
+  {
+   "id": "G13",
+   "group": "oyun",
+   "title": "El açıldı: perler ortada",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "open"
+     }
+    }
+   ],
+   "hold": 2600
+  },
+  {
+   "id": "G14",
+   "group": "oyun",
+   "title": "İşleme testi (herkes açık)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "isle"
+     }
+    }
+   ],
+   "hold": 1500
+  },
+  {
+   "id": "G15",
+   "group": "oyun",
+   "title": "Altın işleme göstergeleri",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "isle"
+     }
+    }
+   ],
+   "hold": 3000,
+   "holdApprox": true,
+   "note": "taş seçimi gerektirir"
+  },
+  {
+   "id": "G16",
+   "group": "oyun",
+   "title": "Yeşil okey alma göstergesi (Y4 seçili)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "isle"
+     }
+    },
+    {
+     "wait": 1300
+    },
+    {
+     "masa": "scSel",
+     "args": [
+      "Y4"
+     ]
+    }
+   ],
+   "hold": 700,
+   "auto": true,
+   "holdApprox": false
+  },
+  {
+   "id": "G17",
+   "group": "oyun",
+   "title": "Okey alındı (Y4 ↔ okey)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "isle"
+     }
+    },
+    {
+     "wait": 1300
+    },
+    {
+     "masa": "scSwap",
+     "args": [
+      "Y4",
+      2,
+      0
+     ]
+    }
+   ],
+   "auto": true,
+   "hold": 900,
+   "holdApprox": false
+  },
+  {
+   "id": "G18",
+   "group": "oyun",
+   "title": "İşleme yapıldı + Geri topla",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "isle"
+     }
+    },
+    {
+     "wait": 1500
+    },
+    {
+     "masa": "isle"
+    }
+   ],
+   "hold": 900
+  },
+  {
+   "id": "G19",
+   "group": "oyun",
+   "title": "Geri toplandı",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "isle"
+     }
+    },
+    {
+     "wait": 1500
+    },
+    {
+     "masa": "isle"
+    },
+    {
+     "wait": 900
+    },
+    {
+     "masa": "undoTurn"
+    }
+   ],
+   "hold": 700
+  },
+  {
+   "id": "G20",
+   "group": "oyun",
+   "title": "Hatalı açma (turuncu Aç)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "penOpen"
+     }
+    }
+   ],
+   "hold": 1500
+  },
+  {
+   "id": "G21",
+   "group": "oyun",
+   "title": "Hatalı per masada",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "penOpen"
+     }
+    },
+    {
+     "wait": 1500
+    },
+    {
+     "masa": "openHand"
+    }
+   ],
+   "hold": 600
+  },
+  {
+   "id": "G22",
+   "group": "oyun",
+   "title": "Ceza tostu",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "penOpen"
+     }
+    },
+    {
+     "wait": 1500
+    },
+    {
+     "masa": "openHand"
+    }
+   ],
+   "hold": 1600
+  },
+  {
+   "id": "G23",
+   "group": "oyun",
+   "title": "İşlek taş testi",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "penIslek"
+     }
+    }
+   ],
+   "hold": 1500
+  },
+  {
+   "id": "G24",
+   "group": "oyun",
+   "title": "İşlek taş cezası (B4 atıldı)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "penIslek"
+     }
+    },
+    {
+     "wait": 1500
+    },
+    {
+     "masa": "scDiscardCode",
+     "args": [
+      "B4"
+     ]
+    }
+   ],
+   "auto": true,
+   "hold": 1200,
+   "holdApprox": false
+  },
+  {
+   "id": "G25",
+   "group": "oyun",
+   "title": "Elden bit düğmesi",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "bomb"
+     }
+    }
+   ],
+   "hold": 1500
+  },
+  {
+   "id": "G26",
+   "group": "oyun",
+   "title": "Taş fırlatılıyor",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "bomb"
+     }
+    },
+    {
+     "wait": 1500
+    },
+    {
+     "masa": "bomb"
+    }
+   ],
+   "hold": 300
+  },
+  {
+   "id": "G27",
+   "group": "oyun",
+   "title": "Nükleer patlama",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "bomb"
+     }
+    },
+    {
+     "wait": 1500
+    },
+    {
+     "masa": "bomb"
+    }
+   ],
+   "hold": 1300,
+   "holdApprox": true
+  },
+  {
+   "id": "G28",
+   "group": "oyun",
+   "title": "ELDEN BİTTİN",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "bomb"
+     }
+    },
+    {
+     "wait": 1500
+    },
+    {
+     "masa": "bomb"
+    }
+   ],
+   "hold": 2600,
+   "holdApprox": true
+  },
+  {
+   "id": "G29",
+   "group": "oyun",
+   "title": "El sonu (kazandın)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "bomb"
+     }
+    },
+    {
+     "wait": 1500
+    },
+    {
+     "masa": "bomb"
+    }
+   ],
+   "hold": 6500,
+   "holdApprox": true
+  },
+  {
+   "id": "G30",
+   "group": "oyun",
+   "title": "Sıra sende",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "play"
+     }
+    }
+   ],
+   "hold": 2200
+  },
+  {
+   "id": "G31",
+   "group": "oyun",
+   "title": "Soldan alındı + Geri bırak",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "play"
+     }
+    },
+    {
+     "wait": 2000
+    },
+    {
+     "masa": "drawFrom",
+     "args": [
+      "side"
+     ]
+    }
+   ],
+   "hold": 800
+  },
+  {
+   "id": "G32",
+   "group": "oyun",
+   "title": "Masa ayarları",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "settings"
+     }
+    }
+   ],
+   "hold": 900
+  },
+  {
+   "id": "G33",
+   "group": "oyun",
+   "title": "Masadan kalk onayı",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "exit"
+     }
+    }
+   ],
+   "hold": 900
+  },
+  {
+   "id": "G34",
+   "group": "oyun",
+   "title": "El sonu (Ayşe kazandı)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "end"
+     }
+    }
+   ],
+   "hold": 8000,
+   "holdApprox": true
+  },
+  {
+   "id": "T01",
+   "group": "masa",
+   "title": "Bekleme: 2/4 oyuncu",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "seat"
+     }
+    }
+   ],
+   "hold": 1500,
+   "holdApprox": false
+  },
+  {
+   "id": "T02",
+   "group": "masa",
+   "title": "Masa doldu, geri sayım",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "seat"
+     }
+    }
+   ],
+   "hold": 6500,
+   "holdApprox": true
+  },
+  {
+   "id": "T03",
+   "group": "masa",
+   "title": "Dağıtım: girdap, karma",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "deal"
+     }
+    }
+   ],
+   "hold": 1200,
+   "holdApprox": false
+  },
+  {
+   "id": "T04",
+   "group": "masa",
+   "title": "Dağıtım bitti, İlk hamle senin",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "play"
+     }
+    }
+   ],
+   "hold": 600,
+   "holdApprox": false
+  },
+  {
+   "id": "T05",
+   "group": "masa",
+   "title": "Çekme aşaması, Ayşe'nin perleri",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "play"
+     }
+    }
+   ],
+   "hold": 2200,
+   "holdApprox": false
+  },
+  {
+   "id": "T06",
+   "group": "masa",
+   "title": "Çay ısmarlandı bildirimi",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "play"
+     }
+    }
+   ],
+   "hold": 2600,
+   "holdApprox": false
+  },
+  {
+   "id": "T07",
+   "group": "masa",
+   "title": "Oyuncu kartı (Zeynep), hızlı ikram",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "play"
+     }
+    },
+    {
+     "wait": 1500
+    },
+    {
+     "set": "Masa",
+     "s": {
+      "card": 3
+     }
+    }
+   ],
+   "auto": true,
+   "hold": 700,
+   "holdApprox": false
+  },
+  {
+   "id": "T08",
+   "group": "masa",
+   "title": "Hediye paneli · İkram",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "gift"
+     }
+    }
+   ],
+   "hold": 900,
+   "holdApprox": false
+  },
+  {
+   "id": "T09",
+   "group": "masa",
+   "title": "Hediye paneli · Hediye (Pasta)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "gift"
+     }
+    },
+    {
+     "wait": 700
+    },
+    {
+     "set": "Masa",
+     "s": {
+      "giftTab": 1,
+      "giftSel": "cake"
+     }
+    }
+   ],
+   "auto": true,
+   "hold": 500,
+   "holdApprox": false
+  },
+  {
+   "id": "T10",
+   "group": "masa",
+   "title": "Hediye paneli · Emoji",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "gift"
+     }
+    },
+    {
+     "wait": 700
+    },
+    {
+     "set": "Masa",
+     "s": {
+      "giftTab": 2,
+      "giftSel": null
+     }
+    }
+   ],
+   "auto": true,
+   "hold": 500,
+   "holdApprox": false
+  },
+  {
+   "id": "T11",
+   "group": "masa",
+   "title": "Roket uçuşu",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "play"
+     }
+    },
+    {
+     "wait": 1500
+    },
+    {
+     "masa": "botGift",
+     "args": [
+      3,
+      "rocket",
+      2,
+      ""
+     ]
+    }
+   ],
+   "auto": true,
+   "hold": 2400,
+   "holdApprox": true
+  },
+  {
+   "id": "T12",
+   "group": "masa",
+   "title": "Roket indi + teşekkür balonu",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "play"
+     }
+    },
+    {
+     "wait": 1500
+    },
+    {
+     "masa": "botGift",
+     "args": [
+      3,
+      "rocket",
+      2,
+      ""
+     ]
+    }
+   ],
+   "auto": true,
+   "hold": 6600,
+   "holdApprox": true
+  },
+  {
+   "id": "T13",
+   "group": "masa",
+   "title": "Sohbet paneli",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "chat"
+     }
+    }
+   ],
+   "hold": 1800,
+   "holdApprox": false
+  },
+  {
+   "id": "T14",
+   "group": "masa",
+   "title": "El açıldı · Yere aç / İşle",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "open"
+     }
+    }
+   ],
+   "hold": 2600,
+   "holdApprox": false
+  },
+  {
+   "id": "T15",
+   "group": "masa",
+   "title": "Ayarlar · Görünüm",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "settings"
+     }
+    }
+   ],
+   "hold": 900,
+   "holdApprox": false
+  },
+  {
+   "id": "T16",
+   "group": "masa",
+   "title": "Masa ayarları · Oyun",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "settings"
+     }
+    },
+    {
+     "wait": 500
+    },
+    {
+     "set": "Masa",
+     "s": {
+      "setTab": 0
+     }
+    }
+   ],
+   "auto": true,
+   "hold": 500,
+   "holdApprox": false
+  },
+  {
+   "id": "T17",
+   "group": "masa",
+   "title": "Masa ayarları · Ses",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "settings"
+     }
+    },
+    {
+     "wait": 500
+    },
+    {
+     "set": "Masa",
+     "s": {
+      "setTab": 1
+     }
+    }
+   ],
+   "auto": true,
+   "hold": 500,
+   "holdApprox": false
+  },
+  {
+   "id": "T18",
+   "group": "masa",
+   "title": "Masa ayarları · Bildirimler",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "settings"
+     }
+    },
+    {
+     "wait": 500
+    },
+    {
+     "set": "Masa",
+     "s": {
+      "setTab": 3
+     }
+    }
+   ],
+   "auto": true,
+   "hold": 500,
+   "holdApprox": false
+  },
+  {
+   "id": "T19",
+   "group": "masa",
+   "title": "Tema: Ceviz salon + Klasik ceviz ıstaka",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "play"
+     }
+    },
+    {
+     "wait": 600
+    },
+    {
+     "masa": "setSet",
+     "args": [
+      {
+       "tableSkin": "wood",
+       "rackSkin": "walnut"
+      },
+      true
+     ]
+    }
+   ],
+   "auto": true,
+   "hold": 1200,
+   "holdApprox": false
+  },
+  {
+   "id": "T20",
+   "group": "masa",
+   "title": "Tema: Hologram + Neon cam ıstaka",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "play"
+     }
+    },
+    {
+     "wait": 600
+    },
+    {
+     "masa": "setSet",
+     "args": [
+      {
+       "tableSkin": "holo",
+       "rackSkin": "neon"
+      },
+      true
+     ]
+    }
+   ],
+   "auto": true,
+   "hold": 1200,
+   "holdApprox": false
+  },
+  {
+   "id": "T21",
+   "group": "masa",
+   "title": "Tema: Andromeda masa + ıstaka",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "play"
+     }
+    },
+    {
+     "wait": 600
+    },
+    {
+     "masa": "setSet",
+     "args": [
+      {
+       "tableSkin": "andromeda",
+       "rackSkin": "andromeda"
+      },
+      true
+     ]
+    }
+   ],
+   "auto": true,
+   "hold": 1200,
+   "holdApprox": false
+  },
+  {
+   "id": "T22",
+   "group": "masa",
+   "title": "Kuşbakışı görünüm (Andromeda)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "play"
+     }
+    },
+    {
+     "wait": 600
+    },
+    {
+     "masa": "setSet",
+     "args": [
+      {
+       "tableSkin": "andromeda",
+       "rackSkin": "andromeda",
+       "view": "top"
+      },
+      true
+     ]
+    }
+   ],
+   "auto": true,
+   "hold": 1600,
+   "holdApprox": false
+  },
+  {
+   "id": "T23",
+   "group": "masa",
+   "title": "Bitiş anı: Ayşe bitirdi",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "end"
+     }
+    }
+   ],
+   "hold": 3200,
+   "holdApprox": true
+  },
+  {
+   "id": "T24",
+   "group": "masa",
+   "title": "El sonu tablosu",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "end"
+     }
+    }
+   ],
+   "hold": 8000,
+   "holdApprox": true
+  },
+  {
+   "id": "T25",
+   "group": "masa",
+   "title": "Masadan kalk onayı",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "exit"
+     }
+    }
+   ],
+   "hold": 900,
+   "holdApprox": false
+  },
+  {
+   "id": "T26",
+   "group": "masa",
+   "title": "Bağlantı koptu",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "net"
+     }
+    }
+   ],
+   "hold": 1500,
+   "holdApprox": true
+  },
+  {
+   "id": "T27",
+   "group": "masa",
+   "title": "EN — oyun sırasında",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "play"
+     }
+    }
+   ],
+   "auto": true,
+   "hold": 2200,
+   "holdApprox": false,
+   "lang": "en"
+  },
+  {
+   "id": "T28",
+   "group": "masa",
+   "title": "Botlara karşı: başlık, ANTRENMAN, el sayacı",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "play",
+      "bots": true
+     }
+    }
+   ],
+   "auto": true,
+   "hold": 2200,
+   "holdApprox": false
+  },
+  {
+   "id": "T30",
+   "group": "masa",
+   "title": "Botlara karşı · masadan kalk onayı",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "exit",
+      "bots": true
+     }
+    }
+   ],
+   "auto": true,
+   "hold": 900,
+   "holdApprox": false
+  },
+  {
+   "id": "T33",
+   "group": "masa",
+   "title": "Okey rozeti masada",
+   "path": [],
+   "auto": false,
+   "note": "kaldırıldı: masada okey temsil rozeti yok; okeyin değeri perdeki konumundan çıkar (R-13)",
+   "removed": true
+  },
+  {
+   "id": "T34",
+   "group": "masa",
+   "title": "Ceza: attığın K9 ile bot açtı (+90, R-43)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "scenario": "R43"
+    },
+    {
+     "table": {
+      "flow": null,
+      "bots": true
+     }
+    },
+    {
+     "waitMy": true
+    },
+    {
+     "masa": "scDiscard",
+     "args": [
+      "K9b"
+     ]
+    },
+    {
+     "waitPen": {
+      "seat": 0,
+      "after": 300
+     }
+    }
+   ],
+   "auto": true,
+   "hold": 1500,
+   "holdApprox": false,
+   "scenario": "R43"
+  },
+  {
+   "id": "T35",
+   "group": "masa",
+   "title": "Eksik açılış cezası (+101)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "penOpen"
+     }
+    },
+    {
+     "wait": 1500
+    },
+    {
+     "masa": "openHand"
+    }
+   ],
+   "auto": true,
+   "hold": 600,
+   "holdApprox": false
+  },
+  {
+   "id": "T36",
+   "group": "masa",
+   "title": "Ceza: masadaki okeyin alındı (+101, R-44)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "scenario": "R44"
+    },
+    {
+     "table": {
+      "flow": null,
+      "bots": true
+     }
+    },
+    {
+     "waitMy": true
+    },
+    {
+     "masa": "scOpen",
+     "args": [
+      [
+       [
+        "R10a",
+        "R11a",
+        "Y5a",
+        "R13a"
+       ],
+       [
+        "K13a",
+        "B13a",
+        "Y13a"
+       ],
+       [
+        "K10a",
+        "K11a",
+        "K12a"
+       ]
+      ]
+     ]
+    },
+    {
+     "wait": 900
+    },
+    {
+     "masa": "scDiscard",
+     "args": [
+      "R6a"
+     ]
+    },
+    {
+     "waitPen": {
+      "seat": 0,
+      "after": 300
+     }
+    }
+   ],
+   "auto": true,
+   "hold": 1500,
+   "holdApprox": false,
+   "scenario": "R44"
+  },
+  {
+   "id": "T38",
+   "group": "masa",
+   "title": "Yerden alındı + Geri bırak",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "play"
+     }
+    },
+    {
+     "wait": 2000
+    },
+    {
+     "masa": "drawFrom",
+     "args": [
+      "side"
+     ]
+    }
+   ],
+   "auto": true,
+   "hold": 800,
+   "holdApprox": false
+  },
+  {
+   "id": "T39",
+   "group": "masa",
+   "title": "Soldan alınan taş halkaya geri sürükleniyor",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "play"
+     }
+    },
+    {
+     "wait": 2000
+    },
+    {
+     "masa": "drawFrom",
+     "args": [
+      "side"
+     ]
+    },
+    {
+     "wait": 700
+    },
+    {
+     "masa": "scDrag",
+     "args": [
+      "$side",
+      "ring",
+      0.9
+     ]
+    }
+   ],
+   "auto": true,
+   "hold": 400,
+   "holdApprox": false
+  },
+  {
+   "id": "T40",
+   "group": "masa",
+   "title": "Mesaj kataloğu",
+   "path": [],
+   "auto": false,
+   "note": "kaldırıldı: Mesaj kataloğu bir referans sayfası: Referans - Masa Ek Durumlar",
+   "removed": true
+  },
+  {
+   "id": "T41",
+   "group": "masa",
+   "title": "Mesaj kuyruğu",
+   "path": [],
+   "auto": false,
+   "note": "kaldırıldı: Mesaj kuyruğu referans sayfasında; oyunda tek satırlık sistem mesajı + tost",
+   "removed": true
+  },
+  {
+   "id": "T42",
+   "group": "masa",
+   "title": "El sonu · botlara karşı",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "end",
+      "bots": true
+     }
+    }
+   ],
+   "auto": true,
+   "hold": 8000,
+   "holdApprox": true
+  },
+  {
+   "id": "T43",
+   "group": "masa",
+   "title": "El sonu · çevrimiçi masa",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "end"
+     }
+    }
+   ],
+   "auto": true,
+   "hold": 8000,
+   "holdApprox": true
+  },
+  {
+   "id": "T44",
+   "group": "masa",
+   "title": "El sonu puansız (çiftle bitiş)",
+   "path": [],
+   "auto": false,
+   "note": "kaldırıldı: Çiftle bitiş artık puanlanır (×2, R-50…R-56); \"Bu el puanlanmadı\" yok",
+   "removed": true
+  },
+  {
+   "id": "T45",
+   "group": "masa",
+   "title": "Maç sonu · kazandın",
+   "path": [],
+   "auto": false,
+   "note": "kaldırıldı: Ayrı maç sonu ekranı yok; maç sonu lobide tost (dereceli: S16 sonuç)",
+   "removed": true
+  },
+  {
+   "id": "T46",
+   "group": "masa",
+   "title": "Maç sonu · 2. sıra",
+   "path": [],
+   "auto": false,
+   "note": "kaldırıldı: Ayrı maç sonu ekranı yok (T45 ile aynı)",
+   "removed": true
+  },
+  {
+   "id": "T47",
+   "group": "masa",
+   "title": "Okeyi al: Y4 sürükleniyor, uygun hedefler parlıyor",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "isle"
+     }
+    },
+    {
+     "wait": 1300
+    },
+    {
+     "masa": "scDrag",
+     "args": [
+      "Y4",
+      "target",
+      0.55
+     ]
+    }
+   ],
+   "auto": true,
+   "hold": 500,
+   "holdApprox": false
+  },
+  {
+   "id": "T48",
+   "group": "masa",
+   "title": "Okey alma ipucu",
+   "path": [],
+   "auto": false,
+   "note": "kaldırıldı: Okeye uzun basma ipucu yok",
+   "removed": true
+  },
+  {
+   "id": "T49",
+   "group": "masa",
+   "title": "Okeyi al: yanlış taşla deneme (K5)",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": "isle"
+     }
+    },
+    {
+     "wait": 1300
+    },
+    {
+     "masa": "scSwap",
+     "args": [
+      "K5",
+      2,
+      0,
+      true
+     ]
+    }
+   ],
+   "auto": true,
+   "hold": 500,
+   "holdApprox": false
+  },
+  {
+   "id": "T50",
+   "group": "masa",
+   "title": "Menü → masa yükleme ekranı",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": null,
+      "noWait": true
+     }
+    }
+   ],
+   "auto": true,
+   "hold": 900,
+   "holdApprox": false
+  },
+  {
+   "id": "T51",
+   "group": "masa",
+   "title": "Masa açılamadı hatası",
+   "path": [
+    {
+     "acct": true
+    },
+    {
+     "table": {
+      "flow": null,
+      "noWait": true
+     }
+    },
+    {
+     "wait": 300
+    },
+    {
+     "set": "App",
+     "s": {
+      "gameOn": false
+     },
+     "deep": {
+      "ld": {
+       "err": true
+      }
+     }
+    }
+   ],
+   "auto": true,
+   "hold": 500,
+   "holdApprox": false
+  }
+ ]
+}

@@ -21,6 +21,14 @@ REPO = os.path.dirname(HERE)
 PROTO = os.path.join(REPO, "Design", "Galaxy101_ClaudeCode", "prototip")
 PAGE = "Galaxy 101 - Gerçek Ana Oyun.dc.html"
 THEMES = ["saturn", "mars", "neptun", "jupiter", "venus"]
+# Every visible text node (the format tools/compare_ui.py reads): [text, x, y, w, h, fontSize, weight, family, color].
+TEXT_DUMP = """() => { const out=[]; const walker=document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n;
+ while((n=walker.nextNode())){ const t=n.textContent.trim(); if(!t) continue; const r=document.createRange(); r.selectNodeContents(n);
+  const b=r.getBoundingClientRect(); if(b.width<1||b.height<1||b.right<0||b.bottom<0||b.left>1280||b.top>720) continue; let vis=true;
+  for(let e=n.parentElement;e;e=e.parentElement){const cs=getComputedStyle(e); if(cs.visibility==='hidden'||cs.display==='none'||+cs.opacity<0.02){vis=false;break;}}
+  if(!vis) continue; const cs=getComputedStyle(n.parentElement); const owner=n.parentElement.closest('[data-g101-id]');
+  out.push([t.slice(0,80), Math.round(b.x), Math.round(b.y), Math.round(b.width), Math.round(b.height), cs.fontSize, cs.fontWeight, cs.fontFamily.split(',')[0], cs.color, owner?owner.getAttribute('data-g101-id'):null]); }
+ return out; }"""
 
 
 def load_states():
@@ -75,6 +83,8 @@ async def capture(browser, base, st, variant, root, timeout_s):
         dump = await page.evaluate("() => window.G101Dump || null")
         with open(os.path.join(d, sid + ".layout.json"), "w", encoding="utf-8") as f:
             json.dump(dump, f, ensure_ascii=False, indent=1)
+        with open(os.path.join(d, sid + ".text.json"), "w", encoding="utf-8") as f:
+            json.dump(await page.evaluate(TEXT_DUMP), f, ensure_ascii=False)
         rec["routerError"] = await page.evaluate("() => window.G101State && window.G101State.error")
         rec["items"] = dump and dump.get("count")
     except Exception as e:  # noqa: BLE001 - every failure is recorded, the run continues

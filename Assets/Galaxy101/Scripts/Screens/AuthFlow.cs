@@ -56,6 +56,9 @@ namespace Galaxy101
 
         private string L(string tr, string en) => view.L(tr, en);
 
+        /// <summary>The guest form's nickname and colour before it is drawn (the state router's S05 path sets f.nick and f.color).</summary>
+        public void Prefill(string guestNick, string guestColor) { nick = guestNick; color = guestColor; if (layer != null) Render(); }
+
         public async void Show()
         {
             var canvas = view.Root.Q<VisualElement>("galaxy-canvas") ?? view.Root;

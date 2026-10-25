@@ -1,0 +1,472 @@
+{
+ "thresholds": "- Referans: `artifacts/v4/ref/<ID>.png` (Chrome, GPU, 1280×720, seed 42, ft = katalog `hold`); Unity: `scripts/Capture-G101States.ps1` (Development player, pencereli 1280×720, aynı ID/seed/ft).\n- Metin kutuları: `tools/compare_ui.py` ±3 px konum, genişlik/yükseklik ±%6 (en az 3 px), yazı boyutu ±0,5 px.\n- Yerleşim dökümü: aynı `data-g101-id` adlı öğeler için kutu ±3 px; renk, font, harf aralığı, köşe birebir.\n- Piksel farkı: arka plan tuvali (yıldız + gezegen) maskelenir (EK-001); 3D masa kareleri yalnız göz kontrolü + `tween3d`/`materials`/`lighting` değerleri.\n- \"eşleşti\": metin ve öğe eşikleri içinde; \"bilinçli fark\": nedeni `UNITY_FARKLARI.md`'de; \"eksik\": `EKSIKLER.md`'de kayıtlı.",
+ "states": {
+  "01": {
+   "unity": "Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs"
+  },
+  "02": {
+   "unity": "Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs"
+  },
+  "03": {
+   "unity": "Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs"
+  },
+  "04": {
+   "unity": "Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs"
+  },
+  "05": {
+   "unity": "Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs"
+  },
+  "06": {
+   "unity": "Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs"
+  },
+  "10": {
+   "unity": "Scripts/Screens/SettingsController.cs"
+  },
+  "11": {
+   "unity": "Scripts/Screens/SettingsController.cs"
+  },
+  "12": {
+   "unity": "Scripts/Screens/SettingsController.cs"
+  },
+  "13": {
+   "unity": "Scripts/Screens/SettingsController.cs"
+  },
+  "14": {
+   "unity": "Scripts/Screens/SettingsController.cs"
+  },
+  "15": {
+   "unity": "Scripts/Dialogs/EditProfileController.cs"
+  },
+  "16": {
+   "unity": "Scripts/Dialogs/EditProfileController.cs"
+  },
+  "17": {
+   "unity": "Scripts/Dialogs/EditProfileController.cs"
+  },
+  "18": {
+   "unity": "Scripts/Dialogs/EditProfileController.cs"
+  },
+  "19": {
+   "unity": "Scripts/Dialogs/ConfirmController.cs, DoneController.cs"
+  },
+  "20": {
+   "unity": "Scripts/Dialogs/ConfirmController.cs, DoneController.cs"
+  },
+  "21": {
+   "unity": "Scripts/Dialogs/ConfirmController.cs, DoneController.cs"
+  },
+  "22": {
+   "unity": "Scripts/Dialogs/ConfirmController.cs, DoneController.cs"
+  },
+  "30": {
+   "unity": "Scripts/Screens/ShopController.cs"
+  },
+  "31": {
+   "unity": "Scripts/Screens/ShopController.cs"
+  },
+  "32": {
+   "unity": "Scripts/Screens/ShopController.cs"
+  },
+  "40": {
+   "unity": "Scripts/Screens/FriendsController.cs"
+  },
+  "41": {
+   "unity": "Scripts/Screens/FriendsController.cs"
+  },
+  "42": {
+   "unity": "Scripts/Screens/FriendsController.cs"
+  },
+  "43": {
+   "unity": "Scripts/Screens/FriendsController.cs"
+  },
+  "44": {
+   "unity": "Scripts/Dialogs/AddFriendController.cs"
+  },
+  "45": {
+   "unity": "Scripts/Dialogs/AddFriendController.cs"
+  },
+  "46": {
+   "unity": "Scripts/Dialogs/AddFriendController.cs"
+  },
+  "47": {
+   "unity": "Scripts/Dialogs/AddFriendController.cs"
+  },
+  "50": {
+   "unity": "Scripts/Screens/LeaderboardController.cs"
+  },
+  "51": {
+   "unity": "Scripts/Screens/LeaderboardController.cs"
+  },
+  "52": {
+   "unity": "Scripts/Screens/LeaderboardController.cs"
+  },
+  "60": {
+   "unity": "Scripts/Screens (DailyReward panel, MenuView)"
+  },
+  "61": {
+   "unity": "Scripts/Screens (DailyReward panel, MenuView)"
+  },
+  "70": {
+   "unity": "Scripts/Screens (Rules panel, MenuView)"
+  },
+  "71": {
+   "unity": "Scripts/Screens (Rules panel, MenuView)"
+  },
+  "72": {
+   "unity": "Scripts/Screens (Rules panel, MenuView)"
+  },
+  "73": {
+   "unity": "Scripts/Screens (Rules panel, MenuView)"
+  },
+  "74": {
+   "unity": "Scripts/Screens (Rules panel, MenuView)"
+  },
+  "75": {
+   "unity": "Scripts/Screens (Rules panel, MenuView)"
+  },
+  "80": {
+   "unity": "Scripts/Screens/ProfileController.cs (+ ShareProfile)"
+  },
+  "81": {
+   "unity": "Scripts/Screens/ProfileController.cs (+ ShareProfile)"
+  },
+  "82": {
+   "unity": "Scripts/Screens/ProfileController.cs (+ ShareProfile)"
+  },
+  "83": {
+   "unity": "Scripts/Screens/ProfileController.cs (+ ShareProfile)"
+  },
+  "84": {
+   "unity": "Scripts/Screens/ProfileController.cs (+ ShareProfile)"
+  },
+  "90": {
+   "unity": "Scripts/Screens/SettingsController.cs"
+  },
+  "91": {
+   "unity": "Scripts/Screens/SettingsController.cs"
+  },
+  "92": {
+   "unity": "Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs"
+  },
+  "93": {
+   "unity": "Scripts/Screens/ShopController.cs"
+  },
+  "94": {
+   "unity": "Scripts/Screens/FriendsController.cs"
+  },
+  "95": {
+   "unity": "Scripts/Screens (DailyReward panel, MenuView)"
+  },
+  "96": {
+   "unity": "Scripts/Screens (Rules panel, MenuView)"
+  },
+  "97": {
+   "unity": "Scripts/Screens/ProfileController.cs (+ ShareProfile)"
+  },
+  "S01": {
+   "unity": "Scripts/Screens/AuthFlow.cs"
+  },
+  "S02": {
+   "unity": "Scripts/Screens/AuthFlow.cs"
+  },
+  "S03": {
+   "unity": "Scripts/Screens/AuthFlow.cs"
+  },
+  "S04": {
+   "unity": "Scripts/Screens/AuthFlow.cs"
+  },
+  "S05": {
+   "unity": "Scripts/Screens/AuthFlow.cs"
+  },
+  "S06": {
+   "unity": "Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs"
+  },
+  "S07": {
+   "unity": "Scripts/Screens/SettingsController.cs"
+  },
+  "S08": {
+   "unity": "Scripts/Screens/SettingsController.cs"
+  },
+  "S09": {
+   "unity": "Scripts/Screens/LobbyScreen*.cs"
+  },
+  "S10": {
+   "unity": "Scripts/Screens/LobbyScreen*.cs"
+  },
+  "S11": {
+   "unity": "Scripts/Screens/LobbyScreen*.cs"
+  },
+  "S12": {
+   "unity": "Scripts/Screens/LobbyScreen*.cs"
+  },
+  "S13": {
+   "unity": "Scripts/Screens/LobbyScreen*.cs"
+  },
+  "S14": {
+   "unity": "Scripts/Screens/LobbyScreen*.cs"
+  },
+  "S15": {
+   "unity": "Scripts/Screens/LobbyScreen*.cs"
+  },
+  "S16": {
+   "unity": "Scripts/Screens/RankedQueue.cs (yalnız kuyruk; dereceli ana ekranı yok)"
+  },
+  "G01": {
+   "unity": "Scripts/Screens/TableLoadingOverlay.cs"
+  },
+  "G02": {
+   "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs"
+  },
+  "G03": {
+   "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs"
+  },
+  "G04": {
+   "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs"
+  },
+  "G05": {
+   "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs"
+  },
+  "G06": {
+   "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs"
+  },
+  "G07": {
+   "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs"
+  },
+  "G08": {
+   "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs"
+  },
+  "G09": {
+   "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs"
+  },
+  "G10": {
+   "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs"
+  },
+  "G11": {
+   "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs"
+  },
+  "G12": {
+   "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs"
+  },
+  "G13": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G14": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G15": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G16": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G17": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G18": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G19": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G20": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G21": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G22": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G23": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G24": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G25": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G26": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G27": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G28": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G29": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G30": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G31": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G32": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G33": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "G34": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T01": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T02": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T03": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T04": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T05": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T06": {
+   "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs"
+  },
+  "T07": {
+   "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs"
+  },
+  "T08": {
+   "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs"
+  },
+  "T09": {
+   "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs"
+  },
+  "T10": {
+   "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs"
+  },
+  "T11": {
+   "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs"
+  },
+  "T12": {
+   "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs"
+  },
+  "T13": {
+   "unity": "Table/Scripts/Hud/TableHud.Social.cs"
+  },
+  "T14": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T15": {
+   "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs"
+  },
+  "T16": {
+   "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs"
+  },
+  "T17": {
+   "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs"
+  },
+  "T18": {
+   "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs"
+  },
+  "T19": {
+   "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs"
+  },
+  "T20": {
+   "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs"
+  },
+  "T21": {
+   "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs"
+  },
+  "T22": {
+   "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs"
+  },
+  "T23": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T24": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T25": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T26": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T27": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T28": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T30": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T33": {
+   "unity": "Table/Scripts/Hud/TableHud.cs + Game/RackInput.cs okey ipucu (ShowOkeyTip)",
+   "durum": "kaldırıldı",
+   "not": "kaldırıldı: masada okey temsil rozeti yok; okeyin değeri perdeki konumundan çıkar (R-13) · Unity karşılığı kaldırılacak"
+  },
+  "T34": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T35": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T36": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T38": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T39": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T40": {
+   "unity": "—",
+   "durum": "kaldırıldı",
+   "not": "kaldırıldı: Mesaj kataloğu bir referans sayfası: Referans - Masa Ek Durumlar"
+  },
+  "T41": {
+   "unity": "—",
+   "durum": "kaldırıldı",
+   "not": "kaldırıldı: Mesaj kuyruğu referans sayfasında; oyunda tek satırlık sistem mesajı + tost"
+  },
+  "T42": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T43": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T44": {
+   "unity": "Table/Scripts/Hud/TableHud.cs el sonu",
+   "durum": "kaldırıldı",
+   "not": "kaldırıldı: Çiftle bitiş artık puanlanır (×2, R-50…R-56); \"Bu el puanlanmadı\" yok · Unity karşılığı kaldırılacak"
+  },
+  "T45": {
+   "unity": "Table/Scripts/Hud/TableHud.cs BuildMatchEnd + Game/TableGame.cs ShowMatchEnd",
+   "durum": "kaldırıldı",
+   "not": "kaldırıldı: Ayrı maç sonu ekranı yok; maç sonu lobide tost (dereceli: S16 sonuç) · Unity karşılığı kaldırılacak"
+  },
+  "T46": {
+   "unity": "Table/Scripts/Hud/TableHud.cs BuildMatchEnd",
+   "durum": "kaldırıldı",
+   "not": "kaldırıldı: Ayrı maç sonu ekranı yok (T45 ile aynı) · Unity karşılığı kaldırılacak"
+  },
+  "T47": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T48": {
+   "unity": "Table/Scripts/Game/TableGame.cs ShowOkeyTip",
+   "durum": "kaldırıldı",
+   "not": "kaldırıldı: Okeye uzun basma ipucu yok · Unity karşılığı kaldırılacak"
+  },
+  "T49": {
+   "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs"
+  },
+  "T50": {
+   "unity": "Scripts/Screens/TableLoadingOverlay.cs"
+  },
+  "T51": {
+   "unity": "Scripts/Screens/TableLoadingOverlay.cs"
+  }
+ }
+}

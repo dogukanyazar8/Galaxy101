@@ -7,9 +7,12 @@ namespace Galaxy101
     public static class GalaxyPreferencesBridge
     {
         public const string StateFileName="galaxy-menu.json";
+        /// <summary>Development state router (G101StateRouter): every state run starts from its own empty save.</summary>
+        public static string OverridePath;
         public static string ResolveStatePath(string explicitPath=null)
         {
             if(explicitPath!=null)return Path.GetFullPath(explicitPath);
+            if(OverridePath!=null)return Path.GetFullPath(OverridePath);
 #if UNITY_EDITOR || OKEY_DIAGNOSTICS
             var args=Environment.GetCommandLineArgs();int flag=Array.IndexOf(args,"-galaxyMenuState");
             if(flag>=0)

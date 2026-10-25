@@ -46,32 +46,7 @@
   "tableStrings": {
    "packageKeys": 258,
    "present": 198,
-   "updated": [
-    {
-     "key": "gave",
-     "file": "table_strings",
-     "old": [
-      "{0}, {1} için {2} ısmarladı",
-      "{0} sent {1} {2}"
-     ],
-     "new": [
-      "{0}, {1} için {2} gönderdin",
-      "{0} sent {1} {2}"
-     ]
-    },
-    {
-     "key": "gaveAll",
-     "file": "table_strings",
-     "old": [
-      "{0} herkese {1} gönderdi",
-      "{0} sent everyone {1}"
-     ],
-     "new": [
-      "{0} herkese {1} gönderdin",
-      "{0} sent everyone {1}"
-     ]
-    }
-   ],
+   "updated": [],
    "keptPlaceholderMismatch": [],
    "keptListShift": [
     {
@@ -177,6 +152,40 @@
       "Medium angle, rack and table balanced"
      ],
      "movedTo": "views.2.1"
+    }
+   ],
+   "keptConditional": [
+    {
+     "key": "gave",
+     "file": "table_strings",
+     "old": [
+      "{0}, {1} için {2} ısmarladı",
+      "{0} sent {1} {2}"
+     ],
+     "new": [
+      "{0}, {1} için {2} gönderdin",
+      "{0} sent {1} {2}"
+     ],
+     "unusedParams": [
+      "tab",
+      "me"
+     ]
+    },
+    {
+     "key": "gaveAll",
+     "file": "table_strings",
+     "old": [
+      "{0} herkese {1} gönderdi",
+      "{0} sent everyone {1}"
+     ],
+     "new": [
+      "{0} herkese {1} gönderdin",
+      "{0} sent everyone {1}"
+     ],
+     "unusedParams": [
+      "tab",
+      "me"
+     ]
     }
    ],
    "added": [
@@ -739,14 +748,11 @@
  },
  "lastRun": {
   "sections": [
-   "ranks"
+   "strings"
   ],
   "changedFiles": [
-   "Assets/Galaxy101/Resources/Galaxy101/Rank/galaxy_160.png",
-   "Assets/Galaxy101/Resources/Galaxy101/Rank/galaxy_160@2x.png",
-   "Assets/Galaxy101/Resources/Galaxy101/Rank/galaxy_52.png",
-   "Assets/Galaxy101/Resources/Galaxy101/Rank/galaxy_52@2x.png",
-   "Assets/Galaxy101/Resources/Galaxy101/Rank/ranks.json"
+   "Assets/Galaxy101/Resources/Galaxy101/Strings/strings_v4.json",
+   "Assets/Galaxy101/Resources/Galaxy101/Table/Strings/table_strings.csv"
   ]
  }
 }

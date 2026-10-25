@@ -158,6 +158,13 @@ def placeholders(text: str) -> set[str]:
     return set(PLACEHOLDER.findall(text or ''))
 
 
+def unused_params(entry: dict) -> list[str]:
+    """Named params with no {n} in either text: the package flattened a conditional string function to one branch
+    (G101-Masa.dc.html gave/gaveAll/toYou pick the verb from tab/me)."""
+    used = placeholders(entry['tr']) | placeholders(entry['en'])
+    return [p for i, p in enumerate(entry.get('params') or []) if str(i) not in used]
+
+
 def package_strings() -> tuple[dict, list[dict], dict]:
     """All package texts with unique keys. Duplicate inline keys get "#2", "#3" in source order (the D-62 rule for
     repeated element names); error texts reuse the key of the identical game text when there is one."""
@@ -220,6 +227,8 @@ def section_strings() -> None:
         rec = OrderedDict(tr=x['tr'], en=x['en'])
         if x.get('params'):
             rec['params'] = x['params']
+            if unused_params(x):
+                rec['unusedParams'] = unused_params(x)
         if x['pkgKey'] != x['key']:
             rec['pkgKey'] = x['pkgKey']
         if x.get('uses'):
@@ -232,7 +241,9 @@ def section_strings() -> None:
             scheme='<ekran>.<tablo>.<yol> · satır içi <ekran>.inline.<alan>@<satır> (pkg/strings/README.md)',
             duplicates='Pakette aynı anahtarla birden çok satır içi metin var; ikinci ve sonrakiler kaynak sırasıyla #2, #3 '
                        'alır (D-62 kuralı). Asıl paket anahtarı "pkgKey" alanında.',
-            errors='errors[kod].key metnin anahtarıdır; ui=silent/resync kodlarının metni yoktur (pkg/protocol/protocol.json).'),
+            errors='errors[kod].key metnin anahtarıdır; ui=silent/resync kodlarının metni yoktur (pkg/protocol/protocol.json).',
+            unusedParams='Paket params listesinde olup metinde {n} karşılığı olmayan parametreler: kaynak fonksiyon koşulluydu '
+                         '(ör. G101-Masa.dc.html gave: fiil tab/me ile seçilir); metin yalnız bir dalı gösterir.'),
         counts=OrderedDict(package=meta['counts'], keys=len(entries),
                            byGroup=dict(Counter(x['group'] for x in entries)), errorCodes=len(errors)),
         strings=strings, errors=errors, notes=meta['notes'])
@@ -267,7 +278,7 @@ def update_table_strings(entries: list[dict]) -> dict:
 
     folder = RES / 'Table/Strings'
     names = ['table_strings', 'table_strings_ek', 'table_strings_extra']
-    present, updated, kept, moved = set(), [], [], []
+    present, updated, kept, moved, conditional = set(), [], [], [], []
     tables = {}
     for name in names:
         rows = read_csv(folder / f'{name}.csv')
@@ -284,6 +295,10 @@ def update_table_strings(entries: list[dict]) -> dict:
             if (target := shifted(key, (row[1], row[2]))) is not None:
                 entry['movedTo'] = target
                 moved.append(entry)
+            elif unused_params(x):
+                # A prototype string function with a condition (gave: verb by tab/me) flattened to one branch.
+                entry['unusedParams'] = unused_params(x)
+                conditional.append(entry)
             elif placeholders(row[1]) == placeholders(x['tr']) and placeholders(row[2]) == placeholders(x['en']):
                 row[1], row[2] = x['tr'], x['en']
                 updated.append(entry)
@@ -299,7 +314,7 @@ def update_table_strings(entries: list[dict]) -> dict:
         write_text(folder / f'{name}.csv', csv_text(tables[name]))
     project_only = sorted({r[0] for n in names for r in tables[n][1:]} - set(pkg))
     return OrderedDict(packageKeys=len(pkg), present=len(present), updated=updated, keptPlaceholderMismatch=kept,
-                       keptListShift=moved, added=added, projectOnly=project_only)
+                       keptListShift=moved, keptConditional=conditional, added=added, projectOnly=project_only)
 
 
 # ---------------------------------------------------------------- themes

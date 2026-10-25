@@ -147,7 +147,7 @@ for k, text in pk_themes['vars'].items():
                            'değişmedi; fontlar fonts.json rollerine göre (bölüm Fontlar)'])
         st['farklı'] += 1
 theme_rows.append([code('tema.transition'), f"{cell(pk_themes['transition'])} (themes.json transition)", '— (themes.json)',
-                   'eksik', 'veride yok; anim/easings.json ile Faz 2 (EK-405)'])
+                   'eksik', 'themes.json gezegen sözlüğünde yer yok; süre ve eğri Faz 2 animasyonunda (anim/easings.json cssPlanetMove)'])
 st['eksik'] += 1
 counts['Temalar'] = st
 
@@ -360,7 +360,7 @@ for k, v in sound['volume']['defaults'].items():
     st[status] += 1
     sound_rows.append([code(f'ses.ayar.{k}'), f'varsayılan {v} (g101-sound.js S(); events.json volume)',
                        f'content.json settingsDefaults.{k} = {cell(o1)} · Table/table_content.json settingsDefaults.{k} = {cell(o2)}',
-                       status, f'sound_events.json volume.defaults.{k} = {v}; ayar dosyalarına dokunulmadı (EK-409)'])
+                       status, f'sound_events.json volume.defaults.{k} = {v}; ayar dosyalarına dokunulmadı (EK-402)'])
 rules = [('ses.kural.kanal', 'efekt kategorileri sfx, müzik music kaydırıcısı; tile → tileSnd, chat → chatSnd ve notifSnd (g101-sound.js CAT, gainFor)', 'channels, toggles'),
          ('ses.kural.kazanç', events['volume'], 'volume.rule'),
          ('ses.kural.kısma', events['mixing']['duck'], 'mixing.duck'),
@@ -449,6 +449,7 @@ v4 = json.loads((RES / 'Strings/strings_v4.json').read_text(encoding='utf-8'))
 ts = report['strings']['tableStrings']
 table_updated = {u['key'] for u in ts['updated']}
 table_shift = {u['key']: u['movedTo'] for u in ts['keptListShift']}
+table_conditional = {u['key'] for u in ts['keptConditional']}
 table_added = set(ts['added'])
 compare = []
 for key, s in v4['strings'].items():
@@ -458,7 +459,7 @@ for key, s in v4['strings'].items():
     tr, en = s['tr'], s['en']
     old_tr = old_en = src = None
     if not tr or not en:
-        status, how = 'eksik (pakette boş)', 'paket'
+        status, how = 'boş (pakette bilinçli)', 'paket'
     elif pkg_key.startswith('table.STR.') and pkg_key[10:] in table_keys:
         old_tr, old_en, src = table_keys[pkg_key[10:]]
         src += ' ' + pkg_key[10:]
@@ -478,6 +479,7 @@ for key, s in v4['strings'].items():
         k = pkg_key[10:]
         after = ('Table/Strings güncellendi' if k in table_updated else
                  f'Table/Strings eski metin kaldı (dizi kaydı → {table_shift[k]})' if k in table_shift else
+                 'Table/Strings eski metin kaldı (koşullu fonksiyon, EK-412)' if k in table_conditional else
                  'Table/Strings eklendi' if k in table_added else 'Table/Strings aynı')
         after = 'strings_v4.csv; ' + after
     else:
@@ -495,7 +497,7 @@ CMP.write_bytes(b'\xef\xbb\xbf' + buf.getvalue().encode('utf-8'))
 
 sc = Counter((c['group'], c['status']) for c in compare)
 groups = ['table', 'inline', 'error']
-statuses = ['var', 'farklı', 'eksik', 'eksik (pakette boş)']
+statuses = ['var', 'farklı', 'eksik', 'boş (pakette bilinçli)']
 summary_rows = []
 for g in groups:
     total = sum(v for (gg, _), v in sc.items() if gg == g)
@@ -537,25 +539,29 @@ md.append(f"Paket: {pk_strings['counts']['tables']} tablo + {pk_strings['counts'
           '(strings_tr_en.csv, additional_strings.csv, content/themes/supplemental/table_content.json ve C# `L("tr","en")` / `Text("tr","en")` çağrıları). '
           'Menü yerelleştirmesi anahtar değil Türkçe metinle çalıştığı için (LocalizationBridge) metin eşleşmesi kullanıldı. '
           'Tüm anahtarlar ve durumları: `docs/v4/hat-d/strings_compare.csv`.\n')
-md.append(table(summary_rows, header=('Grup', 'Anahtar', 'var', 'farklı', 'eksik (yeni)', 'eksik (pakette boş)')) + '\n')
+md.append(table(summary_rows, header=('Grup', 'Anahtar', 'var', 'farklı', 'eksik (yeni)', 'boş (pakette bilinçli)')) + '\n')
 md.append(f"Masa HUD tabloları (Table/Strings): pakette {ts['packageKeys']} `table.STR` anahtarı; projede {ts['present']} vardı; "
-          f"{len(ts['updated'])} metin güncellendi, {len(ts['keptListShift'])} dizi kaydı eski metinle kaldı, "
+          f"{len(ts['updated'])} metin güncellendi, {len(ts['keptListShift'])} dizi kaydı ve {len(ts['keptConditional'])} koşullu metin eski haliyle kaldı, "
           f"{len(ts['keptPlaceholderMismatch'])} yer tutucu uyuşmazlığı, {len(ts['added'])} anahtar eklendi; "
           f"{len(project_only_table)} masa anahtarı pakette yok.\n")
 md.append('### Ek A · farklı metinler\n')
 diff_rows = [[code(c['key']), f"TR {cell(c['tr'])}<br>EN {cell(c['en'])}", f"TR {cell(c['projectTr'])}<br>EN {cell(c['projectEn'])} ({cell(c['projectSource'])}; eşleşme: {c['match']})",
               'farklı', cell(c['after'])] for c in compare if c['status'] == 'farklı']
 md.append(table(diff_rows) + '\n')
-md.append('### Ek B · eksik metinler (pakette boş)\n')
-md.append(table([[code(c['key']), 'TR "" · EN "" (strings.json tables)', '—', c['status'], 'strings_v4.csv (boş); EK-401'] for c in compare
-                 if c['status'] == 'eksik (pakette boş)']) + '\n')
+md.append('### Ek B · boş metinler (pakette bilinçli boş)\n')
+md.append(table([[code(c['key']), 'TR "" · EN "" (strings.json tables; G101-Menu.dc.html:1033 RULES örneği "")', '—', c['status'], 'strings_v4.csv (boş; örneği olmayan kural bölümü)'] for c in compare
+                 if c['status'] == 'boş (pakette bilinçli)']) + '\n')
 md.append('### Ek C · masa anahtarları: pakette yok\n')
 md.append('Projenin `Table/Strings/*.csv` dosyalarında olup pakette `table.STR.<k>` karşılığı olmayan anahtarlar (silinmedi; HUD kodu kullanıyor).\n')
 md.append(', '.join(code(k) for k in project_only_table) + '\n')
-md.append('### Ek D · masa dizi kayıtları (eski metin kaldı)\n')
+md.append('### Ek D · masa metinleri: eski metin kaldı\n')
+md.append('Dizi kayıtları HUD\'da konumla okunur (`TableHud.Windows.cs` `views.{i}`); koşullu fonksiyonlardan düzleşmiş metinler HUD\'da kodla kurulur (`TableHud.Gifts.cs` `GiftSentence`).\n')
 md.append(table([[code(u['key']), f"TR {cell(u['new'][0])} · EN {cell(u['new'][1])} (table.STR.{u['key']})",
                   f"TR {cell(u['old'][0])} · EN {cell(u['old'][1])} ({u['file']}.csv)", 'farklı',
-                  f"eski metin kaldı; pakette bu metin {code(u['movedTo'])} sırasında (EK-403)"] for u in ts['keptListShift']]) + '\n')
+                  f"eski metin kaldı; pakette bu metin {code(u['movedTo'])} sırasında (EK-403)"] for u in ts['keptListShift']]
+                + [[code(u['key']), f"TR {cell(u['new'][0])} · EN {cell(u['new'][1])} (table.STR.{u['key']}; kullanılmayan parametre {', '.join(u['unusedParams'])})",
+                    f"TR {cell(u['old'][0])} · EN {cell(u['old'][1])} ({u['file']}.csv)", 'farklı',
+                    'eski metin kaldı; paket metni G101-Masa.dc.html fonksiyonunun tek dalı (EK-412)'] for u in ts['keptConditional']]) + '\n')
 OUT.parent.mkdir(parents=True, exist_ok=True)
 OUT.write_text('\n'.join(md), encoding='utf-8')
 print(json.dumps({k: dict(v) for k, v in counts.items()}, ensure_ascii=False, indent=1))

@@ -15,7 +15,8 @@
  "keyRules": {
   "scheme": "<ekran>.<tablo>.<yol> · satır içi <ekran>.inline.<alan>@<satır> (pkg/strings/README.md)",
   "duplicates": "Pakette aynı anahtarla birden çok satır içi metin var; ikinci ve sonrakiler kaynak sırasıyla #2, #3 alır (D-62 kuralı). Asıl paket anahtarı \"pkgKey\" alanında.",
-  "errors": "errors[kod].key metnin anahtarıdır; ui=silent/resync kodlarının metni yoktur (pkg/protocol/protocol.json)."
+  "errors": "errors[kod].key metnin anahtarıdır; ui=silent/resync kodlarının metni yoktur (pkg/protocol/protocol.json).",
+  "unusedParams": "Paket params listesinde olup metinde {n} karşılığı olmayan parametreler: kaynak fonksiyon koşulluydu (ör. G101-Masa.dc.html gave: fiil tab/me ile seçilir); metin yalnız bir dalı gösterir."
  },
  "counts": {
   "package": {
@@ -1778,6 +1779,9 @@
    "params": [
     "n",
     "p"
+   ],
+   "unusedParams": [
+    "n"
    ]
   },
   "lobby.STR.invByCode": {
@@ -2097,6 +2101,10 @@
    "tr": "22 taşla sen başlıyorsun",
    "en": "You start with 22 tiles",
    "params": [
+    "n",
+    "me"
+   ],
+   "unusedParams": [
     "n",
     "me"
    ]
@@ -3046,6 +3054,10 @@
     "it",
     "tab",
     "me"
+   ],
+   "unusedParams": [
+    "tab",
+    "me"
    ]
   },
   "table.STR.gaveAll": {
@@ -3056,6 +3068,10 @@
     "it",
     "tab",
     "me"
+   ],
+   "unusedParams": [
+    "tab",
+    "me"
    ]
   },
   "table.STR.toYou": {
@@ -3064,6 +3080,9 @@
    "params": [
     "a",
     "it",
+    "tab"
+   ],
+   "unusedParams": [
     "tab"
    ]
   },

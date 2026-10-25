@@ -36,6 +36,12 @@ Görev: `Design/PROMPT_v4_OTONOM_GELISTIRME.md`. Bağlam sıfırlanırsa buradan
 - Unity yönlendirici ilk koşu: 70 durum (menü 54, S01–S15) Development oyuncusunda çekildi (`artifacts/v4/unity/run2`). Menü ve giriş ekranları referansa çok yakın; farklar: lig rozeti, "YAKINDA" (kaldırıldı, K-10), sürüm (0.4.0'a çekildi), `app.version` etiketi (eklendi), açılış ilerlemesi (prototip algoritmasına geçti), lobi demo arka ucu (düzeltildi).
 - Hat ilerlemesi (22:35): A 3 commit (V4 motor + botlar, 106/106 vektör, 72/72 JS eşdeğerlik, sürüm kaydı); B 1 commit (protokol merkezi + `com.galaxy101.table` çalışma zamanı); C 2 commit (103 GLB yerleşti); D 1 commit (metinler, temalar, fontlar, ikonlar, rozetler, imleçler, sesler).
 
+- 22:36 referans yakalama bitti: 992/992 kare (ana 144, tekrar 144, EN 144, 4 tema × 140), yol hatası 0. Tekrar farkı yalnız arka plan tuvali (UI kutularında %0). Ana + EN için metin dökümü ikinci geçişte (`ref_capture_text.log`).
+- 22:40 Hat A bitti → ana kopyaya birleşti (`9c42c73`). `dotnet test tools/v4/nunit/CoreV4Tests.csproj` 791/791 (vektör 106/106, eşdeğerlik 72/72, mevcut 583). Unity EditMode 946: 907 geçti, 32 kırmızı (eski 32), 7 atlandı → eski handoff yolu düzeltildi (`f5ec3c4`); "Bronz III" testi Hat D birleşince Unity'de yerelleştirme içe aktarımıyla kapanacak (EK-410).
+- 22:40 Hat C ve Hat D bitti (birleşme sırası gereği B'yi bekliyor). Hat B: 26/26 paket akışı xUnit'te yeşil, sürüyor.
+- Faz 2 kod hatları (K-11, worktree): `v4/menu` (01–97, S06–S08), `v4/ranked` (Dereceli ekranları, S16), `v4/lobby` (S09–S15 + bekleme/davet/izle/katıl), `v4/audio` (28 ses olayı, müzik, 11 imleç). Masa (`v4/table`) B bitince.
+- İlk ölçüm (run3, menü+giriş+lobi 69 durum): metin eşleşmesi menüde ~%85, UI piksel %6–30. Eşikler ölçüldü (DURUMLAR "Eşikler").
+
 ## Sıradaki
 
 - Referans yakalamanın bitmesi → `capture_report.json` özetinin buraya ve DURUMLAR'a girmesi.

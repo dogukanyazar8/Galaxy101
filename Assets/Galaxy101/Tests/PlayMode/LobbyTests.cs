@@ -186,7 +186,7 @@ namespace Galaxy101.Tests
             fake.List = ReferenceSeed(); fake.Chips = 10000;
             var menu = Menu(); var root = menu.View.Root; yield return null;
             menu.Model.Profile["name"] = "Misafir1549";
-            var play = root.Q<Button>("play-now"); using (var evt = NavigationSubmitEvent.GetPooled()) { evt.target = play; play.SendEvent(evt); }
+            var play = root.Q<Button>("menu.play"); using (var evt = NavigationSubmitEvent.GetPooled()) { evt.target = play; play.SendEvent(evt); }
             yield return null; yield return null;
             Assert.That(Cards(root), Is.EqualTo(12));
             var order = menu.Lobby.Filter(fake.List, fake.Chips).Select(t => t.Name).ToList();
@@ -220,7 +220,7 @@ namespace Galaxy101.Tests
             var menu = Menu(); var root = menu.View.Root; yield return null;
             menu.Model.SelectedMode = 0;
             if (UiDump.Dir != null) { yield return new WaitForSeconds(1f); yield return UiDump.Capture(root, "S06_menu"); }
-            var play = root.Q<Button>("play-now"); using (var evt = NavigationSubmitEvent.GetPooled()) { evt.target = play; play.SendEvent(evt); }
+            var play = root.Q<Button>("menu.play"); using (var evt = NavigationSubmitEvent.GetPooled()) { evt.target = play; play.SendEvent(evt); }
             yield return null; yield return null;
             Assert.That(menu.Lobby, Is.Not.Null); Assert.That(menu.Lobby.Visible, Is.True); Assert.That(fake.Subscribes, Is.GreaterThan(0));
             Assert.That(root.Q<VisualElement>("main-layer").resolvedStyle.display, Is.EqualTo(DisplayStyle.None), "the menu hides under the lobby");
@@ -351,7 +351,7 @@ namespace Galaxy101.Tests
             yield return new WaitForSeconds(1.5f); yield return Snap("A01_menu");
             // A hovered button keeps its ledge (hover brightness is a filter).
             menu.View.OpenPanel("settings", 0); yield return new WaitForSeconds(.8f);
-            var close = root.Q<VisualElement>("settings-close");
+            var close = root.Q<VisualElement>("menu.closeSettings#2");
             using (var move = PointerMoveEvent.GetPooled(new Event { type = EventType.MouseMove, mousePosition = close.worldBound.center })) root.panel.visualTree.SendEvent(move);
             yield return new WaitForSeconds(.3f); yield return Snap("A09_settings_close_hover");
             menu.View.CloseTop(); yield return new WaitForSeconds(.5f);

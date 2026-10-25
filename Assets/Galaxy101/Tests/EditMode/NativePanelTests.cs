@@ -51,15 +51,19 @@ namespace Galaxy101.Tests
             var controller = new EditProfileController(); controller.OnOpen(view);
             var body = controller.Build(view);
             view.Root.Add(body);
-            var name = body.Q<TextField>("profile-name");
+            var name = body.Q<TextField>("menu.pf.onName");
             name.value = "ab";
-            Assert.That(body.Q<Button>("profile-save").enabledSelf, Is.False);
-            Assert.That(body.Q<Label>("profile-name-hint").text, Does.StartWith("3–16"));
+            Assert.That(body.Q<Button>("menu.pf.save").enabledSelf, Is.False);
+            Assert.That(body.Q<Label>("menu.pf.hint").text, Does.StartWith("3–16"));
             name.value = "İpek_32";
-            Assert.That(body.Q<Button>("profile-save").enabledSelf, Is.True);
+            Assert.That(body.Q<Button>("menu.pf.save").enabledSelf, Is.True);
             Assert.That((string)model.Profile["name"], Is.EqualTo("Doğukan Y."));
-            Assert.That(body.Q<VisualElement>("profile-colors").childCount, Is.EqualTo(8));
-            Assert.That(body.Q<Button>("draft-frame-2").enabledSelf, Is.False);
+            Assert.That(body.Q<VisualElement>("profile-colors").Query<Button>(className: "g-edit-swatch").ToList().Count, Is.EqualTo(8));
+            // v4: seven frames (Klasik + the six leagues); the sample's peak (Altın II) leaves Elmas, Usta and Galaksi locked.
+            Assert.That(body.Q<VisualElement>("profile-frames").childCount, Is.EqualTo(7));
+            Assert.That(body.Q<Button>("menu.o.pick[3]").enabledSelf, Is.True);
+            Assert.That(body.Q<Button>("menu.o.pick[4]").enabledSelf, Is.False);
+            Assert.That(body.Q<Button>("menu.o.pick[6]").enabledSelf, Is.False);
         }
 
         [TestCase("tr", "SİL")]
@@ -69,8 +73,8 @@ namespace Galaxy101.Tests
             view.Services.Settings.SetLanguage(language);
             var body = new ConfirmController { Kind = "delete" }.Build(view);
             view.Root.Add(body);
-            var button = body.Q<Button>("confirm-account-action");
-            var input = body.Q<TextField>("delete-confirmation");
+            var button = body.Q<Button>("menu.cf.go");
+            var input = body.Q<TextField>("menu.cf.onType");
             Assert.That(button.enabledSelf, Is.False);
             input.value = word + "!";
             Assert.That(button.enabledSelf, Is.False);

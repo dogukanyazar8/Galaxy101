@@ -47,6 +47,10 @@ namespace Galaxy101.Diagnostics
         /// <summary>The state account's name and colour (G101StateRouter.AccountName / AccountColor).</summary>
         public string MeName = G101StateRouter.AccountName, MeColor = G101StateRouter.AccountColor;
 
+        public RankedSearch Queue { get; private set; }
+        public RankedFound Pending => found;
+        public void Refresh() { }
+
         public event Action Changed;
         public event Action<string, bool> PartyAnswered;
         public event Action<RankedSearch> Searching;
@@ -81,7 +85,7 @@ namespace Galaxy101.Diagnostics
         {
             var started = DateTime.UtcNow; var opps = new List<RankedPlayer>(); double t = 1.5;
             var plan = new List<double>(); for (int i = 0; i < n; i++) { t += 1 + Next() * 2.2; plan.Add(t); }
-            Searching?.Invoke(new RankedSearch { Range = 1, Opponents = opps.ToList() });
+            Searching?.Invoke(Queue = new RankedSearch { Mode = mode, Range = 1, Opponents = opps.ToList() });
             while (opps.Count < n)
             {
                 await Wait(250);
@@ -89,7 +93,7 @@ namespace Galaxy101.Diagnostics
                 double sec = (DateTime.UtcNow - started).TotalSeconds; bool wide = sec >= 30;
                 bool changed = false;
                 while (opps.Count < n && sec >= plan[opps.Count]) { opps.Add(Opponent(opps, wide)); changed = true; }
-                if (changed || wide) Searching?.Invoke(new RankedSearch { Range = wide ? 2 : 1, Filled = opps.Count, Opponents = opps.ToList() });
+                if (changed || wide) Searching?.Invoke(Queue = new RankedSearch { Mode = mode, Range = wide ? 2 : 1, Filled = opps.Count, Opponents = opps.ToList() });
             }
             await Wait(700);
             if (me != run) return;
@@ -112,7 +116,7 @@ namespace Galaxy101.Diagnostics
             if (mode == "duo") players = new List<RankedPlayer> { self, opps[0], team.FirstOrDefault() ?? opps[0], opps[1] }; // D-29: you and your partner at 0 and 2
             else if (mode == "squad") players = new[] { self }.Concat(team).ToList();
             else players = new[] { self }.Concat(opps).ToList();
-            found = new RankedFound { MatchId = "rk-demo-" + me, Players = players, Accepted = players.Select(_ => false).ToList(), Seconds = 10 };
+            found = new RankedFound { MatchId = "rk-demo-" + me, Players = players, Accepted = players.Select(_ => false).ToList(), Seconds = 10 }; Queue = null;
             mine = false;
             Found?.Invoke(found);
             for (int i = 0; i < players.Count; i++) if (!players[i].Me) _ = AcceptLater(me, i, 600 + Next() * 2600);
@@ -132,7 +136,7 @@ namespace Galaxy101.Diagnostics
         {
             await Wait(found.Seconds * 1000);
             if (me != run || found == null || found.Accepted.All(a => a)) return;
-            run++; found = null; Cancelled?.Invoke("timeout");
+            run++; found = null; Queue = null; Cancelled?.Invoke("timeout");
         }
 
         private async void Check(int me)
@@ -142,21 +146,21 @@ namespace Galaxy101.Diagnostics
             Ready?.Invoke(1800);
             await Wait(1800); // rankedLoading (protocol/timings.md)
             if (done != run) return;
-            found = null;
-            Started?.Invoke(new RankedStart { Mode = mode, Players = players });
+            found = null; Queue = null;
+            Started?.Invoke(new RankedStart { Mode = mode, Players = players, Seat = players.FindIndex(p => p.Me) });
         }
 
         public Task<string> AcceptAsync(string matchId, bool accept)
         {
             if (found == null || found.MatchId != matchId) return Task.FromResult<string>(null);
-            if (!accept) { run++; found = null; return Task.FromResult<string>(null); }
+            if (!accept) { run++; found = null; Queue = null; return Task.FromResult<string>(null); }
             mine = true; int me = found.Players.FindIndex(p => p.Me); if (me >= 0) found.Accepted[me] = true;
             Accepted?.Invoke(found.Accepted.ToList());
             Check(run);
             return Task.FromResult<string>(null);
         }
 
-        public Task CancelAsync() { run++; found = null; return Task.CompletedTask; }
+        public Task CancelAsync() { run++; found = null; Queue = null; return Task.CompletedTask; }
 
         /// <summary>A finished match (applyRanked): the standing moves and the screen shows the result card.</summary>
         public RankedResult Finish(int place)

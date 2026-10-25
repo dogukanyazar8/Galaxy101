@@ -31,6 +31,10 @@ namespace Galaxy101.Tests
                 new RankedPlayer { Id = "ht", Name = "Hakan T.", Color = "#22B8CF", Idx = 7, Online = false }
             };
             public IReadOnlyList<RankedPlayer> Friends => List;
+            public RankedSearch Queue { get; set; }
+            public RankedFound Pending { get; set; }
+            public int Refreshes;
+            public void Refresh() => Refreshes++;
             public string QueueAnswer;
             public string QueuedMode; public List<string> QueuedParty; public int Cancels; public readonly List<bool> Answers = new List<bool>(); public readonly List<string> Invited = new List<string>();
             public event Action Changed;
@@ -69,6 +73,7 @@ namespace Galaxy101.Tests
         {
             MainMenuController.RankedBackend = null; MainMenuController.AuthOnStart = null; MainMenuController.OpenMatchTable = true; RankedScreen.Pending = null;
             if (owner != null) UnityEngine.Object.Destroy(owner);
+            if (Galaxy101.Online.GalaxyOnline.Instance != null) UnityEngine.Object.Destroy(Galaxy101.Online.GalaxyOnline.Instance.gameObject);
             yield return null;
             if (statePath != null && File.Exists(statePath)) File.Delete(statePath);
         }
@@ -318,6 +323,70 @@ namespace Galaxy101.Tests
             Assert.That(TextOf(root, "ranked.res.pSub"), Is.EqualTo("Altın II → Altın I"));
             Click(root, "ranked.res.close#2"); yield return null;
             Assert.That(menu.Ranked.ResultStage, Is.Null);
+        }
+
+        [UnityTest]
+        public IEnumerator OpeningOnAFoundMatchAndFallingBackToTheSearch()
+        {
+            // A party leader queued this player: the screen opens on the match waiting for accepts (rankedFound).
+            fake.Pending = new RankedFound { MatchId = "r9", Players = new List<RankedPlayer> { new RankedPlayer { Id = "me", Name = "Doğukan Y.", Idx = 7, Me = true },
+                new RankedPlayer { Id = "x", Name = "Kerem D.", Idx = 8 }, new RankedPlayer { Id = "ay", Name = "Ayşe Y.", Idx = 6 }, new RankedPlayer { Id = "y", Name = "Zeynep A.", Idx = 7 } },
+                Accepted = new List<bool> { false, false, true, false } };
+            var menu = Menu(); var root = menu.View.Root; yield return null;
+            menu.OpenRanked(); yield return null;
+            Assert.That(fake.Refreshes, Is.EqualTo(1), "the screen asks for the standing and the friends");
+            Assert.That(menu.Ranked.Found, Is.Not.Null); Assert.That(TextOf(root, "ranked.found.kicker"), Is.EqualTo("MAÇ BULUNDU"));
+            Click(root, "ranked.accept"); yield return null;
+            // Another player timed out: the server puts the party back in the search (lane B EK-219).
+            fake.Search(new RankedSearch { Mode = "duo", Range = 1 }); yield return null;
+            Assert.That(menu.Ranked.Found, Is.Null); Assert.That(menu.Ranked.Searching, Is.True); Assert.That(menu.Ranked.Mode, Is.EqualTo("duo"));
+            Assert.That(menu.Ranked.LastToast, Is.EqualTo("Eşleşme süresi doldu · aramaya dönülüyor"));
+            Assert.That(TextOf(root, "ranked.clock"), Does.EndWith("0/2 bulundu"));
+            fake.Cancel("cancel"); yield return null;
+            Assert.That(menu.Ranked.LastToast, Is.EqualTo("Arama iptal edildi"), "the party leader stopped the search");
+        }
+
+        private static void Inbound(Galaxy101.Online.GalaxyRealtime realtime, string type, string json)
+        {
+            var field = typeof(Galaxy101.Online.GalaxyRealtime).GetField("inbox", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var inbox = (System.Collections.Concurrent.ConcurrentQueue<(string, Newtonsoft.Json.Linq.JToken)>)field.GetValue(realtime);
+            inbox.Enqueue((type, Newtonsoft.Json.Linq.JToken.Parse(json.Replace('\'', '"'))));
+            realtime.Pump();
+        }
+
+        /// <summary>The v4 ranked messages (protocol.json) as the screen's events: search, found (10 s), accepted, ready, matchStart, rankChange.</summary>
+        [UnityTest]
+        public IEnumerator OnlineBackendSpeaksTheV4RankedMessages()
+        {
+            var online = Galaxy101.Online.GalaxyOnline.Ensure("http://127.0.0.1:9");
+            var backend = RankedOnlineBackend.For(online);
+            Assert.That(RankedOnlineBackend.For(online), Is.SameAs(backend), "one backend per session");
+            RankedFound found = null; IReadOnlyList<bool> accepted = null; int ready = 0, incoming = 0; RankedStart start = null; RankedResult result = null; string cancelled = null;
+            backend.Incoming += () => incoming++;
+            Inbound(online.Realtime, "rankedSearch", "{'mode':'duo','since':1000,'range':2,'filled':2,'at':1000}");
+            Assert.That(incoming, Is.EqualTo(1), "nobody listened: the menu opens the screen");
+            Assert.That(backend.Queue.Mode, Is.EqualTo("duo")); Assert.That(backend.Queue.Range, Is.EqualTo(2)); Assert.That(backend.Queue.Filled, Is.EqualTo(0), "the server's filled is this party's own seats, not opponents");
+            backend.Found += f => found = f; backend.Accepted += a => accepted = a; backend.Ready += ms => ready = ms;
+            backend.Started += s => start = s; backend.RankChanged += r => result = r; backend.Cancelled += r => cancelled = r;
+            Inbound(online.Realtime, "rankedFound", "{'found':{'matchId':'r1','players':[{'user':{'id':'me','name':'Doğukan Y.','color':'#FF8A5B','rankIdx':7}},{'user':{'id':'b','name':'Kerem D.','rankIdx':8}},"
+                + "{'user':{'id':'c','name':'Ayşe Y.','rankIdx':6}},{'user':{'id':'d','name':'Zeynep A.','rankIdx':5}}],'expiresAt':11000,'accepted':[false,false,false,false]},'at':1000}");
+            Assert.That(found.MatchId, Is.EqualTo("r1")); Assert.That(found.Seconds, Is.EqualTo(10).Within(.01f)); Assert.That(found.Players[0].Me, Is.True);
+            Assert.That(found.Players.Select(p => p.Idx), Is.EqualTo(new[] { 7, 8, 6, 5 })); Assert.That(backend.Pending, Is.SameAs(found)); Assert.That(backend.Queue, Is.Null);
+            Inbound(online.Realtime, "rankedAccepted", "{'index':1,'accepted':[false,true,false,false],'at':1500}");
+            Assert.That(accepted, Is.EqualTo(new[] { false, true, false, false }));
+            Inbound(online.Realtime, "rankedReady", "{'table':{'id':'t1','ranked':true},'loadingMs':1800,'at':2000}");
+            Assert.That(ready, Is.EqualTo(1800));
+            Inbound(online.Realtime, "matchStart", "{'table':{'id':'other'},'countdownMs':3000}");
+            Assert.That(start, Is.Null, "another table's matchStart is not the ranked match");
+            Inbound(online.Realtime, "matchStart", "{'table':{'id':'t1','seats':[{'user':{'id':'b','name':'Kerem D.'}},{'user':{'id':'me','name':'Doğukan Y.'}},null,{'user':{'id':'d','name':'Zeynep A.'}}]},'countdownMs':3000}");
+            Assert.That(start, Is.Not.Null); Assert.That(start.Mode, Is.EqualTo("duo")); Assert.That(start.Seat, Is.EqualTo(1)); Assert.That(start.Match, Is.InstanceOf<Galaxy101.Contracts.V4MatchStart>());
+            Assert.That(backend.Pending, Is.Null);
+            Inbound(online.Realtime, "rankChange", "{'before':{'idx':7,'lp':72},'after':{'idx':8,'lp':2},'delta':30,'place':1,'tierUp':true,'leagueUp':false,'down':false,'protectedLeft':0}");
+            Assert.That((result.Event, result.FromIdx, result.ToIdx, result.ToLp, result.Delta, result.Mode), Is.EqualTo(("tier", 7, 8, 2, 30, "duo")));
+            Inbound(online.Realtime, "rankedCancelled", "{'reason':'timeout'}");
+            Assert.That(cancelled, Is.EqualTo("timeout"));
+            var queued = backend.QueueAsync("solo", new List<string>()); yield return new WaitUntil(() => queued.IsCompleted);
+            Assert.That(queued.Result, Is.EqualTo("offline"), "no socket: the ack says offline");
         }
     }
 }

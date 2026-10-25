@@ -1,0 +1,752 @@
+{
+ "strings": {
+  "packageEntries": {
+   "tables": 751,
+   "inline": 241,
+   "errors": 49
+  },
+  "errorTotal": 94,
+  "errorTexts": 49,
+  "uniqueKeys": 1017,
+  "byGroup": {
+   "table": 751,
+   "inline": 241,
+   "error": 25
+  },
+  "duplicateInlineKeys": [
+   "app.inline.lang@538",
+   "app.inline.type@538",
+   "menu.inline.btn@1284",
+   "menu.inline.btn@1307",
+   "menu.inline.copyLabel@1311",
+   "menu.inline.fmtAgo@1216",
+   "menu.inline.next@1550",
+   "menu.inline.state@1251",
+   "menu.inline.x@1221",
+   "menu.inline.x@1279",
+   "menu.inline.x@1280",
+   "menu.inline.x@1317",
+   "menu.inline.x@1348",
+   "ranked.inline.k@567",
+   "ranked.inline.kicker@530",
+   "ranked.inline.label@518",
+   "ranked.inline.mode@566",
+   "ranked.inline.st@557",
+   "ranked.inline.sub@523",
+   "ranked.inline.team@534",
+   "ranked.inline.title@530",
+   "ranked.inline.title@542",
+   "ranked.inline.x@525"
+  ],
+  "errorConflicts": [],
+  "missingText": [
+   "menu.RULES.1.2",
+   "menu.RULES.5.2"
+  ],
+  "tableStrings": {
+   "packageKeys": 258,
+   "present": 198,
+   "updated": [
+    {
+     "key": "gave",
+     "file": "table_strings",
+     "old": [
+      "{0}, {1} için {2} ısmarladı",
+      "{0} sent {1} {2}"
+     ],
+     "new": [
+      "{0}, {1} için {2} gönderdin",
+      "{0} sent {1} {2}"
+     ]
+    },
+    {
+     "key": "gaveAll",
+     "file": "table_strings",
+     "old": [
+      "{0} herkese {1} gönderdi",
+      "{0} sent everyone {1}"
+     ],
+     "new": [
+      "{0} herkese {1} gönderdin",
+      "{0} sent everyone {1}"
+     ]
+    }
+   ],
+   "keptPlaceholderMismatch": [],
+   "keptListShift": [
+    {
+     "key": "flows.4",
+     "file": "table_strings",
+     "old": [
+      "Hediye",
+      "Gifts"
+     ],
+     "new": [
+      "Elden bitiş",
+      "Bomb finish"
+     ],
+     "movedTo": "flows.5"
+    },
+    {
+     "key": "flows.5",
+     "file": "table_strings",
+     "old": [
+      "Sohbet",
+      "Chat"
+     ],
+     "new": [
+      "Hediye",
+      "Gifts"
+     ],
+     "movedTo": "flows.6"
+    },
+    {
+     "key": "flows.6",
+     "file": "table_strings",
+     "old": [
+      "El sonu",
+      "Hand over"
+     ],
+     "new": [
+      "Sohbet",
+      "Chat"
+     ],
+     "movedTo": "flows.7"
+    },
+    {
+     "key": "flows.7",
+     "file": "table_strings",
+     "old": [
+      "Çıkış",
+      "Leave"
+     ],
+     "new": [
+      "El sonu",
+      "Hand over"
+     ],
+     "movedTo": "flows.8"
+    },
+    {
+     "key": "flows.8",
+     "file": "table_strings",
+     "old": [
+      "Bağlantı koptu",
+      "Disconnected"
+     ],
+     "new": [
+      "Çıkış",
+      "Leave"
+     ],
+     "movedTo": "flows.9"
+    },
+    {
+     "key": "flows.9",
+     "file": "table_strings",
+     "old": [
+      "Ayarlar",
+      "Settings"
+     ],
+     "new": [
+      "Bağlantı koptu",
+      "Disconnected"
+     ],
+     "movedTo": "flows.10"
+    },
+    {
+     "key": "views.1.0",
+     "file": "table_strings",
+     "old": [
+      "Kuşbakışı",
+      "Top view"
+     ],
+     "new": [
+      "Yarı yüksek",
+      "Mid view"
+     ],
+     "movedTo": "views.2.0"
+    },
+    {
+     "key": "views.1.1",
+     "file": "table_strings",
+     "old": [
+      "Yüksek açı, tüm masa görünür",
+      "High angle, whole table visible"
+     ],
+     "new": [
+      "Orta açı, ıstaka ve masa dengeli",
+      "Medium angle, rack and table balanced"
+     ],
+     "movedTo": "views.2.1"
+    }
+   ],
+   "added": [
+    "dealYou",
+    "dealBy",
+    "dsBuild",
+    "dsRoll",
+    "dsYourRoll",
+    "dsRolling",
+    "dsInd",
+    "dsFake",
+    "dsExtra",
+    "dsDist",
+    "dsCenter",
+    "dsStart",
+    "roll",
+    "rollAgain",
+    "diceCap",
+    "okeyCap",
+    "dealerCap",
+    "flows.10",
+    "views.2.0",
+    "views.2.1",
+    "engErr.E_SIDE_DISCARD",
+    "engErr.E_SIDE_MUST_OPEN",
+    "engErr.E_NOT_OPENED",
+    "engErr.E_MELD_INVALID",
+    "engErr.E_LAST_TILE",
+    "engErr.E_SWAP_INVALID",
+    "engErrAny",
+    "okeyTaken",
+    "undoBtn",
+    "undoTip",
+    "undone",
+    "shortTip",
+    "penOpenRun",
+    "penOpenPair",
+    "penIslek",
+    "penCode.P_OKEY_DISCARD",
+    "penCode.P_OPENED_WITH",
+    "penCode.P_OKEY_TAKEN",
+    "penCode.P_OPEN_SHORT",
+    "penFlash",
+    "penS",
+    "penOpenTest",
+    "penIslekTest",
+    "isleTestHint",
+    "returnBtn",
+    "returnTip",
+    "bombBtn",
+    "bombTip",
+    "bombTitle",
+    "bombSub",
+    "layPair",
+    "cantIsleClosed",
+    "layPairNo",
+    "isleDrawFirst",
+    "gaugePair",
+    "tagSide",
+    "tagIslek",
+    "engErr.E_SIDE_RETURNED",
+    "engErr.E_MELD_MIX",
+    "engErr.E_ISLE_DISABLED"
+   ],
+   "projectOnly": [
+    "botBadge",
+    "botRoom",
+    "botStake",
+    "botTag",
+    "color.B",
+    "color.K",
+    "color.R",
+    "color.Y",
+    "drawDeckOnly",
+    "ev.okeyPen",
+    "ev.opened",
+    "ev.pairs",
+    "ev.penFed",
+    "ev.penOkeyTaken",
+    "ev.penPlayable",
+    "ev.penShort",
+    "exitBodyBot",
+    "handCounter",
+    "heCPen",
+    "ldErrBody",
+    "ldErrTitle",
+    "ldKick",
+    "ldRetry",
+    "ldTip.0",
+    "lenLong",
+    "lenNormal",
+    "lenQuick",
+    "msAgain",
+    "msByHand",
+    "msHandCol",
+    "msKick",
+    "msLevelUp",
+    "msLobby",
+    "msLoseSub",
+    "msPlace",
+    "msRank",
+    "msWin",
+    "msWinSub",
+    "msXp",
+    "msXp1",
+    "msXp2",
+    "msXp3",
+    "msXpLeft",
+    "msXpOther",
+    "msXpWins",
+    "msg.canPutBack",
+    "msg.cantDiscardPicked",
+    "msg.cantIsle",
+    "msg.groupMove",
+    "msg.lastTile",
+    "msg.okeyOnlyWith",
+    "msg.openFirst",
+    "msg.pairsOnly",
+    "msg.timeUp",
+    "msg.timeWarn",
+    "mulHand",
+    "mulOkey",
+    "mulPairs",
+    "noteFinPairs",
+    "notePairs",
+    "okStandsFor",
+    "okStandsForAuto",
+    "pairsHand",
+    "pen.fed",
+    "pen.okey",
+    "pen.okeyTaken",
+    "pen.playable",
+    "pen.returned",
+    "pen.short",
+    "pen.shortPairs",
+    "penBubbleOkey",
+    "penBubbleTile",
+    "pileTag",
+    "putBack",
+    "putBackHint",
+    "takeOkeyBanner",
+    "takeOkeyHint",
+    "unscored",
+    "unscoredSub",
+    "why.fed",
+    "why.okey",
+    "why.okeyTaken",
+    "why.playable",
+    "why.short",
+    "xpPill"
+   ]
+  }
+ },
+ "themes": {
+  "changes": [
+   [
+    "Satürn",
+    "loadingRingOpacity",
+    null,
+    0.85
+   ],
+   [
+    "Mars",
+    "loadingRingOpacity",
+    null,
+    0
+   ],
+   [
+    "Neptün",
+    "loadingRingOpacity",
+    null,
+    0.35
+   ],
+   [
+    "Jüpiter",
+    "loadingRingOpacity",
+    null,
+    0.25
+   ],
+   [
+    "Venüs",
+    "loadingRingOpacity",
+    null,
+    0
+   ]
+  ],
+  "packageProblems": [],
+  "tableChanges": [],
+  "transition": "Tema değişimi: CSS değişkenleri 0,6 sn; gezegen konumu 1 sn cubic-bezier(.6,0,.2,1) (anim/easings.json cssPlanetMove)"
+ },
+ "fonts": {
+  "files": [
+   {
+    "package": "fonts/Montserrat-SemiBold.ttf",
+    "project": "Assets/Galaxy101/Resources/Galaxy101/Fonts/Montserrat-600.ttf",
+    "weight": 600,
+    "sha256": "b4e1563393d73fdff491a869441245aef31add2ec03d9c97a6dae4de07c52fd0",
+    "status": "farklı",
+    "missingGlyphs": []
+   },
+   {
+    "package": "fonts/Montserrat-Bold.ttf",
+    "project": "Assets/Galaxy101/Resources/Galaxy101/Fonts/Montserrat-700.ttf",
+    "weight": 700,
+    "sha256": "bc6e854971cea46b463be6f9eef4d9cd52f51cfc1fc0dd90c9d3e6483dc0ec61",
+    "status": "farklı",
+    "missingGlyphs": []
+   },
+   {
+    "package": "fonts/Montserrat-ExtraBold.ttf",
+    "project": "Assets/Galaxy101/Resources/Galaxy101/Fonts/Montserrat-800.ttf",
+    "weight": 800,
+    "sha256": "d3ac6a843d3ba6d5cafd44cf39e437055c8aed7e261010f595f57d3c7b3e2c1b",
+    "status": "farklı",
+    "missingGlyphs": []
+   },
+   {
+    "package": "fonts/Montserrat-Black.ttf",
+    "project": "Assets/Galaxy101/Resources/Galaxy101/Fonts/Montserrat-900.ttf",
+    "weight": 900,
+    "sha256": "ea67b37f8776eebea135cd1fe9adeaf6f9427683e8dc11ab8398b6be5f102c60",
+    "status": "farklı",
+    "missingGlyphs": []
+   },
+   {
+    "package": "fonts/Montserrat-Variable.ttf",
+    "project": null,
+    "weight": 100,
+    "variable": true,
+    "status": "kopyalanmadı",
+    "note": "değişken font; istemci sabit ağırlıklı TTF kullanır (fonts.json license notu)"
+   },
+   {
+    "package": "fonts/Baloo2-SemiBold.ttf",
+    "project": "Assets/Galaxy101/Resources/Galaxy101/Fonts/Baloo2-600.ttf",
+    "weight": 600,
+    "sha256": "b2e326e489d1f6b9cee91173850c924db5013e034fb78722216f046082cda998",
+    "status": "farklı",
+    "missingGlyphs": []
+   },
+   {
+    "package": "fonts/Baloo2-Bold.ttf",
+    "project": "Assets/Galaxy101/Resources/Galaxy101/Fonts/Baloo2-700.ttf",
+    "weight": 700,
+    "sha256": "e1bc2e47cfd8897297d0713cbc22e6656b7e5eadddfac6ca16f78c5618c3fe60",
+    "status": "farklı",
+    "missingGlyphs": []
+   },
+   {
+    "package": "fonts/Baloo2-ExtraBold.ttf",
+    "project": "Assets/Galaxy101/Resources/Galaxy101/Fonts/Baloo2-800.ttf",
+    "weight": 800,
+    "sha256": "f9f24a56b1ed9e0a27107f6a25c5ae61875c30bff9f25ee2ec6636763789a420",
+    "status": "farklı",
+    "missingGlyphs": []
+   },
+   {
+    "package": "fonts/Baloo2-Variable.ttf",
+    "project": null,
+    "weight": 400,
+    "variable": true,
+    "status": "kopyalanmadı",
+    "note": "değişken font; istemci sabit ağırlıklı TTF kullanır (fonts.json license notu)"
+   },
+   {
+    "package": "fonts/Nunito-Bold.ttf",
+    "project": "Assets/Galaxy101/Resources/Galaxy101/Fonts/Nunito-700.ttf",
+    "weight": 700,
+    "sha256": "ad443e47990c5fc4b263693b3018b7807868263b8c42ccb1115e030158931960",
+    "status": "eksik",
+    "missingGlyphs": []
+   },
+   {
+    "package": "fonts/Nunito-Variable.ttf",
+    "project": null,
+    "weight": 200,
+    "variable": true,
+    "status": "kopyalanmadı",
+    "note": "değişken font; istemci sabit ağırlıklı TTF kullanır (fonts.json license notu)"
+   },
+   {
+    "package": "fonts/OFL-Montserrat.txt",
+    "project": "Assets/Galaxy101/Resources/Galaxy101/Fonts/Montserrat-OFL.txt",
+    "status": "var"
+   },
+   {
+    "package": "fonts/OFL-Baloo2.txt",
+    "project": "Assets/Galaxy101/Resources/Galaxy101/Fonts/Baloo2-OFL.txt",
+    "status": "var"
+   },
+   {
+    "package": "fonts/OFL-Nunito.txt",
+    "project": "Assets/Galaxy101/Resources/Galaxy101/Fonts/Nunito-OFL.txt",
+    "status": "var"
+   }
+  ],
+  "used": {
+   "logo": {
+    "family": "Montserrat",
+    "weights": [
+     700,
+     800
+    ],
+    "var": "--fL"
+   },
+   "heading": {
+    "family": "Montserrat",
+    "weights": [
+     600,
+     700,
+     800,
+     900
+    ],
+    "var": "--fH"
+   },
+   "body": {
+    "family": "Baloo 2",
+    "weights": [
+     600,
+     700,
+     800
+    ],
+    "var": "--fB"
+   },
+   "versionTag": {
+    "family": "Nunito",
+    "weights": [
+     700
+    ]
+   }
+  }
+ },
+ "icons": {
+  "count": 69,
+  "galaxyIconIncompatible": {
+   "menu-v-pick": [
+    "<g>"
+   ],
+   "icon-20": [
+    "<g>"
+   ],
+   "icon-50": [
+    "<defs>",
+    "<g>",
+    "circle fill gradyan",
+    "kök fill gradyan",
+    "path fill gradyan",
+    "path stroke gradyan",
+    "rect fill gradyan",
+    "rect stroke gradyan",
+    "rect@transform"
+   ],
+   "table-v-pick": [
+    "<g>"
+   ],
+   "icon-67": [
+    "<g>"
+   ],
+   "icon-69": [
+    "style:animation"
+   ]
+  }
+ },
+ "ranks": {
+  "count": 75,
+  "byKind": {
+   "emblem": 63,
+   "medal": 12
+  }
+ },
+ "cursors": {
+  "count": 11
+ },
+ "sound": {
+  "events": 28,
+  "music": 2,
+  "wav": {
+   "ui.tap": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 0.645
+   },
+   "ui.open": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 0.76
+   },
+   "ui.close": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 0.72
+   },
+   "ui.screen": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 0.86
+   },
+   "ui.error": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 0.78
+   },
+   "ui.reward": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 1.3
+   },
+   "turn.mine": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 1.02
+   },
+   "turn.warn": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 0.9
+   },
+   "count.tick": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 0.72
+   },
+   "count.go": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 0.98
+   },
+   "deal.shuffle": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 1.5
+   },
+   "dice.roll": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 2.05
+   },
+   "deal.indicator": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 1.0
+   },
+   "deal.distribute": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 3.0
+   },
+   "tile.draw": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 0.69
+   },
+   "tile.discard": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 0.71
+   },
+   "tile.slide": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 0.66
+   },
+   "meld.lay": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 0.86
+   },
+   "meld.add": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 0.72
+   },
+   "okey.swap": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 0.98
+   },
+   "penalty": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 1.12
+   },
+   "finish": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 1.8
+   },
+   "finish.nuke": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 2.35
+   },
+   "hand.end": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 1.2
+   },
+   "gift.send": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 1.0
+   },
+   "gift.receive": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 1.2
+   },
+   "gift.rocket": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 6.2
+   },
+   "chat.message": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 0.74
+   },
+   "music.menu": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 32.0
+   },
+   "music.table": {
+    "rate": 44100,
+    "bits": 16,
+    "channels": 2,
+    "seconds": 40.0
+   }
+  },
+  "offFormat": {}
+ },
+ "lastRun": {
+  "sections": [
+   "ranks"
+  ],
+  "changedFiles": [
+   "Assets/Galaxy101/Resources/Galaxy101/Rank/galaxy_160.png",
+   "Assets/Galaxy101/Resources/Galaxy101/Rank/galaxy_160@2x.png",
+   "Assets/Galaxy101/Resources/Galaxy101/Rank/galaxy_52.png",
+   "Assets/Galaxy101/Resources/Galaxy101/Rank/galaxy_52@2x.png",
+   "Assets/Galaxy101/Resources/Galaxy101/Rank/ranks.json"
+  ]
+ }
+}

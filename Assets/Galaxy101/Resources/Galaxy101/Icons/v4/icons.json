@@ -1,0 +1,1225 @@
+{
+ "version": "0.4.0",
+ "source": "pkg/assets/icons.json",
+ "note": "Arayüzdeki satır içi SVG ikonlar, kopyalar birleştirildi. Renk currentColor (oyunda temanın --ic / --aT / --a1 rengi). Ad, ikonun kullanıldığı ilk öğe kimliğinden türetildi; usedBy tüm öğeleri listeler. İçinde {{ }} olan (veriye göre çizilen) SVG'ler burada yok; onlar kodla çizilir.",
+ "count": 69,
+ "loader": "GalaxyIcon: view.Icon(\"v4/<id>\") → Resources Galaxy101/Icons/v4/<id>.txt",
+ "icons": {
+  "app-splash-tip-box": {
+   "txt": "Galaxy101/Icons/v4/app-splash-tip-box",
+   "svg": "Galaxy101/Icons/v4/svg/app-splash-tip-box",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "app.splash.tipBox",
+    "load.bar"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:70",
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:280"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "auth-guest": {
+   "txt": "Galaxy101/Icons/v4/auth-guest",
+   "svg": "Galaxy101/Icons/v4/svg/auth-guest",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "auth.guest"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:111"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "auth-login": {
+   "txt": "Galaxy101/Icons/v4/auth-login",
+   "svg": "Galaxy101/Icons/v4/svg/auth-login",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "auth.login"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:115"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "auth-register": {
+   "txt": "Galaxy101/Icons/v4/auth-register",
+   "svg": "Galaxy101/Icons/v4/svg/auth-register",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "auth.register"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:119"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "form-back": {
+   "txt": "Galaxy101/Icons/v4/form-back",
+   "svg": "Galaxy101/Icons/v4/svg/form-back",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.8,
+   "usedBy": [
+    "form.back",
+    "lobby.back",
+    "ranked.back"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:137",
+    "G101-Lobi.dc.html:24",
+    "G101-Dereceli.dc.html:26"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "form-field-eye": {
+   "txt": "Galaxy101/Icons/v4/form-field-eye",
+   "svg": "Galaxy101/Icons/v4/svg/form-field-eye",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "form.field[{{ $index }}].eye",
+    "lobby.b.go[{{ $index }}]"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:155",
+    "G101-Lobi.dc.html:94",
+    "G101-Masa.dc.html:176"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "form-field-eye-7": {
+   "txt": "Galaxy101/Icons/v4/form-field-eye-7",
+   "svg": "Galaxy101/Icons/v4/svg/form-field-eye-7",
+   "viewBox": "0 0 24 24",
+   "stroke": 3.6,
+   "usedBy": [
+    "form.field[{{ $index }}].eye",
+    "form.terms",
+    "form.errorText",
+    "menu.t.soon[{{ $index }}]",
+    "menu.dl.claimDay[{{ $index }}]",
+    "menu.k.claim[{{ $index }}]",
+    "menu.sh.copy",
+    "menu.sh.inviteSub",
+    "ranked.p.ini[{{ $index }}]",
+    "table.thank"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:158",
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:201",
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:214",
+    "G101-Menu.dc.html:108",
+    "G101-Menu.dc.html:679",
+    "G101-Menu.dc.html:693",
+    "G101-Menu.dc.html:706",
+    "G101-Menu.dc.html:929",
+    "G101-Menu.dc.html:949",
+    "G101-Menu.dc.html:957",
+    "G101-Lobi.dc.html:249",
+    "G101-Lobi.dc.html:518",
+    "G101-Dereceli.dc.html:281",
+    "G101-Masa.dc.html:349"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "form-guest-chips": {
+   "txt": "Galaxy101/Icons/v4/form-guest-chips",
+   "svg": "Galaxy101/Icons/v4/svg/form-guest-chips",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "form.guest.chips"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:194"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "load-fail": {
+   "txt": "Galaxy101/Icons/v4/load-fail",
+   "svg": "Galaxy101/Icons/v4/svg/load-fail",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "load.fail"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:288"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-open-settings": {
+   "txt": "Galaxy101/Icons/v4/menu-open-settings",
+   "svg": "Galaxy101/Icons/v4/svg/menu-open-settings",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "menu.openSettings",
+    "menu.closeSettings",
+    "table.openSettings",
+    "table.closeSettings"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:76",
+    "G101-Menu.dc.html:179",
+    "G101-Masa.dc.html:161",
+    "G101-Masa.dc.html:539"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-open-shop": {
+   "txt": "Galaxy101/Icons/v4/menu-open-shop",
+   "svg": "Galaxy101/Icons/v4/svg/menu-open-shop",
+   "viewBox": "0 0 24 24",
+   "stroke": 1.9,
+   "usedBy": [
+    "menu.openShop"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:118",
+    "G101-Menu.dc.html:395"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-open-friends": {
+   "txt": "Galaxy101/Icons/v4/menu-open-friends",
+   "svg": "Galaxy101/Icons/v4/svg/menu-open-friends",
+   "viewBox": "0 0 24 24",
+   "stroke": 1.9,
+   "usedBy": [
+    "menu.openFriends"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:125",
+    "G101-Menu.dc.html:396"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-open-leader": {
+   "txt": "Galaxy101/Icons/v4/menu-open-leader",
+   "svg": "Galaxy101/Icons/v4/svg/menu-open-leader",
+   "viewBox": "0 0 24 24",
+   "stroke": 1.9,
+   "usedBy": [
+    "menu.openLeader"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:132",
+    "G101-Menu.dc.html:397"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-open-daily": {
+   "txt": "Galaxy101/Icons/v4/menu-open-daily",
+   "svg": "Galaxy101/Icons/v4/svg/menu-open-daily",
+   "viewBox": "0 0 24 24",
+   "stroke": 1.9,
+   "usedBy": [
+    "menu.openDaily"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:138",
+    "G101-Menu.dc.html:398"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-open-rules": {
+   "txt": "Galaxy101/Icons/v4/menu-open-rules",
+   "svg": "Galaxy101/Icons/v4/svg/menu-open-rules",
+   "viewBox": "0 0 24 24",
+   "stroke": 1.9,
+   "usedBy": [
+    "menu.openRules"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:145",
+    "G101-Menu.dc.html:399"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-ask-quit": {
+   "txt": "Galaxy101/Icons/v4/menu-ask-quit",
+   "svg": "Galaxy101/Icons/v4/svg/menu-ask-quit",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "menu.askQuit"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:190",
+    "G101-Menu.dc.html:831"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-close-settings": {
+   "txt": "Galaxy101/Icons/v4/menu-close-settings",
+   "svg": "Galaxy101/Icons/v4/svg/menu-close-settings",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.8,
+   "usedBy": [
+    "menu.closeSettings#2",
+    "menu.closePanel#2",
+    "menu.fr.clearQ",
+    "menu.closeDlg#2",
+    "menu.closeDlg#5",
+    "menu.closeDlg#6",
+    "lobby.clearQ",
+    "lobby.z.kick[{{ $index }}]",
+    "lobby.iv.close#2",
+    "lobby.closeCreate#2",
+    "ranked.z.kick[{{ $index }}]",
+    "ranked.closeInvite#2",
+    "table.closeCard[{{ $index }}]",
+    "table.closeGift#2",
+    "table.closeChat#2",
+    "table.closeSettings#2"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:202",
+    "G101-Menu.dc.html:414",
+    "G101-Menu.dc.html:592",
+    "G101-Menu.dc.html:766",
+    "G101-Menu.dc.html:861",
+    "G101-Menu.dc.html:898",
+    "G101-Lobi.dc.html:65",
+    "G101-Lobi.dc.html:163",
+    "G101-Lobi.dc.html:258",
+    "G101-Lobi.dc.html:421",
+    "G101-Dereceli.dc.html:130",
+    "G101-Dereceli.dc.html:253",
+    "G101-Masa.dc.html:100",
+    "G101-Masa.dc.html:372",
+    "G101-Masa.dc.html:429",
+    "G101-Masa.dc.html:557"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-sec-cur": {
+   "txt": "Galaxy101/Icons/v4/menu-sec-cur",
+   "svg": "Galaxy101/Icons/v4/svg/menu-sec-cur",
+   "viewBox": "0 0 24 24",
+   "stroke": 3,
+   "usedBy": [
+    "menu.sec.cur[{{ $index }}]",
+    "lobby.cf.rulesSum"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:279",
+    "G101-Lobi.dc.html:394"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-v-pick": {
+   "txt": "Galaxy101/Icons/v4/menu-v-pick",
+   "svg": "Galaxy101/Icons/v4/svg/menu-v-pick",
+   "viewBox": "0 0 96 62",
+   "stroke": 1.5,
+   "usedBy": [
+    "menu.v.pick[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:288"
+   ],
+   "galaxyIcon": {
+    "ok": false,
+    "issues": [
+     "<g>"
+    ]
+   }
+  },
+  "icon-20": {
+   "txt": "Galaxy101/Icons/v4/icon-20",
+   "svg": "Galaxy101/Icons/v4/svg/icon-20",
+   "viewBox": "0 0 96 62",
+   "stroke": 1.5,
+   "usedBy": [],
+   "uses": [
+    "G101-Menu.dc.html:289",
+    "G101-Masa.dc.html:597"
+   ],
+   "galaxyIcon": {
+    "ok": false,
+    "issues": [
+     "<g>"
+    ]
+   }
+  },
+  "icon-21": {
+   "txt": "Galaxy101/Icons/v4/icon-21",
+   "svg": "Galaxy101/Icons/v4/svg/icon-21",
+   "viewBox": "0 0 96 62",
+   "stroke": 1.5,
+   "usedBy": [],
+   "uses": [
+    "G101-Menu.dc.html:290"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-close-panel": {
+   "txt": "Galaxy101/Icons/v4/menu-close-panel",
+   "svg": "Galaxy101/Icons/v4/svg/menu-close-panel",
+   "viewBox": "0 0 24 24",
+   "stroke": 1.9,
+   "usedBy": [
+    "menu.closePanel"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:394"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-open-profile": {
+   "txt": "Galaxy101/Icons/v4/menu-open-profile",
+   "svg": "Galaxy101/Icons/v4/svg/menu-open-profile",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "menu.openProfile#2"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:448"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-open-share": {
+   "txt": "Galaxy101/Icons/v4/menu-open-share",
+   "svg": "Galaxy101/Icons/v4/svg/menu-open-share",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "menu.openShare",
+    "lobby.w.share",
+    "lobby.d.share"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:449",
+    "G101-Menu.dc.html:895",
+    "G101-Lobi.dc.html:138",
+    "G101-Lobi.dc.html:530"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-shop-deal-title": {
+   "txt": "Galaxy101/Icons/v4/menu-shop-deal-title",
+   "svg": "Galaxy101/Icons/v4/svg/menu-shop-deal-title",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "menu.shop.dealTitle",
+    "menu.dl.doneCount"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:543",
+    "G101-Menu.dc.html:687"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "icon-26": {
+   "txt": "Galaxy101/Icons/v4/icon-26",
+   "svg": "Galaxy101/Icons/v4/svg/icon-26",
+   "viewBox": "0 0 60 100",
+   "stroke": 14,
+   "usedBy": [],
+   "uses": [
+    "G101-Menu.dc.html:570"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-i-price": {
+   "txt": "Galaxy101/Icons/v4/menu-i-price",
+   "svg": "Galaxy101/Icons/v4/svg/menu-i-price",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "menu.i.price[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:590"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-af-copy": {
+   "txt": "Galaxy101/Icons/v4/menu-af-copy",
+   "svg": "Galaxy101/Icons/v4/svg/menu-af-copy",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "menu.af.copy#2",
+    "menu.af.copy#3"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:597",
+    "G101-Menu.dc.html:886"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-open-add-friend": {
+   "txt": "Galaxy101/Icons/v4/menu-open-add-friend",
+   "svg": "Galaxy101/Icons/v4/svg/menu-open-add-friend",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "menu.openAddFriend"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:600",
+    "G101-Menu.dc.html:858"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "icon-30": {
+   "txt": "Galaxy101/Icons/v4/icon-30",
+   "svg": "Galaxy101/Icons/v4/svg/icon-30",
+   "viewBox": "0 0 34 24",
+   "stroke": null,
+   "usedBy": [],
+   "uses": [
+    "G101-Menu.dc.html:631"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "lobby-t-name": {
+   "txt": "Galaxy101/Icons/v4/lobby-t-name",
+   "svg": "Galaxy101/Icons/v4/svg/lobby-t-name",
+   "viewBox": "0 0 24 24",
+   "stroke": 3,
+   "usedBy": [
+    "lobby.t.name[{{ $index }}]",
+    "lobby.cf.passD",
+    "lobby.b.label[{{ $index }}]",
+    "lobby.cs.name",
+    "lobby.d.body",
+    "lobby.d.code"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:808",
+    "G101-Lobi.dc.html:75",
+    "G101-Lobi.dc.html:327",
+    "G101-Lobi.dc.html:348",
+    "G101-Lobi.dc.html:425",
+    "G101-Lobi.dc.html:467",
+    "G101-Lobi.dc.html:525"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "icon-32": {
+   "txt": "Galaxy101/Icons/v4/icon-32",
+   "svg": "Galaxy101/Icons/v4/svg/icon-32",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [],
+   "uses": [
+    "G101-Menu.dc.html:829"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "icon-33": {
+   "txt": "Galaxy101/Icons/v4/icon-33",
+   "svg": "Galaxy101/Icons/v4/svg/icon-33",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [],
+   "uses": [
+    "G101-Menu.dc.html:830"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "menu-sh-link-label": {
+   "txt": "Galaxy101/Icons/v4/menu-sh-link-label",
+   "svg": "Galaxy101/Icons/v4/svg/menu-sh-link-label",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "menu.sh.linkLabel"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:925"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "lobby-open-code": {
+   "txt": "Galaxy101/Icons/v4/lobby-open-code",
+   "svg": "Galaxy101/Icons/v4/svg/lobby-open-code",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "lobby.openCode",
+    "lobby.d.submitPin"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:37",
+    "G101-Lobi.dc.html:487"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "lobby-open-create": {
+   "txt": "Galaxy101/Icons/v4/lobby-open-create",
+   "svg": "Galaxy101/Icons/v4/svg/lobby-open-create",
+   "viewBox": "0 0 24 24",
+   "stroke": 3,
+   "usedBy": [
+    "lobby.openCreate",
+    "lobby.closeCreate",
+    "ranked.openInvite[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:40",
+    "G101-Lobi.dc.html:295",
+    "G101-Dereceli.dc.html:143"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "lobby-o-pick": {
+   "txt": "Galaxy101/Icons/v4/lobby-o-pick",
+   "svg": "Galaxy101/Icons/v4/svg/lobby-o-pick",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "lobby.o.pick[{{ $index }}]",
+    "lobby.g.label[{{ $index }}]",
+    "lobby.b.n[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:63",
+    "G101-Lobi.dc.html:109",
+    "G101-Lobi.dc.html:232"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "lobby-w-leave": {
+   "txt": "Galaxy101/Icons/v4/lobby-w-leave",
+   "svg": "Galaxy101/Icons/v4/svg/lobby-w-leave",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "lobby.w.leave",
+    "table.askExit",
+    "table.stay"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:124",
+    "G101-Masa.dc.html:146",
+    "G101-Masa.dc.html:521"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "lobby-w-open-inv": {
+   "txt": "Galaxy101/Icons/v4/lobby-w-open-inv",
+   "svg": "Galaxy101/Icons/v4/svg/lobby-w-open-inv",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "lobby.w.openInv"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:131"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "lobby-z-ini": {
+   "txt": "Galaxy101/Icons/v4/lobby-z-ini",
+   "svg": "Galaxy101/Icons/v4/svg/lobby-z-ini",
+   "viewBox": "0 0 26 20",
+   "stroke": null,
+   "usedBy": [
+    "lobby.z.ini[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:162"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "lobby-z-invite": {
+   "txt": "Galaxy101/Icons/v4/lobby-z-invite",
+   "svg": "Galaxy101/Icons/v4/svg/lobby-z-invite",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "lobby.z.invite[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:174"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "lobby-z-add-bot": {
+   "txt": "Galaxy101/Icons/v4/lobby-z-add-bot",
+   "svg": "Galaxy101/Icons/v4/svg/lobby-z-add-bot",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "lobby.z.addBot[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:177"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "wait-summary-prize": {
+   "txt": "Galaxy101/Icons/v4/wait-summary-prize",
+   "svg": "Galaxy101/Icons/v4/svg/wait-summary-prize",
+   "viewBox": "0 0 24 24",
+   "stroke": 2,
+   "usedBy": [
+    "wait.summary.prize"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:208"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "lobby-iv-close": {
+   "txt": "Galaxy101/Icons/v4/lobby-iv-close",
+   "svg": "Galaxy101/Icons/v4/svg/lobby-iv-close",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "lobby.iv.close"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:224"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "lobby-w-share": {
+   "txt": "Galaxy101/Icons/v4/lobby-w-share",
+   "svg": "Galaxy101/Icons/v4/svg/lobby-w-share",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "lobby.w.share#2"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:278"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "lobby-cf-toggle-rules": {
+   "txt": "Galaxy101/Icons/v4/lobby-cf-toggle-rules",
+   "svg": "Galaxy101/Icons/v4/svg/lobby-cf-toggle-rules",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "lobby.cf.toggleRules"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:392"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "icon-47": {
+   "txt": "Galaxy101/Icons/v4/icon-47",
+   "svg": "Galaxy101/Icons/v4/svg/icon-47",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [],
+   "uses": [
+    "G101-Lobi.dc.html:504"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "icon-48": {
+   "txt": "Galaxy101/Icons/v4/icon-48",
+   "svg": "Galaxy101/Icons/v4/svg/icon-48",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [],
+   "uses": [
+    "G101-Lobi.dc.html:505"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "lobby-d-copy": {
+   "txt": "Galaxy101/Icons/v4/lobby-d-copy",
+   "svg": "Galaxy101/Icons/v4/svg/lobby-d-copy",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "lobby.d.copy"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:529"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "icon-50": {
+   "txt": "Galaxy101/Icons/v4/icon-50",
+   "svg": "Galaxy101/Icons/v4/svg/icon-50",
+   "viewBox": "0 0 40 40",
+   "stroke": null,
+   "usedBy": [],
+   "uses": [
+    "G101-Dereceli.dc.html:29"
+   ],
+   "galaxyIcon": {
+    "ok": false,
+    "issues": [
+     "<defs>",
+     "<g>",
+     "circle fill gradyan",
+     "kök fill gradyan",
+     "path fill gradyan",
+     "path stroke gradyan",
+     "rect fill gradyan",
+     "rect stroke gradyan",
+     "rect@transform"
+    ]
+   }
+  },
+  "ranked-me-next": {
+   "txt": "Galaxy101/Icons/v4/ranked-me-next",
+   "svg": "Galaxy101/Icons/v4/svg/ranked-me-next",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "ranked.me.next"
+   ],
+   "uses": [
+    "G101-Dereceli.dc.html:81"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "ranked-to-progress": {
+   "txt": "Galaxy101/Icons/v4/ranked-to-progress",
+   "svg": "Galaxy101/Icons/v4/svg/ranked-to-progress",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "ranked.toProgress"
+   ],
+   "uses": [
+    "G101-Dereceli.dc.html:92"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "ranked-m-pick": {
+   "txt": "Galaxy101/Icons/v4/ranked-m-pick",
+   "svg": "Galaxy101/Icons/v4/svg/ranked-m-pick",
+   "viewBox": "0 0 24 24",
+   "stroke": null,
+   "usedBy": [
+    "ranked.m.pick[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Dereceli.dc.html:103"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "ranked-table-sub": {
+   "txt": "Galaxy101/Icons/v4/ranked-table-sub",
+   "svg": "Galaxy101/Icons/v4/svg/ranked-table-sub",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "ranked.table.sub"
+   ],
+   "uses": [
+    "G101-Dereceli.dc.html:122"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "ranked-range-short": {
+   "txt": "Galaxy101/Icons/v4/ranked-range-short",
+   "svg": "Galaxy101/Icons/v4/svg/ranked-range-short",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "ranked.range.short[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Dereceli.dc.html:167"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "ranked-close-invite": {
+   "txt": "Galaxy101/Icons/v4/ranked-close-invite",
+   "svg": "Galaxy101/Icons/v4/svg/ranked-close-invite",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "ranked.closeInvite"
+   ],
+   "uses": [
+    "G101-Dereceli.dc.html:251"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "table-open-chat": {
+   "txt": "Galaxy101/Icons/v4/table-open-chat",
+   "svg": "Galaxy101/Icons/v4/svg/table-open-chat",
+   "viewBox": "0 0 24 24",
+   "stroke": 2,
+   "usedBy": [
+    "table.openChat"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:206"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "table-open-gift-any": {
+   "txt": "Galaxy101/Icons/v4/table-open-gift-any",
+   "svg": "Galaxy101/Icons/v4/svg/table-open-gift-any",
+   "viewBox": "0 0 24 24",
+   "stroke": 2,
+   "usedBy": [
+    "table.openGiftAny",
+    "table.closeGift"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:210",
+    "G101-Masa.dc.html:368"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "table-do-undo": {
+   "txt": "Galaxy101/Icons/v4/table-do-undo",
+   "svg": "Galaxy101/Icons/v4/svg/table-do-undo",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "table.doUndo"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:239"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "table-do-return": {
+   "txt": "Galaxy101/Icons/v4/table-do-return",
+   "svg": "Galaxy101/Icons/v4/svg/table-do-return",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "table.doReturn"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:242"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "table-do-bomb": {
+   "txt": "Galaxy101/Icons/v4/table-do-bomb",
+   "svg": "Galaxy101/Icons/v4/svg/table-do-bomb",
+   "viewBox": "0 0 24 24",
+   "stroke": null,
+   "usedBy": [
+    "table.doBomb"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:245"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "table-t-indicator": {
+   "txt": "Galaxy101/Icons/v4/table-t-indicator",
+   "svg": "Galaxy101/Icons/v4/svg/table-t-indicator",
+   "viewBox": "0 0 18 40",
+   "stroke": 2.4,
+   "usedBy": [
+    "table.t.indicator#2"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:298"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "table-dh-roll": {
+   "txt": "Galaxy101/Icons/v4/table-dh-roll",
+   "svg": "Galaxy101/Icons/v4/svg/table-dh-roll",
+   "viewBox": "0 0 26 26",
+   "stroke": null,
+   "usedBy": [
+    "table.dh.roll"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:308"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "table-close-chat": {
+   "txt": "Galaxy101/Icons/v4/table-close-chat",
+   "svg": "Galaxy101/Icons/v4/svg/table-close-chat",
+   "viewBox": "0 0 24 24",
+   "stroke": 2,
+   "usedBy": [
+    "table.closeChat"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:425"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "table-send-draft": {
+   "txt": "Galaxy101/Icons/v4/table-send-draft",
+   "svg": "Galaxy101/Icons/v4/svg/table-send-draft",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "table.sendDraft"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:459"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "table-v-pick": {
+   "txt": "Galaxy101/Icons/v4/table-v-pick",
+   "svg": "Galaxy101/Icons/v4/svg/table-v-pick",
+   "viewBox": "0 0 96 62",
+   "stroke": 1.5,
+   "usedBy": [
+    "table.v.pick[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:594"
+   ],
+   "galaxyIcon": {
+    "ok": false,
+    "issues": [
+     "<g>"
+    ]
+   }
+  },
+  "icon-67": {
+   "txt": "Galaxy101/Icons/v4/icon-67",
+   "svg": "Galaxy101/Icons/v4/svg/icon-67",
+   "viewBox": "0 0 96 62",
+   "stroke": 1.5,
+   "usedBy": [],
+   "uses": [
+    "G101-Masa.dc.html:600"
+   ],
+   "galaxyIcon": {
+    "ok": false,
+    "issues": [
+     "<g>"
+    ]
+   }
+  },
+  "table-t-in-use": {
+   "txt": "Galaxy101/Icons/v4/table-t-in-use",
+   "svg": "Galaxy101/Icons/v4/svg/table-t-in-use",
+   "viewBox": "0 0 60 100",
+   "stroke": 15,
+   "usedBy": [
+    "table.t.inUse[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:651",
+    "G101-Masa.dc.html:652"
+   ],
+   "galaxyIcon": {
+    "ok": true,
+    "issues": []
+   }
+  },
+  "icon-69": {
+   "txt": "Galaxy101/Icons/v4/icon-69",
+   "svg": "Galaxy101/Icons/v4/svg/icon-69",
+   "viewBox": "0 0 76 62",
+   "stroke": 6,
+   "usedBy": [],
+   "uses": [
+    "G101-Masa.dc.html:678"
+   ],
+   "galaxyIcon": {
+    "ok": false,
+    "issues": [
+     "style:animation"
+    ]
+   }
+  }
+ }
+}

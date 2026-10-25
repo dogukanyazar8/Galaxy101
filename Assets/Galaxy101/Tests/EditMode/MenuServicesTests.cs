@@ -21,8 +21,8 @@ namespace Galaxy101.Tests
         }
 
         private MenuModel NewModel() => new MenuModel(
-            File.ReadAllText("Design/galaxy101_unity_handoff/spec/data/content.json"),
-            File.ReadAllText("Design/galaxy101_unity_handoff/spec/data/themes.json"), savePath);
+            File.ReadAllText("Assets/Galaxy101/Resources/Galaxy101/content.json"),
+            File.ReadAllText("Assets/Galaxy101/Resources/Galaxy101/themes.json"), savePath);
 
         [TearDown] public void TearDown()
         {
@@ -126,7 +126,7 @@ namespace Galaxy101.Tests
 
         [Test] public void LocalizationPreservesDuplicateKeysAndContextualTranslations()
         {
-            string csv = File.ReadAllText("Design/galaxy101_unity_handoff/spec/data/strings_tr_en.csv");
+            string csv = File.ReadAllText("Assets/Galaxy101/Resources/Galaxy101/strings_tr_en.csv");
             var rows = LocalizationCatalog.Parse(csv);
             Assert.That(rows.Count, Is.EqualTo(194));
             Assert.That(rows.Select(x => x.Key).Distinct().Count(), Is.EqualTo(rows.Count));

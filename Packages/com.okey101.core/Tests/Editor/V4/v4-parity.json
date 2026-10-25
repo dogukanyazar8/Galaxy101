@@ -1,0 +1,1289 @@
+{
+ "source": "rules.js 0.4.0 + bots.js",
+ "cases": [
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 5
+   },
+   "seed": 7919,
+   "steps": 287,
+   "fails": 0,
+   "events": "9cb856fd9839ae0a41967fe296265aac85bd1309de425f424eb76a5418a167f9",
+   "state": "b7e542a5fafceda8565ce2a94cb083dea3746a1598c11dc952dda8331021231e",
+   "totals": [
+    934,
+    348,
+    495,
+    442
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 5
+   },
+   "seed": 15838,
+   "steps": 285,
+   "fails": 0,
+   "events": "c6c63963731c85e709b98da252cb255b8f295ebe84b4612e8ef89967457b4e79",
+   "state": "12bb0ec84202c89960541de2fe9efcc18341d0ca440efa05375431fb5ff56f92",
+   "totals": [
+    484,
+    665,
+    912,
+    766
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 5
+   },
+   "seed": 23757,
+   "steps": 308,
+   "fails": 0,
+   "events": "27d18cb33f359560d88acd6d034268af3ee362a60e56dfc6766bb87cd90fb3f5",
+   "state": "3d0a2543db4a03666f63af47bfed7bf63ca5a4f1d00db6ac6d1c71d1c99bd179",
+   "totals": [
+    604,
+    577,
+    704,
+    742
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 5
+   },
+   "seed": 31676,
+   "steps": 275,
+   "fails": 0,
+   "events": "8e4cea40eccfab59e77c338b4c42699237debb8a267ad4ba9bdafff0a1056b92",
+   "state": "f1d7845b13dc7dc95e6932158bd38c0e0f1a5f2d4d4212aa13a62ce86c47bc1b",
+   "totals": [
+    591,
+    757,
+    710,
+    824
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 5
+   },
+   "seed": 39595,
+   "steps": 267,
+   "fails": 0,
+   "events": "5efdfeab363121e8dd896ac3640b844756ea32a1434ab74b79e9c58342b8714a",
+   "state": "af3bc06943b75b510c6aa3196d479df10438a5a22bc7b8f92041c46db71a362e",
+   "totals": [
+    308,
+    667,
+    708,
+    716
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 5
+   },
+   "seed": 47514,
+   "steps": 257,
+   "fails": 0,
+   "events": "9736d2e4df5bbad781e09b7997d53ec49c3fe424d617f2ae419146282f29a8da",
+   "state": "1be47c9a49358a1174474db9705041327291cc0d5009c6bf2f1db43b2b57cd02",
+   "totals": [
+    191,
+    1196,
+    417,
+    773
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 5
+   },
+   "seed": 55433,
+   "steps": 256,
+   "fails": 0,
+   "events": "b8ad320d17f78ba4e804c89898f20e82d6dd2aba524ce6731b43836d3209c9c3",
+   "state": "fe23fa2f3ecd0e4121ce55768d7bca2df1903daad9c32e22d7b9a99e8fe37b95",
+   "totals": [
+    283,
+    947,
+    471,
+    636
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 5
+   },
+   "seed": 63352,
+   "steps": 240,
+   "fails": 0,
+   "events": "80cdfb57e9ddd16cc3c98005b227496b3f8dd4761e7a5c3714a655e63bf97512",
+   "state": "c160295136c59ba5aba90a3a9542515b6e16594765ca4c135affbe7720c2342c",
+   "totals": [
+    840,
+    490,
+    322,
+    416
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 5
+   },
+   "seed": 71271,
+   "steps": 248,
+   "fails": 0,
+   "events": "a3631829b391ae0723507411366f24512f1f55b7f1bce2230ea8a432ec171471",
+   "state": "1c338690ff74ead4c5a4acef1526c6c89861db5650956e23099fdfd9511d62f5",
+   "totals": [
+    763,
+    523,
+    841,
+    579
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 5
+   },
+   "seed": 79190,
+   "steps": 231,
+   "fails": 0,
+   "events": "3593887bbe6fc2da2a367904d0a50fba6221c5e9dbb7cc9d9c1847e41db1b990",
+   "state": "d5f2b4fbe8567a74d02bab1261f8b60c40810d82f37e7db6e024d52d96eeadbe",
+   "totals": [
+    975,
+    776,
+    43,
+    157
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 5
+   },
+   "seed": 87109,
+   "steps": 285,
+   "fails": 0,
+   "events": "5c959c845ad6be855b30c8a90988621ee2f661760bda7951e3e52c03dd648eb7",
+   "state": "bf0506e99e0c9089e59b8ef50aa6c00a396e3ace1c94c4d9337f1d788c0e8dfa",
+   "totals": [
+    133,
+    417,
+    462,
+    737
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 5
+   },
+   "seed": 95028,
+   "steps": 293,
+   "fails": 0,
+   "events": "0d2ebf8e9d76c09a4dcee414c54afc991c4138042285edff643187264d6278b3",
+   "state": "53dbe8b0bdcd7c22285b966b3947efdc921bc72fd2795ed797376b528f00c116",
+   "totals": [
+    583,
+    375,
+    343,
+    442
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 5
+   },
+   "seed": 7920,
+   "steps": 262,
+   "fails": 0,
+   "events": "32666dd0357d97c3a29ee330c8321a19fe4cd9a528c8fa102dbe5cce3c45ebcc",
+   "state": "645618fe66d4035bdf17adc783a378a8ed17188d92a6730fc0ffb808910f17fc",
+   "totals": [
+    1308,
+    307,
+    542,
+    205
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 5
+   },
+   "seed": 15839,
+   "steps": 277,
+   "fails": 0,
+   "events": "2b5712a98dba06eae51682a6a93b2490261909d959d126ad7b18ccec0e2d2f45",
+   "state": "3a53cb8478d39ef7d8d058d209c88ec81aa5e39f8706383f4d726bcc56074a6a",
+   "totals": [
+    650,
+    836,
+    353,
+    248
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 5
+   },
+   "seed": 23758,
+   "steps": 268,
+   "fails": 0,
+   "events": "a994d16c763221d1ea590c7dda1a38c45ea632a551d5d6a21dc976e65313bac9",
+   "state": "b6729e34212e797e3d0b697d2038e7a984b0a77e0b4768084076239b134f61c2",
+   "totals": [
+    364,
+    319,
+    288,
+    255
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 5
+   },
+   "seed": 31677,
+   "steps": 264,
+   "fails": 0,
+   "events": "3a91eac290caaa4b11b1cf684e9017e30aaa61548ba41592c24c068b80e815c8",
+   "state": "a6ff7a34384a986fa576899009ae3fb028fc65207fdb1782d0a9b46ccb06d3d8",
+   "totals": [
+    753,
+    237,
+    263,
+    501
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 5
+   },
+   "seed": 39596,
+   "steps": 280,
+   "fails": 0,
+   "events": "053941e6597921d77496d8a69922442624e8dec91a38d8bb8c8917d492bdb88a",
+   "state": "6327ea27d27d4c1ff432c2268e3ce9800518f92a43646acbd65ab560a281b22f",
+   "totals": [
+    474,
+    570,
+    427,
+    -65
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 5
+   },
+   "seed": 47515,
+   "steps": 271,
+   "fails": 0,
+   "events": "0435586b8b2ac3e166e417adde23dafdc5f52788c542232bfb6c1e0cf927c2e3",
+   "state": "0081954c3032882b190de0b9ce70796d46263758237e965576ecc67b8c1e0a1d",
+   "totals": [
+    717,
+    748,
+    731,
+    267
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 5
+   },
+   "seed": 55434,
+   "steps": 288,
+   "fails": 0,
+   "events": "75a77fbd7fb2ae0fda2625384d9a639f820bc4bebe4503d04cfb94bf048b683f",
+   "state": "6888f0d4ed2a618682599377c2cf71e54fd07b3e236e08ebbb2d33ac1da4f6ad",
+   "totals": [
+    586,
+    267,
+    379,
+    516
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 5
+   },
+   "seed": 63353,
+   "steps": 275,
+   "fails": 0,
+   "events": "a0fccbae7b59f67d840b692f20a1fa431cacb51dc9e17bde835ea2d4dac6a58c",
+   "state": "e5f154e26974684ff936765cb0edb4d6c322d8afdfb4f9b104316dd898b54dcf",
+   "totals": [
+    329,
+    750,
+    146,
+    679
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 5
+   },
+   "seed": 71272,
+   "steps": 251,
+   "fails": 0,
+   "events": "3258cc09b42b521b9d5e9bf40f4dd860e22321d9fec95b58c04912b75d4c72fa",
+   "state": "48efc14b235ec5c9c2b82b08d12dc5015463664c131b8e60357403cfbbc7be13",
+   "totals": [
+    637,
+    129,
+    395,
+    329
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 5
+   },
+   "seed": 79191,
+   "steps": 232,
+   "fails": 0,
+   "events": "d0e5756c5bd51b8c5cde0f6b52ae27dc16b6a3df7407b1c9ece172f8dce407b7",
+   "state": "2a051779a1a5da90d1625999f1f1eba6aa541e5a1e993580728d76876cbce921",
+   "totals": [
+    580,
+    764,
+    349,
+    546
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 5
+   },
+   "seed": 87110,
+   "steps": 285,
+   "fails": 0,
+   "events": "9724c41e7319b789b6c37b357b9b88cb80d439f02727cd62443c54a765e9fe68",
+   "state": "e953589ba2e49d512e94d81a8c48b0e6fe4a2e172dd846affd91e4246da2e077",
+   "totals": [
+    914,
+    578,
+    907,
+    377
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 5
+   },
+   "seed": 95029,
+   "steps": 271,
+   "fails": 0,
+   "events": "2344f545e1b4205c21787ab9c35509fadc675c884ce4157fd0da6dc68e9484d0",
+   "state": "adee04ea90c15f8d4d4564b6b456158cdfafa6f984706d544e935f834dc69b30",
+   "totals": [
+    104,
+    667,
+    581,
+    285
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "katlama": true
+   },
+   "seed": 7921,
+   "steps": 161,
+   "fails": 0,
+   "events": "a54d0e57c69baf8690309687f9113d45f28675a4bb538d15dfa3c673b2bc49ac",
+   "state": "1f5cbadf94d1bc9ec206892ffd22ab873a47bb6319c472af4b33c78617eb1277",
+   "totals": [
+    726,
+    236,
+    394,
+    394
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "katlama": true
+   },
+   "seed": 15840,
+   "steps": 143,
+   "fails": 0,
+   "events": "3d68a4d85fac82c22f2875589d32a9594d20d6928345308ae4ca236ab1659132",
+   "state": "b832b6ce7ef3c081beba6057c5bc2e0e5c560c9868ecfb9570c947bb3579bad1",
+   "totals": [
+    410,
+    362,
+    421,
+    606
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "katlama": true
+   },
+   "seed": 23759,
+   "steps": 164,
+   "fails": 0,
+   "events": "e6e8eb2fc35fdd6a2387bfd18bba9e2e0085dc520e799ac12f908cba691af3bc",
+   "state": "6fc8a5bdd7a904e3bb4fba7740c694ef9b85b4087d62fdeb510b52bf1572d8f6",
+   "totals": [
+    564,
+    -13,
+    446,
+    312
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "katlama": true
+   },
+   "seed": 31678,
+   "steps": 160,
+   "fails": 0,
+   "events": "a16fa2e4ba7de657bff060c4d14ac028247d46b98943b39bb037ffdb5ada024b",
+   "state": "1cb94d508bc0c9dbd48e471ff04095223fbc5e7c3fe7e7e0c0b48c2a3d7842ed",
+   "totals": [
+    413,
+    339,
+    514,
+    285
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "katlama": true
+   },
+   "seed": 39597,
+   "steps": 160,
+   "fails": 0,
+   "events": "56c6f50e9a7358840df9cd3a75a997c7e07dd1d2dc5082b7daf71df84c0866f2",
+   "state": "9f12400aaeec7f67eac691fe4c915e14579d4d5edd0e085a84c93c259754a8b1",
+   "totals": [
+    596,
+    362,
+    260,
+    303
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "katlama": true
+   },
+   "seed": 47516,
+   "steps": 146,
+   "fails": 0,
+   "events": "6469f088e12daa65aa5eebd1cf029b8c4b99ee7ee1c7dd3937008e69ac2a91b0",
+   "state": "5362f6a96dc154c13b2caefe0f18c84d0ead7d9054b0e59d61aa8a57d220e530",
+   "totals": [
+    235,
+    562,
+    411,
+    580
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "katlama": true
+   },
+   "seed": 55435,
+   "steps": 146,
+   "fails": 0,
+   "events": "f8d255f86f2321e56efdb2a442f368705d4357ad175630031f6c0dd5b23a8345",
+   "state": "e61d1ff638f491dd7b4213d768ac05de6686d9c8e1357d9153d164b1e29e66fe",
+   "totals": [
+    174,
+    402,
+    349,
+    257
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "katlama": true
+   },
+   "seed": 63354,
+   "steps": 156,
+   "fails": 0,
+   "events": "4db2a74365b912e4a61cf742e8524046f14f994305bda051fe6a28edadb06f99",
+   "state": "cbff064426bb5a33d0aa157f5019f170ebee9024fa7a006c845785602c941855",
+   "totals": [
+    513,
+    274,
+    566,
+    85
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "katlama": true
+   },
+   "seed": 71273,
+   "steps": 142,
+   "fails": 0,
+   "events": "2b14c9523b291d5b02cf354735f272f8f402ba34b53018f3aff132dc748ddf6f",
+   "state": "6490ef14c224b4ed8e3efd0e26c0cb3867c945b4e2cc054ed8f16dad30216fc0",
+   "totals": [
+    202,
+    629,
+    347,
+    305
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "katlama": true
+   },
+   "seed": 79192,
+   "steps": 155,
+   "fails": 0,
+   "events": "a6fe3cd1240a780b57766a9cf7d90dc1f1ab535268f3220cf2a13d51dfac94e2",
+   "state": "9e4c3759435f1cbd19a46bf37177c73a45c009e33b4d2299d996b1bc7b159d01",
+   "totals": [
+    223,
+    578,
+    219,
+    341
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "katlama": true
+   },
+   "seed": 87111,
+   "steps": 151,
+   "fails": 0,
+   "events": "9344d1c7b918642e662ad86cb77660eefe597c3471245b0bba31d070edb9f534",
+   "state": "3fddc9836d384ca8db93a0ac1c8fc0fcc545b66df863117266248035b4a8237f",
+   "totals": [
+    478,
+    684,
+    402,
+    508
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "katlama": true
+   },
+   "seed": 95030,
+   "steps": 159,
+   "fails": 0,
+   "events": "443e26bbc9ccedf31f06dbffb71164f92a926def6448e2673013febf33616b28",
+   "state": "cce8c5a137adcf3329419e40152deafd67272524773a85db59a2dfc4fdbd11a6",
+   "totals": [
+    462,
+    274,
+    -55,
+    480
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 3,
+    "katlama": true,
+    "katlamaPartner": false
+   },
+   "seed": 7922,
+   "steps": 152,
+   "fails": 0,
+   "events": "7a52b98a4e720dbc7a176e622ceba2dd38a38304b5c8c67867e9dee048671b4c",
+   "state": "911ee1b5cf8e767cbcbf2e55c0f7be864adaacf9ce87ed9a9e76e718b3f77459",
+   "totals": [
+    0,
+    310,
+    332,
+    222
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 3,
+    "katlama": true,
+    "katlamaPartner": false
+   },
+   "seed": 15841,
+   "steps": 140,
+   "fails": 0,
+   "events": "3e64947c06de4130fb68af4ed99cac1c6c2ea22301bf35baf8ada0342ae1098c",
+   "state": "64bea22d4625219c44909e0d0d628cb88367a591cd8b9b4f0e60203a988f085b",
+   "totals": [
+    606,
+    606,
+    339,
+    305
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 3,
+    "katlama": true,
+    "katlamaPartner": false
+   },
+   "seed": 23760,
+   "steps": 120,
+   "fails": 0,
+   "events": "f5554939e376ae1c7766f7467323fe841bf85f681e536f7532de99970ed8912f",
+   "state": "42d7018c6176bdb61b1c9f7237587f319bfe589bead167978d861b0cabbe1fd4",
+   "totals": [
+    281,
+    195,
+    514,
+    99
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 3,
+    "katlama": true,
+    "katlamaPartner": false
+   },
+   "seed": 31679,
+   "steps": 183,
+   "fails": 0,
+   "events": "ed7b633e779a80eafaa40d990ae7e9816930578f29b5a44db83334088033004b",
+   "state": "66592aaa049b979551020d14596eb0db54f2ddd2d407586a992b33901ee1ac09",
+   "totals": [
+    627,
+    295,
+    338,
+    304
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 3,
+    "katlama": true,
+    "katlamaPartner": false
+   },
+   "seed": 39598,
+   "steps": 156,
+   "fails": 0,
+   "events": "e9e05123a7ba2c30cf9a9c9dc1862251e565a7a2f8398480fd0dd7cdd78c3a3e",
+   "state": "e4dee931972e47687e413fd3ea697045368dd3cdaf55225d48d5e5dea5273c1b",
+   "totals": [
+    215,
+    365,
+    128,
+    694
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 3,
+    "katlama": true,
+    "katlamaPartner": false
+   },
+   "seed": 47517,
+   "steps": 146,
+   "fails": 0,
+   "events": "10e2b56f2e99821e043c04443f990a74776497917951394c2c4aa5ffe319458c",
+   "state": "333cb64b145e8b4d767cf7745fbf13af70615b649da7f4b3af5fbff2421cf720",
+   "totals": [
+    135,
+    515,
+    9,
+    241
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 3,
+    "katlama": true,
+    "katlamaPartner": false
+   },
+   "seed": 55436,
+   "steps": 153,
+   "fails": 0,
+   "events": "7dfb25f760d920447ee738b69e091e20ce0e64deff860a44b8b438b98e360d95",
+   "state": "039d5f835c37facbd8d3f7002bc1eed072345234ae1533116bafb871a40e7913",
+   "totals": [
+    332,
+    107,
+    636,
+    352
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 3,
+    "katlama": true,
+    "katlamaPartner": false
+   },
+   "seed": 63355,
+   "steps": 159,
+   "fails": 0,
+   "events": "340b9cc917491cbf9aadb4db12ba3da6476c46ffd0816f7a6e4ef6031f8f9c83",
+   "state": "e5aadd28fb4c3a4c03d776d091dc5ae1e5832bf8aef372bc8443b940bdb9fc92",
+   "totals": [
+    411,
+    136,
+    214,
+    123
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 3,
+    "katlama": true,
+    "katlamaPartner": false
+   },
+   "seed": 71274,
+   "steps": 161,
+   "fails": 0,
+   "events": "aeab3399dc4852a0b1b60a186a18cd40a77aa2597686c0050515404e27ba6332",
+   "state": "3d4b8b10274e3a5e1cda251b3fde2aa4e45d567a0baaad7f163076c63f01d0a4",
+   "totals": [
+    260,
+    198,
+    539,
+    449
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 3,
+    "katlama": true,
+    "katlamaPartner": false
+   },
+   "seed": 79193,
+   "steps": 149,
+   "fails": 0,
+   "events": "03b254fd54d2d724edeb444f0e9fc1fe574c0abc6a9dfe43e3e1e020d5af8834",
+   "state": "9f2d69bd5cd852acf570970d018326990af01df59bae2859afdee907755e05a9",
+   "totals": [
+    562,
+    542,
+    542,
+    331
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 3,
+    "katlama": true,
+    "katlamaPartner": false
+   },
+   "seed": 87112,
+   "steps": 141,
+   "fails": 0,
+   "events": "e7958379e01923ac2b2c6a851db6505389cde0bf8dc41469e839e1619901daf1",
+   "state": "746a32137731182d9ea38a38341708d164537a8a984c3101f3b4d9a9d736b0fb",
+   "totals": [
+    307,
+    232,
+    594,
+    78
+   ]
+  },
+  {
+   "opts": {
+    "mode": "pairs",
+    "hands": 3,
+    "katlama": true,
+    "katlamaPartner": false
+   },
+   "seed": 95031,
+   "steps": 153,
+   "fails": 0,
+   "events": "07469ae675a80496bb3124fc65333887a4c49e9293347e0ba8ffd411d838e0e6",
+   "state": "5a0f8db9dd2f10da1ee7c89065f69c5ac49c4d49765a22368e64f2033bc2c4b2",
+   "totals": [
+    345,
+    423,
+    566,
+    490
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "isle": false
+   },
+   "seed": 7923,
+   "steps": 129,
+   "fails": 0,
+   "events": "01378ee3fa3adee18fb14225c89d3cd5e333067e18421334bffb984bb91397df",
+   "state": "b2a381c643cdf8b4ee3f8162b327baf3a66a0e48d5ccd4faaec9d9045cbacf7a",
+   "totals": [
+    420,
+    33,
+    716,
+    573
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "isle": false
+   },
+   "seed": 15842,
+   "steps": 139,
+   "fails": 0,
+   "events": "2f941b933daddde18a6aa85f3d23bb4a7ad5bbad61afad78b11bbe96fb9f75a0",
+   "state": "2f88ab3952407b4e45f0c8c1145dec305bdcbfa341bb0d329df9b40dde023dea",
+   "totals": [
+    5,
+    457,
+    453,
+    381
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "isle": false
+   },
+   "seed": 23761,
+   "steps": 153,
+   "fails": 0,
+   "events": "04a71fad106927c5cefadee9ce153ab35df38675ba9c2deda72017e16ea6ca67",
+   "state": "c488355b581150a9171a3ee9656e8100b3a9488ff959c2b2e0893ac87f54fefd",
+   "totals": [
+    229,
+    284,
+    772,
+    221
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "isle": false
+   },
+   "seed": 31680,
+   "steps": 140,
+   "fails": 0,
+   "events": "3cc39a1da57542d08fa392fed07e46ae17bb6a2e836a96308c018f5fc4776a95",
+   "state": "d6658ae07e9a738b72839cfdc39838c28eff6ad2abc721eef74f19dd8103d0ab",
+   "totals": [
+    696,
+    161,
+    404,
+    336
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "isle": false
+   },
+   "seed": 39599,
+   "steps": 148,
+   "fails": 0,
+   "events": "c9cb1f7e848a507fa9a45b4faf6aac7406bb488e9dd693f42932e51a00ef9f68",
+   "state": "d8bd2d47dad895b7909d7fc89110b35dcaef72ad2c85362902c5430d11271ae4",
+   "totals": [
+    208,
+    381,
+    766,
+    494
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "isle": false
+   },
+   "seed": 47518,
+   "steps": 148,
+   "fails": 0,
+   "events": "e17b1918130f5c36c8207c0098abc63963d5ad7b317e90b13c9909fb2241697d",
+   "state": "8f6fc8aaa29c5e0bf7f4a247dab87580b64f5d7eaa8e5f95838d75c08f5c832b",
+   "totals": [
+    390,
+    73,
+    348,
+    323
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "isle": false
+   },
+   "seed": 55437,
+   "steps": 148,
+   "fails": 0,
+   "events": "89f95a368f1d824ca3c2cfd8095fc260a4d34735e90605e259453fbf21fb0333",
+   "state": "62033322ff50e7b1b13b7ec5631288c52722a92c20dfa000f433dd5b77ac5f3d",
+   "totals": [
+    184,
+    479,
+    68,
+    603
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "isle": false
+   },
+   "seed": 63356,
+   "steps": 145,
+   "fails": 0,
+   "events": "b690dc429d67f4b302ce26f1eea806e5f8d8aee640bad5ef441fd59a0f6a25f9",
+   "state": "012f8ca75e789d283830e131ad2a3426ca736fcc0c89591b24e56e844053aa5d",
+   "totals": [
+    620,
+    407,
+    404,
+    419
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "isle": false
+   },
+   "seed": 71275,
+   "steps": 142,
+   "fails": 0,
+   "events": "143d6b9cc374c6653dbf968e0353a915c36552ef99753310390c5ff86916eb2a",
+   "state": "5e78e0921d6e1979a66a91a2205253de1db6e499c99b4e86463babf565e15f87",
+   "totals": [
+    86,
+    534,
+    325,
+    508
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "isle": false
+   },
+   "seed": 79194,
+   "steps": 141,
+   "fails": 0,
+   "events": "696089efa9d5f9300d9e009c6cdcf5f1e0a9ad9771be5f191c2eb1d4c151f533",
+   "state": "24b5c3a412eedcb259bcffba7827c637e49333a56322b340fbe94b37bc79cbf2",
+   "totals": [
+    449,
+    556,
+    97,
+    284
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "isle": false
+   },
+   "seed": 87113,
+   "steps": 154,
+   "fails": 0,
+   "events": "29b42b2163a7ab20a41e3cf132c775a8217412d8eadfb219e50b34a2784153f6",
+   "state": "0cd25be9b387aa8b9bd64b41930809e22e0395f2c52d08aad8630427c7dd1300",
+   "totals": [
+    330,
+    161,
+    366,
+    284
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "isle": false
+   },
+   "seed": 95032,
+   "steps": 157,
+   "fails": 0,
+   "events": "b70f704afec46e88be3f294a9977652d24c6eb395db1949d503045cf7ec4e03e",
+   "state": "c7d8c735ea1fe1464551b57b51e65a58b1e708063bdd6691fb9dcc5f49fd4d08",
+   "totals": [
+    227,
+    461,
+    339,
+    550
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "penalties": false
+   },
+   "seed": 7924,
+   "steps": 142,
+   "fails": 0,
+   "events": "db6a62952098633b25603e0a0c613cd23b46c67fca933a6f3762c401112bd921",
+   "state": "09299cb011314d15a0c8ddd956fc597097d870161ad29a8551fa0a8f3393c27c",
+   "totals": [
+    134,
+    -62,
+    224,
+    234
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "penalties": false
+   },
+   "seed": 15843,
+   "steps": 172,
+   "fails": 0,
+   "events": "f886c969305661771c190bca0cf2edbbc0b0a91e3a0a27f6ef40d6ee614def79",
+   "state": "ab9688c53d242f829ed611a6878b40423f21eddcbb297f6c7d9fedcc918fb508",
+   "totals": [
+    -4,
+    428,
+    117,
+    429
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "penalties": false
+   },
+   "seed": 23762,
+   "steps": 151,
+   "fails": 0,
+   "events": "61e24ec55768f17a3db1d9a205551374f5dd60ed1a6d62a68451bf5e194f9fea",
+   "state": "603a771f0f871fb4d87535460f94a341499db9fd135d5f62e54a0c0531508d8a",
+   "totals": [
+    241,
+    33,
+    -303,
+    261
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "penalties": false
+   },
+   "seed": 31681,
+   "steps": 142,
+   "fails": 0,
+   "events": "750d0168103e25276c61f5cffc443b83ba3b64d8304f5d32fb1b1e50cc0194ef",
+   "state": "bd96c6ee64525377c71ee64bf12b05bceabbb6cd68c78bf9ba0da87bdf77c9a7",
+   "totals": [
+    231,
+    33,
+    412,
+    124
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "penalties": false
+   },
+   "seed": 39600,
+   "steps": 161,
+   "fails": 0,
+   "events": "9f8c846fec4ec6681de4ba072fe747ec4d72a8c6e5cc00bde903a716840ebfd2",
+   "state": "88ec43ba412a916139b74fc9d4aec6c85b8dfba1d3e49d72cc4df4a26718f0b6",
+   "totals": [
+    -81,
+    232,
+    343,
+    424
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "penalties": false
+   },
+   "seed": 47519,
+   "steps": 154,
+   "fails": 0,
+   "events": "721af9946010e0be393dc8e06dbec330a65b6d6e7cb2f5e794a7d896a0b3b8da",
+   "state": "1a8da91a9004273978e3b480d0c1bf3dc7c14740f8823b720488b178f428eb21",
+   "totals": [
+    117,
+    101,
+    246,
+    606
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "penalties": false
+   },
+   "seed": 55438,
+   "steps": 128,
+   "fails": 0,
+   "events": "b8c6a3689a649c4e0529c5c3d8bec2b3271c1ccc7e6575772d9df8ca89b5f77d",
+   "state": "e86f535cd5f50c7803fc002c4c0f9b4580e3d65ac2dac13656a9623a728b2726",
+   "totals": [
+    -101,
+    490,
+    611,
+    40
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "penalties": false
+   },
+   "seed": 63357,
+   "steps": 171,
+   "fails": 0,
+   "events": "d8695f82d2da6f848cac20907c3f0de200c5f4900d69f8a87dbf85ba446079d5",
+   "state": "d421d8ae6325957292ca4b632d5401ed12eb821b4b346172061278c394396740",
+   "totals": [
+    237,
+    258,
+    -83,
+    235
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "penalties": false
+   },
+   "seed": 71276,
+   "steps": 140,
+   "fails": 0,
+   "events": "c6123fd23dd79482bfd031109e7393eb42486e9dcb9339d4d5de0d53e91113c2",
+   "state": "2045a8d38fd59d307fedd325e0beac28e996f01976a0d2e7ca8095e559ee7633",
+   "totals": [
+    351,
+    62,
+    606,
+    303
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "penalties": false
+   },
+   "seed": 79195,
+   "steps": 179,
+   "fails": 0,
+   "events": "8aee6aa06858b6dbd136eaaab6d831fa565e96e35b00996ba42693db97716ad0",
+   "state": "fffbcf7d78fff764c0db8f5da831f4f9e17c4e7a4a0e2e8940a3fef7f64edc9f",
+   "totals": [
+    405,
+    71,
+    213,
+    248
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "penalties": false
+   },
+   "seed": 87114,
+   "steps": 169,
+   "fails": 0,
+   "events": "3e027850542c1a117e0cd6c79ec3253090bfa83f7aeba7a1c61d0c98ea6832ee",
+   "state": "e769c377dec87707169198f2f0600c3bead43e1e9bf8ba1d5865c0ed195b3c32",
+   "totals": [
+    2,
+    44,
+    249,
+    226
+   ]
+  },
+  {
+   "opts": {
+    "mode": "solo",
+    "hands": 3,
+    "penalties": false
+   },
+   "seed": 95033,
+   "steps": 139,
+   "fails": 0,
+   "events": "bc051f49db3ab0a2b3e2283ece3b9ba392a55b961abffe93a624bbae9b809448",
+   "state": "f23fbfc697cb56dd9f53f981fee30fba25ffb72e691c28192d0f91304156c244",
+   "totals": [
+    244,
+    -31,
+    303,
+    129
+   ]
+  }
+ ]
+}

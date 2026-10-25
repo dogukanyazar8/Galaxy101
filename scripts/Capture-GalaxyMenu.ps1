@@ -24,7 +24,7 @@ try{
 }finally{if(-not $process.HasExited){$process.Kill($true);$process.WaitForExit()};$process.Dispose()}
 $manifest=Get-Content -LiteralPath (Join-Path $outputRoot 'manifest.json') -Raw | ConvertFrom-Json
 if($manifest.status -ne 'completed' -or $manifest.captures.Count -ne 56 -or @($manifest.captures|Where-Object{-not $_.nonblank}).Count -ne 0){throw 'Capture manifest is incomplete or contains blank frames.'}
-$referenceRoot=Join-Path $PSScriptRoot '../Design/galaxy101_unity_handoff/screenshots'
+$referenceRoot=Join-Path $PSScriptRoot '../Design/old/galaxy101_unity_handoff/screenshots'
 $expected=@(Get-ChildItem -LiteralPath $referenceRoot -Filter '*.png' -File|Select-Object -ExpandProperty Name)
 $actual=@($manifest.captures|Where-Object reference|Select-Object -ExpandProperty file)
 if(Compare-Object $expected $actual){throw 'Capture did not cover the exact supplied reference set.'}

@@ -74,7 +74,7 @@ namespace Galaxy101.Tests
             string path = Path.Combine(Path.GetTempPath(), "galaxy101-fps-" + Guid.NewGuid().ToString("N") + ".json");
             try
             {
-                MenuModel New() => new MenuModel(File.ReadAllText("Design/galaxy101_unity_handoff/spec/data/content.json"), File.ReadAllText("Design/galaxy101_unity_handoff/spec/data/themes.json"), path);
+                MenuModel New() => new MenuModel(File.ReadAllText("Assets/Galaxy101/Resources/Galaxy101/content.json"), File.ReadAllText("Assets/Galaxy101/Resources/Galaxy101/themes.json"), path);
                 var model = New();
                 Assert.That((int)model.Settings["fps"], Is.EqualTo(FramePacing.Auto));
                 var services = new MenuServices(model);

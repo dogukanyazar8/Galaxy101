@@ -1,0 +1,1157 @@
+{
+ "suite": "open",
+ "version": "0.4.0",
+ "note": "Aksi belirtilmedikçe gösterge B6a → okey B7 (B7a, B7b), sahte okey Ja/Jb = B7.",
+ "tests": [
+  {
+   "id": "OPEN-01",
+   "title": "101 açma: 46 + 33 + 26 = 105",
+   "rules": [
+    "R-20"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "K10a",
+       "K11a",
+       "K12a",
+       "K13a",
+       "Y11a",
+       "R11a",
+       "B11a",
+       "Y5a",
+       "Y6a",
+       "Y7a",
+       "Y8a",
+       "R2a",
+       "R6b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "K10a",
+         "K11a",
+         "K12a",
+         "K13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "Y11a",
+         "R11a",
+         "B11a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "Y5a",
+         "Y6a",
+         "Y7a",
+         "Y8a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "opened",
+        "seat": 0,
+        "mode": "run",
+        "value": 105
+       }
+      ],
+      "state": {
+       "hand.opened.0": 105,
+       "hand.openMode.0": "run",
+       "hand.racks.0#set": [
+        "R2a",
+        "R6b"
+       ],
+       "hand.melds#len": 3
+      }
+     }
+    },
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "R2a",
+         "R6b"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "error": "E_ALREADY_OPENED"
+     }
+    }
+   ]
+  },
+  {
+   "id": "OPEN-02",
+   "title": "Eksik açılış 79 / 101: kabul edilir, taşlar ıstakaya döner, +101",
+   "rules": [
+    "R-23",
+    "R-40"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "K10a",
+       "K11a",
+       "K12a",
+       "K13a",
+       "Y11a",
+       "R11a",
+       "B11a",
+       "Y5a",
+       "Y6a",
+       "Y7a",
+       "Y8a",
+       "R2a",
+       "R6b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "K10a",
+         "K11a",
+         "K12a",
+         "K13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "Y11a",
+         "R11a",
+         "B11a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "openShort",
+        "seat": 0,
+        "value": 79,
+        "need": 101
+       },
+       {
+        "e": "penalty",
+        "seat": 0,
+        "code": "P_OPEN_SHORT",
+        "amount": 101
+       }
+      ],
+      "state": {
+       "hand.opened.0": 0,
+       "hand.racks.0#len": 13,
+       "hand.melds#len": 0,
+       "hand.pen.0": 101
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "OPEN-03",
+   "title": "5 çift açma; çift açan sonra yalnız çift açabilir",
+   "rules": [
+    "R-21",
+    "R-24"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R5a",
+       "R5b",
+       "Y9a",
+       "Y9b",
+       "K1a",
+       "K1b",
+       "B2a",
+       "B2b",
+       "R13a",
+       "B7a",
+       "Y3a",
+       "K7a",
+       "K8a",
+       "K9a"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "pair",
+        "tiles": [
+         "R5a",
+         "R5b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "Y9a",
+         "Y9b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "K1a",
+         "K1b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "B2a",
+         "B2b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "R13a",
+         "B7a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.opened.0": 5,
+       "hand.openMode.0": "pair",
+       "hand.racks.0#len": 4
+      }
+     }
+    },
+    {
+     "do": {
+      "t": "lay",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "K7a",
+         "K8a",
+         "K9a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "error": "E_OPEN_MODE"
+     }
+    }
+   ]
+  },
+  {
+   "id": "OPEN-04",
+   "title": "Eksik çift açılışı 4 / 5: +101",
+   "rules": [
+    "R-23",
+    "R-40"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R5a",
+       "R5b",
+       "Y9a",
+       "Y9b",
+       "K1a",
+       "K1b",
+       "B2a",
+       "B2b",
+       "R13a",
+       "B7a",
+       "Y3a",
+       "K7a",
+       "K8a",
+       "K9a"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "pair",
+        "tiles": [
+         "R5a",
+         "R5b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "Y9a",
+         "Y9b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "K1a",
+         "K1b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "B2a",
+         "B2b"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "openShort",
+        "mode": "pair",
+        "value": 4,
+        "need": 5
+       }
+      ],
+      "state": {
+       "hand.opened.0": 0,
+       "hand.pen.0": 101
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "OPEN-05",
+   "title": "Seri ve çift aynı açılışta karışmaz",
+   "rules": [
+    "R-22"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R5a",
+       "R5b",
+       "Y9a",
+       "Y9b",
+       "K1a",
+       "K1b",
+       "B2a",
+       "B2b",
+       "R13a",
+       "B7a",
+       "Y3a",
+       "K7a",
+       "K8a",
+       "K9a"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "pair",
+        "tiles": [
+         "R5a",
+         "R5b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "Y9a",
+         "Y9b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "K1a",
+         "K1b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "B2a",
+         "B2b"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "K7a",
+         "K8a",
+         "K9a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "error": "E_MELD_MIX"
+     }
+    }
+   ]
+  },
+  {
+   "id": "OPEN-06",
+   "title": "Geçersiz per reddedilir (ceza yok)",
+   "rules": [
+    "R-22"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "K10a",
+       "K11a",
+       "K12a",
+       "K13a",
+       "Y11a",
+       "R11a",
+       "B11a",
+       "Y5a",
+       "Y6a",
+       "Y7a",
+       "Y8a",
+       "R2a",
+       "R6b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "K10a",
+         "K11a",
+         "R2a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "error": "E_MELD_INVALID"
+     }
+    }
+   ]
+  },
+  {
+   "id": "OPEN-07",
+   "title": "Açarken ıstakada en az 1 taş kalmalı",
+   "rules": [
+    "R-35"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "K10a",
+       "K11a",
+       "K12a",
+       "K13a",
+       "Y11a",
+       "R11a",
+       "B11a",
+       "Y5a",
+       "Y6a",
+       "Y7a",
+       "Y8a"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "K10a",
+         "K11a",
+         "K12a",
+         "K13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "Y11a",
+         "R11a",
+         "B11a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "Y5a",
+         "Y6a",
+         "Y7a",
+         "Y8a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "error": "E_LAST_TILE"
+     }
+    }
+   ]
+  },
+  {
+   "id": "OPEN-08",
+   "title": "Geri topla: açılış geri alınır, ceza yok; ikinci kez geri alınamaz",
+   "rules": [
+    "R-34"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "K10a",
+       "K11a",
+       "K12a",
+       "K13a",
+       "Y11a",
+       "R11a",
+       "B11a",
+       "Y5a",
+       "Y6a",
+       "Y7a",
+       "Y8a",
+       "R2a",
+       "R6b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "K10a",
+         "K11a",
+         "K12a",
+         "K13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "Y11a",
+         "R11a",
+         "B11a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "Y5a",
+         "Y6a",
+         "Y7a",
+         "Y8a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true
+     }
+    },
+    {
+     "do": {
+      "t": "undo",
+      "seat": 0
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.opened.0": 0,
+       "hand.openMode.0": null,
+       "hand.racks.0#len": 13,
+       "hand.melds#len": 0,
+       "hand.pen.0": 0
+      }
+     }
+    },
+    {
+     "do": {
+      "t": "undo",
+      "seat": 0
+     },
+     "expect": {
+      "error": "E_NO_UNDO"
+     }
+    }
+   ]
+  },
+  {
+   "id": "OPEN-09",
+   "title": "Açılış puanı sabit: sonra yere açmak puanı artırmaz",
+   "rules": [
+    "R-24"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "K10a",
+       "K11a",
+       "K12a",
+       "K13a",
+       "Y11a",
+       "R11a",
+       "B11a",
+       "Y5a",
+       "Y6a",
+       "Y7a",
+       "Y8a",
+       "R2a",
+       "R6b",
+       "R3a",
+       "R4a"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "K10a",
+         "K11a",
+         "K12a",
+         "K13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "Y11a",
+         "R11a",
+         "B11a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "Y5a",
+         "Y6a",
+         "Y7a",
+         "Y8a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true
+     }
+    },
+    {
+     "do": {
+      "t": "lay",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "R2a",
+         "R3a",
+         "R4a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.opened.0": 105,
+       "hand.melds#len": 4,
+       "hand.racks.0": [
+        "R6b"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "OPEN-10",
+   "title": "Seri açan aynı turda çift de açar; açılış türü seri kalır",
+   "rules": [
+    "R-24"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "K7a",
+       "K8a",
+       "K9a",
+       "K10a",
+       "K11a",
+       "K12a",
+       "K13a",
+       "R11a",
+       "Y11a",
+       "B11a",
+       "R5a",
+       "R5b",
+       "Y9a",
+       "Y9b",
+       "B3a"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "openMode": [
+      null,
+      null,
+      null,
+      null
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "K7a",
+         "K8a",
+         "K9a",
+         "K10a",
+         "K11a",
+         "K12a",
+         "K13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "R11a",
+         "Y11a",
+         "B11a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.opened.0": 103,
+       "hand.openMode.0": "run"
+      }
+     }
+    },
+    {
+     "do": {
+      "t": "lay",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "pair",
+        "tiles": [
+         "R5a",
+         "R5b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "Y9a",
+         "Y9b"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.openMode.0": "run",
+       "hand.opened.0": 103,
+       "hand.racks.0#len": 1
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "OPEN-11",
+   "title": "Seri açmış oyuncu sonraki turda çift açar",
+   "rules": [
+    "R-24"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "K7a",
+       "K8a",
+       "K9a",
+       "K10a",
+       "K11a",
+       "K12a",
+       "K13a",
+       "R11a",
+       "Y11a",
+       "B11a",
+       "R5a",
+       "R5b",
+       "Y9a",
+       "Y9b",
+       "B3a"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      103,
+      0,
+      0,
+      0
+     ],
+     "openMode": [
+      "run",
+      null,
+      null,
+      null
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "lay",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "pair",
+        "tiles": [
+         "R5a",
+         "R5b"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.openMode.0": "run",
+       "hand.melds#len": 1
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

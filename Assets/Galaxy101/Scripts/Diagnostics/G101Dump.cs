@@ -76,8 +76,9 @@ namespace Galaxy101.Diagnostics
                 var root = doc.rootVisualElement; var (frame, k) = Canvas(root);
                 foreach (var label in root.Query<TextElement>().ToList())
                 {
+                    if (label is GalaxyButton) continue;   // its "button-caption" child draws the text
                     string text = Regex.Replace(label.text ?? "", "<[^>]+>", "");
-                    if (string.IsNullOrWhiteSpace(text) || !Visible(label)) continue;
+                    if (string.IsNullOrWhiteSpace(text) || !Visible(label) || label.resolvedStyle.color.a < .02f) continue;
                     var b = label.worldBound; if (b.width < 1 || b.height < 1) continue;
                     var p = label.resolvedStyle;
                     float x = b.x + p.paddingLeft + p.borderLeftWidth, y = b.y + p.paddingTop + p.borderTopWidth;

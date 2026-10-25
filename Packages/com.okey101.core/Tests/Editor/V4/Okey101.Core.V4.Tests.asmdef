@@ -1,0 +1,10 @@
+{
+  "name": "Okey101.Core.V4.Tests",
+  "rootNamespace": "Okey101.Core.V4.Tests",
+  "references": ["Okey101.Core"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false,
+  "overrideReferences": true,
+  "precompiledReferences": ["Newtonsoft.Json.dll", "nunit.framework.dll"]
+}

@@ -1,0 +1,50 @@
+<Project>
+  <!--
+    SDK NUnit project that compiles the Unity-free core, bots and application code plus their EditMode tests,
+    so rules work can be verified without opening Unity. Output goes to the temp folder, outside the repo.
+    Run from the repo root (scenario fixtures load by relative path):
+      dotnet test tools/v4/nunit/CoreV4Tests.csproj
+  -->
+  <PropertyGroup>
+    <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../../..'))</RepoRoot>
+    <ScratchRoot>$([System.IO.Path]::Combine($([System.IO.Path]::GetTempPath()), 'okey101-v4-rules-nunit'))</ScratchRoot>
+    <BaseIntermediateOutputPath>$(ScratchRoot)/obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(ScratchRoot)/obj/</MSBuildProjectExtensionsPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <OutputPath>$(ScratchRoot)/bin/</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <DefineConstants>$(DefineConstants);UNITY_EDITOR;OKEY_DIAGNOSTICS</DefineConstants>
+    <RootNamespace>Okey101.Core.V4Tests</RootNamespace>
+    <AssemblyName>Okey101.CoreV4Tests</AssemblyName>
+    <NoWarn>$(NoWarn);CS1591;NU1603</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>RepoRoot</_Parameter1>
+      <_Parameter2>$(RepoRoot)</_Parameter2>
+    </AssemblyAttribute>
+    <Compile Include="$(MSBuildThisFileDirectory)*.cs" />
+    <Compile Include="$(RepoRoot)/Packages/com.okey101.core/Runtime/**/*.cs" Link="Core/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(RepoRoot)/Packages/com.okey101.core/Tests/**/*.cs" Link="CoreTests/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(RepoRoot)/Assets/Okey101/Bots/**/*.cs" Link="Bots/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(RepoRoot)/Assets/Okey101/Application/**/*.cs" Link="Application/%(RecursiveDir)%(Filename)%(Extension)" />
+    <!-- SimulationTests logs through UnityEngine.Debug; it is the only EditMode test that needs the engine. -->
+    <Compile Include="$(RepoRoot)/Assets/Okey101/Tests/EditMode/**/*.cs" Exclude="$(RepoRoot)/Assets/Okey101/Tests/EditMode/SimulationTests.cs" Link="AppTests/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

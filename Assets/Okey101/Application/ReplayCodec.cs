@@ -24,6 +24,15 @@ namespace Okey101.Application
         public ReplayRecord(RoundState initialState, IReadOnlyList<GameCommand> commands, string expectedFinalHash)
         { InitialState = initialState ?? throw new ArgumentNullException(nameof(initialState)); Commands = Array.AsReadOnly(commands.ToArray()); ExpectedFinalHash = expectedFinalHash; }
     }
+    /// <summary>A record opened by <see cref="ReplayCodec.ReadAny"/>: exactly one of Legacy (old engine) or V4 is set.</summary>
+    public sealed class ReplayDocument
+    {
+        public RecordEngine Engine { get; }
+        public ReplayRecord Legacy { get; }
+        public V4ReplayRecord V4 { get; }
+        public ReplayDocument(ReplayRecord legacy) { Engine = RecordEngine.Legacy; Legacy = legacy ?? throw new ArgumentNullException(nameof(legacy)); }
+        public ReplayDocument(V4ReplayRecord v4) { Engine = RecordEngine.V4; V4 = v4 ?? throw new ArgumentNullException(nameof(v4)); }
+    }
     public sealed class ReplayCodec
     {
         public const int MaxBytes = 20 * 1024 * 1024, MaxCommands = 2000;
@@ -33,8 +42,64 @@ namespace Okey101.Application
         {
             var target = Resolve(path);
             if (!Restore(record, CancellationToken.None).Success) throw new ArgumentException("Replay validation failed.", nameof(record));
-            var bytes = DiagnosticsJson.Encode(DiagnosticsJson.Document(record));
-            if (bytes.Length > MaxBytes) throw new ArgumentException("Replay exceeds the 20 MiB limit.", nameof(record));
+            WriteBytes(DiagnosticsJson.Encode(DiagnosticsJson.Document(record)), path, target, nameof(record));
+        }
+        /// <summary>K-02: writes a v4 match record (101-v4 / mulberry32-v4) after checking that it replays to its hash.</summary>
+        public void WriteV4(V4ReplayRecord record, string path)
+        {
+            var target = Resolve(path);
+            if (record == null || !V4Replay.Restore(record).Success) throw new ArgumentException("Replay validation failed.", nameof(record));
+            WriteBytes(V4Replay.Encode(record), path, target, nameof(record));
+        }
+        /// <summary>K-02: opens a record with the engine its versions name (101-v1 → old engine, 101-v4 → v4); other versions fail.</summary>
+        public RuleResult<ReplayDocument> ReadAny(string path)
+        {
+            try
+            {
+                var target = Resolve(path);
+                byte[] bytes;
+                using (var stream = new FileStream(target, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    if (stream.Length > MaxBytes) return RuleResult<ReplayDocument>.Fail(ErrorCode.InvalidState);
+                    using (var reader = new BinaryReader(stream)) bytes = reader.ReadBytes(MaxBytes + 1);
+                }
+                return DecodeAny(bytes);
+            }
+            catch (IOException) { return RuleResult<ReplayDocument>.Fail(ErrorCode.InvalidState); }
+            catch (UnauthorizedAccessException) { return RuleResult<ReplayDocument>.Fail(ErrorCode.InvalidState); }
+            catch (ArgumentException) { return RuleResult<ReplayDocument>.Fail(ErrorCode.InvalidState); }
+        }
+        internal static RuleResult<ReplayDocument> DecodeAny(byte[] bytes)
+        {
+            if (bytes == null || bytes.Length > MaxBytes) return RuleResult<ReplayDocument>.Fail(ErrorCode.InvalidState);
+            try
+            {
+                var v = DiagnosticsJson.Versions(bytes);
+                switch (RecordVersions.Classify(v.SchemaVersion, v.RuleVersion, v.ShuffleVersion))
+                {
+                    case RecordEngine.Legacy:
+                    {
+                        var legacy = Decode(bytes, CancellationToken.None);
+                        return legacy.Success ? RuleResult<ReplayDocument>.Ok(new ReplayDocument(legacy.Value)) : RuleResult<ReplayDocument>.Fail(legacy.Error);
+                    }
+                    case RecordEngine.V4:
+                    {
+                        var record = V4Replay.Decode(bytes);
+                        var restored = V4Replay.Restore(record);
+                        return restored.Success ? RuleResult<ReplayDocument>.Ok(new ReplayDocument(record)) : RuleResult<ReplayDocument>.Fail(restored.Error);
+                    }
+                    default: return RuleResult<ReplayDocument>.Fail(ErrorCode.InvalidState);
+                }
+            }
+            catch (SerializationException) { return RuleResult<ReplayDocument>.Fail(ErrorCode.InvalidState); }
+            catch (XmlException) { return RuleResult<ReplayDocument>.Fail(ErrorCode.InvalidState); }
+            catch (ArgumentException) { return RuleResult<ReplayDocument>.Fail(ErrorCode.InvalidState); }
+            catch (FormatException) { return RuleResult<ReplayDocument>.Fail(ErrorCode.InvalidState); }
+            catch (OverflowException) { return RuleResult<ReplayDocument>.Fail(ErrorCode.InvalidState); }
+        }
+        private void WriteBytes(byte[] bytes, string path, string target, string parameter)
+        {
+            if (bytes.Length > MaxBytes) throw new ArgumentException("Replay exceeds the 20 MiB limit.", parameter);
             Directory.CreateDirectory(root); CheckAncestors(root);
             var temporary = Path.Combine(root, ".writing-" + Guid.NewGuid().ToString("N"));
             try

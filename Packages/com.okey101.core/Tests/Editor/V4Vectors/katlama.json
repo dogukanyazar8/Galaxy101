@@ -1,0 +1,1228 @@
+{
+ "suite": "katlamali",
+ "tests": [
+  {
+   "id": "KAT-01",
+   "title": "Katlamalı seri: önceki açan 105 → 104 eksik açılış (gereken 106)",
+   "rules": [
+    "R-64"
+   ],
+   "init": {
+    "spec": {
+     "opts": {
+      "katlama": true
+     },
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R9a",
+       "R10a",
+       "R11a",
+       "R12a",
+       "R13a",
+       "B9a",
+       "B10a",
+       "B11a",
+       "B12a",
+       "B13a",
+       "K4a",
+       "Y4a",
+       "R4a",
+       "K1a",
+       "K2a"
+      ],
+      [
+       "Y8a"
+      ],
+      [
+       "Y9a"
+      ],
+      [
+       "Y10a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      105,
+      0,
+      0
+     ],
+     "openMode": [
+      null,
+      "run",
+      null,
+      null
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 9
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "R10a",
+         "R11a",
+         "R12a",
+         "R13a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "B10a",
+         "B11a",
+         "B12a",
+         "B13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "K4a",
+         "Y4a",
+         "R4a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "openShort",
+        "need": 106
+       }
+      ],
+      "state": {
+       "hand.opened.0": 0
+      }
+     }
+    },
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "R9a",
+         "R10a",
+         "R11a",
+         "R12a",
+         "R13a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "B9a",
+         "B10a",
+         "B11a",
+         "B12a",
+         "B13a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "opened",
+        "value": 110
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "KAT-02",
+   "title": "Klasik (katlamasız): önceki açan 105 → 104 yeter",
+   "rules": [
+    "R-20"
+   ],
+   "init": {
+    "spec": {
+     "opts": {
+      "katlama": false
+     },
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R9a",
+       "R10a",
+       "R11a",
+       "R12a",
+       "R13a",
+       "B9a",
+       "B10a",
+       "B11a",
+       "B12a",
+       "B13a",
+       "K4a",
+       "Y4a",
+       "R4a",
+       "K1a",
+       "K2a"
+      ],
+      [
+       "Y8a"
+      ],
+      [
+       "Y9a"
+      ],
+      [
+       "Y10a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      105,
+      0,
+      0
+     ],
+     "openMode": [
+      null,
+      "run",
+      null,
+      null
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 9
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "R10a",
+         "R11a",
+         "R12a",
+         "R13a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "B10a",
+         "B11a",
+         "B12a",
+         "B13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "K4a",
+         "Y4a",
+         "R4a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "opened",
+        "value": 104
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "KAT-03",
+   "title": "Katlamalı: tam önceki + 1 kabul (103 → 104)",
+   "rules": [
+    "R-64"
+   ],
+   "init": {
+    "spec": {
+     "opts": {
+      "katlama": true
+     },
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R9a",
+       "R10a",
+       "R11a",
+       "R12a",
+       "R13a",
+       "B9a",
+       "B10a",
+       "B11a",
+       "B12a",
+       "B13a",
+       "K4a",
+       "Y4a",
+       "R4a",
+       "K1a",
+       "K2a"
+      ],
+      [
+       "Y8a"
+      ],
+      [
+       "Y9a"
+      ],
+      [
+       "Y10a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      103,
+      0,
+      0
+     ],
+     "openMode": [
+      null,
+      "run",
+      null,
+      null
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 9
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "R10a",
+         "R11a",
+         "R12a",
+         "R13a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "B10a",
+         "B11a",
+         "B12a",
+         "B13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "K4a",
+         "Y4a",
+         "R4a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "opened",
+        "value": 104
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "KAT-04",
+   "title": "Seri açılış çift eşiğini yükseltmez: önceki seri 120 → 5 çift yeter",
+   "rules": [
+    "R-64"
+   ],
+   "init": {
+    "spec": {
+     "opts": {
+      "katlama": true
+     },
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R1a",
+       "R1b",
+       "R2a",
+       "R2b",
+       "R3a",
+       "R3b",
+       "Y5a",
+       "Y5b",
+       "K8a",
+       "K8b",
+       "B9a"
+      ],
+      [
+       "Y8a"
+      ],
+      [
+       "Y9a"
+      ],
+      [
+       "Y10a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      120,
+      0,
+      0
+     ],
+     "openMode": [
+      null,
+      "run",
+      null,
+      null
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 9
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "pair",
+        "tiles": [
+         "R1a",
+         "R1b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "R2a",
+         "R2b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "R3a",
+         "R3b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "Y5a",
+         "Y5b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "K8a",
+         "K8b"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "opened",
+        "mode": "pair",
+        "value": 5
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "KAT-05",
+   "title": "Önceki çift 5 → 5 çift eksik (gereken 6)",
+   "rules": [
+    "R-64"
+   ],
+   "init": {
+    "spec": {
+     "opts": {
+      "katlama": true
+     },
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R1a",
+       "R1b",
+       "R2a",
+       "R2b",
+       "R3a",
+       "R3b",
+       "Y5a",
+       "Y5b",
+       "K8a",
+       "K8b",
+       "B9a"
+      ],
+      [
+       "Y8a"
+      ],
+      [
+       "Y9a"
+      ],
+      [
+       "Y10a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      5,
+      0,
+      0
+     ],
+     "openMode": [
+      null,
+      "pair",
+      null,
+      null
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 9
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "pair",
+        "tiles": [
+         "R1a",
+         "R1b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "R2a",
+         "R2b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "R3a",
+         "R3b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "Y5a",
+         "Y5b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "K8a",
+         "K8b"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "openShort",
+        "mode": "pair",
+        "need": 6
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "KAT-06",
+   "title": "Çift açılış seri eşiğini yükseltmez: önceki 7 çift → 104 seri yeter",
+   "rules": [
+    "R-64"
+   ],
+   "init": {
+    "spec": {
+     "opts": {
+      "katlama": true
+     },
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R9a",
+       "R10a",
+       "R11a",
+       "R12a",
+       "R13a",
+       "B9a",
+       "B10a",
+       "B11a",
+       "B12a",
+       "B13a",
+       "K4a",
+       "Y4a",
+       "R4a",
+       "K1a",
+       "K2a"
+      ],
+      [
+       "Y8a"
+      ],
+      [
+       "Y9a"
+      ],
+      [
+       "Y10a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      7,
+      0,
+      0
+     ],
+     "openMode": [
+      null,
+      "pair",
+      null,
+      null
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 9
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "R10a",
+         "R11a",
+         "R12a",
+         "R13a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "B10a",
+         "B11a",
+         "B12a",
+         "B13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "K4a",
+         "Y4a",
+         "R4a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "opened",
+        "value": 104
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "KAT-07",
+   "title": "En yüksek önceki açılış geçerli: 102 ve 109 açılmış → gereken 110",
+   "rules": [
+    "R-64"
+   ],
+   "init": {
+    "spec": {
+     "opts": {
+      "katlama": true
+     },
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R9a",
+       "R10a",
+       "R11a",
+       "R12a",
+       "R13a",
+       "B9a",
+       "B10a",
+       "B11a",
+       "B12a",
+       "B13a",
+       "K4a",
+       "Y4a",
+       "R4a",
+       "K1a",
+       "K2a"
+      ],
+      [
+       "Y8a"
+      ],
+      [
+       "Y9a"
+      ],
+      [
+       "Y10a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      102,
+      109,
+      0
+     ],
+     "openMode": [
+      null,
+      "run",
+      "run",
+      null
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 9
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "R10a",
+         "R11a",
+         "R12a",
+         "R13a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "B10a",
+         "B11a",
+         "B12a",
+         "B13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "K4a",
+         "Y4a",
+         "R4a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "openShort",
+        "need": 110
+       }
+      ]
+     }
+    },
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "R9a",
+         "R10a",
+         "R11a",
+         "R12a",
+         "R13a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "B9a",
+         "B10a",
+         "B11a",
+         "B12a",
+         "B13a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "opened",
+        "value": 110
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "KAT-08",
+   "title": "Eşli, \"ortağın açılışı yükseltsin\" AÇIK: ortak 110 → gereken 111",
+   "rules": [
+    "R-64"
+   ],
+   "init": {
+    "spec": {
+     "opts": {
+      "katlama": true,
+      "mode": "pairs",
+      "katlamaPartner": true
+     },
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R9a",
+       "R10a",
+       "R11a",
+       "R12a",
+       "R13a",
+       "B9a",
+       "B10a",
+       "B11a",
+       "B12a",
+       "B13a",
+       "K4a",
+       "Y4a",
+       "R4a",
+       "K1a",
+       "K2a"
+      ],
+      [
+       "Y8a"
+      ],
+      [
+       "Y9a"
+      ],
+      [
+       "Y10a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      110,
+      0
+     ],
+     "openMode": [
+      null,
+      null,
+      "run",
+      null
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 9
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "R9a",
+         "R10a",
+         "R11a",
+         "R12a",
+         "R13a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "B9a",
+         "B10a",
+         "B11a",
+         "B12a",
+         "B13a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "openShort",
+        "need": 111
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "KAT-09",
+   "title": "Eşli, \"ortağın açılışı yükseltsin\" KAPALI: ortak 110 sayılmaz → 104 yeter",
+   "rules": [
+    "R-64"
+   ],
+   "init": {
+    "spec": {
+     "opts": {
+      "katlama": true,
+      "mode": "pairs",
+      "katlamaPartner": false
+     },
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R9a",
+       "R10a",
+       "R11a",
+       "R12a",
+       "R13a",
+       "B9a",
+       "B10a",
+       "B11a",
+       "B12a",
+       "B13a",
+       "K4a",
+       "Y4a",
+       "R4a",
+       "K1a",
+       "K2a"
+      ],
+      [
+       "Y8a"
+      ],
+      [
+       "Y9a"
+      ],
+      [
+       "Y10a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      110,
+      0
+     ],
+     "openMode": [
+      null,
+      null,
+      "run",
+      null
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 9
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "R10a",
+         "R11a",
+         "R12a",
+         "R13a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "B10a",
+         "B11a",
+         "B12a",
+         "B13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "K4a",
+         "Y4a",
+         "R4a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "opened",
+        "value": 104
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "KAT-10",
+   "title": "Eşli, KAPALI: rakip 105 sayılır → gereken 106",
+   "rules": [
+    "R-64"
+   ],
+   "init": {
+    "spec": {
+     "opts": {
+      "katlama": true,
+      "mode": "pairs",
+      "katlamaPartner": false
+     },
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R9a",
+       "R10a",
+       "R11a",
+       "R12a",
+       "R13a",
+       "B9a",
+       "B10a",
+       "B11a",
+       "B12a",
+       "B13a",
+       "K4a",
+       "Y4a",
+       "R4a",
+       "K1a",
+       "K2a"
+      ],
+      [
+       "Y8a"
+      ],
+      [
+       "Y9a"
+      ],
+      [
+       "Y10a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      105,
+      110,
+      0
+     ],
+     "openMode": [
+      null,
+      "run",
+      "run",
+      null
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 9
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "R10a",
+         "R11a",
+         "R12a",
+         "R13a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "B10a",
+         "B11a",
+         "B12a",
+         "B13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "K4a",
+         "Y4a",
+         "R4a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "openShort",
+        "need": 106
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "KAT-11",
+   "title": "El bitince eşik 101 / 5 çifte döner (yeni elde katlama sıfır)",
+   "rules": [
+    "R-64"
+   ],
+   "call": {
+    "fn": "openNeedFresh"
+   },
+   "expect": {
+    "run": 101,
+    "pair": 5
+   }
+  }
+ ]
+}

@@ -1,0 +1,673 @@
+{
+ "suite": "penalties",
+ "version": "0.4.0",
+ "note": "Aksi belirtilmedikçe gösterge B6a → okey B7 (B7a, B7b), sahte okey Ja/Jb = B7.",
+ "tests": [
+  {
+   "id": "PEN-01",
+   "title": "İşlek taş atma (seriye eklenebilir): +101",
+   "rules": [
+    "R-41"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R7a",
+       "B7b",
+       "Ja",
+       "K4a",
+       "R2a",
+       "R3b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      0,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R7a"
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "discarded",
+        "tile": "R7a"
+       },
+       {
+        "e": "penalty",
+        "seat": 0,
+        "code": "P_ISLEK",
+        "amount": 101
+       }
+      ],
+      "state": {
+       "hand.pen.0": 101
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "PEN-02",
+   "title": "İşlek taş atma (masadaki okeyin yerine geçebilir): +101",
+   "rules": [
+    "R-41"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R7a",
+       "B7b",
+       "Ja",
+       "K4a",
+       "R2a",
+       "R3b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      0,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "K4a"
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "penalty",
+        "code": "P_ISLEK"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "PEN-03",
+   "title": "Okey atma: +101 (işlek cezası ayrıca yazılmaz)",
+   "rules": [
+    "R-42"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R7a",
+       "B7b",
+       "Ja",
+       "K4a",
+       "R2a",
+       "R3b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      0,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "B7b"
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "penalty",
+        "code": "P_OKEY_DISCARD",
+        "amount": 101
+       }
+      ],
+      "noEvents": [
+       {
+        "e": "penalty",
+        "code": "P_ISLEK"
+       }
+      ],
+      "state": {
+       "hand.pen.0": 101
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "PEN-04",
+   "title": "Sahte okey okey değildir: işlek değilse ceza yok",
+   "rules": [
+    "R-42",
+    "R-13"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R7a",
+       "B7b",
+       "Ja",
+       "K4a",
+       "R2a",
+       "R3b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      0,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "Ja"
+     },
+     "expect": {
+      "ok": true,
+      "noEvents": [
+       {
+        "e": "penalty"
+       }
+      ],
+      "state": {
+       "hand.pen.0": 0
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "PEN-05",
+   "title": "Ceza kuralları kapalı masada ceza yazılmaz",
+   "rules": [
+    "R-62"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R7a",
+       "B7b",
+       "Ja",
+       "K4a",
+       "R2a",
+       "R3b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      0,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "opts": {
+      "penalties": false
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R7a"
+     },
+     "expect": {
+      "ok": true,
+      "noEvents": [
+       {
+        "e": "penalty"
+       }
+      ],
+      "state": {
+       "hand.pen.0": 0
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "PEN-06",
+   "title": "İşleme kapalı masada işlek cezası yok",
+   "rules": [
+    "R-61",
+    "R-62"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R7a",
+       "B7b",
+       "Ja",
+       "K4a",
+       "R2a",
+       "R3b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      0,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "opts": {
+      "isle": false
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R7a"
+     },
+     "expect": {
+      "ok": true,
+      "noEvents": [
+       {
+        "e": "penalty"
+       }
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}

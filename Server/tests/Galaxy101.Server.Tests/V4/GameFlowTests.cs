@@ -138,7 +138,7 @@ public sealed class GameFlowTests(ServerFixture server)
         await c.SendAsync(M.Hello);
         await c.SendAsync(M.VsBotsStart, new { mode = "solo", hands = 1 });
         Assert.True(await env.UntilAsync(() => c.Of(M.Turn).Count > 0));
-        await c.CloseAsync();
+        await env.DropAsync(c);
         await env.AdvanceAsync(4000);
         var d = await env.ReconnectAsync(c);
         Assert.True((await d.SendAsync(M.Hello, new { token = "t" })).Ok);

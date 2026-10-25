@@ -167,6 +167,27 @@ public sealed class V4Env(ServerFixture server) : IAsyncDisposable
         foreach (var c in clients.ToList()) await c.FlushAsync(registry);
     }
 
+    /// <summary>
+    /// Waits (real time, the clock stands still) until <paramref name="done"/> holds: the server learns of a closed socket
+    /// asynchronously, after the client's close.
+    /// </summary>
+    public async Task WaitAsync(Func<Task<bool>> done)
+    {
+        var until = DateTime.UtcNow.AddSeconds(15);
+        while (!await done() && DateTime.UtcNow < until) await Task.Delay(5);
+        await SettleAsync();
+    }
+
+    /// <summary>Closes the client's socket and waits until the server has let it go.</summary>
+    public async Task DropAsync(V4Client c)
+    {
+        await c.CloseAsync();
+        var registry = Server.Services.GetRequiredService<Galaxy101.Server.Realtime.ConnectionRegistry>();
+        await WaitAsync(() => Task.FromResult(!registry.IsOnline(c.Account)));
+        await Task.Delay(20);
+        await SettleAsync();
+    }
+
     public async Task AdvanceAsync(long ms)
     {
         Server.Clock.Advance(TimeSpan.FromMilliseconds(ms));

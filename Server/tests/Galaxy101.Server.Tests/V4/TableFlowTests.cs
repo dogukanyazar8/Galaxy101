@@ -151,7 +151,7 @@ public sealed class TableFlowTests(ServerFixture server)
         Assert.True(await env.UntilAsync(() => c.Of(M.Turn).Count > 0));
         const int oSeat = 1;
         await o.CloseAsync();
-        await env.SettleAsync();
+        await env.WaitAsync(async () => !(await env.Hub.ProbeAsync(name))!.Connected[oSeat]);
         Assert.False((await env.Hub.ProbeAsync(name))!.Left[oSeat]);
         Assert.Contains(c.Of(M.SeatConnection), f => f.Int("seat") == oSeat && !f["connected"].GetBoolean());
         Assert.True(await env.UntilAsync(() => env.Hub.ProbeAsync(name).Result!.Autoplay[oSeat], 3000), "otomatik oyuna geçmedi");
@@ -180,7 +180,7 @@ public sealed class TableFlowTests(ServerFixture server)
         await o.SendAsync(M.TableJoin, new { tableId = created["table"].GetProperty("id").GetString() });
         Assert.Equal(24000, await ChipsAsync(o));
         await o.CloseAsync();
-        await env.SettleAsync();
+        await env.WaitAsync(async () => (await env.Hub.ProbeAsync(name))!.SeatAccount[1] is null);
         var probe = (await env.Hub.ProbeAsync(name))!;
         Assert.Null(probe.SeatAccount[1]);
         Assert.Equal(25000, await ChipsAsync(o));

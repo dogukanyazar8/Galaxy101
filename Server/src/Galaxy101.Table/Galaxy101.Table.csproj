@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The match flow (Packages/com.galaxy101.table), compiled from the same sources the Unity client runs offline.
+       C# 9 like the Unity package: the server must not accept what Unity would not compile. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>Galaxy101.Table</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(RepoRoot)/Packages/com.galaxy101.table/Runtime/**/*.cs" Link="Table/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Galaxy101.Rules/Galaxy101.Rules.csproj" />
+    <ProjectReference Include="$(RepoRoot)/Shared/Galaxy101.Contracts/Galaxy101.Contracts.csproj" />
+  </ItemGroup>
+</Project>

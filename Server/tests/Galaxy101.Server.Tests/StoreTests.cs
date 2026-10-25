@@ -109,13 +109,13 @@ public sealed class StorePurchaseTests(ServerFixture server)
         var purchase = new StorePurchaseRequest { Platform = "google", ProductId = "galaxy101.gems_1", Receipt = receipt };
 
         var first = (await (await client.PostAsJsonAsync("/v1/shop/store-purchase", purchase)).Content.ReadFromJsonAsync<PurchaseResponse>())!;
-        Assert.Equal(20 + 550, first.Wallet.Gems);
+        Assert.Equal(20 + 605, first.Wallet.Gems); // D-27: 550 + %10 bonus
         Assert.False(first.AlreadyProcessed);
 
         // The client retrying after a lost response gets the same wallet, no second grant.
         var retry = (await (await client.PostAsJsonAsync("/v1/shop/store-purchase", purchase)).Content.ReadFromJsonAsync<PurchaseResponse>())!;
         Assert.True(retry.AlreadyProcessed);
-        Assert.Equal(20 + 550, retry.Wallet.Gems);
+        Assert.Equal(20 + 605, retry.Wallet.Gems);
 
         var (_, thief) = await server.GuestAsync();
         var stolen = await WithFakeStore(thief.AccessToken).PostAsJsonAsync("/v1/shop/store-purchase", purchase);

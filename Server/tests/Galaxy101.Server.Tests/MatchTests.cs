@@ -69,7 +69,7 @@ public sealed class MatchTests(ServerFixture server)
             Assert.True((await active.Live.RequestAsync(MessageTypes.MatchGift, new GiftMessage { MatchId = matchId, Gift = "tea", TargetSeat = other.Start.YourSeat })).Ok);
             await other.Live.WaitAsync<GiftMessage>(MessageTypes.MatchGift);
             Assert.Equal(9000 - 100, (await active.Live.WaitAsync<WalletResponse>(MessageTypes.Wallet)).Chips);
-            // Chat reaches every seat: text up to 80 characters or a ready phrase by index, rate limited.
+            // Chat reaches every seat: text up to 120 characters (D-32) or a ready phrase by index, rate limited.
             Assert.True((await active.Live.RequestAsync(MessageTypes.MatchChat, new ChatMessage { MatchId = matchId, Text = " merhaba " })).Ok);
             Assert.Equal("merhaba", (await other.Live.WaitAsync<ChatMessage>(MessageTypes.MatchChat)).Text);
             Assert.Equal(ErrorCodes.RateLimited, (await active.Live.RequestAsync(MessageTypes.MatchChat, new ChatMessage { MatchId = matchId, Quick = 2 })).Code);
@@ -93,8 +93,10 @@ public sealed class MatchTests(ServerFixture server)
             var end = await table[0].Live.WaitAsync<MatchEndMessage>(MessageTypes.MatchEnd);
             Assert.False(end.Aborted);
             Assert.Equal(1, end.Placements.Min(x => x.Place));
-            // Two hands (60 XP at least each) and the place bonus 500 / 200 / 80 / 0.
-            Assert.All(end.Placements, x => Assert.True(x.Xp >= 2 * 60 + new[] { 500, 200, 80, 0 }[x.Place - 1]));
+            // Two hands (60 XP at least each) and the place bonus 500 / 200 / 80 / 0, shared by tied places (D-40).
+            int[] bonus = [500, 200, 80, 0];
+            Assert.All(end.Placements, x => Assert.True(x.Xp >= 2 * 60 + Galaxy101.Table.TableSettlement.Shared(bonus,
+                [.. Enumerable.Range(x.Place - 1, end.Placements.Count(y => y.Place == x.Place))])));
             Assert.Equal(2, table[0].Live.Count(MessageTypes.MatchHandEnd));
 
             var wallets = await Task.WhenAll(table.Select(p => p.Http.GetFromJsonAsync<WalletResponse>("/v1/wallet")));

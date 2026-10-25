@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Galaxy101.Contracts;
+using Galaxy101.Online;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -10,14 +10,16 @@ namespace Galaxy101
 {
     public sealed partial class LobbyScreen
     {
-        // Bottom (you), right, top, left inside the 872×592 room area (reference POS).
+        // POS of waitVals(): bottom (you), right, top, left inside the 872 × 592 table area at (28, 100).
         private static readonly Vector2[] SeatSpots = { new Vector2(436, 520), new Vector2(800, 308), new Vector2(436, 92), new Vector2(72, 308) };
         private float roomShownAt, countdownAt;
         private int countdownFrom;
         private bool leaving, copied;
         private readonly Dictionary<Guid, string> seen = new Dictionary<Guid, string>();
+        /// <summary>w.keys: who sat in each seat when it last popped in (lbPop .4s plays when a seat fills).</summary>
+        private readonly Dictionary<int, (Guid Who, float At)> seatPops = new Dictionary<int, (Guid, float)>();
 
-        /// <summary>"X masaya oturdu" / bot / left notices from consecutive room states.</summary>
+        /// <summary>The flashes of waitTick / addBot: "X masaya oturdu" (ok), "Bot koltuğa oturdu" (info).</summary>
         private void NoteSeats(TableStateMessage state)
         {
             var now = state.Table.Seats.Where(s => s?.Player != null).ToDictionary(s => s.Player.Id, s => s.Player.Name);
@@ -25,8 +27,9 @@ namespace Galaxy101
                 foreach (var joined in now.Where(p => !seen.ContainsKey(p.Key) && p.Key != backend.Me))
                 {
                     bool bot = state.Table.Seats.Any(s => s?.Player?.Id == joined.Key && s.Bot);
-                    Flash(bot ? L("Bot koltuğa oturdu", "A bot took the seat") : L(joined.Value + " masaya oturdu", joined.Value + " sat down"), "info");
-                    if (invite != null && invite.Sent.TryGetValue(joined.Key, out var sent)) sent.State = "in";
+                    if (bot) Flash(S("botAdded"), "info"); else Flash(S("joined", joined.Value), "ok");
+                    // A friend who accepted sits down: the row's invite is done (Masada).
+                    if (invite != null && invite.Sent.ContainsKey(joined.Key)) invite.Sent.Remove(joined.Key);
                 }
             seen.Clear(); foreach (var p in now) seen[p.Key] = p.Value;
         }
@@ -38,145 +41,159 @@ namespace Galaxy101
             var room = backend.Room; var t = room.Table; int mine = Mathf.Clamp(room.YourSeat, 0, 3);
             bool host = t.HostId == backend.Me, pairs = t.Type == "pairs";
             int seated = t.Seats.Count(s => s != null); bool full = seated == 4;
-            var page = Fill("room"); page.pickingMode = PickingMode.Ignore; body.Add(page);
-            if (Time.realtimeSinceStartup - roomShownAt < .3f) { float began = roomShownAt; page.style.opacity = 0; Animate(() => page.style.opacity = Mathf.Clamp01((Time.realtimeSinceStartup - began) / .3f)); }
-
-            // Top bar: Ayrıl, BEKLEME ODASI (+ Oda sahibi sensin) and the name, Davet et, code box (private), balance.
-            var bar = Row(); MenuView.Place(bar, 0, 0, 1280, 86); Pad(bar, 0, 28, 0, 28); page.Add(bar);
-            var leave = Row(); leave.name = "room-leave"; leave.style.height = 46; Pad(leave, 0, 16, 0, 12); Raise(leave, "var(--pnH)", 14, 4, "var(--pnS)");
-            var li = view.Icon("leave", 20, "var(--ic)"); li.style.marginRight = 8; leave.Add(li); leave.Add(Text(L("Ayrıl", "Leave"), 15, "Montserrat-700", "#F4F1E8"));
-            GalaxyFilters.HoverBrightness(leave, 1.25f); Tap(leave, () => _ = Leave()); bar.Add(leave);
-            var titles = Box(); titles.style.marginLeft = 14; titles.style.flexShrink = 1;
-            var tag = Row(); var cap = Text(L("BEKLEME ODASI", "WAITING ROOM"), 11, "Baloo2-800", "var(--a1)"); MenuView.Tracking(cap, 1.8f, 11); tag.Add(cap);
-            if (host) { var own = Text(L("Oda sahibi sensin", "You are the host"), 11, "Baloo2-800", "var(--a1)"); own.name = "room-host"; own.style.marginLeft = 10; Pad(own, 2, 8, 2, 8); view.Decorate(own, "rgba(255,201,74,.16)", 7); tag.Add(own); }
-            titles.Add(tag);
-            var name = Text(t.Name, 24, "Montserrat-700", "#F4F1E8"); name.style.marginTop = 3; name.style.maxWidth = 520; name.style.overflow = Overflow.Hidden; name.style.textOverflow = TextOverflow.Ellipsis; titles.Add(name);
-            bar.Add(titles); bar.Add(Grow());
             int counting = Countdown;
+            var page = Fill("lobby-room"); page.pickingMode = PickingMode.Ignore; body.Add(page);
+            FadeIn(page, roomShownAt, .3f);
+
+            // Top bar (86, padding 0 28, gap 14): Ayrıl, BEKLEME ODASI (+ Oda sahibi sensin) over the name, Davet et, the code box, chips.
+            var bar = Row(); MenuView.Place(bar, 0, 0, 1280, 86); Pad(bar, 0, 28, 0, 28); page.Add(bar);
+            var leave = Row(); leave.name = "lobby.w.leave"; leave.style.height = 46; Pad(leave, 0, 16, 0, 12); Raise(leave, "var(--pnH)", 14, 4, "var(--pnS)"); leave.tooltip = S("leaveRoom");
+            var li = view.Icon(IconLeave, 20, "var(--ic)"); li.style.marginRight = 8; leave.Add(li); leave.Add(Text(S("leaveRoom"), 15, "Montserrat-700", "#F4F1E8"));
+            GalaxyFilters.HoverBrightness(leave, 1.25f); Tap(leave, () => _ = Leave(host)); bar.Add(leave);
+            var titles = Box(); titles.style.marginLeft = 14; titles.style.flexShrink = 1;
+            var tag = Row(); var cap = Text(S("waitRoom"), 11, "Baloo2-800", "var(--a1)", 0, "lobby.text.waitRoom"); MenuView.Tracking(cap, 1.8f, 11); tag.Add(cap);
+            if (host) { var own = Text(S("youOwn"), 11, "Baloo2-800", "var(--a1)", 0, "lobby.text.youOwn"); own.style.marginLeft = 10; Pad(own, 2, 8, 2, 8); view.Decorate(own, "rgba(255,201,74,.16)", 7); tag.Add(own); }
+            titles.Add(tag);
+            var name = Text(t.Name, 24, "Montserrat-700", "#F4F1E8", 1.1f, "lobby.w.name"); name.style.marginTop = 3; name.style.maxWidth = 520; name.style.overflow = Overflow.Hidden; name.style.textOverflow = TextOverflow.Ellipsis; titles.Add(name);
+            bar.Add(titles); bar.Add(Grow());
             if (!full && counting == 0)
             {
-                var inv = Row(); inv.name = "room-invite"; inv.style.height = 46; inv.style.marginLeft = 14; Pad(inv, 0, 18, 0, 14); Raise(inv, "linear-gradient(var(--a1),var(--a2))", 14, 4, "var(--aS)");
-                var ii = view.Icon("invite", 16, "var(--aT)"); ii.style.marginRight = 8; inv.Add(ii); inv.Add(Text(L("Davet et", "Invite"), 15, "Montserrat-800", "var(--aT)"));
+                var inv = Row(); inv.name = "lobby.w.openInv"; inv.style.height = 46; inv.style.marginLeft = 14; Pad(inv, 0, 18, 0, 14); Raise(inv, "linear-gradient(var(--a1),var(--a2))", 14, 4, "var(--aS)");
+                var ii = view.Icon(IconInvite, 16, "var(--aT)"); ii.style.marginRight = 8; inv.Add(ii); inv.Add(Text(S("invite"), 15, "Montserrat-800", "var(--aT)"));
                 int pending = invite?.Sent.Values.Count(x => x.State == "pend") ?? 0;
-                if (pending > 0) { var n = Text(pending.ToString(), 11, "Baloo2-800", "var(--a1)"); n.style.marginLeft = 8; n.style.minWidth = 20; n.style.height = 20; n.style.unityTextAlign = TextAnchor.MiddleCenter; view.Decorate(n, "var(--aT)", 10); inv.Add(n); }
+                if (pending > 0) { var n = Text(pending.ToString(), 11, "Baloo2-800", "var(--a1)", 20f / 11, "lobby.w.pendN"); n.style.marginLeft = 8; n.style.minWidth = 20; Pad(n, 0, 6, 0, 6); n.style.unityTextAlign = TextAnchor.MiddleCenter; view.Decorate(n, "var(--aT)", 10); inv.Add(n); }
                 GalaxyFilters.HoverBrightness(inv, 1.08f); Tap(inv, () => OpenInvite(null)); bar.Add(inv);
             }
-            if (t.Private && room.Code != null)
+            if (room.Code != null && t.Private)
             {
+                // gap 10, 46 tall, padding 0 6 0 16, radius 14, 1px dashed --bd, rgba(0,0,0,.2).
                 var codeBox = Row(); codeBox.style.height = 46; codeBox.style.marginLeft = 14; Pad(codeBox, 0, 6, 0, 16); view.Decorate(codeBox, "rgba(0,0,0,.2)", 14); DashedBorder(codeBox, 1, view.C("var(--bd)"));
-                codeBox.Add(Text(L("Kod", "Code"), 12, "Baloo2-800", "var(--mt)"));
-                var code = Text(room.Code, 18, "Montserrat-700", "var(--a1)"); code.name = "room-code"; code.style.marginLeft = 10; MenuView.Tracking(code, 3, 18); codeBox.Add(code);
-                var copy = Text(copied ? L("Kopyalandı", "Copied") : L("Kodu kopyala", "Copy code"), 13, "Montserrat-700", "#F4F1E8"); copy.name = "room-copy"; copy.style.marginLeft = 10; copy.style.height = 34; copy.style.unityTextAlign = TextAnchor.MiddleCenter; Pad(copy, 0, 12, 0, 12); Raise(copy, "var(--pnH)", 10, 3, "var(--pnS)");
+                codeBox.Add(Text(S("code"), 12, "Baloo2-800", "var(--mt)", 0, "lobby.text.code"));
+                var code = Text(room.Code, 18, "Montserrat-700", "var(--a1)", 0, "lobby.w.code"); code.style.marginLeft = 10; MenuView.Tracking(code, 3, 18); codeBox.Add(code);
+                var copy = Text(copied ? S("copied") : S("copy"), 13, "Montserrat-700", "#F4F1E8", 0, "lobby.w.copy"); copy.style.marginLeft = 10; copy.style.height = 34; copy.style.unityTextAlign = TextAnchor.MiddleCenter; Pad(copy, 0, 12, 0, 12); Raise(copy, "var(--pnH)", 10, 3, "var(--pnS)");
                 Tap(copy, CopyCode); codeBox.Add(copy);
-                var share = Box("room-share"); Square(share, 34); share.style.marginLeft = 6; Raise(share, "var(--pnH)", 10, 3, "var(--pnS)"); share.Add(view.Icon("share", 16, "var(--ic)")); share.tooltip = L("Paylaş", "Share");
-                Tap(share, () => OpenDialog(new Dialog { Kind = "share" })); codeBox.Add(share);
+                var share = Box("lobby.w.share"); Square(share, 34); share.style.marginLeft = 10; Raise(share, "var(--pnH)", 10, 3, "var(--pnS)"); share.Add(view.Icon(IconShare, 16, "var(--ic)")); share.tooltip = S("share");
+                Tap(share, () => OpenDialog(new Dialog { Kind = "share", SharePin = roomPin })); codeBox.Add(share);
                 bar.Add(codeBox);
             }
             bar.Add(Balance(backend.Chips, false));
 
-            // The oval table with pool, status and four seat dots; seats around it.
+            // The oval table with GALAXY 101, the pool, the status and four seat dots; the seats around it.
             var area = Box(); MenuView.Place(area, 28, 100, 872, 592); page.Add(area);
             // box-shadow: inset 0 0 0 3px rgba(255,255,255,.08), inset 0 0 0 10px --dp, inset 0 0 0 12px --a2, 0 0 60px --gl,
             // 0 24px 50px rgba(0,0,0,.45). The glow comes from a filled twin behind the table (a ring would glow thin).
             var halo = Box(); MenuView.Place(halo, 156, 176, 560, 264); view.Decorate(halo, "var(--dp)", 132); GalaxyFilters.Shadow(halo, 0, 0, 30, view.C("var(--gl)")); area.Add(halo);
-            var oval = Box("room-table"); MenuView.Place(oval, 156, 176, 560, 264);
+            var oval = Box("lobby-room-table"); MenuView.Place(oval, 156, 176, 560, 264);
             view.Decorate(oval, "radial-gradient(ellipse at 50% 40%,var(--pnH),var(--sd) 75%)", 132);
             Border(oval, 12, view.C("var(--dp)")); GalaxyFilters.Shadow(oval, 0, 24, 25, new Color(0, 0, 0, .45f)); area.Add(oval);
             // Absolute children start inside the 12 px border: −2 puts the gold band 10–12 px in, −12 the sheen at the edge.
             var rim = Box(); rim.style.position = Position.Absolute; rim.style.left = rim.style.top = rim.style.right = rim.style.bottom = -2; Radius(rim, 122); Border(rim, 2, view.C("var(--a2)")); oval.Add(rim);
             var sheen = Box(); sheen.style.position = Position.Absolute; sheen.style.left = sheen.style.top = sheen.style.right = sheen.style.bottom = -12; Radius(sheen, 132); Border(sheen, 3, new Color(1, 1, 1, .08f)); oval.Add(sheen);
             var middle = Box(); MenuView.Place(middle, 156, 176, 560, 264); middle.style.alignItems = Align.Center; middle.style.justifyContent = Justify.Center; area.Add(middle);
-            var brand = Text("GALAXY 101", 22, "Montserrat-800", "var(--a1)"); MenuView.Tracking(brand, 4, 22); middle.Add(brand);
+            // 800 22px/1 --fL, letter-spacing 4px, gradient --lg1 → --a1 → --a2 clipped to the text (UF-801: --a1).
+            var brand = Text("GALAXY 101", 22, "Montserrat-800", "var(--a1)", 1); MenuView.Tracking(brand, 4, 22); middle.Add(brand);
             var pool = Row(); pool.style.marginTop = 8; Pad(pool, 6, 14, 6, 14); view.Decorate(pool, "rgba(0,0,0,.28)", 999);
-            var coin = Box(); Square(coin, 18); view.Decorate(coin, "radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)", 9); pool.Add(coin);
-            var pl = Text(L("Toplam havuz", "Total pool"), 13, "Baloo2-800", "var(--mt)"); pl.style.marginLeft = 8; pool.Add(pl);
-            var pv = Text(view.N(t.Stake * 4), 17, "Montserrat-700", "#F4F1E8"); pv.style.marginLeft = 8; pool.Add(pv); middle.Add(pool);
-            var status = Text(StatusLine(full, seated, counting), 14, "Baloo2-800", full ? "#8EF0B0" : "var(--ic)"); status.name = "room-status"; status.style.marginTop = 8; middle.Add(status);
+            pool.Add(Coin(18, false));
+            var pl = Text(S("pool"), 13, "Baloo2-800", "var(--mt)", 0, "lobby.text.pool"); pl.style.marginLeft = 8; pool.Add(pl);
+            var pv = Text(view.N(t.Stake * 4), 17, "Montserrat-700", "#F4F1E8", 0, "lobby.w.pool"); pv.style.marginLeft = 8; pool.Add(pv); middle.Add(pool);
+            var status = Text(StatusLine(full, seated, counting), 14, "Baloo2-800", full ? "#8EF0B0" : "var(--ic)", 0, "lobby.w.status"); status.style.marginTop = 8; middle.Add(status);
             var dots = Row(); dots.style.marginTop = 8;
-            for (int s = 0; s < 4; s++) { var d = Box(); Square(d, 10); if (s > 0) d.style.marginLeft = 6; view.Decorate(d, t.Seats[s] != null ? "var(--a1)" : "rgba(255,255,255,.15)", 5); dots.Add(d); }
+            for (int s = 0; s < 4; s++) { var d = Box(); Square(d, 10); if (s > 0) d.style.marginLeft = 6; view.Decorate(d, t.Seats[(s + mine) % 4] != null ? "var(--a1)" : "rgba(255,255,255,.15)", 5); dots.Add(d); }
             middle.Add(dots);
-            if (counting > 0) Animate(() => { int left = Countdown; status.text = StatusLine(full, seated, left); });
+            if (counting > 0) Animate(() => { int left = Countdown; status.text = StatusLine(full, seated, left); }, status);
 
-            for (int s = 0; s < 4; s++) area.Add(Seat(t, s, (s - mine + 4) % 4, host, pairs, counting > 0));
+            // The host's crown sits on the host's seat; a room whose owner has no seat (the prototype's enterWait(t, true)
+            // on a table you are not at) crowns mk()'s owner: 0.
+            int crowned = t.Seats.FindIndex(s => s?.Player != null && s.Player.Id == t.HostId); if (crowned < 0) crowned = 0;
+            for (int spot = 0; spot < 4; spot++) area.Add(Seat(t, (spot + mine) % 4, spot, host, pairs, counting > 0, crowned));
 
-            // Right panel: ÖZET facts, badges, prize note, hint, Başlat.
-            var panel = Box("room-summary"); panel.style.position = Position.Absolute; panel.style.right = 28; panel.style.top = 100; panel.style.height = 720 - 100 - 28; panel.style.width = 330; // Raise hangs the 8 px ledge below it
+            // The summary panel (right 28, top 100, bottom 28, 330 wide, padding 20, gap 14, radius 24, 1px rgba(255,255,255,.08), 0 8px 0 --pnS).
+            var panel = Box("lobby-room-summary"); panel.style.position = Position.Absolute; panel.style.right = 28; panel.style.top = 100; panel.style.height = 720 - 100 - 28; panel.style.width = 330;
             Pad(panel, 20, 20, 20, 20); Border(panel, 1, new Color(1, 1, 1, .08f)); Raise(panel, "var(--pn)", 24, 8, "var(--pnS)"); page.Add(panel);
-            var sc = Text(L("ÖZET", "SUMMARY"), 11, "Baloo2-800", "var(--mt)"); MenuView.Tracking(sc, 1.8f, 11); panel.Add(sc);
-            panel.Add(Facts("var(--sd)", (L("BAHİS", "BET"), view.N(t.Stake)), (L("HAVUZ", "POOL"), view.N(t.Stake * 4)), (L("EL", "HANDS"), t.Hands.ToString()), (L("TUR SÜRESİ", "TURN TIME"), L(t.TurnSeconds + " sn", t.TurnSeconds + "s"))));
-            var badges = Row(); badges.style.flexWrap = Wrap.Wrap; badges.style.marginTop = 14; badges.style.flexShrink = 1;
-            foreach (var b in Badges(t, true)) badges.Add(b);
-            panel.Add(badges);
-            var prize = Row(); prize.style.marginTop = 8; Pad(prize, 11, 13, 11, 13); view.Decorate(prize, "rgba(255,201,74,.1)", 14); Border(prize, 1, new Color(1, .79f, .29f, .22f)); // inset ring
-            prize.Add(view.Icon("trophy", 22, "var(--a1)"));
-            var pt = Text(pairs ? L("Kazanan takım " + view.N(t.Stake * 4) + " çipi alır; kişi başı " + view.N(t.Stake * 2) + ".", "The winning team takes " + view.N(t.Stake * 4) + " chips; " + view.N(t.Stake * 2) + " each.") : L("Kazanan " + view.N(t.Stake * 4) + " çipin tamamını alır.", "The winner takes all " + view.N(t.Stake * 4) + " chips."), 13, "Baloo2-700", "var(--ic)");
+            var head = Row(); head.name = "wait.summary.head"; head.style.justifyContent = Justify.SpaceBetween; head.style.height = 24;
+            var sc = Text(S("summary"), 11, "Baloo2-800", "var(--mt)", 0, "lobby.text.summary"); MenuView.Tracking(sc, 1.8f, 11); head.Add(sc);
+            var ids = Ids(t, 0); ids.style.flexWrap = Wrap.NoWrap; head.Add(ids); panel.Add(head);
+            var stats = Stats(t, "var(--sd)", "wait.summary.stats"); stats.style.marginTop = 14; panel.Add(stats);
+            var rules = RulesList(t, "var(--sd)", "wait.summary.rules", "lobby.text.kRules"); rules.style.marginTop = 14; panel.Add(rules);
+            // padding 11 14, gap 10, radius 14, rgba(255,201,74,.1), inset 0 0 0 1px rgba(255,201,74,.22).
+            var prize = Row(); prize.name = "wait.summary.prize"; prize.style.marginTop = 14; Pad(prize, 10, 13, 10, 13); view.Decorate(prize, "rgba(255,201,74,.1)", 14); Border(prize, 1, new Color(1, .79f, .29f, .22f));
+            prize.Add(view.Icon(IconTrophy, 22, "var(--a1)"));
+            var pt = Text(pairs ? S("prizeSumE", view.N(t.Stake * 4), view.N(t.Stake * 2)) : S("prizeSum", view.N(t.Stake * 4)), 13, "Baloo2-700", "var(--ic)", 1.35f, "lobby.w.sum.prize");
             Paragraph(pt, 1.35f); pt.style.flexShrink = 1; pt.style.marginLeft = 10; prize.Add(pt); panel.Add(prize);
-            panel.Add(Grow());
-            var hint = Text(host ? full ? L("Herkes yerinde, oyunu başlat.", "Everyone is seated, start the game.") : L("Dört koltuk dolunca başlatabilirsin. Boş koltuğa bot ekleyebilirsin.", "You can start once all four seats are taken. Add bots to empty seats.") : L("Oda sahibi oyunu başlatınca masa açılır.", "The table opens when the host starts the game."), 13, "Baloo2-700", "var(--mt)");
-            Paragraph(hint, 1.4f); hint.style.unityTextAlign = TextAnchor.MiddleCenter; hint.style.marginBottom = 14; panel.Add(hint);
+            var hint = Text(host ? full ? S("hintReady") : S("hintOwner") : S("hintGuest"), 13, "Baloo2-700", "var(--mt)", 1.4f, "lobby.w.hint");
+            Paragraph(hint, 1.4f); hint.style.unityTextAlign = TextAnchor.MiddleCenter; hint.style.marginTop = 14; panel.Add(hint);
             bool ready = host && full && counting == 0;
-            string label = counting > 0 ? L("Oyun başlıyor · " + counting, "Starting · " + counting) : host ? full ? L("Başlat", "Start") : L("Başlat · " + seated + "/4", "Start · " + seated + "/4") : L("Oda sahibi bekleniyor", "Waiting for the host");
-            var start = Row(); start.name = "room-start"; start.style.height = 62; start.style.justifyContent = Justify.Center;
+            string label = counting > 0 ? S("starting", counting) : host ? full ? S("start") : S("startN", seated) : S("guestWait");
+            var start = Row(); start.name = "lobby.w.start"; start.style.height = 62; start.style.marginTop = 14; start.style.justifyContent = Justify.Center;
             Raise(start, ready ? "linear-gradient(#5BE38A,#2BB45F)" : "var(--pnH)", 18, 5, ready ? "#18793F" : "var(--pnS)");
             if (!host || counting > 0) { var spin = Spinner(18, ready ? "#05301A" : "var(--mt)"); spin.style.marginRight = 10; start.Add(spin); }
             var sl = Text(label, 20, "Montserrat-800", ready ? "#05301A" : "var(--mt)"); start.Add(sl);
-            if (counting > 0) Animate(() => { int left = Countdown; sl.text = left > 0 ? L("Oyun başlıyor · " + left, "Starting · " + left) : L("Masa açılıyor…", "Opening the table…"); });
-            if (ready) { Pulse(start); Tap(start, () => _ = Start()); }
+            if (counting > 0) Animate(() => { int left = Countdown; sl.text = left > 0 ? S("starting", left) : S("connT"); }, sl);
+            if (ready) { Pulse(start, 2f); Tap(start, () => _ = Start()); }
             panel.Add(start);
 
-            if (InviteOpen) BuildInvite(t, host);
+            if (InviteOpen) BuildInvite(t, host, counting > 0);
         }
 
-        private string StatusLine(bool full, int seated, int counting) =>
-            counting > 0 ? L("Oyun başlıyor · " + counting, "Starting · " + counting) : full ? L("Masa hazır", "Table is ready") : L("Oyuncular bekleniyor · " + seated + "/4", "Waiting for players · " + seated + "/4");
+        private string StatusLine(bool full, int seated, int counting) => counting > 0 ? S("starting", counting) : full ? S("ready") : S("waitN", seated);
 
-        private VisualElement Seat(TableSummary t, int seat, int spot, bool host, bool pairs, bool counting)
+        /// <summary>One seat of w.seats: a filled one (face, crown, kick, tag, name, team) or an empty one (dots, Boş koltuk, Davet, Bot ekle).</summary>
+        private VisualElement Seat(TableSummary t, int seat, int spot, bool host, bool pairs, bool counting, int crowned)
         {
             var at = SeatSpots[spot];
-            // CSS: translate(-50%,-50%) — the seat's content is centred on its spot, whatever its height.
-            var slot = Box("room-seat-" + seat); MenuView.Place(slot, at.x - 100, at.y - 100, 200, 200); slot.style.alignItems = Align.Center; slot.style.justifyContent = Justify.Center;
+            // transform: translate(-50%,-50%), width 200, column, centred, gap 6.
+            var slot = Box("lobby-seat-" + spot); MenuView.Place(slot, at.x - 100, at.y - 100, 200, 200); slot.style.alignItems = Align.Center; slot.style.justifyContent = Justify.Center;
             var entry = t.Seats[seat];
             if (entry?.Player != null)
             {
                 bool me = entry.Player.Id == backend.Me;
                 var holder = Box(); Square(holder, 76);
-                var face = Box(); Square(face, 76); view.Decorate(face, entry.Bot ? "#5B6390" : entry.Player.Color ?? "#3D7BFF", 38); Border(face, 3, view.C(me ? "var(--a1)" : "rgba(255,255,255,.85)"));
-                GalaxyFilters.Shadow(face, 0, 10, 12, new Color(0, 0, 0, .4f));
+                // box-shadow: 0 0 0 3px --pnS, 0 10px 24px rgba(0,0,0,.4) — a --pnS disc 3 px larger behind the face.
+                var ring = Box(); MenuView.Place(ring, -3, -3, 82, 82); view.Decorate(ring, "var(--pnS)", 41); GalaxyFilters.Shadow(ring, 0, 10, 12, new Color(0, 0, 0, .4f)); holder.Add(ring);
+                var face = Box("lobby.z.ini[" + spot + "]"); MenuView.Place(face, 0, 0, 76, 76); face.style.alignItems = Align.Center; face.style.justifyContent = Justify.Center;
+                view.Decorate(face, entry.Bot ? "#5B6390" : entry.Player.Color ?? "#3D7BFF", 38); Border(face, 3, view.C(me ? "var(--a1)" : "rgba(255,255,255,.85)"));
                 face.Add(Text(Initials(entry.Player.Name), 24, "Montserrat-700", "#fff")); holder.Add(face);
-                if (entry.Player.Id == t.HostId) { var crown = view.Icon("crown", 26, "#FFD964"); crown.name = "room-crown"; crown.style.position = Position.Absolute; crown.style.top = -18; crown.style.left = 25; crown.tooltip = L("Oda sahibi", "Host"); holder.Add(crown); }
+                if (seat == crowned) { var crown = view.Icon(IconCrown, 26, null); crown.style.height = 20; crown.style.position = Position.Absolute; crown.style.top = -14; crown.style.left = 25; crown.tooltip = S("ownerT"); holder.Add(crown); }
                 if (host && !me && !counting)
                 {
-                    var kick = Box("room-kick-" + seat); Square(kick, 26); kick.style.position = Position.Absolute; kick.style.right = -6; kick.style.top = -4; Raise(kick, "#FF5E6C", 13, 3, "#C23E4A");
-                    kick.Add(view.Icon("close", 11, "#fff")); kick.tooltip = L("Masadan çıkar", "Remove from table"); string who = entry.Player.Name;
-                    GalaxyFilters.HoverBrightness(kick, 1.1f); Tap(kick, () => _ = Kick(seat, who, entry.Bot)); holder.Add(kick);
+                    var kick = Box("lobby.z.kick[" + spot + "]"); Square(kick, 26); kick.style.position = Position.Absolute; kick.style.right = -6; kick.style.top = -4; Raise(kick, "#FF5E6C", 13, 3, "#C23E4A");
+                    kick.Add(view.Icon(IconClose, 11, "#fff")); kick.tooltip = S("kick"); string who = entry.Player.Name;
+                    GalaxyFilters.HoverBrightness(kick, 1.1f); Tap(kick, () => _ = Kick(seat, who)); holder.Add(kick);
                 }
-                string tagText = entry.Bot ? "BOT" : me ? L("SEN", "YOU") : L("SV ", "LV ") + Math.Max(1, entry.Player.Level);
-                var tag = Text(tagText, 10, "Baloo2-800", entry.Bot ? "#fff" : me ? "var(--aT)" : "var(--ic)"); Pad(tag, 1, 8, 1, 8); view.Decorate(tag, entry.Bot ? "#5B6390" : me ? "var(--a1)" : "var(--pnH)", 7);
+                string tagText = entry.Bot ? S("bot") : me ? S("you") : (En ? "LV " : "SV ") + Math.Max(1, entry.Player.Level);
+                var tag = Text(tagText, 10, "Baloo2-800", entry.Bot ? "#fff" : me ? "var(--aT)" : "var(--ic)", 0, "lobby.z.tag[" + spot + "]"); Pad(tag, 1, 8, 1, 8); view.Decorate(tag, entry.Bot ? "#5B6390" : me ? "var(--a1)" : "var(--pnH)", 7);
                 tag.style.position = Position.Absolute; tag.style.bottom = -8; tag.style.alignSelf = Align.Center; holder.Add(tag);
                 slot.Add(holder);
-                var label = Text(entry.Player.Name, 16, "Montserrat-700", "#F4F1E8"); label.style.marginTop = 12; slot.Add(label);
-                if (pairs) { bool a = seat % 2 == 0; var team = Text(a ? L("Takım A", "Team A") : L("Takım B", "Team B"), 11, "Baloo2-800", "#fff"); team.style.marginTop = 6; Pad(team, 2, 9, 2, 9); view.Decorate(team, a ? "#3D7BFF" : "#FF6B6B", 7); slot.Add(team); }
+                SeatPop(holder, spot, entry.Player.Id);
+                var label = Text(entry.Player.Name, 16, "Montserrat-700", "#F4F1E8", 0, "lobby.z.name[" + spot + "]"); label.style.marginTop = 6 + 6; slot.Add(label);
+                if (pairs)
+                {
+                    // Seats 0 + 2 are Takım A, 1 + 3 Takım B (i % 2).
+                    bool a = spot % 2 == 0; var team = Text(a ? S("teamA") : S("teamB"), 11, "Baloo2-800", "#fff", 0, "lobby.z.team[" + spot + "]"); team.style.marginTop = 6; Pad(team, 2, 9, 2, 9); view.Decorate(team, a ? "#3D7BFF" : "#FF6B6B", 7); slot.Add(team);
+                }
                 return slot;
             }
+            seatPops.Remove(spot);
             var empty = Box(); Square(empty, 76); view.Decorate(empty, "rgba(0,0,0,.18)", 38); DashedBorder(empty, 2, view.C("var(--bd)"));
             var dots = Row();
             for (int i = 0; i < 3; i++)
             {
+                // lbDots 1.2s, delays 0 / .2 / .4 s: opacity .25 → 1 → .25 (ease).
                 var d = Box(); Square(d, 6); if (i > 0) d.style.marginLeft = 4; view.Decorate(d, "var(--mt)", 3); dots.Add(d); float phase = i * .2f;
-                Animate(() => d.style.opacity = .25f + .75f * (0.5f - 0.5f * Mathf.Cos((Time.realtimeSinceStartup - phase) / 1.2f * Mathf.PI * 2)));
+                Animate(() => { float p = Mathf.Repeat((Time.realtimeSinceStartup - phase) / 1.2f, 1); float k = MenuView.CssBezier(.25f, .1f, .25f, 1, p < .5f ? p * 2 : (p - .5f) * 2); d.style.opacity = p < .5f ? Mathf.Lerp(.25f, 1, k) : Mathf.Lerp(1, .25f, k); }, d);
             }
             empty.Add(dots); slot.Add(empty);
-            var el = Text(L("Boş koltuk", "Empty seat"), 14, "Baloo2-700", "var(--mt)"); el.style.marginTop = 6; slot.Add(el);
+            var el = Text(S("emptySeat"), 14, "Baloo2-700", "var(--mt)", 0, "lobby.text.emptySeat[" + spot + "]"); el.style.marginTop = 6; slot.Add(el);
             if (!counting)
             {
                 var buttons = Row(); buttons.style.marginTop = 6;
-                var inv = Row(); inv.name = "room-invite-" + seat; Pad(inv, 7, 12, 7, 12); Raise(inv, "linear-gradient(var(--a1),var(--a2))", 11, 3, "var(--aS)");
-                var ii = view.Icon("invite", 14, "var(--aT)"); ii.style.marginRight = 6; inv.Add(ii); inv.Add(Text(L("Davet", "Invite"), 13, "Montserrat-800", "var(--aT)"));
+                var inv = Row(); inv.name = "lobby.z.invite[" + spot + "]"; Pad(inv, 7, 12, 7, 12); Raise(inv, "linear-gradient(var(--a1),var(--a2))", 11, 3, "var(--aS)");
+                var ii = view.Icon(IconSeatInvite, 14, "var(--aT)"); ii.style.marginRight = 6; inv.Add(ii); inv.Add(Text(S("inviteS"), 13, "Montserrat-800", "var(--aT)"));
                 GalaxyFilters.HoverBrightness(inv, 1.08f); Tap(inv, () => OpenInvite(seat)); buttons.Add(inv);
                 if (host)
                 {
-                    var bot = Row(); bot.name = "room-bot-" + seat; bot.style.marginLeft = 6; Pad(bot, 7, 13, 7, 13); Raise(bot, "var(--pnH)", 11, 3, "var(--pnS)");
-                    var bi = view.Icon("bot", 15, "var(--ic)"); bi.style.marginRight = 6; bot.Add(bi); bot.Add(Text(L("Bot ekle", "Add bot"), 13, "Montserrat-700", "#F4F1E8"));
+                    var bot = Row(); bot.name = "lobby.z.addBot[" + spot + "]"; bot.style.marginLeft = 6; Pad(bot, 7, 13, 7, 13); Raise(bot, "var(--pnH)", 11, 3, "var(--pnS)");
+                    var bi = view.Icon(IconBot, 15, "var(--ic)"); bi.style.marginRight = 6; bot.Add(bi); bot.Add(Text(S("addBot"), 13, "Montserrat-700", "#F4F1E8"));
                     GalaxyFilters.HoverBrightness(bot, 1.2f); Tap(bot, () => _ = AddBot(seat)); buttons.Add(bot);
                 }
                 slot.Add(buttons);
@@ -184,10 +201,17 @@ namespace Galaxy101
             return slot;
         }
 
-        private VisualElement Spinner(int size, string color)
+        /// <summary>lbPop .4s both: scale .5 → 1.08 (70 %, opaque) → 1, when a seat fills (not on every redraw).</summary>
+        private void SeatPop(VisualElement holder, int spot, Guid who)
         {
-            var ring = Box(); Square(ring, size); Radius(ring, size / 2f); Border(ring, 3, view.C(color)); ring.style.borderTopColor = Color.clear;
-            Animate(() => ring.style.rotate = new Rotate(Mathf.Repeat(Time.realtimeSinceStartup / .8f, 1) * 360)); return ring;
+            if (!seatPops.TryGetValue(spot, out var pop) || pop.Who != who) seatPops[spot] = pop = (who, Time.realtimeSinceStartup);
+            float began = pop.At; if (Time.realtimeSinceStartup - began >= .4f) return;
+            Animate(() =>
+            {
+                float u = Mathf.Clamp01((Time.realtimeSinceStartup - began) / .4f), e = MenuView.CssBezier(.25f, .1f, .25f, 1, u);
+                float s = e < .7f ? Mathf.Lerp(.5f, 1.08f, e / .7f) : Mathf.Lerp(1.08f, 1, (e - .7f) / .3f);
+                holder.style.scale = new Scale(Vector2.one * s); holder.style.opacity = Mathf.Clamp01(e / .7f);
+            }, holder);
         }
 
         private void CopyCode()
@@ -197,56 +221,62 @@ namespace Galaxy101
             layer?.schedule.Execute(() => { copied = false; if (screen == "wait") Render(); }).ExecuteLater(1600);
         }
 
-        private async System.Threading.Tasks.Task Leave()
+        /// <summary>leaveWait(): tableLeave (the stake comes back, R-90 / D-11); "Masan kapatıldı" for the owner, "Bekleme odasından ayrıldın" otherwise.</summary>
+        private async System.Threading.Tasks.Task Leave(bool host)
         {
             leaving = true; invite = null; inviteOpen = false;
             string error = await backend.LeaveAsync();
             if (layer == null) return;
-            if (error != null && error != ErrorCodes.NotFound) { leaving = false; Flash(L("Ayrılamadın (" + error + ")", "Could not leave (" + error + ")"), "bad"); return; }
-            if (backend.Room == null || error == ErrorCodes.NotFound) { screen = "list"; animateCards = true; Render(); }
-            Flash(L("Bekleme odasından ayrıldın", "You left the waiting room"), "info");
+            if (error != null && error != ErrorCodes.NotFound && error != "E_NOT_SEATED") { leaving = false; Flash(L("Ayrılamadın (" + error + ")", "Could not leave (" + error + ")"), "bad"); return; }
+            if (backend.Room == null || error != null) { screen = "list"; animateCards = true; Render(); }
+            Flash(host ? S("closedMine") : S("leftRoom"), "info");
         }
 
         private async System.Threading.Tasks.Task AddBot(int seat)
         {
             string error = await backend.AddBotAsync(seat);
-            if (error != null && layer != null) Flash(L("Bot eklenemedi (" + error + ")", "Could not add a bot (" + error + ")"), "bad");
+            if (error != null && layer != null && ErrorText(error) is string text) Flash(text, "bad");
         }
 
-        private async System.Threading.Tasks.Task Kick(int seat, string who, bool bot)
+        private async System.Threading.Tasks.Task Kick(int seat, string who)
         {
             string error = await backend.KickAsync(seat);
             if (layer == null) return;
-            if (error != null) Flash(L("Çıkarılamadı (" + error + ")", "Could not remove (" + error + ")"), "bad");
-            else Flash(bot ? L("Bot masadan çıkarıldı", "The bot was removed") : L(who + " masadan çıkarıldı", who + " was removed"), "bad");
+            if (error != null) { if (ErrorText(error) is string text) Flash(text, "bad"); }
+            else Flash(S("kicked", who), "bad");
         }
 
         private async System.Threading.Tasks.Task Start()
         {
             string error = await backend.StartAsync();
-            if (error != null && layer != null) Flash(error == TableErrors.NotReady ? L("Dört koltuk dolmadan başlatılamaz", "All four seats must be taken") : L("Başlatılamadı (" + error + ")", "Could not start (" + error + ")"), "bad");
+            if (error != null && layer != null && ErrorText(error) is string text) Flash(text, "bad");
         }
 
-        // ---------- invite (S14, S15) ----------
+        // ---------- invite (S14 Arkadaşlar, S15 Son oynadıkların) ----------
         public sealed class InviteState
         {
             public string Tab = "friends", Query = "";
             public int? Seat;
             public float OpenedAt;
-            public List<FriendResponse> Friends, Recent;
+            public bool QueryFocused;
+            public List<FriendResponse> Friends;
+            public List<RecentPlayer> Recent;
             public readonly Dictionary<Guid, Sent> Sent = new Dictionary<Guid, Sent>();
         }
 
+        /// <summary>w.sent[name]: "pend" (30 s), "no" (declined), "exp" (no answer).</summary>
         public sealed class Sent { public string State = "pend"; public float At; }
 
         private InviteState invite;
         public InviteState Invite => invite;
+        /// <summary>inviteSend: an invite lasts 30 s (protocol inviteSend / invSub).</summary>
         public const float InviteSeconds = 30;
 
+        /// <summary>openInv / z.invite: inv {tab: 'fr', q: '', seat} — the sent invites carry over.</summary>
         public void OpenInvite(int? seat)
         {
             invite = invite ?? new InviteState(); inviteOpen = true;
-            invite.Seat = seat; invite.Query = ""; invite.OpenedAt = Time.realtimeSinceStartup;
+            invite.Tab = "friends"; invite.Seat = seat; invite.Query = ""; invite.OpenedAt = Time.realtimeSinceStartup;
             Render();
             _ = LoadInvitees();
         }
@@ -256,394 +286,216 @@ namespace Galaxy101
             var state = invite; if (state == null) return;
             var friends = await backend.FriendsAsync(); var recent = await backend.RecentAsync();
             if (invite != state) return;
-            state.Friends = friends; state.Recent = recent.Where(r => friends.All(f => f.Player?.Id != r.Player?.Id)).ToList();
+            state.Friends = friends ?? new List<FriendResponse>();
+            state.Recent = (recent ?? new List<RecentPlayer>()).Where(r => r.Friend?.Player != null && state.Friends.All(f => f.Player?.Id != r.Friend.Player.Id)).ToList();
             if (screen == "wait") Render();
         }
 
         private bool inviteOpen;
         public bool InviteOpen => inviteOpen && invite != null;
-        /// <summary>Closing keeps the sent invites (their countdowns and the pending badge on Davet et).</summary>
+        /// <summary>iv.close: the panel goes, the sent invites stay (their countdowns and the count on Davet et).</summary>
         private void CloseInvite() { inviteOpen = false; Render(); }
 
-        private void BuildInvite(TableSummary t, bool host)
+        private void BuildInvite(TableSummary t, bool host, bool counting)
         {
             var state = invite; int free = t.Seats.Count(s => s == null);
-            var shade = Fill("invite-backdrop"); shade.pickingMode = PickingMode.Position; view.Decorate(shade, "rgba(0,0,0,.55)"); Tap(shade, CloseInvite); body.Add(shade);
-            var modal = Row(); modal.name = "invite-modal"; modal.pickingMode = PickingMode.Position; modal.style.alignItems = Align.Stretch; MenuView.Place(modal, 189, 69, 902, 582); modal.style.overflow = Overflow.Hidden;
+            // iv.open: z 25, lbFade .2s; backdrop lobby.iv.close (rgba(0,0,0,.55), blur(6px)).
+            var shade = Fill("lobby.iv.close"); shade.pickingMode = PickingMode.Position; view.Decorate(shade, "rgba(0,0,0,.55)"); GalaxyFilters.BackdropBlur(shade, 6); Tap(shade, CloseInvite); body.Add(shade);
+            FadeIn(shade, state.OpenedAt, .2f);
+            // 900 × 580 inside a 1 px border, grid minmax(0,1fr) 290px, radius 28; lbModal .32s cubic-bezier(.22,1,.36,1).
+            var modal = Row(); modal.name = "lobby-invite"; modal.pickingMode = PickingMode.Position; modal.style.alignItems = Align.Stretch; MenuView.Place(modal, 189, 69, 902, 582); modal.style.overflow = Overflow.Hidden;
             Border(modal, 1, new Color(1, 1, 1, .1f)); Raise(modal, "var(--pn)", 28, 10, "var(--pnS)"); GalaxyFilters.Shadow(modal, 0, 40, 45, new Color(0, 0, 0, .6f));
-            modal.RegisterCallback<ClickEvent>(e => e.StopPropagation()); Pop(modal, state.OpenedAt, .32f); body.Add(modal);
+            modal.RegisterCallback<ClickEvent>(e => e.StopPropagation()); Pop(modal, state.OpenedAt, .32f, false, true); body.Add(modal);
 
+            // Left: padding 22 22 0 28, gap 14.
             var left = Box(); left.style.flexGrow = 1; left.style.flexBasis = 0; Pad(left, 22, 22, 0, 28); modal.Add(left);
             var head = Row();
-            var icon = Box(); Square(icon, 50); Raise(icon, "linear-gradient(160deg,var(--a1),var(--a2))", 16, 4, "var(--aS)"); icon.Add(view.Icon("invite", 24, "var(--aT)")); head.Add(icon);
-            var words = Box(); words.style.marginLeft = 14;
-            words.Add(Text(L("Arkadaşlarını davet et", "Invite friends"), 26, "Montserrat-700", "#F4F1E8"));
-            var sub = Text(free > 0 ? L(free + " boş koltuk · davet 30 sn geçerli", free + " empty " + (free > 1 ? "seats" : "seat") + " · invites last 30 s") : L("Masa dolu · davet gönderilemez", "Table is full · no invites"), 13, "Baloo2-700", "var(--mt)"); sub.style.marginTop = 3; words.Add(sub);
+            // The header's person icon: its "+" bar is drawn at x 24–30, outside the 24-unit view box, so only the stem shows.
+            var icon = Box(); Square(icon, 50); Raise(icon, "linear-gradient(160deg,var(--a1),var(--a2))", 16, 4, "var(--aS)"); icon.Add(ClippedIcon(IconInviteHead, 24, "var(--aT)")); head.Add(icon);
+            var words = Box(); words.style.marginLeft = 14; words.style.flexShrink = 1;
+            words.Add(Text(S("invT"), 26, "Montserrat-700", "#F4F1E8", 1.1f, "lobby.text.invT"));
+            // invSub(n): "n boş koltuk · davet 30 sn geçerli" (EN seat / seats) or "Masa dolu · davet gönderilemez" (EK-412).
+            int open = counting ? 0 : free;
+            var sub = Text(open > 0 ? L(open + " boş koltuk · davet 30 sn geçerli", open + " empty " + (open > 1 ? "seats" : "seat") + " · invites last 30 s") : L("Masa dolu · davet gönderilemez", "Table is full · no invites"), 13, "Baloo2-700", "var(--mt)", 0, "lobby.iv.sub");
+            sub.style.marginTop = 3; words.Add(sub);
             head.Add(words); left.Add(head);
 
             var tools = Row(); tools.style.marginTop = 14;
-            var tabs = Segment();
-            int online = state.Friends?.Count(f => f.Presence != "offline") ?? 0;
-            foreach (var (value, label, n) in new[] { ("friends", L("Arkadaşlar", "Friends"), state.Friends == null ? "…" : online + "/" + state.Friends.Count), ("recent", L("Son oynadıkların", "Recent players"), state.Recent == null ? "…" : state.Recent.Count.ToString()) })
+            // Tabs: gap 4, padding 4, radius 14, --dp, inset 0 2px 0 rgba(0,0,0,.3); a tab 36 tall, padding 0 14, gap 7, 800 14px; its count 900 11px at .75.
+            var tabs = Segment(4); tabs.name = "lobby-invite-tabs"; view.InsetRing(tabs, 14)("rest");
+            int online = state.Friends?.Count(f => f.Presence == "online") ?? 0;
+            var tabList = new[] { ("friends", S("tabFr"), state.Friends == null ? "…" : online + "/" + state.Friends.Count), ("recent", S("tabRe"), state.Recent == null ? "…" : state.Recent.Count.ToString()) };
+            for (int i = 0; i < tabList.Length; i++)
             {
-                string pick = value; bool on = state.Tab == value;
-                var tab = SegmentOption("invite-tab-" + value, label, on, () => { state.Tab = pick; Render(); }, 14, 9, 14, value == "friends" ? 4 : 0);
-                var count = Text(n, 11, "Baloo2-800", on ? "var(--aT)" : "var(--mt)"); count.style.marginLeft = 7; count.style.opacity = .75f; tab.Add(count); tabs.Add(tab);
+                var (value, label, n) = tabList[i]; string pick = value; bool on = state.Tab == value;
+                var tab = SegmentOption("lobby.b.pick[" + i + "]", label, on, () => { state.Tab = pick; Render(); }, 14, 0, 14, i == 0 ? 4 : 0, 10, "Montserrat-800"); tab.style.height = 36;
+                var count = Text(n, 11, "Baloo2-800", on ? "var(--aT)" : "var(--mt)", 0, "lobby.b.n[" + i + "]"); count.style.marginLeft = 7; count.style.opacity = .75f; tab.Add(count); tabs.Add(tab);
             }
             tools.Add(tabs);
-            var search = Row(); search.style.flexGrow = 1; search.style.height = 44; search.style.marginLeft = 10; Pad(search, 0, 14, 0, 14); view.Decorate(search, "var(--dp)", 14);
-            search.Add(view.Icon("search", 16, "var(--mt)"));
-            var field = Input("invite-search", state.Query, L("Oyuncu ara", "Search players"), 14, "Baloo2-700", "#F4F1E8", 24); field.style.flexGrow = 1; field.style.marginLeft = 8;
+            // Search: flex 1, 44 tall, padding 0 14, gap 8, radius 14, --dp, qRing.
+            var search = Row(); search.name = "lobby-invite-search"; search.style.flexGrow = 1; search.style.height = 44; search.style.marginLeft = 10; Pad(search, 0, 14, 0, 14); view.Decorate(search, "var(--dp)", 14);
+            var ring = FieldRing(search, 14); ring(state.QueryFocused ? "focus" : "rest");
+            search.Add(view.Icon(IconSearch, 16, "var(--mt)"));
+            var field = Input("lobby.iv.onQ", state.Query, S("invSearch"), 14, "Baloo2-700", "#F4F1E8", 24); field.style.flexGrow = 1; field.style.marginLeft = 8;
+            field.RegisterCallback<FocusInEvent>(_ => { state.QueryFocused = true; ring("focus"); });
+            field.RegisterCallback<FocusOutEvent>(_ => { state.QueryFocused = false; ring("rest"); });
             search.Add(field); tools.Add(search); left.Add(tools);
 
-            var list = view.Scroll(false); list.name = "invite-list"; list.style.flexGrow = 1; list.style.marginTop = 14; list.contentContainer.style.paddingRight = 6; list.contentContainer.style.paddingBottom = 20; left.Add(list);
+            // Rows: flex 1, gap 8, padding 2 6 20 0; the thin scrollbar takes no room in the reference (rows 554 wide, UF-802).
+            var list = view.Scroll(false); list.name = "lobby-invite-list"; list.verticalScrollerVisibility = ScrollerVisibility.Hidden; list.style.flexGrow = 1; list.style.marginTop = 14;
+            list.contentContainer.style.paddingTop = 2; list.contentContainer.style.paddingRight = 6; list.contentContainer.style.paddingBottom = 20; left.Add(list);
             void FillRows()
             {
                 list.Clear();
-                var pool = state.Tab == "recent" ? state.Recent : state.Friends;
+                bool recent = state.Tab == "recent";
+                var pool = recent ? state.Recent?.Select(r => (r.Friend, r.PlayedAt)).ToList() : state.Friends?.Select(f => (f, (DateTimeOffset?)null)).ToList();
                 if (pool == null) { var wait = Spinner(26, "var(--mt)"); wait.style.alignSelf = Align.Center; wait.style.marginTop = 40; list.Add(wait); return; }
-                string q = state.Query.Trim().ToLower(new System.Globalization.CultureInfo("tr-TR"));
+                var tr = new System.Globalization.CultureInfo("tr-TR"); string q = state.Query.Trim().ToLower(tr);
+                // rows: the query on the name, then online, in a game, offline (a stable sort: the server's order within each).
                 int Order(FriendResponse f) => f.Presence == "online" ? 0 : f.Presence == "playing" ? 1 : 2;
-                var rows = pool.Where(f => f.Player != null && (q.Length == 0 || f.Player.Name.ToLower(new System.Globalization.CultureInfo("tr-TR")).Contains(q))).OrderBy(Order).ThenBy(f => f.Player.Name).ToList();
-                if (rows.Count == 0) { var none = Text(pool.Count == 0 ? state.Tab == "recent" ? L("Henüz birlikte oynadığın kimse yok", "Nobody played with you yet") : L("Henüz arkadaşın yok", "No friends yet") : L("Bu isimde oyuncu yok", "No player with that name"), 14, "Baloo2-700", "var(--mt)"); none.style.alignSelf = Align.Center; none.style.marginTop = 40; list.Add(none); return; }
-                foreach (var f in rows) list.Add(InviteRow(f, t, free));
+                var rows = pool.Where(f => f.Item1?.Player != null && (q.Length == 0 || f.Item1.Player.Name.ToLower(tr).Contains(q))).OrderBy(f => Order(f.Item1)).ToList();
+                if (rows.Count == 0) { var none = Text(S("invNone"), 14, "Baloo2-700", "var(--mt)", 0, "lobby.text.invNone"); none.style.alignSelf = Align.Center; Pad(none, 40, 0, 40, 0); list.Add(none); return; }
+                for (int i = 0; i < rows.Count; i++) { var row = InviteRow(rows[i].Item1, rows[i].Item2, recent, i, t, counting ? 0 : free); if (i > 0) row.style.marginTop = 8; list.Add(row); }
             }
             FillRows();
             field.RegisterValueChangedCallback(e => { state.Query = e.newValue ?? ""; FillRows(); });
 
-            // Right: seats, counts, code, notes.
-            var right = Box(); right.style.width = 290; Pad(right, 22, 22, 22, 22); view.Decorate(right, "var(--sd)", 0); right.style.borderLeftWidth = 1; right.style.borderLeftColor = new Color(1, 1, 1, .06f); modal.Add(right);
+            // Right: padding 22, gap 14, --sd, border-left 1px rgba(255,255,255,.06).
+            var right = Box("lobby-invite-side"); right.style.width = 290; Pad(right, 22, 22, 22, 22); view.Decorate(right, "var(--sd)", 0); right.style.borderLeftWidth = 1; right.style.borderLeftColor = new Color(1, 1, 1, .06f); modal.Add(right);
             var top = Row(); top.style.justifyContent = Justify.FlexEnd;
-            var close = Box("invite-close"); Square(close, 40); Raise(close, "var(--pnH)", 12, 3, "var(--pnS)"); close.Add(view.Icon("close", 14, "var(--ic)")); close.tooltip = L("Kapat", "Close"); GalaxyFilters.HoverBrightness(close, 1.2f); Tap(close, CloseInvite); top.Add(close); right.Add(top);
-            var seatsCap = Text(L("KOLTUKLAR", "SEATS"), 11, "Baloo2-800", "var(--mt)"); MenuView.Tracking(seatsCap, 1.8f, 11); seatsCap.style.marginTop = 14; right.Add(seatsCap);
-            var seats = Row(); seats.style.marginTop = 14; seats.style.justifyContent = Justify.SpaceBetween;
-            for (int s = 0; s < 4; s++)
+            var close = Box("lobby.iv.close#2"); Square(close, 40); Raise(close, "var(--pnH)", 12, 3, "var(--pnS)"); close.Add(view.Icon(IconClose, 14, "var(--ic)")); close.tooltip = S("close"); GalaxyFilters.HoverBrightness(close, 1.2f); Tap(close, CloseInvite); top.Add(close); right.Add(top);
+            var seatsCap = Text(S("invSeats"), 11, "Baloo2-800", "var(--mt)", 0, "lobby.text.invSeats"); MenuView.Tracking(seatsCap, 1.8f, 11); seatsCap.style.marginTop = 14; right.Add(seatsCap);
+            // grid repeat(4,1fr), gap 8, aspect-ratio 1: (245 − 3 × 8) / 4 = 55.25.
+            var seats = Row(); seats.style.marginTop = 14;
+            int mine = Mathf.Clamp(backend.Room?.YourSeat ?? 0, 0, 3);
+            for (int spot = 0; spot < 4; spot++)
             {
-                var e = t.Seats[s]; var chip = Box(); Square(chip, 56);
-                if (e?.Player != null) { view.Decorate(chip, e.Bot ? "#5B6390" : e.Player.Color ?? "#3D7BFF", 28); Border(chip, 2, view.C(e.Player.Id == backend.Me ? "var(--a1)" : "rgba(255,255,255,.75)")); chip.Add(Text(Initials(e.Player.Name), 14, "Montserrat-700", "#fff")); chip.tooltip = e.Player.Name; }
-                else { bool chosen = state.Seat == s; view.Decorate(chip, chosen ? "rgba(255,201,74,.16)" : "rgba(0,0,0,.2)", 28); DashedBorder(chip, 2, view.C(chosen ? "var(--a1)" : "var(--bd)")); chip.Add(Text("+", 14, "Montserrat-700", chosen ? "var(--a1)" : "var(--mt)")); }
+                int s = (spot + mine) % 4;
+                var chip = SeatChip(t.Seats[s], 55.25f, 14, "lobby.z.ini[" + spot + "]", state.Seat == s); if (spot > 0) chip.style.marginLeft = 8;
                 seats.Add(chip);
             }
             right.Add(seats);
             int pending = state.Sent.Values.Count(x => x.State == "pend");
-            var line = Text(L((4 - free) + "/4 dolu" + (pending > 0 ? " · " + pending + " davet bekliyor" : ""), (4 - free) + "/4 taken" + (pending > 0 ? " · " + pending + " pending" : "")), 13, "Baloo2-700", "var(--ic)"); line.name = "invite-seat-line"; line.style.marginTop = 14; right.Add(line);
-            var rule = Box(); rule.style.height = 1; rule.style.marginTop = 14; rule.style.marginBottom = 14; rule.style.backgroundColor = new Color(1, 1, 1, .07f); right.Add(rule);
+            // invSeatLine(n, p): "k/4 dolu" + " · p davet bekliyor" while invites wait (EK-412).
+            var line = Text(L((4 - free) + "/4 dolu" + (pending > 0 ? " · " + pending + " davet bekliyor" : ""), (4 - free) + "/4 taken" + (pending > 0 ? " · " + pending + " pending" : "")), 13, "Baloo2-700", "var(--ic)", 1.4f, "lobby.iv.seatLine");
+            line.style.marginTop = 14; right.Add(line);
+            var rule = Box(); rule.style.height = 1; rule.style.marginTop = 14 + 4; rule.style.marginBottom = 4; rule.style.backgroundColor = new Color(1, 1, 1, .07f); right.Add(rule);
             var room = backend.Room;
             if (t.Private && room?.Code != null)
             {
-                var cc = Text(L("KODLA DAVET", "INVITE BY CODE"), 11, "Baloo2-800", "var(--mt)"); MenuView.Tracking(cc, 1.8f, 11); right.Add(cc);
-                var codeBox = Box(); codeBox.style.alignItems = Align.Center; codeBox.style.marginTop = 10; Pad(codeBox, 14, 0, 14, 0); view.Decorate(codeBox, "rgba(0,0,0,.18)", 18); DashedBorder(codeBox, 2, view.C("var(--bd)"));
-                var code = Text(room.Code, 30, "Montserrat-800", "var(--a1)"); MenuView.Tracking(code, 5, 30); codeBox.Add(code); right.Add(codeBox);
-                var buttons = Row(); buttons.style.marginTop = 10;
-                var copy = Text(copied ? L("Kopyalandı", "Copied") : L("Kodu kopyala", "Copy code"), 14, "Montserrat-700", "#F4F1E8"); copy.name = "invite-copy"; copy.style.flexGrow = 1; copy.style.height = 42; copy.style.unityTextAlign = TextAnchor.MiddleCenter; Raise(copy, "var(--pnH)", 13, 4, "var(--pnS)"); Tap(copy, CopyCode); buttons.Add(copy);
-                var share = Text(L("Paylaş", "Share"), 14, "Montserrat-700", "#fff"); share.style.flexGrow = 1; share.style.marginLeft = 8; share.style.height = 42; share.style.unityTextAlign = TextAnchor.MiddleCenter; Raise(share, "#3D7BFF", 13, 4, "#2148B0"); Tap(share, () => OpenDialog(new Dialog { Kind = "share" })); buttons.Add(share);
+                var cc = Text(S("invByCode"), 11, "Baloo2-800", "var(--mt)", 0, "lobby.text.invByCode"); MenuView.Tracking(cc, 1.8f, 11); cc.style.marginTop = 14; right.Add(cc);
+                // gap 4, padding 14 0, radius 18, 2px dashed --bd, rgba(0,0,0,.18); the code 800 30px/1.1 --fL, letter-spacing 5px (UF-801).
+                var codeBox = Box(); codeBox.style.alignItems = Align.Center; codeBox.style.marginTop = 14; Pad(codeBox, 14, 0, 14, 0); view.Decorate(codeBox, "rgba(0,0,0,.18)", 18); DashedBorder(codeBox, 2, view.C("var(--bd)"));
+                var code = Text(room.Code, 30, "Montserrat-800", "var(--a1)", 1.1f, "lobby.w.code#2"); MenuView.Tracking(code, 5, 30); codeBox.Add(code); right.Add(codeBox);
+                var buttons = Row(); buttons.style.marginTop = 14;
+                var copy = Text(copied ? S("copied") : S("copy"), 14, "Montserrat-700", "#F4F1E8", 0, "lobby.w.copy#2"); copy.style.flexGrow = 1; copy.style.flexBasis = 0; copy.style.height = 42; copy.style.unityTextAlign = TextAnchor.MiddleCenter; Raise(copy, "var(--pnH)", 13, 4, "var(--pnS)"); Tap(copy, CopyCode); buttons.Add(copy);
+                var share = Text(S("share"), 14, "Montserrat-700", "#fff", 0, "lobby.w.share#2"); share.style.flexGrow = 1; share.style.flexBasis = 0; share.style.marginLeft = 8; share.style.height = 42; share.style.unityTextAlign = TextAnchor.MiddleCenter; Raise(share, "#3D7BFF", 13, 4, "#2148B0"); Tap(share, () => OpenDialog(new Dialog { Kind = "share", SharePin = roomPin })); buttons.Add(share);
                 right.Add(buttons);
             }
             else
             {
-                var note = Row(); note.style.alignItems = Align.FlexStart; Pad(note, 12, 14, 12, 14); view.Decorate(note, "rgba(255,255,255,.04)", 14);
-                note.Add(view.Icon("info", 18, "var(--mt)"));
-                var nt = Text(L("Açık masa lobide listelenir; davet edilen arkadaşın doğrudan boş koltuğa oturur.", "Open tables are listed in the lobby; invited friends sit straight into an empty seat."), 13, "Baloo2-700", "var(--mt)");
-                Paragraph(nt); nt.style.flexShrink = 1; nt.style.marginLeft = 10; note.Add(nt); right.Add(note);
+                // iv.openTbl: gap 10, padding 12 14, radius 14, rgba(255,255,255,.04); the info icon 18 (margin-top 1).
+                var note = Row(); note.style.alignItems = Align.FlexStart; note.style.marginTop = 14; Pad(note, 12, 14, 12, 14); view.Decorate(note, "rgba(255,255,255,.04)", 14);
+                var info = view.Icon(IconInfo, 18, "var(--mt)"); info.style.marginTop = 1; note.Add(info);
+                var nt = Text(S("invOpen"), 13, "Baloo2-700", "var(--mt)", 1.4f, "lobby.text.invOpen");
+                Paragraph(nt, 1.4f); nt.style.flexShrink = 1; nt.style.flexGrow = 1; nt.style.marginLeft = 10; note.Add(nt); right.Add(note);
             }
             right.Add(Grow());
-            var foot = Text(L("Kabul eden arkadaşın boş koltuğa otomatik oturur.", "Friends who accept take an empty seat automatically."), 12, "Baloo2-700", "var(--mt)"); Paragraph(foot); foot.style.unityTextAlign = TextAnchor.MiddleCenter; right.Add(foot);
+            var foot = Text(S("invNote"), 12, "Baloo2-700", "var(--mt)", 1.4f, "lobby.text.invNote"); Paragraph(foot, 1.4f); foot.style.unityTextAlign = TextAnchor.MiddleCenter; right.Add(foot);
         }
 
-        private VisualElement InviteRow(FriendResponse f, TableSummary t, int free)
+        /// <summary>One iv.rows entry: avatar with the presence dot, name + level, the presence line, and the state button.</summary>
+        private VisualElement InviteRow(FriendResponse f, DateTimeOffset? playedAt, bool recent, int index, TableSummary t, int free)
         {
             var p = f.Player; bool seated = t.Seats.Any(s => s?.Player?.Id == p.Id);
             invite.Sent.TryGetValue(p.Id, out var sent);
-            string st = seated ? "in" : sent?.State;
+            string st = seated ? "in" : sent?.State ?? (f.Presence == "online" ? "can" : f.Presence == "playing" ? "game" : "off");
             float left = sent != null && st == "pend" ? InviteSeconds - (Time.realtimeSinceStartup - sent.At) : 0;
             if (st == "pend" && left <= 0) { sent.State = st = "exp"; }
-            var row = Row(); row.name = "invite-row-" + p.Id; row.style.marginBottom = 8; Pad(row, 10, 12, 10, 10); view.Decorate(row, "var(--sd)", 16);
+            // r.ring: pend → inset 0 0 0 2px rgba(255,201,74,.45), in → rgba(60,203,110,.4) (the padding gives it back).
+            float ring = st == "pend" || st == "in" ? 2 : 0;
+            var row = Row(); row.name = "lobby-invite-row-" + p.Id; Pad(row, 10 - ring, 12 - ring, 10 - ring, 10 - ring); view.Decorate(row, "var(--sd)", 16);
             if (st == "pend") Border(row, 2, new Color(1, .79f, .29f, .45f)); else if (st == "in") Border(row, 2, new Color(.235f, .8f, .43f, .4f));
             row.style.opacity = f.Presence == "offline" && st != "in" ? .55f : 1;
-            var face = Box(); Square(face, 46); view.Decorate(face, p.Color ?? "#3D7BFF", 23); Border(face, 2, new Color(1, 1, 1, .8f)); face.Add(Text(Initials(p.Name), 16, "Montserrat-700", "#fff"));
-            var dot = Box(); Square(dot, 14); dot.style.position = Position.Absolute; dot.style.right = -1; dot.style.bottom = -1; view.Decorate(dot, f.Presence == "online" ? "#3CCB6E" : f.Presence == "playing" ? "#FFC94A" : "#6B7393", 7); Border(dot, 3, view.C("var(--sd)")); face.Add(dot);
-            row.Add(face);
-            var words = Box(); words.style.flexGrow = 1; words.style.flexShrink = 1; words.style.marginLeft = 14;
-            var nameLine = Row(); var name = Text(p.Name, 17, "Montserrat-700", "#F4F1E8"); name.style.flexShrink = 1; name.style.overflow = Overflow.Hidden; name.style.textOverflow = TextOverflow.Ellipsis; nameLine.Add(name);
-            var lv = Text(L("SV ", "LV ") + Math.Max(1, p.Level), 10, "Baloo2-800", "var(--ic)"); lv.style.marginLeft = 8; Pad(lv, 1, 7, 1, 7); view.Decorate(lv, "var(--pnH)", 6); nameLine.Add(lv); words.Add(nameLine);
-            string subText = f.Presence == "online" ? L("Çevrimiçi", "Online") : f.Presence == "playing" ? L("Oyunda", "In a game") : f.LastSeen is DateTimeOffset seenAt ? L("Son görülme " + Ago(seenAt), "Last seen " + Ago(seenAt)) : L("Çevrimdışı", "Offline");
-            words.Add(Text(subText, 12, "Baloo2-700", f.Presence == "online" ? "#8EF0B0" : f.Presence == "playing" ? "var(--a1)" : "var(--mt)")); row.Add(words);
+            var holder = Box(); Square(holder, 46);
+            var face = Box("lobby.r.ini[" + index + "]"); Square(face, 46); view.Decorate(face, p.Color ?? "#3D7BFF", 23); Border(face, 2, new Color(1, 1, 1, .8f)); face.Add(Text(Initials(p.Name), 16, "Montserrat-700", "#fff")); holder.Add(face);
+            var dot = Box(); Square(dot, 14); dot.style.position = Position.Absolute; dot.style.right = -1; dot.style.bottom = -1; view.Decorate(dot, f.Presence == "online" ? "#3CCB6E" : f.Presence == "playing" ? "#FFC94A" : "#6B7199", 7); Border(dot, 3, view.C("var(--sd)")); holder.Add(dot);
+            row.Add(holder);
+            var words = Box(); words.style.flexGrow = 1; words.style.flexShrink = 1; words.style.marginLeft = 14; words.style.overflow = Overflow.Hidden;
+            var nameLine = Row(); var name = Text(p.Name, 17, "Montserrat-700", "#F4F1E8", 1.2f, "lobby.r.name[" + index + "]"); name.style.flexShrink = 1; name.style.overflow = Overflow.Hidden; name.style.textOverflow = TextOverflow.Ellipsis; nameLine.Add(name);
+            var lv = Text((En ? "LV " : "SV ") + Math.Max(1, p.Level), 10, "Baloo2-800", "var(--ic)", 0, "lobby.r.lv[" + index + "]"); lv.style.marginLeft = 8; Pad(lv, 1, 7, 1, 7); view.Decorate(lv, "var(--pnH)", 6); nameLine.Add(lv); words.Add(nameLine);
+            // sub: Çevrimiçi / Oyunda / Son görülme ‹seen›; a recent player's line adds when you played together.
+            string subText = f.Presence == "online" ? S("stOn") : f.Presence == "playing" ? S("stGame") : S("stOff", f.LastSeen is DateTimeOffset seenAt ? SeenAgo(seenAt) : "").TrimEnd();
+            if (recent && playedAt is DateTimeOffset played) subText += " · " + PlayedAgo(played);
+            var subLine = Text(subText, 12, "Baloo2-700", f.Presence == "online" ? "#8EF0B0" : f.Presence == "playing" ? "var(--a1)" : "var(--mt)", 0, "lobby.r.sub[" + index + "]");
+            subLine.style.marginTop = 2; subLine.style.overflow = Overflow.Hidden; subLine.style.textOverflow = TextOverflow.Ellipsis; words.Add(subLine); row.Add(words);
 
-            string label, bg, fg, shade; bool can = false;
-            if (st == "in") { label = L("Masada", "Seated"); bg = "#3CCB6E"; fg = "#062B14"; shade = "#22914A"; }
-            else if (st == "pend") { label = L("Bekleniyor " + Mathf.CeilToInt(left), "Waiting " + Mathf.CeilToInt(left)); bg = "var(--pnH)"; fg = "#F4F1E8"; shade = "var(--pnS)"; can = true; }
-            else if (free == 0) { label = L("Masa dolu", "Table full"); bg = "var(--dp)"; fg = "var(--mt)"; shade = "rgba(0,0,0,.25)"; }
-            else if (f.Presence == "playing") { label = L("Oyunda", "In a game"); bg = "var(--dp)"; fg = "var(--mt)"; shade = "rgba(0,0,0,.25)"; }
-            else if (f.Presence == "offline") { label = L("Çevrimdışı", "Offline"); bg = "var(--dp)"; fg = "var(--mt)"; shade = "rgba(0,0,0,.25)"; }
-            else if (st == "exp") { label = L("Tekrar davet", "Invite again"); bg = "var(--pnH)"; fg = "#F4F1E8"; shade = "var(--pnS)"; can = true; }
-            else if (st == "no") { label = L("Reddetti", "Declined"); bg = "var(--dp)"; fg = "#FF9AA3"; shade = "rgba(0,0,0,.25)"; }
-            else { label = L("Davet et", "Invite"); bg = "linear-gradient(var(--a1),var(--a2))"; fg = "var(--aT)"; shade = "var(--aS)"; can = true; }
-            var button = Row(); button.name = "invite-send-" + p.Id; button.style.minWidth = 136; button.style.height = 40; button.style.justifyContent = Justify.Center; Pad(button, 0, 14, 0, 14); button.style.overflow = Overflow.Hidden;
+            string label, bg, fg, shade; bool can = false, check = false;
+            if (st == "in") { label = S("bIn"); bg = "rgba(60,203,110,.16)"; fg = "#8EF0B0"; shade = "transparent"; check = true; }
+            else if (st == "pend") { label = S("bPend", Mathf.Max(0, Mathf.FloorToInt(left))); bg = "var(--pnH)"; fg = "#F4F1E8"; shade = "var(--pnS)"; can = true; }
+            else if (st == "no") { label = S("bNo"); bg = "rgba(255,94,108,.14)"; fg = "#FF9AA3"; shade = "transparent"; }
+            else if (st == "game") { label = S("bGame"); bg = "var(--dp)"; fg = "var(--mt)"; shade = "rgba(0,0,0,.25)"; }
+            else if (st == "off") { label = S("bOff"); bg = "var(--dp)"; fg = "var(--mt)"; shade = "rgba(0,0,0,.25)"; }
+            else if (free == 0) { label = S("bFull"); bg = "var(--dp)"; fg = "var(--mt)"; shade = "rgba(0,0,0,.25)"; }
+            else if (st == "exp") { label = S("bExp"); bg = "var(--pnH)"; fg = "#F4F1E8"; shade = "var(--pnS)"; can = true; }
+            else { label = S("bInv"); bg = "linear-gradient(var(--a1),var(--a2))"; fg = "var(--aT)"; shade = "var(--aS)"; can = true; }
+            // r.go: min-width 136, 40 tall, padding 0 14, gap 8, radius 12, 0 4px 0 shade, 800 14px, overflow hidden.
+            var button = Row(); button.name = "lobby.r.go[" + index + "]"; button.style.minWidth = 136; button.style.height = 40; button.style.marginLeft = 14; button.style.justifyContent = Justify.Center; Pad(button, 0, 14, 0, 14); button.style.overflow = Overflow.Hidden;
             Raise(button, bg, 12, 4, shade);
             if (st == "pend")
             {
-                var spin = Spinner(14, fg); spin.style.marginRight = 8; button.Add(spin);
+                // The 3 px --a1 bar shrinks with the time left (width 1s linear); a 14 px spinner (2.5px currentColor).
                 var bar = Box(); bar.style.position = Position.Absolute; bar.style.left = 0; bar.style.bottom = 0; bar.style.height = 3; bar.style.backgroundColor = view.C("var(--a1)"); button.Add(bar);
-                button.tooltip = L("İptal etmek için tıkla", "Click to cancel");
-                var text = Text(label, 14, "Montserrat-800", fg); button.Add(text); var s = sent;
+                var spin = Spinner(14, fg, 2.5f); spin.style.marginRight = 8; button.Add(spin);
+                button.tooltip = S("bCancel");
+                var text = Text(label, 14, "Montserrat-800", fg); button.Add(text); var s = sent; string who = p.Name;
                 Animate(() =>
                 {
                     float remaining = InviteSeconds - (Time.realtimeSinceStartup - s.At);
-                    bar.style.width = Length.Percent(Mathf.Clamp01(remaining / InviteSeconds) * 100);
-                    if (remaining <= 0 && s.State == "pend") { s.State = "exp"; Flash(L(p.Name + " yanıt vermedi", p.Name + " didn’t respond"), "info"); Render(); return; }
-                    text.text = L("Bekleniyor " + Mathf.CeilToInt(Mathf.Max(0, remaining)), "Waiting " + Mathf.CeilToInt(Mathf.Max(0, remaining)));
-                });
+                    bar.style.width = Length.Percent(Mathf.Clamp01(Mathf.Ceil(Mathf.Max(0, remaining)) / InviteSeconds) * 100);
+                    if (remaining <= 0 && s.State == "pend") { s.State = "exp"; Flash(S("invExp", who), "info"); Render(); return; }
+                    text.text = S("bPend", Mathf.Max(0, Mathf.FloorToInt(remaining)));
+                }, button);
             }
             else
             {
-                if (st == "in") { var tick = view.Icon("tick", 15, fg); tick.style.marginRight = 8; button.Add(tick); }
+                if (check) { var tick = view.Icon(IconCheck, 15, fg); tick.style.marginRight = 8; button.Add(tick); }
                 button.Add(Text(label, 14, "Montserrat-800", fg));
             }
-            if (can) Tap(button, () => _ = SendInvite(p, st == "pend"));
+            if (can) Tap(button, () => _ = SendInvite(p, recent, st == "pend"));
             row.Add(button);
             return row;
         }
 
-        private string Ago(DateTimeOffset at)
-        {
-            var span = DateTimeOffset.UtcNow - at;
-            if (span.TotalMinutes < 60) return L(Math.Max(1, (int)span.TotalMinutes) + " dk önce", Math.Max(1, (int)span.TotalMinutes) + " min ago");
-            if (span.TotalHours < 24) return L((int)span.TotalHours + " sa önce", (int)span.TotalHours + " h ago");
-            return L((int)span.TotalDays + " gün önce", (int)span.TotalDays + " d ago");
-        }
-
-        private async System.Threading.Tasks.Task SendInvite(PlayerSummary p, bool cancel)
+        /// <summary>sendInvite(fr) / the pending button's cancel: inviteSend (into the picked seat) or inviteCancel.</summary>
+        private async System.Threading.Tasks.Task SendInvite(PlayerSummary p, bool recent, bool cancel)
         {
             var state = invite; if (state == null) return;
-            if (cancel) { state.Sent.Remove(p.Id); Render(); return; }
-            var code = backend.Room?.Code; if (code == null) return;
-            state.Sent[p.Id] = new Sent { At = Time.realtimeSinceStartup }; Render();
-            string error = await backend.InviteAsync(p.Id, code);
-            if (layer == null || invite != state) return;
-            if (error != null)
-            {
-                state.Sent[p.Id].State = "no";
-                Flash(error == ErrorCodes.InvitesDisabled ? L(p.Name + " davetleri kapattı", p.Name + " turned invites off") : L(p.Name + " davet edilemedi", "Could not invite " + p.Name), "bad");
-            }
-            else Flash(L(p.Name + " davet edildi", p.Name + " invited"), "good");
+            if (cancel) { state.Sent.Remove(p.Id); Render(); _ = backend.CancelInviteAsync(p.Id); return; }
+            state.Sent[p.Id] = new Sent { At = Time.realtimeSinceStartup };
+            Flash(S("invSent", p.Name), "info"); Render();
+            string error = await backend.InviteAsync(p.Id, state.Seat, recent);
+            if (layer == null || invite != state || error == null) return;
+            // A refused send (offline, busy, not friends …) is silent in the package (S14): the row offers the invite again.
+            state.Sent.Remove(p.Id);
+            if (ErrorText(error) is string text) Flash(text, "bad");
+            else if (error == ErrorCodes.InvitesDisabled) Flash(L(p.Name + " davetleri kapattı", p.Name + " turned invites off"), "bad");
             Render();
         }
 
-        // ---------- dialogs ----------
-        public sealed class Dialog
+        /// <summary>inviteResult: declined → Reddetti (invNo, bad), expired → Tekrar davet (invExp); accepted shows as the player sitting down.</summary>
+        private void OnInviteAnswered(Guid player, string result)
         {
-            public string Kind, Pin = "", Code = "", Error;
-            public TableSummary Table;
-            public InviteMessage Invite;
-            public float Shake, OpenedAt;
-            public bool First, Copied;
-            /// <summary>A PIN asked to watch the table (İzle), not to sit.</summary>
-            public bool Watch;
-        }
-
-        private Dialog dialog;
-        public Dialog Current => dialog;
-
-        private void OpenDialog(Dialog next) { next.OpenedAt = Time.realtimeSinceStartup; dialog = next; RenderDialog(); }
-        private void CloseDialog() { dialog = null; RenderDialog(); }
-
-        /// <summary>A CSS content-box width: the design's "width" plus the padding and border already set on the card.</summary>
-        private static void ContentWidth(VisualElement card, float width) =>
-            card.style.width = width + card.style.paddingLeft.value.value + card.style.paddingRight.value.value + card.style.borderLeftWidth.value + card.style.borderRightWidth.value;
-
-        public void OpenCode() => OpenDialog(new Dialog { Kind = "code" });
-
-        /// <summary>A friend's invite (realtime <c>invite</c>): who, the stake, Katıl joins by the table code.</summary>
-        public void ShowInvite(InviteMessage message) => OpenDialog(new Dialog { Kind = "invited", Invite = message });
-
-        private void RenderDialog()
-        {
-            if (dialogLayer == null) return;
-            dialogLayer.Clear();
-            var d = dialog; if (d == null) { dialogLayer.pickingMode = PickingMode.Ignore; return; }
-            dialogLayer.pickingMode = PickingMode.Position;
-            var shade = Fill("dialog-backdrop"); shade.pickingMode = PickingMode.Position; view.Decorate(shade, "rgba(0,0,0,.55)");
-            Tap(shade, () => { if (d.Kind != "connect" && d.Kind != "offline") CloseDialog(); }); dialogLayer.Add(shade);
-            var frame = Fill("dialog-frame"); frame.style.alignItems = Align.Center; frame.style.justifyContent = Justify.Center; dialogLayer.Add(frame);
-            var card = Box("dialog-" + d.Kind); card.pickingMode = PickingMode.Position; card.style.alignItems = Align.Center;
-            Border(card, 1, new Color(1, 1, 1, .1f)); Raise(card, "var(--pn)", 26, 10, "var(--pnS)"); GalaxyFilters.Shadow(card, 0, 40, 45, new Color(0, 0, 0, .6f));
-            card.RegisterCallback<ClickEvent>(e => e.StopPropagation()); frame.Add(card); Pop(card, d.OpenedAt, .25f);
-            switch (d.Kind)
+            var state = invite; if (layer == null || state == null || !state.Sent.TryGetValue(player, out var sent) || sent.State != "pend") return;
+            string who = state.Friends?.FirstOrDefault(f => f.Player?.Id == player)?.Player?.Name ?? state.Recent?.FirstOrDefault(r => r.Friend?.Player?.Id == player)?.Friend.Player.Name ?? "";
+            switch (result)
             {
-                case "connect":
-                    Pad(card, 30, 30, 30, 30); ContentWidth(card, 380);
-                    var spin = Spinner(44, "var(--a1)"); Border(spin, 4, view.C("var(--a1)")); spin.style.borderTopColor = Color.clear; card.Add(spin);
-                    var ct = Text(L("Masaya bağlanılıyor…", "Connecting to the table…"), 20, "Montserrat-700", "#F4F1E8"); ct.style.marginTop = 12; card.Add(ct);
-                    if (d.Table != null) { var cb = Text(d.Table.Name + " · " + view.N(d.Table.Stake), 14, "Baloo2-700", "var(--mt)"); cb.style.marginTop = 12; card.Add(cb); }
-                    break;
-                case "pin": BuildPin(card, d); break;
-                case "code": BuildCodeDialog(card, d); break;
-                case "full":
-                case "closed":
-                    Pad(card, 30, 30, 24, 30); ContentWidth(card, 450);
-                    var badge = Box(); Square(badge, 68); Raise(badge, "linear-gradient(#FF7A86,#E8455A)", 22, 5, "#9E1F33"); badge.Add(view.Icon(d.Kind == "full" ? "table-full" : "table-closed", 32, "#fff")); card.Add(badge);
-                    var et = Text(d.Kind == "full" ? L("Masa doldu", "Table is full") : L("Masa kapandı", "Table closed"), 24, "Montserrat-700", "#F4F1E8"); et.style.marginTop = 14; card.Add(et);
-                    var eb = Text(d.Kind == "full" ? L("Son koltuk sen bağlanırken doldu.", "The last seat was taken while you were connecting.") : L("Oda sahibi masayı kapattı.", "The host closed the table."), 15, "Baloo2-700", "var(--mt)");
-                    Paragraph(eb); eb.style.maxWidth = 360; eb.style.unityTextAlign = TextAnchor.MiddleCenter; eb.style.marginTop = 10; card.Add(eb);
-                    card.Add(Pair(L("Tamam", "OK"), CloseDialog, L("Benzer masa bul", "Find a similar table"), () => Similar(d.Table), "dialog-ok", "dialog-alt"));
-                    break;
-                case "share": BuildShare(card, d); break;
-                case "offline":
-                    Pad(card, 30, 30, 24, 30); ContentWidth(card, 450);
-                    var ob = Box(); Square(ob, 68); Raise(ob, "linear-gradient(#FF7A86,#E8455A)", 22, 5, "#9E1F33"); ob.Add(view.Icon("table-wifi-off", 32, "#fff")); card.Add(ob);
-                    var ot = Text(L("Sunucuya bağlanılamadı", "Could not reach the server"), 24, "Montserrat-700", "#F4F1E8"); ot.style.marginTop = 14; card.Add(ot);
-                    var obody = Text(L("Lobi için çevrimiçi olmalısın. Bağlantını kontrol edip yeniden dene.", "The lobby needs you online. Check your connection and try again."), 15, "Baloo2-700", "var(--mt)");
-                    Paragraph(obody); obody.style.maxWidth = 360; obody.style.unityTextAlign = TextAnchor.MiddleCenter; obody.style.marginTop = 10; card.Add(obody);
-                    card.Add(Pair(L("Ana menü", "Main menu"), () => { CloseDialog(); Back(); }, L("Tekrar dene", "Try again"), async () => { CloseDialog(); if (await Connect()) Render(); }, "dialog-ok", "dialog-alt"));
-                    break;
-                case "invited":
-                    var m = d.Invite; Pad(card, 30, 30, 24, 30); ContentWidth(card, 450);
-                    var face = Box(); Square(face, 68); view.Decorate(face, m.From?.Color ?? "#3D7BFF", 34); Border(face, 3, new Color(1, 1, 1, .85f)); face.Add(Text(Initials(m.From?.Name), 24, "Montserrat-700", "#fff")); card.Add(face);
-                    var it = Text(L((m.From?.Name ?? "Bir arkadaşın") + " seni masaya çağırıyor", (m.From?.Name ?? "A friend") + " invites you to a table"), 22, "Montserrat-700", "#F4F1E8"); it.style.marginTop = 14; Paragraph(it); it.style.unityTextAlign = TextAnchor.MiddleCenter; card.Add(it);
-                    var ib = Text(L("Bahis " + view.N(m.Stake) + " · kod " + m.RoomCode, "Bet " + view.N(m.Stake) + " · code " + m.RoomCode), 15, "Baloo2-700", "var(--mt)"); ib.style.marginTop = 10; card.Add(ib);
-                    card.Add(Pair(L("Sonra", "Later"), CloseDialog, L("Katıl", "Join"), () =>
-                    {
-                        if (m.Stake > backend.Chips) { CloseDialog(); Low(m.Stake, backend.Chips); return; }
-                        var code = m.RoomCode; CloseDialog(); _ = JoinAsync(new TableJoinMessage { Code = code }, null);
-                    }, "dialog-ok", "dialog-alt"));
-                    break;
+                case "declined": sent.State = "no"; Flash(S("invNo", who), "bad"); break;
+                case "expired": sent.State = "exp"; Flash(S("invExp", who), "info"); break;
+                case "failed": state.Sent.Remove(player); break;
+                default: return;
             }
-        }
-
-        private void BuildPin(VisualElement card, Dialog d)
-        {
-            Pad(card, 30, 30, 24, 30); ContentWidth(card, 440);
-            var icon = Box(); Square(icon, 68); Raise(icon, "linear-gradient(160deg,var(--a1),var(--a2))", 22, 5, "var(--aS)"); GalaxyFilters.Shadow(icon, 0, 0, 15, view.C("var(--gl)")); icon.Add(view.Icon("lock", 30, "var(--aT)")); card.Add(icon);
-            var title = Text(L("Şifreli masa", "Password protected"), 24, "Montserrat-700", "#F4F1E8"); title.style.marginTop = 12; card.Add(title);
-            var sub = Text(d.Table == null ? L("Kod " + d.Code, "Code " + d.Code) : L(d.Table.Name + " · " + view.N(d.Table.Stake) + " bahis", d.Table.Name + " · " + view.N(d.Table.Stake) + " bet"), 14, "Baloo2-700", "var(--mt)"); sub.style.marginTop = 12; card.Add(sub);
-            var boxes = Row(); boxes.style.marginTop = 20; boxes.style.marginBottom = 2; boxes.name = "dialog-pin-boxes";
-            var cells = new List<Label>();
-            for (int i = 0; i < 4; i++)
-            {
-                var cell = Text("", 30, "Montserrat-700", "#F4F1E8"); cell.style.width = 58; cell.style.height = 66; cell.style.unityTextAlign = TextAnchor.MiddleCenter; if (i > 0) cell.style.marginLeft = 10;
-                view.Decorate(cell, "var(--dp)", 16); cells.Add(cell); boxes.Add(cell);
-            }
-            var field = Input("dialog-pin", d.Pin, "", 16, "Baloo2-700", "#F4F1E8", 4);
-            field.style.position = Position.Absolute; field.style.left = field.style.top = field.style.right = field.style.bottom = 0; field.style.opacity = 0;
-            void Paint()
-            {
-                for (int i = 0; i < 4; i++)
-                {
-                    cells[i].text = i < d.Pin.Length ? "•" : "";
-                    bool focus = i == Math.Min(d.Pin.Length, 3);
-                    Border(cells[i], 2, d.Error != null ? view.C("#FF5E6C") : focus ? view.C("var(--a1)") : Color.clear);
-                }
-            }
-            field.RegisterValueChangedCallback(e => { string digits = Regex.Replace(e.newValue ?? "", "\\D", ""); if (digits.Length > 4) digits = digits.Substring(0, 4); if (digits != e.newValue) field.SetValueWithoutNotify(digits); d.Pin = digits; d.Error = null; Paint(); ErrorLine(card, d); if (digits.Length == 4) SubmitPin(d); });
-            field.RegisterCallback<KeyDownEvent>(e => { if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter) { e.StopPropagation(); SubmitPin(d); } }, TrickleDown.TrickleDown);
-            boxes.Add(field); card.Add(boxes); Paint();
-            Shake(boxes, d.Shake);
-            ErrorLine(card, d);
-            card.Add(Pair(L("Vazgeç", "Cancel"), CloseDialog, L("Gir", "Enter"), () => SubmitPin(d), "dialog-cancel", "dialog-submit", d.Pin.Length == 4));
-            field.schedule.Execute(() => field.Focus()).ExecuteLater(30);
-        }
-
-        private void SubmitPin(Dialog d)
-        {
-            if (d.Pin.Length != 4) { d.Error = L("4 rakam gir", "Enter 4 digits"); d.Shake = Time.realtimeSinceStartup; RenderDialog(); return; }
-            _ = JoinAsync(new TableJoinMessage { TableId = d.Table?.Id, Code = d.Table == null ? d.Code : null, Pin = d.Pin }, d.Table, d.Watch);
-        }
-
-        private void BuildCodeDialog(VisualElement card, Dialog d)
-        {
-            card.style.alignItems = Align.Stretch; Pad(card, 26, 28, 24, 28); ContentWidth(card, 480);
-            var head = Row();
-            var icon = Box(); Square(icon, 46); Raise(icon, "var(--pnH)", 14, 4, "var(--pnS)"); icon.Add(view.Icon("key", 22, "var(--a1)")); head.Add(icon);
-            var words = Box(); words.style.marginLeft = 12; words.style.flexShrink = 1;
-            words.Add(Text(L("Kodla katıl", "Join by code"), 22, "Montserrat-700", "#F4F1E8", 1.15f));
-            var s = Text(L("Özel masalar lobide görünmez; arkadaşından aldığın kodu yaz.", "Private tables are hidden from the lobby; type the code a friend sent you."), 13, "Baloo2-700", "var(--mt)"); Paragraph(s); words.Add(s);
-            head.Add(words); card.Add(head);
-            // The ring is an inset box-shadow in CSS: the padding gives its 2 px back.
-            var box = Row(); box.name = "dialog-code-box"; box.style.height = 62; box.style.marginTop = 14; Pad(box, 0, 16, 0, 16); view.Decorate(box, "var(--dp)", 16);
-            Border(box, 2, view.C(d.Error != null ? "#FF5E6C" : "var(--bd)"));
-            var field = Input("dialog-code", d.Code, "GX-0000", 26, "Montserrat-700", "var(--a1)", 8); field.style.flexGrow = 1; MenuView.Tracking(field, 5, 26);
-            field.RegisterValueChangedCallback(e => { string up = (e.newValue ?? "").ToUpperInvariant(); if (up != e.newValue) field.SetValueWithoutNotify(up); d.Code = up; if (d.Error != null) { d.Error = null; Border(box, 2, view.C("var(--bd)")); ErrorLine(card, d); } });
-            field.RegisterCallback<KeyDownEvent>(e => { if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter) { e.StopPropagation(); SubmitCode(d); } }, TrickleDown.TrickleDown);
-            box.Add(field); card.Add(box); Shake(box, d.Shake);
-            ErrorLine(card, d);
-            card.Add(Pair(L("Vazgeç", "Cancel"), CloseDialog, L("Katıl", "Join"), () => SubmitCode(d), "dialog-cancel", "dialog-submit"));
-            field.schedule.Execute(() => field.Focus()).ExecuteLater(30);
-        }
-
-        /// <summary>GX-XXXX: letters and digits only; "GX7Q2M", "7q2m" and "gx-7q2m" all mean GX-7Q2M.</summary>
-        public static string NormalizeCode(string input)
-        {
-            string text = (input ?? "").Trim().ToUpperInvariant();
-            // "GX-…": what follows the dash is the code; otherwise a leading GX on six characters is the prefix.
-            if (text.Contains("-")) text = text.Substring(text.IndexOf('-') + 1);
-            string raw = Regex.Replace(text, "[^A-Z0-9]", "");
-            if (raw.StartsWith("GX") && raw.Length == 6) raw = raw.Substring(2);
-            return raw.Length == 4 ? "GX-" + raw : null;
-        }
-
-        private void SubmitCode(Dialog d)
-        {
-            var code = NormalizeCode(d.Code);
-            if (code == null) { d.Error = L("Kod GX- ve 4 karakterden oluşur", "The code is GX- and 4 characters"); d.Shake = Time.realtimeSinceStartup; RenderDialog(); return; }
-            _ = JoinAsync(new TableJoinMessage { Code = code }, null);
-        }
-
-        private void ErrorLine(VisualElement card, Dialog d)
-        {
-            var line = card.Q<Label>("dialog-error");
-            // Pin: centred 14 px line (min-height 20, gap 12); code: a 13 px line under the field (min-height 18, gap 14).
-            bool code = d.Kind == "code";
-            if (line == null)
-            {
-                line = Text("", code ? 13 : 14, "Baloo2-800", "#FF8A94"); line.name = "dialog-error"; line.style.height = StyleKeyword.Auto; line.style.minHeight = code ? 18 : 20;
-                line.style.marginTop = code ? 14 : 12; line.style.alignSelf = code ? Align.Stretch : Align.Center; card.Add(line);
-            }
-            line.text = d.Error ?? "";
-        }
-
-        private void BuildShare(VisualElement card, Dialog d)
-        {
-            var room = backend.Room; string code = room?.Code ?? "";
-            Pad(card, 30, 30, 24, 30); ContentWidth(card, 520);
-            var ok = Box(); Square(ok, 64); Raise(ok, "#3CCB6E", 32, 5, "#22914A"); GalaxyFilters.Shadow(ok, 0, 0, 15, new Color(.235f, .8f, .43f, .5f)); ok.Add(view.Icon("tick", 30, "#fff")); card.Add(ok);
-            var title = Text(L("Özel masan hazır", "Your private table is ready"), 24, "Montserrat-700", "#F4F1E8"); title.style.marginTop = 12; card.Add(title);
-            var sub = Text(L("Masa lobide listelenmez. Kodu arkadaşlarına gönder, kodla katılsınlar.", "It isn’t listed in the lobby. Send the code to friends so they can join."), 14, "Baloo2-700", "var(--mt)");
-            Paragraph(sub); sub.style.maxWidth = 400; sub.style.unityTextAlign = TextAnchor.MiddleCenter; sub.style.marginTop = 12; card.Add(sub);
-            var box = Box(); box.style.alignSelf = Align.Stretch; box.style.alignItems = Align.Center; box.style.marginTop = 16; Pad(box, 18, 0, 16, 0); view.Decorate(box, "rgba(0,0,0,.18)", 20); DashedBorder(box, 2, view.C("var(--bd)"));
-            var cap = Text(L("DAVET KODU", "INVITE CODE"), 11, "Baloo2-800", "var(--mt)"); MenuView.Tracking(cap, 1.8f, 11); box.Add(cap);
-            var big = Text(code, 44, "Montserrat-800", "var(--a1)"); big.name = "share-code"; MenuView.Tracking(big, 8, 44); big.style.marginTop = 6; box.Add(big);
-            if (!string.IsNullOrEmpty(d.Pin))
-            {
-                var pin = Row(); pin.style.marginTop = 6; Pad(pin, 5, 12, 5, 12); view.Decorate(pin, "var(--dp)", 10);
-                pin.Add(view.Icon("lock", 13, "var(--a1)")); var pl = Text(L("Şifre", "Password"), 13, "Baloo2-800", "var(--ic)"); pl.style.marginLeft = 8; pin.Add(pl);
-                var pv = Text(d.Pin, 15, "Montserrat-700", "#F4F1E8"); MenuView.Tracking(pv, 4, 15); pv.style.marginLeft = 8; pin.Add(pv); box.Add(pin);
-            }
-            card.Add(box);
-            string text = L("Galaxy 101'de \"" + room?.Table?.Name + "\" masasına gel! Kod: " + code + (string.IsNullOrEmpty(d.Pin) ? "" : " · Şifre: " + d.Pin), "Join my \"" + room?.Table?.Name + "\" table on Galaxy 101! Code: " + code + (string.IsNullOrEmpty(d.Pin) ? "" : " · Password: " + d.Pin));
-            var buttons = Row(); buttons.style.alignSelf = Align.Stretch; buttons.style.marginTop = 12;
-            var copy = Text(d.Copied ? L("Kopyalandı", "Copied") : L("Kodu kopyala", "Copy code"), 16, "Montserrat-700", d.Copied ? "#062B14" : "#F4F1E8"); copy.name = "share-copy"; copy.style.flexGrow = 1; copy.style.flexBasis = 0; Pad(copy, 13, 0, 13, 0); copy.style.unityTextAlign = TextAnchor.MiddleCenter;
-            Raise(copy, d.Copied ? "#3CCB6E" : "var(--pnH)", 16, 5, d.Copied ? "#22914A" : "var(--pnS)"); Tap(copy, () => { view.Copy(code); d.Copied = true; RenderDialog(); }); buttons.Add(copy);
-            var share = Text(L("Paylaş", "Share"), 16, "Montserrat-700", "#fff"); share.name = "share-share"; share.style.flexGrow = 1; share.style.flexBasis = 0; share.style.marginLeft = 10; Pad(share, 13, 0, 13, 0); share.style.unityTextAlign = TextAnchor.MiddleCenter;
-            Raise(share, "#3D7BFF", 16, 5, "#2148B0"); Tap(share, () => { view.Copy(text); Flash(L("Davet metni kopyalandı", "Invite text copied"), "good"); }); buttons.Add(share);
-            card.Add(buttons);
-            var room2 = Text(d.First ? L("Bekleme odasına geç", "Go to waiting room") : L("Odaya dön", "Back to room"), 17, "Montserrat-800", "var(--aT)"); room2.name = "share-room"; room2.style.alignSelf = Align.Stretch; room2.style.marginTop = 14; Pad(room2, 15, 0, 15, 0); room2.style.unityTextAlign = TextAnchor.MiddleCenter;
-            Raise(room2, "linear-gradient(var(--a1),var(--a2))", 16, 5, "var(--aS)"); Tap(room2, CloseDialog); card.Add(room2);
-        }
-
-        private VisualElement Pair(string first, Action firstGo, string second, Action secondGo, string firstName, string secondName, bool secondOn = true)
-        {
-            var row = Row(); row.style.alignSelf = Align.Stretch; row.style.marginTop = 14;
-            var a = Text(first, 16, "Montserrat-700", "#F4F1E8"); a.name = firstName; a.style.flexGrow = 1; a.style.flexBasis = 0; Pad(a, 14, 0, 14, 0); a.style.unityTextAlign = TextAnchor.MiddleCenter; Raise(a, "var(--pnH)", 16, 5, "var(--pnS)"); Tap(a, firstGo); row.Add(a);
-            var b = Text(second, 16, "Montserrat-800", secondOn ? "var(--aT)" : "var(--mt)"); b.name = secondName; b.style.flexGrow = 1; b.style.flexBasis = 0; b.style.marginLeft = 10; Pad(b, 14, 0, 14, 0); b.style.unityTextAlign = TextAnchor.MiddleCenter;
-            Raise(b, secondOn ? "linear-gradient(var(--a1),var(--a2))" : "var(--pnH)", 16, 5, secondOn ? "var(--aS)" : "var(--pnS)"); Tap(b, secondGo); row.Add(b);
-            return row;
-        }
-
-        /// <summary>lbShake .4 s: ±8 px.</summary>
-        private void Shake(VisualElement element, float at)
-        {
-            if (at <= 0) return;
-            Animate(() => { float t = (Time.realtimeSinceStartup - at) / .4f; element.style.translate = new Translate(t >= 1 || t < 0 ? 0 : 8 * Mathf.Sin(t * Mathf.PI * 4) * (1 - t * .3f), 0); });
+            if (screen == "wait") Render();
         }
     }
 }

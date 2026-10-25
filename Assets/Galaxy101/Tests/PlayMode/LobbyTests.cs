@@ -36,11 +36,13 @@ namespace Galaxy101.Tests
             public event Action TablesChanged;
             public event Action<TableStateMessage> RoomChanged;
             public event Action ChipsChanged;
+            public event Action<Guid, string> InviteAnswered;
+            public void Answer(Guid player, string result) => InviteAnswered?.Invoke(player, result);
             public TableOptions Created;
             public TableJoinMessage Joined;
             public string JoinAnswer, CreateAnswer;
             public int Subscribes, Starts;
-            public readonly List<(Guid, string)> Invites = new List<(Guid, string)>();
+            public readonly List<(Guid, int?)> Invites = new List<(Guid, int?)>();
             public List<FriendResponse> Friends = new List<FriendResponse>();
 
             public Task<string> SubscribeAsync() { Subscribes++; return Task.FromResult(Online ? null : "offline"); }
@@ -80,8 +82,9 @@ namespace Galaxy101.Tests
             public Task<string> KickAsync(int seat) { var t = Room.Table; t.Seats[seat] = null; Set(new TableStateMessage { Table = t, Code = Room.Code, YourSeat = Room.YourSeat }); return Task.FromResult<string>(null); }
             public Task<string> StartAsync() { Starts++; Set(new TableStateMessage { Table = Room.Table, Code = Room.Code, YourSeat = Room.YourSeat, Countdown = 3 }); return Task.FromResult<string>(null); }
             public Task<List<FriendResponse>> FriendsAsync() => Task.FromResult(Friends);
-            public Task<List<FriendResponse>> RecentAsync() => Task.FromResult(new List<FriendResponse>());
-            public Task<string> InviteAsync(Guid friend, string code) { Invites.Add((friend, code)); return Task.FromResult<string>(null); }
+            public Task<List<RecentPlayer>> RecentAsync() => Task.FromResult(new List<RecentPlayer>());
+            public Task<string> InviteAsync(Guid player, int? seat, bool recent) { Invites.Add((player, seat)); return Task.FromResult<string>(null); }
+            public Task<string> CancelInviteAsync(Guid player) => Task.FromResult<string>(null);
 
             public void Set(TableStateMessage state) { Room = state.Closed ? null : state; RoomChanged?.Invoke(state); }
             public void Started() { var t = Room.Table; var seat = Room.YourSeat; Room = null; RoomChanged?.Invoke(new TableStateMessage { Table = t, Closed = true, MatchId = Guid.NewGuid(), Reason = "started", YourSeat = seat }); }
@@ -138,6 +141,15 @@ namespace Galaxy101.Tests
             var e = root.Q<VisualElement>(name); Assert.That(e, Is.Not.Null, "element " + name);
             using (var evt = ClickEvent.GetPooled()) { evt.target = e; e.SendEvent(evt); }
         }
+
+        /// <summary>A prototype id repeats across groups (lobby.o.pick[i] in every segment): the group's own name scopes it.</summary>
+        private static void Click(VisualElement root, string group, string name)
+        {
+            var scope = root.Q<VisualElement>(group); Assert.That(scope, Is.Not.Null, "element " + group);
+            Click(scope, name);
+        }
+
+        private static string Error(VisualElement root, string name) => root.Q<Label>(name)?.text ?? "";
 
         private static IEnumerator Until(Func<bool> condition, float seconds, string what)
         {
@@ -198,17 +210,17 @@ namespace Galaxy101.Tests
             if (UiDump.Dir == null) yield break;
 
             // The rest of tools/ref_capture.py's walk: Masa aç, Kodla katıl (+ a wrong code), then a new open table's room.
-            Click(root, "lobby-create"); yield return new WaitForSeconds(.6f);
+            Click(root, "lobby.openCreate"); yield return new WaitForSeconds(.6f);
             yield return UiDump.Capture(root, "S10_create");
-            Click(root, "create-cancel"); yield return new WaitForSeconds(.4f);
-            Click(root, "lobby-code"); yield return new WaitForSeconds(.6f);
+            Click(root, "lobby.closeCreate#3"); yield return new WaitForSeconds(.4f);
+            Click(root, "lobby.openCode"); yield return new WaitForSeconds(.6f);
             yield return UiDump.Capture(root, "S12_code");
             fake.JoinAnswer = TableErrors.Closed;
-            root.Q<TextField>("dialog-code").value = "GX-ZZ99"; Click(root, "dialog-submit");
-            yield return Until(() => root.Q<Label>("dialog-error") != null, 3, "the wrong-code error");
+            root.Q<TextField>("lobby.d.onCode").value = "GX-ZZ99"; Click(root, "lobby.d.submitCode");
+            yield return Until(() => Error(root, "lobby.d.codeErr").Length > 0, 3, "the wrong-code error");
             yield return UiDump.Capture(root, "S12_code_error");
-            Click(root, "dialog-cancel"); fake.JoinAnswer = null; yield return new WaitForSeconds(.4f);
-            Click(root, "lobby-create"); yield return null; Click(root, "create-submit");
+            Click(root, "lobby.closeDlg#3"); fake.JoinAnswer = null; yield return new WaitForSeconds(.4f);
+            Click(root, "lobby.openCreate"); yield return null; Click(root, "lobby.cf.create");
             yield return Until(() => menu.Lobby.Screen == "wait", 3, "the waiting room");
             yield return new WaitForSeconds(1.2f);
             yield return UiDump.Capture(root, "S13_room");
@@ -233,17 +245,17 @@ namespace Galaxy101.Tests
             Assert.That(order.Take(4), Is.EqualTo(new[] { "Hızlı Eller", "Takım Ruhu", "Çay Ocağı", "Şifreli Salon" }));
             Assert.That(order.Last(), Is.EqualTo("Dolu Masa"));
 
-            Click(root, "lobby-type-pairs"); yield return null; Assert.That(Cards(root), Is.EqualTo(2));
-            Click(root, "lobby-doubling"); yield return null; Assert.That(Cards(root), Is.EqualTo(1));
-            Click(root, "lobby-type-all"); Click(root, "lobby-doubling"); yield return null;
-            Click(root, "lobby-stake-5000"); yield return null; Assert.That(Cards(root), Is.EqualTo(2));
-            Click(root, "lobby-stake-0"); Click(root, "lobby-free"); yield return null; Assert.That(Cards(root), Is.EqualTo(6), "the full table drops out");
-            Click(root, "lobby-free"); yield return null;
-            root.Q<TextField>("lobby-search").value = "çay"; yield return null;
+            Click(root, "lobby-types", "lobby.o.pick[2]"); yield return null; Assert.That(Cards(root), Is.EqualTo(2));
+            Click(root, "lobby.chKat.toggle"); yield return null; Assert.That(Cards(root), Is.EqualTo(1));
+            Click(root, "lobby-types", "lobby.o.pick[0]"); Click(root, "lobby.chKat.toggle"); yield return null;
+            Click(root, "lobby-stakes", "lobby.o.pick[2]"); yield return null; Assert.That(Cards(root), Is.EqualTo(2));
+            Click(root, "lobby-stakes", "lobby.o.pick[0]"); Click(root, "lobby.chFree.toggle"); yield return null; Assert.That(Cards(root), Is.EqualTo(6), "the full table drops out");
+            Click(root, "lobby.chFree.toggle"); yield return null;
+            root.Q<TextField>("lobby.onQ").value = "çay"; yield return null;
             Assert.That(Cards(root), Is.EqualTo(1), "Turkish-insensitive search");
-            root.Q<TextField>("lobby-search").value = "yok böyle"; yield return null;
+            root.Q<TextField>("lobby.onQ").value = "yok böyle"; yield return null;
             Assert.That(root.Q<VisualElement>("lobby-empty"), Is.Not.Null);
-            Click(root, "lobby-clear-filters"); yield return null; Assert.That(Cards(root), Is.EqualTo(7));
+            Click(root, "lobby.resetFilters"); yield return null; Assert.That(Cards(root), Is.EqualTo(7));
 
             // Live updates: a new table arrives.
             fake.List.Add(Summary("Yeni Masa", "single", 1000, Guid.NewGuid())); fake.Push(); yield return null;
@@ -251,12 +263,12 @@ namespace Galaxy101.Tests
 
             // A stake above the balance: the button is dimmed and says how much is missing.
             var rich = fake.List.First(t => t.Name == "Usta Masası");
-            Click(root, "lobby-sit-" + rich.Id); yield return null;
-            Assert.That(menu.Lobby.LastToast, Does.Contain(menu.View.N(25000)), "50.000 - 25.000 short");
+            Click(root, "lobby-card-" + rich.Id, "lobby.b.go[0]"); yield return null;
+            Assert.That(menu.Lobby.LastToast, Does.Contain(menu.View.N(25000)), "lowB: 50.000 bahis için 25.000 çip daha gerekiyor");
             Assert.That(fake.Joined, Is.Null);
 
             // Back to the menu.
-            Click(root, "lobby-back"); yield return null;
+            Click(root, "lobby.back"); yield return null;
             Assert.That(menu.Lobby.Visible, Is.False);
             Assert.That(root.Q<VisualElement>("main-layer").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
         }
@@ -268,22 +280,24 @@ namespace Galaxy101.Tests
             menu.OpenLobby(); menu.Lobby.ConnectSeconds = .3f; yield return null;
             TableStateMessage started = null; menu.Lobby.MatchStarted += s => started = s;
             var table = fake.List.First(t => t.Name == "Hızlı Eller");
-            Click(root, "lobby-sit-" + table.Id); yield return null;
-            Assert.That(menu.Lobby.DialogKind, Is.EqualTo("connect").Or.Null);
+            Click(root, "lobby-card-" + table.Id, "lobby.b.go[0]"); yield return null;
+            Assert.That(menu.Lobby.DialogKind, Is.EqualTo("connect"), "connect(): Masaya bağlanılıyor… first");
+            Assert.That(menu.Lobby.Screen, Is.EqualTo("list"), "the room waits behind the connecting dialog");
             yield return Until(() => menu.Lobby.Screen == "wait" && menu.Lobby.DialogKind == null, 3, "the waiting room");
             Assert.That(fake.Joined.TableId, Is.EqualTo(table.Id));
-            Assert.That(root.Q<VisualElement>("room-seat-1"), Is.Not.Null);
-            Assert.That(root.Q<VisualElement>("room-bot-2"), Is.Null, "a guest cannot add bots");
-            Assert.That(root.Q<Label>("room-status").text, Does.Contain("2/4"));
+            // You sit in seat 1: the seats turn so that you are at the bottom (spot 0); seat 2 is spot 1, seat 3 spot 2.
+            Assert.That(root.Q<VisualElement>("lobby-seat-1"), Is.Not.Null);
+            Assert.That(root.Q<VisualElement>("lobby.z.addBot[1]"), Is.Null, "a guest cannot add bots");
+            Assert.That(root.Q<Label>("lobby.w.status").text, Does.Contain("2/4"));
 
             // Become the host (the server passes the host on) and fill the table with bots.
             var room = fake.Room; room.Table.HostId = fake.Me; fake.Set(room); yield return null;
-            Assert.That(root.Q<VisualElement>("room-host"), Is.Not.Null);
-            Click(root, "room-bot-2"); yield return null;
-            Click(root, "room-bot-3"); yield return null;
+            Assert.That(root.Q<VisualElement>("lobby.text.youOwn"), Is.Not.Null);
+            Click(root, "lobby.z.addBot[1]"); yield return null;
+            Click(root, "lobby.z.addBot[2]"); yield return null;
             Assert.That(fake.Room.Table.Seats.All(s => s != null), Is.True);
             Assert.That(menu.Lobby.Countdown, Is.InRange(4, 5));
-            Assert.That(root.Q<VisualElement>("room-kick-2"), Is.Null, "no kicking during the countdown");
+            Assert.That(root.Q<VisualElement>("lobby.z.kick[1]"), Is.Null, "no kicking during the countdown");
             yield return Shot("S13_room_full.png");
 
             fake.Started(); yield return null;
@@ -296,45 +310,49 @@ namespace Galaxy101.Tests
             var menu = Menu(); var root = menu.View.Root; yield return null;
             menu.OpenLobby(); menu.Lobby.ConnectSeconds = .05f; yield return null;
             var locked = fake.List.First(t => t.Locked);
-            Click(root, "lobby-sit-" + locked.Id); yield return null;
+            Click(root, "lobby-card-" + locked.Id, "lobby.b.go[0]"); yield return null;
             Assert.That(menu.Lobby.DialogKind, Is.EqualTo("pin"));
             fake.JoinAnswer = TableErrors.WrongPin;
-            root.Q<TextField>("dialog-pin").value = "1111"; yield return null; yield return null;
+            root.Q<TextField>("lobby.d.onPin").value = "11"; Click(root, "lobby.d.submitPin"); yield return null;
+            Assert.That(fake.Joined, Is.Null, "submitPin waits for four digits");
+            root.Q<TextField>("lobby.d.onPin").value = "1111"; Click(root, "lobby.d.submitPin"); yield return null; yield return null;
             Assert.That(fake.Joined.Pin, Is.EqualTo("1111"));
             Assert.That(menu.Lobby.DialogKind, Is.EqualTo("pin"));
-            Assert.That(root.Q<Label>("dialog-error").text, Does.Contain("Yanlış").Or.Contain("Wrong"));
+            Assert.That(Error(root, "lobby.d.pinErr"), Does.Contain("Yanlış").Or.Contain("Wrong"));
+            Assert.That(root.Q<TextField>("lobby.d.onPin").value, Is.Empty, "a wrong PIN clears");
             yield return Shot("S11_pin_wrong.png");
             fake.JoinAnswer = null;
-            root.Q<TextField>("dialog-pin").value = "1234"; yield return null;
+            root.Q<TextField>("lobby.d.onPin").value = "1234"; Click(root, "lobby.d.submitPin"); yield return null;
             yield return Until(() => menu.Lobby.Screen == "wait", 3, "joining with the right PIN");
             Assert.That(fake.Joined.Pin, Is.EqualTo("1234"));
 
-            // Code: format check before the server, then the server's "no such table".
-            Click(root, "room-leave"); yield return null; yield return null;
+            // Code: six characters (GX + 4) before the server, then the server's "no such table".
+            Click(root, "lobby.w.leave"); yield return null; yield return null;
             Assert.That(menu.Lobby.Screen, Is.EqualTo("list"));
             Assert.That(LobbyScreen.NormalizeCode("gx7q2m"), Is.EqualTo("GX-7Q2M"));
-            Assert.That(LobbyScreen.NormalizeCode("7q2m"), Is.EqualTo("GX-7Q2M"));
+            Assert.That(LobbyScreen.NormalizeCode("GX-7Q2M"), Is.EqualTo("GX-7Q2M"));
+            Assert.That(LobbyScreen.NormalizeCode("7q2m"), Is.Null, "codeShort: the code has 6 characters");
             Assert.That(LobbyScreen.NormalizeCode("GX-7Q2"), Is.Null);
             Assert.That(LobbyScreen.NormalizeCode("gx-12"), Is.Null);
-            Click(root, "lobby-code"); yield return null;
+            Click(root, "lobby.openCode"); yield return null;
             Assert.That(menu.Lobby.DialogKind, Is.EqualTo("code"));
-            root.Q<TextField>("dialog-code").value = "gx-12"; Click(root, "dialog-submit"); yield return null;
-            Assert.That(root.Q<Label>("dialog-error").text, Is.Not.Empty);
+            root.Q<TextField>("lobby.d.onCode").value = "gx-12"; Click(root, "lobby.d.submitCode"); yield return null;
+            Assert.That(Error(root, "lobby.d.codeErr"), Is.Not.Empty);
             fake.JoinAnswer = TableErrors.Closed;
-            root.Q<TextField>("dialog-code").value = "gx-zz99"; Click(root, "dialog-submit");
-            yield return Until(() => menu.Lobby.DialogKind == "code" && root.Q<Label>("dialog-error") != null, 3, "the code dialog back with the error");
+            root.Q<TextField>("lobby.d.onCode").value = "gx-zz99"; Click(root, "lobby.d.submitCode");
+            yield return Until(() => menu.Lobby.DialogKind == "code" && Error(root, "lobby.d.codeErr").Length > 0, 3, "the code dialog with the error");
             Assert.That(fake.Joined.Code, Is.EqualTo("GX-ZZ99"));
-            Assert.That(root.Q<Label>("dialog-error").text, Does.Contain("bulunamadı").Or.Contain("No open table"));
+            Assert.That(Error(root, "lobby.d.codeErr"), Does.Contain("bulunamadı").Or.Contain("No open table"));
             yield return Shot("S12_code_error.png");
 
             // Full while connecting: the full dialog offers a similar table.
-            Click(root, "dialog-cancel"); yield return null;
+            Click(root, "lobby.closeDlg#3"); yield return null;
             fake.JoinAnswer = TableErrors.Full;
             var open = fake.List.First(t => t.Name == "Hızlı Eller");
-            Click(root, "lobby-sit-" + open.Id);
+            Click(root, "lobby-card-" + open.Id, "lobby.b.go[0]");
             yield return Until(() => menu.Lobby.DialogKind == "full", 3, "the full dialog");
             yield return Shot("lobby_full.png");
-            Click(root, "dialog-ok"); yield return null;
+            Click(root, "lobby.closeDlg#4"); yield return null;
             Assert.That(menu.Lobby.DialogKind, Is.Null);
         }
 
@@ -356,17 +374,17 @@ namespace Galaxy101.Tests
             yield return new WaitForSeconds(.3f); yield return Snap("A09_settings_close_hover");
             menu.View.CloseTop(); yield return new WaitForSeconds(.5f);
             menu.OpenLobby(); yield return new WaitForSeconds(1f); yield return Snap("A02_lobby");
-            root.Q<TextField>("lobby-search").value = "Gece"; yield return new WaitForSeconds(.3f); yield return Snap("A03_search");
-            root.Q<TextField>("lobby-search").value = "zzz"; yield return new WaitForSeconds(.3f); yield return Snap("A04_empty");
-            root.Q<TextField>("lobby-search").value = ""; yield return null;
-            Click(root, "lobby-create"); yield return new WaitForSeconds(1f); yield return Snap("A05_create");
-            Click(root, "create-vis-private"); Click(root, "create-pin-toggle"); yield return null;
-            root.Q<TextField>("create-pin").value = "12"; yield return new WaitForSeconds(.3f); yield return Snap("A06_create_pin");
-            Click(root, "create-cancel"); yield return new WaitForSeconds(.4f);
-            Click(root, "lobby-code"); yield return new WaitForSeconds(.6f); yield return Snap("A07_code");
-            Click(root, "dialog-cancel"); yield return new WaitForSeconds(.4f);
+            root.Q<TextField>("lobby.onQ").value = "Gece"; yield return new WaitForSeconds(.3f); yield return Snap("A03_search");
+            root.Q<TextField>("lobby.onQ").value = "zzz"; yield return new WaitForSeconds(.3f); yield return Snap("A04_empty");
+            root.Q<TextField>("lobby.onQ").value = ""; yield return null;
+            Click(root, "lobby.openCreate"); yield return new WaitForSeconds(1f); yield return Snap("A05_create");
+            Click(root, "lobby-create-vis", "lobby.o.pick[1]"); Click(root, "lobby.cf.passT.flip"); yield return null;
+            root.Q<TextField>("lobby.cf.onPass").value = "12"; yield return new WaitForSeconds(.3f); yield return Snap("A06_create_pin");
+            Click(root, "lobby.closeCreate#3"); yield return new WaitForSeconds(.4f);
+            Click(root, "lobby.openCode"); yield return new WaitForSeconds(.6f); yield return Snap("A07_code");
+            Click(root, "lobby.closeDlg#3"); yield return new WaitForSeconds(.4f);
             menu.Lobby.ConnectSeconds = .3f;
-            Click(root, "lobby-sit-" + fake.List.First(t => t.Name == "Hızlı Eller").Id);
+            Click(root, "lobby-card-" + fake.List.First(t => t.Name == "Hızlı Eller").Id, "lobby.b.go[0]");
             yield return Until(() => menu.Lobby.Screen == "wait" && menu.Lobby.DialogKind == null, 3, "the waiting room");
             var room = fake.Room; room.Table.HostId = fake.Me; fake.Set(room); yield return new WaitForSeconds(.8f); yield return Snap("A08_room");
         }
@@ -380,11 +398,12 @@ namespace Galaxy101.Tests
             using (var watch = new FrameWatch(owner.GetComponent<UIDocument>(), new RectInt(0, 0, 1280, 720)))
             {
                 yield return new WaitForSecondsRealtime(1f);
-                foreach (var name in new[] { "lobby-type-pairs", "lobby-doubling", "lobby-stake-5000", "lobby-free", "lobby-clear-filters" })
-                    yield return watch.Stable(() => Click(root, name), name);
-                Click(root, "lobby-create"); yield return new WaitForSecondsRealtime(1f);
-                foreach (var name in new[] { "create-type-pairs", "create-stake-10000", "create-hands-7", "create-turn-45", "create-doubling", "create-vis-private", "create-pin-toggle", "create-rules" })
-                    yield return watch.Stable(() => Click(root, name), name);
+                foreach (var (group, name) in new[] { ("lobby-types", "lobby.o.pick[2]"), (null, "lobby.chKat.toggle"), ("lobby-stakes", "lobby.o.pick[2]"), (null, "lobby.chFree.toggle"), (null, "lobby.resetFilters") })
+                    yield return watch.Stable(() => { if (group != null) Click(root, group, name); else Click(root, name); }, name);
+                Click(root, "lobby.openCreate"); yield return new WaitForSecondsRealtime(1f);
+                foreach (var (group, name) in new[] { ("lobby-create-type", "lobby.o.pick[1]"), ("lobby-create-tiers", "lobby.b.pick[2]"), ("lobby-create-hands", "lobby.o.pick[2]"), ("lobby-create-turn", "lobby.o.pick[3]"),
+                    (null, "lobby.cf.katT.flip"), (null, "lobby.cf.katPT.flip"), ("lobby-create-vis", "lobby.o.pick[1]"), (null, "lobby.cf.passT.flip"), (null, "lobby.cf.toggleRules") })
+                    yield return watch.Stable(() => { if (group != null) Click(root, group, name); else Click(root, name); }, name);
             }
         }
 
@@ -395,41 +414,45 @@ namespace Galaxy101.Tests
             menu.Model.Profile["name"] = "Doğukan";
             menu.OpenLobby(); yield return null;
             fake.Balance(12000); yield return null;
-            Click(root, "lobby-create"); yield return null;
+            Click(root, "lobby.openCreate"); yield return null;
             Assert.That(menu.Lobby.Draft, Is.Not.Null);
-            Assert.That(root.Q<TextField>("create-name").value, Is.EqualTo("Doğukan’in masası"));
-            Assert.That(menu.Lobby.Draft.Stake, Is.EqualTo(5000), "the highest stake up to 5K that the balance allows");
+            Assert.That(root.Q<TextField>("lobby.cf.onName").value, Is.EqualTo("Doğukan’ın masası"), "genTR(first) + masası");
+            Assert.That(menu.Lobby.Draft.Stake, Is.EqualTo(5000), "openCreate: 5K when the balance allows it");
             yield return new WaitForSeconds(.4f);
             yield return Shot("S10_create.png");
 
-            Click(root, "create-stake-50000"); yield return null;
-            Assert.That(root.Q<VisualElement>("create-warn"), Is.Not.Null, "a locked stake explains what is missing");
+            Click(root, "lobby-create-tiers", "lobby.b.pick[3]"); yield return null;
+            Assert.That(root.Q<VisualElement>("lobby-create-warn"), Is.Not.Null, "a locked stake explains what is missing");
             Assert.That(menu.Lobby.Draft.Stake, Is.EqualTo(5000));
-            Click(root, "create-stake-10000"); Click(root, "create-type-pairs"); Click(root, "create-hands-7"); Click(root, "create-turn-45"); Click(root, "create-doubling");
-            Click(root, "create-vis-private"); Click(root, "create-pin-toggle"); yield return null;
-            root.Q<TextField>("create-name").value = "   ";
-            Click(root, "create-submit"); yield return null;
+            Click(root, "lobby-create-tiers", "lobby.b.pick[2]"); Click(root, "lobby-create-type", "lobby.o.pick[1]"); Click(root, "lobby-create-hands", "lobby.o.pick[2]"); Click(root, "lobby-create-turn", "lobby.o.pick[3]"); Click(root, "lobby.cf.katT.flip");
+            yield return null;
+            Assert.That(root.Q<VisualElement>("lobby.create.katlamaPartner"), Is.Not.Null, "Eşli + Katlamalı asks whether the partner raises the bar (R-64)");
+            Click(root, "lobby.cf.katPT.flip");
+            Click(root, "lobby-create-vis", "lobby.o.pick[1]"); Click(root, "lobby.cf.passT.flip"); yield return null;
+            root.Q<TextField>("lobby.cf.onName").value = "   ";
+            Click(root, "lobby.cf.create"); yield return null;
             Assert.That(fake.Created, Is.Null, "an empty name and a missing PIN block the form");
-            root.Q<TextField>("create-name").value = "Gece Kuşları";
-            root.Q<TextField>("create-pin").value = "a123"; yield return null;
+            root.Q<TextField>("lobby.cf.onName").value = "Gece Kuşları";
+            root.Q<TextField>("lobby.cf.onPass").value = "a123"; yield return null;
             Assert.That(menu.Lobby.Draft.Pin, Is.EqualTo("123"), "digits only");
-            root.Q<TextField>("create-pin").value = "1234"; yield return null;
-            Click(root, "create-rules"); yield return null;
-            Click(root, "create-rule-chat-quick"); Click(root, "create-rule-okey"); yield return null;
-            Click(root, "create-submit"); yield return null; yield return null;
+            root.Q<TextField>("lobby.cf.onPass").value = "1234"; yield return null;
+            Click(root, "lobby.cf.toggleRules"); yield return null;
+            Click(root, "lobby-create-rule-chat", "lobby.o.pick[1]"); Click(root, "lobby.r.flip[0]"); yield return null;
+            Click(root, "lobby.cf.create"); yield return null; yield return null;
             Assert.That(fake.Created, Is.Not.Null);
             Assert.That(fake.Created.Name, Is.EqualTo("Gece Kuşları"));
             Assert.That(fake.Created.Type, Is.EqualTo("pairs")); Assert.That(fake.Created.Stake, Is.EqualTo(10000));
-            Assert.That(fake.Created.Hands, Is.EqualTo(7)); Assert.That(fake.Created.TurnSeconds, Is.EqualTo(45)); Assert.That(fake.Created.Doubling, Is.True);
+            Assert.That(fake.Created.Hands, Is.EqualTo(7)); Assert.That(fake.Created.TurnSeconds, Is.EqualTo(45)); Assert.That(fake.Created.Doubling, Is.True); Assert.That(fake.Created.PartnerRaises, Is.False);
             Assert.That(fake.Created.Visibility, Is.EqualTo("private")); Assert.That(fake.Created.Pin, Is.EqualTo("1234"));
             Assert.That(fake.Created.Chat, Is.EqualTo("quick")); Assert.That(fake.Created.OkeyPenalty, Is.False); Assert.That(fake.Created.Penalties, Is.True); Assert.That(fake.Created.Processing, Is.True);
             Assert.That(menu.Lobby.Screen, Is.EqualTo("wait"));
             Assert.That(menu.Lobby.DialogKind, Is.EqualTo("share"), "a private table shows its code first");
-            Assert.That(root.Q<Label>("share-code").text, Is.EqualTo("GX-AB12"));
+            Assert.That(root.Q<Label>("lobby.d.code").text, Is.EqualTo("GX-AB12"));
+            Assert.That(root.Q<Label>("lobby.d.pass").text, Is.EqualTo("1234"));
             yield return new WaitForSeconds(.3f);
             yield return Shot("lobby_share.png");
-            Click(root, "share-room"); yield return null;
-            Assert.That(root.Q<Label>("room-code").text, Is.EqualTo("GX-AB12"));
+            Click(root, "lobby.d.toRoom"); yield return null;
+            Assert.That(root.Q<Label>("lobby.w.code").text, Is.EqualTo("GX-AB12"));
             yield return Shot("S13_room.png");
         }
 
@@ -442,23 +465,29 @@ namespace Galaxy101.Tests
             fake.Friends.Add(new FriendResponse { Player = Player(Guid.NewGuid(), "Ece M.", "#3CCB6E"), Presence = "playing" });
             fake.Friends.Add(new FriendResponse { Player = Player(Guid.NewGuid(), "Oğuz P.", "#8B5CF6"), Presence = "offline", LastSeen = DateTimeOffset.UtcNow.AddHours(-3) });
             menu.OpenLobby(); yield return null;
-            Click(root, "lobby-create"); yield return null; Click(root, "create-submit"); yield return null; yield return null;
+            Click(root, "lobby.openCreate"); yield return null; Click(root, "lobby.cf.create"); yield return null; yield return null;
             Assert.That(menu.Lobby.Screen, Is.EqualTo("wait"));
-            Click(root, "room-invite-1"); yield return null; yield return null;
+            Click(root, "lobby.z.invite[1]"); yield return null; yield return null;
             Assert.That(menu.Lobby.InviteOpen, Is.True);
-            Assert.That(root.Q<VisualElement>("invite-row-" + mert), Is.Not.Null);
-            Click(root, "invite-send-" + mert); yield return null;
-            Assert.That(fake.Invites.Single(), Is.EqualTo((mert, "GX-AB12")));
+            Assert.That(root.Q<VisualElement>("lobby-invite-row-" + mert), Is.Not.Null);
+            Assert.That(root.Q<Label>("lobby.b.n[0]").text, Is.EqualTo("1/3"), "online friends / all friends");
+            Click(root, "lobby-invite-row-" + mert, "lobby.r.go[0]"); yield return null;
+            Assert.That(fake.Invites.Single(), Is.EqualTo((mert, (int?)1)), "inviteSend into the seat the invite was opened from");
             Assert.That(menu.Lobby.Invite.Sent[mert].State, Is.EqualTo("pend"));
             yield return new WaitForSeconds(.4f);
             yield return Shot("S14_invite.png");
 
+            // Ece declines (inviteResult): her row says Reddetti.
+            var ece = fake.Friends[1].Player.Id; menu.Lobby.Invite.Sent[ece] = new LobbyScreen.Sent { At = Time.realtimeSinceStartup };
+            fake.Answer(ece, "declined"); yield return null;
+            Assert.That(menu.Lobby.Invite.Sent[ece].State, Is.EqualTo("no"));
+
             // Mert accepts: he takes seat 1 and his row says Masada.
             var room = fake.Room; room.Table.Seats[1] = new TableSeat { Player = Player(mert, "Mert K.", "#16B6A8") }; fake.Set(room); yield return null;
-            Assert.That(menu.Lobby.Invite.Sent[mert].State, Is.EqualTo("in"));
-            Click(root, "invite-close"); yield return null;
+            Assert.That(menu.Lobby.Invite.Sent.ContainsKey(mert), Is.False, "seated: the invite is done");
+            Click(root, "lobby.iv.close#2"); yield return null;
             Assert.That(menu.Lobby.InviteOpen, Is.False);
-            Assert.That(root.Q<VisualElement>("room-kick-1"), Is.Not.Null, "the host can remove a seated player");
+            Assert.That(root.Q<VisualElement>("lobby.z.kick[1]"), Is.Not.Null, "the host can remove a seated player");
         }
 
         [UnityTest]
@@ -468,7 +497,7 @@ namespace Galaxy101.Tests
             var menu = Menu(); var root = menu.View.Root; yield return null;
             menu.OpenLobby(); yield return null; yield return null;
             Assert.That(menu.Lobby.DialogKind, Is.EqualTo("offline"));
-            fake.Online = true; Click(root, "dialog-alt"); yield return null; yield return null;
+            fake.Online = true; Click(root, "lobby.d.alt"); yield return null; yield return null;
             Assert.That(menu.Lobby.DialogKind, Is.Null);
         }
 
@@ -506,14 +535,14 @@ namespace Galaxy101.Tests
             Assert.That(menu.Lobby.DialogKind, Is.Null, "subscribed");
 
             // A private, PIN-locked table; a second guest joins it by code and PIN through its own socket.
-            Click(root, "lobby-create"); yield return null;
-            root.Q<TextField>("create-name").value = "Canlı Test " + UnityEngine.Random.Range(10, 99);
-            Click(root, "create-vis-private"); Click(root, "create-pin-toggle"); yield return null;
-            root.Q<TextField>("create-pin").value = "4321";
-            Click(root, "create-submit");
+            Click(root, "lobby.openCreate"); yield return null;
+            root.Q<TextField>("lobby.cf.onName").value = "Canlı Test " + UnityEngine.Random.Range(10, 99);
+            Click(root, "lobby-create-vis", "lobby.o.pick[1]"); Click(root, "lobby.cf.passT.flip"); yield return null;
+            root.Q<TextField>("lobby.cf.onPass").value = "4321";
+            Click(root, "lobby.cf.create");
             yield return Until(() => menu.Lobby.Screen == "wait" && menu.Lobby.DialogKind == "share", 10, "the waiting room and its code");
-            string code = root.Q<Label>("share-code")?.text; Assert.That(code, Does.Match("^GX-[A-Z0-9]{4}$"));
-            Click(root, "share-room"); yield return null;
+            string code = root.Q<Label>("lobby.d.code")?.text; Assert.That(code, Does.Match("^GX-[A-Z0-9]{4}$"));
+            Click(root, "lobby.d.toRoom"); yield return null;
 
             var api = new GalaxyApi(null); var realtime = new GalaxyRealtime(api);
             try
@@ -524,11 +553,11 @@ namespace Galaxy101.Tests
                 Assert.That(wrong.Result.Code, Is.EqualTo(TableErrors.WrongPin));
                 var join = realtime.RequestAsync(LobbyMessageTypes.Join, new TableJoinMessage { Code = code.Substring(3).ToLowerInvariant(), Pin = "4321" }); yield return Until(() => join.IsCompleted, 10, "joining by code");
                 Assert.That(join.Result.Ok, Is.True, join.Result.Code);
-                yield return Until(() => root.Q<Label>("room-status")?.text.Contains("2/4") == true, 10, "the second player in the room");
+                yield return Until(() => root.Q<Label>("lobby.w.status")?.text.Contains("2/4") == true, 10, "the second player in the room");
 
-                // Fill with bots and start; the table becomes a match.
-                Click(root, "room-bot-2"); yield return new WaitForSeconds(.5f);
-                Click(root, "room-bot-3");
+                // Fill with bots and start; the table becomes a match (you are seat 0: seats 2 and 3 are spots 2 and 3).
+                Click(root, "lobby.z.addBot[2]"); yield return new WaitForSeconds(.5f);
+                Click(root, "lobby.z.addBot[3]");
                 yield return Until(() => menu.Lobby.Countdown > 0 || started != null, 10, "the countdown");
                 yield return Until(() => started != null, 15, "the match start");
                 Assert.That(started.MatchId, Is.Not.Null); Assert.That(started.YourSeat, Is.EqualTo(0));

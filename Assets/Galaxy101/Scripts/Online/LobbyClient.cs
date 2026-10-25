@@ -6,9 +6,17 @@ using Galaxy101.Contracts;
 namespace Galaxy101.Online
 {
     /// <summary>
-    /// What the Klasik lobby (spec/20) needs from the server: the live table list, the waiting room state and the
-    /// table actions. Every action answers null when accepted or the server's error code (<see cref="TableErrors"/>,
-    /// <see cref="ErrorCodes"/>, "offline", "timeout").
+    /// What the Klasik lobby (spec/20, v4 S09–S15) needs from the server: the live table list, the waiting room state and
+    /// the table actions. Every action answers null when accepted or the server's error code (v4 E_* codes, or the
+    /// current server's <see cref="TableErrors"/> / <see cref="ErrorCodes"/>, "offline", "timeout").
+    /// <para>
+    /// v4 package protocol (protocol.md): lobbySubscribe / lobby / lobbyTable / lobbyTableRemoved feed
+    /// <see cref="Tables"/>; tableCreate, tableJoin, tableJoinCode, tableSpectate, tableLeave, seatAddBot, seatKick,
+    /// tableStart are the actions; tableState and countdown become <see cref="Room"/>; leftTable{reason}, kicked and
+    /// tableClosed{reason} close it (<see cref="TableStateMessage.Reason"/>: "left" | "disconnect" | "kicked" |
+    /// "ownerLeft"); inviteSend / inviteCancel / inviteResult are the invite calls and <see cref="InviteAnswered"/>.
+    /// docs/v4/lobby/RAPOR.md lists the field mapping.
+    /// </para>
     /// </summary>
     public interface ILobbyBackend
     {
@@ -21,6 +29,8 @@ namespace Galaxy101.Online
         event Action TablesChanged;
         event Action<TableStateMessage> RoomChanged;
         event Action ChipsChanged;
+        /// <summary>inviteResult: a player answered (or let lapse) your invite — "accepted", "declined", "expired" or "failed".</summary>
+        event Action<Guid, string> InviteAnswered;
         Task<string> SubscribeAsync();
         void Unsubscribe();
         Task<string> CreateAsync(TableOptions options);
@@ -32,8 +42,19 @@ namespace Galaxy101.Online
         Task<string> KickAsync(int seat);
         Task<string> StartAsync();
         Task<List<FriendResponse>> FriendsAsync();
-        Task<List<FriendResponse>> RecentAsync();
-        Task<string> InviteAsync(Guid friend, string code);
+        /// <summary>Son oynadıkların: players you shared a table with, newest first.</summary>
+        Task<List<RecentPlayer>> RecentAsync();
+        /// <summary>inviteSend: to a friend (or a recent player), into <paramref name="seat"/> when one was picked.</summary>
+        Task<string> InviteAsync(Guid player, int? seat, bool recent);
+        /// <summary>inviteCancel: take back a pending invite (the prototype's "İptal etmek için tıkla").</summary>
+        Task<string> CancelInviteAsync(Guid player);
+    }
+
+    /// <summary>A Son oynadıkların row: the player with presence, and when you last played together (null when unknown).</summary>
+    public sealed class RecentPlayer
+    {
+        public FriendResponse Friend { get; set; }
+        public DateTimeOffset? PlayedAt { get; set; }
     }
 
     /// <summary>The lobby over the signed-in session's WebSocket (<see cref="GalaxyOnline"/>).</summary>
@@ -72,6 +93,8 @@ namespace Galaxy101.Online
         public event Action TablesChanged;
         public event Action<TableStateMessage> RoomChanged;
         public event Action ChipsChanged;
+        /// <summary>The current server answers invites by seating the player (the room state): it never reports a refusal.</summary>
+        public event Action<Guid, string> InviteAnswered { add { } remove { } }
 
         private void OnChanged() => ChipsChanged?.Invoke();
 
@@ -101,17 +124,23 @@ namespace Galaxy101.Online
             catch (ApiException) { return new List<FriendResponse>(); }
         }
 
-        public async Task<List<FriendResponse>> RecentAsync()
+        /// <summary>/v1/players/recent has no "played at" yet (EK-804): <see cref="RecentPlayer.PlayedAt"/> stays null.</summary>
+        public async Task<List<RecentPlayer>> RecentAsync()
         {
-            try { return await online.Api.RecentPlayersAsync() ?? new List<FriendResponse>(); }
-            catch (ApiException) { return new List<FriendResponse>(); }
+            try { return (await online.Api.RecentPlayersAsync() ?? new List<FriendResponse>()).ConvertAll(f => new RecentPlayer { Friend = f }); }
+            catch (ApiException) { return new List<RecentPlayer>(); }
         }
 
-        public async Task<string> InviteAsync(Guid friend, string code)
+        /// <summary>The current server invites by the room code over HTTP (no seat, no recent-player invites).</summary>
+        public async Task<string> InviteAsync(Guid player, int? seat, bool recent)
         {
-            try { await online.Api.InviteAsync(friend, code); return null; }
+            var code = Room?.Code; if (code == null) return TableErrors.Closed;
+            try { await online.Api.InviteAsync(player, code); return null; }
             catch (ApiException e) { return e.Offline ? "offline" : e.Code; }
         }
+
+        /// <summary>The HTTP invite cannot be taken back; the row only stops waiting.</summary>
+        public Task<string> CancelInviteAsync(Guid player) => Task.FromResult<string>(null);
 
         private async Task<string> Request(string type, object data)
         {

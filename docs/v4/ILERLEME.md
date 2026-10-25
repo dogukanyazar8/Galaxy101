@@ -33,6 +33,9 @@ Görev: `Design/PROMPT_v4_OTONOM_GELISTIRME.md`. Bağlam sıfırlanırsa buradan
 - Faz 1 başlatıldı (753287e'den dört worktree). Hat B'ye ek istek: maç akışı (dağıtım takvimi, tur, botlar, el sonu) taşımadan bağımsız saf C# çalışma zamanı olarak yeni `Packages/com.galaxy101.table/` paketinde; sunucu bunu sarar, Unity çevrimdışı/yönlendirici için aynısını koşar (prototipteki "masa kendi mockServer'ına bağlanır" modeli).
 - Faz 2 altyapısı (ana kopya, hatlarla çakışmayan dosyalar): `GameClock` (D-60/61), `G101StateRouter` (menü 01–97, S01–S08), `G101Dump`, `scripts/Capture-G101States.ps1`, `tools/v4/{compare_states,unity_compile,make_meta,states_table,anim_matrix}.py`. Unity'siz derleme: `python tools/v4/unity_compile.py` → OK.
 
+- Unity yönlendirici ilk koşu: 70 durum (menü 54, S01–S15) Development oyuncusunda çekildi (`artifacts/v4/unity/run2`). Menü ve giriş ekranları referansa çok yakın; farklar: lig rozeti, "YAKINDA" (kaldırıldı, K-10), sürüm (0.4.0'a çekildi), `app.version` etiketi (eklendi), açılış ilerlemesi (prototip algoritmasına geçti), lobi demo arka ucu (düzeltildi).
+- Hat ilerlemesi (22:35): A 3 commit (V4 motor + botlar, 106/106 vektör, 72/72 JS eşdeğerlik, sürüm kaydı); B 1 commit (protokol merkezi + `com.galaxy101.table` çalışma zamanı); C 2 commit (103 GLB yerleşti); D 1 commit (metinler, temalar, fontlar, ikonlar, rozetler, imleçler, sesler).
+
 ## Sıradaki
 
 - Referans yakalamanın bitmesi → `capture_report.json` özetinin buraya ve DURUMLAR'a girmesi.

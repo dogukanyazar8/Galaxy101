@@ -29,6 +29,7 @@ def ui_mask(layout, size):
         b = it["box"]
         if not it.get("visible") or it["id"] in FULL or (b["w"] >= 1270 and b["h"] >= 710): continue
         d.rectangle([b["x"], b["y"], b["x"] + b["w"], b["y"] + b["h"]], fill=255)
+    d.rectangle([1150, 696, 1280, 720], fill=0)   # Unity's "Development Build" watermark (UNITY_FARKLARI UF-01)
     return m
 
 

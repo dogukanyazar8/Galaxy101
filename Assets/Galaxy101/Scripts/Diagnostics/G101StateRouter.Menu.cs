@@ -22,7 +22,7 @@ namespace Galaxy101.Diagnostics
             var view = Menu.View; var model = Menu.Model;
             switch (id)
             {
-                case "06": model.SelectedMode = 1; model.NotifyChanged(); break;                         // set Menu {sel: 1}
+                case "06": model.SelectedMode = MenuView.V3Modes[1]; model.NotifyChanged(); view.Refresh(); break;   // set Menu {sel: 1} (2nd card)
                 case "10": case "91": case "S08": view.OpenPanel("settings", 0); break;                   // settingsOpen, setTab 0
                 case "11": view.OpenPanel("settings", 1); break;
                 case "12": case "S07": view.OpenPanel("settings", 2); break;

@@ -9,10 +9,10 @@ Görev: `Design/PROMPT_v4_OTONOM_GELISTIRME.md`. Bağlam sıfırlanırsa buradan
 | 0.1 taban commit | tamam · `39bed5b` |
 | 0.2 paket okuma + Node doğrulama | tamam · 106/106 vektör, 26/26 akış (`node tools/v4/run_package_tests.js`) |
 | 0.3 referans yakalama | sürüyor · `tools/ref_capture.py` → `artifacts/v4/ref/` |
-| 0.4 fark matrisi | sürüyor |
+| 0.4 fark matrisi | dizin + durumlar + animasyon yazıldı; hat bölümleri hatlardan gelecek |
 | 0.5 mimari kararlar | yazıldı · `KARARLAR.md` |
-| 1 paralel hatlar | başlamadı |
-| 2 Unity istemci | başlamadı |
+| 1 paralel hatlar | sürüyor · worktree'ler `C:/GD/Okey101-v4/{rules,server,assets3d,data}`, dallar `v4/{rules,server,assets3d,data}` (alt ajanlar) |
+| 2 Unity istemci | altyapı başladı · `G101StateRouter`, `GameClock`, `G101Dump` (`fdbb251`) |
 | 3 uçtan uca | başlamadı |
 | 4 rapor | başlamadı |
 
@@ -29,6 +29,9 @@ Görev: `Design/PROMPT_v4_OTONOM_GELISTIRME.md`. Bağlam sıfırlanırsa buradan
   - Paket testleri Node'da: 106/106 vektör, 26/26 akış (`artifacts/v4/package/node_results.json`).
 - Taban commit `39bed5b` (yerel; push yok).
 - Referans yakalama: `tools/ref_capture.py` v4 yönlendiricisine göre yeniden yazıldı. Bulgular: donmadan sonra sayfanın `setTimeout`'u tutulduğu için hazır olma Python'dan yoklanıyor; SwiftShader masa durumlarında yavaş, yüklü Chrome GPU ile çekiliyor; yıldız/gezegen tuvali iki açılışta farklı (EK-001).
+
+- Faz 1 başlatıldı (753287e'den dört worktree). Hat B'ye ek istek: maç akışı (dağıtım takvimi, tur, botlar, el sonu) taşımadan bağımsız saf C# çalışma zamanı olarak yeni `Packages/com.galaxy101.table/` paketinde; sunucu bunu sarar, Unity çevrimdışı/yönlendirici için aynısını koşar (prototipteki "masa kendi mockServer'ına bağlanır" modeli).
+- Faz 2 altyapısı (ana kopya, hatlarla çakışmayan dosyalar): `GameClock` (D-60/61), `G101StateRouter` (menü 01–97, S01–S08), `G101Dump`, `scripts/Capture-G101States.ps1`, `tools/v4/{compare_states,unity_compile,make_meta,states_table,anim_matrix}.py`. Unity'siz derleme: `python tools/v4/unity_compile.py` → OK.
 
 ## Sıradaki
 

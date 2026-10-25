@@ -129,6 +129,9 @@ namespace Galaxy101
         }
 
         // ---------- layout ----------
+        /// <summary>Redraw after an outside change (the state router sets the invite tab).</summary>
+        public void Refresh() => Render();
+
         private void Render()
         {
             if (body == null) return;
@@ -399,6 +402,9 @@ namespace Galaxy101
 
         // ---------- actions ----------
         private void Low(long stake, long chips) => Flash(L("Yetersiz bakiye · " + view.N(stake - chips) + " çip eksik", "Not enough chips · " + view.N(stake - chips) + " short"), "bad");
+
+        /// <summary>"Otur" on a table card (the state router's S11 path calls it as the prototype's attempt(t, 'join') does).</summary>
+        public void TrySit(TableSummary t) => Sit(t);
 
         private void Sit(TableSummary t)
         {

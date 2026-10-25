@@ -135,6 +135,13 @@ namespace Galaxy101.Diagnostics
             if (steps != null) yield return Guard(steps, e => error = e.Message);
             if (error != null) { record["error"] = error; Debug.LogWarning("G101_STATE_PATH_ERROR " + id + " " + error); }
             yield return new WaitForSecondsRealtime(hold / 1000f);
+            // A settings screen may apply its display draft; the frame is always the 1280×720 window.
+            if (!UnityEngine.Application.isEditor && (Screen.width != 1280 || Screen.height != 720))
+            {
+                Screen.SetResolution(1280, 720, FullScreenMode.Windowed);
+                for (int i = 0; i < 30 && (Screen.width != 1280 || Screen.height != 720); i++) yield return null;
+                yield return Settle(.3f);
+            }
             GameClock.Freeze(hold);
             yield return null; yield return new WaitForEndOfFrame();
             yield return Capture(id, record);

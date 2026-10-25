@@ -38,24 +38,26 @@ def main():
     ap.add_argument("--repo", default=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     ap.add_argument("--project", default="Galaxy101.PlayMode.Tests")
     ap.add_argument("--scratch", default=os.path.join(tempfile.gettempdir(), "g101-unity-compile"))
+    ap.add_argument("--csproj-from", help="folder holding the Unity-generated *.csproj (default: --repo); lets a git worktree, which has none, compile with the main copy's")
     a = ap.parse_args()
     repo, scratch = os.path.abspath(a.repo), os.path.abspath(a.scratch)
     os.makedirs(scratch, exist_ok=True)
     asm = asmdef_dirs(repo)
     owned = set(asm.values())
-    for f in os.listdir(repo):
+    gen = os.path.abspath(a.csproj_from or repo)
+    for f in os.listdir(gen):
         if not f.endswith(".csproj"): continue
         name = f[:-7]
-        with open(os.path.join(repo, f), encoding="utf-8-sig") as h: text = h.read()
+        with open(os.path.join(gen, f), encoding="utf-8-sig") as h: text = h.read()
         text = text.replace("<BaseIntermediateOutputPath>Temp\\obj\\$(MSBuildProjectName)</BaseIntermediateOutputPath>",
                             f"<BaseIntermediateOutputPath>{scratch}\\obj\\$(MSBuildProjectName)\\</BaseIntermediateOutputPath>")
         text = text.replace("<OutputPath>Temp\\bin\\Debug\\</OutputPath>", f"<OutputPath>{scratch}\\bin\\</OutputPath>")
         def absolute(m):
             path = m.group(2)
             if re.match(r"^[A-Za-z]:\\", path) or path.endswith(".csproj"): return m.group(0)
-            return f'{m.group(1)}"{os.path.join(repo, path)}"'
+            return f'{m.group(1)}"{os.path.join(gen if path.startswith("Library") else repo, path)}"'
         text = re.sub(r'(Include=)"([^"]+)"', absolute, text)
-        text = re.sub(r"<HintPath>(?![A-Za-z]:\\)([^<]+)</HintPath>", lambda m: f"<HintPath>{os.path.join(repo, m.group(1))}</HintPath>", text)
+        text = re.sub(r"<HintPath>(?![A-Za-z]:\\)([^<]+)</HintPath>", lambda m: f"<HintPath>{os.path.join(gen if m.group(1).startswith('Library') else repo, m.group(1))}</HintPath>", text)
         if name in asm:
             files = sources(asm[name], owned)
             items = "\n".join(f'    <Compile Include="{p}" />' for p in files)

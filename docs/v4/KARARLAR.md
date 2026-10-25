@@ -12,6 +12,9 @@ Kaynak görev: `Design/PROMPT_v4_OTONOM_GELISTIRME.md` §0.5. Paket: `Design/Gal
 | K-06 | Unity durum yönlendirici + ortak saat (D-60…D-62) | karar · Faz 2 |
 | K-07 | Referans kareleri: duruma sabitlenmiş tema/dil URL'den ezilmez | uygulandı (Faz 0.3) |
 | K-08 | Karşılaştırmada arka plan tuvali (yıldız, gezegen) maskelenir | karar · Faz 2 |
+| K-09 | Maç akışı taşımadan bağımsız saf C# paket (`com.galaxy101.table`): sunucu ve Unity çevrimdışı aynı kodu koşar | karar · Hat B → Faz 2 |
+| K-10 | "Botlara karşı" v4'teki gibi açık (YAKINDA kalkar) | karar · Faz 2 |
+| K-11 | Faz 2 kod yazımı ekran gruplarına bölünebilir (worktree'de, Unity'siz derleme); Unity'de doğrulama yalnız ana kopyada ve sırayla | karar · Faz 2 |
 
 ## K-01 · Kural motoru: `rules.js` → C# adım motoru
 
@@ -53,3 +56,15 @@ Görevdeki URL şablonu `theme=saturn&lang=tr` içerir; ancak yönlendirici URL 
 ## K-08 · Karşılaştırma eşikleri
 
 Referansın kendisi iki açılışta aynı kareyi vermiyor (EKSIKLER EK-001: yıldız/gezegen tuvali). Bu yüzden piksel farkı arka plan tuvali maskelenerek ölçülür; yerleşim dökümü (kutu ±3 px, renk, font, harf aralığı, köşe, gölge) birincil ölçüttür. Eşikler `docs/v4/DURUMLAR.md` başında.
+
+## K-09 · Maç akışı tek kod
+
+Prototipte masa kendi `mockServer` örneğine bağlanır (`DEMO_LIST.md` "Oyun sayfası"): dağıtım töreni, bot hamleleri, tur süresi, el sonu hep "sunucu" kodundan gelir, istemci yalnız canlandırır. Unity'nin aynı durumları (G01–G34, T01–T51) aynı seed'le aynı karelerle açabilmesi ve çevrimdışı "Botlara karşı" oynayabilmesi için maç akışı (D-24 takvimi, D-23, D-25, R-66/D-35/D-36, bot zamanlaması D-20, gizli bilgi izdüşümü) taşımadan bağımsız saf C# olarak yeni `Packages/com.galaxy101.table/` paketinde yazılır; sunucu (Hat B) bunu ağ, veritabanı ve ekonomiyle sarar, Unity yerel oturumda doğrudan koşar. İki ayrı akış kodu (sunucu + istemci) birbirinden ayrılabilirdi; tek kod bunu önler.
+
+## K-10 · Botlara karşı
+
+Hafızadaki eski ürün kararı (24 Ekim 2026: "Botlara karşı YAKINDA kalır") v4 paketinden eski. v4: ana menüde "Botlara karşı · Çevrimdışı" kartı etkin (durum 01), T28/T30/T42 botlara karşı masa durumları, R-94 "Botlara karşı: çip yok", D-42 XP botlara karşı da verilir, `vsBotsStart` C2S. Görevin öncelik sırasında paket önce gelir; mod açılır, rapor bu çelişkiyi ayrıca belirtir.
+
+## K-11 · Faz 2'nin bölünmesi
+
+Unity aynı anda tek süreç çalıştırabilir; bu kısıt Unity'nin *çalıştırılmasına* aittir. Ekran kodunun yazımı Unity gerektirmez (`tools/v4/unity_compile.py --repo <worktree> --csproj-from <ana kopya>` ile derlenir). Bu yüzden birbirinden bağımsız ekran grupları (ör. Dereceli ekranı, ses sistemi) ayrı worktree'lerde yazılabilir; ana kopyaya birleşince durum yönlendiricisiyle Unity'de sırayla doğrulanır.

@@ -171,12 +171,12 @@ namespace Galaxy101
             var subtitle=Text(PlaySubtitle(),13,false,"var(--aT)");playSubtitle=subtitle;subtitle.name="play-subtitle";subtitle.style.unityFont=Font("Baloo2-800");subtitle.style.marginTop=4;subtitle.style.opacity=.8f;play.Add(subtitle);host.Add(play);
         }
         /// <summary>
-        /// v3 modes (spec/20, S06): Klasik (Tekli / Eşli tables in the lobby), Dereceli and Botlara karşı marked YAKINDA.
+        /// v4 modes (G101-Menu modes, menu.STR.modes): Klasik (Tekli / Eşli tables in the lobby), Dereceli, Botlara karşı — all open (soon: false).
         /// Cards keep the model's mode indices (0 Klasik, 3 Dereceli, 4 Botlara karşı) so saves and tests stay valid.
         /// </summary>
         public static readonly int[] V3Modes = { 0, 3, 4 };
-        /// <summary>Klasik and Dereceli play; Botlara karşı is YAKINDA.</summary>
-        public static bool IsSoon(int mode) => mode != 0 && mode != 3;
+        /// <summary>v4: no mode is YAKINDA (G101-Menu modes[].soon = false; KARARLAR K-10).</summary>
+        public static bool IsSoon(int mode) => false;
         private void BuildModes()
         {
             var strip=Box("mode-strip");Place(strip,0,474,1280,90);strip.style.flexDirection=FlexDirection.Row;strip.style.justifyContent=Justify.Center;AddMain(strip);
@@ -254,7 +254,8 @@ namespace Galaxy101
             foreach(var m in modeCards)m.Target(m.Index==selected,animationTime,instant);
             if(playSubtitle!=null)playSubtitle.text=PlaySubtitle();
         }
-        private string PlaySubtitle()=>Model.SelectedMode==3?L("Dereceli · ligine yakın rakipler","Ranked · players near your league"):Model.SelectedMode==4?L("Botlara karşı · yakında açılıyor","Vs bots · coming soon"):L("Klasik · Tekli / Eşli · masalar","Classic · Singles / Pairs · tables");
+        // menu.STR.subs.0–2
+        private string PlaySubtitle()=>Model.SelectedMode==3?L("Dereceli · Solo / Duo / Squad","Ranked · Solo / Duo / Squad"):Model.SelectedMode==4?L("Botlara karşı · antrenman · bahis yok","Vs bots · practice · no stake"):L("Klasik · Tekli / Eşli · masalar","Classic · Singles / Pairs · tables");
         /// <summary>A mode card: saved, then the cards and HEMEN OYNA's subtitle change in place — nothing is rebuilt.</summary>
         private void PickMode(int index)
         {
@@ -262,7 +263,7 @@ namespace Galaxy101
             if(!Model.Persist()){Model.SelectedMode=previous;Toast(L("Değişiklikler kaydedilemedi. Tekrar dene.","Could not save changes. Try again."));}
             ApplyModes();
         }
-        /// <summary>HEMEN OYNA: Klasik opens the lobby; a YAKINDA mode only says so.</summary>
+        /// <summary>HEMEN OYNA: Klasik opens the lobby, Dereceli the ranked screen, Botlara karşı the practice table.</summary>
         private void Play()
         {
             if(IsSoon(Model.SelectedMode)){Toast(L("Botlara karşı yakında açılıyor","Vs bots is coming soon"));return;}

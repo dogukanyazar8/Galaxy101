@@ -185,16 +185,16 @@ namespace Galaxy101.Tests
         public IEnumerator MainButtonsEmitSelectedModeAndRefreshWithoutLosingNativeLayout()
         {
             var view=controller.View;int? played=null;controller.PlayRequested+=mode=>played=mode;
-            // Botlara karşı is YAKINDA — selectable, but HEMEN OYNA only says so; Klasik and Dereceli play.
-            var soon=view.Root.Q<Button>("mode-4");soon.Focus();yield return null;using(var evt=NavigationSubmitEvent.GetPooled())soon.SendEvent(evt);yield return null;yield return null;
-            Assert.That(controller.Model.SelectedMode,Is.EqualTo(4));Assert.That(view.Root.Q<Label>("mode-soon-4"),Is.Not.Null);Assert.That(view.Root.Q<Label>("mode-soon-3"),Is.Null);
+            Assert.That(view.Root.Q<Label>("mode-soon-4"),Is.Null);Assert.That(view.Root.Q<Label>("mode-soon-3"),Is.Null);
             var play=view.Root.Q<Button>("play-now");Assert.That(play.worldBound.width,Is.GreaterThan(300));
-            play.Focus();yield return null;using(var evt=NavigationSubmitEvent.GetPooled())play.SendEvent(evt);yield return null;
-            Assert.That(played,Is.Null,"a coming-soon mode does not start");
             var classic=view.Root.Q<Button>("mode-0");using(var evt=NavigationSubmitEvent.GetPooled()){evt.target=classic;classic.SendEvent(evt);}yield return null;yield return null;
             play=view.Root.Q<Button>("play-now");using(var evt=NavigationSubmitEvent.GetPooled()){evt.target=play;play.SendEvent(evt);}yield return null;
             Assert.That(played,Is.EqualTo(0));
             Assert.That(view.Root.Query<Button>(className:"mode-card").ToList().Count,Is.EqualTo(3));
+            // v4 (G101-Menu modes[].soon = false): Botlara karşı is a playable mode with its own subtitle, no YAKINDA mark.
+            var bots=view.Root.Q<Button>("mode-4");using(var evt=NavigationSubmitEvent.GetPooled()){evt.target=bots;bots.SendEvent(evt);}yield return null;yield return null;
+            Assert.That(controller.Model.SelectedMode,Is.EqualTo(4));
+            Assert.That(view.Root.Q<Label>("play-subtitle").text,Is.EqualTo("Botlara karşı · antrenman · bahis yok"));
             Assert.That(controller.View,Is.Not.Null);
         }
     }

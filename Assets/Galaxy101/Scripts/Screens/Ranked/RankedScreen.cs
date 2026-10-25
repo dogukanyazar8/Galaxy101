@@ -72,6 +72,7 @@ namespace Galaxy101
             backend.Changed += OnChanged; backend.PartyAnswered += OnPartyAnswered; backend.Searching += OnSearching; backend.Found += OnFound;
             backend.Accepted += OnAccepted; backend.Cancelled += OnCancelled; backend.Ready += OnReady; backend.Started += OnStarted; backend.RankChanged += OnRankChanged;
             view.Root.RegisterCallback<KeyDownEvent>(OnKey, TrickleDown.TrickleDown);
+            view.Model.Changed += OnChanged; view.Loc.Changed += OnChanged; // balance, profile, language, theme
             shownAt = viewShownAt = Time.realtimeSinceStartup;
             Render();
             if (Pending != null) { var r = Pending; Pending = null; OnRankChanged(r); }
@@ -86,6 +87,7 @@ namespace Galaxy101
             backend.Changed -= OnChanged; backend.PartyAnswered -= OnPartyAnswered; backend.Searching -= OnSearching; backend.Found -= OnFound;
             backend.Accepted -= OnAccepted; backend.Cancelled -= OnCancelled; backend.Ready -= OnReady; backend.Started -= OnStarted; backend.RankChanged -= OnRankChanged;
             view.Root.UnregisterCallback<KeyDownEvent>(OnKey, TrickleDown.TrickleDown);
+            view.Model.Changed -= OnChanged; view.Loc.Changed -= OnChanged;
             ticker?.Pause(); ticker = null; motions.Clear();
             var canvas = layer.parent; layer.RemoveFromHierarchy(); layer = null; body = modalLayer = toastLayer = null;
             var main = canvas?.Q<VisualElement>("main-layer"); if (main != null) main.style.display = DisplayStyle.Flex;

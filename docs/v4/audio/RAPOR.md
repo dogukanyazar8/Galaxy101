@@ -117,4 +117,6 @@ Unity'de bakılacaklar (koşulmadı): ses nesnesi menüde müziği açıyor mu, 
 |---|---|
 | `5b45de0` | `v4/data` birleşimi (WAV'lar, `sound_events.json`, imleç PNG'leri ve `cursors.json`) |
 | `18ce75e` | Ses servisi, müzik, imleç, masa eşlemesi, hook satırları, testler, WAV içe aktarma ayarları |
-| (bu commit) | RAPOR, EKSIKLER, UNITY_FARKLARI |
+| `cdc9fb2` | RAPOR, EKSIKLER, UNITY_FARKLARI |
+| `99735d6` | Hata veren ekran kaynağı düşürülür; imleç ad süzgeci önbellekte |
+| (bu commit) | RAPOR'da commit kimlikleri |

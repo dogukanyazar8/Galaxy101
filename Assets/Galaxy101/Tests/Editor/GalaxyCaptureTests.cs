@@ -15,7 +15,7 @@ namespace Galaxy101.Tests
         {
             Assert.That(Driver,Is.Not.Null);
             var actual = (string[])Driver.GetProperty("ReferenceFiles").GetValue(null);
-            var expected = Directory.GetFiles(Path.Combine(UnityEngine.Application.dataPath,"../Design/galaxy101_unity_handoff/screenshots"),"*.png").Select(Path.GetFileName).ToArray();
+            var expected = Directory.GetFiles(Path.Combine(UnityEngine.Application.dataPath,"../Design/old/galaxy101_unity_handoff/screenshots"),"*.png").Select(Path.GetFileName).ToArray();
             Assert.That(actual,Is.EquivalentTo(expected));
             Assert.That(actual.Distinct(StringComparer.Ordinal).Count(),Is.EqualTo(actual.Length));
         }

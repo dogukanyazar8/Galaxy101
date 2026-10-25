@@ -21,7 +21,7 @@ namespace Galaxy101.Tests
         public void SetUp()
         {
             save = Path.Combine(Path.GetTempPath(), "galaxy-panel-" + Guid.NewGuid().ToString("N") + ".json");
-            model = new MenuModel(File.ReadAllText("Design/galaxy101_unity_handoff/spec/data/content.json"), File.ReadAllText("Design/galaxy101_unity_handoff/spec/data/themes.json"), save);
+            model = new MenuModel(File.ReadAllText("Assets/Galaxy101/Resources/Galaxy101/content.json"), File.ReadAllText("Assets/Galaxy101/Resources/Galaxy101/themes.json"), save);
             localization = new LocalizationBridge(model);
             target = new RenderTexture(1280, 720, 0);
             panelSettings = ScriptableObject.CreateInstance<PanelSettings>();

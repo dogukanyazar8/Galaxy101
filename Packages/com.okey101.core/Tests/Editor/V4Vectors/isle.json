@@ -1,0 +1,1550 @@
+{
+ "suite": "isle",
+ "version": "0.4.0",
+ "note": "Aksi belirtilmedikçe gösterge B6a → okey B7 (B7a, B7b), sahte okey Ja/Jb = B7.",
+ "tests": [
+  {
+   "id": "ISLE-01",
+   "title": "Seriye başa işle",
+   "rules": [
+    "R-25"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a",
+       "R7a",
+       "B7b",
+       "B9a",
+       "K4a",
+       "K6a",
+       "Y1a",
+       "R13b"
+      ],
+      [
+       "Y2a"
+      ],
+      [
+       "Y3a"
+      ],
+      [
+       "Y4a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      120,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "add",
+      "seat": 0,
+      "tile": "R3a",
+      "meld": "m1",
+      "side": "pre"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.melds.0.tiles": [
+        "R3a",
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ISLE-02",
+   "title": "Seriye sona işle",
+   "rules": [
+    "R-25"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a",
+       "R7a",
+       "B7b",
+       "B9a",
+       "K4a",
+       "K6a",
+       "Y1a",
+       "R13b"
+      ],
+      [
+       "Y2a"
+      ],
+      [
+       "Y3a"
+      ],
+      [
+       "Y4a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      120,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "add",
+      "seat": 0,
+      "tile": "R7a",
+      "meld": "m1",
+      "side": "post"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.melds.0.tiles": [
+        "R4a",
+        "R5a",
+        "R6a",
+        "R7a"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ISLE-03",
+   "title": "Yanlış uca işleme reddedilir",
+   "rules": [
+    "R-25"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a",
+       "R7a",
+       "B7b",
+       "B9a",
+       "K4a",
+       "K6a",
+       "Y1a",
+       "R13b"
+      ],
+      [
+       "Y2a"
+      ],
+      [
+       "Y3a"
+      ],
+      [
+       "Y4a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      120,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "add",
+      "seat": 0,
+      "tile": "R3a",
+      "meld": "m1",
+      "side": "post"
+     },
+     "expect": {
+      "error": "E_ISLE_INVALID"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ISLE-04",
+   "title": "Okey serinin iki ucuna da işlenebilir",
+   "rules": [
+    "R-25",
+    "R-13"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a",
+       "R7a",
+       "B7b",
+       "B9a",
+       "K4a",
+       "K6a",
+       "Y1a",
+       "R13b"
+      ],
+      [
+       "Y2a"
+      ],
+      [
+       "Y3a"
+      ],
+      [
+       "Y4a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      120,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "add",
+      "seat": 0,
+      "tile": "B7b",
+      "meld": "m1",
+      "side": "pre"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.melds.0.tiles": [
+        "B7b",
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      }
+     }
+    },
+    {
+     "do": {
+      "t": "undo",
+      "seat": 0
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.melds.0.tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      }
+     }
+    },
+    {
+     "do": {
+      "t": "add",
+      "seat": 0,
+      "tile": "B7b",
+      "meld": "m1",
+      "side": "post"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.melds.0.tiles": [
+        "R4a",
+        "R5a",
+        "R6a",
+        "B7b"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ISLE-05",
+   "title": "Gruba 4. renk işlenir",
+   "rules": [
+    "R-25"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a",
+       "R7a",
+       "B7b",
+       "B9a",
+       "K4a",
+       "K6a",
+       "Y1a",
+       "R13b"
+      ],
+      [
+       "Y2a"
+      ],
+      [
+       "Y3a"
+      ],
+      [
+       "Y4a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      120,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "add",
+      "seat": 0,
+      "tile": "B9a",
+      "meld": "m2"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.melds.1.tiles#len": 4
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ISLE-06",
+   "title": "Çifte işleme yok",
+   "rules": [
+    "R-25"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a",
+       "Y1a"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      120,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "add",
+      "seat": 0,
+      "tile": "R3a",
+      "meld": "m3",
+      "side": "post"
+     },
+     "expect": {
+      "error": "E_ISLE_INVALID"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ISLE-07",
+   "title": "Sarma yok: 11-12-13 sonuna 1 işlenemez",
+   "rules": [
+    "R-12",
+    "R-25"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "Y1a",
+       "R3a"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      120,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "add",
+      "seat": 0,
+      "tile": "Y1a",
+      "meld": "m5",
+      "side": "post"
+     },
+     "expect": {
+      "ok": false,
+      "error": "E_ISLE_INVALID"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ISLE-08",
+   "title": "Istakada son taş kalmalı (işleyerek bitirilemez)",
+   "rules": [
+    "R-35"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      120,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "add",
+      "seat": 0,
+      "tile": "R3a",
+      "meld": "m1",
+      "side": "pre"
+     },
+     "expect": {
+      "error": "E_LAST_TILE"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ISLE-09",
+   "title": "Açmamış oyuncu işleyemez",
+   "rules": [
+    "R-25"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a",
+       "R7a",
+       "B7b",
+       "B9a",
+       "K4a",
+       "K6a",
+       "Y1a",
+       "R13b"
+      ],
+      [
+       "Y2a"
+      ],
+      [
+       "Y3a"
+      ],
+      [
+       "Y4a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      0,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "add",
+      "seat": 0,
+      "tile": "R3a",
+      "meld": "m1",
+      "side": "pre"
+     },
+     "expect": {
+      "error": "E_NOT_OPENED"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ISLE-10",
+   "title": "Masa seçeneği: işleme kapalı",
+   "rules": [
+    "R-61"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a",
+       "R7a",
+       "B7b",
+       "B9a",
+       "K4a",
+       "K6a",
+       "Y1a",
+       "R13b"
+      ],
+      [
+       "Y2a"
+      ],
+      [
+       "Y3a"
+      ],
+      [
+       "Y4a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      120,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "opts": {
+      "isle": false
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "add",
+      "seat": 0,
+      "tile": "R3a",
+      "meld": "m1",
+      "side": "pre"
+     },
+     "expect": {
+      "error": "E_ISLE_DISABLED"
+     }
+    }
+   ]
+  },
+  {
+   "id": "OKEY-01",
+   "title": "Okey alma: K4 okeyin yerine geçer, okey ıstakaya gelir; okeyi koyana +101 (tur sonunda yazılır)",
+   "rules": [
+    "R-26",
+    "R-44"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a",
+       "R7a",
+       "B7b",
+       "B9a",
+       "K4a",
+       "K6a",
+       "Y1a",
+       "R13b"
+      ],
+      [
+       "Y2a"
+      ],
+      [
+       "Y3a"
+      ],
+      [
+       "Y4a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      120,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "swap",
+      "seat": 0,
+      "tile": "K4a",
+      "meld": "m4",
+      "index": 1
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "okeySwapped",
+        "okey": "B7a",
+        "owner": 1
+       }
+      ],
+      "state": {
+       "hand.melds.3.tiles": [
+        "K3a",
+        "K4a",
+        "K5a"
+       ],
+       "hand.pen": [
+        0,
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R13b"
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "penalty",
+        "seat": 1,
+        "code": "P_OKEY_TAKEN",
+        "amount": 101
+       }
+      ],
+      "state": {
+       "hand.pen": [
+        0,
+        101,
+        0,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "OKEY-02",
+   "title": "Okey yalnız temsil ettiği taşla alınır",
+   "rules": [
+    "R-26"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a",
+       "R7a",
+       "B7b",
+       "B9a",
+       "K4a",
+       "K6a",
+       "Y1a",
+       "R13b"
+      ],
+      [
+       "Y2a"
+      ],
+      [
+       "Y3a"
+      ],
+      [
+       "Y4a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      120,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "swap",
+      "seat": 0,
+      "tile": "K6a",
+      "meld": "m4",
+      "index": 1
+     },
+     "expect": {
+      "error": "E_SWAP_INVALID"
+     }
+    }
+   ]
+  },
+  {
+   "id": "OKEY-03",
+   "title": "Okey alma geri toplanırsa ceza yazılmaz",
+   "rules": [
+    "R-34",
+    "R-44"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a",
+       "R7a",
+       "B7b",
+       "B9a",
+       "K4a",
+       "K6a",
+       "Y1a",
+       "R13b"
+      ],
+      [
+       "Y2a"
+      ],
+      [
+       "Y3a"
+      ],
+      [
+       "Y4a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      120,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "swap",
+      "seat": 0,
+      "tile": "K4a",
+      "meld": "m4",
+      "index": 1
+     },
+     "expect": {
+      "ok": true
+     }
+    },
+    {
+     "do": {
+      "t": "undo",
+      "seat": 0
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.melds.3.tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      }
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R13b"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.pen": [
+        0,
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

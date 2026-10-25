@@ -114,7 +114,7 @@ namespace Galaxy101
                 return;
             }
             layer.Clear();
-            var dim=Box("modal-backdrop");dim.name=nested?"dialog-backdrop":"panel-backdrop";Decorate(dim,nested?"rgba(0,0,0,.5)":"rgba(0,0,0,.55)");
+            var dim=Box("modal-backdrop");dim.name=nested?"dialog-backdrop":"panel-backdrop";Decorate(dim,nested?"rgba(0,0,0,.5)":"rgba(0,0,0,.55)");GalaxyFilters.BackdropBlur(dim,nested?4:6); // menu.closePanel / closeDlg: backdrop-filter blur(6px) / blur(4px)
             dim.RegisterCallback<PointerDownEvent>(evt=>{if(evt.target!=dim)return;CloseTop();evt.StopImmediatePropagation();});layer.Add(dim);
             var center=Box("modal-center");center.pickingMode=PickingMode.Ignore;center.style.width=Length.Percent(100);center.style.height=Length.Percent(100);layer.Add(center);
             card.Add(Page(card));card.userData=key+"|"+Tab(key);

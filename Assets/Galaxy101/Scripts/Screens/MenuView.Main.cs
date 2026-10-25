@@ -25,9 +25,10 @@ namespace Galaxy101
             animationJob=Root.schedule.Execute(()=>
             {
                 float now=Time.realtimeSinceStartup;float delta=Mathf.Clamp(now-last,0,.05f);last=now;if(!focused)return;
-                // Frozen (state router, D-61): every animation sits at the canonical instant, as G101Clock.freeze sets each CSS
-                // animation's currentTime to 100000 + ft ms.
-                if(GameClock.Frozen)animationTime=GameClock.Seconds;else animationTime+=delta;
+                // Frozen (state router): every CSS animation's currentTime is the canonical instant. g101-state.js freezes with
+                // G101Clock.freeze() — no ms — so the reference frames sit at 100000 ms, not 100000 + ft (the bob, float and
+                // pulse phases of artifacts/v4/ref agree), whatever GameClock.Freeze was given.
+                if(GameClock.Frozen)animationTime=(float)(GameClock.CanonMs/1000);else animationTime+=delta;
                 foreach(var motion in motions)motion(animationTime);
                 if(mainLayer!=null&&mainLayer.resolvedStyle.display!=DisplayStyle.None)foreach(var section in sections.Values)foreach(var motion in section.Motions)motion(animationTime);
                 foreach(var motion in panelMotions)motion(animationTime);
@@ -283,19 +284,20 @@ namespace Galaxy101
         private void BuildFooter()
         {
             var shade=Box();Place(shade,0,610,1280,110);shade.pickingMode=PickingMode.Ignore;Decorate(shade,"linear-gradient(transparent,rgba(0,0,0,.55))");AddMain(shade);
-            string[] keys={"shop","friends","leader","daily","rules"},tr={"Mağaza","Arkadaşlar","Liderlik","Günlük ödül","Kurallar"},en={"Shop","Friends","Leaderboard","Daily reward","Rules"};
+            string[] keys={"shop","friends","leader","daily","rules"},openIds={"Shop","Friends","Leader","Daily","Rules"},tr={"Mağaza","Arkadaşlar","Liderlik","Günlük ödül","Kurallar"},en={"Shop","Friends","Leaderboard","Daily reward","Rules"};
             string[] backgrounds={"linear-gradient(160deg,var(--a1),var(--a2))","linear-gradient(160deg,#7AA6FF,#3D6BF0)","linear-gradient(160deg,#C2A4FF,#7C4DEB)","linear-gradient(160deg,#4FDB80,#25A857)","linear-gradient(160deg,#5BE6D6,#14A596)"};
             string[] shadows={"var(--aS)","#2448B8","#5530B0","#18793F","#0C746A"},labels={"var(--a1)","#A9C4FF","#D4C2FF","#8EF0B0","#9AF2E8"};
             string[] glows={"var(--gl)","rgba(80,130,255,.4)","rgba(150,110,255,.4)","rgba(60,203,110,.4)","rgba(40,210,190,.4)"};
             var nav=Box("footer-navigation");Place(nav,440,622,400,84);AddMain(nav);
             for(int i=0;i<keys.Length;i++)
             {
-                string key=keys[i];var item=Button("",()=>OpenPanel(key),"plain nav-button");item.name="nav-"+key;if(i==keys.Length-1)item.style.marginRight=0;
+                string key=keys[i];var item=Button("",()=>OpenPanel(key),"plain nav-button");item.name="menu.open"+openIds[i];if(i==keys.Length-1)item.style.marginRight=0;
                 var square=Box("nav-square");Decorate(square,backgrounds[i],18,4,shadows[i]);GalaxyFilters.Shadow(square,0,0,i==0?11:10,C(glows[i]));
                 var highlight=Box();highlight.pickingMode=PickingMode.Ignore;Place(highlight,0,0,56,56);highlight.style.borderTopLeftRadius=highlight.style.borderTopRightRadius=18;highlight.style.borderTopWidth=1;highlight.style.borderTopColor=new Color(1,1,1,i==0?.5f:i==3?.35f:.4f);square.Add(highlight);
                 square.Add(Icon(key,i==0?30:28,i==0?"var(--aT)":"#fff"));item.Add(square);
-                var label=Text(L(tr[i],en[i]),12,false,labels[i]);label.style.unityFont=Font("Baloo2-800");label.style.whiteSpace=WhiteSpace.NoWrap;label.style.marginTop=6;item.Add(label);
-                if(i==0)Badge(item,"%50",true);if(i==1)Badge(item,Services.Friends.GetFriends(true).Count.ToString());if(i==3&&!Model.DayClaimed){var badge=Badge(square,"1");badge.style.top=-7;badge.style.right=-8;}
+                var label=Text(L(tr[i],en[i]),12,false,labels[i]);label.name="menu.t."+keys[i];label.style.unityFont=Font("Baloo2-800");label.style.whiteSpace=WhiteSpace.NoWrap;label.style.marginTop=6;item.Add(label);
+                if(i==0)Badge(item,"%50",true);if(i==1)Badge(item,Services.Friends.GetFriends(true).Count.ToString());// The prototype's Günlük ödül badge is static markup ("1", also after Topla — EKSIKLER EK-609).
+                if(i==3){var badge=Badge(square,"1");badge.style.top=-7;badge.style.right=-8;}
                 // bob 1.6s, default ease: 0 → -4px → 0.
                 if(i==3)Animate(t=>{float f=Mathf.Repeat(t,1.6f)/1.6f;item.style.translate=new Translate(0,-4*(f<.5f?CssBezier(.25f,.1f,.25f,1,f*2):1-CssBezier(.25f,.1f,.25f,1,f*2-1)));});nav.Add(item);
             }
@@ -311,7 +313,7 @@ namespace Galaxy101
         }
         private void BuildPlanetPicker()
         {
-            var picker=Box("planet-picker");var label=Text(L("GEZEGEN TEMASI","PLANET THEME"),10,false,"var(--mt)");label.style.unityFont=Font("Baloo2-800");Tracking(label,1.5f,10);label.style.marginLeft=4;label.style.marginBottom=8;picker.Add(label);
+            var picker=Box("planet-picker");var label=Text(L("GEZEGEN TEMASI","PLANET THEME"),10,false,"var(--mt)");label.name="menu.t.planetTheme";label.style.unityFont=Font("Baloo2-800");Tracking(label,1.5f,10);label.style.marginLeft=4;label.style.marginBottom=8;picker.Add(label);
             var pill=Row();pill.name="planet-theme-pill";pill.AddToClassList("planet-pill");pill.style.height=48;pill.style.alignSelf=Align.FlexStart;Decorate(pill,"rgba(0,0,0,.35)",24);GalaxyFilters.BackdropBlur(pill,8);
             var orbs=Row();orbs.name="planet-theme-orbs";orbs.style.marginRight=10;pill.Add(orbs);
             for(int i=0;i<PlanetNames.Length;i++)

@@ -87,9 +87,9 @@ namespace Galaxy101.Tests
         {
             var body = new FriendsController().Build(view);
             view.Root.Add(body);
-            var input = body.Q<TextField>("friend-query");
+            var input = body.Q<TextField>("menu.fr.onQ");
             input.value = "#AY-2187";
-            Assert.That(body.Q<TextField>("friend-query"), Is.SameAs(input));
+            Assert.That(body.Q<TextField>("menu.fr.onQ"), Is.SameAs(input));
             var names = body.Q<ScrollView>("friend-list").Query<Label>().ToList().Select(label => label.text).ToArray();
             Assert.That(names, Does.Contain("Ayşe Y."));
             Assert.That(names, Does.Not.Contain("Burak C."));

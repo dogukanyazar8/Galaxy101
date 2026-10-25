@@ -107,7 +107,12 @@ namespace Galaxy101
         private bool Busy => Searching || Found != null;
         public bool Ready => Joined >= Need() && party.Count >= Need();
 
-        public void SetView(string value) { if (View == value) return; View = value; viewShownAt = Time.realtimeSinceStartup; Render(); }
+        public void SetView(string value)
+        {
+            if (View == value) return;
+            // The view's content mounts again: its fade and the seats' rkSeat play again, as in the prototype.
+            View = value; viewShownAt = Time.realtimeSinceStartup; seatsSeen.Clear(); Render();
+        }
 
         public void SetMode(string value)
         {
@@ -129,7 +134,7 @@ namespace Galaxy101
             Render();
             string error = await backend.InviteAsync(friend);
             if (error == null || layer == null) return;
-            party.RemoveAll(p => p.Friend.Id == friend.Id); Flash(ErrorText(error), "bad"); Render();
+            party.RemoveAll(p => p.Friend.Id == friend.Id); FlashError(error); Render();
         }
 
         private void OnPartyAnswered(string id, bool joined)
@@ -146,11 +151,11 @@ namespace Galaxy101
         public async void StartSearch()
         {
             if (Busy || layer == null) return;
-            if (Mode != "squad") { Searching = true; search = new RankedSearch(); searchStartedAt = Time.realtimeSinceStartup; seatsSeen.Clear(); }
+            if (Mode != "squad") { Searching = true; search = new RankedSearch(); searchStartedAt = Time.realtimeSinceStartup; }
             Render();
             string error = await backend.QueueAsync(Mode, party.Select(p => p.Friend.Id).ToList());
             if (error == null || layer == null) return;
-            Searching = false; Flash(ErrorText(error), "bad"); Render();
+            Searching = false; FlashError(error); Render();
         }
 
         public void Cancel()
@@ -160,10 +165,13 @@ namespace Galaxy101
             Flash(L("Arama iptal edildi", "Search cancelled"), "info"); Render();
         }
 
-        public void Accept()
+        public async void Accept()
         {
             if (Found == null || acceptedByMe) return;
-            acceptedByMe = true; _ = backend.AcceptAsync(Found.MatchId, true); Render();
+            var match = Found; acceptedByMe = true; Render();
+            string error = await backend.AcceptAsync(match.MatchId, true);
+            if (error == null || layer == null || Found != match) return;
+            Found = null; FlashError(error); Render(); // E_MATCH_EXPIRED: the search goes on (rankedSearch)
         }
 
         public void Decline()
@@ -233,17 +241,25 @@ namespace Galaxy101
             Render();
         }
 
+        /// <summary>
+        /// The error's toast (strings errors[code]): E_PARTY_RANGE "Aralık dışı", E_ALREADY_SEATED, E_MATCH_EXPIRED; E_ALREADY_QUEUED,
+        /// E_MODE, E_PARTY_SIZE and E_NOT_QUEUED are silent (null). Transport failures keep the menu's earlier queue texts.
+        /// </summary>
         private string ErrorText(string code)
         {
             switch (code)
             {
-                case "E_PARTY_RANGE": return L("Dereceli takımlar ±1 lig içinde olmalı", "Ranked parties must be within ±1 league");
-                case "E_ALREADY_QUEUED": case "E_ALREADY_SEATED": case "conflict": return L("Zaten bir masadasın ya da sıradasın", "You are already at a table or in a queue");
+                case "E_PARTY_RANGE": return L("Aralık dışı", "Out of range");
+                case "E_ALREADY_SEATED": return L("Zaten bir masada oturuyorsun", "You are already seated at a table");
+                case "E_MATCH_EXPIRED": return L("Eşleşme süresi doldu · aramaya dönülüyor", "Match expired · back to search");
+                case "E_ALREADY_QUEUED": case "E_MODE": case "E_PARTY_SIZE": case "E_NOT_QUEUED": return null;
+                case "conflict": return L("Zaten bir masadasın ya da sıradasın", "You are already at a table or in a queue");
                 case "offline": case "timeout": return L("Sunucuya ulaşılamadı", "Server unreachable");
-                case "E_MODE": return L("Bu mod şu an kapalı", "This mode is not available right now");
                 default: return L("Eşleşme başlatılamadı", "Could not start matchmaking");
             }
         }
+
+        private void FlashError(string code) { string text = ErrorText(code); if (text != null) Flash(text, "bad"); }
 
         // ---------- layout ----------
         public void Refresh() => Render();

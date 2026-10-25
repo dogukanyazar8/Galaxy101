@@ -75,7 +75,7 @@ namespace Galaxy101
             if (!ack.Ok)
             {
                 if (run == queueRun) { offStart?.Invoke(); offStart = null; }
-                return ack.Code == ErrorCodes.Conflict ? "E_ALREADY_QUEUED" : ack.Code == "offline" || ack.Code == "timeout" ? ack.Code : ack.Code ?? "error";
+                return ack.Code ?? "error"; // conflict, offline, timeout: RankedScreen.ErrorText
             }
             Searching?.Invoke(new RankedSearch { Range = 1 });
             Widen(run);

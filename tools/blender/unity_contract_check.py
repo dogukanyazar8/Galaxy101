@@ -3,13 +3,13 @@
 The table code (read-only references) finds models, nodes and materials by name. This script checks every v4 GLB
 against those lookups, so the Unity phase knows what keeps working when it switches to Models/v4/...:
 
-  TableAssetBuilder.cs:22-29   Models/<galaxy101_..._saturn>.glb file names, prefab per skin / gift / chair / room / die
+  TableAssetBuilder.cs:21-44   Models/<galaxy101_..._saturn>.glb file names, prefab per skin / gift / chair / room / die
   TableScene.cs:268, TileFactory.cs:33-34,67   tile set child "tas_R1" with "tas_govde" and "tas_yuz"
   TableScene.cs:305            material "cuha" on the table (felt texture from Resources)
   TableScene.cs:317            rack GLB root carries TILT (rotation X = -0.36 rad)
   TableFx.cs:76, 84            renderer "holo_halka*"; LED materials ("led*" / "*_led*")
   TableGifts.cs:77-81          gift nodes "demet", "kupa_govde", "alev*", "kabarcik*"
-  SkinService.cs:57-79         material names recoloured per theme
+  SkinService.cs:56-79         material names recoloured per theme
   TableCeremony.cs:225         die faces in Unity space: +y 1, +x 2, +z 3, -z 4, -x 5, -y 6
   glTFast 6.20 Extensions      supported extensions (Library/PackageCache/com.unity.cloud.gltfast/Runtime/Scripts/GltfImport.cs)
 
@@ -75,7 +75,7 @@ def main():
             r1 = next((n for n in children(f, root_i) if n.get("name") == "tas_R1"), None)
             if f["kind"] == "tile":
                 r1 = next((n for n in f["nodes"] if n.get("parent") is None), None)
-                add(f["file"], "tek taş kökü", True, f"kök {r1.get('name')} (TableAssetBuilder tas_tek kullanmaz)", "TableAssetBuilder.cs:27-29")
+                add(f["file"], "tek taş kökü", True, f"kök {r1.get('name')} (TableAssetBuilder tas_tek kullanmaz)", "TableAssetBuilder.cs:25-42")
                 continue
             kids = {n.get("name") for n in children(f, r1["i"])} if r1 else set()
             add(f["file"], "tas_R1/tas_govde + tas_yuz", bool(r1) and {"tas_govde", "tas_yuz"} <= kids,

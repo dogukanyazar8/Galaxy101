@@ -560,7 +560,7 @@
    "check": "tek taş kökü",
    "status": "uyar",
    "detail": "kök tas_R7 (TableAssetBuilder tas_tek kullanmaz)",
-   "source": "TableAssetBuilder.cs:27-29"
+   "source": "TableAssetBuilder.cs:25-42"
   },
   {
    "file": "mars/galaxy101_istaka_aluminyum_mars.glb",
@@ -819,7 +819,7 @@
    "check": "tek taş kökü",
    "status": "uyar",
    "detail": "kök tas_R7 (TableAssetBuilder tas_tek kullanmaz)",
-   "source": "TableAssetBuilder.cs:27-29"
+   "source": "TableAssetBuilder.cs:25-42"
   },
   {
    "file": "neptun/galaxy101_istaka_aluminyum_neptun.glb",
@@ -1078,7 +1078,7 @@
    "check": "tek taş kökü",
    "status": "uyar",
    "detail": "kök tas_R7 (TableAssetBuilder tas_tek kullanmaz)",
-   "source": "TableAssetBuilder.cs:27-29"
+   "source": "TableAssetBuilder.cs:25-42"
   },
   {
    "file": "saturn/galaxy101_istaka_aluminyum_saturn.glb",
@@ -1337,7 +1337,7 @@
    "check": "tek taş kökü",
    "status": "uyar",
    "detail": "kök tas_R7 (TableAssetBuilder tas_tek kullanmaz)",
-   "source": "TableAssetBuilder.cs:27-29"
+   "source": "TableAssetBuilder.cs:25-42"
   },
   {
    "file": "venus/galaxy101_istaka_aluminyum_venus.glb",
@@ -1596,7 +1596,7 @@
    "check": "tek taş kökü",
    "status": "uyar",
    "detail": "kök tas_R7 (TableAssetBuilder tas_tek kullanmaz)",
-   "source": "TableAssetBuilder.cs:27-29"
+   "source": "TableAssetBuilder.cs:25-42"
   }
  ]
 }

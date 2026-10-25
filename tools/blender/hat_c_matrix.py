@@ -236,6 +236,7 @@ def main():
     H = ["Kimlik", "Pakette ne diyor (kaynak)", "Projede ne vardı (dosya)", "Durum", "v4 sonrası"]
     g, m, l, y = glb_rows(inv, proj, cmp, con, pl), material_rows(mm), light_rows(lm), layout_rows(lay)
     count = lambda rows: {s: sum(1 for r in rows if r[3].startswith(s)) for s in ("var", "farklı", "eksik", "pakette yok")}
+    fmt = lambda c: ", ".join(f"{k} {v}" for k, v in c.items() if v)
     parts = [
         "# v4 fark matrisi · Hat C · 3D varlıklar",
         "",
@@ -247,7 +248,8 @@ def main():
         "Durum: **var** paketle aynı · **farklı** projede var ama değer/içerik farklı · **eksik** pakette var, projede yok · **pakette yok** projede/GLB'de var, pakette tanımı yok. "
         "\"v4 sonrası\" sütunu bu hattın yerleştirdiği dosyayı (`Models/v4/...`) ve Unity aşamasının yapacağını söyler. Ayrıntı: `docs/v4/hat-c/RAPOR.md`, eksikler: `docs/v4/hat-c/EKSIKLER.md`.",
         "",
-        f"Özet: GLB {len(g)} satır {count(g)} · malzeme {len(m)} satır {count(m)} · ışık/ayar {len(l)} satır {count(l)} · yerleşim/kamera {len(y)} satır {count(y)}.",
+        "Özet (satır sayısı ve Durum dağılımı): " + " · ".join(f"{name} {len(rows)} ({fmt(count(rows))})" for name, rows in
+                                                             (("GLB", g), ("malzeme", m), ("ışık/ayar", l), ("yerleşim/kamera", y))) + ".",
         "",
         "## 1 · GLB dosyaları (103)",
         "",

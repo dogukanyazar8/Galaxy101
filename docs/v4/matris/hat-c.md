@@ -4,7 +4,7 @@ Kaynak: `Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/` (103 GLB) ve `pr
 
 Durum: **var** paketle aynı · **farklı** projede var ama değer/içerik farklı · **eksik** pakette var, projede yok · **pakette yok** projede/GLB'de var, pakette tanımı yok. "v4 sonrası" sütunu bu hattın yerleştirdiği dosyayı (`Models/v4/...`) ve Unity aşamasının yapacağını söyler. Ayrıntı: `docs/v4/hat-c/RAPOR.md`, eksikler: `docs/v4/hat-c/EKSIKLER.md`.
 
-Özet: GLB 103 satır {'var': 0, 'farklı': 29, 'eksik': 74, 'pakette yok': 0} · malzeme 140 satır {'var': 26, 'farklı': 4, 'eksik': 16, 'pakette yok': 94} · ışık/ayar 18 satır {'var': 12, 'farklı': 4, 'eksik': 0, 'pakette yok': 0} · yerleşim/kamera 24 satır {'var': 23, 'farklı': 0, 'eksik': 1, 'pakette yok': 0}.
+Özet (satır sayısı ve Durum dağılımı): GLB 103 (farklı 29, eksik 74) · malzeme 140 (var 26, farklı 4, eksik 16, pakette yok 94) · ışık/ayar 18 (var 12, farklı 4) · yerleşim/kamera 24 (var 23, eksik 1).
 
 ## 1 · GLB dosyaları (103)
 

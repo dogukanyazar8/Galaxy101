@@ -42,6 +42,9 @@ Görev: `Design/PROMPT_v4_OTONOM_GELISTIRME.md`. Bağlam sıfırlanırsa buradan
 - Faz 2 kod hatları (K-11, worktree): `v4/menu` (01–97, S06–S08), `v4/ranked` (Dereceli ekranları, S16), `v4/lobby` (S09–S15 + bekleme/davet/izle/katıl), `v4/audio` (28 ses olayı, müzik, 11 imleç). Masa (`v4/table`) B bitince.
 - İlk ölçüm (run3, menü+giriş+lobi 69 durum): metin eşleşmesi menüde ~%85, UI piksel %6–30. Eşikler ölçüldü (DURUMLAR "Eşikler").
 
+- 22:50 run4 (Unity, 69 durum): lobi demo arka ucu artık doğru (S13 bekleme odası referansa yakın). Ölçümler `durumlar.json`'a işlendi; menü hattına iş listesi olarak iletildi.
+- 22:52 `v4/table` (ana kopya + v4/server + v4/data + v4/assets3d) açıldı; masa hattı başladı (istemci modeli → yerel oturum → TableGame v4 → ağ → yönlendirici → HUD).
+
 ## Sıradaki
 
 - Referans yakalamanın bitmesi → `capture_report.json` özetinin buraya ve DURUMLAR'a girmesi.

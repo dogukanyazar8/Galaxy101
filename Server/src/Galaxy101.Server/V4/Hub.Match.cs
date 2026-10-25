@@ -25,6 +25,7 @@ public sealed partial class Hub
         };
         NextRig = null;
         t.Run = new TableRuntime(t.Host, setup, bots, t.ChatRng);
+        foreach (var k in t.HumanSeats) t.Run.Connected[k] = live.IsOnline(t.Seats[k]!.Account!.Value);
         var humans = t.HumanSeats.Select(k => t.Seats[k]!.Account!.Value).ToList();
         foreach (var account in humans) live.SetPlaying(account, t.Id);
         t.Run.Start(TablePub(t));

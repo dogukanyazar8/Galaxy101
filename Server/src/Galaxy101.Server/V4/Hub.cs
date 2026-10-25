@@ -290,10 +290,20 @@ public sealed partial class Hub : IRealtimeReplyHandler, IHostedService
         p.Subscribed = false;
         if (p.Table is not { } t) return;
         if (p.Seat < 0) { t.Spectators.Remove(p.Id); p.Table = null; return; }
-        // Waiting room: out at once, stake back (R-66, reconnectWaitRoom 0). In the match the seat is kept (R-66).
-        if (t.Status is "waiting" or "countdown") { await LeaveWaitRoomAsync(t, p, "disconnect"); return; }
+        // Waiting room: out at once, stake back (R-66, reconnectWaitRoom 0). In the match the seat is kept (R-66); a ranked
+        // table being prepared is already the match (its seat stays, the server plays it when its turns time out).
+        if (t.Status is "waiting" or "countdown" && !t.Ranked) { await LeaveWaitRoomAsync(t, p, "disconnect"); return; }
         t.Run?.Disconnect(p.Seat);
     }
+
+    /// <summary>The account is deleted or banned: out of the queue, the waiting room or the match (a forfeit, R-60).</summary>
+    public Task RemoveAsync(Guid account) => Run(async () =>
+    {
+        if (!people.TryGetValue(account, out var p)) return true;
+        if (p.Queue is { } q) { var f = q.Found; Unqueue(q, "cancel"); q.Found = null; if (f is not null) { Release(f, q); TryMatch(); } }
+        if (p.Table is not null) await TableLeaveAsync(p);
+        return true;
+    });
 
     // ---- Game intents ----------------------------------------------------------------------------------------------
 

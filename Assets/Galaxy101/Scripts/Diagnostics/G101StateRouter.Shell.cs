@@ -14,6 +14,7 @@ namespace Galaxy101.Diagnostics
             {
                 case "S01":                                                    // fresh: the splash with its loading bar
                     yield return OpenMenu(theme, lang, true);
+                    holdOrigin = Menu.Auth?.SplashStartedAt;
                     yield break;
                 case "S02": case "S03": case "S04": case "S05":                 // logout → go auth | login | register | guest
                 {

@@ -45,8 +45,18 @@ namespace Galaxy101
         public bool Visible => layer != null;
         public string Screen => screen;
         public VisualElement Layer => layer;
-        /// <summary>Minimum splash time (spec/18: the bar fills before the panel); tests shorten it.</summary>
-        public float SplashSeconds = 2.4f;
+        /// <summary>
+        /// The prototype's 2800 ms splash gate (runSplash: the bar may reach 100 % once 2.8 s have passed and the heavy module
+        /// is in, or after 7 s); every splash time scales with it, so tests shorten it.
+        /// </summary>
+        public float SplashSeconds = 2.8f;
+        // runSplash(): target 18 → 46 fonts ready → 62 planet ready → 84 heavy module (here: the session check) in; every
+        // 40 ms sp += 0.9 + rand × 1.8 up to cap = (elapsed > 2800 and target ≥ 84) or elapsed > 7000 ? 100 : min(target, 96).
+        private float splashProgress, splashTarget = 18, splashStepAt;
+        private Mulberry32 splashRandom;
+        private float SplashScale => Mathf.Max(.01f, SplashSeconds) / 2.8f;
+        /// <summary>Realtime the splash began (the state router times S01 from it, as the prototype's 'fresh' page load).</summary>
+        public float SplashStartedAt => splashStarted;
 
         public AuthFlow(MenuView view, Transform owner, GalaxyOnline online)
         {
@@ -69,9 +79,13 @@ namespace Galaxy101
             background.Configure(view.Model.Planet, (bool?)view.Model.Settings["motion"] ?? true, (string)view.Model.Settings["quality"] ?? "Yüksek");
             background.SetFocused(UnityEngine.Application.isFocused || UnityEngine.Application.isBatchMode);
             body = Fill("auth-body"); body.pickingMode = PickingMode.Ignore; layer.Add(body);
-            screen = "splash"; splashStarted = Time.realtimeSinceStartup; Render();
+            screen = "splash"; splashStarted = Time.realtimeSinceStartup; splashProgress = 0; splashStepAt = splashStarted;
+            splashTarget = 62; // the fonts ship with the build and the planet is drawn above: 46 and 62 at once
+            splashRandom = GameClock.Stream("splash"); Render();
             var resume = online.ResumeAsync();
-            while (Time.realtimeSinceStartup - splashStarted < SplashSeconds || !resume.IsCompleted) await Task.Yield();
+            while (splashProgress < 100 || !resume.IsCompleted) { if (resume.IsCompleted) splashTarget = 84; await Task.Yield(); }
+            float hold = Time.realtimeSinceStartup + .38f * SplashScale;   // setTimeout(afterSplash, 380)
+            while (Time.realtimeSinceStartup < hold) await Task.Yield();
             bool resumed = false; string banned = null;
             try { resumed = resume.Result; }
             catch (Exception e)
@@ -207,7 +221,15 @@ namespace Galaxy101
             var messages = new[] { L("Gezegenler hizalanıyor…", "Aligning planets…"), L("Taşlar diziliyor…", "Racking tiles…"), L("Masalar hazırlanıyor…", "Setting up tables…"), L("Neredeyse hazır…", "Almost ready…"), L("Hazır", "Ready") };
             Animate(() =>
             {
-                float u = Mathf.Clamp01((Time.realtimeSinceStartup - splashStarted) / Mathf.Max(.01f, SplashSeconds)) * 100;
+                float now = Time.realtimeSinceStartup, scale = SplashScale;
+                while (now >= splashStepAt && splashProgress < 100)
+                {
+                    float elapsed = (splashStepAt - splashStarted) / scale;
+                    float cap = elapsed > 2.8f && splashTarget >= 84 || elapsed > 7f ? 100 : Mathf.Min(splashTarget, 96);
+                    splashProgress = Mathf.Min(cap, splashProgress + .9f + (float)splashRandom.NextDouble() * 1.8f);
+                    splashStepAt += .04f * scale;
+                }
+                float u = splashProgress;
                 fill.style.width = Length.Percent(u); pct.text = Mathf.FloorToInt(u) + "%";
                 message.text = messages[u >= 100 ? 4 : u > 75 ? 3 : u > 45 ? 2 : u > 20 ? 1 : 0];
             });
@@ -222,7 +244,7 @@ namespace Galaxy101
             Pad(tip, 11, 18, 11, 11); view.Decorate(tip, "rgba(0,0,0,.32)", 18); Border(tip, 1, new Color(1, 1, 1, .08f));
             var bulb = Box(); bulb.style.width = bulb.style.height = 30; bulb.style.alignItems = Align.Center; bulb.style.justifyContent = Justify.Center; bulb.style.marginRight = 12;
             view.Decorate(bulb, "linear-gradient(160deg,var(--a1),var(--a2))", 10); bulb.Add(view.Icon("tip-bulb", 16, "var(--aT)")); tip.Add(bulb);
-            tip.Add(Text(tips[UnityEngine.Random.Range(0, tips.Length)], 14, "Baloo2-700", "var(--ic)")); body.Add(tip);
+            tip.Add(Text(tips[(int)(GameClock.Stream("splash-tip").NextDouble() * tips.Length)], 14, "Baloo2-700", "var(--ic)")); body.Add(tip);
             var mark = Row(); mark.style.position = Position.Absolute; mark.style.right = 20; mark.style.bottom = 14;
             var diamond = Box(); diamond.style.width = diamond.style.height = 9; diamond.style.rotate = new Rotate(45); diamond.style.marginRight = 5; view.Decorate(diamond, "linear-gradient(135deg,var(--a1),var(--a2))", 2); mark.Add(diamond);
             mark.Add(Text("CDX", 12, "Montserrat-800", "#F4F1E8")); var games = Text("GAMES", 11, "Baloo2-700", "var(--mt)"); MenuView.Tracking(games, 1.5f, 11); games.style.marginLeft = 5; mark.Add(games);

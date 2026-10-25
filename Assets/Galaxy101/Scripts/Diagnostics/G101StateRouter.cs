@@ -108,6 +108,9 @@ namespace Galaxy101.Diagnostics
             if (!UnityEngine.Application.isEditor) UnityEngine.Application.Quit(0);
         }
 
+        /// <summary>Set by a step when the state's hold counts from an earlier moment than the end of its path.</summary>
+        private float? holdOrigin;
+
         private JObject Entry(string id) => (JObject)catalogue.FirstOrDefault(s => (string)s["id"] == id);
 
         private IEnumerator RunState(string id)
@@ -134,7 +137,9 @@ namespace Galaxy101.Diagnostics
             catch (Exception e) { error = e.Message; steps = null; }
             if (steps != null) yield return Guard(steps, e => error = e.Message);
             if (error != null) { record["error"] = error; Debug.LogWarning("G101_STATE_PATH_ERROR " + id + " " + error); }
-            yield return new WaitForSecondsRealtime(hold / 1000f);
+            // The hold runs from the end of the path, or from the moment a step names (S01: the splash's own start).
+            float holdUntil = (holdOrigin ?? Time.realtimeSinceStartup) + hold / 1000f; holdOrigin = null;
+            while (Time.realtimeSinceStartup < holdUntil) yield return null;
             // A settings screen may apply its display draft; the frame is always the 1280×720 window.
             if (!UnityEngine.Application.isEditor && (Screen.width != 1280 || Screen.height != 720))
             {

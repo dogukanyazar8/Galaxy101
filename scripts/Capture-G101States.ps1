@@ -28,6 +28,8 @@ New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
 $executable = Join-Path $buildRoot ([IO.Path]::GetFileName($report.executable))
 $info = [Diagnostics.ProcessStartInfo]::new($executable)
 $info.UseShellExecute = $false
+$info.RedirectStandardOutput = $true
+$info.RedirectStandardError = $true
 $arguments = @('-screen-width', '1280', '-screen-height', '720', '-screen-fullscreen', '0', '-popupwindow', '-force-d3d11',
     "-g101State=$States", "-g101Seed=$Seed", "-g101Out=$outputRoot", '-logFile', (Join-Path $outputRoot 'player.log'))
 if ($Theme) { $arguments += "-g101Theme=$Theme" }
@@ -35,6 +37,7 @@ if ($Lang) { $arguments += "-g101Lang=$Lang" }
 if ($Ft -ge 0) { $arguments += "-g101Ft=$Ft" }
 foreach ($argument in $arguments) { $info.ArgumentList.Add($argument) }
 $process = [Diagnostics.Process]::Start($info)
+$null = $process.StandardOutput.ReadToEndAsync(); $null = $process.StandardError.ReadToEndAsync()   # the player log has it all
 try {
     if (-not $process.WaitForExit($TimeoutSeconds * 1000)) { $process.Kill($true); $process.WaitForExit(); throw "State capture exceeded $TimeoutSeconds s." }
     $exit = $process.ExitCode

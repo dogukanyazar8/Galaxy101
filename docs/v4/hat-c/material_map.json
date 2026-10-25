@@ -1,0 +1,5050 @@
+{
+ "tool": "tools/blender/material_light_map.py",
+ "summary": {
+  "package_entries": 46,
+  "v4": {
+   "var": 31,
+   "farklı": 3,
+   "eksik": 12
+  },
+  "project": {
+   "var": 26,
+   "farklı": 4,
+   "eksik": 16
+  },
+  "glb_names_not_in_package": 94,
+  "theme_tokens": {
+   "saturn": {
+    "a1": "#FFD964",
+    "a2": "#F5A623",
+    "f1": "#2C3790",
+    "f2": "#11153F",
+    "rim": "#4a5080",
+    "tile": "#FFFDF6",
+    "leather": "#232A66",
+    "glow": "#F5A623",
+    "sky": "#FFE7A3"
+   },
+   "mars": {
+    "a1": "#FFA26B",
+    "a2": "#E8552E",
+    "f1": "#74291E",
+    "f2": "#2A0D09",
+    "rim": "#6e3e36",
+    "tile": "#FFF7F0",
+    "leather": "#4A1E19",
+    "glow": "#E8552E",
+    "sky": "#FFC9B0"
+   },
+   "neptun": {
+    "a1": "#8CEBFF",
+    "a2": "#2FB4E8",
+    "f1": "#164FA4",
+    "f2": "#061A40",
+    "rim": "#3e5e8e",
+    "tile": "#F8FCFF",
+    "leather": "#12407F",
+    "glow": "#2FB4E8",
+    "sky": "#CDEBFF"
+   },
+   "jupiter": {
+    "a1": "#FFC88A",
+    "a2": "#E58B45",
+    "f1": "#66462A",
+    "f2": "#22150A",
+    "rim": "#6c5538",
+    "tile": "#FFFAF2",
+    "leather": "#47321F",
+    "glow": "#E58B45",
+    "sky": "#FFE2C2"
+   },
+   "venus": {
+    "a1": "#FFD3A8",
+    "a2": "#F28AA0",
+    "f1": "#713464",
+    "f2": "#260E23",
+    "rim": "#704668",
+    "tile": "#FFFBF6",
+    "leather": "#4C2444",
+    "glow": "#F28AA0",
+    "sky": "#FFE0C8"
+   }
+  }
+ },
+ "materials": [
+  {
+   "id": "table[0] steel",
+   "source": "materials.json table[0] (key steel)",
+   "type": "MeshStandardMaterial",
+   "name": "masa_kenar",
+   "package": {
+    "name": "masa_kenar",
+    "color": "#3b4260",
+    "metalness": 0.9,
+    "roughness": 0.28
+   },
+   "project_code": "SkinService.cs:70 renk ← Rim",
+   "v4": {
+    "files": 26,
+    "kinds": [
+     "chair",
+     "scene",
+     "table/andromeda",
+     "table/ceviz",
+     "table/hologram",
+     "table/istasyon"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "ortak",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#3b4260",
+      "glb": [
+       "#3E5E8E",
+       "#4A5080",
+       "#6C5538",
+       "#6E3E36",
+       "#704668"
+      ],
+      "glb_distinct": 5,
+      "status": "tema",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.9,
+      "glb": [
+       0.9
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.28,
+      "glb": [
+       0.28
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 5,
+    "kinds": [
+     "chair",
+     "table/andromeda",
+     "table/ceviz",
+     "table/hologram",
+     "table/istasyon"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#3b4260",
+      "glb": [
+       "#4A5080"
+      ],
+      "glb_distinct": 1,
+      "status": "tema",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.9,
+      "glb": [
+       0.9
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.28,
+      "glb": [
+       0.28
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "table[1] dark",
+   "source": "materials.json table[1] (key dark)",
+   "type": "MeshStandardMaterial",
+   "name": "koyu_metal",
+   "package": {
+    "name": "koyu_metal",
+    "color": "#131829",
+    "metalness": 0.75,
+    "roughness": 0.42
+   },
+   "v4": {
+    "files": 27,
+    "kinds": [
+     "chair",
+     "room/istasyon",
+     "scene",
+     "table/andromeda",
+     "table/ceviz",
+     "table/hologram",
+     "table/istasyon"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "ortak",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#131829",
+      "glb": [
+       "#131829"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.75,
+      "glb": [
+       0.75
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.42,
+      "glb": [
+       0.42
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 6,
+    "kinds": [
+     "chair",
+     "room/istasyon",
+     "table/andromeda",
+     "table/ceviz",
+     "table/hologram",
+     "table/istasyon"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#131829",
+      "glb": [
+       "#131829"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.75,
+      "glb": [
+       0.75
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.42,
+      "glb": [
+       0.42
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "table[2] led",
+   "source": "materials.json table[2] (key led)",
+   "type": "MeshStandardMaterial",
+   "name": "led",
+   "package": {
+    "name": "led",
+    "color": "#000000",
+    "emissive": "#FFC94A",
+    "emissiveIntensity": 2.4
+   },
+   "project_code": "SkinService.cs:59 emisyon ← A1; TableFx.cs:84 LED nabzı",
+   "v4": {
+    "files": 42,
+    "kinds": [
+     "chair",
+     "room/istasyon",
+     "scene",
+     "table/andromeda",
+     "table/ceviz",
+     "table/hologram",
+     "table/istasyon"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "ortak",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#000000",
+      "glb": [
+       "#000000"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissive",
+      "package": "#FFC94A",
+      "glb": [
+       "#8CEBFF",
+       "#FFA26B",
+       "#FFC88A",
+       "#FFD3A8",
+       "#FFD964"
+      ],
+      "glb_distinct": 5,
+      "status": "tema",
+      "differs_in": []
+     },
+     {
+      "prop": "emissiveIntensity",
+      "package": 2.4,
+      "glb": [
+       2.4,
+       2.444
+      ],
+      "glb_distinct": 2,
+      "status": "animasyon anı, var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 6,
+    "kinds": [
+     "chair",
+     "room/istasyon",
+     "table/andromeda",
+     "table/ceviz",
+     "table/hologram",
+     "table/istasyon"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#000000",
+      "glb": [
+       "#000000"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissive",
+      "package": "#FFC94A",
+      "glb": [
+       "#FFD964"
+      ],
+      "glb_distinct": 1,
+      "status": "tema",
+      "differs_in": []
+     },
+     {
+      "prop": "emissiveIntensity",
+      "package": 2.4,
+      "glb": [
+       2.4,
+       2.447
+      ],
+      "glb_distinct": 2,
+      "status": "animasyon anı, var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "table[3] ledLine",
+   "source": "materials.json table[3] (key ledLine)",
+   "type": "MeshBasicMaterial",
+   "name": "led_cizgi",
+   "package": {
+    "name": "led_cizgi",
+    "color": "#FFC94A",
+    "transparent": true,
+    "opacity": 0.55
+   },
+   "project_code": "SkinService.cs:68 renk ← A1 (alfa korunur)",
+   "v4": {
+    "files": 5,
+    "kinds": [
+     "table/istasyon"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#FFC94A",
+      "glb": [
+       "#8CEBFF",
+       "#FFA26B",
+       "#FFC88A",
+       "#FFD3A8",
+       "#FFD964"
+      ],
+      "glb_distinct": 5,
+      "status": "tema",
+      "differs_in": []
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.55,
+      "glb": [
+       0.55
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "table/istasyon"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#FFC94A",
+      "glb": [
+       "#FFD964"
+      ],
+      "glb_distinct": 1,
+      "status": "tema",
+      "differs_in": []
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.55,
+      "glb": [
+       0.55
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "table[4] felt",
+   "source": "materials.json table[4] (key felt)",
+   "type": "MeshStandardMaterial",
+   "name": "cuha",
+   "package": {
+    "name": "cuha",
+    "roughness": 0.96,
+    "metalness": 0.0
+   },
+   "project_code": "TableScene.cs:296-308 Resources/Galaxy101/Table/Felt dokusu; SkinService.cs:78 speküler eşleme",
+   "v4": {
+    "files": 25,
+    "kinds": [
+     "scene",
+     "table/andromeda",
+     "table/ceviz",
+     "table/hologram",
+     "table/istasyon"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "roughness",
+      "package": 0.96,
+      "glb": [
+       0.96
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.0,
+      "glb": [
+       0
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 4,
+    "kinds": [
+     "table/andromeda",
+     "table/ceviz",
+     "table/hologram",
+     "table/istasyon"
+    ],
+    "checks": [
+     {
+      "prop": "roughness",
+      "package": 0.96,
+      "glb": [
+       0.96,
+       1
+      ],
+      "glb_distinct": 2,
+      "status": "doku (cila: MR haritası × 1), var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.0,
+      "glb": [
+       0,
+       1
+      ],
+      "glb_distinct": 2,
+      "status": "doku (cila: MR haritası × 1), var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "table[5] tileSide",
+   "source": "materials.json table[5] (key tileSide)",
+   "type": "MeshPhysicalMaterial",
+   "name": "tas_kenar",
+   "package": {
+    "name": "tas_kenar",
+    "color": "#E3D7BC",
+    "roughness": 0.34,
+    "clearcoat": 0.8
+   },
+   "alias": {
+    "glb_name": "tas_kenar_classic",
+    "note": "tiles3d.js:104-113 applyBody: ad tas_<skin> / tas_kenar_<skin>; paket değerleri klasik setin"
+   },
+   "v4": {
+    "files": 5,
+    "kinds": [
+     "tile_set/klasik"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#E3D7BC",
+      "glb": [
+       "#E3D7BC"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.34,
+      "glb": [
+       0.34
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoat",
+      "package": 0.8,
+      "glb": [
+       0.8
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "tile_set/klasik"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#E3D7BC",
+      "glb": [
+       "#E3D7BC"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.34,
+      "glb": [
+       0.34
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoat",
+      "package": 0.8,
+      "glb": [
+       0.8
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "table[6] tile",
+   "source": "materials.json table[6] (key tile)",
+   "type": "MeshPhysicalMaterial",
+   "name": "tas",
+   "package": {
+    "name": "tas",
+    "color": "#FFF8EA",
+    "roughness": 0.36,
+    "clearcoat": 0.7,
+    "clearcoatRoughness": 0.22
+   },
+   "alias": {
+    "glb_name": "tas_classic",
+    "note": "tiles3d.js:104-113 applyBody: ad tas_<skin> / tas_kenar_<skin>; paket değerleri klasik setin"
+   },
+   "project_code": "SkinService.cs:76 tas_classic renk ← Tile (tf1)",
+   "v4": {
+    "files": 5,
+    "kinds": [
+     "tile_set/klasik"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#FFF8EA",
+      "glb": [
+       "#F8FCFF",
+       "#FFF7F0",
+       "#FFFAF2",
+       "#FFFBF6",
+       "#FFFDF6"
+      ],
+      "glb_distinct": 5,
+      "status": "tema",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.36,
+      "glb": [
+       0.36
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoat",
+      "package": 0.7,
+      "glb": [
+       0.7
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoatRoughness",
+      "package": 0.22,
+      "glb": [
+       0.22
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "tile_set/klasik"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#FFF8EA",
+      "glb": [
+       "#FFFDF6"
+      ],
+      "glb_distinct": 1,
+      "status": "tema",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.36,
+      "glb": [
+       0.36
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoat",
+      "package": 0.7,
+      "glb": [
+       0.7
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoatRoughness",
+      "package": 0.22,
+      "glb": [
+       0.22
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "table[7] leather",
+   "source": "materials.json table[7] (key leather)",
+   "type": "MeshStandardMaterial",
+   "name": "deri",
+   "package": {
+    "name": "deri",
+    "color": "#1d2240",
+    "roughness": 0.6,
+    "metalness": 0.1
+   },
+   "project_code": "SkinService.cs:72 renk ← Leather (pn)",
+   "v4": {
+    "files": 6,
+    "kinds": [
+     "chair",
+     "scene"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "ortak",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#1d2240",
+      "glb": [
+       "#12407F",
+       "#232A66",
+       "#47321F",
+       "#4A1E19",
+       "#4C2444"
+      ],
+      "glb_distinct": 5,
+      "status": "tema",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.6,
+      "glb": [
+       0.6
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.1,
+      "glb": [
+       0.1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "chair"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#1d2240",
+      "glb": [
+       "#232A66"
+      ],
+      "glb_distinct": 1,
+      "status": "tema",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.6,
+      "glb": [
+       0.6
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.1,
+      "glb": [
+       0.1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "table[8] floor",
+   "source": "materials.json table[8] (key floor)",
+   "type": "MeshStandardMaterial",
+   "name": "zemin",
+   "package": {
+    "name": "zemin",
+    "color": "#ffffff",
+    "metalness": 0.55,
+    "roughness": 0.5
+   },
+   "v4": {
+    "files": 6,
+    "kinds": [
+     "room/istasyon",
+     "scene"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "ortak",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#ffffff",
+      "glb": [
+       "#FFFFFF"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.55,
+      "glb": [
+       0.55
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.5,
+      "glb": [
+       0.5
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "room/istasyon"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#ffffff",
+      "glb": [
+       "#FFFFFF"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.55,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "doku (cila: MR haritası × 1)",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.5,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "doku (cila: MR haritası × 1)",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "table[9] wall",
+   "source": "materials.json table[9] (key wall)",
+   "type": "MeshStandardMaterial",
+   "name": "duvar",
+   "package": {
+    "name": "duvar",
+    "color": "#ffffff",
+    "metalness": 0.4,
+    "roughness": 0.6
+   },
+   "project_code": "SkinService.cs:63 emisyon ← A1",
+   "v4": {
+    "files": 6,
+    "kinds": [
+     "room/istasyon",
+     "scene"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "ortak",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#ffffff",
+      "glb": [
+       "#FFFFFF"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.4,
+      "glb": [
+       0.4
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.6,
+      "glb": [
+       0.6
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "room/istasyon"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#ffffff",
+      "glb": [
+       "#FFFFFF"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.4,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "doku (cila: MR haritası × 1)",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.6,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "doku (cila: MR haritası × 1)",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "table[10] ok",
+   "source": "materials.json table[10] (key ok)",
+   "type": "MeshBasicMaterial",
+   "name": "gecerli",
+   "package": {
+    "name": "gecerli",
+    "color": "#3CCB6E"
+   },
+   "project_code": "TileFactory.cs:159 kodda üretilir (#3CCB6E)",
+   "v4": {
+    "files": 0,
+    "status": "eksik"
+   },
+   "project": {
+    "files": 0,
+    "status": "eksik"
+   }
+  },
+  {
+   "id": "table[11] newBar",
+   "source": "materials.json table[11] (key newBar)",
+   "type": "MeshBasicMaterial",
+   "name": "yeni_tas",
+   "package": {
+    "name": "yeni_tas",
+    "color": "#FFD964",
+    "transparent": true
+   },
+   "project_code": "TileFactory.cs:160 kodda üretilir",
+   "v4": {
+    "files": 0,
+    "status": "eksik"
+   },
+   "project": {
+    "files": 0,
+    "status": "eksik"
+   }
+  },
+  {
+   "id": "table[12] zone",
+   "source": "materials.json table[12] (key zone)",
+   "type": "MeshBasicMaterial",
+   "name": "atma_alani",
+   "package": {
+    "name": "atma_alani",
+    "color": "#FFC94A",
+    "transparent": true,
+    "opacity": 0.4,
+    "depthWrite": false
+   },
+   "project_code": "TableScene.cs:334 kodda üretilir (Unlit, A1, opaklık 0.4)",
+   "v4": {
+    "files": 20,
+    "kinds": [
+     "markers",
+     "scene"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#FFC94A",
+      "glb": [
+       "#8CEBFF",
+       "#FFA26B",
+       "#FFC88A",
+       "#FFD3A8",
+       "#FFD964"
+      ],
+      "glb_distinct": 5,
+      "status": "tema",
+      "differs_in": []
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.4,
+      "glb": [
+       0,
+       0.16,
+       0.6
+      ],
+      "glb_distinct": 3,
+      "status": "dışa aktarma (opaklık <0.3 → 0.6/0.8), çalışma anı (sahne_tam canlı sahne kopyası)",
+      "differs_in": []
+     },
+     {
+      "prop": "depthWrite",
+      "package": false,
+      "glb": null,
+      "status": "glTF'e geçmez"
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 0,
+    "status": "eksik"
+   }
+  },
+  {
+   "id": "table[13] zoneFill",
+   "source": "materials.json table[13] (key zoneFill)",
+   "type": "MeshBasicMaterial",
+   "name": "atma_dolgu",
+   "package": {
+    "name": "atma_dolgu",
+    "color": "#FFC94A",
+    "transparent": true,
+    "opacity": 0.0,
+    "depthWrite": false,
+    "blending": "THREE.AdditiveBlending"
+   },
+   "project_code": "TableFx.cs:60 kodda üretilir (additive)",
+   "v4": {
+    "files": 10,
+    "kinds": [
+     "markers",
+     "scene"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#FFC94A",
+      "glb": [
+       "#8CEBFF",
+       "#FFA26B",
+       "#FFC88A",
+       "#FFD3A8",
+       "#FFD964"
+      ],
+      "glb_distinct": 5,
+      "status": "tema",
+      "differs_in": []
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.0,
+      "glb": [
+       0,
+       0.6
+      ],
+      "glb_distinct": 2,
+      "status": "dışa aktarma (opaklık <0.3 → 0.6/0.8), var",
+      "differs_in": []
+     },
+     {
+      "prop": "depthWrite",
+      "package": false,
+      "glb": null,
+      "status": "glTF'e geçmez"
+     },
+     {
+      "prop": "blending",
+      "package": "THREE.AdditiveBlending",
+      "glb": null,
+      "status": "glTF'e geçmez"
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 0,
+    "status": "eksik"
+   }
+  },
+  {
+   "id": "table[14] halo",
+   "source": "materials.json table[14] (key halo)",
+   "type": "MeshBasicMaterial",
+   "name": "hale",
+   "package": {
+    "name": "hale",
+    "map": "glowTex()",
+    "color": "#FFC94A",
+    "transparent": true,
+    "opacity": 0.25,
+    "depthWrite": false,
+    "blending": "THREE.AdditiveBlending"
+   },
+   "project_code": "TableFx.cs:62 deste_parilti kodda üretilir; masa_hale yok",
+   "v4": {
+    "files": 30,
+    "kinds": [
+     "markers",
+     "scene"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "map",
+      "package": "glowTex()",
+      "glb": [
+       "True"
+      ],
+      "status": "ifade (doku/çalışma anı)"
+     },
+     {
+      "prop": "color",
+      "package": "#FFC94A",
+      "glb": [
+       "#7F9CFF",
+       "#8CEBFF",
+       "#FFA26B",
+       "#FFC88A",
+       "#FFC94A",
+       "#FFD3A8",
+       "#FFD964"
+      ],
+      "glb_distinct": 7,
+      "status": "tema, var",
+      "differs_in": []
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.25,
+      "glb": [
+       0,
+       0.25,
+       0.6
+      ],
+      "glb_distinct": 3,
+      "status": "dışa aktarma (opaklık <0.3 → 0.6/0.8), var, çalışma anı (sahne_tam canlı sahne kopyası)",
+      "differs_in": []
+     },
+     {
+      "prop": "depthWrite",
+      "package": false,
+      "glb": null,
+      "status": "glTF'e geçmez"
+     },
+     {
+      "prop": "blending",
+      "package": "THREE.AdditiveBlending",
+      "glb": null,
+      "status": "glTF'e geçmez"
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 0,
+    "status": "eksik"
+   }
+  },
+  {
+   "id": "table[15] holo",
+   "source": "materials.json table[15] (key holo)",
+   "type": "MeshBasicMaterial",
+   "name": "holo",
+   "package": {
+    "name": "holo",
+    "color": "#FFC94A",
+    "transparent": true,
+    "opacity": 0.35,
+    "depthWrite": false,
+    "blending": "THREE.AdditiveBlending",
+    "side": "THREE.DoubleSide"
+   },
+   "project_code": "SkinService.cs:68 renk ← A1 (andromeda istisnası yok); TableFx.cs:76-80 additive, dönüş",
+   "v4": {
+    "files": 25,
+    "kinds": [
+     "scene",
+     "table/andromeda",
+     "table/ceviz",
+     "table/hologram",
+     "table/istasyon"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#FFC94A",
+      "glb": [
+       "#8CEBFF",
+       "#B79CFF",
+       "#FFA26B",
+       "#FFC88A",
+       "#FFD3A8",
+       "#FFD964"
+      ],
+      "glb_distinct": 6,
+      "status": "tema",
+      "differs_in": []
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.35,
+      "glb": [
+       0.12,
+       0.3,
+       0.5
+      ],
+      "glb_distinct": 3,
+      "status": "tema",
+      "differs_in": []
+     },
+     {
+      "prop": "depthWrite",
+      "package": false,
+      "glb": null,
+      "status": "glTF'e geçmez"
+     },
+     {
+      "prop": "blending",
+      "package": "THREE.AdditiveBlending",
+      "glb": null,
+      "status": "glTF'e geçmez"
+     },
+     {
+      "prop": "side",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 4,
+    "kinds": [
+     "table/andromeda",
+     "table/ceviz",
+     "table/hologram",
+     "table/istasyon"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#FFC94A",
+      "glb": [
+       "#B79CFF",
+       "#FFD964"
+      ],
+      "glb_distinct": 2,
+      "status": "tema",
+      "differs_in": []
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.35,
+      "glb": [
+       0.12,
+       0.3,
+       0.5
+      ],
+      "glb_distinct": 3,
+      "status": "tema",
+      "differs_in": []
+     },
+     {
+      "prop": "depthWrite",
+      "package": false,
+      "glb": null,
+      "status": "glTF'e geçmez"
+     },
+     {
+      "prop": "blending",
+      "package": "THREE.AdditiveBlending",
+      "glb": null,
+      "status": "glTF'e geçmez"
+     },
+     {
+      "prop": "side",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "table[16] tagMats[kind]",
+   "source": "materials.json table[16] (key tagMats[kind])",
+   "type": "MeshBasicMaterial",
+   "name": "simge_*",
+   "package": {
+    "name": "'simge_' + kind",
+    "map": "tx",
+    "transparent": true,
+    "depthWrite": false
+   },
+   "project_code": "Unity'de 3D simge yok (HUD)",
+   "v4": {
+    "files": 10,
+    "kinds": [
+     "markers"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "map",
+      "package": "tx",
+      "glb": [
+       "True"
+      ],
+      "status": "ifade (doku/çalışma anı)"
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "depthWrite",
+      "package": false,
+      "glb": null,
+      "status": "glTF'e geçmez"
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 0,
+    "status": "eksik"
+   }
+  },
+  {
+   "id": "table[17] m",
+   "source": "materials.json table[17] (key m)",
+   "type": "MeshBasicMaterial",
+   "name": "*_duz",
+   "package": {
+    "name": "base.name + '_duz'",
+    "map": "base.map",
+    "transparent": true,
+    "depthWrite": false,
+    "toneMapped": false
+   },
+   "project_code": "TileFactory.cs:48 tas_yuz_isiksiz_<skin> (Galaxy101/FlatFace)",
+   "v4": {
+    "files": 0,
+    "status": "eksik"
+   },
+   "project": {
+    "files": 0,
+    "status": "eksik"
+   }
+  },
+  {
+   "id": "table[18] inner",
+   "source": "materials.json table[18] (key inner)",
+   "type": "MeshBasicMaterial",
+   "name": "masa_pirinc_cizgi",
+   "package": {
+    "name": "masa_pirinc_cizgi",
+    "color": "#D9B15A",
+    "transparent": true,
+    "opacity": 0.7
+   },
+   "v4": {
+    "files": 5,
+    "kinds": [
+     "table/ceviz"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#D9B15A",
+      "glb": [
+       "#D9B15A"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.7,
+      "glb": [
+       0.7
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "table/ceviz"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#D9B15A",
+      "glb": [
+       "#D9B15A"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.7,
+      "glb": [
+       0.7
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "table[19] inner",
+   "source": "materials.json table[19] (key inner)",
+   "type": "MeshBasicMaterial",
+   "name": "masa_holo_cizgi",
+   "package": {
+    "name": "masa_holo_cizgi",
+    "transparent": true,
+    "opacity": 0.95
+   },
+   "project_code": "SkinService.cs:68 renk ← A1 (alfa korunur)",
+   "v4": {
+    "files": 5,
+    "kinds": [
+     "table/hologram"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.95,
+      "glb": [
+       0.95
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "table/hologram"
+    ],
+    "checks": [
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.95,
+      "glb": [
+       0.95
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "table[20] inner",
+   "source": "materials.json table[20] (key inner)",
+   "type": "MeshBasicMaterial",
+   "name": "masa_andromeda_cizgi",
+   "package": {
+    "name": "masa_andromeda_cizgi",
+    "color": "#B79CFF",
+    "transparent": true,
+    "opacity": 0.85
+   },
+   "v4": {
+    "files": 10,
+    "kinds": [
+     "scene",
+     "table/andromeda"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#B79CFF",
+      "glb": [
+       "#B79CFF"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.85,
+      "glb": [
+       0.85
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "table/andromeda"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#B79CFF",
+      "glb": [
+       "#B79CFF"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.85,
+      "glb": [
+       0.85
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "tableSkins.wood.slab",
+   "source": "materials.json tableSkins.wood.slab",
+   "type": "MeshPhysicalMaterial",
+   "name": "masa_ceviz_govde",
+   "package": {
+    "name": "masa_ceviz_govde",
+    "roughness": 0.5,
+    "clearcoat": 0.5
+   },
+   "v4": {
+    "files": 5,
+    "kinds": [
+     "table/ceviz"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "roughness",
+      "package": 0.5,
+      "glb": [
+       0.5
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoat",
+      "package": 0.5,
+      "glb": [
+       0.5
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "table/ceviz"
+    ],
+    "checks": [
+     {
+      "prop": "roughness",
+      "package": 0.5,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "doku (cila: MR haritası × 1)",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoat",
+      "package": 0.5,
+      "glb": [
+       0.5
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "tableSkins.wood.rim",
+   "source": "materials.json tableSkins.wood.rim",
+   "type": "MeshPhysicalMaterial",
+   "name": "masa_ceviz_kenar",
+   "package": {
+    "name": "masa_ceviz_kenar",
+    "roughness": 0.32,
+    "clearcoat": 1,
+    "clearcoatRoughness": 0.15
+   },
+   "v4": {
+    "files": 5,
+    "kinds": [
+     "table/ceviz"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "roughness",
+      "package": 0.32,
+      "glb": [
+       0.32
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoat",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoatRoughness",
+      "package": 0.15,
+      "glb": [
+       0.15
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "table/ceviz"
+    ],
+    "checks": [
+     {
+      "prop": "roughness",
+      "package": 0.32,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "doku (cila: MR haritası × 1)",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoat",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoatRoughness",
+      "package": 0.15,
+      "glb": [
+       0.15
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "tableSkins.wood.band",
+   "source": "materials.json tableSkins.wood.band",
+   "type": "MeshStandardMaterial",
+   "name": "masa_pirinc",
+   "package": {
+    "name": "masa_pirinc",
+    "color": "#D9A94A",
+    "metalness": 1,
+    "roughness": 0.25
+   },
+   "v4": {
+    "files": 5,
+    "kinds": [
+     "table/ceviz"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#D9A94A",
+      "glb": [
+       "#D9A94A"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.25,
+      "glb": [
+       0.25
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "table/ceviz"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#D9A94A",
+      "glb": [
+       "#D9A94A"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.25,
+      "glb": [
+       0.25
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "tableSkins.wood.inner",
+   "source": "materials.json tableSkins.wood.inner",
+   "type": "MeshBasicMaterial",
+   "name": "masa_pirinc_cizgi",
+   "package": {
+    "name": "masa_pirinc_cizgi",
+    "color": "#D9B15A",
+    "transparent": true,
+    "opacity": 0.7
+   },
+   "v4": {
+    "files": 5,
+    "kinds": [
+     "table/ceviz"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#D9B15A",
+      "glb": [
+       "#D9B15A"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.7,
+      "glb": [
+       0.7
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "table/ceviz"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#D9B15A",
+      "glb": [
+       "#D9B15A"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.7,
+      "glb": [
+       0.7
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "tableSkins.holo.slab",
+   "source": "materials.json tableSkins.holo.slab",
+   "type": "MeshPhysicalMaterial",
+   "name": "masa_cam_govde",
+   "package": {
+    "name": "masa_cam_govde",
+    "color": "#070a16",
+    "metalness": 0.3,
+    "roughness": 0.1,
+    "clearcoat": 1
+   },
+   "v4": {
+    "files": 5,
+    "kinds": [
+     "table/hologram"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#070a16",
+      "glb": [
+       "#070A16"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.3,
+      "glb": [
+       0.3
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.1,
+      "glb": [
+       0.1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoat",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "table/hologram"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#070a16",
+      "glb": [
+       "#070A16"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.3,
+      "glb": [
+       0.3
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.1,
+      "glb": [
+       0.1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoat",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "tableSkins.holo.rim",
+   "source": "materials.json tableSkins.holo.rim",
+   "type": "MeshPhysicalMaterial",
+   "name": "masa_cam_kenar",
+   "package": {
+    "name": "masa_cam_kenar",
+    "color": "#1a2448",
+    "metalness": 0.15,
+    "roughness": 0.03,
+    "clearcoat": 1,
+    "transparent": true,
+    "opacity": 0.42,
+    "emissiveIntensity": 0.06,
+    "envMapIntensity": 2
+   },
+   "project_code": "SkinService.cs:65 emisyon ← A1",
+   "v4": {
+    "files": 5,
+    "kinds": [
+     "table/hologram"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#1a2448",
+      "glb": [
+       "#1A2448"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.15,
+      "glb": [
+       0.15
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.03,
+      "glb": [
+       0.03
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoat",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.42,
+      "glb": [
+       0.42
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissiveIntensity",
+      "package": 0.06,
+      "glb": [
+       0.06
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "envMapIntensity",
+      "package": 2,
+      "glb": null,
+      "status": "glTF'e geçmez"
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "table/hologram"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#1a2448",
+      "glb": [
+       "#1A2448"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.15,
+      "glb": [
+       0.15
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.03,
+      "glb": [
+       0.03
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoat",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.42,
+      "glb": [
+       0.42
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissiveIntensity",
+      "package": 0.06,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "güç renge katlanmış",
+      "differs_in": []
+     },
+     {
+      "prop": "envMapIntensity",
+      "package": 2,
+      "glb": null,
+      "status": "glTF'e geçmez"
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "tableSkins.holo.band",
+   "source": "materials.json tableSkins.holo.band",
+   "type": "MeshStandardMaterial",
+   "name": "masa_holo_led",
+   "package": {
+    "name": "masa_holo_led",
+    "color": "#000",
+    "emissiveIntensity": 3.4
+   },
+   "project_code": "SkinService.cs:59 emisyon ← A1",
+   "v4": {
+    "files": 5,
+    "kinds": [
+     "table/hologram"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#000",
+      "glb": [
+       "#000000"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissiveIntensity",
+      "package": 3.4,
+      "glb": [
+       3.4
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "table/hologram"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#000",
+      "glb": [
+       "#000000"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissiveIntensity",
+      "package": 3.4,
+      "glb": [
+       3.4
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "tableSkins.holo.inner",
+   "source": "materials.json tableSkins.holo.inner",
+   "type": "MeshBasicMaterial",
+   "name": "masa_holo_cizgi",
+   "package": {
+    "name": "masa_holo_cizgi",
+    "transparent": true,
+    "opacity": 0.95
+   },
+   "project_code": "SkinService.cs:68 renk ← A1 (alfa korunur)",
+   "v4": {
+    "files": 5,
+    "kinds": [
+     "table/hologram"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.95,
+      "glb": [
+       0.95
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "table/hologram"
+    ],
+    "checks": [
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.95,
+      "glb": [
+       0.95
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "tableSkins.andro.slab",
+   "source": "materials.json tableSkins.andro.slab",
+   "type": "MeshPhysicalMaterial",
+   "name": "masa_andromeda_govde",
+   "package": {
+    "name": "masa_andromeda_govde",
+    "color": "#080a1c",
+    "metalness": 0.5,
+    "roughness": 0.3,
+    "clearcoat": 1
+   },
+   "v4": {
+    "files": 10,
+    "kinds": [
+     "scene",
+     "table/andromeda"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#080a1c",
+      "glb": [
+       "#080A1C"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.5,
+      "glb": [
+       0.5
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.3,
+      "glb": [
+       0.3
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoat",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "table/andromeda"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#080a1c",
+      "glb": [
+       "#080A1C"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.5,
+      "glb": [
+       0.5
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.3,
+      "glb": [
+       0.3
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoat",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "tableSkins.andro.rim",
+   "source": "materials.json tableSkins.andro.rim",
+   "type": "MeshPhysicalMaterial",
+   "name": "masa_andromeda_kenar",
+   "package": {
+    "name": "masa_andromeda_kenar",
+    "color": "#2a2470",
+    "metalness": 0.9,
+    "roughness": 0.14,
+    "clearcoat": 1,
+    "iridescence": 1,
+    "iridescenceIOR": 1.35,
+    "iridescenceThicknessRange": [
+     300,
+     520
+    ],
+    "emissive": "#3a2a90",
+    "emissiveIntensity": 0.25
+   },
+   "v4": {
+    "files": 10,
+    "kinds": [
+     "scene",
+     "table/andromeda"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#2a2470",
+      "glb": [
+       "#2A2470"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.9,
+      "glb": [
+       0.9
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.14,
+      "glb": [
+       0.14
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoat",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "iridescence",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "iridescenceIOR",
+      "package": 1.35,
+      "glb": [
+       1.35
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "iridescenceThicknessRange",
+      "package": [
+       300,
+       520
+      ],
+      "glb": [
+       [
+        300,
+        520
+       ]
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissive",
+      "package": "#3a2a90",
+      "glb": [
+       "#3A2A90"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissiveIntensity",
+      "package": 0.25,
+      "glb": [
+       0.25
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "table/andromeda"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#2a2470",
+      "glb": [
+       "#2A2470"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.9,
+      "glb": [
+       0.9
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.14,
+      "glb": [
+       0.14
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoat",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "iridescence",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "iridescenceIOR",
+      "package": 1.35,
+      "glb": [
+       1.35
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "iridescenceThicknessRange",
+      "package": [
+       300,
+       520
+      ],
+      "glb": [
+       [
+        100,
+        400
+       ]
+      ],
+      "glb_distinct": 1,
+      "status": "farklı",
+      "differs_in": [
+       "galaxy101_masa_andromeda_saturn.glb"
+      ]
+     },
+     {
+      "prop": "emissive",
+      "package": "#3a2a90",
+      "glb": [
+       "#1A114B"
+      ],
+      "glb_distinct": 1,
+      "status": "güç renge katlanmış",
+      "differs_in": []
+     },
+     {
+      "prop": "emissiveIntensity",
+      "package": 0.25,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "güç renge katlanmış",
+      "differs_in": []
+     }
+    ],
+    "status": "farklı"
+   }
+  },
+  {
+   "id": "tableSkins.andro.band",
+   "source": "materials.json tableSkins.andro.band",
+   "type": "MeshStandardMaterial",
+   "name": "masa_andromeda_led",
+   "package": {
+    "name": "masa_andromeda_led",
+    "color": "#000",
+    "emissive": "#8FB4FF",
+    "emissiveIntensity": 2.8
+   },
+   "v4": {
+    "files": 10,
+    "kinds": [
+     "scene",
+     "table/andromeda"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#000",
+      "glb": [
+       "#000000"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissive",
+      "package": "#8FB4FF",
+      "glb": [
+       "#8FB4FF"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissiveIntensity",
+      "package": 2.8,
+      "glb": [
+       2.8
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "table/andromeda"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#000",
+      "glb": [
+       "#000000"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissive",
+      "package": "#8FB4FF",
+      "glb": [
+       "#8FB4FF"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissiveIntensity",
+      "package": 2.8,
+      "glb": [
+       2.8
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "tableSkins.andro.inner",
+   "source": "materials.json tableSkins.andro.inner",
+   "type": "MeshBasicMaterial",
+   "name": "masa_andromeda_cizgi",
+   "package": {
+    "name": "masa_andromeda_cizgi",
+    "color": "#B79CFF",
+    "transparent": true,
+    "opacity": 0.85
+   },
+   "v4": {
+    "files": 10,
+    "kinds": [
+     "scene",
+     "table/andromeda"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#B79CFF",
+      "glb": [
+       "#B79CFF"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.85,
+      "glb": [
+       0.85
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "table/andromeda"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#B79CFF",
+      "glb": [
+       "#B79CFF"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "transparent",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "opacity",
+      "package": 0.85,
+      "glb": [
+       0.85
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "MeshBasicMaterial→KHR_materials_unlit",
+      "package": true,
+      "glb": [
+       true
+      ],
+      "status": "var"
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "tableSkins.randro.base",
+   "source": "materials.json tableSkins.randro.base",
+   "type": "MeshPhysicalMaterial",
+   "name": "istaka_andromeda_taban",
+   "package": {
+    "name": "istaka_andromeda_taban",
+    "color": "#0b0d26",
+    "metalness": 0.8,
+    "roughness": 0.18,
+    "clearcoat": 1,
+    "iridescence": 1,
+    "iridescenceIOR": 1.6,
+    "iridescenceThicknessRange": [
+     180,
+     820
+    ]
+   },
+   "v4": {
+    "files": 0,
+    "status": "eksik"
+   },
+   "project": {
+    "files": 0,
+    "status": "eksik"
+   }
+  },
+  {
+   "id": "tableSkins.randro.ledge",
+   "source": "materials.json tableSkins.randro.ledge",
+   "type": "MeshPhysicalMaterial",
+   "name": "istaka_andromeda_kenar",
+   "package": {
+    "name": "istaka_andromeda_kenar",
+    "color": "#2a2f6a",
+    "metalness": 1,
+    "roughness": 0.18,
+    "iridescence": 1,
+    "iridescenceIOR": 1.7,
+    "iridescenceThicknessRange": [
+     250,
+     900
+    ]
+   },
+   "v4": {
+    "files": 0,
+    "status": "eksik"
+   },
+   "project": {
+    "files": 0,
+    "status": "eksik"
+   }
+  },
+  {
+   "id": "tableSkins.randro.back",
+   "source": "materials.json tableSkins.randro.back",
+   "type": "MeshPhysicalMaterial",
+   "name": "istaka_andromeda_arka",
+   "package": {
+    "name": "istaka_andromeda_arka",
+    "color": "#ffffff",
+    "roughness": 0.25,
+    "metalness": 0.15,
+    "clearcoat": 1,
+    "clearcoatRoughness": 0.1,
+    "emissive": "#ffffff",
+    "emissiveIntensity": 0.4
+   },
+   "v4": {
+    "files": 0,
+    "status": "eksik"
+   },
+   "project": {
+    "files": 0,
+    "status": "eksik"
+   }
+  },
+  {
+   "id": "tableSkins.randro.cap",
+   "source": "materials.json tableSkins.randro.cap",
+   "type": "MeshPhysicalMaterial",
+   "name": "istaka_andromeda_uc",
+   "package": {
+    "name": "istaka_andromeda_uc",
+    "color": "#141038",
+    "metalness": 0.8,
+    "roughness": 0.18,
+    "clearcoat": 1,
+    "iridescence": 1,
+    "iridescenceIOR": 1.35,
+    "iridescenceThicknessRange": [
+     300,
+     520
+    ],
+    "emissive": "#6B4FE0",
+    "emissiveIntensity": 0.18
+   },
+   "v4": {
+    "files": 10,
+    "kinds": [
+     "rack/andromeda",
+     "scene"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#141038",
+      "glb": [
+       "#141038"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.8,
+      "glb": [
+       0.85
+      ],
+      "glb_distinct": 1,
+      "status": "farklı",
+      "differs_in": [
+       "jupiter/galaxy101_istaka_andromeda_jupiter.glb",
+       "jupiter/galaxy101_sahne_tam_jupiter.glb",
+       "mars/galaxy101_istaka_andromeda_mars.glb",
+       "mars/galaxy101_sahne_tam_mars.glb",
+       "neptun/galaxy101_istaka_andromeda_neptun.glb",
+       "neptun/galaxy101_sahne_tam_neptun.glb"
+      ]
+     },
+     {
+      "prop": "roughness",
+      "package": 0.18,
+      "glb": [
+       0.16
+      ],
+      "glb_distinct": 1,
+      "status": "farklı",
+      "differs_in": [
+       "jupiter/galaxy101_istaka_andromeda_jupiter.glb",
+       "jupiter/galaxy101_sahne_tam_jupiter.glb",
+       "mars/galaxy101_istaka_andromeda_mars.glb",
+       "mars/galaxy101_sahne_tam_mars.glb",
+       "neptun/galaxy101_istaka_andromeda_neptun.glb",
+       "neptun/galaxy101_sahne_tam_neptun.glb"
+      ]
+     },
+     {
+      "prop": "clearcoat",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "iridescence",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "iridescenceIOR",
+      "package": 1.35,
+      "glb": [
+       1.35
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "iridescenceThicknessRange",
+      "package": [
+       300,
+       520
+      ],
+      "glb": [
+       [
+        300,
+        520
+       ]
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissive",
+      "package": "#6B4FE0",
+      "glb": [
+       "#6B4FE0"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissiveIntensity",
+      "package": 0.18,
+      "glb": [
+       0.18
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "farklı"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "rack/andromeda"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#141038",
+      "glb": [
+       "#141038"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "metalness",
+      "package": 0.8,
+      "glb": [
+       0.85
+      ],
+      "glb_distinct": 1,
+      "status": "farklı",
+      "differs_in": [
+       "galaxy101_istaka_andromeda_saturn.glb"
+      ]
+     },
+     {
+      "prop": "roughness",
+      "package": 0.18,
+      "glb": [
+       0.16
+      ],
+      "glb_distinct": 1,
+      "status": "farklı",
+      "differs_in": [
+       "galaxy101_istaka_andromeda_saturn.glb"
+      ]
+     },
+     {
+      "prop": "clearcoat",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "iridescence",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "iridescenceIOR",
+      "package": 1.35,
+      "glb": [
+       1.35
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "iridescenceThicknessRange",
+      "package": [
+       300,
+       520
+      ],
+      "glb": [
+       [
+        100,
+        400
+       ]
+      ],
+      "glb_distinct": 1,
+      "status": "farklı",
+      "differs_in": [
+       "galaxy101_istaka_andromeda_saturn.glb"
+      ]
+     },
+     {
+      "prop": "emissive",
+      "package": "#6B4FE0",
+      "glb": [
+       "#2D1F66"
+      ],
+      "glb_distinct": 1,
+      "status": "güç renge katlanmış",
+      "differs_in": []
+     },
+     {
+      "prop": "emissiveIntensity",
+      "package": 0.18,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "güç renge katlanmış",
+      "differs_in": []
+     }
+    ],
+    "status": "farklı"
+   }
+  },
+  {
+   "id": "tableSkins.randro.led",
+   "source": "materials.json tableSkins.randro.led",
+   "type": "MeshStandardMaterial",
+   "name": "istaka_andromeda_led",
+   "package": {
+    "name": "istaka_andromeda_led",
+    "color": "#000",
+    "emissive": "#B79CFF",
+    "emissiveIntensity": 3
+   },
+   "v4": {
+    "files": 10,
+    "kinds": [
+     "rack/andromeda",
+     "scene"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#000",
+      "glb": [
+       "#000000"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissive",
+      "package": "#B79CFF",
+      "glb": [
+       "#B79CFF"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissiveIntensity",
+      "package": 3,
+      "glb": [
+       3
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "rack/andromeda"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#000",
+      "glb": [
+       "#000000"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissive",
+      "package": "#B79CFF",
+      "glb": [
+       "#B79CFF"
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "emissiveIntensity",
+      "package": 3,
+      "glb": [
+       3
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     }
+    ],
+    "status": "var"
+   }
+  },
+  {
+   "id": "tableSkins.rwood.all",
+   "source": "materials.json tableSkins.rwood.all",
+   "type": "MeshPhysicalMaterial",
+   "name": "istaka_ceviz",
+   "package": {
+    "name": "istaka_ceviz",
+    "roughness": 0.34,
+    "clearcoat": 1,
+    "clearcoatRoughness": 0.18
+   },
+   "v4": {
+    "files": 5,
+    "kinds": [
+     "rack/ceviz"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "roughness",
+      "package": 0.34,
+      "glb": [
+       0.42
+      ],
+      "glb_distinct": 1,
+      "status": "farklı",
+      "differs_in": [
+       "jupiter/galaxy101_istaka_ceviz_jupiter.glb",
+       "mars/galaxy101_istaka_ceviz_mars.glb",
+       "neptun/galaxy101_istaka_ceviz_neptun.glb",
+       "saturn/galaxy101_istaka_ceviz_saturn.glb",
+       "venus/galaxy101_istaka_ceviz_venus.glb"
+      ]
+     },
+     {
+      "prop": "clearcoat",
+      "package": 1,
+      "glb": [
+       0.9
+      ],
+      "glb_distinct": 1,
+      "status": "farklı",
+      "differs_in": [
+       "jupiter/galaxy101_istaka_ceviz_jupiter.glb",
+       "mars/galaxy101_istaka_ceviz_mars.glb",
+       "neptun/galaxy101_istaka_ceviz_neptun.glb",
+       "saturn/galaxy101_istaka_ceviz_saturn.glb",
+       "venus/galaxy101_istaka_ceviz_venus.glb"
+      ]
+     },
+     {
+      "prop": "clearcoatRoughness",
+      "package": 0.18,
+      "glb": [
+       0.22
+      ],
+      "glb_distinct": 1,
+      "status": "farklı",
+      "differs_in": [
+       "jupiter/galaxy101_istaka_ceviz_jupiter.glb",
+       "mars/galaxy101_istaka_ceviz_mars.glb",
+       "neptun/galaxy101_istaka_ceviz_neptun.glb",
+       "saturn/galaxy101_istaka_ceviz_saturn.glb",
+       "venus/galaxy101_istaka_ceviz_venus.glb"
+      ]
+     }
+    ],
+    "status": "farklı"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "rack/ceviz"
+    ],
+    "checks": [
+     {
+      "prop": "roughness",
+      "package": 0.34,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "doku (cila: MR haritası × 1)",
+      "differs_in": []
+     },
+     {
+      "prop": "clearcoat",
+      "package": 1,
+      "glb": [
+       0.9
+      ],
+      "glb_distinct": 1,
+      "status": "farklı",
+      "differs_in": [
+       "galaxy101_istaka_ceviz_saturn.glb"
+      ]
+     },
+     {
+      "prop": "clearcoatRoughness",
+      "package": 0.18,
+      "glb": [
+       0.22
+      ],
+      "glb_distinct": 1,
+      "status": "farklı",
+      "differs_in": [
+       "galaxy101_istaka_ceviz_saturn.glb"
+      ]
+     }
+    ],
+    "status": "farklı"
+   }
+  },
+  {
+   "id": "tableSkins.rwood.back",
+   "source": "materials.json tableSkins.rwood.back",
+   "type": "MeshPhysicalMaterial",
+   "name": "istaka_ceviz_arka",
+   "package": {
+    "name": "istaka_ceviz_arka",
+    "roughness": 0.4,
+    "clearcoat": 0.8
+   },
+   "v4": {
+    "files": 0,
+    "status": "eksik"
+   },
+   "project": {
+    "files": 0,
+    "status": "eksik"
+   }
+  },
+  {
+   "id": "tableSkins.rwood.led",
+   "source": "materials.json tableSkins.rwood.led",
+   "type": "MeshStandardMaterial",
+   "name": "istaka_pirinc",
+   "package": {
+    "name": "istaka_pirinc",
+    "color": "#E0B04E",
+    "metalness": 1,
+    "roughness": 0.22
+   },
+   "v4": {
+    "files": 5,
+    "kinds": [
+     "rack/ceviz"
+    ],
+    "themes": [
+     "jupiter",
+     "mars",
+     "neptun",
+     "saturn",
+     "venus"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#E0B04E",
+      "glb": [
+       "#D6A649"
+      ],
+      "glb_distinct": 1,
+      "status": "farklı",
+      "differs_in": [
+       "jupiter/galaxy101_istaka_ceviz_jupiter.glb",
+       "mars/galaxy101_istaka_ceviz_mars.glb",
+       "neptun/galaxy101_istaka_ceviz_neptun.glb",
+       "saturn/galaxy101_istaka_ceviz_saturn.glb",
+       "venus/galaxy101_istaka_ceviz_venus.glb"
+      ]
+     },
+     {
+      "prop": "metalness",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.22,
+      "glb": [
+       0.24
+      ],
+      "glb_distinct": 1,
+      "status": "farklı",
+      "differs_in": [
+       "jupiter/galaxy101_istaka_ceviz_jupiter.glb",
+       "mars/galaxy101_istaka_ceviz_mars.glb",
+       "neptun/galaxy101_istaka_ceviz_neptun.glb",
+       "saturn/galaxy101_istaka_ceviz_saturn.glb",
+       "venus/galaxy101_istaka_ceviz_venus.glb"
+      ]
+     }
+    ],
+    "status": "farklı"
+   },
+   "project": {
+    "files": 1,
+    "kinds": [
+     "rack/ceviz"
+    ],
+    "checks": [
+     {
+      "prop": "color",
+      "package": "#E0B04E",
+      "glb": [
+       "#D6A649"
+      ],
+      "glb_distinct": 1,
+      "status": "farklı",
+      "differs_in": [
+       "galaxy101_istaka_ceviz_saturn.glb"
+      ]
+     },
+     {
+      "prop": "metalness",
+      "package": 1,
+      "glb": [
+       1
+      ],
+      "glb_distinct": 1,
+      "status": "var",
+      "differs_in": []
+     },
+     {
+      "prop": "roughness",
+      "package": 0.22,
+      "glb": [
+       0.24
+      ],
+      "glb_distinct": 1,
+      "status": "farklı",
+      "differs_in": [
+       "galaxy101_istaka_ceviz_saturn.glb"
+      ]
+     }
+    ],
+    "status": "farklı"
+   }
+  },
+  {
+   "id": "tableSkins.rneon.base",
+   "source": "materials.json tableSkins.rneon.base",
+   "type": "MeshPhysicalMaterial",
+   "name": "istaka_neon_taban",
+   "package": {
+    "name": "istaka_neon_taban",
+    "color": "#05060c",
+    "roughness": 0.12,
+    "clearcoat": 1
+   },
+   "v4": {
+    "files": 0,
+    "status": "eksik"
+   },
+   "project": {
+    "files": 0,
+    "status": "eksik"
+   }
+  },
+  {
+   "id": "tableSkins.rneon.ledge",
+   "source": "materials.json tableSkins.rneon.ledge",
+   "type": "MeshStandardMaterial",
+   "name": "istaka_neon_kenar",
+   "package": {
+    "name": "istaka_neon_kenar",
+    "color": "#05050a",
+    "roughness": 0.2,
+    "emissiveIntensity": 0.42
+   },
+   "v4": {
+    "files": 0,
+    "status": "eksik"
+   },
+   "project": {
+    "files": 0,
+    "status": "eksik"
+   }
+  },
+  {
+   "id": "tableSkins.rneon.back",
+   "source": "materials.json tableSkins.rneon.back",
+   "type": "MeshPhysicalMaterial",
+   "name": "istaka_neon_arka",
+   "package": {
+    "name": "istaka_neon_arka",
+    "color": "#07080f",
+    "roughness": 0.1,
+    "clearcoat": 1,
+    "metalness": 0.3
+   },
+   "v4": {
+    "files": 0,
+    "status": "eksik"
+   },
+   "project": {
+    "files": 0,
+    "status": "eksik"
+   }
+  },
+  {
+   "id": "tableSkins.rneon.cap",
+   "source": "materials.json tableSkins.rneon.cap",
+   "type": "MeshPhysicalMaterial",
+   "name": "istaka_neon_uc",
+   "package": {
+    "name": "istaka_neon_uc",
+    "color": "#0b0c16",
+    "roughness": 0.1,
+    "clearcoat": 1,
+    "emissiveIntensity": 0.55
+   },
+   "v4": {
+    "files": 0,
+    "status": "eksik"
+   },
+   "project": {
+    "files": 0,
+    "status": "eksik"
+   }
+  },
+  {
+   "id": "tableSkins.rneon.led",
+   "source": "materials.json tableSkins.rneon.led",
+   "type": "MeshStandardMaterial",
+   "name": "istaka_neon_led",
+   "package": {
+    "name": "istaka_neon_led",
+    "color": "#000",
+    "emissive": "#ffffff",
+    "emissiveIntensity": 3
+   },
+   "v4": {
+    "files": 0,
+    "status": "eksik"
+   },
+   "project": {
+    "files": 0,
+    "status": "eksik"
+   }
+  }
+ ],
+ "not_in_package": [
+  {
+   "name": "(adsız)",
+   "files": 10,
+   "kinds": [
+    "markers",
+    "scene"
+   ],
+   "in_project": false
+  },
+  {
+   "name": "ahsap",
+   "files": 1,
+   "kinds": [
+    "treat/simit"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "alev",
+   "files": 2,
+   "kinds": [
+    "gift/cake",
+    "gift/rocket"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "alev_ic",
+   "files": 2,
+   "kinds": [
+    "gift/cake",
+    "gift/rocket"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "altin",
+   "files": 5,
+   "kinds": [
+    "gift/flower",
+    "gift/rocket",
+    "gift/trophy",
+    "treat/coffee",
+    "treat/tea"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "bakir",
+   "files": 1,
+   "kinds": [
+    "treat/baklava"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "beyaz",
+   "files": 2,
+   "kinds": [
+    "gift/rocket",
+    "gift/trophy"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "buz",
+   "files": 1,
+   "kinds": [
+    "treat/cola"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "buzlu_cam",
+   "files": 1,
+   "kinds": [
+    "treat/cola"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "cam",
+   "files": 2,
+   "kinds": [
+    "treat/coffee",
+    "treat/tea"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "cam_dip",
+   "files": 3,
+   "kinds": [
+    "treat/coffee",
+    "treat/cola",
+    "treat/tea"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "cay",
+   "files": 1,
+   "kinds": [
+    "treat/tea"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "cay_yuzey",
+   "files": 1,
+   "kinds": [
+    "treat/tea"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "cekirdek",
+   "files": 1,
+   "kinds": [
+    "treat/seeds"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "cekirdek_cizgili",
+   "files": 1,
+   "kinds": [
+    "treat/seeds"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "celik",
+   "files": 1,
+   "kinds": [
+    "gift/rocket"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "cilek",
+   "files": 1,
+   "kinds": [
+    "gift/cake"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "cilek_yaprak",
+   "files": 1,
+   "kinds": [
+    "gift/cake"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "fistik",
+   "files": 1,
+   "kinds": [
+    "treat/baklava"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "hamur_kat",
+   "files": 1,
+   "kinds": [
+    "treat/baklava"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_akcaagac_kakma",
+   "files": 5,
+   "kinds": [
+    "rack/ceviz"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_aluminyum",
+   "files": 5,
+   "kinds": [
+    "rack/aluminyum"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_andromeda_govde",
+   "files": 10,
+   "kinds": [
+    "rack/andromeda",
+    "scene"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_andromeda_panel",
+   "files": 10,
+   "kinds": [
+    "rack/andromeda",
+    "scene"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_ceviz_uc",
+   "files": 5,
+   "kinds": [
+    "rack/ceviz"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_eloksal",
+   "files": 5,
+   "kinds": [
+    "rack/aluminyum"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_fume_cam",
+   "files": 5,
+   "kinds": [
+    "rack/aluminyum"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_gulagaci",
+   "files": 5,
+   "kinds": [
+    "rack/sedef"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_gulagaci_uc",
+   "files": 5,
+   "kinds": [
+    "rack/sedef"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_karbon",
+   "files": 5,
+   "kinds": [
+    "rack/karbon"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_karbon_cerceve",
+   "files": 5,
+   "kinds": [
+    "rack/karbon"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_karbon_dikis",
+   "files": 5,
+   "kinds": [
+    "rack/karbon"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_led",
+   "files": 5,
+   "kinds": [
+    "rack/aluminyum"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_neon_cam",
+   "files": 5,
+   "kinds": [
+    "rack/neon"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_neon_govde",
+   "files": 5,
+   "kinds": [
+    "rack/neon"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_neon_tup1",
+   "files": 5,
+   "kinds": [
+    "rack/neon"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_neon_tup2",
+   "files": 5,
+   "kinds": [
+    "rack/neon"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_sedef",
+   "files": 5,
+   "kinds": [
+    "rack/sedef"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_sedef_panel",
+   "files": 5,
+   "kinds": [
+    "rack/sedef"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "istaka_yaldiz",
+   "files": 5,
+   "kinds": [
+    "rack/sedef"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "iznik_desen",
+   "files": 1,
+   "kinds": [
+    "treat/coffee"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "kabarcik",
+   "files": 1,
+   "kinds": [
+    "treat/cola"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "kabuk",
+   "files": 1,
+   "kinds": [
+    "treat/seeds"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "kaide",
+   "files": 1,
+   "kinds": [
+    "gift/trophy"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "kese_kagidi",
+   "files": 1,
+   "kinds": [
+    "treat/seeds"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "kirmizi",
+   "files": 1,
+   "kinds": [
+    "gift/rocket"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "kola",
+   "files": 1,
+   "kinds": [
+    "treat/cola"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "kola_kopuk",
+   "files": 1,
+   "kinds": [
+    "treat/cola"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "kopuk",
+   "files": 1,
+   "kinds": [
+    "treat/coffee"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "krema",
+   "files": 1,
+   "kinds": [
+    "gift/cake"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "lacivert",
+   "files": 1,
+   "kinds": [
+    "gift/rocket"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "lale_0",
+   "files": 1,
+   "kinds": [
+    "gift/flower"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "lale_1",
+   "files": 1,
+   "kinds": [
+    "gift/flower"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "lale_2",
+   "files": 1,
+   "kinds": [
+    "gift/flower"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "lale_3",
+   "files": 1,
+   "kinds": [
+    "gift/flower"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "lale_4",
+   "files": 1,
+   "kinds": [
+    "gift/flower"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "limon_dilim",
+   "files": 1,
+   "kinds": [
+    "treat/cola"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "limon_kabuk",
+   "files": 1,
+   "kinds": [
+    "treat/cola"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "lokum",
+   "files": 1,
+   "kinds": [
+    "treat/coffee"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "mantar",
+   "files": 1,
+   "kinds": [
+    "treat/cola"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "mum",
+   "files": 1,
+   "kinds": [
+    "gift/cake"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "nane",
+   "files": 1,
+   "kinds": [
+    "treat/cola"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "pasta_pembe",
+   "files": 1,
+   "kinds": [
+    "gift/cake"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "pencere",
+   "files": 1,
+   "kinds": [
+    "gift/rocket"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "pipet",
+   "files": 1,
+   "kinds": [
+    "treat/cola"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "plaka",
+   "files": 1,
+   "kinds": [
+    "gift/trophy"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "porselen",
+   "files": 3,
+   "kinds": [
+    "gift/cake",
+    "treat/coffee",
+    "treat/tea"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "sap",
+   "files": 1,
+   "kinds": [
+    "gift/flower"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "seker",
+   "files": 1,
+   "kinds": [
+    "treat/tea"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "seramik",
+   "files": 1,
+   "kinds": [
+    "gift/flower"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "serbet",
+   "files": 1,
+   "kinds": [
+    "treat/baklava"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "simit",
+   "files": 1,
+   "kinds": [
+    "treat/simit"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "su",
+   "files": 1,
+   "kinds": [
+    "treat/coffee"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "susam",
+   "files": 1,
+   "kinds": [
+    "treat/simit"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "tas_galaxy",
+   "files": 5,
+   "kinds": [
+    "tile_set/galaksi"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "tas_gold",
+   "files": 5,
+   "kinds": [
+    "tile_set/altin"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "tas_kenar_galaxy",
+   "files": 5,
+   "kinds": [
+    "tile_set/galaksi"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "tas_kenar_gold",
+   "files": 5,
+   "kinds": [
+    "tile_set/altin"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "tas_kenar_marble",
+   "files": 15,
+   "kinds": [
+    "scene",
+    "tile",
+    "tile_set/mermer"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "tas_kenar_neon",
+   "files": 5,
+   "kinds": [
+    "tile_set/neon"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "tas_marble",
+   "files": 15,
+   "kinds": [
+    "scene",
+    "tile",
+    "tile_set/mermer"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "tas_neon",
+   "files": 5,
+   "kinds": [
+    "tile_set/neon"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "tas_yuz_classic_*",
+   "files": 5,
+   "kinds": [
+    "tile_set/klasik"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "tas_yuz_galaxy_*",
+   "files": 5,
+   "kinds": [
+    "tile_set/galaksi"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "tas_yuz_gold_*",
+   "files": 5,
+   "kinds": [
+    "tile_set/altin"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "tas_yuz_marble_*",
+   "files": 10,
+   "kinds": [
+    "tile",
+    "tile_set/mermer"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "tas_yuz_neon_*",
+   "files": 5,
+   "kinds": [
+    "tile_set/neon"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "yaprak",
+   "files": 1,
+   "kinds": [
+    "gift/flower"
+   ],
+   "in_project": true
+  },
+  {
+   "name": "zar_1",
+   "files": 1,
+   "kinds": [
+    "die"
+   ],
+   "in_project": false
+  },
+  {
+   "name": "zar_2",
+   "files": 1,
+   "kinds": [
+    "die"
+   ],
+   "in_project": false
+  },
+  {
+   "name": "zar_3",
+   "files": 1,
+   "kinds": [
+    "die"
+   ],
+   "in_project": false
+  },
+  {
+   "name": "zar_4",
+   "files": 1,
+   "kinds": [
+    "die"
+   ],
+   "in_project": false
+  },
+  {
+   "name": "zar_5",
+   "files": 1,
+   "kinds": [
+    "die"
+   ],
+   "in_project": false
+  },
+  {
+   "name": "zar_6",
+   "files": 1,
+   "kinds": [
+    "die"
+   ],
+   "in_project": false
+  }
+ ]
+}

@@ -4,13 +4,18 @@
 8 columns × 7 rows → 2048×2520 per skin. Cell order: R1…R13, B1…B13, Y1…Y13, K1…K13, J.
 Writes <out>/TileFaces_<skin>.png and <out>/tile_faces.json (cell size, grid, per-skin roughness/emission).
 
-Usage: uv run --with playwright --with pillow python bake_tile_faces.py <reference/table dir> <out dir>
+Usage: uv run --with playwright --with pillow python bake_tile_faces.py <prototype dir> <out dir> [export page]
+  <prototype dir>: v4 = Design/Galaxy101_ClaudeCode/prototip (page "Araç - 3D Varlık Dışa Aktarma.html");
+  the older reference/table dir (page "Galaxy101_3D_Varlik_Disa_Aktarma.html") still works. The page is found
+  automatically unless given.
 """
-import base64, functools, http.server, io, json, os, re, sys, threading, asyncio
+import base64, functools, http.server, io, json, os, re, sys, threading, asyncio, urllib.parse
 from PIL import Image
 from playwright.async_api import async_playwright
 
 ROOT, OUT = os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[2])
+PAGES = ("Araç - 3D Varlık Dışa Aktarma.html", "Galaxy101_3D_Varlik_Disa_Aktarma.html")
+PAGE = sys.argv[3] if len(sys.argv) > 3 else next(p for p in PAGES if os.path.exists(os.path.join(ROOT, p)))
 SKINS = ["classic", "galaxy", "gold", "neon", "marble"]
 COLS, ROWS, CW, CH = 8, 7, 256, 360
 CVS = ("function cvs(w, h) { const k = 2; const c = document.createElement('canvas'); c.width = w * k; c.height = h * k; "
@@ -41,7 +46,7 @@ async def main():
             body, n = re.subn(r"function cvs\(w, h\) \{[^\n]*\}", CVS, body, count=1); assert n == 1
             await route.fulfill(body=body, content_type="text/javascript")
         await page.route("**/tiles3d.js", patch)
-        await page.goto(f"http://127.0.0.1:{httpd.server_address[1]}/Galaxy101_3D_Varlik_Disa_Aktarma.html")
+        await page.goto(f"http://127.0.0.1:{httpd.server_address[1]}/{urllib.parse.quote(PAGE)}")
         await page.wait_for_function("document.querySelector('#list .it') !== null", timeout=60000)
         result = await page.evaluate(SCRIPT, SKINS)
         await browser.close()

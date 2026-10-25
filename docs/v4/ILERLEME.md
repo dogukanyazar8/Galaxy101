@@ -45,6 +45,13 @@ Görev: `Design/PROMPT_v4_OTONOM_GELISTIRME.md`. Bağlam sıfırlanırsa buradan
 - 22:50 run4 (Unity, 69 durum): lobi demo arka ucu artık doğru (S13 bekleme odası referansa yakın). Ölçümler `durumlar.json`'a işlendi; menü hattına iş listesi olarak iletildi.
 - 22:52 `v4/table` (ana kopya + v4/server + v4/data + v4/assets3d) açıldı; masa hattı başladı (istemci modeli → yerel oturum → TableGame v4 → ağ → yönlendirici → HUD).
 
+- 23:05 Faz 1 birleşmeleri tamam: A (`9c42c73`) → B (`4b7e976`, son `d949edc`) → D (`321d118`) → C (`e372d47`). Ana kopyada:
+  - `node tools/v4/run_package_tests.js`: 106/106 vektör, 26/26 akış.
+  - `dotnet test tools/v4/nunit/CoreV4Tests.csproj`: 791/791.
+  - Sunucu xUnit (Docker): 130/130 (99 mevcut + 27 v4 akış + 4 çalışma zamanı).
+  - Unity içe aktarma (`MenuAssetBuilder.PrepareAssets`, batch): yerelleştirme tabloları, Nunito-700, font atlasları (`3daf284`).
+  - Unity EditMode: 946 test, 939 geçti, 0 kırmızı, 7 atlandı (GPU testleri; `-Graphics` koşusu ayrıca).
+
 ## Sıradaki
 
 - Referans yakalamanın bitmesi → `capture_report.json` özetinin buraya ve DURUMLAR'a girmesi.

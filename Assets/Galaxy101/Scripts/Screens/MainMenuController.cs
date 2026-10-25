@@ -50,7 +50,7 @@ namespace Galaxy101
             {
                 // Back from a table with the session still open: no splash or sign-in again.
                 var signed=Galaxy101.Online.GalaxyOnline.Instance;
-                if(signed!=null&&signed.SignedIn){ApplyOnline(signed);HookOnline(signed);if(ReturnToLobby){ReturnToLobby=false;if(FromRanked)FromRanked=false;else OpenLobby();}}
+                if(signed!=null&&signed.SignedIn){ApplyOnline(signed);HookOnline(signed);if(ReturnToLobby){ReturnToLobby=false;if(FromRanked){FromRanked=false;OpenRanked();}else OpenLobby();}}
                 else ShowAuth();
             }
         }
@@ -89,23 +89,36 @@ namespace Galaxy101
         }
         /// <summary>Set by an online table when it closes: the menu opens straight into the lobby.</summary>
         public static bool ReturnToLobby;
-        /// <summary>The table was a Dereceli match: back to the menu, not the Klasik lobby.</summary>
+        /// <summary>The table was a Dereceli match: back to the Dereceli screen (its result card), not the Klasik lobby.</summary>
         public static bool FromRanked;
-        private RankedQueue ranked;
-        /// <summary>Dereceli (HEMEN OYNA): the server's queue by league; the table opens when four are matched.</summary>
-        private void StartRanked()
+        /// <summary>The Dereceli screen (spec/27, S16); its backend is the signed-in session unless the state router or a test supplies one.</summary>
+        public RankedScreen Ranked {get;private set;}
+        public static Func<IRankedBackend> RankedBackend;
+        /// <summary>Dereceli (HEMEN OYNA): the Dereceli screen; its MAÇ ARA starts the server's queue.</summary>
+        private void StartRanked()=>OpenRanked();
+        public void OpenRanked()
         {
-            var online=Galaxy101.Online.GalaxyOnline.Instance;
-            if(online==null||!online.SignedIn){View.Toast(View.L("Dereceli için giriş yapmalısın","Sign in to play ranked"));return;}
-            if(ranked==null){ranked=new RankedQueue(View,online);ranked.Matched+=OnRankedMatched;}
-            ranked.Start();
+            Initialize();if(Ranked!=null&&Ranked.Visible)return;
+            if(Ranked==null)
+            {
+                IRankedBackend backend=RankedBackend?.Invoke();
+                if(backend==null)
+                {
+                    var online=Galaxy101.Online.GalaxyOnline.Instance;
+                    if(online==null||!online.SignedIn){View.Toast(View.L("Dereceli için giriş yapmalısın","Sign in to play ranked"));return;}
+                    backend=new RankedOnlineBackend(online);
+                }
+                Ranked=new RankedScreen(View,backend);Ranked.Matched+=OnRankedMatched;
+            }
+            Ranked.Show();
         }
-        private void OnRankedMatched(Galaxy101.Contracts.MatchStartMessage start)
+        /// <summary>Both accepted: the table opens (the server's match, or a local table for the demo season), "Dereceli · Solo".</summary>
+        private void OnRankedMatched(RankedStart start)
         {
+            if(this==null||start==null||!OpenMatchTable)return;
             var online=Galaxy101.Online.GalaxyOnline.Instance;
-            if(online==null||this==null)return;
-            Galaxy101.Table.TableGame.PendingOnline=new Galaxy101.Table.NetworkTableSession(online,start.MatchId);
-            Galaxy101.Table.TableGame.PendingRoom=View.L("Dereceli · Sezon ","Ranked · Season ")+(online.Profile?.Progress?.Season??1);
+            if(start.Match is Galaxy101.Contracts.MatchStartMessage match&&online!=null)Galaxy101.Table.TableGame.PendingOnline=new Galaxy101.Table.NetworkTableSession(online,match.MatchId);
+            Galaxy101.Table.TableGame.PendingRoom=View.L("Dereceli · ","Ranked · ")+(start.Mode=="duo"?"Duo":start.Mode=="squad"?"Squad":"Solo");
             FromRanked=true;
             _=StartLocalAsync(GalaxyTableScene);
         }

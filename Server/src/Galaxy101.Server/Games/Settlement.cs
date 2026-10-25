@@ -9,23 +9,29 @@ public sealed record SeatOutcome(int Seat, int Place, long Payout, long ChipDelt
 
 /// <summary>
 /// End-of-match arithmetic, pure and deterministic. Lower 101 totals rank higher. In pairs (seats 0+2 vs 1+3) a seat's
-/// key is its team's total. A seat that left ranks below everyone who stayed and receives nothing.
-/// Tied seats share the payout, LP and weekly points of the positions they occupy.
+/// key is its team's total. A seat that left receives nothing and ranks last; in solo it also ranks below everyone who
+/// stayed, while in pairs a bot plays it to the end and the team still ranks by its total — if the team wins, the partner
+/// who stayed takes the whole team prize (25 Ekim 2026). Tied seats share the payout, LP and weekly points of the positions
+/// they occupy.
 /// </summary>
 public static class Settlement
 {
-    public static SeatOutcome[] Settle(string mode, long stake, IReadOnlyList<int> totals, int leftMask, GameOptions options)
+    /// <param name="seasonLp">Ranked: each seat's season LP (its league sets the LP table); null for other modes.</param>
+    public static SeatOutcome[] Settle(string mode, long stake, IReadOnlyList<int> totals, int leftMask, GameOptions options, int botMask = 0,
+        IReadOnlyList<int>? seasonLp = null)
     {
         var pairs = mode == GameModes.Pairs;
         bool Left(int s) => (leftMask & (1 << s)) != 0;
-        // Pairs: a team with a leaver forfeits as a team.
-        bool Forfeit(int s) => pairs ? Left(s) || Left((s + 2) % 4) : Left(s);
+        bool Bot(int s) => (botMask & (1 << s)) != 0;
+        // Solo: a leaver forfeits. Pairs: the leaver's seat plays on, so the team keeps its place.
+        bool Forfeit(int s) => !pairs && Left(s);
         (int, long) Key(int s) => (Forfeit(s) ? 1 : 0, pairs ? (long)totals[s] + totals[(s + 2) % 4] : totals[s]);
 
         var order = Enumerable.Range(0, 4).OrderBy(Key).ThenBy(s => s).ToArray();
         var groups = order.GroupBy(Key).Select(g => g.ToArray()).ToList();
         var payoutTable = pairs ? [0.5, 0.5, 0, 0] : options.SoloPayout;
-        var pot = stake * 4;
+        // Only the people at the table paid in: a bot's seat adds nothing to the pot.
+        var pot = stake * Enumerable.Range(0, 4).Count(s => !Bot(s));
         var distributable = pot - pot * options.RakePercent / 100;
 
         var place = new int[4];
@@ -37,24 +43,28 @@ public static class Settlement
         {
             var seats = groups[g];
             var span = Enumerable.Range(position, seats.Length).ToArray();
+            // A bot's or a leaver's share goes to the people placed with it (a pairs partner, a tie), or to nobody when no
+            // person placed there.
+            var people = seats.Count(s => !Left(s) && !Bot(s));
             foreach (var s in seats)
             {
                 place[s] = 1 + (pairs ? g : position);
-                if (Left(s)) { lp[s] = options.RankedLp[3]; continue; }
-                payout[s] = (long)Math.Floor(distributable * span.Average(p => payoutTable[p]));
-                lp[s] = (int)Math.Round(span.Average(p => (double)options.RankedLp[p]), MidpointRounding.ToZero);
+                var table = Profile.Ranked.Table(seasonLp?[s] ?? 0);
+                if (Left(s)) { if (pairs) place[s] = 2; lp[s] = table[3]; continue; }
+                if (!Bot(s)) payout[s] = (long)Math.Floor(distributable * span.Average(p => payoutTable[p]) * seats.Length / people);
+                lp[s] = (int)Math.Round(span.Average(p => (double)table[p]), MidpointRounding.ToZero);
                 weekly[s] = (int)Math.Round(span.Average(p => (double)options.WeeklyPoints[p]), MidpointRounding.ToZero);
             }
             position += seats.Length;
         }
         // Rounding remainders go to the best-placed seat that stayed, so no chips vanish when nobody forfeited.
         var paid = payout.Sum();
-        var winners = groups[0].Where(s => !Left(s)).ToArray();
+        var winners = groups[0].Where(s => !Left(s) && !Bot(s)).ToArray();
         if (stake > 0 && leftMask == 0 && winners.Length > 0) payout[winners[0]] += distributable - paid;
 
         var ranked = mode == GameModes.Ranked;
         var rated = mode != GameModes.Private;
-        return [.. Enumerable.Range(0, 4).Select(s => new SeatOutcome(s, place[s], payout[s], payout[s] - stake,
+        return [.. Enumerable.Range(0, 4).Select(s => new SeatOutcome(s, place[s], payout[s], payout[s] - (Bot(s) ? 0 : stake),
             ranked ? lp[s] : null, rated ? weekly[s] : 0))];
     }
 

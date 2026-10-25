@@ -143,7 +143,7 @@ namespace Galaxy101.Table
             {
                 if (selected >= 0 && game.CanDiscard && InZone(ray)) { int id = selected; selected = -1; game.Discard(id); return; }
                 // A click on a lay-off / okey marker plays the selected tile there.
-                if (selected >= 0 && game.Markers != null && table.TableHit(ray, out var felt)) { int t = game.Markers.Nearest(felt, 0.045f); if (t >= 0) { int id = selected; selected = -1; game.SetSelected(-1); game.UseTarget(id, game.Targets[t]); } }
+                if (selected >= 0 && game.Markers != null && table.TableHit(ray, out var felt)) { int t = game.Markers.Nearest(felt, 0.045f); if (t >= 0) { var marker = game.Targets[t]; int id = selected; selected = -1; game.SetSelected(-1); game.UseTarget(id, marker); } } // read before deselecting empties the targets
                 return;
             }
             drag = new Drag { Kind = hit.Value.Kind, View = hit.Value.View, Start = screen };
@@ -239,6 +239,10 @@ namespace Galaxy101.Table
         private void OnUp(Ray ray, bool hasRay)
         {
             var d = drag; drag = null;
+            // The dragged tile's targets exist only while it is the focus: take the marker under the drop before letting go.
+            TableGame.LayTarget marker = null;
+            if (d.Kind == Kind.Rack && d.Moved && !d.Group && hasRay && game.Markers != null && table.TableHit(ray, out var dropAt))
+            { int t = game.Markers.Nearest(dropAt, 0.06f); if (t >= 0) marker = game.Targets[t]; }
             game.SetDragTile(-1);
             if (d.Kind == Kind.Okey) return;
             if (d.Group)
@@ -269,7 +273,7 @@ namespace Galaxy101.Table
                 if (d.Id == game.PickedTile && table.TableHit(ray, out var back) && Vector3.Distance(back, table.DiscardCenter(3)) < 0.1f) { game.PutBack(); return; }
                 if (game.Markers != null) game.Markers.Hot = -1;
                 // A marker within 6 cm takes the tile (spec/23: snaps on approach).
-                if (!target.HasValue && game.Markers != null && table.TableHit(ray, out var drop)) { int t = game.Markers.Nearest(drop, 0.06f); if (t >= 0) { game.UseTarget(d.Id, game.Targets[t]); return; } }
+                if (!target.HasValue && marker != null) { game.UseTarget(d.Id, marker); return; }
                 var okey = target.HasValue ? null : OkeyNear(ray);
                 if (okey != null) { game.TakeOkey(d.Id, okey.Id); return; }
                 int meld = target.HasValue ? -1 : MeldNear(ray);

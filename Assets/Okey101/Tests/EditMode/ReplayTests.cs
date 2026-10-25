@@ -34,6 +34,17 @@ namespace Okey101.Application.Tests
             Assert.That(restored.Value.Stock, Is.EqualTo(initial.Stock));
             Assert.That(restored.Value.LastAcceptedSequences, Is.EqualTo(new long[] { 1, 0, 0, 0 }));
         }
+        [Test] public void ARandomStartKeepsItsDiceThroughAReplay()
+        {
+            // Seed 71 drew its dealer before the dice: only the stored deal tells the real ones.
+            var initial = RoundFactory.Create(71, Guid.NewGuid(), null);
+            var codec = new ReplayCodec(root);
+            codec.Write(new ReplayRecord(initial, Array.Empty<GameCommand>(), ReplayCodec.Hash(initial)), "dealt.json");
+            var restored = ReplayCodec.Restore(codec.Read("dealt.json").Value, CancellationToken.None).Value;
+            var dealt = DealCeremony.Describe(initial); var replayed = DealCeremony.Describe(restored);
+            Assert.That((replayed.Dealer, replayed.DieA, replayed.DieB, replayed.IndicatorPosition), Is.EqualTo((dealt.Dealer, dealt.DieA, dealt.DieB, dealt.IndicatorPosition)));
+            Assert.That(ReplayCodec.Hash(restored), Is.EqualTo(ReplayCodec.Hash(initial)));
+        }
         [Test] public void AnimationSettingsDoNotAffectReplay()
         {
             var codec = new ReplayCodec(root); var state = PracticeDeals.Create("Swap");

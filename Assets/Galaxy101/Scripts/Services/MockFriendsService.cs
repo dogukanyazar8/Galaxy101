@@ -62,6 +62,7 @@ namespace Galaxy101
             model.RequestsHandled.Add(id);
             model.NotifyChanged(); return true;
         }
+        public System.Threading.Tasks.Task<JObject> SearchAsync(string query) => System.Threading.Tasks.Task.FromResult(Search(query));
         public JObject Search(string query)
         {
             if (string.IsNullOrWhiteSpace(query)) return null;

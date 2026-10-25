@@ -8,19 +8,29 @@ from urllib.request import Request, urlopen
 from fontTools.ttLib import TTFont
 from fontTools.varLib.instancer import instantiateVariableFont
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
-import json,re,shutil
+import hashlib,json,re,shutil
 
 ROOT=Path(__file__).resolve().parents[1]
 HANDOFF=ROOT/'Design/galaxy101_unity_handoff'
 RES=ROOT/'Assets/Galaxy101/Resources/Galaxy101'
 FONTS=RES/'Fonts';FONTS.mkdir(parents=True,exist_ok=True)
 CACHE=ROOT/'artifacts/design-inspection/fonts';CACHE.mkdir(parents=True,exist_ok=True)
+# The exact font sources the shipped static weights were cut from: google/fonts moves on, so a download is accepted only
+# when its SHA-256 matches (a newer upstream font fails loudly instead of silently changing the build).
+PINNED={'Montserrat-Variable.ttf':'0f7b311b2f3279e4eef9b2f968bcdbab6e28f4daeb1f049f4f278a902bcd82f7',
+        'Montserrat-OFL.txt':'8b7141c03fa4f8d44e6345d5d4931709290f0f67875e452e95ac1fd3a027802e',
+        'Baloo2-Variable.ttf':'d47a6852548059b1db49a1319d06d499d546c3fa2237cf9eee9c43c8abb025c2',
+        'Baloo2-OFL.txt':'ad09b05dc8bc678c9daf7c4c5f7ef1f55e5726127f4330b2e98e40b9dffcb860'}
+def fetch(path,url):
+    data=path.read_bytes() if path.exists() else urlopen(Request(url,headers={'User-Agent':'Galaxy101-Asset-Import'})).read()
+    digest=hashlib.sha256(data).hexdigest()
+    if digest!=PINNED[path.name]:raise ValueError(f'{path.name}: SHA-256 {digest} is not the pinned source {PINNED[path.name]} ({url})')
+    if not path.exists():path.write_bytes(data)
 for family,name,weights in [('montserrat','Montserrat',[600,700,800,900]),('baloo2','Baloo2',[600,700,800])]:
     variable=CACHE/f'{name}-Variable.ttf'
-    if not variable.exists():
-        variable.write_bytes(urlopen(Request(f'https://raw.githubusercontent.com/google/fonts/main/ofl/{family}/{name}%5Bwght%5D.ttf',headers={'User-Agent':'Galaxy101-Asset-Import'})).read())
+    fetch(variable,f'https://raw.githubusercontent.com/google/fonts/main/ofl/{family}/{name}%5Bwght%5D.ttf')
     licensepath=CACHE/f'{name}-OFL.txt'
-    if not licensepath.exists():licensepath.write_bytes(urlopen(f'https://raw.githubusercontent.com/google/fonts/main/ofl/{family}/OFL.txt').read())
+    fetch(licensepath,f'https://raw.githubusercontent.com/google/fonts/main/ofl/{family}/OFL.txt')
     shutil.copyfile(licensepath,FONTS/licensepath.name)
     for weight in weights:
         output=FONTS/f'{name}-{weight}.ttf'

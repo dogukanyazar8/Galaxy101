@@ -39,11 +39,14 @@ namespace Galaxy101.Table
             new Panel(2, 4, Hex("#ffffff") * 1.0f, new Vector3(5.5f, 1.5f, -1), ThreeSpace.Euler(0, -Mathf.PI / 2, 0)),
         };
 
+        // Parsed once: Radiance runs millions of times while the reflection cube is prefiltered.
+        private static readonly Color WallRadiance = Hex("#10131f");
+
         /// <summary>Radiance seen from the room's centre along a three-space direction (nearest panel, else the box).</summary>
         private static Color Radiance(Vector3 d, Panel[] panels)
         {
             float wall = 6f / Mathf.Max(Mathf.Abs(d.x), Mathf.Max(Mathf.Abs(d.y), Mathf.Abs(d.z)));
-            float best = wall; var color = Hex("#10131f");
+            float best = wall; var color = WallRadiance;
             foreach (var p in panels)
             {
                 float den = Vector3.Dot(p.Normal, d); if (Mathf.Abs(den) < 1e-5f) continue;
@@ -81,27 +84,60 @@ namespace Galaxy101.Table
         /// r·(1.7 − 0.7r) = m/6): GGX importance sampling (Hammersley, 96 samples, N = V = R), weighted by N·L. The room
         /// is analytic, so this needs no GPU work and is made once per tint.
         /// </summary>
+        /// <summary>The warm studio tint the table lights its room with (TableScene).</summary>
+        public static readonly Color TableTint = new Color32(0xFF, 0xC9, 0x4A, 255);
+        private static System.Threading.Tasks.Task<Color[][]> pending; private static Color pendingTint;
+
+        /// <summary>
+        /// Starts prefiltering the reflection cube on worker threads (the menu calls it at start-up): the first table then
+        /// only uploads the result instead of waiting for ~3 million samples.
+        /// </summary>
+        public static void Prewarm() => Prewarm(TableTint);
+
+        public static void Prewarm(Color tint)
+        {
+            if (cached != null && cachedTint == tint || pending != null && pendingTint == tint) return;
+            var panels = Panels(tint); // Unity colour APIs: on this thread
+            pendingTint = tint; pending = System.Threading.Tasks.Task.Run(() => Prefilter(panels));
+        }
+
         public static Cubemap Prefiltered(Color tint)
         {
             if (cached != null && cachedTint == tint) return cached;
-            var panels = Panels(tint);
+            // A prewarm in flight (or done) for this tint is awaited; otherwise the work runs here.
+            var faces = pending != null && pendingTint == tint ? pending.Result : Prefilter(Panels(tint));
+            pending = null;
             var cube = new Cubemap(Size, TextureFormat.RGBAHalf, true) { name = "Galaxy101 three.js environment", hideFlags = HideFlags.DontSave };
+            for (int mip = 0; mip < cube.mipmapCount; mip++)
+                for (int face = 0; face < 6; face++) cube.SetPixels(faces[mip * 6 + face], (CubemapFace)face, mip);
+            cube.Apply(false, false);
+            cached = cube; cachedTint = tint;
+            return cube;
+        }
+
+        /// <summary>Every mip's six faces, mip-major; pure math on the immutable panels, so it runs on any thread.</summary>
+        private static Color[][] Prefilter(Panel[] panels)
+        {
+            int mips = 1; while ((Size >> mips) > 0) mips++; // a full chain: 128 → 1
+            var faces = new Color[mips * 6][];
             const int samples = 96;
             var hammersley = new Vector2[samples];
             for (int i = 0; i < samples; i++) { uint b = (uint)i; b = (b << 16) | (b >> 16); b = ((b & 0x55555555u) << 1) | ((b & 0xAAAAAAAAu) >> 1); b = ((b & 0x33333333u) << 2) | ((b & 0xCCCCCCCCu) >> 2); b = ((b & 0x0F0F0F0Fu) << 4) | ((b & 0xF0F0F0F0u) >> 4); b = ((b & 0x00FF00FFu) << 8) | ((b & 0xFF00FF00u) >> 8); hammersley[i] = new Vector2((i + .5f) / samples, b * 2.3283064365386963e-10f); }
-            for (int mip = 0; mip < cube.mipmapCount; mip++)
+            for (int mip = 0; mip < mips; mip++)
             {
                 int n = Mathf.Max(1, Size >> mip); float m = Mathf.Min(mip, 6) / 6f;
                 float pr = (1.7f - Mathf.Sqrt(Mathf.Max(0, 2.89f - 2.8f * m))) / 1.4f, a = Mathf.Max(pr * pr, 1e-4f);
-                var pixels = new Color[n * n];
                 for (int face = 0; face < 6; face++)
                 {
-                    for (int y = 0; y < n; y++)
+                    var pixels = new Color[n * n]; int f = face, level = mip;
+                    // Rows in parallel.
+                    System.Threading.Tasks.Parallel.For(0, n, y =>
+                    {
                         for (int x = 0; x < n; x++)
                         {
-                            var dir = FaceDirection(face, x, y, n);
+                            var dir = FaceDirection(f, x, y, n);
                             Color sum = Color.black;
-                            if (mip == 0) sum = Radiance(ToThree(dir), panels);
+                            if (level == 0) sum = Radiance(ToThree(dir), panels);
                             else
                             {
                                 // Tangent frame around N.
@@ -119,12 +155,11 @@ namespace Galaxy101.Table
                             }
                             sum.a = 1; pixels[y * n + x] = sum;
                         }
-                    cube.SetPixels(pixels, (CubemapFace)face, mip);
+                    });
+                    faces[mip * 6 + face] = pixels;
                 }
             }
-            cube.Apply(false, false);
-            cached = cube; cachedTint = tint;
-            return cube;
+            return faces;
         }
 
         private static Vector3 ToThree(Vector3 unity) => new Vector3(-unity.x, unity.y, unity.z);

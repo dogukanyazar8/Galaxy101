@@ -11,7 +11,13 @@ namespace Okey101.Core.Rules
     public static class DiscardTurnFinder
     {
         /// <summary>Finds a legal witness using only the player's hand and public information.</summary>
-        public static RuleResult<TurnPlan> Find(PlayerView beforeDraw, CancellationToken token)
+        public static RuleResult<TurnPlan> Find(PlayerView beforeDraw, CancellationToken token) => Find(beforeDraw, token, false);
+
+        /// <summary>
+        /// <paramref name="distinctPool"/>: search <see cref="MeldCandidateGenerator.GenerateDistinct"/> groups — far less
+        /// work on a dense hand, at the cost of rare witnesses that need one specific copy mix.
+        /// </summary>
+        public static RuleResult<TurnPlan> Find(PlayerView beforeDraw, CancellationToken token, bool distinctPool)
         {
             try
             {
@@ -21,7 +27,7 @@ namespace Okey101.Core.Rules
                 if (beforeDraw.Phase != RoundPhase.AwaitingDraw) return RuleResult<TurnPlan>.Fail(ErrorCode.WrongPhase);
                 var drawn = BuildHypotheticalDraw(beforeDraw);
                 if (!drawn.Success) return RuleResult<TurnPlan>.Fail(drawn.Error);
-                var search = new Search(drawn.Value, token);
+                var search = new Search(drawn.Value, token, distinctPool);
                 if (search.Run(out var plan)) return RuleResult<TurnPlan>.Ok(plan);
                 token.ThrowIfCancellationRequested();
                 return RuleResult<TurnPlan>.Fail(ErrorCode.NoLegalUse);
@@ -58,7 +64,7 @@ namespace Okey101.Core.Rules
             foreach (var pile in view.Discards)
                 foreach (var id in pile)
                     if (!occupied.Add(id)) return RuleResult<RoundState>.Fail(ErrorCode.InvalidState);
-            if (view.Discards[previous].Count == 0)
+            if (view.Discards[previous].Count == 0 || view.PreviousDiscardReturned)
                 return RuleResult<RoundState>.Fail(ErrorCode.PreviousDiscardUnavailable);
 
             // Fill invisible locations canonically. Only their public counts are used; no
@@ -76,7 +82,7 @@ namespace Okey101.Core.Rules
                 var hand = p == actor ? view.OwnHand.Concat(new[] { picked }).ToArray()
                     : unknown.Skip(cursor).Take(view.Players[p].HandCount).ToArray();
                 if (p != actor) cursor += hand.Length;
-                players[p] = new PlayerState(hand, view.Players[p].Opening, view.Players[p].Penalties);
+                players[p] = new PlayerState(hand, view.Players[p].Opening, view.Players[p].Penalties, view.Players[p].OpeningValue);
                 discards[p] = p == previous ? view.Discards[p].Take(view.Discards[p].Count - 1).ToArray() : view.Discards[p];
             }
             var sequences = new long[4];
@@ -94,14 +100,19 @@ namespace Okey101.Core.Rules
             private readonly TileFace indicator;
             private readonly CancellationToken token;
             private readonly HashSet<string> visited = new HashSet<string>();
+            private readonly bool distinct;
 
-            public Search(RoundState root, CancellationToken token)
+            public Search(RoundState root, CancellationToken token, bool distinct)
             {
                 this.root = root;
                 this.token = token;
+                this.distinct = distinct;
                 picked = root.PendingDraw.Tile;
                 indicator = TileCatalog.Create()[root.Indicator.Value].PrintedFace.Value;
             }
+
+            private IReadOnlyList<MeldProposal> Generate(IReadOnlyList<TileId> hand, MeldKind kind)
+                => distinct ? MeldCandidateGenerator.GenerateDistinct(hand, indicator, kind, token) : MeldCandidateGenerator.Generate(hand, indicator, kind, token);
 
             public bool Run(out TurnPlan plan)
             {
@@ -154,11 +165,17 @@ namespace Okey101.Core.Rules
                 var groups = new List<MeldProposal>();
                 if (player.Opening == OpeningKind.Series)
                 {
-                    groups.AddRange(MeldCandidateGenerator.Generate(player.Hand, indicator, MeldKind.Run, token));
-                    groups.AddRange(MeldCandidateGenerator.Generate(player.Hand, indicator, MeldKind.Set, token));
+                    groups.AddRange(Generate(player.Hand, MeldKind.Run));
+                    groups.AddRange(Generate(player.Hand, MeldKind.Set));
                 }
                 if (player.Opening == OpeningKind.Pairs || state.Players.Any(p => p.Opening == OpeningKind.Pairs))
-                    groups.AddRange(MeldCandidateGenerator.Generate(player.Hand, indicator, MeldKind.Pair, token));
+                    groups.AddRange(Generate(player.Hand, MeldKind.Pair));
+                if (distinct)
+                {
+                    // Patterns take the picked tile first among its copies, so a group showing its face uses it.
+                    var binder = new MeldBinder(player.Hand, indicator, picked);
+                    groups = groups.Select(g => binder.Bind(g, 0)).ToList();
+                }
                 foreach (var group in groups)
                 {
                     token.ThrowIfCancellationRequested();
@@ -216,45 +233,34 @@ namespace Okey101.Core.Rules
                             yield return new TileFace((TileColor)color, group.Tiles[0].RepresentedFace.Number);
             }
 
-            private static string Key(RoundState state)
-            {
-                var player = state.Players[state.ActivePlayer];
-                var key = new StringBuilder().Append((int)player.Opening).Append('/').Append(state.SeriesTilesUsed).Append('|');
-                foreach (var id in player.Hand.OrderBy(id => id.Value)) key.Append(id.Value).Append(',');
-                foreach (var meld in state.Table.OrderBy(m => m.Id))
-                {
-                    key.Append('|').Append(meld.Id).Append('/').Append(meld.Owner).Append('/').Append((int)meld.Group.Kind).Append(':');
-                    foreach (var tile in meld.Group.Tiles.OrderBy(t => t.Id.Value))
-                        key.Append(tile.Id.Value).Append('/').Append((int)tile.RepresentedFace.Color)
-                            .Append('/').Append(tile.RepresentedFace.Number).Append(',');
-                }
-                return key.ToString();
-            }
+            private static string Key(RoundState state) => TableEvaluator.PositionKey(state);
 
             private bool FindOpening(OpeningKind opening, out TurnPlan plan)
             {
                 plan = null;
-                var hand = root.Players[root.ActivePlayer].Hand.OrderBy(id => id.Value).ToArray();
+                // Groups are patterns bound to the lowest free copies as they are picked (the picked tile first among its
+                // copies), so a packing needing any copy mix is found; positions follow the binder's order.
+                var binder = new MeldBinder(root.Players[root.ActivePlayer].Hand, indicator, picked);
+                var hand = binder.Tiles.ToArray();
                 var pairs = opening == OpeningKind.Pairs;
-                var threshold = pairs ? 5 : 101;
+                var threshold = TableEvaluator.OpeningBar(root, root.ActivePlayer, opening);
                 var values = hand.Select(id => TileCatalog.IsRealJoker(id, indicator) ? 13 :
                     TileCatalog.GetNonJokerFace(id, indicator).Number).ToArray();
-                if (pairs ? hand.Length < 11 : values.Sum() < 101) return false;
+                // Below the threshold only finishing from the hand (every tile but one laid) can still open.
+                var canFinish = TableEvaluator.FinishesFromHand(hand.Length, hand.Length - 1);
+                if (!canFinish && (pairs ? hand.Length < 2 * threshold + 1 : values.Sum() < threshold)) return false;
 
-                var indexes = new Dictionary<TileId, int>();
-                for (var i = 0; i < hand.Length; i++) indexes.Add(hand[i], i);
-                var pickedBit = 1u << indexes[picked];
-                var choices = new List<OpeningChoice>[hand.Length];
+                var pickedBit = 1u << Array.IndexOf(hand, picked);
+                // Every pattern under each face (or okey) it needs: the pivot's face finds the groups that can cover it.
+                var choices = new List<OpeningChoice>[53];
                 for (var i = 0; i < choices.Length; i++) choices[i] = new List<OpeningChoice>();
                 var kinds = pairs ? new[] { MeldKind.Pair } : new[] { MeldKind.Run, MeldKind.Set };
                 foreach (var kind in kinds)
-                    foreach (var group in MeldCandidateGenerator.Generate(hand, indicator, kind, token))
+                    foreach (var group in Generate(hand, kind))
                     {
                         token.ThrowIfCancellationRequested();
-                        uint mask = 0;
-                        foreach (var tile in group.Tiles) mask |= 1u << indexes[tile.Id];
-                        var choice = new OpeningChoice(group, mask, pairs ? 1 : group.Tiles.Sum(t => t.RepresentedFace.Number));
-                        foreach (var tile in group.Tiles) choices[indexes[tile.Id]].Add(choice);
+                        var choice = new OpeningChoice(group, MeldBinder.Needs(group, indicator), pairs ? 1 : group.Tiles.Sum(t => t.RepresentedFace.Number));
+                        foreach (var key in choice.Needs.Distinct()) choices[key].Add(choice);
                     }
 
                 var selected = new List<MeldProposal>();
@@ -272,7 +278,7 @@ namespace Okey101.Core.Rules
                     // Group count also determines whether the remaining meld ID space is sufficient.
                     var key = (available, used, value, containsPicked, selected.Count);
                     if (memoize && failed.Contains(key)) return false;
-                    if (containsPicked && value >= threshold)
+                    if (containsPicked && (value >= threshold || TableEvaluator.FinishesFromHand(hand.Length, used)))
                     {
                         var open = new OpenGroups(opening, selected);
                         var result = TableEvaluator.Evaluate(root, new TableAction[] { open });
@@ -289,14 +295,17 @@ namespace Okey101.Core.Rules
                         remaining++;
                         upper += values[i];
                     }
-                    if (pivot < 0 || (pairs ? value + remaining / 2 < threshold : value + upper < threshold)) return false;
-                    foreach (var choice in choices[pivot])
+                    // A finish from the hand leaves exactly one tile out; once two are skipped only the threshold can open.
+                    var finishOpen = canFinish && hand.Length - used - remaining <= 1;
+                    if (pivot < 0 || (!finishOpen && (pairs ? value + remaining / 2 < threshold : value + upper < threshold))) return false;
+                    // The pivot is the lowest free tile, so a pattern needing its face binds that very tile.
+                    foreach (var choice in choices[binder.KeyAt(pivot)])
                     {
                         token.ThrowIfCancellationRequested();
-                        if ((available & choice.Mask) != choice.Mask || used + choice.Group.Tiles.Count >= hand.Length) continue;
-                        selected.Add(choice.Group);
-                        if (Select(available & ~choice.Mask, used + choice.Group.Tiles.Count,
-                            Math.Min(threshold, value + choice.Value), containsPicked || (choice.Mask & pickedBit) != 0)) return true;
+                        if (used + choice.Group.Tiles.Count >= hand.Length || !binder.TryMask(choice.Needs, ~available, out var mask) || (mask & (1u << pivot)) == 0) continue;
+                        selected.Add(binder.Bind(choice.Group, choice.Needs, ~available));
+                        if (Select(available & ~mask, used + choice.Group.Tiles.Count,
+                            Math.Min(threshold, value + choice.Value), containsPicked || (mask & pickedBit) != 0)) return true;
                         selected.RemoveAt(selected.Count - 1);
                     }
                     if ((1u << pivot) != pickedBit && Select(available & ~(1u << pivot), used, value, containsPicked)) return true;
@@ -312,10 +321,10 @@ namespace Okey101.Core.Rules
             private readonly struct OpeningChoice
             {
                 public MeldProposal Group { get; }
-                public uint Mask { get; }
+                public int[] Needs { get; }
                 public int Value { get; }
-                public OpeningChoice(MeldProposal group, uint mask, int value)
-                { Group = group; Mask = mask; Value = value; }
+                public OpeningChoice(MeldProposal group, int[] needs, int value)
+                { Group = group; Needs = needs; Value = value; }
             }
         }
     }

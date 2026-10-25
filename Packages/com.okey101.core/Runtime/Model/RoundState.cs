@@ -11,11 +11,14 @@ namespace Okey101.Core.Model
         public IReadOnlyList<TileId> Hand { get; }
         public OpeningKind Opening { get; }
         public int Penalties { get; }
-        public PlayerState(IReadOnlyList<TileId> hand, OpeningKind opening, int penalties)
+        /// <summary>The opening's series total or pair count, fixed for the hand (katlamalı bar); 0 before opening.</summary>
+        public int OpeningValue { get; }
+        public PlayerState(IReadOnlyList<TileId> hand, OpeningKind opening, int penalties, int openingValue = 0)
         {
             Immutable.EnumValue(opening, nameof(opening));
             if (penalties < 0) throw new ArgumentOutOfRangeException(nameof(penalties));
-            Hand = Immutable.Copy(hand, nameof(hand)); Opening = opening; Penalties = penalties;
+            if (openingValue < 0 || (opening == OpeningKind.None && openingValue != 0)) throw new ArgumentOutOfRangeException(nameof(openingValue));
+            Hand = Immutable.Copy(hand, nameof(hand)); Opening = opening; Penalties = penalties; OpeningValue = openingValue;
         }
     }
 
@@ -56,15 +59,17 @@ namespace Okey101.Core.Model
         public bool PreviousDiscardReturned { get; }
         /// <summary>The room's switchable rules (penalties); <see cref="RuleOptions.Standard"/> unless the room changed them.</summary>
         public RuleOptions Options { get; }
+        /// <summary>The deal ceremony that produced this round (spec/21); null for hand-built states.</summary>
+        public DealInfo Deal { get; }
 
         public RoundState(Guid roundId, long version, uint seed, int startingPlayer, int activePlayer,
             int turnNumber, RoundPhase phase, TileId indicator, IReadOnlyList<TileId> stock,
             IReadOnlyList<PlayerState> players, IReadOnlyList<Meld> table,
             IReadOnlyList<IReadOnlyList<TileId>> discards, DrawReceipt pendingDraw,
             OpeningKind openingAtTurnStart, int seriesTilesUsed, bool isInitialTurn,
-            IReadOnlyList<long> lastAcceptedSequences, RoundResult result = null, bool previousDiscardReturned = false, RuleOptions options = null)
+            IReadOnlyList<long> lastAcceptedSequences, RoundResult result = null, bool previousDiscardReturned = false, RuleOptions options = null, DealInfo deal = null)
         {
-            Options = options ?? RuleOptions.Standard;
+            Options = options ?? RuleOptions.Standard; Deal = deal;
             if (roundId == Guid.Empty) throw new ArgumentException("A round identity is required.", nameof(roundId));
             if (version < 0) throw new ArgumentOutOfRangeException(nameof(version));
             if (turnNumber < 0) throw new ArgumentOutOfRangeException(nameof(turnNumber));

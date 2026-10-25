@@ -1,0 +1,69 @@
+{
+ "version": "0.4.0",
+ "source": "g101-cursor.js (canlı üretici)",
+ "size": 32,
+ "hotspots": {
+  "default": [
+   4,
+   3
+  ],
+  "pointer": [
+   4,
+   3
+  ],
+  "grab": [
+   16,
+   15
+  ],
+  "grabbing": [
+   16,
+   16
+  ],
+  "drop": [
+   16,
+   16
+  ],
+  "text": [
+   16,
+   16
+  ],
+  "no": [
+   4,
+   3
+  ],
+  "wait": [
+   16,
+   16
+  ],
+  "progress": [
+   4,
+   3
+  ],
+  "ew": [
+   16,
+   16
+  ],
+  "ns": [
+   16,
+   16
+  ]
+ },
+ "names": [
+  "default",
+  "pointer",
+  "grab",
+  "grabbing",
+  "drop",
+  "text",
+  "no",
+  "wait",
+  "progress",
+  "ew",
+  "ns"
+ ],
+ "rules": [
+  "Öğenin data-cursor özniteliği > input/textarea (text; pasifse no) > inline cursor stili > varsayılan",
+  "data-cursor-lock (ör. meşgulken wait) alt öğeleri ezer",
+  "Sürüklenen taş: grab → grabbing; bırakılabilir alan üstünde drop"
+ ]
+}

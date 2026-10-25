@@ -17,7 +17,7 @@ public static class Badges
         Badge("hundred_hands", s.Hands, 100),
         Badge("doubling_king", s.ModeWins[Doubling], 25),
         Badge("win_streak", s.BestStreak, 7),
-        Badge("diamond_league", s.Lp, 1000),
+        Badge("diamond_league", s.BestLp, Ranked.Codes.ToList().IndexOf("d3") * Ranked.DivisionLp), // Elmas III
         Badge("galaxy_traveller", BitOperations.PopCount((uint)planetsTried), ProfileRules.Planets.Length),
         Badge("legend", s.Wins, 1000),
     ];

@@ -18,6 +18,30 @@ public sealed class Account
     public string? DeviceId { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset LastSeenAt { get; set; }
+    /// <summary>Set by a moderator: no sign-in until then.</summary>
+    public DateTimeOffset? BannedUntil { get; set; }
+    public string? BanReason { get; set; }
+}
+
+/// <summary>One player hiding another: their chat and emotes, friend requests and invitations no longer reach the blocker.</summary>
+public sealed class PlayerBlock
+{
+    public Guid BlockerId { get; set; }
+    public Guid BlockedId { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+}
+
+/// <summary>A player reported for moderators (reason: "chat", "name", "cheating" or "other").</summary>
+public sealed class PlayerReport
+{
+    public long Id { get; set; }
+    public Guid? ReporterId { get; set; }
+    public Guid ReportedId { get; set; }
+    public required string Reason { get; set; }
+    public string Details { get; set; } = "";
+    public Guid? MatchId { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset? ResolvedAt { get; set; }
 }
 
 /// <summary>E-mail + password sign-in (spec/18). The e-mail is stored trimmed and lower-cased.</summary>
@@ -126,6 +150,21 @@ public sealed class PlayerStats
     public int BestStreak { get; set; }
     public int[] ModeHands { get; set; } = new int[4];
     public int[] ModeWins { get; set; } = new int[4];
+    /// <summary>The season <see cref="Lp"/> belongs to (0: before seasons were kept); older rows roll over on first use.</summary>
+    public int LpSeason { get; set; }
+    /// <summary>This season's highest LP (season reward, "Sezon en iyi").</summary>
+    public int BestLp { get; set; }
+    /// <summary>Protected ranked matches left after reaching a new league.</summary>
+    public int Shield { get; set; }
+}
+
+/// <summary>A finished season for a player: the best LP and league reached (the reward was paid when it rolled over).</summary>
+public sealed class SeasonResult
+{
+    public Guid AccountId { get; set; }
+    public int Season { get; set; }
+    public int BestLp { get; set; }
+    public required string League { get; set; }
 }
 
 /// <summary>Board keys: "w:2026-10-19" (week starting that Monday) or "s:1" (season).</summary>
@@ -180,6 +219,7 @@ public sealed class MatchMove
 
 public sealed class MatchParticipant
 {
+    public long Id { get; set; }
     public Guid MatchId { get; set; }
     public int Seat { get; set; }
     public Guid? AccountId { get; set; }

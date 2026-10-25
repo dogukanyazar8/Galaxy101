@@ -39,6 +39,69 @@ namespace Okey101.Application.Tests
         }
 
         [Test]
+        public void FinishesFromTheHandBelow101()
+        {
+            // spec/22 elden bitiş: 14 tiles in groups worth 91 plus one to throw open and win without reaching 101.
+            var state = Builder(NinetyOneAndSpare(), OpeningKind.None).Build();
+            var plan = new BotPlanner().PlanTurn(PlayerViewProjector.ForPlayer(state, 0), CancellationToken.None);
+            var result = TurnEvaluator.Evaluate(state, plan);
+            Assert.That(result.Success, Is.True, result.Error.ToString());
+            Assert.That(result.Value.Players[0].Opening, Is.EqualTo(OpeningKind.Series));
+            Assert.That(result.Value.Players[0].Hand, Is.Empty);
+        }
+
+        [Test]
+        public void FinderTakesAPreviousDiscardThatFinishesFromTheHand()
+        {
+            var picked = Id(TileColor.Yellow, 13);
+            var waiting = Builder(NinetyOneAndSpare().Where(id => id != picked).ToArray(), OpeningKind.None)
+                .WithTurn(0, RoundPhase.AwaitingDraw).WithDiscard(3, picked).Build();
+            var found = DiscardTurnFinder.Find(PlayerViewProjector.ForPlayer(waiting, 0), CancellationToken.None);
+            Assert.That(found.Success, Is.True, found.Error.ToString());
+            var result = TurnEvaluator.Evaluate(DrawPrevious(waiting), found.Value);
+            Assert.That(result.Success, Is.True, result.Error.ToString());
+            Assert.That(result.Value.Players[0].Hand, Is.Empty);
+        }
+
+        [Test]
+        public void FinishNeedingMixedCopiesIsFoundAndTaken()
+        {
+            // Six groups worth 65 that need one copy of R1, R3, R5, Y1 and Y5 each in two groups — an odd cycle of shared
+            // faces (1s set, R1-R3, R3-R5, 5s set, Y1-Y5) no fixed copy order can bind: finishing below 101 from the hand.
+            TileId C(TileColor color, int number, int copy = 0) => new TileId(Id(color, number).Value + copy);
+            var hand = new[]
+            {
+                C(TileColor.Red, 1), C(TileColor.Red, 1, 1), C(TileColor.Red, 2), C(TileColor.Red, 3), C(TileColor.Red, 3, 1), C(TileColor.Red, 4), C(TileColor.Red, 5), C(TileColor.Red, 5, 1),
+                C(TileColor.Yellow, 1), C(TileColor.Yellow, 1, 1), C(TileColor.Yellow, 2), C(TileColor.Yellow, 3), C(TileColor.Yellow, 4), C(TileColor.Yellow, 5), C(TileColor.Yellow, 5, 1),
+                C(TileColor.Blue, 1), C(TileColor.Black, 2), C(TileColor.Black, 3), C(TileColor.Black, 4), C(TileColor.Black, 5), C(TileColor.Black, 10),
+            };
+            var picked = C(TileColor.Blue, 5);
+            var waiting = Builder(hand, OpeningKind.None).WithTurn(0, RoundPhase.AwaitingDraw).WithDiscard(3, picked).Build();
+            var view = PlayerViewProjector.ForPlayer(waiting, 0);
+            var found = DiscardTurnFinder.Find(view, CancellationToken.None, true);
+            Assert.That(found.Success, Is.True, found.Error.ToString());
+            var decision = new BotPlanner().ChooseDraw(view, CancellationToken.None);
+            Assert.That(decision.Source, Is.EqualTo(DrawSource.PreviousDiscard));
+            var result = TurnEvaluator.Evaluate(DrawPrevious(waiting), decision.Witness);
+            Assert.That(result.Success, Is.True, result.Error.ToString());
+            Assert.That(result.Value.Players[0].Hand, Is.Empty, "the witness finishes");
+            // The same 22 tiles after a stock draw: the planner finishes too.
+            var drawn = Builder(hand.Concat(new[] { picked }).ToArray(), OpeningKind.None).Build();
+            var plan = new BotPlanner().PlanTurn(PlayerViewProjector.ForPlayer(drawn, 0), CancellationToken.None);
+            var finished = TurnEvaluator.Evaluate(drawn, plan);
+            Assert.That(finished.Success, Is.True, finished.Error.ToString());
+            Assert.That(finished.Value.Players[0].Hand, Is.Empty, "the plan finishes");
+        }
+
+        // 14 tiles in groups worth 3+4+5 + 1+2+3 + 6+6+6 + 9+10+11+12+13 = 91 and a spare.
+        private static TileId[] NinetyOneAndSpare() => new[]
+        {
+            Id(TileColor.Red, 3), Id(TileColor.Red, 4), Id(TileColor.Red, 5), Id(TileColor.Blue, 1), Id(TileColor.Blue, 2), Id(TileColor.Blue, 3),
+            new TileId(Id(TileColor.Red, 6).Value + 1), Id(TileColor.Blue, 6), Id(TileColor.Yellow, 6),
+            Id(TileColor.Yellow, 9), Id(TileColor.Yellow, 10), Id(TileColor.Yellow, 11), Id(TileColor.Yellow, 12), Id(TileColor.Yellow, 13), Spare,
+        };
+
+        [Test]
         public void UsesWitnessAndRespectsTwoTileBudget()
         {
             var picked = Id(TileColor.Red, 1);
@@ -82,6 +145,34 @@ namespace Okey101.Application.Tests
             var first = planner.PlanTurn(view, CancellationToken.None);
             for (var i = 0; i < 3; i++) Assert.That(Key(planner.PlanTurn(view, CancellationToken.None)), Is.EqualTo(Key(first)));
             Assert.That(first.Actions.Count, Is.GreaterThan(0));
+        }
+
+        [Test]
+        public void APileTileGivenBackIsNotTakenAgain()
+        {
+            // R1 would extend nothing usable twice: once given back this turn, only the stock may be drawn (engine rule).
+            var picked = Id(TileColor.Red, 1);
+            var waiting = Builder(new[] { Id(TileColor.Red, 2), Id(TileColor.Red, 3), Spare }, OpeningKind.Series)
+                .WithTurn(0, RoundPhase.AwaitingDraw).WithDiscard(3, picked).Build();
+            var returned = new RoundState(waiting.RoundId, waiting.Version, waiting.Seed, 0, 0, 1, RoundPhase.AwaitingDraw, waiting.Indicator,
+                waiting.Stock, waiting.Players, waiting.Table, waiting.Discards, null, OpeningKind.Series, 0, false, waiting.LastAcceptedSequences, null, true);
+            var view = PlayerViewProjector.ForPlayer(returned, 0);
+            Assert.That(view.PreviousDiscardReturned, Is.True);
+            Assert.That(new BotPlanner().ChooseDraw(view, CancellationToken.None).Source, Is.EqualTo(DrawSource.Stock));
+            Assert.That(DiscardTurnFinder.Find(view, CancellationToken.None).Error, Is.EqualTo(ErrorCode.PreviousDiscardUnavailable));
+        }
+
+        [Test]
+        public void APileTileThePlayerCannotUseIsReportedNotPlanned()
+        {
+            // A player may take a pile tile with no use (it then has to go back); a timed-out seat's bot cannot plan
+            // with it, and says so with InvalidOperationException (the server then returns it and draws the stock).
+            // Not opened, three tiles cannot reach 101: R1 has no use this turn.
+            var waiting = Builder(new[] { Id(TileColor.Red, 2), Id(TileColor.Red, 3), Spare }, OpeningKind.None)
+                .WithTurn(0, RoundPhase.AwaitingDraw).WithDiscard(3, Id(TileColor.Red, 1)).Build();
+            Assert.That(DiscardTurnFinder.Find(PlayerViewProjector.ForPlayer(waiting, 0), CancellationToken.None, false).Error, Is.EqualTo(ErrorCode.NoLegalUse));
+            var taken = PlayerViewProjector.ForPlayer(DrawPrevious(waiting), 0);
+            Assert.Throws<InvalidOperationException>(() => new BotPlanner().PlanTurn(taken, CancellationToken.None));
         }
 
         [Test]

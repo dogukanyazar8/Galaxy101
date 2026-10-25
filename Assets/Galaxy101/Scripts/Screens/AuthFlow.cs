@@ -35,6 +35,9 @@ namespace Galaxy101
         // Form fields keep their values across rebuilds (language switch, error redraw).
         private string email = "", password = "", password2 = "", name = "", nick, color;
         private bool remember = true, terms, showPassword;
+        // Şifremi unuttum: the six-digit code from the e-mail, and whether it was sent (step two).
+        private string resetCode = "";
+        private bool resetSent;
         private float splashStarted;
 
         /// <summary>Signed in (or resumed): the menu takes over.</summary>
@@ -66,13 +69,19 @@ namespace Galaxy101
             screen = "splash"; splashStarted = Time.realtimeSinceStartup; Render();
             var resume = online.ResumeAsync();
             while (Time.realtimeSinceStartup - splashStarted < SplashSeconds || !resume.IsCompleted) await Task.Yield();
-            bool resumed = false;
-            try { resumed = resume.Result; } catch (Exception e) { Debug.LogWarning("Resume failed: " + e.Message); }
+            bool resumed = false; string banned = null;
+            try { resumed = resume.Result; }
+            catch (Exception e)
+            {
+                if (e.InnerException is ApiException api && api.Code == ErrorCodes.Banned) banned = Explain(api);
+                else Debug.LogWarning("Resume failed: " + e.Message);
+            }
             if (layer == null) return;
             await SplashOut();
             if (layer == null) return;
             // A remembered session goes straight to the menu (menuIn), without a greeting — as the design's afterSplash().
             if (resumed) { Finish(null, null, fromSplash: true); return; }
+            if (banned != null) { Go("login"); error = banned; Render(); return; }
             Go("choice");
         }
 
@@ -122,6 +131,7 @@ namespace Galaxy101
                 case "login": BuildLogin(); break;
                 case "register": BuildRegister(); break;
                 case "guest": BuildGuest(); break;
+                case "reset": BuildReset(); break;
             }
             if (focusName != null && body.Q<TextField>(focusName) is TextField again)
                 again.schedule.Execute(() => { again.Focus(); again.SelectRange(again.value.Length, again.value.Length); });
@@ -459,12 +469,37 @@ namespace Galaxy101
             options.Add(Switch42("auth-remember", remember, L("Beni hatırla", "Remember me"), () => { remember = !remember; error = null; Render(); }));
             options.Add(Grow());
             var forgot = Text(L("Şifremi unuttum", "Forgot password"), 14, "Baloo2-800", "var(--a1)"); forgot.name = "auth-forgot";
-            Tap(forgot, () => { error = Regex.IsMatch(email.Trim(), "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$") ? L("Şifre sıfırlama bu sürümde henüz yok; destekle iletişime geç.", "Password reset is not available yet; contact support.") : L("Sıfırlama için önce e-postanı yaz.", "Type your email first to reset."); Render(); });
+            Tap(forgot, () => { resetSent = false; resetCode = ""; password = password2 = ""; Go("reset"); });
             options.Add(forgot); Add(panel, options);
             AddError(panel);
             Spacer(panel);
             Add(panel, Cta("auth-submit", L("Giriş yap", "Log in")));
             Add(panel, Switch(L("Hesabın yok mu?", "No account yet?"), L("Kayıt ol", "Sign up"), "register"));
+        }
+
+        /// <summary>
+        /// Şifremi unuttum (spec/18 S03): the account's e-mail gets a six-digit code; the code and a new password sign in
+        /// (every other device is signed out).
+        /// </summary>
+        private void BuildReset()
+        {
+            var panel = FormPanel(L("Şifreni sıfırla", "Reset your password"), resetSent
+                ? L("E-postana gelen 6 haneli kodu ve yeni şifreni yaz", "Enter the 6-digit code from your e-mail and a new password")
+                : L("Hesabının e-postasını yaz, sıfırlama kodu gönderelim", "Enter your account's e-mail and we'll send a reset code"));
+            Field(panel, "email", L("E-POSTA", "EMAIL"), "auth-email", email, "ornek@mail.com", false, v => { email = v; if (resetSent) { resetSent = false; Render(); } });
+            if (resetSent)
+            {
+                Field(panel, "code", L("KOD", "CODE"), "auth-reset-code", resetCode, "123456", false, v => resetCode = v, 6);
+                Field(panel, "pass", L("YENİ ŞİFRE", "NEW PASSWORD"), "auth-password", password, L("En az 6 karakter", "At least 6 characters"), true, v => password = v, 40);
+                Field(panel, "pass2", L("YENİ ŞİFRE (TEKRAR)", "NEW PASSWORD (AGAIN)"), "auth-password2", password2, L("Aynı şifre", "Same password"), true, v => password2 = v, 40);
+                var again = Text(L("Kodu yeniden gönder", "Send the code again"), 14, "Baloo2-800", "var(--a1)"); again.name = "auth-reset-again";
+                Tap(again, () => { resetSent = false; Submit(); });
+                var row = Row(); row.Add(Grow()); row.Add(again); Add(panel, row);
+            }
+            AddError(panel);
+            Spacer(panel);
+            Add(panel, Cta("auth-submit", resetSent ? L("Şifreyi değiştir", "Change password") : L("Kod gönder", "Send code")));
+            Add(panel, Switch(L("Şifreni hatırladın mı?", "Remembered it?"), L("Giriş yap", "Log in"), "login"));
         }
 
         private void BuildRegister()
@@ -573,12 +608,24 @@ namespace Galaxy101
             busy = true; error = null; Render();
             try
             {
-                if (screen == "login") await online.LoginAsync(email.Trim(), password, remember);
+                if (screen == "reset" && !resetSent)
+                {
+                    await online.Api.PostAsync<Newtonsoft.Json.Linq.JObject>("/v1/auth/password/forgot", new PasswordForgotRequest { Email = email.Trim() });
+                    busy = false; resetSent = true; resetCode = ""; password = password2 = ""; tried.Remove("reset"); Render();
+                    return;
+                }
+                if (screen == "reset")
+                {
+                    await online.Api.PostAsync<Newtonsoft.Json.Linq.JObject>("/v1/auth/password/reset", new PasswordResetRequest { Email = email.Trim(), Code = resetCode.Trim(), Password = password });
+                    await online.LoginAsync(email.Trim(), password, remember);
+                }
+                else if (screen == "login") await online.LoginAsync(email.Trim(), password, remember);
                 else if (screen == "register") await online.RegisterAsync(new RegisterRequest { Name = name.Trim(), Email = email.Trim(), Password = password, AcceptTerms = terms, Color = color });
                 else if (screen == "guest") await online.GuestAsync(nick.Trim(), color);
                 busy = false;
                 string who = (online.Profile?.Name ?? nick ?? "").Trim().Split(' ')[0];
-                if (screen == "login") Finish(L("Hoş geldin, " + who + "!", "Welcome, " + who + "!"), "ok");
+                if (screen == "reset") Finish(L("Şifren değişti. Hoş geldin, " + who + "!", "Password changed. Welcome, " + who + "!"), "ok");
+                else if (screen == "login") Finish(L("Hoş geldin, " + who + "!", "Welcome, " + who + "!"), "ok");
                 else Finish(L("Hoş geldin, " + who + "! " + view.N(online.Wallet?.Chips ?? 0) + " çip hesabına eklendi", "Welcome, " + who + "! " + view.N(online.Wallet?.Chips ?? 0) + " chips added"), "gold");
             }
             catch (ApiException e)
@@ -614,6 +661,13 @@ namespace Galaxy101
                 case "guest":
                     if (!NameRule.IsMatch(nick.Trim())) e["nick"] = L("3–16 harf, rakam ya da _", "3–16 letters, digits or _");
                     break;
+                case "reset":
+                    if (!mail) e["email"] = L("Geçerli bir e-posta yaz", "Enter a valid email");
+                    if (!resetSent) break;
+                    if (!Regex.IsMatch(resetCode.Trim(), "^[0-9]{6}$")) e["code"] = L("6 haneli kod", "The 6-digit code");
+                    if (password.Length < 6) e["pass"] = L("En az 6 karakter", "At least 6 characters");
+                    if (password2 != password) e["pass2"] = L("Şifreler aynı değil", "Passwords don’t match");
+                    break;
             }
             return e;
         }
@@ -635,6 +689,12 @@ namespace Galaxy101
                 case ErrorCodes.TermsRequired: return L("Devam etmek için koşulları kabul et", "Accept the terms to continue");
                 case ErrorCodes.Validation: return L("Bilgileri kontrol et: ad 3–16 karakter, şifre en az 6.", "Check the details: name 3–16 characters, password at least 6.");
                 case ErrorCodes.RateLimited: return L("Çok hızlı denedin; biraz bekle.", "Too many attempts; wait a moment.");
+                case ErrorCodes.CodeInvalid: return L("Kod hatalı ya da süresi doldu. Yeni kod iste.", "The code is wrong or expired. Ask for a new one.");
+                case ErrorCodes.EmailUnavailable: return L("Şu an e-posta gönderilemiyor. Biraz sonra tekrar dene.", "E-mail cannot be sent right now. Try again later.");
+                case ErrorCodes.Inappropriate: return L("Bu ad uygun değil; başka bir ad seç.", "This name is not allowed; pick another one.");
+                case ErrorCodes.Banned:
+                    int hours = Mathf.CeilToInt(((int?)e.Body?["retryAfter"] ?? 0) / 3600f);
+                    return L("Hesabın askıya alındı (" + hours + " saat).", "Your account is suspended (" + hours + " h).");
                 default: return L("Bir şeyler ters gitti (" + e.Code + ").", "Something went wrong (" + e.Code + ").");
             }
         }

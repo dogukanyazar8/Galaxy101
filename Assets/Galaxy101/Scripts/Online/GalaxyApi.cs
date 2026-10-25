@@ -68,7 +68,8 @@ namespace Galaxy101.Online
         public async Task<bool> ResumeAsync(string refreshToken)
         {
             try { Use(await SendAsync<TokenResponse>("POST", "/v1/auth/refresh", new RefreshRequest { RefreshToken = refreshToken }, false)); return true; }
-            catch (ApiException e) when (!e.Offline) { return false; }
+            // A ban is not a dead session: the token stays remembered for after it, and the caller shows why.
+            catch (ApiException e) when (!e.Offline && e.Code != ErrorCodes.Banned) { return false; }
         }
         public async Task LogoutAsync()
         {

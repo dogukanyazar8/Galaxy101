@@ -16,12 +16,14 @@ namespace Okey101.Core.Rules
                 (group.Kind == MeldKind.Set && (count < 3 || count > 4)))
                 return RuleResult<int>.Fail(ErrorCode.InvalidGroup);
 
-            var ids = new HashSet<TileId>();
+            // Indexed loops and bit masks: planners validate groups by the hundred thousand, so nothing is allocated here.
+            var tiles = group.Tiles;
             var total = 0;
-            foreach (var tile in group.Tiles)
+            for (var i = 0; i < count; i++)
             {
-                if (!tile.RepresentedFace.IsValid || !ids.Add(tile.Id))
-                    return RuleResult<int>.Fail(ErrorCode.InvalidTile);
+                var tile = tiles[i];
+                if (!tile.RepresentedFace.IsValid) return RuleResult<int>.Fail(ErrorCode.InvalidTile);
+                for (var j = 0; j < i; j++) if (tiles[j].Id == tile.Id) return RuleResult<int>.Fail(ErrorCode.InvalidTile);
                 if (!TileCatalog.IsRealJoker(tile.Id, indicator) &&
                     TileCatalog.GetNonJokerFace(tile.Id, indicator) != tile.RepresentedFace)
                     return RuleResult<int>.Fail(ErrorCode.InvalidTile);
@@ -44,14 +46,14 @@ namespace Okey101.Core.Rules
         private static bool IsRun(IReadOnlyList<PlacedTile> tiles)
         {
             var color = tiles[0].RepresentedFace.Color;
-            var seen = new bool[14];
+            var seen = 0;
             var minimum = 13;
             var maximum = 1;
-            foreach (var tile in tiles)
+            for (var i = 0; i < tiles.Count; i++)
             {
-                var face = tile.RepresentedFace;
-                if (face.Color != color || seen[face.Number]) return false;
-                seen[face.Number] = true;
+                var face = tiles[i].RepresentedFace;
+                if (face.Color != color || (seen & (1 << face.Number)) != 0) return false;
+                seen |= 1 << face.Number;
                 if (face.Number < minimum) minimum = face.Number;
                 if (face.Number > maximum) maximum = face.Number;
             }
@@ -61,12 +63,12 @@ namespace Okey101.Core.Rules
         private static bool IsSet(IReadOnlyList<PlacedTile> tiles)
         {
             var number = tiles[0].RepresentedFace.Number;
-            var seen = new bool[4];
-            foreach (var tile in tiles)
+            var seen = 0;
+            for (var i = 0; i < tiles.Count; i++)
             {
-                var face = tile.RepresentedFace;
-                if (face.Number != number || seen[(int)face.Color]) return false;
-                seen[(int)face.Color] = true;
+                var face = tiles[i].RepresentedFace;
+                if (face.Number != number || (seen & (1 << (int)face.Color)) != 0) return false;
+                seen |= 1 << (int)face.Color;
             }
             return true;
         }

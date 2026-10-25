@@ -42,9 +42,19 @@ namespace Okey101.Core.Turns
             var extra = deck[Stacks * StackHeight];
 
             int indicatorStack = a - 1, position = b - 1;
-            bool fakeShown = !TileCatalog.Create()[stacks[indicatorStack][position].Value].PrintedFace.HasValue;
-            if (fakeShown) position += 1; // b ≤ 6, so a tile above always exists
-            var indicator = stacks[indicatorStack][position];
+            var column = stacks[indicatorStack];
+            bool IsFake(int p) => !TileCatalog.Create()[column[p].Value].PrintedFace.HasValue;
+            bool fakeShown = IsFake(position);
+            if (fakeShown)
+            {
+                // The first real tile above; when both fake okeys reach the top of the stack, the first real one below.
+                // Only two fakes exist, so a 7-tile stack always holds a real tile.
+                int up = position + 1;
+                while (up < column.Count && IsFake(up)) up++;
+                if (up < column.Count) position = up;
+                else do position--; while (IsFake(position));
+            }
+            var indicator = column[position];
             stacks[indicatorStack].RemoveAt(position);
             int extraStack = StackOf(a, 1);
             stacks[extraStack].Add(extra);
@@ -66,8 +76,11 @@ namespace Okey101.Core.Turns
             return new DealPlan(info, indicator, hands.Select(h => (IReadOnlyList<TileId>)h.ToArray()).ToArray(), stock.ToArray());
         }
 
-        /// <summary>The public part of a round's deal (dealer, dice, stacks) for the ceremony on every client.</summary>
-        public static DealInfo Describe(RoundState state) => Plan(state.Seed, state.StartingPlayer).Info;
+        /// <summary>
+        /// The public part of a round's deal (dealer, dice, stacks) for the ceremony on every client. A random-start round
+        /// drew its dealer from the stream before the dice, so only the deal kept on the round tells its real dice.
+        /// </summary>
+        public static DealInfo Describe(RoundState state) => state.Deal ?? Plan(state.Seed, state.StartingPlayer).Info;
     }
 
     public sealed class DealPlan

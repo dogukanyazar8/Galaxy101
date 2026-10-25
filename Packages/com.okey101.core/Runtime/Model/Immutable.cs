@@ -12,7 +12,8 @@ namespace Okey101.Core.Model
             var result = new T[source.Count];
             for (var i = 0; i < result.Length; i++)
             {
-                if (source[i] is null) throw new ArgumentException("Collection contains a null item.", name);
+                // Value types (tile ids, placed tiles) cannot be null: skip the check rather than box every item.
+                if (!typeof(T).IsValueType && (object)source[i] == null) throw new ArgumentException("Collection contains a null item.", name);
                 result[i] = source[i];
             }
             return new ReadOnlyCollection<T>(result);
@@ -31,9 +32,15 @@ namespace Okey101.Core.Model
             if (value < 0 || value > 3) throw new ArgumentOutOfRangeException(name);
         }
 
+        /// <summary>Defined-value check without boxing (Enum.IsDefined boxes; tiles and groups are made by the million in searches).</summary>
         public static void EnumValue<T>(T value, string name) where T : struct, Enum
         {
-            if (!Enum.IsDefined(typeof(T), value)) throw new ArgumentOutOfRangeException(name);
+            if (!Defined<T>.Values.Contains(value)) throw new ArgumentOutOfRangeException(name);
+        }
+
+        private static class Defined<T> where T : struct, Enum
+        {
+            public static readonly HashSet<T> Values = new HashSet<T>((T[])Enum.GetValues(typeof(T)));
         }
     }
 }

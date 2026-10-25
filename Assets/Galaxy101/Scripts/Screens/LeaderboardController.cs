@@ -67,7 +67,7 @@ namespace Galaxy101
             var name = v.Row(face, v.Text((string)player["name"], 15, true)); PanelUi.Gap(name, 10);
             var league = (string)player["league"];
             var translated = v.Model.Content["leaderboard"]?["leagues"]?[v.Loc.Language]?[league]?.ToString() ?? league;
-            var row = v.Row(v.Text(v.N((int)player["rank"]), 16, true, self ? "a1" : "mt"), name, LeagueCell(v, translated, LeagueColor(league)), v.Text(v.N((int)player["points"]), 16, true));
+            var row = v.Row(v.Text((int)player["rank"] > 0 ? v.N((int)player["rank"]) : "—", 16, true, self ? "a1" : "mt"), name, LeagueCell(v, translated, LeagueColor(league)), v.Text(v.N((int)player["points"]), 16, true));
             row.AddToClassList(self ? "g-leader-self" : "g-leader-row");
             if ((bool?)player["me"] == true && !self) row.AddToClassList("g-panel-selected");
             Columns(row);
@@ -94,6 +94,10 @@ namespace Galaxy101
             row[3].style.unityTextAlign = UnityEngine.TextAnchor.MiddleRight;
         }
 
-        private static string LeagueColor(string code) => code != null && code.StartsWith("d", System.StringComparison.Ordinal) ? "#7FE3FF" : "#FFC94A";
+        /// <summary>Bronz, Gümüş, Altın, Elmas, Usta, Galaksi.</summary>
+        private static string LeagueColor(string code) => code == "gx" ? "#B79CFF" : string.IsNullOrEmpty(code) ? "#FFC94A" : code[0] switch
+        {
+            'b' => "#E6A271", 's' => "#D9E0EC", 'd' => "#7FE3FF", 'm' => "#FF8A9E", _ => "#FFC94A",
+        };
     }
 }

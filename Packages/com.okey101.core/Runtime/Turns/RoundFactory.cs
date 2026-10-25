@@ -21,7 +21,7 @@ namespace Okey101.Core.Turns
             var discards = Enumerable.Range(0, 4).Select(_ => (IReadOnlyList<TileId>)Array.Empty<TileId>()).ToArray();
             var state = new RoundState(roundId, 0, seed, starter, starter, 0, RoundPhase.PlanningTurn,
                 indicator, plan.Stock.ToArray(), players, Array.Empty<Meld>(), discards, null,
-                OpeningKind.None, 0, true, new long[4], options: options);
+                OpeningKind.None, 0, true, new long[4], options: options, deal: plan.Info);
             if (!StateInvariant.Validate(state).Success) throw new InvalidOperationException("Round factory produced invalid tile ownership.");
             return state;
         }

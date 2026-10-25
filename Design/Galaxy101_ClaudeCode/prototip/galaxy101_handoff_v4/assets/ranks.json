@@ -1,0 +1,294 @@
+{
+ "version": "0.4.0",
+ "source": "g101-rank.js (oyunun kullandığı canlı tanım)",
+ "steps": 15,
+ "roman": [
+  "",
+  "I",
+  "II",
+  "III"
+ ],
+ "rewardChips": [
+  5000,
+  15000,
+  40000,
+  100000,
+  250000,
+  1000000
+ ],
+ "lpDeltas": {
+  "idx<=8": [
+   30,
+   10,
+   -10,
+   -20
+  ],
+  "idx>8": [
+   25,
+   5,
+   -12,
+   -22
+  ]
+ },
+ "leagues": [
+  {
+   "key": "bronze",
+   "tr": "Bronz",
+   "en": "Bronze",
+   "motif": {
+    "tr": "Bronz · Kehribar",
+    "en": "Bronze · Amber"
+   },
+   "metal": [
+    "#FFE0BC",
+    "#E8A46A",
+    "#A65B2B",
+    "#4E230C"
+   ],
+   "plate": [
+    "#4A2612",
+    "#140803"
+   ],
+   "gem": [
+    "#4A1600",
+    "#B9520A",
+    "#FFAE3A",
+    "#FFF1C8"
+   ],
+   "colors": [
+    "#FFE0BC",
+    "#E8A46A",
+    "#A65B2B",
+    "#3E1C0A"
+   ],
+   "text": "#F5BE8E",
+   "bar": "linear-gradient(90deg,#A65B2B,#E8A46A 60%,#FFE0BC)",
+   "glow": "rgba(255,174,58,.45)",
+   "distribution": "~%25",
+   "prism": false,
+   "iridescent": false,
+   "seasonRewardChips": 5000,
+   "frame": {
+    "bg": "conic-gradient(from 210deg,#4E230C,#E8A46A 8%,#FFE0BC 16%,#E8A46A 26%,#A65B2B 40%,#4E230C 50%,#A65B2B 60%,#E8A46A 72%,#FFE0BC 80%,#E8A46A 88%,#4E230C)",
+    "sh": "0 0 0 2px #4E230C,0 0 16px rgba(255,174,58,.45)",
+    "gap": "#4E230C"
+   }
+  },
+  {
+   "key": "silver",
+   "tr": "Gümüş",
+   "en": "Silver",
+   "motif": {
+    "tr": "Gümüş · Safir",
+    "en": "Silver · Sapphire"
+   },
+   "metal": [
+    "#FFFFFF",
+    "#D8E0EA",
+    "#8794A8",
+    "#2E3544"
+   ],
+   "plate": [
+    "#1C2A48",
+    "#070C1A"
+   ],
+   "gem": [
+    "#05124A",
+    "#1A48D0",
+    "#6CA6FF",
+    "#E4F0FF"
+   ],
+   "colors": [
+    "#FFFFFF",
+    "#D8E0EA",
+    "#8794A8",
+    "#28303F"
+   ],
+   "text": "#DCE5F1",
+   "bar": "linear-gradient(90deg,#8794A8,#D8E0EA 60%,#FFFFFF)",
+   "glow": "rgba(108,166,255,.45)",
+   "distribution": "~%30",
+   "prism": false,
+   "iridescent": false,
+   "seasonRewardChips": 15000,
+   "frame": {
+    "bg": "conic-gradient(from 210deg,#2E3544,#D8E0EA 8%,#FFFFFF 16%,#D8E0EA 26%,#8794A8 40%,#2E3544 50%,#8794A8 60%,#D8E0EA 72%,#FFFFFF 80%,#D8E0EA 88%,#2E3544)",
+    "sh": "0 0 0 2px #2E3544,0 0 16px rgba(108,166,255,.45)",
+    "gap": "#2E3544"
+   }
+  },
+  {
+   "key": "gold",
+   "tr": "Altın",
+   "en": "Gold",
+   "motif": {
+    "tr": "Altın · Zümrüt",
+    "en": "Gold · Emerald"
+   },
+   "metal": [
+    "#FFF6D2",
+    "#F6C640",
+    "#B07A0C",
+    "#4A2C02"
+   ],
+   "plate": [
+    "#0E2C1E",
+    "#030E08"
+   ],
+   "gem": [
+    "#022814",
+    "#08884A",
+    "#3EE38E",
+    "#DAFFEA"
+   ],
+   "colors": [
+    "#FFF6D2",
+    "#F6C640",
+    "#B07A0C",
+    "#412602"
+   ],
+   "text": "#FFD45C",
+   "bar": "linear-gradient(90deg,#B07A0C,#F6C640 60%,#FFF6D2)",
+   "glow": "rgba(246,198,64,.5)",
+   "distribution": "~%25",
+   "prism": false,
+   "iridescent": false,
+   "seasonRewardChips": 40000,
+   "frame": {
+    "bg": "conic-gradient(from 210deg,#4A2C02,#F6C640 8%,#FFF6D2 16%,#F6C640 26%,#B07A0C 40%,#4A2C02 50%,#B07A0C 60%,#F6C640 72%,#FFF6D2 80%,#F6C640 88%,#4A2C02)",
+    "sh": "0 0 0 2px #4A2C02,0 0 16px rgba(246,198,64,.5)",
+    "gap": "#4A2C02"
+   }
+  },
+  {
+   "key": "diamond",
+   "tr": "Elmas",
+   "en": "Diamond",
+   "motif": {
+    "tr": "Platin · Elmas",
+    "en": "Platinum · Diamond"
+   },
+   "metal": [
+    "#FFFFFF",
+    "#E6EEF6",
+    "#A2B2C8",
+    "#3E4A5E"
+   ],
+   "plate": [
+    "#14304E",
+    "#050E1E"
+   ],
+   "gem": [
+    "#4E6A8C",
+    "#B4CCE6",
+    "#F2F9FF",
+    "#FFFFFF"
+   ],
+   "colors": [
+    "#EAFDFF",
+    "#9FE6FF",
+    "#5A8EC8",
+    "#0A2A58"
+   ],
+   "text": "#9FE6FF",
+   "bar": "linear-gradient(90deg,#5A8EC8,#9FE6FF 60%,#EAFDFF)",
+   "glow": "rgba(170,225,255,.55)",
+   "distribution": "~%13",
+   "prism": true,
+   "iridescent": false,
+   "seasonRewardChips": 100000,
+   "frame": {
+    "bg": "conic-gradient(from 210deg,#3E4A5E,#E6EEF6 8%,#FFFFFF 16%,#E6EEF6 26%,#A2B2C8 40%,#3E4A5E 50%,#A2B2C8 60%,#E6EEF6 72%,#FFFFFF 80%,#E6EEF6 88%,#3E4A5E)",
+    "sh": "0 0 0 2px #3E4A5E,0 0 16px rgba(170,225,255,.55)",
+    "gap": "#3E4A5E"
+   }
+  },
+  {
+   "key": "master",
+   "tr": "Usta",
+   "en": "Master",
+   "motif": {
+    "tr": "Gül altın · Yakut",
+    "en": "Rose gold · Ruby"
+   },
+   "metal": [
+    "#FFE6EE",
+    "#EBA1B4",
+    "#9A4A62",
+    "#341020"
+   ],
+   "plate": [
+    "#3A0818",
+    "#120006"
+   ],
+   "gem": [
+    "#3A0010",
+    "#B4122E",
+    "#FF5470",
+    "#FFE2E8"
+   ],
+   "colors": [
+    "#FFE6EE",
+    "#FF6F8E",
+    "#B4122E",
+    "#3A0716"
+   ],
+   "text": "#FF8FA6",
+   "bar": "linear-gradient(90deg,#B4122E,#FF6F8E 60%,#FFE6EE)",
+   "glow": "rgba(255,84,112,.5)",
+   "distribution": "~%6",
+   "prism": false,
+   "iridescent": false,
+   "seasonRewardChips": 250000,
+   "frame": {
+    "bg": "conic-gradient(from 210deg,#341020,#EBA1B4 8%,#FFE6EE 16%,#EBA1B4 26%,#9A4A62 40%,#341020 50%,#9A4A62 60%,#EBA1B4 72%,#FFE6EE 80%,#EBA1B4 88%,#341020)",
+    "sh": "0 0 0 2px #341020,0 0 16px rgba(255,84,112,.5)",
+    "gap": "#341020"
+   }
+  },
+  {
+   "key": "galaxy",
+   "tr": "Galaksi",
+   "en": "Galaxy",
+   "motif": {
+    "tr": "Titanyum · Opal",
+    "en": "Titanium · Opal"
+   },
+   "metal": [
+    "#E2FFFB",
+    "#7FD8F0",
+    "#5A44B8",
+    "#120A34"
+   ],
+   "plate": [
+    "#1E1060",
+    "#05021A"
+   ],
+   "gem": [
+    "#1A0A50",
+    "#6A3FE0",
+    "#3DF5E0",
+    "#FFFFFF"
+   ],
+   "colors": [
+    "#E2FFFB",
+    "#3DF5E0",
+    "#8C6EFF",
+    "#1A1150"
+   ],
+   "text": "#B9A6FF",
+   "bar": "linear-gradient(90deg,#8C6EFF,#5FB4F0 55%,#3DF5E0)",
+   "glow": "rgba(140,110,255,.6)",
+   "distribution": "İlk 100",
+   "prism": false,
+   "iridescent": true,
+   "seasonRewardChips": 1000000,
+   "frame": {
+    "bg": "conic-gradient(from 200deg,#120A34,#8C6EFF 12%,#E2FFFB 22%,#3DF5E0 30%,#2A1A7A 44%,#8C6EFF 56%,#E2FFFB 66%,#3DF5E0 76%,#5A44B8 88%,#120A34)",
+    "sh": "0 0 0 2px #120A34,0 0 22px rgba(140,110,255,.6),0 0 40px rgba(61,245,224,.22)",
+    "gap": "#120A34"
+   }
+  }
+ ],
+ "files": "rank/<lig>[_<I|II|III>]_<24|52|160>.svg · rank/medal_<lig>_<16|24>.svg"
+}

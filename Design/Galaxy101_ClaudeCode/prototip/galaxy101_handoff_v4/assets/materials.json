@@ -1,0 +1,579 @@
+{
+ "version": "0.4.0",
+ "source": "table3d.js · tiles3d.js · racks3d.js · gifts3d.js",
+ "units": "three.js PBR (metalness/roughness). Unity URP Lit: metallic = metalness, smoothness = 1 − roughness; clearcoat → URP Complex Lit Clear Coat.",
+ "table": [
+  {
+   "key": "steel",
+   "type": "MeshStandardMaterial",
+   "params": "name: 'masa_kenar', color: '#3b4260', metalness: 0.9, roughness: 0.28"
+  },
+  {
+   "key": "dark",
+   "type": "MeshStandardMaterial",
+   "params": "name: 'koyu_metal', color: '#131829', metalness: 0.75, roughness: 0.42"
+  },
+  {
+   "key": "led",
+   "type": "MeshStandardMaterial",
+   "params": "name: 'led', color: '#000000', emissive: '#FFC94A', emissiveIntensity: 2.4"
+  },
+  {
+   "key": "ledLine",
+   "type": "MeshBasicMaterial",
+   "params": "name: 'led_cizgi', color: '#FFC94A', transparent: true, opacity: 0.55"
+  },
+  {
+   "key": "felt",
+   "type": "MeshStandardMaterial",
+   "params": "name: 'cuha', roughness: 0.96, metalness: 0"
+  },
+  {
+   "key": "tileSide",
+   "type": "MeshPhysicalMaterial",
+   "params": "name: 'tas_kenar', color: '#E3D7BC', roughness: 0.34, clearcoat: 0.8"
+  },
+  {
+   "key": "tile",
+   "type": "MeshPhysicalMaterial",
+   "params": "name: 'tas', color: '#FFF8EA', roughness: 0.36, clearcoat: 0.7, clearcoatRoughness: 0.22"
+  },
+  {
+   "key": "leather",
+   "type": "MeshStandardMaterial",
+   "params": "name: 'deri', color: '#1d2240', roughness: 0.6, metalness: 0.1"
+  },
+  {
+   "key": "floor",
+   "type": "MeshStandardMaterial",
+   "params": "name: 'zemin', color: '#ffffff', metalness: 0.55, roughness: 0.5"
+  },
+  {
+   "key": "wall",
+   "type": "MeshStandardMaterial",
+   "params": "name: 'duvar', color: '#ffffff', metalness: 0.4, roughness: 0.6"
+  },
+  {
+   "key": "ok",
+   "type": "MeshBasicMaterial",
+   "params": "name: 'gecerli', color: '#3CCB6E'"
+  },
+  {
+   "key": "newBar",
+   "type": "MeshBasicMaterial",
+   "params": "name: 'yeni_tas', color: '#FFD964', transparent: true"
+  },
+  {
+   "key": "zone",
+   "type": "MeshBasicMaterial",
+   "params": "name: 'atma_alani', color: '#FFC94A', transparent: true, opacity: 0.4, depthWrite: false"
+  },
+  {
+   "key": "zoneFill",
+   "type": "MeshBasicMaterial",
+   "params": "name: 'atma_dolgu', color: '#FFC94A', transparent: true, opacity: 0.0, depthWrite: false, blending: THREE.AdditiveBlending"
+  },
+  {
+   "key": "halo",
+   "type": "MeshBasicMaterial",
+   "params": "name: 'hale', map: glowTex(), color: '#FFC94A', transparent: true, opacity: 0.25, depthWrite: false, blending: THREE.AdditiveBlending"
+  },
+  {
+   "key": "holo",
+   "type": "MeshBasicMaterial",
+   "params": "name: 'holo', color: '#FFC94A', transparent: true, opacity: 0.35, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide"
+  },
+  {
+   "key": "tagMats[kind]",
+   "type": "MeshBasicMaterial",
+   "params": "name: 'simge_' + kind, map: tx, transparent: true, depthWrite: false"
+  },
+  {
+   "key": "m",
+   "type": "MeshBasicMaterial",
+   "params": "name: base.name + '_duz', map: base.map, transparent: true, depthWrite: false, toneMapped: false"
+  },
+  {
+   "key": "inner",
+   "type": "MeshBasicMaterial",
+   "params": "name: 'masa_pirinc_cizgi', color: '#D9B15A', transparent: true, opacity: 0.7"
+  },
+  {
+   "key": "inner",
+   "type": "MeshBasicMaterial",
+   "params": "name: 'masa_holo_cizgi', transparent: true, opacity: 0.95"
+  },
+  {
+   "key": "inner",
+   "type": "MeshBasicMaterial",
+   "params": "name: 'masa_andromeda_cizgi', color: '#B79CFF', transparent: true, opacity: 0.85"
+  }
+ ],
+ "tableSkins": {
+  "wood": {
+   "slab": {
+    "type": "MeshPhysicalMaterial",
+    "name": "masa_ceviz_govde",
+    "roughness": 0.5,
+    "clearcoat": 0.5
+   },
+   "rim": {
+    "type": "MeshPhysicalMaterial",
+    "name": "masa_ceviz_kenar",
+    "roughness": 0.32,
+    "clearcoat": 1,
+    "clearcoatRoughness": 0.15
+   },
+   "band": {
+    "type": "MeshStandardMaterial",
+    "name": "masa_pirinc",
+    "color": "#D9A94A",
+    "metalness": 1,
+    "roughness": 0.25
+   },
+   "inner": {
+    "type": "MeshBasicMaterial",
+    "name": "masa_pirinc_cizgi",
+    "color": "#D9B15A",
+    "transparent": true,
+    "opacity": 0.7
+   }
+  },
+  "holo": {
+   "slab": {
+    "type": "MeshPhysicalMaterial",
+    "name": "masa_cam_govde",
+    "color": "#070a16",
+    "metalness": 0.3,
+    "roughness": 0.1,
+    "clearcoat": 1
+   },
+   "rim": {
+    "type": "MeshPhysicalMaterial",
+    "name": "masa_cam_kenar",
+    "color": "#1a2448",
+    "metalness": 0.15,
+    "roughness": 0.03,
+    "clearcoat": 1,
+    "transparent": true,
+    "opacity": 0.42,
+    "emissiveIntensity": 0.06,
+    "envMapIntensity": 2
+   },
+   "band": {
+    "type": "MeshStandardMaterial",
+    "name": "masa_holo_led",
+    "color": "#000",
+    "emissiveIntensity": 3.4
+   },
+   "inner": {
+    "type": "MeshBasicMaterial",
+    "name": "masa_holo_cizgi",
+    "transparent": true,
+    "opacity": 0.95
+   }
+  },
+  "andro": {
+   "slab": {
+    "type": "MeshPhysicalMaterial",
+    "name": "masa_andromeda_govde",
+    "color": "#080a1c",
+    "metalness": 0.5,
+    "roughness": 0.3,
+    "clearcoat": 1
+   },
+   "rim": {
+    "type": "MeshPhysicalMaterial",
+    "name": "masa_andromeda_kenar",
+    "color": "#2a2470",
+    "metalness": 0.9,
+    "roughness": 0.14,
+    "clearcoat": 1,
+    "iridescence": 1,
+    "iridescenceIOR": 1.35,
+    "iridescenceThicknessRange": [
+     300,
+     520
+    ],
+    "emissive": "#3a2a90",
+    "emissiveIntensity": 0.25
+   },
+   "band": {
+    "type": "MeshStandardMaterial",
+    "name": "masa_andromeda_led",
+    "color": "#000",
+    "emissive": "#8FB4FF",
+    "emissiveIntensity": 2.8
+   },
+   "inner": {
+    "type": "MeshBasicMaterial",
+    "name": "masa_andromeda_cizgi",
+    "color": "#B79CFF",
+    "transparent": true,
+    "opacity": 0.85
+   }
+  },
+  "randro": {
+   "base": {
+    "type": "MeshPhysicalMaterial",
+    "name": "istaka_andromeda_taban",
+    "color": "#0b0d26",
+    "metalness": 0.8,
+    "roughness": 0.18,
+    "clearcoat": 1,
+    "iridescence": 1,
+    "iridescenceIOR": 1.6,
+    "iridescenceThicknessRange": [
+     180,
+     820
+    ]
+   },
+   "ledge": {
+    "type": "MeshPhysicalMaterial",
+    "name": "istaka_andromeda_kenar",
+    "color": "#2a2f6a",
+    "metalness": 1,
+    "roughness": 0.18,
+    "iridescence": 1,
+    "iridescenceIOR": 1.7,
+    "iridescenceThicknessRange": [
+     250,
+     900
+    ]
+   },
+   "back": {
+    "type": "MeshPhysicalMaterial",
+    "name": "istaka_andromeda_arka",
+    "color": "#ffffff",
+    "roughness": 0.25,
+    "metalness": 0.15,
+    "clearcoat": 1,
+    "clearcoatRoughness": 0.1,
+    "emissive": "#ffffff",
+    "emissiveIntensity": 0.4
+   },
+   "cap": {
+    "type": "MeshPhysicalMaterial",
+    "name": "istaka_andromeda_uc",
+    "color": "#141038",
+    "metalness": 0.8,
+    "roughness": 0.18,
+    "clearcoat": 1,
+    "iridescence": 1,
+    "iridescenceIOR": 1.35,
+    "iridescenceThicknessRange": [
+     300,
+     520
+    ],
+    "emissive": "#6B4FE0",
+    "emissiveIntensity": 0.18
+   },
+   "led": {
+    "type": "MeshStandardMaterial",
+    "name": "istaka_andromeda_led",
+    "color": "#000",
+    "emissive": "#B79CFF",
+    "emissiveIntensity": 3
+   }
+  },
+  "rwood": {
+   "all": {
+    "type": "MeshPhysicalMaterial",
+    "name": "istaka_ceviz",
+    "roughness": 0.34,
+    "clearcoat": 1,
+    "clearcoatRoughness": 0.18
+   },
+   "back": {
+    "type": "MeshPhysicalMaterial",
+    "name": "istaka_ceviz_arka",
+    "roughness": 0.4,
+    "clearcoat": 0.8
+   },
+   "led": {
+    "type": "MeshStandardMaterial",
+    "name": "istaka_pirinc",
+    "color": "#E0B04E",
+    "metalness": 1,
+    "roughness": 0.22
+   }
+  },
+  "rneon": {
+   "base": {
+    "type": "MeshPhysicalMaterial",
+    "name": "istaka_neon_taban",
+    "color": "#05060c",
+    "roughness": 0.12,
+    "clearcoat": 1
+   },
+   "ledge": {
+    "type": "MeshStandardMaterial",
+    "name": "istaka_neon_kenar",
+    "color": "#05050a",
+    "roughness": 0.2,
+    "emissiveIntensity": 0.42
+   },
+   "back": {
+    "type": "MeshPhysicalMaterial",
+    "name": "istaka_neon_arka",
+    "color": "#07080f",
+    "roughness": 0.1,
+    "clearcoat": 1,
+    "metalness": 0.3
+   },
+   "cap": {
+    "type": "MeshPhysicalMaterial",
+    "name": "istaka_neon_uc",
+    "color": "#0b0c16",
+    "roughness": 0.1,
+    "clearcoat": 1,
+    "emissiveIntensity": 0.55
+   },
+   "led": {
+    "type": "MeshStandardMaterial",
+    "name": "istaka_neon_led",
+    "color": "#000",
+    "emissive": "#ffffff",
+    "emissiveIntensity": 3
+   }
+  }
+ },
+ "tableSkinApply": "  function applyLook() {\n    const th = theme, acc = th.a1, acc2 = th.a2, ts = skins.table, rs = skins.rack;\n    M.led.emissive.set(acc); seatLed.forEach((m) => m.emissive.set(acc)); M.ledLine.color.set(acc); M.zone.color.set(acc); M.zoneFill.color.set(acc); sideRing.material.color.set(acc);\n    M.halo.color.set(acc2); deckGlow.material.color.set(acc); M.holo.color.set(acc); M.wall.emissive.set(acc);\n    tileKit.applyBody(M.tile, tileSkin, th, M.tileSide); M.steel.color.set(th.rim || '#3b4260'); M.leather.color.set(th.leather || '#1d2240');\n    back.color.set(th.glow || acc); hemi.color.set(th.sky || '#c9d6ff');\n    if (M.felt.map) M.felt.map.dispose();\n    M.felt.map = ts === 'andromeda' ? andromedaTex(1024, 1024, false) : ts === 'holo' ? feltTex(th.f2, '#03050d', acc, 'holo') : ts === 'wood' ? feltTex(th.f1, th.f2, acc, 'wood') : feltTex(th.f1, th.f2, acc); M.felt.needsUpdate = true;\n    M.felt.emissive = new THREE.Color(ts === 'holo' ? acc : ts === 'andromeda' ? '#ffffff' : '#000'); M.felt.emissiveMap = ts === 'holo' || ts === 'andromeda' ? M.felt.map : null; M.felt.emissiveIntensity = ts === 'holo' ? 0.35 : ts === 'andromeda' ? 0.5 : 0;\n    if (ts === 'wood') { const W1 = woodTex('#5A3220', 'rgba(30,14,6,.8)', 2), W2 = woodTex('#3A2014', 'rgba(15,6,2,.8)', 2); SK.wood.rim.map = W1; SK.wood.slab.map = W2; SK.wood.rim.needsUpdate = SK.wood.slab.needsUpdate = true; swap(slab, SK.wood.slab); swap(rimM, SK.wood.rim); swap(band, SK.wood.band); swap(inner, SK.wood.inner); }\n    else if (ts === 'andromeda') { swap(slab, SK.andro.slab); swap(rimM, SK.andro.rim); swap(band, SK.andro.band); swap(inner, SK.andro.inner); }\n    else if (ts === 'holo') { SK.holo.rim.emissive.set(acc); SK.holo.band.emissive.set(acc); SK.holo.inner.color.set(acc); swap(slab, SK.holo.slab); swap(rimM, SK.holo.rim); swap(band, SK.holo.band); swap(inner, SK.holo.inner); }\n    else { swap(slab, M.dark); swap(rimM, M.steel); swap(band, M.led); swap(inner, M.ledLine); }\n    M.holo.opacity = ts === 'holo' ? 0.5 : ts === 'andromeda' ? 0.12 : 0.3; halo.material.opacity = ts === 'wood' ? 0.12 : ts === 'holo' ? 0.4 : 0.25; if (ts === 'andromeda') { M.halo.color.set('#7F9CFF'); M.holo.color.set('#B79CFF'); }\n    buildRacks(); rackKit.theme(th);\n  }",
+ "tiles": {
+  "colors": {
+   "R": "#D7263D",
+   "B": "#1F5FBF",
+   "K": "#1B1B1B",
+   "Y": "#E39B12"
+  },
+  "skins": [
+   "classic",
+   "galaxy",
+   "gold",
+   "neon",
+   "marble"
+  ],
+  "glyphs": {
+   "0": {
+    "w": 60,
+    "d": "M30 7C46 7 53 22 53 50C53 78 46 93 30 93C14 93 7 78 7 50C7 22 14 7 30 7Z"
+   },
+   "1": {
+    "w": 42,
+    "d": "M8 24L28 8V93"
+   },
+   "2": {
+    "w": 60,
+    "d": "M9 28C9 15 18 7 30 7C43 7 51 15 51 28C51 42 40 52 9 93H53"
+   },
+   "3": {
+    "w": 60,
+    "d": "M10 7H50L27 40C43 39 53 50 53 65C53 82 42 93 29 93C19 93 11 88 7 80"
+   },
+   "4": {
+    "w": 62,
+    "d": "M40 93V7L7 66H55"
+   },
+   "5": {
+    "w": 60,
+    "d": "M50 7H15L12 43C17 39 23 37 30 37C44 37 53 48 53 64C53 81 43 93 29 93C19 93 11 88 7 80"
+   },
+   "6": {
+    "w": 60,
+    "d": "M42 7L14 54M53 70A23 23 0 1 1 7 70A23 23 0 1 1 53 70Z"
+   },
+   "7": {
+    "w": 60,
+    "d": "M7 7H53L22 93"
+   },
+   "8": {
+    "w": 60,
+    "d": "M48 26A18.5 18.5 0 1 1 11 26A18.5 18.5 0 1 1 48 26ZM53 70A23 23 0 1 1 7 70A23 23 0 1 1 53 70Z"
+   },
+   "9": {
+    "w": 60,
+    "d": "M18 93L46 46M7 30A23 23 0 1 1 53 30A23 23 0 1 1 7 30Z"
+   }
+  }
+ },
+ "racks": {
+  "skins": [
+   "walnut",
+   "sedef",
+   "chrome",
+   "carbon",
+   "neon",
+   "andromeda"
+  ]
+ },
+ "gifts": {
+  "scale": {
+   "tea": 1.05,
+   "coffee": 1,
+   "cola": 0.98,
+   "simit": 0.85,
+   "baklava": 0.82,
+   "seeds": 0.9,
+   "flower": 0.95,
+   "cake": 0.82,
+   "trophy": 1.1,
+   "rocket": 1.15
+  },
+  "list": [
+   {
+    "k": "tea",
+    "tab": 0,
+    "price": 100
+   },
+   {
+    "k": "coffee",
+    "tab": 0,
+    "price": 150
+   },
+   {
+    "k": "cola",
+    "tab": 0,
+    "price": 120
+   },
+   {
+    "k": "simit",
+    "tab": 0,
+    "price": 200
+   },
+   {
+    "k": "baklava",
+    "tab": 0,
+    "price": 500
+   },
+   {
+    "k": "seeds",
+    "tab": 0,
+    "price": 80
+   },
+   {
+    "k": "flower",
+    "tab": 1,
+    "price": 1000
+   },
+   {
+    "k": "cake",
+    "tab": 1,
+    "price": 2500
+   },
+   {
+    "k": "trophy",
+    "tab": 1,
+    "price": 5000
+   },
+   {
+    "k": "rocket",
+    "tab": 1,
+    "price": 10000
+   }
+  ]
+ },
+ "meshNames": [
+  "istaka_",
+  "istaka",
+  "koltuk",
+  "tas_",
+  "deste",
+  "zar",
+  "tas_govde",
+  "tas_yuz",
+  "istaka_",
+  "koltuk",
+  "tas_seti_",
+  "tas_sahte_okey",
+  "hediye_"
+ ],
+ "previews": {
+  "table": {
+   "station": {
+    "rim": "linear-gradient(160deg,#6a7396,#2c3352)",
+    "line": "inset 0 0 0 2px var(--a1)",
+    "glow": "0 0 0 2px var(--a1),0 0 18px var(--gl)"
+   },
+   "wood": {
+    "rim": "linear-gradient(160deg,#7A4528,#3A2014)",
+    "line": "inset 0 0 0 2px #D9B15A",
+    "glow": "0 3px 0 #22120a"
+   },
+   "holo": {
+    "rim": "linear-gradient(160deg,rgba(120,160,255,.35),rgba(20,30,60,.6))",
+    "line": "inset 0 0 0 1px var(--a1),inset 0 0 20px var(--gl)",
+    "glow": "0 0 0 1px var(--a1),0 0 24px var(--gl)"
+   }
+  },
+  "rack": {
+   "chrome": {
+    "back": "linear-gradient(#c3c8d2,#7d8494)",
+    "ledge": "#e4e7ee",
+    "glow": "inset 0 2px 0 var(--a1)"
+   },
+   "walnut": {
+    "back": "linear-gradient(#7a4527,#4a2614)",
+    "ledge": "#8a5230",
+    "glow": "inset 0 2px 0 #EBD5A8"
+   },
+   "sedef": {
+    "back": "linear-gradient(#4A1E12,#2a0f08)",
+    "ledge": "#E4BE62",
+    "glow": "inset 0 2px 0 #F6F0E6"
+   },
+   "carbon": {
+    "back": "repeating-linear-gradient(45deg,#14161d 0 4px,#2c2f38 4px 8px)",
+    "ledge": "#14161d",
+    "glow": "inset 0 2px 0 var(--a1)"
+   },
+   "neon": {
+    "back": "linear-gradient(#0b0c14,#05060c)",
+    "ledge": "var(--a1)",
+    "glow": "0 0 14px var(--gl),inset 0 2px 0 #fff"
+   }
+  },
+  "tile": {
+   "classic": {
+    "face": "linear-gradient(#FFFDF6,#F1E9D6)",
+    "edge": "inset 0 -3px 0 #E3D7BC,0 2px 0 #B9AB8C",
+    "c1": "#D7263D",
+    "c2": "#1F5FBF",
+    "jk": "#127A4A",
+    "ts": "none"
+   },
+   "galaxy": {
+    "face": "linear-gradient(#3B2F7A,#1C1648)",
+    "edge": "inset 0 -3px 0 #120E30,0 2px 0 #0A0820,0 0 10px rgba(140,110,255,.5)",
+    "c1": "#FF3D5A",
+    "c2": "#FFC21A",
+    "jk": "#FFD964",
+    "ts": "drop-shadow(0 0 1.5px rgba(6,4,24,.9)) drop-shadow(0 0 1.5px rgba(6,4,24,.9))"
+   },
+   "gold": {
+    "face": "linear-gradient(#1d1d24,#050507)",
+    "edge": "inset 0 -3px 0 #D9B25A,0 2px 0 #8A6A20,0 0 10px rgba(255,201,74,.4)",
+    "c1": "#FF3348",
+    "c2": "#3D95FF",
+    "jk": "#E9C46A",
+    "ts": "drop-shadow(0 0 1px #B8892E) drop-shadow(0 0 1px #B8892E)"
+   },
+   "neon": {
+    "face": "linear-gradient(#14202E,#0A1018)",
+    "edge": "inset 0 -3px 0 #06090E,0 2px 0 #000,0 0 10px rgba(61,245,224,.5)",
+    "c1": "#2E9BFF",
+    "c2": "#FFD21F",
+    "jk": "#3DF5E0",
+    "ts": "drop-shadow(0 0 1.5px #000) drop-shadow(0 0 1.5px #000)"
+   },
+   "marble": {
+    "face": "linear-gradient(#FFFFFF,#E4E6EC)",
+    "edge": "inset 0 -3px 0 #C9CCD6,0 2px 0 #9499A8",
+    "c1": "#2B3A55",
+    "c2": "#C21F36",
+    "jk": "#2B3A55",
+    "ts": "none"
+   }
+  }
+ },
+ "models": "Geometri kodla üretilir. GLB/OBJ dışa aktarma: proje kökündeki \"Araç - 3D Varlık Dışa Aktarma.html\" (masa, ıstakalar, taş setleri, hediyeler; malzeme adları yukarıdakilerle aynı)."
+}

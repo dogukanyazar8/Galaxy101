@@ -175,7 +175,8 @@ namespace Galaxy101
         /// Cards keep the model's mode indices (0 Klasik, 3 Dereceli, 4 Botlara karşı) so saves and tests stay valid.
         /// </summary>
         public static readonly int[] V3Modes = { 0, 3, 4 };
-        public static bool IsSoon(int mode) => mode != 0;
+        /// <summary>Klasik and Dereceli play; Botlara karşı is YAKINDA.</summary>
+        public static bool IsSoon(int mode) => mode != 0 && mode != 3;
         private void BuildModes()
         {
             var strip=Box("mode-strip");Place(strip,0,474,1280,90);strip.style.flexDirection=FlexDirection.Row;strip.style.justifyContent=Justify.Center;AddMain(strip);
@@ -253,7 +254,7 @@ namespace Galaxy101
             foreach(var m in modeCards)m.Target(m.Index==selected,animationTime,instant);
             if(playSubtitle!=null)playSubtitle.text=PlaySubtitle();
         }
-        private string PlaySubtitle()=>Model.SelectedMode==3?L("Dereceli · yakında açılıyor","Ranked · coming soon"):Model.SelectedMode==4?L("Botlara karşı · yakında açılıyor","Vs bots · coming soon"):L("Klasik · Tekli / Eşli · masalar","Classic · Singles / Pairs · tables");
+        private string PlaySubtitle()=>Model.SelectedMode==3?L("Dereceli · ligine yakın rakipler","Ranked · players near your league"):Model.SelectedMode==4?L("Botlara karşı · yakında açılıyor","Vs bots · coming soon"):L("Klasik · Tekli / Eşli · masalar","Classic · Singles / Pairs · tables");
         /// <summary>A mode card: saved, then the cards and HEMEN OYNA's subtitle change in place — nothing is rebuilt.</summary>
         private void PickMode(int index)
         {
@@ -264,7 +265,7 @@ namespace Galaxy101
         /// <summary>HEMEN OYNA: Klasik opens the lobby; a YAKINDA mode only says so.</summary>
         private void Play()
         {
-            if(IsSoon(Model.SelectedMode)){Toast(Model.SelectedMode==3?L("Dereceli yakında açılıyor","Ranked is coming soon"):L("Botlara karşı yakında açılıyor","Vs bots is coming soon"));return;}
+            if(IsSoon(Model.SelectedMode)){Toast(L("Botlara karşı yakında açılıyor","Vs bots is coming soon"));return;}
             PlayRequested?.Invoke(Model.SelectedMode);
         }
         private void BuildFooter()
@@ -401,7 +402,9 @@ namespace Galaxy101
         public static Label CssParagraph(Label label,float lineHeight,bool pretty)
         {
             string plain=label.text??"";label.enableRichText=true;label.style.whiteSpace=WhiteSpace.Normal;label.style.flexShrink=0;
-            string Wrap(string body)=>"<line-height="+lineHeight.ToString("0.##",System.Globalization.CultureInfo.InvariantCulture)+"px>"+body;
+            // The text itself is never markup (a player's status may hold "<b>"): only the line-height tag is parsed.
+            string Wrap(string body)=>"<line-height="+lineHeight.ToString("0.##",System.Globalization.CultureInfo.InvariantCulture)+"px><noparse>"
+                +System.Text.RegularExpressions.Regex.Replace(body,"</noparse",m=>"<\u200B/noparse",System.Text.RegularExpressions.RegexOptions.IgnoreCase)+"</noparse>";
             var font=label.style.unityFont.value;float size=label.style.fontSize.value.value;
             float half=(lineHeight-NaturalLineHeight(font!=null?font.name:null,size))/2;
             label.style.marginTop=label.style.marginTop.value.value+half;label.style.marginBottom=label.style.marginBottom.value.value+half;

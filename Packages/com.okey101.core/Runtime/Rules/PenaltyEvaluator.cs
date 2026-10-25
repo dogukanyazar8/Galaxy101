@@ -18,7 +18,7 @@ namespace Okey101.Core.Rules
             var indicator = TileCatalog.Create()[afterActions.Indicator.Value].PrintedFace;
             if (!indicator.HasValue) throw new ArgumentException("Indicator must have a printed face.", nameof(afterActions));
             if (TileCatalog.IsRealJoker(discard, indicator.Value)) return afterActions.Options.OkeyDiscardPenalty ? 101 : 0;
-            if (!afterActions.Options.PlayableDiscardPenalty) return 0;
+            if (!afterActions.Options.PlayableDiscardPenalty || !afterActions.Options.Processing) return 0;
             if (player.Opening == OpeningKind.None ||
                 (player.Opening == OpeningKind.Pairs && afterActions.SeriesTilesUsed >= 2)) return 0;
 

@@ -36,6 +36,16 @@ public sealed class GameCalendar(TimeProvider clock, Microsoft.Extensions.Option
     }
     public DateTimeOffset NextReset => StartOf(Today.AddDays(1));
     public DateTimeOffset WeekEnd => StartOf(WeekStart(Today).AddDays(7));
+    /// <summary>The Dereceli season of today (1 before the first season starts).</summary>
+    public int Season
+    {
+        get
+        {
+            var o = options.Value; var days = Today.DayNumber - o.SeasonStart.DayNumber;
+            return days < 0 ? 1 : 1 + days / (7 * Math.Max(1, o.SeasonWeeks));
+        }
+    }
+    public DateTimeOffset SeasonEnd => StartOf(options.Value.SeasonStart.AddDays(7 * Math.Max(1, options.Value.SeasonWeeks) * Season));
 
     private static TimeZoneInfo Resolve(string id)
     {

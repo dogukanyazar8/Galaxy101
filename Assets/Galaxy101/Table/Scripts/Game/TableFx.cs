@@ -176,7 +176,8 @@ namespace Galaxy101.Table
         private System.Collections.IEnumerator NuclearRun(Transform tile, Vector3 impact, TableCameraRig rig, System.Action onImpact)
         {
             Vector3 start = tile.position, top = start + Vector3.up * 0.58f; var startScale = tile.localScale; var rotation = tile.rotation;
-            float t0 = Time.time;
+            float t0 = Time.time, emit = 0; var gold = Hex("#FFC94A");
+            // The reference emits once per 60 Hz frame (sparks on half of them): rates, so any frame rate gives the same amount.
             while (Time.time - t0 < 0.8f)
             {
                 float u = (Time.time - t0) / 0.8f, rise = Mathf.Clamp01(u / 0.46f), k = 1 - Mathf.Pow(1 - rise, 3);
@@ -184,15 +185,15 @@ namespace Galaxy101.Table
                 tile.position = Vector3.Lerp(start, top, k) + new Vector3(Random.Range(-tremble, tremble), Random.Range(-tremble, tremble), Random.Range(-tremble, tremble));
                 tile.localScale = startScale * Mathf.Lerp(1.15f, 1.4f, u);
                 tile.rotation = rotation * Quaternion.AngleAxis(u * 25, Vector3.right);
-                if (u > 0.46f && Random.value < 0.5f) SparkAt(tile.position + Random.insideUnitSphere * 0.03f, Hex("#FFC94A"));
+                if (u > 0.46f) for (emit += Time.deltaTime * 30; emit >= 1; emit--) SparkAt(tile.position + Random.insideUnitSphere * 0.03f, gold);
                 yield return null;
             }
-            t0 = Time.time; var from = tile.position;
+            t0 = Time.time; emit = 0; var from = tile.position;
             while (Time.time - t0 < 0.45f)
             {
                 float u = (Time.time - t0) / 0.45f, k = u * u * u;
                 tile.position = Vector3.Lerp(from, impact, k); tile.Rotate(Vector3.up, 900 * Time.deltaTime, Space.World);
-                Smoke(tile.position);
+                for (emit += Time.deltaTime * 60; emit >= 1; emit--) Smoke(tile.position);
                 yield return null;
             }
             tile.position = impact; tile.localScale = startScale;

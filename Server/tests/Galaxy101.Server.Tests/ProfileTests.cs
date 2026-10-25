@@ -85,8 +85,14 @@ public sealed class ProfileTests(ServerFixture server)
     public async Task Deleting_the_account_removes_it_and_its_sessions()
     {
         var (client, tokens) = await server.GuestAsync();
+        var ticket = (await (await client.PostAsync("/v1/realtime/ticket", null)).Content.ReadFromJsonAsync<RealtimeTicketResponse>())!;
         Assert.Equal(HttpStatusCode.NoContent, (await client.DeleteAsync("/v1/account")).StatusCode);
-        Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync("/v1/profile")).StatusCode);
+        // A ticket taken before the deletion opens no socket after it.
+        await Assert.ThrowsAnyAsync<Exception>(() => server.Server.CreateWebSocketClient()
+            .ConnectAsync(new Uri(server.Server.BaseAddress, "/v1/ws?ticket=" + ticket.Ticket), CancellationToken.None));
+        // The account's still-unexpired access token is refused at once: no API, no socket ticket.
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/v1/profile")).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.PostAsync("/v1/realtime/ticket", null)).StatusCode);
         var refresh = await server.CreateClient().PostAsJsonAsync("/v1/auth/refresh", new RefreshRequest { RefreshToken = tokens.RefreshToken });
         Assert.Equal(HttpStatusCode.Unauthorized, refresh.StatusCode);
     }

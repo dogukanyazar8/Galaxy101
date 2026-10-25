@@ -23,7 +23,7 @@ namespace Galaxy101.Table
         public sealed class State
         {
             public string Phase = "draw"; // deal, draw, discard, opp, fin
-            public int Active = 0, DeckCount = 24, Chips = 125400, Unread = 0, OpenSum = 88, TurnSeconds = 30, Pairs;
+            public int Active = 0, DeckCount = 24, Chips = 125400, Unread = 0, OpenSum = 88, OpenBar = 101, TurnSeconds = 30, Pairs, PairsBar = 5;
             public int[] TileCounts = { 21, 21, 21, 21 };
             /// <summary>Opened total (series) or pair count per seat; 0 = not opened.</summary>
             public int[] Opened = { 0, 0, 117, 0 };
@@ -45,7 +45,7 @@ namespace Galaxy101.Table
             public bool DeckOnly, ShowPutBack;
             /// <summary>T28: hand counter and the XP / level pill (bot tables are XP-only).</summary>
             public int MatchHands = 5, Level = 24;
-            public long XpInLevel = 11200, XpNeed = 12000;
+            public long XpInLevel = 6240, XpNeed = 9000;
             public MatchInfo Match;
             /// <summary>T33/T47–T49: every okey on the table with what it stands for, drag targets and refusals; the
             /// tooltip under one okey; the band text while dragging a tile that can take an okey.</summary>
@@ -71,6 +71,7 @@ namespace Galaxy101.Table
         private sealed class BalloonInfo { public string Text; public bool Danger; public float Until, ShownAt, Duration = 2.5f; }
         private Toast flash;
         private readonly Dictionary<int, BalloonInfo> balloons = new Dictionary<int, BalloonInfo>();
+        private readonly List<int> expired = new List<int>(4); // per-frame scratch: no list allocated while nothing expires
         private readonly int[] shownPenalty = new int[4];
         private readonly float[] penaltyChangedAt = { -10, -10, -10, -10 };
         private VisualElement toastLayer;
@@ -113,7 +114,12 @@ namespace Galaxy101.Table
             if (view == null) return;
             float now = Time.realtimeSinceStartup; bool dirty = false;
             if (flash != null && !flash.Sticky && now > flash.Until) { flash = null; RenderToasts(); }
-            foreach (var seat in new List<int>(balloons.Keys)) if (now > balloons[seat].Until) { balloons.Remove(seat); dirty = true; }
+            if (balloons.Count > 0)
+            {
+                expired.Clear();
+                foreach (var pair in balloons) if (now > pair.Value.Until) expired.Add(pair.Key);
+                foreach (var seat in expired) { balloons.Remove(seat); dirty = true; }
+            }
             UpdateWindows();
             if (dirty) Render(Current);
         }
@@ -191,8 +197,11 @@ namespace Galaxy101.Table
 
         public string L(string tr, string en) => view != null ? view.L(tr, en) : tr;
         public string SeatName(int k) => seats != null ? (string)Seat(k)["name"] : "";
-        /// <summary>A server match's seat: name, initials, colour, level and whether the server's bot plays it.</summary>
-        public void SetSeat(int k, string name, string color, int level, bool bot)
+        /// <summary>
+        /// A server match's seat: name, initials, colour, level, whether the server's bot plays it, and the account's
+        /// league, win rate and hands for the player card (none for a bot: the sample figures never show for a real seat).
+        /// </summary>
+        public void SetSeat(int k, string name, string color, int level, bool bot, string league = null, int winRate = 0, int hands = 0)
         {
             if (seats == null) return;
             // Server bots arrive as "Bot · Ayşe": the badge says BOT, the plate the name.
@@ -200,6 +209,8 @@ namespace Galaxy101.Table
             var seat = Seat(k); seat["name"] = name; seat["ini"] = Galaxy101.ProfileValidation.Initials(name ?? "");
             if (!string.IsNullOrEmpty(color)) seat["color"] = color;
             seat["lv"] = Math.Max(1, level); seat["bot"] = bot;
+            seat["rank"] = league == null ? "BOT" : (string)model.Content["leaderboard"]?["leagues"]?[view.Loc.Language]?[league] ?? league;
+            seat["win"] = Math.Max(0, Math.Min(100, winRate)); seat["hands"] = Math.Max(0, hands);
         }
         public string SeatFirstName(int k) => seats != null ? FirstName(k) : "";
 
@@ -233,6 +244,8 @@ namespace Galaxy101.Table
             string quality = ((string)model.Settings["quality"] ?? "Yüksek").ToLowerInvariant();
             bool low = quality == "düşük" || quality == "low", medium = quality == "orta" || quality == "medium";
             viewMsaa = low ? 1 : medium ? 2 : 4; viewScaleCap = low ? 1 : medium ? 1.5f : 2.2f;
+            // Düşük also drops the table's shadow pass and halves the tile trails.
+            table.SetEffectQuality(low ? 0 : medium ? 1 : 2); TileView.TrailScale = low ? .5f : 1;
             background.UseTableLayout(TableTheme.Load(table.Planet).Pg);
             background.SetFocused(Application.isFocused || Application.isBatchMode);
 
@@ -312,8 +325,11 @@ namespace Galaxy101.Table
 
         public void Render(State state)
         {
+            var chipsBefore = Current.Chips;
             Current = state ?? throw new ArgumentNullException(nameof(state));
             if (view == null) return; // rendered once Initialize runs
+            // An open gift drawer or player card shows the balance and what it affords: a wallet change redraws it.
+            if (state.Chips != chipsBefore && (Window == "gift" || Window == "card")) RenderWindows(true);
             seenNow.Clear();
             motions.Clear(); anchors.Clear(); dynamicAnchors.Clear(); anchorLayer.Clear(); hudLayer.Clear();
             for (int k = 1; k <= 3; k++) BuildOpponent(k, state);
@@ -876,7 +892,7 @@ namespace Galaxy101.Table
             var count = Text(s.DeckCount.ToString(), "Montserrat-700", 16, "#F4F1E8"); count.name = "deck-count"; count.style.minWidth = 22; deck.Add(count);
             bar.Add(deck);
 
-            // XP pill instead of chips (T28): level disc, 100×7 bar, "11.200 / 12.000 XP".
+            // XP pill instead of chips (T28): level disc, 100×7 bar, "6.240 / 9.000 XP".
             var xp = Row(8); xp.name = "xp-pill"; Pad(xp, 5, 14, 5, 5); view.Decorate(xp, "var(--dp)", 18);
             var levelDisc = new VisualElement { pickingMode = PickingMode.Ignore }; levelDisc.style.width = levelDisc.style.height = 30; levelDisc.style.alignItems = Align.Center; levelDisc.style.justifyContent = Justify.Center;
             view.Decorate(levelDisc, "linear-gradient(var(--a1),var(--a2))", 15); levelDisc.Add(Text(s.Level.ToString(), "Montserrat-800", 12, "var(--aT)")); xp.Add(levelDisc);
@@ -1167,12 +1183,12 @@ namespace Galaxy101.Table
             view.Decorate(meter, "rgba(5,8,22,.62)", 22); Border(meter, 1, new Color(1, 1, 1, .08f)); GalaxyFilters.BackdropBlur(meter, 6);
             var gauge = new VisualElement { pickingMode = PickingMode.Ignore }; gauge.style.width = gauge.style.height = 62;
             bool opened = s.Opened[0] > 0;
-            var arc = new ArcRing(view.C(s.OpenSum >= 101 || opened ? "#3CCB6E" : "#FF5E6C"), new Color(1, 1, 1, .1f)) { Fraction = Mathf.Min(100, Mathf.Round(s.OpenSum / 101f * 100)) / 100f };
+            var arc = new ArcRing(view.C(s.OpenSum >= s.OpenBar || opened ? "#3CCB6E" : "#FF5E6C"), new Color(1, 1, 1, .1f)) { Fraction = Mathf.Min(100, Mathf.Round(s.OpenSum / (float)s.OpenBar * 100)) / 100f };
             MenuView.Place(arc, 0, 0, 62, 62); gauge.Add(arc);
             var dial = new VisualElement { pickingMode = PickingMode.Ignore }; MenuView.Place(dial, 6, 6, 50, 50); dial.style.alignItems = Align.Center; dial.style.justifyContent = Justify.Center;
             view.Decorate(dial, "var(--dp)", 25);
             var sum = Text(s.OpenSum.ToString(), "Montserrat-700", 19, "#F4F1E8"); sum.name = "table-open-sum"; dial.Add(sum);
-            dial.Add(Text(opened ? L("AÇIK", "OPEN") : "/ 101", "Baloo2-800", 9, "var(--mt)"));
+            dial.Add(Text(opened ? L("AÇIK", "OPEN") : "/ " + s.OpenBar, "Baloo2-800", 9, "var(--mt)"));
             gauge.Add(dial); meter.Add(gauge);
 
             var column = new VisualElement { pickingMode = PickingMode.Ignore };
@@ -1204,7 +1220,7 @@ namespace Galaxy101.Table
             }
             if (!opened && s.Pairs >= 3 || s.OpenedPairs[0])
             {
-                var pairs = ActionButton("table-pairs", L("Çift aç · " + s.Pairs + "/5", "Open pairs · " + s.Pairs + "/5"), s.CanPair, false, 14, "pairs");
+                var pairs = ActionButton("table-pairs", L("Çift aç · " + s.Pairs + "/" + s.PairsBar, "Open pairs · " + s.Pairs + "/" + s.PairsBar), s.CanPair, false, 14, "pairs");
                 // warnB(): fewer than five pairs is a short opening — the same orange-red as Aç.
                 if (s.ShortPairs && s.CanPair) { view.Decorate(pairs, "linear-gradient(#FF9A4D,#E8573A)", 15, 5, "#9E3418"); pairs.style.color = view.C("#fff"); pairs.EnableInClassList("short", true); }
                 buttons.Add(pairs);

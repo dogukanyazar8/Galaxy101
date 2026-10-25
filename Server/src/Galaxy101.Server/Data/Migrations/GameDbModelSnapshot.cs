@@ -20,6 +20,7 @@ namespace Galaxy101.Server.Data.Migrations
                 .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Galaxy101.Server.Data.Account", b =>
@@ -32,6 +33,15 @@ namespace Galaxy101.Server.Data.Migrations
                     b.Property<string>("AcceptedPrivacyVersion")
                         .HasColumnType("text")
                         .HasColumnName("accepted_privacy_version");
+
+                    b.Property<string>("BanReason")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("ban_reason");
+
+                    b.Property<DateTimeOffset?>("BannedUntil")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("banned_until");
 
                     b.Property<string>("Color")
                         .IsRequired()
@@ -104,6 +114,12 @@ namespace Galaxy101.Server.Data.Migrations
                     b.HasIndex("FriendCode")
                         .IsUnique()
                         .HasDatabaseName("ix_accounts_friend_code");
+
+                    b.HasIndex("Name")
+                        .HasDatabaseName("ix_accounts_name");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Name"), "gin");
+                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("Name"), new[] { "gin_trgm_ops" });
 
                     b.ToTable("accounts", (string)null);
                 });
@@ -343,13 +359,12 @@ namespace Galaxy101.Server.Data.Migrations
 
             modelBuilder.Entity("Galaxy101.Server.Data.MatchParticipant", b =>
                 {
-                    b.Property<Guid>("MatchId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("match_id");
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
-                    b.Property<int>("Seat")
-                        .HasColumnType("integer")
-                        .HasColumnName("seat");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<Guid?>("AccountId")
                         .HasColumnType("uuid")
@@ -371,6 +386,10 @@ namespace Galaxy101.Server.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("lp_delta");
 
+                    b.Property<Guid>("MatchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("match_id");
+
                     b.Property<string>("Mode")
                         .IsRequired()
                         .HasMaxLength(12)
@@ -381,6 +400,10 @@ namespace Galaxy101.Server.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("place");
 
+                    b.Property<int>("Seat")
+                        .HasColumnType("integer")
+                        .HasColumnName("seat");
+
                     b.Property<int>("Total")
                         .HasColumnType("integer")
                         .HasColumnName("total");
@@ -389,12 +412,15 @@ namespace Galaxy101.Server.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("xp");
 
-                    b.HasKey("MatchId", "Seat")
+                    b.HasKey("Id")
                         .HasName("pk_match_participants");
 
                     b.HasIndex("AccountId", "FinishedAt")
                         .IsDescending(false, true)
                         .HasDatabaseName("ix_match_participants_account_id_finished_at");
+
+                    b.HasIndex("MatchId", "Seat")
+                        .HasDatabaseName("ix_match_participants_match_id_seat");
 
                     b.ToTable("match_participants", (string)null);
                 });
@@ -529,11 +555,94 @@ namespace Galaxy101.Server.Data.Migrations
                     b.ToTable("password_logins", (string)null);
                 });
 
+            modelBuilder.Entity("Galaxy101.Server.Data.PlayerBlock", b =>
+                {
+                    b.Property<Guid>("BlockerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("blocker_id");
+
+                    b.Property<Guid>("BlockedId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("blocked_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.HasKey("BlockerId", "BlockedId")
+                        .HasName("pk_blocks");
+
+                    b.HasIndex("BlockedId")
+                        .HasDatabaseName("ix_blocks_blocked_id");
+
+                    b.ToTable("blocks", (string)null);
+                });
+
+            modelBuilder.Entity("Galaxy101.Server.Data.PlayerReport", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("details");
+
+                    b.Property<Guid?>("MatchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("match_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid>("ReportedId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reported_id");
+
+                    b.Property<Guid?>("ReporterId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reporter_id");
+
+                    b.Property<DateTimeOffset?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("resolved_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_reports");
+
+                    b.HasIndex("ReportedId")
+                        .HasDatabaseName("ix_reports_reported_id");
+
+                    b.HasIndex("ResolvedAt", "CreatedAt")
+                        .HasDatabaseName("ix_reports_resolved_at_created_at");
+
+                    b.HasIndex("ReporterId", "ReportedId", "CreatedAt")
+                        .HasDatabaseName("ix_reports_reporter_id_reported_id_created_at");
+
+                    b.ToTable("reports", (string)null);
+                });
+
             modelBuilder.Entity("Galaxy101.Server.Data.PlayerStats", b =>
                 {
                     b.Property<Guid>("AccountId")
                         .HasColumnType("uuid")
                         .HasColumnName("account_id");
+
+                    b.Property<int>("BestLp")
+                        .HasColumnType("integer")
+                        .HasColumnName("best_lp");
 
                     b.Property<int>("BestOpening")
                         .HasColumnType("integer")
@@ -555,6 +664,10 @@ namespace Galaxy101.Server.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("lp");
 
+                    b.Property<int>("LpSeason")
+                        .HasColumnType("integer")
+                        .HasColumnName("lp_season");
+
                     b.PrimitiveCollection<int[]>("ModeHands")
                         .IsRequired()
                         .HasColumnType("integer[]")
@@ -572,6 +685,10 @@ namespace Galaxy101.Server.Data.Migrations
                     b.Property<int>("PairsOpenings")
                         .HasColumnType("integer")
                         .HasColumnName("pairs_openings");
+
+                    b.Property<int>("Shield")
+                        .HasColumnType("integer")
+                        .HasColumnName("shield");
 
                     b.Property<int>("Wins")
                         .HasColumnType("integer")
@@ -637,6 +754,32 @@ namespace Galaxy101.Server.Data.Migrations
                         .HasDatabaseName("ix_refresh_tokens_token_hash");
 
                     b.ToTable("refresh_tokens", (string)null);
+                });
+
+            modelBuilder.Entity("Galaxy101.Server.Data.SeasonResult", b =>
+                {
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("account_id");
+
+                    b.Property<int>("Season")
+                        .HasColumnType("integer")
+                        .HasColumnName("season");
+
+                    b.Property<int>("BestLp")
+                        .HasColumnType("integer")
+                        .HasColumnName("best_lp");
+
+                    b.Property<string>("League")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("character varying(4)")
+                        .HasColumnName("league");
+
+                    b.HasKey("AccountId", "Season")
+                        .HasName("pk_season_results");
+
+                    b.ToTable("season_results", (string)null);
                 });
 
             modelBuilder.Entity("Galaxy101.Server.Data.StorePurchase", b =>
@@ -812,6 +955,39 @@ namespace Galaxy101.Server.Data.Migrations
                         .HasConstraintName("fk_password_logins_accounts_account_id");
                 });
 
+            modelBuilder.Entity("Galaxy101.Server.Data.PlayerBlock", b =>
+                {
+                    b.HasOne("Galaxy101.Server.Data.Account", null)
+                        .WithMany()
+                        .HasForeignKey("BlockedId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_blocks_accounts_blocked_id");
+
+                    b.HasOne("Galaxy101.Server.Data.Account", null)
+                        .WithMany()
+                        .HasForeignKey("BlockerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_blocks_accounts_blocker_id");
+                });
+
+            modelBuilder.Entity("Galaxy101.Server.Data.PlayerReport", b =>
+                {
+                    b.HasOne("Galaxy101.Server.Data.Account", null)
+                        .WithMany()
+                        .HasForeignKey("ReportedId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_reports_accounts_reported_id");
+
+                    b.HasOne("Galaxy101.Server.Data.Account", null)
+                        .WithMany()
+                        .HasForeignKey("ReporterId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_reports_accounts_reporter_id");
+                });
+
             modelBuilder.Entity("Galaxy101.Server.Data.PlayerStats", b =>
                 {
                     b.HasOne("Galaxy101.Server.Data.Account", null)
@@ -830,6 +1006,16 @@ namespace Galaxy101.Server.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_refresh_tokens_accounts_account_id");
+                });
+
+            modelBuilder.Entity("Galaxy101.Server.Data.SeasonResult", b =>
+                {
+                    b.HasOne("Galaxy101.Server.Data.Account", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_season_results_accounts_account_id");
                 });
 
             modelBuilder.Entity("Galaxy101.Server.Data.StorePurchase", b =>

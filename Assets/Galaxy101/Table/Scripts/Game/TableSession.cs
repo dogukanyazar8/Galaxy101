@@ -40,9 +40,19 @@ namespace Galaxy101.Table
         public Guid MatchId { get; }
         public MatchWire Wire { get; private set; }
         public MatchStartMessage Start { get; private set; }
+        /// <summary>İzle: watching from seat 0 with nobody's tiles; the table never plays a turn.</summary>
+        public bool Spectating => Start?.Spectator == true;
+        /// <summary>Someone took a free seat during the match (Start.Seats is updated first).</summary>
+        public event Action SeatsChanged;
         public MatchStateMessage State { get; private set; }
         public HandEndMessage HandEnd { get; private set; }
         public MatchEndMessage End { get; private set; }
+        /// <summary>A treat or gift the server confirmed (mine too): sender, kind, recipient or null for the whole table (local seats).</summary>
+        public event Action<int, string, int?> GiftReceived;
+        /// <summary>An emoji the server passed on (mine too): sender's local seat, emoji.</summary>
+        public event Action<int, string> EmoteReceived;
+        /// <summary>A chat line the server passed on (mine too): sender's local seat, text, or a ready phrase's index.</summary>
+        public event Action<int, string, int?> ChatReceived;
         /// <summary>Hands played so far in the match (0-based index of the current hand).</summary>
         public int HandIndex => State?.HandIndex ?? 0;
         public event Action Changed;
@@ -51,6 +61,11 @@ namespace Galaxy101.Table
         {
             this.online = online; MatchId = matchId;
             subscriptions.Add(online.Realtime.On<MatchStartMessage>(MessageTypes.MatchStart, m => { if (m?.MatchId != MatchId) return; Start = m; Wire = new MatchWire(m.YourSeat); Changed?.Invoke(); }));
+            subscriptions.Add(online.Realtime.On<MatchSeatsMessage>(MessageTypes.MatchSeats, m =>
+            {
+                if (m?.MatchId != MatchId || Start == null) return;
+                Start.Seats = m.Seats; SeatsChanged?.Invoke();
+            }));
             subscriptions.Add(online.Realtime.On<MatchStateMessage>(MessageTypes.MatchState, m =>
             {
                 if (m?.MatchId != MatchId || m.View == null) return;
@@ -59,6 +74,13 @@ namespace Galaxy101.Table
             }));
             subscriptions.Add(online.Realtime.On<HandEndMessage>(MessageTypes.MatchHandEnd, m => { if (m?.MatchId != MatchId) return; HandEnd = m; Changed?.Invoke(); }));
             subscriptions.Add(online.Realtime.On<MatchEndMessage>(MessageTypes.MatchEnd, m => { if (m?.MatchId != MatchId) return; End = m; Changed?.Invoke(); }));
+            subscriptions.Add(online.Realtime.On<GiftMessage>(MessageTypes.MatchGift, m =>
+            {
+                if (m?.MatchId != MatchId || Wire == null || string.IsNullOrEmpty(m.Gift)) return;
+                GiftReceived?.Invoke(Wire.FromSeat(m.Seat), m.Gift, m.TargetSeat is int to ? Wire.FromSeat(to) : (int?)null);
+            }));
+            subscriptions.Add(online.Realtime.On<EmoteMessage>(MessageTypes.MatchEmote, m => { if (m?.MatchId == MatchId && Wire != null && !string.IsNullOrEmpty(m.Emote)) EmoteReceived?.Invoke(Wire.FromSeat(m.Seat), m.Emote); }));
+            subscriptions.Add(online.Realtime.On<ChatMessage>(MessageTypes.MatchChat, m => { if (m?.MatchId == MatchId && Wire != null) ChatReceived?.Invoke(Wire.FromSeat(m.Seat), m.Text, m.Quick); }));
             // Back after a dropped socket: the match went on without us (the server played the seat), ask for the snapshot.
             Action resync = () => { if (End == null) _ = online.Realtime.RequestAsync(MessageTypes.MatchSync, new MatchCommandMessage { MatchId = MatchId }); };
             online.Reconnected += resync; subscriptions.Add(() => online.Reconnected -= resync);
@@ -110,6 +132,65 @@ namespace Galaxy101.Table
                 await Task.Yield();
             }
             return true;
+        }
+
+        /// <summary>Treat a seat (local; null: everyone). The server charges and shows it at every seat. Null, or the error code.</summary>
+        public async Task<string> GiftAsync(string gift, int? target)
+        {
+            if (Wire == null) return "offline";
+            var ack = await online.Realtime.RequestAsync(MessageTypes.MatchGift, new GiftMessage { MatchId = MatchId, Gift = gift, TargetSeat = target is int to ? Wire.ToSeat(to) : (int?)null });
+            return ack.Ok ? null : ack.Code ?? "error";
+        }
+
+        public async Task<string> ChatAsync(string text, int? quick)
+        {
+            var ack = await online.Realtime.RequestAsync(MessageTypes.MatchChat, new ChatMessage { MatchId = MatchId, Text = text, Quick = quick });
+            return ack.Ok ? null : ack.Code ?? "error";
+        }
+
+        /// <summary>A friend request to the player in a local seat, by their friend code. Null, or the error code.</summary>
+        /// <summary>The account behind a seat; null for a server bot (no friend code, nothing to block or report).</summary>
+        private Guid? AccountOf(int seat)
+        {
+            var player = Wire == null ? null : Start?.Seats?.Find(s => s.Seat == Wire.ToSeat(seat))?.Player;
+            return string.IsNullOrEmpty(player?.FriendCode) ? (Guid?)null : player.Id;
+        }
+
+        public bool IsPerson(int seat) => AccountOf(seat) != null;
+
+        /// <summary>Engelle / Engeli kaldır: the blocked player's chat and emotes stop reaching me (this table included).</summary>
+        public async Task<string> BlockAsync(int seat, bool on)
+        {
+            if (!(AccountOf(seat) is Guid id)) return "not_found";
+            try
+            {
+                if (on) await online.Api.PostAsync<Newtonsoft.Json.Linq.JObject>("/v1/players/" + id + "/block", null);
+                else await online.Api.SendAsync<Newtonsoft.Json.Linq.JObject>("DELETE", "/v1/players/" + id + "/block");
+                return null;
+            }
+            catch (ApiException e) { return e.Offline ? "offline" : e.Code; }
+        }
+
+        /// <summary>Şikayet et ("chat", "name" or "cheating"), with this match for the moderators.</summary>
+        public async Task<string> ReportAsync(int seat, string reason)
+        {
+            if (!(AccountOf(seat) is Guid id)) return "not_found";
+            try { await online.Api.PostAsync<Newtonsoft.Json.Linq.JObject>("/v1/players/" + id + "/report", new ReportRequest { Reason = reason, MatchId = MatchId }); return null; }
+            catch (ApiException e) { return e.Offline ? "offline" : e.Code; }
+        }
+
+        public async Task<string> FriendRequestAsync(int seat)
+        {
+            var code = Wire == null ? null : Start?.Seats?.Find(s => s.Seat == Wire.ToSeat(seat))?.Player?.FriendCode;
+            if (string.IsNullOrEmpty(code)) return "not_found"; // a server bot has no account
+            try { await online.Api.PostAsync<Newtonsoft.Json.Linq.JObject>("/v1/friends/requests", new FriendCodeRequest { Code = code }); return null; }
+            catch (ApiException e) { return e.Offline ? "offline" : e.Code; }
+        }
+
+        public async Task<string> EmoteAsync(string emote)
+        {
+            var ack = await online.Realtime.RequestAsync(MessageTypes.MatchEmote, new EmoteMessage { MatchId = MatchId, Emote = emote });
+            return ack.Ok ? null : ack.Code ?? "error";
         }
 
         /// <summary>Masadan kalk: the seat is forfeited; the server plays it to the end.</summary>

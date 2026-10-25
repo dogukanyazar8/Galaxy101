@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Okey101.Presentation;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -20,6 +21,14 @@ namespace Okey101.Editor
             for (var i = 0; i < SceneManager.sceneCount; i++)
                 if (SceneManager.GetSceneAt(i).isDirty)
                     throw new InvalidOperationException("Save open scenes before generating the A0 table. No scene was discarded.");
+            // Everything below rebuilds the classic table's prefabs, materials and scene from scratch: asked before any of
+            // it runs, never in batch mode, so "Keep" leaves every existing asset as it is.
+            if (File.Exists(TableScene) && (UnityEngine.Application.isBatchMode || !EditorUtility.DisplayDialog("Okey 101",
+                    "Rebuild the classic table (" + TableScene + ", its prefabs and materials) from scratch? Changes made to them are lost.", "Rebuild", "Keep")))
+            {
+                Debug.Log("T12_ASSETS_READY (kept) " + TableScene);
+                return;
+            }
             ScenarioExporter.Export();
             Directory.CreateDirectory(Root + "/Scenes");
             Directory.CreateDirectory(Root + "/Art/Materials");
@@ -43,9 +52,13 @@ namespace Okey101.Editor
             var pause=SavePrefab(pauseSource,Root+"/Prefabs/UI/PauseMenu.prefab").GetComponent<PauseMenu>();
             var resultSource=new GameObject("Result panel",typeof(RectTransform),typeof(ResultPanel));resultSource.GetComponent<ResultPanel>().BuildView();
             var result=SavePrefab(resultSource,Root+"/Prefabs/UI/ResultPanel.prefab").GetComponent<ResultPanel>();
-            var bootstrap = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            PrefabUtility.InstantiatePrefab(menu);
-            if (!EditorSceneManager.SaveScene(bootstrap, BootstrapScene)) throw new IOException("Could not save Bootstrap scene.");
+            // The Bootstrap scene now opens the Galaxy menu (MenuAssetBuilder): this A0 tool only creates it when missing.
+            if (!File.Exists(BootstrapScene))
+            {
+                var bootstrap = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                PrefabUtility.InstantiatePrefab(menu);
+                if (!EditorSceneManager.SaveScene(bootstrap, BootstrapScene)) throw new IOException("Could not save Bootstrap scene.");
+            }
             var tableScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var root = new GameObject("Local table");
             var cameraObject = new GameObject("Table Camera", typeof(Camera), typeof(AudioListener));
@@ -56,7 +69,11 @@ namespace Okey101.Editor
             root.AddComponent<DebugPanel>().Configure(System.Array.ConvertAll(ScenarioExporter.Names,
                 name => AssetDatabase.LoadAssetAtPath<TextAsset>(ScenarioExporter.Root + "/" + name + ".json")));
             if (!EditorSceneManager.SaveScene(tableScene, TableScene)) throw new IOException("Could not save Table scene.");
-            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(BootstrapScene, true), new EditorBuildSettingsScene(TableScene, true) };
+            // Bootstrap first and the classic table listed; every other scene in the build (GalaxyTable.unity) stays.
+            var scenes = EditorBuildSettings.scenes.Where(s => s.path != BootstrapScene).ToList();
+            scenes.Insert(0, new EditorBuildSettingsScene(BootstrapScene, true));
+            if (!scenes.Any(s => s.path == TableScene)) scenes.Add(new EditorBuildSettingsScene(TableScene, true));
+            EditorBuildSettings.scenes = scenes.ToArray();
             AssetDatabase.SaveAssets();
             Debug.Log("T12_ASSETS_READY " + TableScene);
         }

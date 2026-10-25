@@ -36,10 +36,10 @@ public sealed class SettlementTests
     {
         var o = Settlement.Settle(GameModes.Ranked, 0, [-200, 50, 60, 70], 0b0001, Options);
         Assert.Equal(4, o[0].Place);
-        Assert.Equal(-16, o[0].LpDelta);
+        Assert.Equal(-20, o[0].LpDelta); // Bronz table: +30 / +10 / −10 / −20
         Assert.Equal(0, o[0].WeeklyPoints);
         Assert.Equal(1, o[1].Place);
-        Assert.Equal(24, o[1].LpDelta);
+        Assert.Equal(30, o[1].LpDelta);
     }
 
     [Fact]
@@ -52,11 +52,33 @@ public sealed class SettlementTests
     }
 
     [Fact]
-    public void Pairs_team_with_a_leaver_forfeits()
+    public void Pairs_leaver_is_played_by_a_bot_and_the_partner_takes_the_whole_team_prize()
     {
+        // Seat 2 left; a bot finished its hands. Team 0 (seats 0, 2) still has the best total, so it wins, and the
+        // partner who stayed takes both halves. The leaver loses the stake, ranks last and earns nothing.
         var o = Settlement.Settle(GameModes.Pairs, 1000, [-500, 30, -500, 40], 0b0100, Options);
+        Assert.Equal([1, 2, 2, 2], o.Select(x => x.Place));
+        Assert.Equal([3000, -1000, -1000, -1000], o.Select(x => x.ChipDelta));
+        Assert.Equal(0, o.Sum(x => x.ChipDelta));
+        Assert.Equal(0, o[2].Payout);
+        Assert.Equal(0, o[2].WeeklyPoints);
+        Assert.Equal((30 + 15) / 2, o[0].WeeklyPoints);
+    }
+
+    [Fact]
+    public void Pairs_team_with_a_leaver_is_ranked_by_its_total_and_can_still_lose()
+    {
+        var o = Settlement.Settle(GameModes.Pairs, 1000, [100, 30, 200, 40], 0b0100, Options);
         Assert.Equal([2, 1, 2, 1], o.Select(x => x.Place));
-        Assert.Equal(-1000, o[0].ChipDelta);
+        Assert.Equal([-1000, 1000, -1000, 1000], o.Select(x => x.ChipDelta));
+    }
+
+    [Fact]
+    public void Solo_leaver_still_forfeits_whatever_the_total()
+    {
+        var o = Settlement.Settle(GameModes.Solo, 1000, [-500, 30, 60, 40], 0b0001, Options);
+        Assert.Equal([4, 1, 3, 2], o.Select(x => x.Place));
+        Assert.Equal([-1000, 3000, -1000, -1000], o.Select(x => x.ChipDelta));
     }
 
     [Fact]
@@ -90,6 +112,25 @@ public sealed class WireTests
             Assert.True(applied.Success, applied.Error.ToString());
             state = applied.Value;
         }
+    }
+
+    [Fact]
+    public void Katlamali_rules_and_opening_values_reach_the_wire()
+    {
+        // Katlamalı Eşli with "Ortağın açılışı eşiği yükseltsin" off: seat 1 opened at 117, so seat 0 needs 118.
+        var start = RoundFactory.Create(12345, Guid.NewGuid(), 0, new RuleOptions(true, true, doubling: true, partnerOpeningsRaise: false));
+        var players = start.Players.ToArray();
+        players[1] = new PlayerState(players[1].Hand, OpeningKind.Series, 0, 117);
+        var state = new RoundState(start.RoundId, start.Version, start.Seed, start.StartingPlayer, start.ActivePlayer, start.TurnNumber, start.Phase,
+            start.Indicator, start.Stock, players, start.Table, start.Discards, start.PendingDraw, start.OpeningAtTurnStart, start.SeriesTilesUsed,
+            start.IsInitialTurn, start.LastAcceptedSequences, options: start.Options, deal: start.Deal);
+        var dto = Wire.ToDto(PlayerViewProjector.ForPlayer(state, 0));
+        Assert.NotNull(dto.Rules);
+        Assert.True(dto.Rules!.Doubling);
+        Assert.False(dto.Rules.PartnerRaises);
+        Assert.Equal(117, dto.Players[1].OpeningValue);
+        Assert.Equal(0, dto.Players[0].OpeningValue);
+        Assert.Equal(118, Okey101.Core.Rules.TableEvaluator.OpeningBar(state, 0, OpeningKind.Series));
     }
 
     [Fact]

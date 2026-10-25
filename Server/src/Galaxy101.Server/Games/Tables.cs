@@ -34,6 +34,8 @@ public sealed class Tables(MatchManager matches, Lobby lobby, ConnectionRegistry
         public DateTimeOffset? StartsAt { get; set; }
         public int Generation { get; set; }
         public MatchSession? Match { get; set; }
+        /// <summary>The match is being created from a snapshot of the seats (stakes being taken): seats are frozen.</summary>
+        public bool Starting { get; set; }
         public bool Closed { get; set; }
         public bool IsBot(int s) => (BotMask & (1 << s)) != 0;
         public IEnumerable<Guid> Humans => Enumerable.Range(0, 4).Where(s => Seats[s] is not null && !IsBot(s)).Select(s => Seats[s]!.Value);
@@ -47,7 +49,7 @@ public sealed class Tables(MatchManager matches, Lobby lobby, ConnectionRegistry
     private bool hooked;
 
     public bool Handles(string type) => type is LobbyMessageTypes.Subscribe or LobbyMessageTypes.Unsubscribe or LobbyMessageTypes.Create
-        or LobbyMessageTypes.Join or LobbyMessageTypes.Leave or LobbyMessageTypes.AddBot or LobbyMessageTypes.Kick or LobbyMessageTypes.Start;
+        or LobbyMessageTypes.Join or LobbyMessageTypes.Watch or LobbyMessageTypes.Leave or LobbyMessageTypes.AddBot or LobbyMessageTypes.Kick or LobbyMessageTypes.Start;
 
     /// <summary>Is <paramref name="account"/> seated at the table with <paramref name="code"/> (friend invites).</summary>
     public (bool Member, long Stake) Membership(Guid account, string code)
@@ -60,6 +62,7 @@ public sealed class Tables(MatchManager matches, Lobby lobby, ConnectionRegistry
         if (o is null) return ErrorCodes.Validation;
         o.Name = (o.Name ?? "").Trim();
         if (o.Name.Length is 0 or > 28) return ErrorCodes.Validation;
+        o.Name = Social.TextFilter.Mask(o.Name); // listed to everyone in the lobby
         if (o.Type is not ("single" or "pairs") || o.Visibility is not ("public" or "private") || o.Chat is not ("on" or "quick" or "off")) return ErrorCodes.Validation;
         if (o.Pin is { Length: > 0 } pin && (pin.Length != 4 || !pin.All(char.IsAsciiDigit))) return ErrorCodes.Validation;
         if (o.Pin is { Length: 0 }) o.Pin = null;
@@ -84,9 +87,10 @@ public sealed class Tables(MatchManager matches, Lobby lobby, ConnectionRegistry
                 return await CreateAsync(account, message.Data.Deserialize<TableCreateMessage>(Connection.Json)?.Options);
             case LobbyMessageTypes.Join:
                 return await JoinAsync(account, message.Data.Deserialize<TableJoinMessage>(Connection.Json)!);
+            case LobbyMessageTypes.Watch:
+                return await WatchAsync(account, message.Data.Deserialize<TableJoinMessage>(Connection.Json)!);
             case LobbyMessageTypes.Leave:
-                Remove(account, null);
-                return null;
+                return Remove(account, null);
             case LobbyMessageTypes.AddBot:
                 return HostAction(account, message.Data.Deserialize<TableSeatMessage>(Connection.Json)!.Seat, add: true);
             case LobbyMessageTypes.Kick:
@@ -112,10 +116,15 @@ public sealed class Tables(MatchManager matches, Lobby lobby, ConnectionRegistry
             if (hooked) return;
             hooked = true;
         }
+        matches.SeatsChanged += session =>
+        {
+            bool listed; lock (gate) listed = tables.Values.Any(t => t.Match == session);
+            if (listed) PublishList();
+        };
         matches.Closed += session =>
         {
             Table? done = null;
-            lock (gate) { done = tables.Values.FirstOrDefault(t => t.Match == session); if (done is not null) tables.Remove(done.Id); }
+            lock (gate) { done = tables.Values.FirstOrDefault(t => t.Match == session); if (done is not null) { tables.Remove(done.Id); PruneNames(); } }
             if (done is not null) PublishList();
         };
     }
@@ -147,30 +156,71 @@ public sealed class Tables(MatchManager matches, Lobby lobby, ConnectionRegistry
         return null;
     }
 
-    private async Task<string?> JoinAsync(Guid account, TableJoinMessage join)
+    /// <summary>The table a join or watch names (id from the list, or the code), checked for its PIN; or the error.</summary>
+    private (Table? Table, string? Error) Find(TableJoinMessage join)
     {
-        Table? found; long stake;
+        var code = (join.Code ?? "").Trim().ToUpperInvariant();
+        if (code.Length == 4) code = "GX-" + code;
+        var found = join.TableId is { } id ? tables.GetValueOrDefault(id) : tables.Values.FirstOrDefault(t => t.Code == code);
+        if (found is null || found.Closed) return (null, TableErrors.Closed);
+        // Private tables are reached by code only.
+        if (join.TableId is not null && found.Options.Visibility == "private") return (null, TableErrors.Closed);
+        if (found.Options.Pin is { } pin && !CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(pin), Encoding.UTF8.GetBytes(join.Pin ?? "")))
+            return (null, TableErrors.WrongPin);
+        return (found, null);
+    }
+
+    /// <summary>İzle: a playing table that allows spectators.</summary>
+    private async Task<string?> WatchAsync(Guid account, TableJoinMessage join)
+    {
+        MatchSession? running;
         lock (gate)
         {
-            var code = (join.Code ?? "").Trim().ToUpperInvariant();
-            if (code.Length == 4) code = "GX-" + code;
-            found = join.TableId is { } id ? tables.GetValueOrDefault(id) : tables.Values.FirstOrDefault(t => t.Code == code);
-            if (found is null || found.Closed) return TableErrors.Closed;
-            // Private tables are reached by code only.
-            if (join.TableId is not null && found.Options.Visibility == "private") return TableErrors.Closed;
-            if (found.Match is not null) return TableErrors.Playing;
-            if (found.Full) return TableErrors.Full;
-            if (found.Options.Pin is { } pin && !CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(pin), Encoding.UTF8.GetBytes(join.Pin ?? "")))
-                return TableErrors.WrongPin;
+            var (found, error) = Find(join);
+            if (found is null) return error;
+            if (!found.Options.Spectators) return ErrorCodes.Validation;
+            running = found.Match;
+        }
+        if (running is null) return TableErrors.NotReady;
+        if (await matches.WatchAsync(account, running) is { } refused) return refused;
+        Handover(account, join, running, -1, "watch");
+        return null;
+    }
+
+    /// <summary>The lobby hands a newcomer or a spectator over to the table (as a waiting room does when its match starts).</summary>
+    private void Handover(Guid account, TableJoinMessage join, MatchSession running, int seat, string reason)
+    {
+        TableSummary? summary;
+        lock (gate) summary = tables.Values.FirstOrDefault(t => t.Match == running) is { } t ? Summary(t) : null;
+        live.Send(account, LobbyMessageTypes.State, new TableStateMessage { Table = summary, Closed = true, MatchId = running.Id, YourSeat = seat, Reason = reason });
+    }
+
+    private async Task<string?> JoinAsync(Guid account, TableJoinMessage join)
+    {
+        Table? found; long stake; MatchSession? running;
+        lock (gate)
+        {
+            (found, var error) = Find(join);
+            if (found is null) return error;
+            running = found.Match;
+            if (running is null && found.Starting) return TableErrors.Playing;
+            if (running is null && found.Full) return TableErrors.Full;
             stake = found.Options.Stake;
         }
-        if (await EntryAsync(account, stake) is { } error) return error;
+        if (await EntryAsync(account, stake) is { } refused) return refused;
+        // Oyuna katıl: a playing table takes a newcomer on a seat the server plays.
+        if (running is not null)
+        {
+            if (await matches.TakeSeatAsync(account, running, join.Seat) is { } taken) return taken;
+            Handover(account, join, running, running.SeatOf(account), "joined");
+            return null;
+        }
         if (!lobby.TryEnter(account, LobbyPlace.Room)) return ErrorCodes.Conflict;
         lock (gate)
         {
             // The table may have filled, started or closed while the wallet was checked.
             int seat = join.Seat is >= 0 and <= 3 && found.Seats[join.Seat.Value] is null ? join.Seat.Value : Array.IndexOf(found.Seats, null);
-            if (found.Closed || found.Match is not null || seat < 0) { lobby.Exit(account, LobbyPlace.Room); return found.Match is not null ? TableErrors.Playing : TableErrors.Full; }
+            if (found.Closed || found.Match is not null || found.Starting || seat < 0) { lobby.Exit(account, LobbyPlace.Room); return found.Match is not null || found.Starting ? TableErrors.Playing : TableErrors.Full; }
             found.Seats[seat] = account; seated[account] = found;
             Arm(found, AutoCountdown);
         }
@@ -185,6 +235,7 @@ public sealed class Tables(MatchManager matches, Lobby lobby, ConnectionRegistry
         {
             if (!seated.TryGetValue(account, out table)) return ErrorCodes.NotFound;
             if (table.Host != account) return TableErrors.NotHost;
+            if (table.Starting) return TableErrors.Playing;
             if (seat is < 0 or > 3 || table.Match is not null) return ErrorCodes.Validation;
             if (add)
             {
@@ -198,6 +249,7 @@ public sealed class Tables(MatchManager matches, Lobby lobby, ConnectionRegistry
                 if (!table.IsBot(seat)) { removed = who; seated.Remove(who); }
                 table.Seats[seat] = null; table.BotMask &= ~(1 << seat);
                 table.StartsAt = null; table.Generation++;
+                PruneNames();
             }
         }
         if (removed is { } kicked) { lobby.Exit(kicked, LobbyPlace.Room); live.Send(kicked, LobbyMessageTypes.State, new TableStateMessage { Table = Summary(table), Closed = true, Reason = "kicked", YourSeat = -1 }); }
@@ -213,6 +265,7 @@ public sealed class Tables(MatchManager matches, Lobby lobby, ConnectionRegistry
             if (!seated.TryGetValue(account, out table)) return ErrorCodes.NotFound;
             if (table.Host != account) return TableErrors.NotHost;
             if (!table.Full) return TableErrors.NotReady;
+            if (table.Starting) return null;
             if (table.StartsAt is { } at && at - clock.GetUtcNow() <= TimeSpan.FromSeconds(HostCountdown)) return null;
             table.StartsAt = null;
             Arm(table, HostCountdown);
@@ -235,61 +288,71 @@ public sealed class Tables(MatchManager matches, Lobby lobby, ConnectionRegistry
         MatchRecord record;
         lock (gate)
         {
-            if (table.Generation != generation || table.Closed || table.Match is not null || !table.Full) return;
+            if (table.Generation != generation || table.Closed || table.Match is not null || table.Starting || !table.Full) return;
             table.Generation++;
+            table.Starting = true;
             var o = table.Options;
             record = new MatchRecord
             {
                 Id = Guid.CreateVersion7(), Mode = o.Type == "pairs" ? GameModes.Pairs : GameModes.Solo, Stake = o.Stake, Status = MatchStatus.Active,
                 Seats = [.. table.Seats.Select(s => s!.Value)], BotMask = table.BotMask, Hands = o.Hands, TurnSeconds = o.TurnSeconds,
-                OptionsJson = JsonSerializer.Serialize(new { chat = o.Chat, gifts = o.Gifts, spectators = o.Spectators, processing = o.Processing, penalties = o.Penalties, okeyPenalty = o.OkeyPenalty, doubling = o.Doubling }),
+                OptionsJson = JsonSerializer.Serialize(new { chat = o.Chat, gifts = o.Gifts, spectators = o.Spectators, processing = o.Processing, penalties = o.Penalties, okeyPenalty = o.OkeyPenalty, doubling = o.Doubling, partnerRaises = o.PartnerRaises }),
                 FirstStarter = RandomNumberGenerator.GetInt32(4), CreatedAt = clock.GetUtcNow(),
             };
         }
+        // The match is made from the record's seats: those are who pays and plays, whatever the table shows meanwhile.
+        var humans = Enumerable.Range(0, 4).Where(s => (record.BotMask & (1 << s)) == 0).Select(s => record.Seats[s]).ToArray();
         IReadOnlyList<Guid> unpaid;
         try { unpaid = await matches.CreateAsync(record); }
         catch (Exception error)
         {
             log.LogError(error, "Table {Code} failed to start", table.Code);
-            lock (gate) table.StartsAt = null;
+            lock (gate) { table.Starting = false; table.StartsAt = null; }
             await PublishAsync(table);
             return;
         }
         if (unpaid.Count > 0)
         {
             // Someone spent their chips meanwhile: they leave the table, the rest wait for a new player.
+            lock (gate) { table.Starting = false; table.StartsAt = null; }
             foreach (var account in unpaid) Remove(account, "insufficient_funds");
-            lock (gate) table.StartsAt = null;
             await PublishAsync(table);
             return;
         }
-        MatchSession? session = matches.Current(table.Humans.First());
+        MatchSession? session = matches.Current(humans[0]);
         lock (gate)
         {
-            table.Match = session; table.StartsAt = null;
-            foreach (var account in table.Humans) seated.Remove(account);
+            table.Match = session; table.Starting = false; table.StartsAt = null;
+            foreach (var account in humans) seated.Remove(account);
         }
-        foreach (var account in table.Humans)
-            live.Send(account, LobbyMessageTypes.State, new TableStateMessage { Table = Summary(table), Closed = true, MatchId = record.Id, Reason = "started", YourSeat = Array.IndexOf(table.Seats, account) });
+        foreach (var account in humans)
+            live.Send(account, LobbyMessageTypes.State, new TableStateMessage { Table = Summary(table), Closed = true, MatchId = record.Id, Reason = "started", YourSeat = Array.IndexOf(record.Seats, account) });
         PublishList();
     }
 
-    /// <summary>Leaving (or disconnecting from) the waiting room. The host passes to the next human; no humans closes the table.</summary>
-    public void Remove(Guid account, string? reason)
+    /// <summary>
+    /// Leaving (or disconnecting from) the waiting room. The host passes to the next human; no humans closes the table.
+    /// A table already starting keeps its seats (the match holds them; a disconnected player rejoins it there).
+    /// </summary>
+    public string? Remove(Guid account, string? reason)
     {
         Table? table;
         lock (gate)
         {
-            if (!seated.Remove(account, out table)) return;
+            if (!seated.TryGetValue(account, out table)) return null;
+            if (table.Starting) return TableErrors.Playing;
+            seated.Remove(account);
             var seat = Array.IndexOf(table.Seats, account);
             if (seat >= 0) table.Seats[seat] = null;
             table.StartsAt = null; table.Generation++;
             if (!table.Humans.Any()) { table.Closed = true; tables.Remove(table.Id); }
             else if (table.Host == account) table.Host = table.Humans.First();
+            PruneNames();
         }
         lobby.Exit(account, LobbyPlace.Room);
         live.Send(account, LobbyMessageTypes.State, new TableStateMessage { Table = Summary(table), Closed = true, Reason = reason ?? "left", YourSeat = -1 });
         _ = PublishAsync(table);
+        return null;
     }
 
     private async Task PublishAsync(Table table)
@@ -306,11 +369,34 @@ public sealed class Tables(MatchManager matches, Lobby lobby, ConnectionRegistry
         PublishList();
     }
 
+    /// <summary>
+    /// The list goes to every subscriber: each table is summarised once and the public list serialised once; only a
+    /// player sitting at a private table gets a list of their own (the public ones plus theirs).
+    /// </summary>
     private void PublishList()
     {
         Guid[] targets;
-        lock (gate) targets = [.. subscribers];
-        foreach (var account in targets) live.Send(account, LobbyMessageTypes.Tables, Snapshot(account));
+        List<(Table Table, TableSummary Summary)> open;
+        var privateOf = new Dictionary<Guid, List<Table>>();
+        lock (gate)
+        {
+            targets = [.. subscribers];
+            if (targets.Length == 0) return;
+            open = [.. tables.Values.Where(t => !t.Closed).OrderByDescending(t => t.CreatedAt).Select(t => (t, Summary(t)))];
+            foreach (var (table, _) in open.Where(x => x.Table.Options.Visibility != "public"))
+                foreach (var human in table.Humans) (privateOf.TryGetValue(human, out var list) ? list : privateOf[human] = []).Add(table);
+        }
+        var everyone = Connection.Frame(LobbyMessageTypes.Tables, new LobbyTablesMessage { Tables = [.. open.Where(x => x.Table.Options.Visibility == "public").Select(x => x.Summary)] });
+        foreach (var account in targets)
+            if (privateOf.TryGetValue(account, out var mine))
+                live.Send(account, LobbyMessageTypes.Tables, new LobbyTablesMessage { Tables = [.. open.Where(x => x.Table.Options.Visibility == "public" || mine.Contains(x.Table)).Select(x => x.Summary)] });
+            else live.SendFrame(account, everyone);
+    }
+
+    /// <summary>Player cards live only while their player sits at a table, so a changed name or avatar shows next time.</summary>
+    private void PruneNames()
+    {
+        foreach (var id in names.Keys.Where(id => !seated.ContainsKey(id) && !tables.Values.Any(t => t.Humans.Contains(id))).ToList()) names.Remove(id);
     }
 
     private LobbyTablesMessage Snapshot(Guid viewer)
@@ -346,10 +432,10 @@ public sealed class Tables(MatchManager matches, Lobby lobby, ConnectionRegistry
         var o = t.Options;
         return new TableSummary
         {
-            Id = t.Id, Name = o.Name, Type = o.Type, Stake = o.Stake, Hands = o.Hands, TurnSeconds = o.TurnSeconds, Doubling = o.Doubling,
+            Id = t.Id, Name = o.Name, Type = o.Type, Stake = o.Stake, Hands = o.Hands, TurnSeconds = o.TurnSeconds, Doubling = o.Doubling, PartnerRaises = o.PartnerRaises,
             Locked = o.Pin is not null, Private = o.Visibility == "private", Spectators = o.Spectators, Chat = o.Chat, Gifts = o.Gifts,
             Processing = o.Processing, Penalties = o.Penalties, OkeyPenalty = o.OkeyPenalty, HostId = t.Host, CreatedAt = t.CreatedAt,
-            Status = t.Match is not null ? "playing" : t.Full ? "full" : "waiting", Hand = t.Match?.HandNumber ?? 0,
+            Status = t.Match is not null ? "playing" : t.Full ? "full" : "waiting", Hand = t.Match?.HandNumber ?? 0, OpenSeats = t.Match?.OpenSeats ?? 0,
             Seats = [.. Enumerable.Range(0, 4).Select(s => t.Seats[s] is not { } id ? null
                 : t.IsBot(s) ? new TableSeat { Bot = true, Player = new PlayerSummary { Id = id, Name = "Bot · " + BotNames[s], Level = 1 } }
                 : new TableSeat { Player = names.GetValueOrDefault(id) ?? new PlayerSummary { Id = id, Name = "…" } })],

@@ -25,6 +25,8 @@ namespace Galaxy101.Online
         void Unsubscribe();
         Task<string> CreateAsync(TableOptions options);
         Task<string> JoinAsync(TableJoinMessage join);
+        /// <summary>İzle: a playing table that allows spectators (PIN when locked).</summary>
+        Task<string> WatchAsync(TableJoinMessage join);
         Task<string> LeaveAsync();
         Task<string> AddBotAsync(int seat);
         Task<string> KickAsync(int seat);
@@ -87,6 +89,7 @@ namespace Galaxy101.Online
         public void Unsubscribe() { subscribed = false; if (online.Realtime.Connected) _ = Request(LobbyMessageTypes.Unsubscribe, null); }
         public Task<string> CreateAsync(TableOptions options) => Request(LobbyMessageTypes.Create, new TableCreateMessage { Options = options });
         public Task<string> JoinAsync(TableJoinMessage join) => Request(LobbyMessageTypes.Join, join);
+        public Task<string> WatchAsync(TableJoinMessage join) => Request(LobbyMessageTypes.Watch, join);
         public Task<string> LeaveAsync() => Request(LobbyMessageTypes.Leave, null);
         public Task<string> AddBotAsync(int seat) => Request(LobbyMessageTypes.AddBot, new TableSeatMessage { Seat = seat });
         public Task<string> KickAsync(int seat) => Request(LobbyMessageTypes.Kick, new TableSeatMessage { Seat = seat });

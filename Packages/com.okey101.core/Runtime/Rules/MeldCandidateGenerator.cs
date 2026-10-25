@@ -14,6 +14,20 @@ namespace Okey101.Core.Rules
 
         public static IReadOnlyList<MeldProposal> Generate(IReadOnlyList<TileId> hand, TileFace indicator,
             MeldKind kind, CancellationToken token)
+            => Generate(hand, indicator, kind, token, false);
+
+        /// <summary>
+        /// The search pool for planners: each group once up to physically equivalent tiles — the faces it shows and where
+        /// okeys stand in (an okey for a face the hand holds stays a choice). The two copies of a face, like the two okeys,
+        /// are interchangeable: a planner binds a pattern to concrete tiles with <see cref="MeldBinder"/> when it picks it,
+        /// so any copy mix a set of groups needs is found. A dense 22-tile hand drops from ~10⁵ runs to about a thousand.
+        /// </summary>
+        public static IReadOnlyList<MeldProposal> GenerateDistinct(IReadOnlyList<TileId> hand, TileFace indicator,
+            MeldKind kind, CancellationToken token)
+            => Generate(hand, indicator, kind, token, true);
+
+        private static IReadOnlyList<MeldProposal> Generate(IReadOnlyList<TileId> hand, TileFace indicator,
+            MeldKind kind, CancellationToken token, bool distinct)
         {
             token.ThrowIfCancellationRequested();
             if (hand == null) throw new ArgumentNullException(nameof(hand));
@@ -36,14 +50,29 @@ namespace Okey101.Core.Rules
             }
 
             var candidates = new List<(MeldProposal Group, int Score)>();
+            var used = new bool[106];
 
             void AddPattern(TileFace[] pattern)
             {
                 token.ThrowIfCancellationRequested();
                 if (pattern.Length > ids.Length) return;
                 var placed = new PlacedTile[pattern.Length];
-                var used = new bool[106];
                 var score = pattern.Sum(face => face.Number);
+
+                // Distinct: only the first unused tile — a copy of the face, or an okey — is tried (the binder picks copies).
+                TileId? First(List<TileId> options)
+                {
+                    foreach (var id in options) if (!used[id.Value]) return id;
+                    return null;
+                }
+
+                void Place(int position, TileId id, TileFace face)
+                {
+                    used[id.Value] = true;
+                    placed[position] = new PlacedTile(id, face);
+                    Fill(position + 1);
+                    used[id.Value] = false;
+                }
 
                 void Fill(int position)
                 {
@@ -56,25 +85,19 @@ namespace Okey101.Core.Rules
                         return;
                     }
                     var face = pattern[position];
+                    if (distinct)
+                    {
+                        if (normals.TryGetValue(face, out var copies) && First(copies) is TileId natural) Place(position, natural, face);
+                        if (First(jokers) is TileId okey) Place(position, okey, face);
+                        return;
+                    }
                     if (normals.TryGetValue(face, out var matching))
                         foreach (var id in matching)
-                        {
-                            if (used[id.Value]) continue;
-                            used[id.Value] = true;
-                            placed[position] = new PlacedTile(id, face);
-                            Fill(position + 1);
-                            used[id.Value] = false;
-                        }
+                            if (!used[id.Value]) Place(position, id, face);
 
                     // A matching natural tile must not suppress valid joker alternatives.
                     foreach (var joker in jokers)
-                    {
-                        if (used[joker.Value]) continue;
-                        used[joker.Value] = true;
-                        placed[position] = new PlacedTile(joker, face);
-                        Fill(position + 1);
-                        used[joker.Value] = false;
-                    }
+                        if (!used[joker.Value]) Place(position, joker, face);
                 }
 
                 Fill(0);
@@ -142,6 +165,84 @@ namespace Okey101.Core.Rules
                 if (comparison != 0) return comparison;
             }
             return 0;
+        }
+    }
+
+    /// <summary>
+    /// Binds group patterns to a hand's tiles. Copies of a face (and the two okeys) are interchangeable, so a pattern takes
+    /// the lowest free copy of each face it shows — <paramref name="preferred"/> (a tile just taken from the pile) first
+    /// among its copies. Whatever packing of patterns the hand's face counts allow then binds disjointly, with every copy
+    /// mix it needs (two fixed copy orders cannot: shared faces may form an odd cycle). Positions fit a 32-bit mask.
+    /// </summary>
+    public sealed class MeldBinder
+    {
+        private const int JokerKey = 52;
+        private readonly TileFace indicator;
+        private readonly TileId[] tiles;
+        private readonly int[] keys, first = new int[JokerKey + 1], count = new int[JokerKey + 1];
+
+        public MeldBinder(IReadOnlyList<TileId> hand, TileFace indicator, TileId? preferred = null)
+        {
+            if (hand == null) throw new ArgumentNullException(nameof(hand));
+            if (hand.Count > 32) throw new ArgumentException("A hand of at most 32 tiles fits the binder's masks.", nameof(hand));
+            this.indicator = indicator;
+            // Sorted by face key, the preferred tile first among its copies, then id: one composite int per tile.
+            tiles = new TileId[hand.Count]; keys = new int[hand.Count]; var order = new int[hand.Count];
+            for (var i = 0; i < tiles.Length; i++)
+            {
+                tiles[i] = hand[i];
+                order[i] = KeyOf(hand[i]) * 256 + (preferred.HasValue && hand[i] == preferred.Value ? 0 : 128) + hand[i].Value;
+            }
+            Array.Sort(order, tiles);
+            for (var i = tiles.Length - 1; i >= 0; i--) { keys[i] = order[i] / 256; first[keys[i]] = i; count[keys[i]]++; }
+        }
+
+        /// <summary>The hand in binding order (by face, the preferred tile first among its copies, okeys last).</summary>
+        public IReadOnlyList<TileId> Tiles => tiles;
+        public int KeyAt(int position) => keys[position];
+        private int KeyOf(TileId id) => TileCatalog.IsRealJoker(id, indicator) ? JokerKey : FaceKey(TileCatalog.GetNonJokerFace(id, indicator));
+        private static int FaceKey(TileFace face) => (int)face.Color * 13 + face.Number - 1;
+        /// <summary>What a group's tile needs: a copy of its face, or any okey for an okey.</summary>
+        public int KeyOf(PlacedTile tile) => TileCatalog.IsRealJoker(tile.Id, indicator) ? JokerKey : FaceKey(tile.RepresentedFace);
+
+        /// <summary>What each of a group's tiles needs. It depends on the indicator only: compute it once per pattern.</summary>
+        public static int[] Needs(MeldProposal group, TileFace indicator)
+        {
+            var tiles = group.Tiles; var needs = new int[tiles.Count];
+            for (var i = 0; i < needs.Length; i++) needs[i] = TileCatalog.IsRealJoker(tiles[i].Id, indicator) ? JokerKey : FaceKey(tiles[i].RepresentedFace);
+            return needs;
+        }
+
+        public bool TryMask(MeldProposal group, uint taken, out uint mask) => TryMask(Needs(group, indicator), taken, out mask);
+
+        /// <summary>Positions a pattern takes beside the <paramref name="taken"/> ones; false when a face has no free copy.</summary>
+        public bool TryMask(int[] needs, uint taken, out uint mask)
+        {
+            mask = 0;
+            for (var i = 0; i < needs.Length; i++)
+            {
+                int key = needs[i], p = first[key], end = p + count[key];
+                while (p < end && ((taken | mask) & (1u << p)) != 0) p++;
+                if (p == end) return false;
+                mask |= 1u << p;
+            }
+            return true;
+        }
+
+        public MeldProposal Bind(MeldProposal group, uint taken) => Bind(group, Needs(group, indicator), taken);
+
+        /// <summary>The group on the tiles <see cref="TryMask(int[], uint, out uint)"/> chose.</summary>
+        public MeldProposal Bind(MeldProposal group, int[] needs, uint taken)
+        {
+            var placed = new PlacedTile[needs.Length]; uint mask = 0;
+            for (var i = 0; i < placed.Length; i++)
+            {
+                int key = needs[i], p = first[key], end = p + count[key];
+                while (p < end && ((taken | mask) & (1u << p)) != 0) p++;
+                if (p == end) throw new InvalidOperationException("The hand cannot hold this group.");
+                mask |= 1u << p; placed[i] = new PlacedTile(tiles[p], group.Tiles[i].RepresentedFace);
+            }
+            return new MeldProposal(group.Kind, placed);
         }
     }
 }

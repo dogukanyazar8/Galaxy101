@@ -8,12 +8,15 @@ namespace Okey101.Core.Model
         public int HandCount { get; }
         public OpeningKind Opening { get; }
         public int Penalties { get; }
-        public PublicPlayerInfo(int handCount, OpeningKind opening, int penalties)
+        /// <summary>The opening's series total or pair count (public: the melds were laid face up).</summary>
+        public int OpeningValue { get; }
+        public PublicPlayerInfo(int handCount, OpeningKind opening, int penalties, int openingValue = 0)
         {
             if (handCount < 0 || handCount > 22) throw new ArgumentOutOfRangeException(nameof(handCount));
             if (penalties < 0) throw new ArgumentOutOfRangeException(nameof(penalties));
+            if (openingValue < 0 || (opening == OpeningKind.None && openingValue != 0)) throw new ArgumentOutOfRangeException(nameof(openingValue));
             Immutable.EnumValue(opening, nameof(opening));
-            HandCount = handCount; Opening = opening; Penalties = penalties;
+            HandCount = handCount; Opening = opening; Penalties = penalties; OpeningValue = openingValue;
         }
     }
 
@@ -40,12 +43,15 @@ namespace Okey101.Core.Model
         public DealInfo Deal { get; }
         /// <summary>The room's switchable rules, public to every seat.</summary>
         public RuleOptions Options { get; }
+        /// <summary>This turn's previous discard was taken and put back: only the stock may be drawn now (public).</summary>
+        public bool PreviousDiscardReturned { get; }
 
         public PlayerView(Guid roundId, long version, int actor, int activePlayer, RoundPhase phase,
             IReadOnlyList<TileId> ownHand, OpeningKind ownOpening, int ownPenalties,
             long ownLastSequence, TileId indicator, int stockCount, IReadOnlyList<PublicPlayerInfo> players,
             IReadOnlyList<Meld> table, IReadOnlyList<IReadOnlyList<TileId>> discards,
-            DrawReceipt pendingDraw, int seriesTilesUsed, RoundResult result = null, DealInfo deal = null, RuleOptions options = null)
+            DrawReceipt pendingDraw, int seriesTilesUsed, RoundResult result = null, DealInfo deal = null, RuleOptions options = null,
+            bool previousDiscardReturned = false)
         {
             Options = options ?? RuleOptions.Standard;
             if (roundId == Guid.Empty) throw new ArgumentException("A round identity is required.", nameof(roundId));
@@ -61,7 +67,7 @@ namespace Okey101.Core.Model
             StockCount = stockCount; Players = Immutable.Copy(players, nameof(players));
             Table = Immutable.Copy(table, nameof(table)); Discards = Immutable.CopyNested(discards, nameof(discards));
             if (Players.Count != 4 || Discards.Count != 4) throw new ArgumentException("Four public player entries and discard piles are required.");
-            PendingDraw = pendingDraw; SeriesTilesUsed = seriesTilesUsed; Result = result; Deal = deal;
+            PendingDraw = pendingDraw; SeriesTilesUsed = seriesTilesUsed; Result = result; Deal = deal; PreviousDiscardReturned = previousDiscardReturned;
         }
     }
 }

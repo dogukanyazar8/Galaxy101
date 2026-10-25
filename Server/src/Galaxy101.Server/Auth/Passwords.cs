@@ -51,6 +51,7 @@ public sealed class Passwords(GameDb db, AccountService accounts, TimeProvider c
         var email = Normalize(request.Email);
         var name = (request.Name ?? "").Trim();
         if (!ProfileRules.ValidName(name) || !ValidEmail(email) || !ValidPassword(request.Password)) return new(null, ErrorCodes.Validation);
+        if (!Social.TextFilter.IsClean(name)) return new(null, ErrorCodes.Inappropriate);
         if (!request.AcceptTerms) return new(null, ErrorCodes.TermsRequired);
         var color = ProfileRules.AvatarColors.Contains(request.Color) ? request.Color : null;
         if (await db.PasswordLogins.AnyAsync(x => x.Email == email, ct)) return new(null, ErrorCodes.EmailTaken);
@@ -72,16 +73,22 @@ public sealed class Passwords(GameDb db, AccountService accounts, TimeProvider c
         if (login.LockedUntil is { } until && until > now) return new(null, ErrorCodes.AccountLocked, 0, (int)Math.Ceiling((until - now).TotalSeconds));
         if (!Verify(request.Password ?? "", login.Hash))
         {
-            login.FailedAttempts = login.LockedUntil is { } expired && expired <= now ? 1 : login.FailedAttempts + 1;
-            if (login.FailedAttempts >= game.PasswordAttempts)
+            // One atomic step per wrong password, so parallel guesses each count (no read-modify-write of the counter).
+            var attempts = await db.Database.SqlQuery<int>($"""
+                UPDATE password_logins
+                SET failed_attempts = CASE WHEN locked_until IS NOT NULL AND locked_until <= {now} THEN 1 ELSE failed_attempts + 1 END, locked_until = NULL
+                WHERE email = {email} AND (locked_until IS NULL OR locked_until <= {now})
+                RETURNING failed_attempts AS "Value"
+                """).ToListAsync(ct);
+            if (attempts.Count == 0) return new(null, ErrorCodes.AccountLocked, 0, game.PasswordLockSeconds); // a parallel guess locked it
+            if (attempts[0] >= game.PasswordAttempts)
             {
-                login.LockedUntil = now.AddSeconds(game.PasswordLockSeconds); login.FailedAttempts = 0;
-                await db.SaveChangesAsync(ct);
+                var lockedUntil = now.AddSeconds(game.PasswordLockSeconds);
+                await db.PasswordLogins.Where(x => x.Email == email && x.LockedUntil == null)
+                    .ExecuteUpdateAsync(u => u.SetProperty(x => x.LockedUntil, lockedUntil).SetProperty(x => x.FailedAttempts, 0), ct);
                 return new(null, ErrorCodes.AccountLocked, 0, game.PasswordLockSeconds);
             }
-            login.LockedUntil = null;
-            await db.SaveChangesAsync(ct);
-            return new(null, ErrorCodes.WrongPassword, game.PasswordAttempts - login.FailedAttempts);
+            return new(null, ErrorCodes.WrongPassword, game.PasswordAttempts - attempts[0]);
         }
         login.FailedAttempts = 0; login.LockedUntil = null;
         await db.SaveChangesAsync(ct);

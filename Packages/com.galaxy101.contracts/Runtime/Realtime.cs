@@ -21,6 +21,8 @@ namespace Galaxy101.Contracts
         public const string MatchLeave = "match.leave";
         public const string MatchEmote = "match.emote";
         public const string MatchGift = "match.gift";
+        /// <summary>Table chat (both directions): a line of text, or a ready phrase by its index.</summary>
+        public const string MatchChat = "match.chat";
 
         // Server → client
         public const string Pong = "pong";
@@ -36,6 +38,8 @@ namespace Galaxy101.Contracts
         public const string MatchState = "match.state";
         public const string MatchHandEnd = "match.handEnd";
         public const string MatchEnd = "match.end";
+        /// <summary>The seats changed during the match (someone took a free seat): MatchSeatsMessage.</summary>
+        public const string MatchSeats = "match.seats";
         public const string Replaced = "session.replaced";
     }
 
@@ -117,6 +121,18 @@ namespace Galaxy101.Contracts
         public Guid MatchId { get; set; }
         public int Seat { get; set; }
         public string Emote { get; set; }
+    }
+
+    /// <summary>
+    /// A chat line at a match table. <see cref="Quick"/> is the index of a ready phrase (each client shows it in its own
+    /// language) — the only kind a "quick" table allows; otherwise <see cref="Text"/>, at most 80 characters.
+    /// </summary>
+    public sealed class ChatMessage
+    {
+        public Guid MatchId { get; set; }
+        public int Seat { get; set; }
+        public string Text { get; set; }
+        public int? Quick { get; set; }
     }
 
     public sealed class GiftMessage

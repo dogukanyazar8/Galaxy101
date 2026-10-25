@@ -35,7 +35,7 @@ namespace Galaxy101
             toolbar.Add(search);
             // Reference code pill: height 48, padding 0 16px, sd fill, 1px dashed bd, gap 10, 16px copy glyph.
             var code = PanelUi.CodeStrip(v, 12, 17, 14); v.Decorate(code, "sd", 14); code.style.height = 48; code.style.paddingLeft = code.style.paddingRight = 16; PanelUi.Gap(code, 10);
-            var copy = PanelUi.CustomButton(v, "", () => v.Copy("DY-4821"), "");
+            var copy = PanelUi.CustomButton(v, "", () => v.Copy(v.Model.FriendCode), "");
             copy.style.width = copy.style.height = 16; copy.style.minWidth = 16; copy.style.paddingLeft = copy.style.paddingRight = copy.style.paddingTop = copy.style.paddingBottom = 0;
             copy.Add(v.Icon("copy", 16)); code.Add(copy);
             toolbar.Add(code);
@@ -98,7 +98,7 @@ namespace Galaxy101
             else
             {
                 var watch = (string)p["act"] == "watch";
-                row.Add(PanelUi.CssButton(v, watch ? v.L("İzle", "Watch") : v.L("Mesaj", "Message"), () => v.Toast(v.L("Çevrimdışı", "Offline")), "secondary", 10, 18, 14, 12, 3));
+                row.Add(PanelUi.CssButton(v, watch ? v.L("İzle", "Watch") : v.L("Mesaj", "Message"), () => v.Toast(watch ? v.L("İzleme yakında", "Watching is coming soon") : v.L("Çevrimdışı", "Offline")), "secondary", 10, 18, 14, 12, 3));
             }
             return row;
         }

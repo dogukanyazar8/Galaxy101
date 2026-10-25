@@ -65,7 +65,7 @@ namespace Galaxy101.Online
             for (int abs = 0; abs < 4; abs++)
             {
                 int k = FromSeat(abs);
-                var p = v.Players[abs]; players[k] = new PublicPlayerInfo(p.HandCount, Opening(p.Opening), p.Penalties);
+                var p = v.Players[abs]; players[k] = new PublicPlayerInfo(p.HandCount, Opening(p.Opening), p.Penalties, p.OpeningValue);
                 discards[k] = (v.Discards.Count > abs ? v.Discards[abs] : new List<int>()).Select(id => new TileId(id)).ToArray();
             }
             // The own entry carries the real hand size (the engine's projection lists it too).
@@ -75,7 +75,8 @@ namespace Galaxy101.Online
             DealInfo deal = v.Deal == null ? null : new DealInfo(FromSeat(v.Deal.Dealer), v.Deal.DieA, v.Deal.DieB, v.Deal.IndicatorStack, v.Deal.IndicatorPosition, v.Deal.FakeOkeyShown, v.Deal.ExtraStack);
             return new PlayerView(v.RoundId, v.Version, 0, FromSeat(v.ActiveSeat), Phase(v.Phase), v.Hand.Select(id => new TileId(id)).ToArray(), Opening(v.Opening), v.Penalties,
                 0, new TileId(v.Indicator), Math.Min(105, v.StockCount), players, table, discards, pending, v.SeriesTilesUsed, v.Result == null ? null : ToResult(v.Result), deal,
-                v.Rules == null ? RuleOptions.Standard : new RuleOptions(v.Rules.OkeyPenalty, v.Rules.PlayablePenalty));
+                v.Rules == null ? RuleOptions.Standard : new RuleOptions(v.Rules.OkeyPenalty, v.Rules.PlayablePenalty, v.Rules.Processing, v.Rules.Doubling, v.Rules.PartnerRaises),
+                v.PreviousDiscardReturned);
         }
 
         public RoundResult ToResult(RoundResultDto r)

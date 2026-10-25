@@ -9,18 +9,30 @@ namespace Galaxy101.Server.Social;
 public static partial class Players
 {
     /// <summary>Public cards for a set of accounts, keyed by id (deleted accounts are simply absent).</summary>
-    public static async Task<Dictionary<Guid, PlayerSummary>> SummariesAsync(GameDb db, IReadOnlyCollection<Guid> ids, CancellationToken ct)
+    /// <summary>
+    /// <paramref name="season"/> &gt; 0: leagues as of that season (an account not yet rolled over shows its reset LP, and
+    /// Galaksi is checked against the season board); 0: the stored LP as it is.
+    /// </summary>
+    public static async Task<Dictionary<Guid, PlayerSummary>> SummariesAsync(GameDb db, IReadOnlyCollection<Guid> ids, CancellationToken ct, int season = 0)
     {
         if (ids.Count == 0) return [];
         var rows = await (from a in db.Accounts.AsNoTracking()
                           join s in db.Stats on a.Id equals s.AccountId
                           where ids.Contains(a.Id)
-                          select new { a.Id, a.Name, a.Color, a.Frame, a.FriendCode, s.Xp, s.Lp }).ToListAsync(ct);
-        return rows.ToDictionary(r => r.Id, r => new PlayerSummary
+                          select new { a.Id, a.Name, a.Color, a.Frame, a.FriendCode, s.Xp, s.Lp, s.LpSeason, s.Hands, s.Wins }).ToListAsync(ct);
+        var result = new Dictionary<Guid, PlayerSummary>();
+        foreach (var r in rows)
         {
-            Id = r.Id, Name = r.Name, Color = r.Color, Frame = r.Frame, FriendCode = r.FriendCode,
-            Level = Progression.Level(r.Xp).Level, League = Progression.League(r.Lp),
-        });
+            var lp = season > 0 ? Ranked.SeasonLp(r.Lp, r.LpSeason, season) : r.Lp;
+            var place = season > 0 && lp >= Ranked.ApexLp ? await Ranked.PlaceAsync(db, LeaderboardEndpoints.SeasonBoard(season), r.Id, lp, ct) : 0;
+            result[r.Id] = new PlayerSummary
+            {
+                Id = r.Id, Name = r.Name, Color = r.Color, Frame = r.Frame, FriendCode = r.FriendCode,
+                Level = Progression.Level(r.Xp).Level, League = Ranked.Code(lp, place),
+                Hands = r.Hands, WinRate = r.Hands == 0 ? 0 : (int)Math.Round(100.0 * r.Wins / r.Hands),
+            };
+        }
+        return result;
     }
 
     public static async Task<PlayerSummary?> SummaryAsync(GameDb db, Guid id, CancellationToken ct) =>

@@ -12,6 +12,9 @@ namespace Galaxy101.Contracts
         public string FriendCode { get; set; }
         public int Level { get; set; }
         public string League { get; set; }
+        /// <summary>Hands played and the share won (0–100): the table's player card.</summary>
+        public int Hands { get; set; }
+        public int WinRate { get; set; }
     }
 
     /// <summary><c>presence</c>: "offline", "online" or "playing".</summary>
@@ -42,6 +45,34 @@ namespace Galaxy101.Contracts
         public bool IsFriend { get; set; }
         public bool RequestSent { get; set; }
         public bool RequestReceived { get; set; }
+    }
+
+    /// <summary>Şikayet et: reason "chat", "name", "cheating" or "other"; optional details (≤ 200) and the match.</summary>
+    public sealed class ReportRequest
+    {
+        public string Reason { get; set; }
+        public string Details { get; set; }
+        public Guid? MatchId { get; set; }
+    }
+
+    /// <summary>A report as moderators see it.</summary>
+    public sealed class ReportResponse
+    {
+        public long Id { get; set; }
+        public Guid? Reporter { get; set; }
+        public PlayerSummary Reported { get; set; }
+        public string Reason { get; set; }
+        public string Details { get; set; }
+        public Guid? MatchId { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
+        public DateTimeOffset? ResolvedAt { get; set; }
+    }
+
+    /// <summary>A moderator's ban: minutes (1 … 10 years) and the reason.</summary>
+    public sealed class BanRequest
+    {
+        public int Minutes { get; set; }
+        public string Reason { get; set; }
     }
 
     public sealed class FriendCodeRequest

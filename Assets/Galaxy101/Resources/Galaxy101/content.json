@@ -380,16 +380,40 @@
     ],
     "leagues": {
       "tr": {
-        "d1": "Elmas I",
-        "d2": "Elmas II",
+        "b3": "Bronz III",
+        "b2": "Bronz II",
+        "b1": "Bronz I",
+        "s3": "Gümüş III",
+        "s2": "Gümüş II",
+        "s1": "Gümüş I",
+        "g3": "Altın III",
+        "g2": "Altın II",
         "g1": "Altın I",
-        "g2": "Altın II"
+        "d3": "Elmas III",
+        "d2": "Elmas II",
+        "d1": "Elmas I",
+        "m3": "Usta III",
+        "m2": "Usta II",
+        "m1": "Usta I",
+        "gx": "Galaksi"
       },
       "en": {
-        "d1": "Diamond I",
-        "d2": "Diamond II",
+        "b3": "Bronze III",
+        "b2": "Bronze II",
+        "b1": "Bronze I",
+        "s3": "Silver III",
+        "s2": "Silver II",
+        "s1": "Silver I",
+        "g3": "Gold III",
+        "g2": "Gold II",
         "g1": "Gold I",
-        "g2": "Gold II"
+        "d3": "Diamond III",
+        "d2": "Diamond II",
+        "d1": "Diamond I",
+        "m3": "Master III",
+        "m2": "Master II",
+        "m1": "Master I",
+        "gx": "Galaxy"
       }
     },
     "note": "Haftalık sekmede puanlar ×0.32; sezon/arkadaş sekmesinde ×1. Satır: [ad, baş harf, avatar rengi, puan, lig kodu, (ben?)]"

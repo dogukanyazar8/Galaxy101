@@ -66,6 +66,7 @@ namespace Galaxy101
             Root.AddToClassList("galaxy-root");Root.focusable=true;
             Root.RegisterCallback<KeyDownEvent>(OnKey,TrickleDown.TrickleDown);Root.RegisterCallback<PointerDownEvent>(OnPointer,TrickleDown.TrickleDown);Root.RegisterCallback<NavigationSubmitEvent>(OnSubmit,TrickleDown.TrickleDown);
             Model.Changed+=Refresh;Loc.Changed+=Refresh;
+            Services.Online.Notice+=(tr,en,kind)=>{if(!disposed)Flash(L(tr,en),kind);}; // a signed-in action's outcome
         }
         public string L(string tr,string en=null)=>Loc.Text(tr,en);
         public string N(long value)=>NumberFormat.Number(value,Loc.Language);
@@ -317,12 +318,14 @@ namespace Galaxy101
             if(Modals.Panel=="settings"&&key!="settings")settings.Discard();
             if(Modals.Panel==null)focusBeforePanel=FocusIdentity(Root.panel?.focusController?.focusedElement as VisualElement);
             bool newlyOpened=Modals.Panel!=key;Modals.OpenPanel(key);if(tab.HasValue)tabs[key]=tab.Value;
+            if(newlyOpened)Services.Online.Load(key); // signed in: the panel's data, fresh from the server
             if(key=="settings"&&newlyOpened)settings.OnOpen(this);Refresh();
         }
         public void OpenDialog(string key)
         {
             if(Modals.Dialog==null)focusBeforeDialog=FocusIdentity(Root.panel?.focusController?.focusedElement as VisualElement);
             if(key=="profile")edit.OnOpen(this);if(key=="add")addFriend.OnOpen(this);
+            if(Modals.Dialog!=key)Services.Online.Load(key);
             if(key=="logout"||key=="delete"){confirm.Kind=key;confirm.OnOpen();DoneFrom=key;}
             if(key=="bye")done.From=DoneFrom;
             Modals.OpenDialog(key);Refresh();

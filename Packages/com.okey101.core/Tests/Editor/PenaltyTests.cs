@@ -32,6 +32,18 @@ namespace Okey101.Core.Tests
             Assert.That(PenaltyEvaluator.GetDiscardPenalty(fits, Id(TileColor.Red, 4), false), Is.EqualTo(playablePenalty), "işlek taş cezası");
         }
 
+        [Test]
+        public void WithoutProcessingNothingIsLaidOnTableMeldsAndNothingIsPlayable()
+        {
+            var four = Id(TileColor.Red, 4);
+            var state = Builder(new[] { four, Spare }, OpeningKind.Series).WithRules(new RuleOptions(true, true, false))
+                .WithTable(new Meld(0, 0, Run(TileColor.Red, 1, 2, 3))).Build();
+            var laid = TableEvaluator.Evaluate(state, new TableAction[] { new ExtendMeld(0, false, new[] { new PlacedTile(four, new TileFace(TileColor.Red, 4)) }) });
+            Assert.That(laid.Error, Is.EqualTo(ErrorCode.ProcessingLimit), "işleme kapalı");
+            Assert.That(PenaltyEvaluator.GetDiscardPenalty(state, four, false), Is.EqualTo(0), "no işlek taş without işleme");
+            Assert.That(new RuleOptions(true, true, false).IsStandard, Is.False);
+        }
+
         [TestCase(OpeningKind.None, 0, 0)]
         [TestCase(OpeningKind.Series, 0, 101)]
         [TestCase(OpeningKind.Series, 4, 101)]

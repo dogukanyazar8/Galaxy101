@@ -44,7 +44,9 @@ public sealed class GameOptions
     public int PasswordLockSeconds { get; set; } = 300;
     public long StartingGems { get; set; } = 20;
     public int MaxFriends { get; set; } = 200;
-    public int Season { get; set; } = 1;
+    /// <summary>Dereceli seasons: <see cref="SeasonWeeks"/> weeks each from this Monday (home time zone); season 1 before it.</summary>
+    public DateOnly SeasonStart { get; set; } = new(2026, 11, 2);
+    public int SeasonWeeks { get; set; } = 8;
 
     public int HandsPerMatch { get; set; } = 4;
     public int TurnSeconds { get; set; } = 30;
@@ -65,8 +67,9 @@ public sealed class GameOptions
     };
     /// <summary>Share of the pot by place for solo tables (pairs: the winning team splits the whole pot).</summary>
     public double[] SoloPayout { get; set; } = [1, 0, 0, 0];
-    public int[] RankedLp { get; set; } = [24, 8, -8, -16];
     public int[] WeeklyPoints { get; set; } = [30, 15, 5, 1];
     public int XpHandWin { get; set; } = 340;
     public int XpHandPlayed { get; set; } = 60;
+    /// <summary>Match-end XP by place (1st–4th); a seat that left gets none.</summary>
+    public int[] XpPlace { get; set; } = [500, 200, 80, 0];
 }

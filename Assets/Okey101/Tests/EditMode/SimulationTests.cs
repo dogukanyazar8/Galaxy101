@@ -61,7 +61,8 @@ namespace Okey101.Application.Tests
                 if (finish.Reason == FinishReason.AllPairs) { Assert.That(actual.HasScore, Is.False); Assert.That(actual.Total, Is.Null); continue; }
                 var b = finish.Winner == p ? -101 : player.Opening == OpeningKind.None ? 202 : (n + 101 * j) * (player.Opening == OpeningKind.Pairs ? 2 : 1);
                 Assert.That(actual.B, Is.EqualTo(b)); Assert.That(actual.M, Is.EqualTo(multiplier));
-                Assert.That(actual.Total, Is.EqualTo((b + player.Penalties) * multiplier));
+                // spec/17 §6 (T42): penalties have their own column and are not multiplied.
+                Assert.That(actual.Total, Is.EqualTo(b * multiplier + player.Penalties));
             }
             UnityEngine.Debug.LogFormat(UnityEngine.LogType.Log, UnityEngine.LogOption.NoStacktrace, null,
                 "SIMULATION_END seed={0} commands={1} reason={2} milliseconds={3}",seed,accepted,finish.Reason,dealTime.ElapsedMilliseconds);

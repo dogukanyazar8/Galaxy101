@@ -49,7 +49,7 @@ namespace Okey101.Core.Turns
                 players[p] = candidate.Players[p];
                 discards[p] = candidate.Discards[p];
             }
-            players[actor] = new PlayerState(hand, player.Opening, player.Penalties + penalty);
+            players[actor] = new PlayerState(hand, player.Opening, player.Penalties + penalty, player.OpeningValue);
             // spec/17 §3: opening with the previous player's discard costs that player the tile value × 10
             // (a discarded okey already cost +101 when it was thrown; it adds nothing here).
             if (draw != null && draw.Source == DrawSource.PreviousDiscard && drawnState.OpeningAtTurnStart == OpeningKind.None &&
@@ -60,7 +60,7 @@ namespace Okey101.Core.Turns
                 if (fed > 0)
                 {
                     if (players[giver].Penalties > int.MaxValue - fed) return RuleResult<RoundState>.Fail(ErrorCode.InvalidState);
-                    players[giver] = new PlayerState(players[giver].Hand, players[giver].Opening, players[giver].Penalties + fed);
+                    players[giver] = new PlayerState(players[giver].Hand, players[giver].Opening, players[giver].Penalties + fed, players[giver].OpeningValue);
                 }
             }
             var pile = new List<TileId>(discards[actor]) { plan.Discard };
@@ -68,7 +68,7 @@ namespace Okey101.Core.Turns
             return RuleResult<RoundState>.Ok(new RoundState(candidate.RoundId, candidate.Version, candidate.Seed,
                 candidate.StartingPlayer, actor, candidate.TurnNumber, candidate.Phase, candidate.Indicator,
                 candidate.Stock, players, candidate.Table, discards, candidate.PendingDraw, candidate.OpeningAtTurnStart,
-                candidate.SeriesTilesUsed, candidate.IsInitialTurn, candidate.LastAcceptedSequences, candidate.Result, options: candidate.Options));
+                candidate.SeriesTilesUsed, candidate.IsInitialTurn, candidate.LastAcceptedSequences, candidate.Result, options: candidate.Options, deal: candidate.Deal));
         }
 
         private static bool FirstOpeningContains(TurnPlan plan, TileId tile)

@@ -185,9 +185,9 @@ namespace Galaxy101.Tests
         public IEnumerator MainButtonsEmitSelectedModeAndRefreshWithoutLosingNativeLayout()
         {
             var view=controller.View;int? played=null;controller.PlayRequested+=mode=>played=mode;
-            // v3 (S06): Dereceli is YAKINDA — selectable, but HEMEN OYNA only says so; Klasik plays.
-            var soon=view.Root.Q<Button>("mode-3");soon.Focus();yield return null;using(var evt=NavigationSubmitEvent.GetPooled())soon.SendEvent(evt);yield return null;yield return null;
-            Assert.That(controller.Model.SelectedMode,Is.EqualTo(3));Assert.That(view.Root.Q<Label>("mode-soon-3"),Is.Not.Null);
+            // Botlara karşı is YAKINDA — selectable, but HEMEN OYNA only says so; Klasik and Dereceli play.
+            var soon=view.Root.Q<Button>("mode-4");soon.Focus();yield return null;using(var evt=NavigationSubmitEvent.GetPooled())soon.SendEvent(evt);yield return null;yield return null;
+            Assert.That(controller.Model.SelectedMode,Is.EqualTo(4));Assert.That(view.Root.Q<Label>("mode-soon-4"),Is.Not.Null);Assert.That(view.Root.Q<Label>("mode-soon-3"),Is.Null);
             var play=view.Root.Q<Button>("play-now");Assert.That(play.worldBound.width,Is.GreaterThan(300));
             play.Focus();yield return null;using(var evt=NavigationSubmitEvent.GetPooled())play.SendEvent(evt);yield return null;
             Assert.That(played,Is.Null,"a coming-soon mode does not start");

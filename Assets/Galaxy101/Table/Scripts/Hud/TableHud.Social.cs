@@ -16,6 +16,12 @@ namespace Galaxy101.Table
         private readonly List<ChatLine> chat = new List<ChatLine>();
         private readonly List<(float At, Action Do)> scheduled = new List<(float, Action)>();
         private readonly HashSet<int> friendSent = new HashSet<int>();
+        // Player safety at a server table: block / unblock and report from the player card (people only, not bots).
+        public Func<int, bool, System.Threading.Tasks.Task<string>> SetBlockOnline;
+        public Func<int, string, System.Threading.Tasks.Task<string>> SendReportOnline;
+        public Func<int, bool> IsPersonOnline;
+        private readonly HashSet<int> blockedSeats = new HashSet<int>(), reportedSeats = new HashSet<int>();
+        private int reportingSeat = -1;
         private VisualElement chatLog, cardAnchor;
         private ScrollView chatScroll;
         private TextField chatInput;
@@ -106,6 +112,8 @@ namespace Galaxy101.Table
         {
             text = (text ?? "").Trim(); if (text.Length == 0) return;
             if (text.Length > 80) text = text.Substring(0, 80);
+            // A server table shows the line when the server passes it back (to every seat): nothing is said locally.
+            if (OnlineTable) { _ = SendChatAsync(text, null); return; }
             Say(0, text);
             if (!OnlineTable && SocialRandom.NextDouble() < BotReplyChance) // people answer for themselves at a server table
             {
@@ -113,6 +121,18 @@ namespace Galaxy101.Table
                 After(1.4f, () => Say(seat, reply));
             }
         }
+
+        private async System.Threading.Tasks.Task SendChatAsync(string text, int? quick)
+        {
+            var error = await SendChatOnline(text, quick);
+            if (error != null) PostSendError(error);
+        }
+
+        /// <summary>A ready phrase: by its index at a server table (each player reads it in their language).</summary>
+        private void SendQuick(int index, string phrase) { if (OnlineTable) _ = SendChatAsync(null, index); else SendChat(phrase); }
+
+        /// <summary>A server table's chat line from a seat (mine included).</summary>
+        public void ChatFrom(int seat, string text, int? quick) => Say(seat, quick is int q ? S("quick." + q) : text);
 
         /// <summary>An opponent's casual line after a discard (16 %), or after finishing.</summary>
         public void BotChatter(int seat, float chance)
@@ -159,7 +179,7 @@ namespace Galaxy101.Table
                 string phrase = S("quick." + i);
                 var chip = Text(phrase, "Baloo2-800", 12, "var(--ic)"); chip.name = "chat-quick-" + i; Pad(chip, 6, 11, 6, 11); chip.style.marginRight = 6; chip.style.marginBottom = 6;
                 view.Decorate(chip, "var(--dp)", 14); GalaxyFilters.HoverBrightness(chip, 1.3f);
-                Tap(chip, () => SendChat(phrase)); quick.Add(chip);
+                int index = i; Tap(chip, () => SendQuick(index, phrase)); quick.Add(chip);
             }
             panel.Add(quick);
 
@@ -265,7 +285,7 @@ namespace Galaxy101.Table
                 var img = Box(); img.style.width = img.style.height = 46; if (GiftThumb(gift) is Texture2D thumb) img.style.backgroundImage = thumb; cell.Add(img);
                 cell.Add(PriceTag(gift, 11));
                 GalaxyFilters.HoverBrightness(cell, 1.2f);
-                Tap(cell, () => { CloseWindow(); SendGift(gift, k.ToString()); });
+                Tap(cell, () => { CloseWindow(); Treat(gift, k.ToString()); });
                 quick.Add(cell);
             }
             card.Add(quick);
@@ -277,12 +297,63 @@ namespace Galaxy101.Table
             bool sent = friendSent.Contains(k);
             var friend = Text(S(sent ? "friendSent" : "addFriend"), "Montserrat-700", 13, sent ? "#8EF0B0" : "#F4F1E8"); friend.name = "card-add-friend"; friend.style.flexGrow = 1; friend.style.flexBasis = 0; friend.style.unityTextAlign = TextAnchor.MiddleCenter;
             Pad(friend, 10, 6, 10, 6); view.Decorate(friend, "var(--pnH)", 13, 4, "var(--pnS)");
-            Tap(friend, () => { if (friendSent.Add(k)) RenderWindows(false); }); buttons.Add(friend);
+            Tap(friend, () => { if (friendSent.Contains(k)) return; if (SendFriendOnline != null) _ = RequestFriendAsync(k); else { friendSent.Add(k); RenderWindows(false); } }); buttons.Add(friend);
             card.Add(buttons);
+            if (SetBlockOnline != null && IsPersonOnline != null && IsPersonOnline(k)) card.Add(SafetyRow(k));
             ApplyGaps(card);
         }
 
         public bool FriendRequested(int seat) => friendSent.Contains(seat);
+
+        /// <summary>Engelle · Şikayet et under the card's buttons; reporting first asks why.</summary>
+        private VisualElement SafetyRow(int k)
+        {
+            var row = Row(6); row.name = "card-safety"; row.style.marginTop = 10; row.style.justifyContent = Justify.Center; row.style.flexWrap = Wrap.Wrap;
+            void Link(string name, string text, string color, Action tap)
+            {
+                var link = Text(text, "Baloo2-800", 12, color); link.name = name; Pad(link, 4, 8, 4, 8);
+                GalaxyFilters.HoverBrightness(link, 1.3f); Tap(link, tap); row.Add(link);
+            }
+            if (reportingSeat == k)
+            {
+                foreach (var (reason, tr, en) in new[] { ("chat", "Küfür / hakaret", "Abuse"), ("name", "Uygunsuz ad", "Offensive name"), ("cheating", "Hile", "Cheating") })
+                    Link("card-report-" + reason, L(tr, en), "#FF8A94", () => _ = ReportAsync(k, reason));
+                Link("card-report-cancel", L("Vazgeç", "Cancel"), "var(--mt)", () => { reportingSeat = -1; RenderWindows(false); });
+                return row;
+            }
+            bool blocked = blockedSeats.Contains(k);
+            Link("card-block", blocked ? L("Engeli kaldır", "Unblock") : L("Engelle", "Block"), "var(--mt)", () => _ = BlockAsync(k, !blocked));
+            if (reportedSeats.Contains(k)) Link("card-reported", L("Şikayet edildi", "Reported"), "#8EF0B0", () => { });
+            else Link("card-report", L("Şikayet et", "Report"), "var(--mt)", () => { reportingSeat = k; RenderWindows(false); });
+            return row;
+        }
+
+        private async System.Threading.Tasks.Task BlockAsync(int seat, bool on)
+        {
+            var error = await SetBlockOnline(seat, on);
+            if (error != null) { Post(ToastKind.Error, error == "offline" ? L("Bağlantı yok", "No connection") : L("İşlem yapılamadı", "Could not complete")); return; }
+            if (on) { blockedSeats.Add(seat); friendSent.Remove(seat); Post(ToastKind.Success, L(SeatFirstName(seat) + " engellendi · mesajları sana gelmeyecek", SeatFirstName(seat) + " blocked · their messages won't reach you")); }
+            else { blockedSeats.Remove(seat); Post(ToastKind.Success, L(SeatFirstName(seat) + " için engel kaldırıldı", SeatFirstName(seat) + " unblocked")); }
+            RenderWindows(false);
+        }
+
+        private async System.Threading.Tasks.Task ReportAsync(int seat, string reason)
+        {
+            reportingSeat = -1;
+            var error = await SendReportOnline(seat, reason);
+            if (error == null) { reportedSeats.Add(seat); Post(ToastKind.Success, L("Şikayetin alındı · teşekkürler", "Report received · thank you")); }
+            else Post(ToastKind.Error, error == "rate_limited" ? L("Bugün için şikayet sınırına ulaştın", "You reached today's report limit") : L("Şikayet gönderilemedi", "Report not sent"));
+            RenderWindows(false);
+        }
+
+        /// <summary>A server table: "İstek gönderildi" only once the server took the request.</summary>
+        private async System.Threading.Tasks.Task RequestFriendAsync(int seat)
+        {
+            var error = await SendFriendOnline(seat);
+            if (error == null || error == "already_friends") { friendSent.Add(seat); RenderWindows(false); return; }
+            Post(ToastKind.Error, error == "friend_limit" ? L("Arkadaş listesi dolu", "Friend list is full") : error == "requests_disabled" ? L("Bu oyuncu istek kabul etmiyor", "This player does not take requests")
+                : error == "not_found" ? L("Bu oyuncuya istek gönderilemez", "This player cannot be added") : L("İstek gönderilemedi", "Request not sent"));
+        }
 
         /// <summary>Gift price, or "Ücretsiz" on bot tables: 10 px coin + 800 11 px #FFD964.</summary>
         private VisualElement PriceTag(string gift, int size)

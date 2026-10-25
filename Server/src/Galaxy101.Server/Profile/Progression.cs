@@ -15,26 +15,17 @@ public static class Progression
         return (level, xp, XpForLevel(level));
     }
 
-    /// <summary>Ascending (code, minimum LP). Codes follow the client tables: g2 = Gold II, d1 = Diamond I.</summary>
-    public static readonly (string Code, int MinLp)[] Leagues =
-        [("b2", 0), ("b1", 150), ("s2", 300), ("s1", 450), ("g2", 600), ("g1", 800), ("d2", 1000), ("d1", 1300)];
-
-    public static string League(int lp)
-    {
-        var code = Leagues[0].Code;
-        foreach (var (c, min) in Leagues) if (lp >= min) code = c;
-        return code;
-    }
-
-    public static int NextLeagueLp(int lp)
-    {
-        foreach (var (_, min) in Leagues) if (lp < min) return min;
-        return lp;
-    }
-
-    public static ProgressResponse Describe(long xp, int lp)
+    /// <summary>Level and the season's league (<see cref="Ranked"/>) for the profile.</summary>
+    public static ProgressResponse Describe(long xp, int lp, int place, int bestLp, int shield, int season, DateTimeOffset seasonEnd)
     {
         var (level, into, next) = Level(xp);
-        return new ProgressResponse { Xp = xp, Level = level, LevelXp = into, NextLevelXp = next, Lp = lp, League = League(lp), NextLeagueLp = NextLeagueLp(lp) };
+        var nextCode = Ranked.NextCode(lp);
+        return new ProgressResponse
+        {
+            Xp = xp, Level = level, LevelXp = into, NextLevelXp = next,
+            Lp = lp, League = Ranked.Code(lp, place), NextLeague = nextCode, NextLeagueLp = nextCode is null ? lp : (Ranked.Division(lp) + 1) * Ranked.DivisionLp,
+            DivisionLp = Ranked.IntoDivision(lp), Season = season, SeasonEndsAt = seasonEnd, SeasonRank = place,
+            BestLeague = Ranked.Code(Math.Max(bestLp, lp), place), Protected = shield,
+        };
     }
 }

@@ -22,13 +22,16 @@ namespace Galaxy101
             root.Q<VisualElement>("header").style.display = DisplayStyle.None;
             var body = root.Q<VisualElement>("content"); body.style.alignItems = Align.Center;
             var delete = Kind == "delete";
+            // A server account is deleted at once (DELETE /v1/account): no grace period may be promised for it. The 30-day
+            // wording belongs to the design's offline demo flow.
+            var serverAccount = Online.GalaxyOnline.Instance is { SignedIn: true };
             var icon = v.Box(); icon.style.width = icon.style.height = 72; icon.style.alignItems = Align.Center; icon.style.justifyContent = Justify.Center;
             v.Decorate(icon, delete ? "linear-gradient(160deg,#FF7A86,#E23B4C)" : "linear-gradient(160deg,var(--pnH),var(--pn))", 22, 5, delete ? "#A82434" : "pnS");
             if (delete) GalaxyFilters.Shadow(icon, 0, 0, 15, v.C("rgba(255,94,108,.4)"));
             icon.Add(v.Icon(delete ? "delete" : "logout", 34, "#fff")); body.Add(icon);
             var title = v.Text(delete ? v.L("Hesabını silmek istiyor musun?", "Delete your account?") : v.L("Çıkış yapmak istiyor musun?", "Log out?"), 24, true);
             title.style.unityTextAlign = UnityEngine.TextAnchor.MiddleCenter; title.style.whiteSpace = WhiteSpace.Normal; title.style.marginTop = 18; body.Add(title);
-            var desc = PanelUi.Wrap(v, delete ? v.L("Hesabın 30 gün sonra kalıcı olarak silinir. Bu süre içinde giriş yaparsan silme işlemi iptal olur.", "Your account will be deleted after 30 days. Logging in during that time cancels the deletion.") : v.L("Çiplerin, ilerlemen ve arkadaşların Google hesabında saklanır. İstediğin zaman tekrar giriş yapabilirsin.", "Your chips, progress and friends are saved to your Google account. You can log back in anytime."), 14);
+            var desc = PanelUi.Wrap(v, delete ? (serverAccount ? v.L("Hesabın ve verilerin hemen, kalıcı olarak silinir. Bu işlem geri alınamaz.", "Your account and its data are deleted now, permanently. This cannot be undone.") : v.L("Hesabın 30 gün sonra kalıcı olarak silinir. Bu süre içinde giriş yaparsan silme işlemi iptal olur.", "Your account will be deleted after 30 days. Logging in during that time cancels the deletion.")) : v.L("Çiplerin, ilerlemen ve arkadaşların Google hesabında saklanır. İstediğin zaman tekrar giriş yapabilirsin.", "Your chips, progress and friends are saved to your Google account. You can log back in anytime."), 14);
             desc.style.marginTop = 12; desc.style.maxWidth = 380; desc.style.unityTextAlign = UnityEngine.TextAnchor.MiddleCenter; body.Add(desc);
             TextField field = null;
             if (delete)
@@ -38,7 +41,7 @@ namespace Galaxy101
                 var losses = v.Column(); PanelUi.Pad(losses, 11, 13); v.Decorate(losses, "rgba(255,94,108,.1)", 14);
                 losses.style.borderLeftWidth = losses.style.borderRightWidth = losses.style.borderTopWidth = losses.style.borderBottomWidth = 1;
                 losses.style.borderLeftColor = losses.style.borderRightColor = losses.style.borderTopColor = losses.style.borderBottomColor = v.C("rgba(255,94,108,.3)");
-                var items = new[] { v.L("125.400 çip ve 340 elmas", "125,400 chips and 340 gems"), v.L("Seviye 24, Altın II derecesi ve rozetler", "Level 24, Gold II rank and badges"), v.L("Arkadaş listesi ve maç geçmişi", "Friend list and match history") };
+                var items = new[] { v.L(v.N(v.Model.Chips) + " çip ve " + v.N(v.Model.Gems) + " elmas", v.N(v.Model.Chips) + " chips and " + v.N(v.Model.Gems) + " gems"), v.L("Seviye 24, Altın II derecesi ve rozetler", "Level 24, Gold II rank and badges"), v.L("Arkadaş listesi ve maç geçmişi", "Friend list and match history") };
                 for (var i = 0; i < items.Length; i++)
                 {
                     var dot = PanelUi.Circle(v, 6, "#FF5E6C"); dot.style.marginRight = 10;
@@ -53,10 +56,21 @@ namespace Galaxy101
             // Buttons: equal halves, gap 12, padding 13px 0, 700 16px.
             var footer = root.Q<VisualElement>("footer"); footer.style.borderTopWidth = 0; footer.style.marginTop = 22; footer.style.paddingTop = 0;
             var cancel = PanelUi.CssButton(v, v.L("Vazgeç", "Cancel"), v.CloseTop, "secondary", 13, 0, 16); cancel.style.flexGrow = 1; cancel.style.flexBasis = 0; cancel.style.flexShrink = 1; footer.Add(cancel);
-            var confirm = PanelUi.CssButton(v, delete ? v.L("Hesabı sil", "Delete account") : v.L("Çıkış yap", "Log out"), () =>
+            Button confirm = null;
+            // The farewell shows only after the server answered: a failed deletion keeps the dialog and says so.
+            async void DeleteAccount()
+            {
+                confirm.SetEnabled(false);
+                var error = await v.Services.Profile.DeleteAccountAsync();
+                if (error == null) { if (serverAccount) v.DoneFrom = "deleted"; v.OpenDialog("bye"); return; }
+                confirm.SetEnabled(true);
+                v.Flash(error == "offline" ? v.L("Sunucuya ulaşılamadı, hesabın silinmedi", "Server unreachable: your account was not deleted") : v.L("Hesap silinemedi", "The account could not be deleted"), "bad");
+            }
+            confirm = PanelUi.CssButton(v, delete ? v.L("Hesabı sil", "Delete account") : v.L("Çıkış yap", "Log out"), () =>
             {
                 if (delete && !CanDelete(field.value, v.Loc.Language)) return;
-                if (delete ? v.Services.Profile.RequestDelete() : v.Services.Profile.Logout()) v.OpenDialog("bye");
+                if (delete) DeleteAccount();
+                else if (v.Services.Profile.Logout()) v.OpenDialog("bye");
             }, "danger", 13, 0, 16);
             confirm.name = "confirm-account-action"; confirm.style.marginLeft = 12; confirm.style.flexGrow = 1; confirm.style.flexBasis = 0; confirm.style.flexShrink = 1; footer.Add(confirm);
             if (delete)

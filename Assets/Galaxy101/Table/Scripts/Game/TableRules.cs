@@ -33,7 +33,7 @@ namespace Galaxy101.Table
             return rules;
         }
 
-        /// <summary>XP needed to leave <paramref name="level"/> (500 × level: level 24 → 12.000).</summary>
+        /// <summary>XP needed to leave <paramref name="level"/> (375 × level, as on the server: level 24 → 9.000).</summary>
         public long XpForLevel(int level) => (long)XpPerLevel * level;
 
         /// <summary>Add XP; returns how many levels were gained.</summary>

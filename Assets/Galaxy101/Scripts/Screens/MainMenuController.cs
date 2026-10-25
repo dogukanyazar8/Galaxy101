@@ -22,6 +22,7 @@ namespace Galaxy101
         private void Start()
         {
             Initialize();
+            Galaxy101.Table.ThreeEnvironment.Prewarm(); // the table's reflection cube, on worker threads while the menu is up
 #if UNITY_EDITOR || OKEY_DIAGNOSTICS
             var args=Environment.GetCommandLineArgs();
             if(Array.IndexOf(args,"-okeyPractice")>=0||Array.IndexOf(args,"-okeyA3Output")>=0||Array.IndexOf(args,"-okeyA4Output")>=0)OnPlay(4,LegacyTableScene);
@@ -49,7 +50,7 @@ namespace Galaxy101
             {
                 // Back from a table with the session still open: no splash or sign-in again.
                 var signed=Galaxy101.Online.GalaxyOnline.Instance;
-                if(signed!=null&&signed.SignedIn){ApplyOnline(signed);HookOnline(signed);if(ReturnToLobby){ReturnToLobby=false;OpenLobby();}}
+                if(signed!=null&&signed.SignedIn){ApplyOnline(signed);HookOnline(signed);if(ReturnToLobby){ReturnToLobby=false;if(FromRanked)FromRanked=false;else OpenLobby();}}
                 else ShowAuth();
             }
         }
@@ -63,11 +64,13 @@ namespace Galaxy101
             Auth.Completed+=()=>{ApplyOnline(online);HookOnline(online);};
             Auth.Show();
         }
-        /// <summary>The menu shows the server's name, colour and balance once signed in.</summary>
+        /// <summary>The menu shows the server's profile card and balance once signed in; signed out, the sign-in comes back.</summary>
         private void ApplyOnline(Galaxy101.Online.GalaxyOnline online)
         {
-            if(online.Profile!=null){Model.Profile["name"]=online.Profile.Name;Model.Profile["color"]=online.Profile.Color;}
-            if(online.Wallet!=null){Model.Chips=online.Wallet.Chips;Model.Gems=online.Wallet.Gems;}
+            if(!online.SignedIn){if(Auth==null||!Auth.Visible)ShowAuth();return;}
+            if(online.Profile!=null){Model.Profile["name"]=online.Profile.Name;Model.Profile["color"]=online.Profile.Color;Model.Profile["status"]=online.Profile.Status??"";Model.Profile["frame"]=online.Profile.Frame;if(online.Profile.Progress!=null){Model.Level=online.Profile.Progress.Level;Model.Xp=online.Profile.Progress.LevelXp;}}
+            if(online.Profile!=null&&!string.IsNullOrEmpty(online.Profile.FriendCode))Model.FriendCode=online.Profile.FriendCode;
+            if(online.Wallet!=null){Model.Chips=online.Wallet.Chips;Model.Gems=online.Wallet.Gems;Model.OwnedSkins.Clear();foreach(var item in online.Wallet.OwnedItems??new System.Collections.Generic.List<string>())Model.OwnedSkins.Add(item);}
             View.Refresh();
         }
         private bool invitesHooked;
@@ -86,9 +89,30 @@ namespace Galaxy101
         }
         /// <summary>Set by an online table when it closes: the menu opens straight into the lobby.</summary>
         public static bool ReturnToLobby;
+        /// <summary>The table was a Dereceli match: back to the menu, not the Klasik lobby.</summary>
+        public static bool FromRanked;
+        private RankedQueue ranked;
+        /// <summary>Dereceli (HEMEN OYNA): the server's queue by league; the table opens when four are matched.</summary>
+        private void StartRanked()
+        {
+            var online=Galaxy101.Online.GalaxyOnline.Instance;
+            if(online==null||!online.SignedIn){View.Toast(View.L("Dereceli için giriş yapmalısın","Sign in to play ranked"));return;}
+            if(ranked==null){ranked=new RankedQueue(View,online);ranked.Matched+=OnRankedMatched;}
+            ranked.Start();
+        }
+        private void OnRankedMatched(Galaxy101.Contracts.MatchStartMessage start)
+        {
+            var online=Galaxy101.Online.GalaxyOnline.Instance;
+            if(online==null||this==null)return;
+            Galaxy101.Table.TableGame.PendingOnline=new Galaxy101.Table.NetworkTableSession(online,start.MatchId);
+            Galaxy101.Table.TableGame.PendingRoom=View.L("Dereceli · Sezon ","Ranked · Season ")+(online.Profile?.Progress?.Season??1);
+            FromRanked=true;
+            _=StartLocalAsync(GalaxyTableScene);
+        }
         private System.Action onlineChanged;
         private void HookOnline(Galaxy101.Online.GalaxyOnline online)
         {
+            View.Services.Online.Load(null); // stats, daily rewards, friends and settings for the menu and its badges
             if(onlineChanged==null){onlineChanged=()=>{if(this!=null)ApplyOnline(online);};online.Changed+=onlineChanged;}
             if(!invitesHooked){invitesHooked=true;inviteOff=online.Realtime.On<Galaxy101.Contracts.InviteMessage>(Galaxy101.Contracts.MessageTypes.Invite,message=>{if(this==null||Auth!=null&&Auth.Visible)return;OpenLobby();Lobby.ShowInvite(message);});}
         }
@@ -137,6 +161,7 @@ namespace Galaxy101
         {
             PlayRequested?.Invoke(mode);Debug.Log("GALAXY101_PLAY_REQUESTED mode="+mode);
             if(mode==0){OpenLobby();return;}
+            if(mode==3){StartRanked();return;}
             if(mode!=4||navigating)return;
             try{await StartLocalAsync(scene);}
             catch(Exception exception){Debug.LogException(exception);if(this!=null)View.Toast(View.L("Masa açılamadı. Yeniden deneyin.","Could not open the table. Try again."));}

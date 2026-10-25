@@ -30,6 +30,16 @@ namespace Galaxy101.Table
 
         /// <summary>A gift or emoji leaves <c>from</c> for <c>to</c> (seat); the 3D flight and the received card hang on it.</summary>
         public event Action<string, int, int> GiftSent;
+        /// <summary>
+        /// A server table: treats and emoji go to the server, which shows them at every seat — mine included — through
+        /// <see cref="BotGift"/> / <see cref="ShowEmote"/>; nothing is simulated (no thanks, no replies). Null at a bot table.
+        /// </summary>
+        public Func<string, int?, System.Threading.Tasks.Task<string>> SendGiftOnline;
+        public Func<string, System.Threading.Tasks.Task<string>> SendEmoteOnline;
+        /// <summary>A server table's chat (text, or a ready phrase's index) and friend request (local seat).</summary>
+        public Func<string, int?, System.Threading.Tasks.Task<string>> SendChatOnline;
+        public Func<int, System.Threading.Tasks.Task<string>> SendFriendOnline;
+        private bool OnlineTable => SendGiftOnline != null;
 
         public IReadOnlyList<GiftInfo> Gifts { get { LoadGifts(); return giftCatalog; } }
         private IEnumerable<string> QuickGifts { get { LoadGifts(); return quickGifts; } }
@@ -81,7 +91,32 @@ namespace Galaxy101.Table
             if (!CanSend) return;
             string pick = GiftSelection, target = GiftTarget;
             GiftSelection = null; CloseWindow();
-            After(.12f, () => { if (pick.StartsWith("e:", StringComparison.Ordinal)) SendEmoji(pick.Substring(2), target); else SendGift(pick, target); });
+            After(.12f, () => Treat(pick, target));
+        }
+
+        /// <summary>Every way to treat (the gift drawer, the player card): through the server at a server table.</summary>
+        private void Treat(string pick, string target)
+        {
+            if (OnlineTable) { _ = SendOnlineAsync(pick, target); return; }
+            if (pick.StartsWith("e:", StringComparison.Ordinal)) SendEmoji(pick.Substring(2), target); else SendGift(pick, target);
+        }
+
+        private async System.Threading.Tasks.Task SendOnlineAsync(string pick, string target)
+        {
+            bool emoji = pick.StartsWith("e:", StringComparison.Ordinal);
+            var error = emoji ? await SendEmoteOnline(pick.Substring(2)) : await SendGiftOnline(pick, target == "all" ? (int?)null : int.Parse(target));
+            if (error != null) PostSendError(error);
+        }
+
+        private void PostSendError(string error) => Post(ToastKind.Error,
+            error == "insufficient_funds" ? L("Çipin yetmedi", "Not enough chips") : error == "rate_limited" ? L("Biraz bekle", "Wait a moment")
+            : error == "validation" ? L("Bu masada izin verilmiyor", "Not allowed at this table") : error == "offline" ? L("Bağlantı yok", "No connection")
+            : L("Gönderilemedi", "Could not send"));
+
+        /// <summary>A server table's emoji from <paramref name="from"/>: it flies to every other seat.</summary>
+        public void ShowEmote(int from, string emoji)
+        {
+            for (int to = 0, i = 0; to < 4; to++) if (to != from) { int seat = to; After(i++ * .14f, () => FlyEmoji(from, seat, emoji)); }
         }
 
         /// <summary>
@@ -139,13 +174,22 @@ namespace Galaxy101.Table
             BuildNotice();
         }
 
-        /// <summary>"Teşekkür et": my bubble, then a 🙏 flies to the sender.</summary>
+        /// <summary>"Teşekkür et": my bubble, then a 🙏 flies to the sender (at a server table both go through the server).</summary>
         public void Thank()
         {
             if (noticeInfo == null) return;
             int from = noticeInfo.Value.From; CloseNotice();
+            if (OnlineTable) { _ = ThankOnlineAsync(); return; }
             Say(0, S("thanksMsg"));
             After(.3f, () => FlyEmoji(0, from, "🙏"));
+        }
+
+        private async System.Threading.Tasks.Task ThankOnlineAsync()
+        {
+            var error = await SendEmoteOnline("🙏");
+            if (error != null) { PostSendError(error); return; }
+            // A quick-phrase or chat-off room refuses the words; the 🙏 has already said it.
+            await SendChatOnline(S("thanksMsg"), null);
         }
 
         private void CloseNotice() { noticeInfo = null; notice?.RemoveFromHierarchy(); notice = null; }

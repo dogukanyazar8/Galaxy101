@@ -109,6 +109,8 @@ namespace Galaxy101.Table
 
         
         private readonly System.Collections.Generic.List<TileFactory> retiredTiles = new System.Collections.Generic.List<TileFactory>();
+        /// <summary>Runtime assets this scene made (post profile and its overrides, the discard ring's mesh and material).</summary>
+        private readonly System.Collections.Generic.List<Object> owned = new System.Collections.Generic.List<Object>();
         private float savedShadowDistance; private int savedCascades, savedMsaa; private UniversalRenderPipelineAsset urp;
 
         private void OnDestroy()
@@ -117,6 +119,8 @@ namespace Galaxy101.Table
             tiles?.Dispose(); tiles = null;
             foreach (var retired in retiredTiles) retired.Dispose();
             retiredTiles.Clear();
+            foreach (var o in owned) Kill(o);
+            owned.Clear();
             // Restore the shared URP asset (the menu and the classic table use it too).
             if (urp != null) { urp.shadowDistance = savedShadowDistance; urp.shadowCascadeCount = savedCascades; urp.msaaSampleCount = savedMsaa; }
         }
@@ -133,6 +137,15 @@ namespace Galaxy101.Table
             urp.shadowDistance = 4.5f; urp.shadowCascadeCount = 1; urp.msaaSampleCount = 4;
         }
 
+        /// <summary>
+        /// Efekt kalitesi for the table (0 Düşük, 1 Orta, 2 Yüksek): Düşük draws no shadows — the shadow pass is the
+        /// largest fixed GPU cost after the view's resolution and MSAA. The URP asset's values come back with the scene.
+        /// </summary>
+        public void SetEffectQuality(int level)
+        {
+            if (urp != null) urp.shadowDistance = level == 0 ? 0 : 4.5f;
+        }
+
         private static void Kill(Object o) { if (o == null) return; if (Application.isPlaying) Destroy(o); else DestroyImmediate(o); }
 
         // ---------- lighting (spec/09 §4) ----------
@@ -141,7 +154,7 @@ namespace Galaxy101.Table
             var theme = skins.Theme;
             var lights = new GameObject("Lighting").transform; lights.SetParent(transform, false);
             // scene.environment (buildEnv, ×0.75) and the hemisphere light (sky / #0a0a14, 0.45): ambient probe + reflections.
-            ThreeEnvironment.Apply(lights, new Color32(0xFF, 0xC9, 0x4A, 255), theme.Sky, new Color32(0x0a, 0x0a, 0x14, 255), 0.45f);
+            ThreeEnvironment.Apply(lights, ThreeEnvironment.TableTint, theme.Sky, new Color32(0x0a, 0x0a, 0x14, 255), 0.45f);
 
             Light Make(string name, LightType type, Color color, float intensity, Vector3 threePos, Vector3? threeTarget)
             {
@@ -176,6 +189,7 @@ namespace Galaxy101.Table
             profile.Add<ColorAdjustments>(true).postExposure.Override(0f);
             profile.Add<MotionBlur>(true).intensity.Override(0f);
             volume.sharedProfile = profile;
+            owned.Add(profile); owned.AddRange(profile.components);
         }
 
         private void BuildCamera()
@@ -316,8 +330,9 @@ namespace Galaxy101.Table
             var pose = seatFrames[0].Pose(DiscardLocal.x, TY + 0.0012f, DiscardLocal.z);
             var zone = new GameObject("DiscardZone"); zone.transform.SetParent(transform, false); DiscardZone = zone.transform;
             zone.transform.position = pose.UnityPosition;
-            zone.AddComponent<MeshFilter>().sharedMesh = RingMesh(0.058f, 0.066f, 48);
+            var ring = RingMesh(0.058f, 0.066f, 48); zone.AddComponent<MeshFilter>().sharedMesh = ring;
             var mat = new Material(Shader.Find("Universal Render Pipeline/Unlit")) { name = "atma_alani" };
+            owned.Add(ring); owned.Add(mat);
             mat.SetFloat("_Surface", 1); mat.SetFloat("_Blend", 0); mat.SetFloat("_ZWrite", 0);
             mat.SetInt("_SrcBlend", (int)BlendMode.SrcAlpha); mat.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha);
             mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT"); mat.renderQueue = (int)RenderQueue.Transparent;

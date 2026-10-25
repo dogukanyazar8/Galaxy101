@@ -26,6 +26,7 @@ ANGLE = math.radians(30)
 LOD_PREFIXES = ("galaxy101_istaka_", "galaxy101_masa_", "galaxy101_koltuk", "galaxy101_hediye_", "galaxy101_ikram_")
 # Surfaces tiles stand on: keep their corners crisp to stay inside the ±0.5 mm seating tolerance.
 RACK_SEATING = {"istaka_govde"}
+SEATING_TOLERANCE = 0.0005
 # Rhombus baklava slices have ~40° tips; an angle-limited bevel overshoots them by ~0.08 mm, so they get normals only.
 NO_BEVEL_PREFIXES = ("dilim_govde",)
 os.makedirs(OUT, exist_ok=True)
@@ -191,6 +192,23 @@ def add_lods(report):
         report["lod1"].append(lod.name)
 
 
+def seating_diffs(before, after):
+    """Height change of every seating sample (same x station in order, the nearest y within 0.25 mm), and how many
+    samples found no counterpart at all (a lost station or surface is a failure, not a skipped comparison)."""
+    def stations(points):
+        return [sorted((p for p in points if p[0] == x), key=lambda p: p[1]) for x in sorted({p[0] for p in points})]
+    rows_before, rows_after = stations(before), stations(after)
+    diffs, lost = [], sum(len(row) for row in rows_before[len(rows_after):])
+    for row_before, row_after in zip(rows_before, rows_after):
+        for _, y, z in row_before:
+            near = min(row_after, key=lambda p: abs(p[1] - y), default=None)
+            if near is not None and abs(near[1] - y) <= 0.00025:
+                diffs.append(abs(near[2] - z))
+            else:
+                lost += 1
+    return diffs, lost
+
+
 def export(path, tangents):
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", export_apply=True, export_materials="EXPORT",
                               export_image_format="AUTO", export_yup=True, export_tangents=tangents,
@@ -220,11 +238,12 @@ for name in sorted(os.listdir(SRC)):
     polish_textures(asset, report)
     if name.startswith(LOD_PREFIXES):
         add_lods(report)
-    seat_after = profile_heights("istaka_govde") if "istaka" in name else []
     export(dst, tangents=bool(report["pbr"]))
     # ---- verification on the exported file ----
     import_file(dst)
     after = snapshot(); issues = []
+    # Seating is measured on the re-imported file: what Unity will load, not the pre-export modifier stack.
+    seat_after = profile_heights("istaka_govde") if "istaka" in name else []
     for obj, b in before["objects"].items():
         a = after["objects"].get(obj)
         if not a:
@@ -247,13 +266,23 @@ for name in sorted(os.listdir(SRC)):
                 issues.append(f"{mat}.{k}: {v} -> {g[k]}")
     seat = None
     if seat_before:
-        ref = {(x, y): z for x, y, z in seat_after}
-        diffs = [abs(ref[(x, y)] - z) for x, y, z in seat_before if (x, y) in ref]
-        seat = {"samples": len(diffs), "max_mm": round(max(diffs) * 1000, 3) if diffs else None,
+        diffs, lost = seating_diffs(seat_before, seat_after)
+        seat = {"samples": len(diffs), "lost": lost, "max_mm": round(max(diffs) * 1000, 3) if diffs else None,
                 "heights_mm": sorted({round(z * 1000, 1) for _, _, z in seat_before})}
+        if lost:
+            issues.append(f"rack seating: {lost} of {len(seat_before)} samples have no counterpart after re-import")
+        if not diffs:
+            issues.append("rack seating: no comparable samples after re-import")
+        elif max(diffs) > SEATING_TOLERANCE:
+            issues.append(f"rack seating moved {max(diffs) * 1000:.2f} mm (tolerance {SEATING_TOLERANCE * 1000:.1f} mm)")
     report.update(issues=issues, seating=seat, size_kb=os.path.getsize(dst) // 1024, src_kb=os.path.getsize(src) // 1024,
                   objects=len(after["objects"]))
     results[name] = report
     print("POLISHED", name, "issues", len(issues))
 json.dump(results, open(REPORT, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
 print("DONE", len(results))
+# A quality gate: any issue (bounds, materials, hierarchy, seating) fails the run.
+failed = [n for n, r in results.items() if r.get("issues")]
+if failed:
+    print("FAILED", len(failed), ":", ", ".join(failed))
+    sys.exit(1)

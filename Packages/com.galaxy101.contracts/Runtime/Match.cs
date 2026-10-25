@@ -74,6 +74,14 @@ namespace Galaxy101.Contracts
         public int YourSeat { get; set; }
         public int TurnSeconds { get; set; }
         public List<SeatResponse> Seats { get; set; } = new List<SeatResponse>();
+        /// <summary>İzle: a spectator's table, seen from seat 0 with nobody's tiles; it never plays.</summary>
+        public bool Spectator { get; set; }
+    }
+
+    public sealed class MatchSeatsMessage
+    {
+        public Guid MatchId { get; set; }
+        public List<SeatResponse> Seats { get; set; } = new List<SeatResponse>();
     }
 
     public sealed class PublicPlayerDto
@@ -81,6 +89,8 @@ namespace Galaxy101.Contracts
         public int HandCount { get; set; }
         public string Opening { get; set; }
         public int Penalties { get; set; }
+        /// <summary>The opening's series total or pair count (0 before opening): the katlamalı bar is the highest + 1.</summary>
+        public int OpeningValue { get; set; }
     }
 
     public sealed class DrawReceiptDto
@@ -116,6 +126,12 @@ namespace Galaxy101.Contracts
     {
         public bool OkeyPenalty { get; set; } = true;
         public bool PlayablePenalty { get; set; } = true;
+        /// <summary>İşleme (laying onto table melds) allowed; absent = on.</summary>
+        public bool Processing { get; set; } = true;
+        /// <summary>Katlamalı: later openers must beat the previous opener; absent = off.</summary>
+        public bool Doubling { get; set; }
+        /// <summary>Katlamalı + Eşli: the partner's (opposite seat's) opening raises the bar; absent = on.</summary>
+        public bool PartnerRaises { get; set; } = true;
     }
 
     /// <summary>Public facts of the deal (spec/21): dealer seat, the two dice, the indicator stack and height, the extra tile's stack.</summary>
@@ -148,6 +164,8 @@ namespace Galaxy101.Contracts
         public List<MeldDto> Table { get; set; } = new List<MeldDto>();
         public List<List<int>> Discards { get; set; } = new List<List<int>>();
         public DrawReceiptDto PendingDraw { get; set; }
+        /// <summary>The active seat put the pile tile back this turn: it may only draw from the stock now.</summary>
+        public bool PreviousDiscardReturned { get; set; }
         public int SeriesTilesUsed { get; set; }
         public RoundResultDto Result { get; set; }
         public DealDto Deal { get; set; }

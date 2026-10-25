@@ -11,7 +11,8 @@ public readonly record struct LedgerResult(LedgerOutcome Outcome, long Chips, lo
 /// <summary>
 /// The only writer of balances. A change is one conditional UPDATE (never below zero, no read-modify-write race)
 /// plus append-only ledger rows keyed by an idempotency key, so a retried operation is applied at most once.
-/// Callers that combine several changes wrap them in one transaction.
+/// The balance and its rows commit together (inside the caller's transaction, or one of their own); callers that combine
+/// several changes wrap them in one transaction.
 /// </summary>
 public sealed class Ledger(GameDb db, TimeProvider clock)
 {
@@ -22,6 +23,15 @@ public sealed class Ledger(GameDb db, TimeProvider clock)
     public async Task<LedgerResult> ApplyAsync(Guid account, long chips, long gems, string reason, string key, CancellationToken ct)
     {
         if (Math.Abs(chips) > MaxDelta || Math.Abs(gems) > MaxDelta) throw new ArgumentOutOfRangeException(nameof(chips));
+        if (db.Database.CurrentTransaction is not null) return await ApplyInTransactionAsync(account, chips, gems, reason, key, ct);
+        await using var tx = await db.Database.BeginTransactionAsync(ct);
+        var result = await ApplyInTransactionAsync(account, chips, gems, reason, key, ct);
+        await tx.CommitAsync(ct);
+        return result;
+    }
+
+    private async Task<LedgerResult> ApplyInTransactionAsync(Guid account, long chips, long gems, string reason, string key, CancellationToken ct)
+    {
         string[] keys = [key + "#chips", key + "#gems", key + "#none"];
         if (await db.Ledger.AnyAsync(x => x.AccountId == account && keys.Contains(x.IdempotencyKey), ct))
         {

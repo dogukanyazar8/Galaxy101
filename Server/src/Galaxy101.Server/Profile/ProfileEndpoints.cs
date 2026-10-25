@@ -1,6 +1,8 @@
 using System.Text.Json;
 using Galaxy101.Contracts;
 using Galaxy101.Server.Data;
+using Galaxy101.Server.Economy;
+using Galaxy101.Server.Social;
 using Galaxy101.Server.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -13,19 +15,25 @@ public static class ProfileEndpoints
     {
         var profile = app.MapGroup("/v1/profile").RequireAuthorization();
 
-        profile.MapGet("", async (HttpContext http, GameDb db, CancellationToken ct) =>
-            await Describe(db, http.User.AccountId(), ct) is { } response ? Results.Ok(response) : Api.NotFound());
+        // The first look in a new season rolls the player over (reward for the last one, the soft reset).
+        profile.MapGet("", async (HttpContext http, GameDb db, Ledger ledger, GameCalendar calendar, CancellationToken ct) =>
+        {
+            var me = http.User.AccountId();
+            await SeasonAsync(db, ledger, calendar, me, ct);
+            return await Describe(db, me, calendar, ct) is { } response ? Results.Ok(response) : Api.NotFound();
+        });
 
-        profile.MapPut("", async (ProfileUpdateRequest request, HttpContext http, GameDb db, CancellationToken ct) =>
+        profile.MapPut("", async (ProfileUpdateRequest request, HttpContext http, GameDb db, GameCalendar calendar, CancellationToken ct) =>
         {
             if (!ProfileRules.ValidProfile(request)) return Api.Error(ErrorCodes.Validation);
+            if (!Social.TextFilter.IsClean(request.Name) || !Social.TextFilter.IsClean(request.Status)) return Api.Error(ErrorCodes.Inappropriate);
             var me = http.User.AccountId();
             var updated = await db.Accounts.Where(x => x.Id == me).ExecuteUpdateAsync(s => s
                 .SetProperty(x => x.Name, request.Name.Trim())
                 .SetProperty(x => x.Color, request.Color)
                 .SetProperty(x => x.Status, request.Status ?? "")
                 .SetProperty(x => x.Frame, request.Frame), ct);
-            return updated == 0 ? Api.NotFound() : Results.Ok(await Describe(db, me, ct));
+            return updated == 0 ? Api.NotFound() : Results.Ok(await Describe(db, me, calendar, ct));
         });
 
         profile.MapGet("/stats", async (HttpContext http, GameDb db, CancellationToken ct) =>
@@ -50,10 +58,12 @@ public static class ProfileEndpoints
         profile.MapGet("/history", async (HttpContext http, GameDb db, CancellationToken ct) =>
         {
             var me = http.User.AccountId();
-            var rows = await db.MatchParticipants.AsNoTracking().Where(x => x.AccountId == me)
-                .OrderByDescending(x => x.FinishedAt).Take(20)
-                .Select(x => new HistoryEntryResponse { MatchId = x.MatchId, Mode = x.Mode, Place = x.Place, ChipDelta = x.ChipDelta, LpDelta = x.LpDelta, FinishedAt = x.FinishedAt })
-                .ToListAsync(ct);
+            var rows = await (from x in db.MatchParticipants.AsNoTracking()
+                              join m in db.Matches on x.MatchId equals m.Id
+                              where x.AccountId == me
+                              orderby x.FinishedAt descending
+                              select new HistoryEntryResponse { MatchId = x.MatchId, Mode = x.Mode, Place = x.Place, ChipDelta = x.ChipDelta, LpDelta = x.LpDelta, Stake = m.Stake, FinishedAt = x.FinishedAt })
+                .Take(20).ToListAsync(ct);
             return Results.Ok(rows);
         });
 
@@ -99,25 +109,53 @@ public static class ProfileEndpoints
         });
 
         // Store requirement: in-app deletion. Personal data goes; purchase and match records stay anonymised.
-        app.MapDelete("/v1/account", async (HttpContext http, GameDb db, IAccountLifecycle lifecycle, CancellationToken ct) =>
+        app.MapDelete("/v1/account", async (HttpContext http, GameDb db, IAccountLifecycle lifecycle, Auth.DeletedAccounts denied, CancellationToken ct) =>
         {
             var me = http.User.AccountId();
-            await lifecycle.BeforeDeleteAsync(me, ct);
-            var deleted = await db.Accounts.Where(x => x.Id == me).ExecuteDeleteAsync(ct);
-            return deleted == 0 ? Api.NotFound() : Results.NoContent();
+            // Its access tokens and tickets stop working first (nothing new starts while it is released); a deletion
+            // that fails lifts that again, so the player is not locked out of an account that still exists.
+            denied.Add(me);
+            try
+            {
+                await lifecycle.BeforeDeleteAsync(me, ct);
+                var deleted = await db.Accounts.Where(x => x.Id == me).ExecuteDeleteAsync(ct);
+                return deleted == 0 ? Api.NotFound() : Results.NoContent();
+            }
+            catch
+            {
+                denied.Remove(me);
+                throw;
+            }
         }).RequireAuthorization();
     }
 
-    public static async Task<ProfileResponse?> Describe(GameDb db, Guid id, CancellationToken ct)
+    /// <summary>Rolls the player's stats into the current season (last season's reward, the soft reset) once.</summary>
+    public static async Task SeasonAsync(GameDb db, Ledger ledger, GameCalendar calendar, Guid id, CancellationToken ct)
+    {
+        var season = calendar.Season;
+        if (!await db.Stats.AnyAsync(x => x.AccountId == id && x.LpSeason < season, ct)) return;
+        await using var tx = await db.Database.BeginTransactionAsync(ct);
+        var stats = (await db.Stats.FromSql($"SELECT * FROM stats WHERE account_id = {id} FOR UPDATE").ToListAsync(ct)).SingleOrDefault();
+        if (stats is null) return;
+        await Ranked.RollOverAsync(db, ledger, stats, season, ct);
+        await db.SaveChangesAsync(ct);
+        await tx.CommitAsync(ct);
+    }
+
+    public static async Task<ProfileResponse?> Describe(GameDb db, Guid id, GameCalendar calendar, CancellationToken ct)
     {
         var a = await db.Accounts.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, ct);
         if (a is null) return null;
-        var s = await db.Stats.AsNoTracking().Where(x => x.AccountId == id).Select(x => new { x.Xp, x.Lp }).FirstAsync(ct);
+        var s = await db.Stats.AsNoTracking().Where(x => x.AccountId == id).Select(x => new { x.Xp, x.Lp, x.LpSeason, x.BestLp, x.Shield }).FirstAsync(ct);
+        var season = calendar.Season; bool current = s.LpSeason >= season;
+        var lp = Ranked.SeasonLp(s.Lp, s.LpSeason, season);
+        var place = await Ranked.PlaceAsync(db, LeaderboardEndpoints.SeasonBoard(season), id, lp, ct);
         var providers = await db.ExternalLogins.Where(x => x.AccountId == id).Select(x => x.Provider).ToListAsync(ct);
         return new ProfileResponse
         {
             Id = a.Id, Name = a.Name, Color = a.Color, Status = a.Status, Frame = a.Frame, FriendCode = a.FriendCode,
-            Planet = a.Planet, Progress = Progression.Describe(s.Xp, s.Lp), LinkedProviders = providers,
+            Planet = a.Planet, Progress = Progression.Describe(s.Xp, lp, place, current ? s.BestLp : lp, current ? s.Shield : 0, season, calendar.SeasonEnd),
+            LinkedProviders = providers,
             AcceptedPrivacyVersion = a.AcceptedPrivacyVersion,
         };
     }

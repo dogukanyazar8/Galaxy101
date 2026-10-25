@@ -43,7 +43,11 @@ public static class FriendsEndpoints
             var code = Players.NormalizeCode(request.Code);
             var target = code is null ? null : await db.Accounts.AsNoTracking().Where(a => a.FriendCode == code).Select(a => new { a.Id, a.SettingsJson }).FirstOrDefaultAsync(ct);
             if (target is null || target.Id == me) return Api.NotFound();
+            if (await ModerationEndpoints.BlockedAsync(db, me, target.Id, ct)) return Api.NotFound(); // a block reads as no such player
             var (low, high) = Players.Pair(me, target.Id);
+            // Counted and changed under both accounts' row locks: parallel requests and accepts cannot pass the limit together.
+            await using var tx = await db.Database.BeginTransactionAsync(ct);
+            await LockPairAsync(db, low, high, ct);
             var existing = await db.Friendships.FirstOrDefaultAsync(f => f.LowId == low && f.HighId == high, ct);
             if (existing is { Accepted: true }) return Api.Conflict(ErrorCodes.AlreadyFriends);
             if (existing is not null && existing.RequesterId == me) return Results.NoContent();
@@ -55,24 +59,33 @@ public static class FriendsEndpoints
                 // They already asked me: asking back is accepting.
                 existing.Accepted = true;
                 await db.SaveChangesAsync(ct);
+                await tx.CommitAsync(ct);
                 live.Send(target.Id, MessageTypes.FriendAccepted, new FriendRequestResponse { Player = card, SentAt = clock.GetUtcNow() });
                 return Results.NoContent();
             }
             if (!ProfileRules.ReadSettings(target.SettingsJson).FriendReq) return Api.Conflict(ErrorCodes.RequestsDisabled);
             db.Friendships.Add(new Friendship { LowId = low, HighId = high, RequesterId = me, CreatedAt = clock.GetUtcNow() });
-            try { await db.SaveChangesAsync(ct); }
+            try { await db.SaveChangesAsync(ct); await tx.CommitAsync(ct); }
             catch (DbUpdateException error) when (error.IsUniqueViolation()) { return Results.NoContent(); }
             live.Send(target.Id, MessageTypes.FriendRequest, new FriendRequestResponse { Player = card, SentAt = clock.GetUtcNow() });
             return Results.NoContent();
         });
 
-        friends.MapPost("/requests/{id:guid}/accept", async (Guid id, HttpContext http, GameDb db, ConnectionRegistry live, TimeProvider clock, CancellationToken ct) =>
+        friends.MapPost("/requests/{id:guid}/accept", async (Guid id, HttpContext http, GameDb db, ConnectionRegistry live, TimeProvider clock,
+            IOptions<GameOptions> game, CancellationToken ct) =>
         {
             var me = http.User.AccountId();
             var (low, high) = Players.Pair(me, id);
+            // The limit holds on acceptance too (requests may have piled up while either list filled), counted under both
+            // accounts' row locks so two parallel accepts cannot both pass it.
+            await using var tx = await db.Database.BeginTransactionAsync(ct);
+            await LockPairAsync(db, low, high, ct);
+            if (await FriendCount(db, me, ct) >= game.Value.MaxFriends || await FriendCount(db, id, ct) >= game.Value.MaxFriends)
+                return Api.Conflict(ErrorCodes.FriendLimit);
             var accepted = await db.Friendships.Where(f => f.LowId == low && f.HighId == high && !f.Accepted && f.RequesterId == id)
                 .ExecuteUpdateAsync(s => s.SetProperty(f => f.Accepted, true), ct);
             if (accepted == 0) return Api.NotFound();
+            await tx.CommitAsync(ct);
             live.Send(id, MessageTypes.FriendAccepted, new FriendRequestResponse { Player = await Players.SummaryAsync(db, me, ct), SentAt = clock.GetUtcNow() });
             return Results.NoContent();
         });
@@ -149,6 +162,10 @@ public static class FriendsEndpoints
     {
         FriendCode = code, Url = $"{game.PublicBaseUrl.TrimEnd('/')}/p/{code}", DeepLink = $"{game.DeepLinkScheme}://friend/{code}",
     };
+
+    /// <summary>Row locks on both accounts, lowest id first (every caller locks in the same order: no deadlock).</summary>
+    private static Task<int> LockPairAsync(GameDb db, Guid low, Guid high, CancellationToken ct) =>
+        db.Database.ExecuteSqlInterpolatedAsync($"SELECT 1 FROM accounts WHERE id IN ({low}, {high}) ORDER BY id FOR UPDATE", ct);
 
     private static Task<int> FriendCount(GameDb db, Guid account, CancellationToken ct) =>
         db.Friendships.CountAsync(f => f.Accepted && (f.LowId == account || f.HighId == account), ct);

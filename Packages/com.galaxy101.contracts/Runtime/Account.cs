@@ -33,6 +33,14 @@ namespace Galaxy101.Contracts
         public const string AccountLocked = "account_locked";
         public const string EmailTaken = "email_taken";
         public const string TermsRequired = "terms_required";
+        /// <summary>Şifremi unuttum: the code is wrong, used up or expired.</summary>
+        public const string CodeInvalid = "code_invalid";
+        /// <summary>The server cannot send e-mail (not configured or the relay failed).</summary>
+        public const string EmailUnavailable = "email_unavailable";
+        /// <summary>The text has words the game does not allow (names, status, table names).</summary>
+        public const string Inappropriate = "inappropriate";
+        /// <summary>Sign-in refused: a moderator's ban runs for <see cref="LoginErrorResponse.RetryAfter"/> more seconds.</summary>
+        public const string Banned = "banned";
     }
 
     public sealed class ErrorResponse
@@ -68,6 +76,20 @@ namespace Galaxy101.Contracts
     public sealed class PasswordLoginRequest
     {
         public string Email { get; set; }
+        public string Password { get; set; }
+    }
+
+    /// <summary>Şifremi unuttum (spec/18 S03), step one: a six-digit code to the e-mail (the answer never says whether it has an account).</summary>
+    public sealed class PasswordForgotRequest
+    {
+        public string Email { get; set; }
+    }
+
+    /// <summary>Step two: the code and the new password (≥ 6). Every session of the account ends.</summary>
+    public sealed class PasswordResetRequest
+    {
+        public string Email { get; set; }
+        public string Code { get; set; }
         public string Password { get; set; }
     }
 

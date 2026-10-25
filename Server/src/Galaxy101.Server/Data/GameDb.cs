@@ -20,9 +20,13 @@ public sealed class GameDb(DbContextOptions<GameDb> options) : DbContext(options
     public DbSet<MatchHand> MatchHands => Set<MatchHand>();
     public DbSet<MatchMove> MatchMoves => Set<MatchMove>();
     public DbSet<MatchParticipant> MatchParticipants => Set<MatchParticipant>();
+    public DbSet<PlayerBlock> Blocks => Set<PlayerBlock>();
+    public DbSet<SeasonResult> SeasonResults => Set<SeasonResult>();
+    public DbSet<PlayerReport> Reports => Set<PlayerReport>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
+        b.HasPostgresExtension("pg_trgm");
         b.Entity<Account>(e =>
         {
             e.HasIndex(x => x.FriendCode).IsUnique();
@@ -34,6 +38,31 @@ public sealed class GameDb(DbContextOptions<GameDb> options) : DbContext(options
             e.Property(x => x.SettingsJson).HasColumnType("jsonb");
             e.Property(x => x.DeviceId).HasMaxLength(128);
             e.Property(x => x.Platform).HasMaxLength(16);
+            e.Property(x => x.BanReason).HasMaxLength(200);
+            // Player search is ILIKE 'prefix%' on names: a trigram index keeps it off a table scan.
+            e.HasIndex(x => x.Name).HasMethod("gin").HasOperators("gin_trgm_ops");
+        });
+        b.Entity<SeasonResult>(e =>
+        {
+            e.HasKey(x => new { x.AccountId, x.Season });
+            e.Property(x => x.League).HasMaxLength(4);
+            e.HasOne<Account>().WithMany().HasForeignKey(x => x.AccountId).OnDelete(DeleteBehavior.Cascade);
+        });
+        b.Entity<PlayerBlock>(e =>
+        {
+            e.HasKey(x => new { x.BlockerId, x.BlockedId });
+            e.HasIndex(x => x.BlockedId);
+            e.HasOne<Account>().WithMany().HasForeignKey(x => x.BlockerId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne<Account>().WithMany().HasForeignKey(x => x.BlockedId).OnDelete(DeleteBehavior.Cascade);
+        });
+        b.Entity<PlayerReport>(e =>
+        {
+            e.Property(x => x.Reason).HasMaxLength(16);
+            e.Property(x => x.Details).HasMaxLength(200);
+            e.HasIndex(x => new { x.ResolvedAt, x.CreatedAt });
+            e.HasIndex(x => new { x.ReporterId, x.ReportedId, x.CreatedAt });
+            e.HasOne<Account>().WithMany().HasForeignKey(x => x.ReporterId).OnDelete(DeleteBehavior.SetNull);
+            e.HasOne<Account>().WithMany().HasForeignKey(x => x.ReportedId).OnDelete(DeleteBehavior.Cascade);
         });
         b.Entity<PasswordLogin>(e =>
         {
@@ -125,7 +154,9 @@ public sealed class GameDb(DbContextOptions<GameDb> options) : DbContext(options
         });
         b.Entity<MatchParticipant>(e =>
         {
-            e.HasKey(x => new { x.MatchId, x.Seat });
+            // A seat can have two rows: the player who left it (forfeit) and the one who took it over.
+            e.HasKey(x => x.Id);
+            e.HasIndex(x => new { x.MatchId, x.Seat });
             e.HasIndex(x => new { x.AccountId, x.FinishedAt }).IsDescending(false, true);
             e.Property(x => x.Mode).HasMaxLength(12);
             e.HasOne<MatchRecord>().WithMany().HasForeignKey(x => x.MatchId).OnDelete(DeleteBehavior.Cascade);

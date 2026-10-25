@@ -12,13 +12,18 @@ public static class AuthEndpoints
 {
     public static void MapAuth(this IEndpointRouteBuilder app)
     {
-        var anonymous = app.MapGroup("/v1/auth").RequireRateLimiting(RateLimits.Auth);
+        var anonymous = app.MapGroup("/v1/auth").RequireRateLimiting(RateLimits.Auth).AddEndpointFilter(async (context, next) =>
+        {
+            try { return await next(context); }
+            catch (AccountBannedException banned) { return Social.ModerationEndpoints.Banned(banned.Until, context.HttpContext.RequestServices.GetRequiredService<TimeProvider>()); }
+        });
 
         // Misafir (spec/18 S05): optional nickname (≤ 16) and avatar colour; guest balance.
         anonymous.MapPost("/guest", async (GuestLoginRequest? request, AccountService accounts, TokenService tokens, CancellationToken ct) =>
         {
             var name = string.IsNullOrWhiteSpace(request?.Name) ? null : request!.Name.Trim();
             if (name is not null && (name.Length > 16 || !Profile.ProfileRules.ValidName(name))) return Api.Error(ErrorCodes.Validation, StatusCodes.Status400BadRequest);
+            if (!Social.TextFilter.IsClean(name)) return Api.Error(ErrorCodes.Inappropriate, StatusCodes.Status400BadRequest);
             var color = Profile.ProfileRules.AvatarColors.Contains(request?.Color) ? request!.Color : null;
             var account = await accounts.CreateAsync(request?.Platform, request?.DeviceId, ct, registered: false, name: name, color: color);
             return Results.Ok(await tokens.IssueAsync(account.Id, true, ct));
@@ -58,6 +63,8 @@ public static class AuthEndpoints
             return Results.Ok(await tokens.IssueAsync(account.Id, true, ct));
         });
 
+        anonymous.MapPasswordReset();
+
         anonymous.MapPost("/refresh", async (RefreshRequest request, TokenService tokens, CancellationToken ct) =>
             await tokens.RefreshAsync(request.RefreshToken, ct) is { } response
                 ? Results.Ok(response)
@@ -89,10 +96,34 @@ public static class AuthEndpoints
             return Results.NoContent();
         });
 
-        app.MapPost("/v1/realtime/ticket", (HttpContext http, RealtimeTickets tickets) =>
-            Results.Ok(new RealtimeTicketResponse { Ticket = tickets.Issue(http.User.AccountId()), ExpiresIn = (int)RealtimeTickets.Lifetime.TotalSeconds }))
-            .RequireAuthorization();
+        app.MapPost("/v1/realtime/ticket", async (HttpContext http, RealtimeTickets tickets, GameDb db, CancellationToken ct) =>
+        {
+            var me = http.User.AccountId();
+            // An access token outlives its account's deletion: no socket (queues, tables, matches) for an account that is gone.
+            if (!await db.Accounts.AnyAsync(a => a.Id == me, ct)) return Results.Unauthorized();
+            return Results.Ok(new RealtimeTicketResponse { Ticket = tickets.Issue(me), ExpiresIn = (int)RealtimeTickets.Lifetime.TotalSeconds });
+        }).RequireAuthorization();
     }
+}
+
+/// <summary>
+/// Accounts deleted while access tokens issued to them may still be unexpired: the bearer check refuses them. Held for one
+/// token lifetime, in memory like the tickets (single instance); after a restart the ticket's account check still applies.
+/// </summary>
+public sealed class DeletedAccounts(TimeProvider clock, Microsoft.Extensions.Options.IOptions<AuthOptions> auth)
+{
+    private readonly ConcurrentDictionary<Guid, DateTimeOffset> until = new();
+
+    public void Add(Guid account)
+    {
+        var now = clock.GetUtcNow();
+        foreach (var (id, expiry) in until) if (expiry <= now) until.TryRemove(id, out _);
+        until[account] = now.AddMinutes(auth.Value.AccessTokenMinutes + 1);
+    }
+
+    public void Remove(Guid account) => until.TryRemove(account, out _);
+
+    public bool Contains(Guid account) => until.TryGetValue(account, out var expiry) && expiry > clock.GetUtcNow();
 }
 
 /// <summary>

@@ -1,0 +1,154 @@
+{
+ "id": "client-tests",
+ "note": "Motorsuz istemci test akışları (G101-Masa go(key)). Yalnız prototip; ıstaka düzeni iki sıra × 15 yuva, null = boş yuva, J = sahte okey. Gerçek oyunda kullanılmaz (DEMO_LIST.md). Sunucu senaryoları: R43.json, R44.json.",
+ "flows": {
+  "seat": "bekleme odası, botlar 1.3/2.7/4.1 sn'de oturur",
+  "deal": "motorsuz dağıtım töreni",
+  "play": "HAND_DEAL",
+  "open": "HAND_OPEN + 1.1 sn sonra openHand",
+  "bomb": "HAND_BOMB (elden bitiş)",
+  "isle": "işleme testi: herkes açık",
+  "penOpen": "hatalı açma testi",
+  "penIslek": "işlek taş testi",
+  "end": "Ayşe işler ve biter",
+  "gift": "hediye paneli",
+  "chat": "sohbet",
+  "exit": "kalk onayı",
+  "net": "bağlantı koptu",
+  "settings": "masa ayarları · Görünüm"
+ },
+ "hands": {
+  "HAND_DEAL": [
+   [
+    "R10",
+    "R11",
+    "R12",
+    "R13",
+    null,
+    "B9",
+    "Y9",
+    "K9",
+    null,
+    "Y4",
+    "Y5",
+    "Y6",
+    null,
+    "K12",
+    "K5"
+   ],
+   [
+    "B7",
+    "K7",
+    null,
+    "J",
+    "Y7",
+    "B11",
+    null,
+    "Y12",
+    null,
+    "B5",
+    "R7",
+    null,
+    "B12",
+    "K11",
+    null
+   ]
+  ],
+  "HAND_OPEN": [
+   [
+    "R10",
+    "R11",
+    "R12",
+    "R13",
+    null,
+    "B9",
+    "Y9",
+    "K9",
+    null,
+    "Y4",
+    "Y5",
+    "Y6",
+    "Y7",
+    null,
+    null
+   ],
+   [
+    "B12",
+    "Y12",
+    "K12",
+    null,
+    "B2",
+    "K7",
+    "R3",
+    null,
+    "B11",
+    "B5",
+    "R7",
+    "K11",
+    "K5",
+    null,
+    null
+   ]
+  ],
+  "HAND_BOMB": [
+   [
+    "R1",
+    "R2",
+    "R3",
+    "R4",
+    null,
+    "B5",
+    "Y5",
+    "K5",
+    null,
+    "K9",
+    "K10",
+    "K11",
+    null,
+    null,
+    null
+   ],
+   [
+    "Y7",
+    "Y8",
+    "Y9",
+    "Y10",
+    null,
+    null,
+    "R6",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ]
+  ],
+  "AYSE_MELDS": [
+   [
+    "K5",
+    "K6",
+    "K7",
+    "K8"
+   ],
+   [
+    "R12",
+    "B12",
+    "Y12"
+   ],
+   [
+    "B9",
+    "B10",
+    "B11",
+    "B12",
+    "B13"
+   ]
+  ]
+ },
+ "source": {
+  "setupPenOpenTest": "setupPenOpenTest(base) {\n    const T = (c) => this.tile(c);\n    const rows = [[null, 'R3', 'R4', 'R5', null, 'K7', 'B7', 'Y7', null, 'B10', 'B11', 'B12', null, 'Y2', null], [null, 'K13', 'R9', null, 'Y11', 'B1', null, 'K4', 'R13', null, 'Y8', null, null, null, null]].map((r) => r.map((x) => (x ? T(x) : null)));\n    const opp = { 1: [], 2: [], 3: [] }; [1, 2, 3].forEach((k) => { for (let j = 0; j < 21; j++) opp[k] = this.oppAdd(opp[k], this.oppId(k)); });\n    this._instant = true; this._turns = 2; this._gone = []; this._sideTake = null; this._anch = {}; this._snap = null; this._botIslek = false;\n    this.setState(this.blank({ ...base, chips: this.state.chips, hand: this.state.hand, phase: 'discard', active: 0, seated: [true, true, true, true], rows, opp, disc: { 0: [], 1: [T('K5')], 2: [T('R10')], 3: [T('Y6')] }, ind: { id: 'ind' + (++this._uid), c: 'B', n: 6 }, deckCount: 20, turnKey: this.state.turnKey + 1, received: [], chat: this.seedChat() }));\n    this.T.setCamera('player', 0); this.startTurn(); this.at(600, () => this.flash(this.L.penOpenTest));\n  }",
+  "setupIsleTest": "setupIsleTest(base, islek) {\n    const T = (c) => this.tile(c), G = (...a) => a.map(T);\n    const melds = {\n      0: [G('R1', 'R2', 'R3', 'R4'), G('K9', 'K10', 'K11'), G('Y12', 'B12', 'K12')],\n      1: [G('R5', 'R6', 'R7', 'R8', 'R9'), G('B1', 'B2', 'B3'), G('Y5', 'B5', 'K5'), G('K2', 'K3', 'K4')],\n      2: [G('Y3', 'B7', 'Y5', 'Y6'), G('R12', 'Y12', 'K12'), G('Y9', 'Y10', 'Y11'), G('B9', 'B10', 'B11')],\n      3: [G('K6', 'K7', 'K8'), G('B11', 'B7', 'B13'), G('Y1', 'R1', 'K1'), G('R10', 'R11', 'R12')],\n    };\n    const rows = [[null, null, 'Y4', 'B12', null, 'R13', 'K5', null, 'Y8', 'B4', null, 'K13', null, null, null], Array(15).fill(null)].map((r) => r.map((x) => (x ? T(x) : null)));\n    const opp = { 1: [], 2: [], 3: [] }; [[1, 4], [2, 3], [3, 5]].forEach(([k, n]) => { for (let j = 0; j < n; j++) opp[k] = this.oppAdd(opp[k], this.oppId(k)); });\n    const disc = { 0: [], 1: [T('R2')], 2: [T('B8')], 3: [T('Y2')] };\n    this._instant = true; this._turns = 3; this._gone = []; this._sideTake = null; this._anch = {}; this._snap = null; this._botIslek = !!islek;\n    this.setState(this.blank({ ...base, chips: this.state.chips, hand: this.state.hand, phase: 'discard', active: 0, seated: [true, true, true, true], rows, opp, melds, disc, opened: [118, 141, 132, 127], openMode: 'run', ind: { id: 'ind' + (++this._uid), c: 'B', n: 6 }, deckCount: 20, turnKey: this.state.turnKey + 1, received: [], chat: this.seedChat() }));\n    this.T.setCamera('player', 0); this.startTurn();\n    this.at(600, () => this.flash(islek ? this.L.penIslekTest : this.L.isleTestHint));\n  }"
+ }
+}

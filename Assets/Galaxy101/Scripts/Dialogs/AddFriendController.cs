@@ -40,10 +40,14 @@ namespace Galaxy101
                 }, sent ? "secondary" : "primary", 11, 18, 15, 12, 3);
                 send.name = "send-friend-request"; if (sent) send.style.color = v.C("#8EF0B0"); resultBox.Add(send);
             }
-            void Search()
+            // Signed in, the server's directory answers; a newer query or a closed dialog drops an older answer.
+            async void Search()
             {
                 if (string.IsNullOrWhiteSpace(query)) return;
-                result = v.Services.Friends.Search(query); searched = true; Fill();
+                var asked = query; var found = await v.Services.Friends.SearchAsync(asked);
+                if (asked != query || v.Modals.Dialog != "add") return;
+                result = found; searched = true;
+                if (resultBox.panel != null) Fill(); else v.Refresh();
             }
             // Reference: 50px query box (padding 0 14px, gap 10, "#" in 700 16px mt) and a padding-sized "Ara" button (0 22px, 700 16px).
             var prefix = v.Text("#", 16, true, "mt"); prefix.style.marginRight = 10;
@@ -65,7 +69,7 @@ namespace Galaxy101
             Button copy = null;
             copy = PanelUi.CssButton(v, "", () =>
             {
-                v.Copy("DY-4821"); copyLabel.text = v.L("Kopyalandı", "Copied");
+                v.Copy(v.Model.FriendCode); copyLabel.text = v.L("Kopyalandı", "Copied");
                 copy.schedule.Execute(() => copyLabel.text = v.L("Kopyala", "Copy")).StartingIn(1500);
             }, "secondary", 9, 14, 14, 12, 3);
             copy.style.flexDirection = FlexDirection.Row; var copyIcon = v.Icon("copy", 14, "#F4F1E8"); copyIcon.style.marginRight = 7; copy.Add(copyIcon); copy.Add(copyLabel);

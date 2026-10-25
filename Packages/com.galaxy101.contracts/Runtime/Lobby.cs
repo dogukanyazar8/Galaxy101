@@ -11,6 +11,8 @@ namespace Galaxy101.Contracts
         public const string Unsubscribe = "lobby.unsubscribe";
         public const string Create = "table.create";
         public const string Join = "table.join";
+        /// <summary>İzle: watch a playing table (TableJoinMessage: id or code, PIN when locked); match.leave stops.</summary>
+        public const string Watch = "table.watch";
         public const string Leave = "table.leave";
         public const string AddBot = "table.addBot";
         public const string Kick = "table.kick";
@@ -44,7 +46,10 @@ namespace Galaxy101.Contracts
         public int Hands { get; set; } = 5;
         /// <summary>1.000, 5.000, 10.000, 50.000 or 100.000.</summary>
         public long Stake { get; set; } = 1000;
+        /// <summary>Katlamalı: each later opener in a hand must beat the previous opener (series 101 → +1, pairs 5 → +1).</summary>
         public bool Doubling { get; set; }
+        /// <summary>Katlamalı + Eşli: the partner's opening raises your bar too ("Ortağın açılışı eşiği yükseltsin"); default on.</summary>
+        public bool PartnerRaises { get; set; } = true;
         /// <summary>15, 20, 30 or 45 seconds.</summary>
         public int TurnSeconds { get; set; } = 30;
         public bool Spectators { get; set; } = true;
@@ -79,6 +84,8 @@ namespace Galaxy101.Contracts
         public int Hands { get; set; }
         public int TurnSeconds { get; set; }
         public bool Doubling { get; set; }
+        /// <summary>Katlamalı + Eşli: the partner's opening raises the bar (see <see cref="TableOptions.PartnerRaises"/>).</summary>
+        public bool PartnerRaises { get; set; } = true;
         public bool Locked { get; set; }
         public bool Private { get; set; }
         public bool Spectators { get; set; }
@@ -91,6 +98,8 @@ namespace Galaxy101.Contracts
         public string Status { get; set; }
         /// <summary>Hand in play (1-based) while playing.</summary>
         public int Hand { get; set; }
+        /// <summary>While playing: seats the server plays (a bot's, or one its player left) that a player may take ("Oyuna katıl").</summary>
+        public int OpenSeats { get; set; }
         public Guid HostId { get; set; }
         /// <summary>Four entries; null for an empty seat.</summary>
         public List<TableSeat> Seats { get; set; } = new List<TableSeat>();

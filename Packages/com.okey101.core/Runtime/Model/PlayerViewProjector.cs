@@ -14,13 +14,14 @@ namespace Okey101.Core.Model
             for (var player = 0; player < players.Length; player++)
             {
                 var source = state.Players[player];
-                players[player] = new PublicPlayerInfo(source.Hand.Count, source.Opening, source.Penalties);
+                players[player] = new PublicPlayerInfo(source.Hand.Count, source.Opening, source.Penalties, source.OpeningValue);
             }
             var own = state.Players[actor];
             return new PlayerView(state.RoundId, state.Version, actor, state.ActivePlayer, state.Phase,
                 own.Hand, own.Opening, own.Penalties, state.LastAcceptedSequences[actor], state.Indicator,
                 state.Stock.Count, players, state.Table, state.Discards,
-                actor == state.ActivePlayer ? state.PendingDraw : null, state.SeriesTilesUsed, state.Result, Turns.DealCeremony.Describe(state), state.Options);
+                actor == state.ActivePlayer ? state.PendingDraw : null, state.SeriesTilesUsed, state.Result, Turns.DealCeremony.Describe(state), state.Options,
+                state.PreviousDiscardReturned);
         }
 
         public static RuleResult<RoundState> ForEvaluation(PlayerView snapshot)
@@ -41,7 +42,7 @@ namespace Okey101.Core.Model
                 var publicPlayer = snapshot.Players[p];
                 var held = p == snapshot.Actor ? snapshot.OwnHand : unknown.Skip(cursor).Take(publicPlayer.HandCount).ToArray();
                 if (p != snapshot.Actor) cursor += publicPlayer.HandCount;
-                players[p] = new PlayerState(held, publicPlayer.Opening, publicPlayer.Penalties);
+                players[p] = new PlayerState(held, publicPlayer.Opening, publicPlayer.Penalties, publicPlayer.OpeningValue);
             }
             if (cursor + snapshot.StockCount != unknown.Length) return RuleResult<RoundState>.Fail(ErrorCode.InvalidState);
             // Canonical unknown allocation satisfies physical invariants only. It is never

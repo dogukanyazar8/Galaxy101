@@ -57,6 +57,8 @@ namespace Galaxy101.Tests
                 return Task.FromResult<string>(null);
             }
 
+            public TableJoinMessage Watched;
+            public Task<string> WatchAsync(TableJoinMessage join) { Watched = join; return Task.FromResult<string>(null); }
             public Task<string> JoinAsync(TableJoinMessage join)
             {
                 Joined = join; if (JoinAnswer != null) return Task.FromResult(JoinAnswer);

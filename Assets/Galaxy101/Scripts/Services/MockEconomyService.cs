@@ -12,6 +12,7 @@ namespace Galaxy101
         public JObject Balance => new JObject { ["chips"] = model.Chips, ["gems"] = model.Gems };
         public JArray GetOffers(int tab) => tab >= 0 && tab < 3 ? (JArray)content["offers"][tab].DeepClone() : new JArray();
         public JObject GetDeal() => (JObject)content["deal"].DeepClone();
+        public System.Threading.Tasks.Task<string> PurchaseAsync(string id) => System.Threading.Tasks.Task.FromResult(Purchase(id) ? null : "insufficient_funds");
         public bool Purchase(string id)
         {
             if (string.IsNullOrEmpty(id)) return false;

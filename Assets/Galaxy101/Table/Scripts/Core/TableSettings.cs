@@ -98,11 +98,28 @@ namespace Galaxy101.Table
         {
             if (menu == null) return false;
             if (JToken.DeepEquals(menu.Settings[key], value)) return false;
+            if (key == "master")
+            {
+                // Dragged, the master volume changes every frame: it applies at once, the menu file is written once the
+                // slider rests (half a second after the last change) instead of per frame.
+                menu.Settings[key] = value; menu.NotifyChanged();
+                persistPending = true; if (!persistScheduled) PersistLater();
+                return true;
+            }
             var previous = menu.Settings[key];
             menu.Settings[key] = value;
             if (!menu.Persist()) { menu.Settings[key] = previous; Debug.LogWarning("Table settings could not save " + key + ": " + menu.LastPersistenceError); return false; }
             menu.NotifyChanged();
             return true;
+        }
+
+        private bool persistPending, persistScheduled;
+        private async void PersistLater()
+        {
+            persistScheduled = true;
+            do { persistPending = false; await System.Threading.Tasks.Task.Delay(500); } while (persistPending);
+            persistScheduled = false;
+            if (!menu.Persist()) Debug.LogWarning("Table settings could not save master: " + menu.LastPersistenceError);
         }
 
         // A dragged slider changes its value every frame: the value is set each time, the disk written at most once a

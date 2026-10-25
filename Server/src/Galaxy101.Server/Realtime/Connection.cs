@@ -19,7 +19,8 @@ public sealed class Connection(Guid account, WebSocket socket, ILogger log)
 
     public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
-    private readonly Channel<byte[]> outbound = Channel.CreateBounded<byte[]>(new BoundedChannelOptions(QueueLimit) { SingleReader = true, FullMode = BoundedChannelFullMode.DropWrite });
+    // Wait mode: TryWrite answers false on a full queue (DropWrite answers true and silently loses the frame).
+    private readonly Channel<byte[]> outbound = Channel.CreateBounded<byte[]>(new BoundedChannelOptions(QueueLimit) { SingleReader = true, FullMode = BoundedChannelFullMode.Wait });
     private readonly CancellationTokenSource closing = new();
     // Inbound flood guard: 40-message burst, refilled at 20 per second.
     private double allowance = 40;
@@ -28,9 +29,13 @@ public sealed class Connection(Guid account, WebSocket socket, ILogger log)
     public Guid Account { get; } = account;
     public CancellationToken Closing => closing.Token;
 
-    public bool Send<T>(string type, T data)
+    public bool Send<T>(string type, T data) => SendFrame(Frame(type, data));
+
+    /// <summary>A serialized frame, to send one message to many sockets without serializing it for each.</summary>
+    public static byte[] Frame<T>(string type, T data) => JsonSerializer.SerializeToUtf8Bytes(new { type, data }, Json);
+
+    public bool SendFrame(byte[] bytes)
     {
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(new { type, data }, Json);
         if (outbound.Writer.TryWrite(bytes)) return true;
         log.LogWarning("Closing slow realtime client {Account}", Account);
         Close();
@@ -38,6 +43,21 @@ public sealed class Connection(Guid account, WebSocket socket, ILogger log)
     }
 
     public void Close() { outbound.Writer.TryComplete(); closing.Cancel(); }
+
+    private volatile bool replaced;
+
+    /// <summary>
+    /// The same account connected again: the queued frames and the <paramref name="notice"/> still go out, then the socket
+    /// closes with the reason "replaced" — the old device learns not to reconnect even if the notice did not fit a full
+    /// queue. A client that does not drain is cut after five seconds, with the same reason.
+    /// </summary>
+    public void Replace(byte[] notice)
+    {
+        replaced = true;
+        outbound.Writer.TryWrite(notice); // best effort: the close carries the reason anyway
+        outbound.Writer.TryComplete();
+        closing.CancelAfter(TimeSpan.FromSeconds(5));
+    }
 
     /// <summary>Runs until the socket closes; calls <paramref name="handle"/> for each valid frame, one at a time.</summary>
     public async Task RunAsync(Func<Connection, Inbound, Task> handle, CancellationToken stopping)
@@ -71,7 +91,7 @@ public sealed class Connection(Guid account, WebSocket socket, ILogger log)
             Close();
             await writer;
             if (socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
-                try { await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None); }
+                try { await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, replaced ? "replaced" : null, CancellationToken.None); }
                 catch (Exception e) when (e is WebSocketException or IOException or ObjectDisposedException) { }
         }
     }
@@ -82,6 +102,11 @@ public sealed class Connection(Guid account, WebSocket socket, ILogger log)
         {
             await foreach (var frame in outbound.Reader.ReadAllAsync(ct))
                 await socket.SendAsync(frame, WebSocketMessageType.Text, true, ct);
+            if (replaced)
+            {
+                await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "replaced", ct);
+                closing.Cancel();
+            }
         }
         catch (OperationCanceledException) { }
         catch (Exception e) when (e is WebSocketException or IOException or ObjectDisposedException) { closing.Cancel(); }

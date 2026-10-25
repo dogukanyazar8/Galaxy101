@@ -74,6 +74,7 @@ public sealed class LobbyTests(ServerFixture server)
             Assert.NotNull(view.View.Rules); Assert.False(view.View.Rules!.OkeyPenalty); Assert.True(view.View.Rules.PlayablePenalty);
             // The table's rules: chat and gifts off.
             Assert.Equal(ErrorCodes.Validation, (await host.Live.RequestAsync(MessageTypes.MatchEmote, new EmoteMessage { MatchId = starts[0].MatchId, Emote = "😂" })).Code);
+            Assert.Equal(ErrorCodes.Validation, (await host.Live.RequestAsync(MessageTypes.MatchChat, new ChatMessage { MatchId = starts[0].MatchId, Quick = 1 })).Code);
             var listedPlaying = await watcher.Live.WaitAsync<LobbyTablesMessage>(LobbyMessageTypes.Tables, m => m.Tables.Any(t => t.Id == room.Table.Id && t.Status == "playing"));
             Assert.Equal(1, listedPlaying.Tables.Single(t => t.Id == room.Table.Id).Hand);
             // The host paid the stake; bots did not.

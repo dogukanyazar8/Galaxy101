@@ -44,6 +44,7 @@ public static class Features
         app.MapDaily();
         app.MapRealtime();
         app.MapFriends();
+        app.MapModeration();
         app.MapLeaderboard();
         app.MapGames();
         return app;

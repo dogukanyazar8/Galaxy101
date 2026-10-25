@@ -174,6 +174,19 @@ namespace Galaxy101.Table
                 hud.Command += OnHudCommand; hud.TilePosition = id => Board.ViewOf(id) is TileView v && v != null ? v.transform.position : (Vector3?)null;
                 hud.Initialize(); hud.Settings.Changed += OnSetting; ReadSettings();
                 hud.GiftSent += OnGiftSent; Gifts.Landed += hud.GiftLanded;
+                if (Online != null)
+                {
+                    // Treats and emoji travel through the server and come back to every seat, mine too.
+                    hud.SendGiftOnline = Online.GiftAsync; hud.SendEmoteOnline = Online.EmoteAsync;
+                    hud.SendChatOnline = Online.ChatAsync; hud.SendFriendOnline = Online.FriendRequestAsync;
+                    hud.SetBlockOnline = Online.BlockAsync; hud.SendReportOnline = Online.ReportAsync; hud.IsPersonOnline = Online.IsPerson;
+                    Online.GiftReceived += (from, kind, to) => hud.BotGift(from, kind, to ?? -1);
+                    Online.EmoteReceived += hud.ShowEmote; Online.ChatReceived += hud.ChatFrom;
+                    Online.SeatsChanged += ApplySeats; // someone took a free seat
+                    // Real prices against the real wallet: the server charges what the drawer shows.
+                    hud.FreeGifts = false;
+                    if (Galaxy101.Online.GalaxyOnline.Instance != null) Galaxy101.Online.GalaxyOnline.Instance.Changed += Notify;
+                }
             }
             _ = Online != null ? RunOnline(life.Token) : Run(life.Token);
         }
@@ -190,6 +203,7 @@ namespace Galaxy101.Table
             foreach (var t in timers) t.Done.TrySetCanceled(); timers.Clear();
             humanDone?.TrySetCanceled();
             if (hud != null) { hud.Command -= OnHudCommand; hud.GiftSent -= OnGiftSent; if (hud.Settings != null) hud.Settings.Changed -= OnSetting; }
+            if (Online != null && Galaxy101.Online.GalaxyOnline.Instance != null) Galaxy101.Online.GalaxyOnline.Instance.Changed -= Notify;
             Board?.Clear();
             Session?.Dispose();
         }
@@ -273,7 +287,7 @@ namespace Galaxy101.Table
                     }
                     dealInfo = null;
                     SyncBoard(); // a hand resumed mid-game also has melds and discards
-                    if (HandNumber == 1 && DemoGifts && hud != null) { string line = T("quick.4"); hud.After(1.8f, () => hud.BotGift(2, "tea", -1, line)); }
+                    if (HandNumber == 1 && DemoGifts && Online == null && hud != null) { string line = T("quick.4"); hud.After(1.8f, () => hud.BotGift(2, "tea", -1, line)); } // bot tables only
                     while (!token.IsCancellationRequested)
                     {
                         view = Session.GetView(Me);
@@ -290,10 +304,40 @@ namespace Galaxy101.Table
         private void OnOnlineChanged()
         {
             onlineSignal?.TrySetResult(true);
+            if (ApplyHandEnd()) Notify();
             // The server played my turn (deadline) or a move arrived out of band: my turn is over.
             if (Online.HasView && HumanTurn && Online.GetView(Me).ActivePlayer != Me) humanDone?.TrySetResult(true);
         }
         private Task OnlineChange() { onlineSignal = new TaskCompletionSource<bool>(); return onlineSignal.Task; }
+
+        /// <summary>İzle: the table only watches (seat 0's side, no tiles of anyone's); no turn, no stake, no XP.</summary>
+        private bool Watching => Online != null && Online.Spectating;
+
+        /// <summary>The server's seats on the HUD: names, colours, levels and the player cards' figures.</summary>
+        private void ApplySeats()
+        {
+            if (hud == null || Online?.Start == null) return;
+            foreach (var seat in Online.Start.Seats)
+                if (seat.Player != null) hud.SetSeat(Online.Wire.FromSeat(seat.Seat), seat.Player.Name, seat.Player.Color, seat.Player.Level, seat.Status == "auto", seat.Player.League, seat.Player.WinRate, seat.Player.Hands);
+            Notify();
+        }
+
+        private Galaxy101.Contracts.HandEndMessage appliedHandEnd;
+
+        /// <summary>
+        /// A server table's running totals and XP are the server's once it ends the hand shown: a player who reconnected
+        /// mid-match has not seen every hand that the local sums count. True when it changed them.
+        /// </summary>
+        private bool ApplyHandEnd()
+        {
+            var end = Online?.HandEnd;
+            if (end == null || end == appliedHandEnd || LastResult == null || end.HandIndex != Online.HandIndex) return false;
+            appliedHandEnd = end; var wire = Online.Wire;
+            for (int abs = 0; abs < 4 && abs < end.Totals.Count; abs++) Totals[wire.FromSeat(abs)] = end.Totals[abs];
+            int mine = wire.ToSeat(Me);
+            if (mine < end.Xp.Count) XpEarned = (int)Math.Min(int.MaxValue, end.Xp[mine]);
+            return true;
+        }
 
         /// <summary>
         /// A server match: names and seats from match.start, every hand dealt by the server (ceremony from its deal facts),
@@ -306,8 +350,8 @@ namespace Galaxy101.Table
                 Current = Phase.Seating; Notify();
                 if (!await Online.ConnectAsync()) { Message(TableHud.ToastKind.Error, L("Maça bağlanılamadı", "Could not join the match")); await Seconds(2); LeaveNow(); return; }
                 var start = Online.Start;
-                turnSeconds = start.TurnSeconds; TableRules.Current.UseHands(start.Hands);
-                if (hud != null) foreach (var seat in start.Seats) if (seat.Player != null) hud.SetSeat(Online.Wire.FromSeat(seat.Seat), seat.Player.Name, seat.Player.Color, seat.Player.Level, seat.Status == "auto");
+                turnSeconds = start.TurnSeconds; TableRules.Current.UseHands(start.Hands); SnapshotProgress(); // also after a reconnect
+                ApplySeats();
                 Guid round = Guid.Empty;
                 while (!token.IsCancellationRequested)
                 {
@@ -320,7 +364,7 @@ namespace Galaxy101.Table
                     for (int k = 0; k < 4; k++) { handPenalties[k] = 0; penaltyReasons[k].Clear(); Seated[k] = true; }
                     Indicator = TileCodes.IndicatorFace(view.Indicator);
                     bool fresh = view.Table.Count == 0 && view.Discards.All(d => d.Count == 0);
-                    if (fresh) await PlayHand(view, token);
+                    if (fresh && !Watching) await PlayHand(view, token); // a spectator sees the board as it is (no deal ceremony)
                     else
                     {
                         // Joined mid-hand (reconnect): no ceremony, the board as it is.
@@ -329,7 +373,7 @@ namespace Galaxy101.Table
                         while (!token.IsCancellationRequested)
                         {
                             view = Session.GetView(Me); if (view.Result != null) break;
-                            if (view.ActivePlayer == Me) await PlayHuman(token); else await WatchOpponent(view, token);
+                            if (view.ActivePlayer == Me && !Watching) await PlayHuman(token); else await WatchOpponent(view, token);
                         }
                     }
                     if (token.IsCancellationRequested) return;
@@ -361,11 +405,16 @@ namespace Galaxy101.Table
         private async Task OnlineMatchEnd()
         {
             var end = Online.End; var wire = Online.Wire;
+            if (Watching && !end.Aborted) { Message(TableHud.ToastKind.Info, L("Maç bitti", "The match is over")); await Seconds(2.5f); LeaveNow(); return; }
             if (end.Aborted) { Message(TableHud.ToastKind.Error, L("Maç iptal edildi · bahisler iade edildi", "Match cancelled · stakes returned")); await Seconds(2.5f); LeaveNow(); return; }
             foreach (var p in end.Placements) Totals[wire.FromSeat(p.Seat)] = p.Total;
             var mine = end.Placements.FirstOrDefault(p => wire.FromSeat(p.Seat) == Me);
-            place = mine?.Place ?? 4; xpBonus = 0;
+            place = mine?.Place ?? 4;
+            // The server's count: the hands' XP and the place bonus (same table as offline; none after leaving).
+            xpBonus = mine != null && !mine.Left ? TableRules.Current.XpPlace[Math.Max(1, Math.Min(4, place)) - 1] : 0;
+            if (mine != null) XpEarned = (int)Math.Min(int.MaxValue, mine.Xp);
             MatchOpen = true; matchStartedAt = Time.realtimeSinceStartup; matchSignal = new TaskCompletionSource<string>(); Notify();
+            if (mine?.LpDelta is int lp) Message(lp >= 0 ? TableHud.ToastKind.Success : TableHud.ToastKind.Info, (lp > 0 ? "+" : "") + lp + " LP");
             if (mine != null && mine.ChipDelta != 0) Message(mine.ChipDelta > 0 ? TableHud.ToastKind.Success : TableHud.ToastKind.Info, (mine.ChipDelta > 0 ? "+" : "") + mine.ChipDelta.ToString("N0", new System.Globalization.CultureInfo("tr-TR")) + L(" çip", " chips"));
             await Task.WhenAny(matchSignal.Task, Seconds(30));
             MatchOpen = false; LeaveNow();
@@ -458,7 +507,8 @@ namespace Galaxy101.Table
         private async Task PlayHuman(CancellationToken token)
         {
             var view = Session.GetView(Me);
-            Active = Me; staged.Clear(); warned = false; pickedTile = -1; deckOnly = false;
+            // A pile tile already put back this turn (seen again after a reconnect) leaves only the deck.
+            Active = Me; staged.Clear(); warned = false; pickedTile = -1; deckOnly = view.PreviousDiscardReturned;
             Current = view.Phase == RoundPhase.AwaitingDraw ? Phase.Draw : Phase.Discard;
             turnStarted = Time.time; turnStartedReal = Time.realtimeSinceStartup;
             humanDone = new TaskCompletionSource<bool>();
@@ -469,18 +519,39 @@ namespace Galaxy101.Table
         /// <summary>Timeout (spec/10 §3): draw from the deck, then discard the drawn tile (else the last tile); the planner covers rule corners.</summary>
         private async Task AutoPlay(CancellationToken token)
         {
-            if (pickedTile >= 0 && Current == Phase.Discard && staged.Count == 0) await PutBackAsync();
+            // A pile tile the staged moves do not lay goes back first: it must be laid this turn, and nothing may lay it.
+            if (pickedTile >= 0 && Current == Phase.Discard && !staged.Any(a => Lays(a, pickedTile))) await PutBackAsync();
             if (Current == Phase.Draw) { if (!await Draw(DrawSource.Stock, null)) return; await Seconds(0.7f); }
             // The drawn tile, else the rightmost one; never the okey (it would cost +101) nor the tile taken from the pile.
             bool Throwable(int id) => id != PickedTile && !TileCatalog.IsRealJoker(new TileId(id), Indicator);
             int pick = LastDrawn >= 0 && Rack.TryFind(LastDrawn, out _) && Throwable(LastDrawn) ? LastDrawn : Rack.Tiles.Where(Throwable).DefaultIfEmpty(Rack.Tiles.Last()).Last();
             if (await TryCommit(pick, false)) return;
             staged.Clear();
+            // The staged moves were refused: an unused pile tile goes back now, then the deck is drawn.
+            if (pickedTile >= 0 && Current == Phase.Discard)
+            {
+                await PutBackAsync();
+                if (Current == Phase.Draw) { if (!await Draw(DrawSource.Stock, null)) return; await Seconds(0.7f); }
+            }
             var view = Session.GetView(Me);
-            var plan = await Task.Run(() => planner.PlanTurn(view, token), token);
-            var receipt = await Submit(new CommitTurnCommand(Meta(view), plan), true);
-            if (receipt.Accepted) AfterCommit();
+            TurnPlan plan = null;
+            try { plan = await Task.Run(() => planner.PlanTurn(view, token), token); }
+            catch (Exception e) when (!(e is OperationCanceledException)) { Debug.LogWarning("GALAXY101_TABLE timed-out turn: planner gave nothing: " + e.Message); }
+            if (plan != null && (await Submit(new CommitTurnCommand(Meta(view), plan), false)).Accepted) { AfterCommit(); return; }
+            // Last resort, as the server does for a seat: any tile the engine takes, without and then with its penalty.
+            foreach (int id in Rack.Tiles.Where(Throwable).Concat(Rack.Tiles).Distinct().ToList())
+                foreach (bool penalty in new[] { false, true })
+                    if ((await Submit(new CommitTurnCommand(Meta(Session.GetView(Me)), new TurnPlan(Array.Empty<TableAction>(), new TileId(id), penalty)), false)).Accepted) { AfterCommit(); return; }
         }
+
+        private static bool Lays(TableAction action, int id) => action switch
+        {
+            OpenGroups open => open.Groups.Any(g => g.Tiles.Any(t => t.Id.Value == id)),
+            AddGroup add => add.Group.Tiles.Any(t => t.Id.Value == id),
+            ExtendMeld extend => extend.Tiles.Any(t => t.Id.Value == id),
+            SwapJoker swap => swap.ReplacementId.Value == id,
+            _ => false,
+        };
 
         /// <summary>
         /// Waiting for players (spec/10 §1, T01–T02): lobby camera, the deck on the felt, bots join at 1.3 / 2.7 / 4.1 s
@@ -526,7 +597,9 @@ namespace Galaxy101.Table
             MatchHand++;
             for (int k = 0; k < 4; k++) handScores[k].Add(view.Result.Scores[k].Total);
             var rules = TableRules.Current;
-            LastXp = humanSeat == Me ? (winner == Me ? rules.XpHandWin : rules.XpHandOther) : 0; XpEarned += LastXp; AddXp(LastXp);
+            LastXp = humanSeat == Me && !Watching ? (winner == Me ? rules.XpHandWin : rules.XpHandOther) : 0; XpEarned += LastXp;
+            if (Online == null) AddXp(LastXp); // a server table's XP is the account's: the server awards it (same amounts)
+            else { appliedHandEnd = null; ApplyHandEnd(); } // its totals replace the local sums (the end may have come first)
             if (winner == Me) handsWon++; else handsOther++;
             Current = Phase.Finished; Active = -1;
             var info = view.Result.FinishInfo;
@@ -536,7 +609,7 @@ namespace Galaxy101.Table
             {
                 int w = info.Winner.Value; momentSeat = w;
                 bool fromHand = info.WinnerOpenedThisTurn && FinishingFromHand;
-                momentTitle = fromHand && w == Me ? L("ELDEN BİTTİN!", "FINISHED FROM THE HAND!") : w == Me ? L("BİTİRDİN!", "YOU FINISHED!") : Upper(Name(w)) + L(" BİTİRDİ!", " FINISHED!");
+                momentTitle = fromHand && w == Me && !Watching ? L("ELDEN BİTTİN!", "FINISHED FROM THE HAND!") : w == Me && !Watching ? L("BİTİRDİN!", "YOU FINISHED!") : Upper(Name(w)) + L(" BİTİRDİ!", " FINISHED!");
                 momentSub = info.Reason == FinishReason.AllPairs ? L("Çiftle bitirdi · el puanlanmadı", "Finished with pairs · hand not scored")
                     : L("Son taşını desteye kapattı · ", "Closed the last tile on the deck · ") + Signed(view.Result.Scores[w].Total ?? -101) + L(" puan", " points");
             }
@@ -548,7 +621,7 @@ namespace Galaxy101.Table
             if (info.Winner.HasValue)
             {
                 int w = info.Winner.Value; Fx.Celebrate(table.Corner(w), AvatarOnScreen(w));
-                if (w != Me) { table.CameraRig.Lean(table.CornerThree(w), 1.3f); string line = T("bot.5"); hud?.After(.7f, () => hud.Say(w, line)); }
+                if (w != Me) { table.CameraRig.Lean(table.CornerThree(w), 1.3f); if (Online == null) { string line = T("bot.5"); hud?.After(.7f, () => hud.Say(w, line)); } } // people speak for themselves
             }
             else Fx.DealFx();
             await Seconds(info.Winner.HasValue ? 3.8f : 2.4f);
@@ -609,7 +682,7 @@ namespace Galaxy101.Table
             {
                 Title = L(MatchHand + ". EL BİTTİ", "HAND " + MatchHand + " OVER"),
                 Sub = info.Winner.HasValue ? Upper(FirstName(info.Winner.Value)) + L(" BİTİRDİ", " FINISHED") : info.Reason == FinishReason.AllPairs ? Upper(T("noteFinPairs")) : L("TAŞ BİTTİ", "DECK EMPTY"),
-                Head = winner == Me ? L("Kazandın!", "You won!") : FirstName(winner) + L(" kazandı", " won"),
+                Head = winner == Me && !Watching ? L("Kazandın!", "You won!") : FirstName(winner) + L(" kazandı", " won"),
                 Xp = LastXp, TotalXp = XpEarned, Winner = winner, StartedAt = resultAt, Seconds = 15,
                 Multiplier = scores.Max(x => x.M), Unscored = info.Reason == FinishReason.AllPairs, LastHand = MatchHand >= TableRules.Current.MatchHands,
             };
@@ -656,6 +729,16 @@ namespace Galaxy101.Table
             var rules = TableRules.Current; int hands = rules.MatchHands;
             var model = hud?.Model;
             int level = model?.Level ?? 1; long xp = model?.Xp ?? 0;
+            int wins = handsWon, others = handsOther;
+            if (Online != null)
+            {
+                // The server keeps a server table's XP (nothing is written here) and counts every hand, also those before a
+                // reconnect: the bar adds its total to the level at the start, and the lines are read back from it.
+                level = Math.Max(1, matchStartLevel); xp = matchStartXp; rules.Add(ref level, ref xp, XpEarned);
+                long handXp = XpEarned - xpBonus, spread = rules.XpHandWin - rules.XpHandOther;
+                long w = spread > 0 ? (handXp - (long)hands * rules.XpHandOther) / spread : -1;
+                if (w >= 0 && w <= hands && w * spread + (long)hands * rules.XpHandOther == handXp) { wins = (int)w; others = hands - wins; }
+            }
             var order = Enumerable.Range(0, 4).OrderBy(k => Totals[k]).ThenBy(k => k).ToList();
             int leader = order[0];
             var m = new TableHud.MatchInfo
@@ -663,15 +746,15 @@ namespace Galaxy101.Table
                 Kick = T("msKick", hands), Won = place == 1, Place = place, Hands = hands, StartedAt = matchStartedAt,
                 Head = place == 1 ? T("msWin") : T("msPlace", place),
                 Sub = place == 1 ? T("msWinSub", hands) : T("msLoseSub", FirstName(leader), Totals[Me] - Totals[leader]),
-                Xp = handsWon * rules.XpHandWin + handsOther * rules.XpHandOther + xpBonus,
+                Xp = Online != null ? XpEarned : wins * rules.XpHandWin + others * rules.XpHandOther + xpBonus,
                 LevelFrom = matchStartLevel, LevelTo = level, LevelUp = level > matchStartLevel,
-                FromFraction = (float)matchStartXp / rules.XpForLevel(matchStartLevel), ToFraction = (float)xp / rules.XpForLevel(level),
+                FromFraction = (float)matchStartXp / rules.XpForLevel(Math.Max(1, matchStartLevel)), ToFraction = (float)xp / rules.XpForLevel(level),
                 XpLeft = T("msXpLeft", (rules.XpForLevel(level) - xp).ToString("N0", new System.Globalization.CultureInfo("tr-TR"))),
                 ByHand = handScores.Select(list => list.ToArray()).ToArray(),
             };
             foreach (int k in order) m.Standings.Add((k, Totals[k]));
-            if (handsWon > 0) m.XpLines.Add((T("msXpWins"), handsWon + " × " + rules.XpHandWin, handsWon * rules.XpHandWin));
-            if (handsOther > 0) m.XpLines.Add((T("msXpOther"), handsOther + " × " + rules.XpHandOther, handsOther * rules.XpHandOther));
+            if (wins > 0) m.XpLines.Add((T("msXpWins"), wins + " × " + rules.XpHandWin, wins * rules.XpHandWin));
+            if (others > 0) m.XpLines.Add((T("msXpOther"), others + " × " + rules.XpHandOther, others * rules.XpHandOther));
             if (place <= 3 && xpBonus > 0) m.XpLines.Add((T("msXp" + place), "", xpBonus));
             return m;
         }
@@ -775,7 +858,7 @@ namespace Galaxy101.Table
             if (receipt.Accepted)
             {
                 Rack.Remove(id); AfterCommit(); myCommits++;
-                if (HandNumber == 1 && DemoGifts && hud != null)
+                if (HandNumber == 1 && DemoGifts && Online == null && hud != null) // the design's demo treats: bot tables only
                 {
                     if (myCommits == 2) hud.After(2.6f, () => hud.BotGift(1, "simit", Me));
                     if (myCommits == 3) { string line = T("bot.5"); hud.After(1.2f, () => hud.BotGift(3, "rocket", 2, line)); }
@@ -809,7 +892,7 @@ namespace Galaxy101.Table
             var receipt = await Session.SubmitAsync(command, life.Token);
             if (!receipt.Accepted) return receipt;
             // Bots chat now and then after their turn (reference oppDiscard: 16 %).
-            if (actor != Me && command is CommitTurnCommand) hud?.BotChatter(actor, .16f);
+            if (actor != Me && command is CommitTurnCommand && Online == null) hud?.BotChatter(actor, .16f); // bots only
             var after = Session.GetView(Me);
             for (int k = 0; k < 4; k++)
             {
@@ -876,7 +959,7 @@ namespace Galaxy101.Table
             var eval = HandEvaluation.Of(Rack, Indicator);
             var opening = OpenedKind(Me);
             if (opening == OpeningKind.Pairs) { Message(TableHud.ToastKind.Error, T("msg.pairsOnly")); return; }
-            if (opening == OpeningKind.None && eval.Sum < 101) { _ = ShortOpening(OpeningKind.Series); return; }
+            if (opening == OpeningKind.None && eval.Sum < Bar(OpeningKind.Series)) { _ = ShortOpening(OpeningKind.Series); return; }
             if (eval.Groups.Count == 0) return;
             var actions = opening == OpeningKind.None
                 ? new List<TableAction> { new OpenGroups(OpeningKind.Series, eval.Groups) }
@@ -891,11 +974,14 @@ namespace Galaxy101.Table
             var eval = HandEvaluation.Of(Rack, Indicator);
             var opening = OpenedKind(Me);
             if (opening == OpeningKind.Series) return;
-            if (opening == OpeningKind.None && eval.Pairs.Count < 5) { _ = ShortOpening(OpeningKind.Pairs); return; }
+            if (opening == OpeningKind.None && eval.Pairs.Count < Bar(OpeningKind.Pairs)) { _ = ShortOpening(OpeningKind.Pairs); return; }
             if (eval.Pairs.Count == 0) return;
             var actions = opening == OpeningKind.None ? new List<TableAction> { new OpenGroups(OpeningKind.Pairs, eval.Pairs) } : eval.Pairs.Select(p => (TableAction)new AddGroup(p)).ToList();
             Stage(actions, eval.Pairs);
         }
+
+        /// <summary>101 / 5 pairs, raised at a katlamalı table by the openings before mine (docs/rules/101-v1.md "Katlamalı").</summary>
+        private int Bar(OpeningKind kind) => TableEvaluator.OpeningBar(Session.GetView(Me), kind);
 
         /// <summary>Eksik açılış: the engine writes +101; the groups stay on the rack (spec/17 §3, T35).</summary>
         /// <summary>
@@ -1226,7 +1312,7 @@ namespace Galaxy101.Table
         }
 
         /// <summary>Exit button (T25): the confirmation card; Esc or "Masada kal" closes it, "Kalk" leaves.</summary>
-        public void RequestExit() { if (leaving) return; ExitOpen = true; Notify(); }
+        public void RequestExit() { if (leaving) return; if (Watching) { LeaveNow(); return; } ExitOpen = true; Notify(); } // a spectator stakes nothing
         public void CancelExit() { if (!ExitOpen) return; ExitOpen = false; Notify(); }
 
         /// <summary>"Kalk": green notice, then the main menu after 1.7 s (spec/10 §10).</summary>
@@ -1245,7 +1331,12 @@ namespace Galaxy101.Table
         {
             if (leaving) return;
             leaving = true; life?.Cancel();
-            if (Online != null) { MainMenuController.ReturnToLobby = true; Online.Dispose(); }
+            if (Online != null)
+            {
+                MainMenuController.ReturnToLobby = true;
+                if (Watching) _ = Online.LeaveAsync(); // stops the server's updates to this spectator
+                Online.Dispose();
+            }
             UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(menuScene, UnityEngine.SceneManagement.LoadSceneMode.Single);
         }
 
@@ -1304,8 +1395,11 @@ namespace Galaxy101.Table
             s.Deal = DealCard();
             s.CanUndo = CanUndo; s.CanFromHand = CanFinishFromHand;
             if (Online?.Start != null) { s.RoomName = OnlineRoom ?? L("Klasik", "Classic"); s.RoomStake = Online.Start.Stake; }
-            s.ShortOpen = CanDiscard && OpenedKind(Me) == OpeningKind.None && eval.Sum < 101;
-            s.ShortPairs = CanDiscard && OpenedKind(Me) == OpeningKind.None && eval.Pairs.Count < 5;
+            // A server table shows the real balance (gifts are paid from it).
+            if (Online != null && Galaxy101.Online.GalaxyOnline.Instance?.Wallet is { } wallet) s.Chips = (int)Math.Min(int.MaxValue, wallet.Chips);
+            s.PairsBar = Bar(OpeningKind.Pairs); s.OpenBar = Bar(OpeningKind.Series);
+            s.ShortOpen = CanDiscard && OpenedKind(Me) == OpeningKind.None && eval.Sum < s.OpenBar;
+            s.ShortPairs = CanDiscard && OpenedKind(Me) == OpeningKind.None && eval.Pairs.Count < s.PairsBar;
             return s;
         }
     }

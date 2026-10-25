@@ -69,6 +69,11 @@ public sealed class MatchTests(ServerFixture server)
             Assert.True((await active.Live.RequestAsync(MessageTypes.MatchGift, new GiftMessage { MatchId = matchId, Gift = "tea", TargetSeat = other.Start.YourSeat })).Ok);
             await other.Live.WaitAsync<GiftMessage>(MessageTypes.MatchGift);
             Assert.Equal(9000 - 100, (await active.Live.WaitAsync<WalletResponse>(MessageTypes.Wallet)).Chips);
+            // Chat reaches every seat: text up to 80 characters or a ready phrase by index, rate limited.
+            Assert.True((await active.Live.RequestAsync(MessageTypes.MatchChat, new ChatMessage { MatchId = matchId, Text = " merhaba " })).Ok);
+            Assert.Equal("merhaba", (await other.Live.WaitAsync<ChatMessage>(MessageTypes.MatchChat)).Text);
+            Assert.Equal(ErrorCodes.RateLimited, (await active.Live.RequestAsync(MessageTypes.MatchChat, new ChatMessage { MatchId = matchId, Quick = 2 })).Code);
+            Assert.Equal(ErrorCodes.Validation, (await other.Live.RequestAsync(MessageTypes.MatchChat, new ChatMessage { MatchId = matchId, Quick = 9 })).Code);
 
             var current = await active.Http.GetFromJsonAsync<MatchRefMessage>("/v1/matches/current");
             Assert.Equal(matchId, current!.MatchId);
@@ -88,6 +93,8 @@ public sealed class MatchTests(ServerFixture server)
             var end = await table[0].Live.WaitAsync<MatchEndMessage>(MessageTypes.MatchEnd);
             Assert.False(end.Aborted);
             Assert.Equal(1, end.Placements.Min(x => x.Place));
+            // Two hands (60 XP at least each) and the place bonus 500 / 200 / 80 / 0.
+            Assert.All(end.Placements, x => Assert.True(x.Xp >= 2 * 60 + new[] { 500, 200, 80, 0 }[x.Place - 1]));
             Assert.Equal(2, table[0].Live.Count(MessageTypes.MatchHandEnd));
 
             var wallets = await Task.WhenAll(table.Select(p => p.Http.GetFromJsonAsync<WalletResponse>("/v1/wallet")));
@@ -97,7 +104,9 @@ public sealed class MatchTests(ServerFixture server)
                 var stats = (await p.Http.GetFromJsonAsync<StatsResponse>("/v1/profile/stats"))!;
                 Assert.Equal(2, stats.Hands);
                 var history = (await p.Http.GetFromJsonAsync<List<HistoryEntryResponse>>("/v1/profile/history"))!;
-                Assert.Equal(GameModes.Solo, Assert.Single(history).Mode);
+                var entry = Assert.Single(history);
+                Assert.Equal(GameModes.Solo, entry.Mode);
+                Assert.Equal(5000, entry.Stake);
                 Assert.True((await p.Http.GetFromJsonAsync<LeaderboardResponse>("/v1/leaderboard/weekly"))!.Me.Points > 0);
                 Assert.True((await p.Http.GetFromJsonAsync<ProfileResponse>("/v1/profile"))!.Progress.Xp >= 2 * 60);
                 Assert.Equal(HttpStatusCode.NoContent, (await p.Http.GetAsync("/v1/matches/current")).StatusCode);
@@ -135,6 +144,24 @@ public sealed class MatchTests(ServerFixture server)
             Assert.Equal(live.Version, replayed.Version);
             Assert.Equal(live.Tiles, replayed.Tiles);
             Assert.Equal(state.MatchId, session.Id);
+        }
+        finally { await LeaveAllAsync(table); }
+    }
+
+    [Fact]
+    public async Task A_blocked_seats_chat_skips_its_blocker_and_everyone_reads_it_masked()
+    {
+        var table = await SeatAsync(GameModes.Solo, 1000);
+        try
+        {
+            await Task.WhenAll(table.Select(p => p.Live.WaitAsync<MatchStateMessage>(MessageTypes.MatchState)));
+            var matchId = table[0].Start.MatchId;
+            Assert.Equal(HttpStatusCode.NoContent, (await table[0].Http.PostAsync($"/v1/players/{table[1].Tokens.AccountId}/block", null)).StatusCode);
+            Assert.True((await table[1].Live.RequestAsync(MessageTypes.MatchChat, new ChatMessage { MatchId = matchId, Text = "selam siktir" })).Ok);
+            Assert.Equal("selam ******", (await table[2].Live.WaitAsync<ChatMessage>(MessageTypes.MatchChat)).Text);
+            Assert.Equal("selam ******", (await table[1].Live.WaitAsync<ChatMessage>(MessageTypes.MatchChat)).Text);
+            await table[3].Live.WaitAsync<ChatMessage>(MessageTypes.MatchChat);
+            Assert.Equal(0, table[0].Live.Count(MessageTypes.MatchChat));
         }
         finally { await LeaveAllAsync(table); }
     }

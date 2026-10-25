@@ -122,31 +122,44 @@ namespace Okey101.Core.Turns
         {
             if (state == null || !TileCatalog.Create()[state.Indicator.Value].PrintedFace.HasValue)
                 return RuleResult<bool>.Fail(ErrorCode.InvalidState);
-            var locations = new HashSet<TileId>();
-            if (!locations.Add(state.Indicator)) return RuleResult<bool>.Fail(ErrorCode.InvalidState);
-            foreach (var tile in state.Stock)
-                if (!locations.Add(tile)) return RuleResult<bool>.Fail(ErrorCode.InvalidState);
-            foreach (var player in state.Players)
-                foreach (var tile in player.Hand)
-                    if (!locations.Add(tile)) return RuleResult<bool>.Fail(ErrorCode.InvalidState);
-            foreach (var pile in state.Discards)
-                foreach (var tile in pile)
-                    if (!locations.Add(tile)) return RuleResult<bool>.Fail(ErrorCode.InvalidState);
-            var groupIds = new HashSet<int>();
-            var indicator = TileCatalog.Create()[state.Indicator.Value].PrintedFace.Value;
-            foreach (var meld in state.Table)
+            // Every one of the 106 tiles in exactly one place. Planners validate on every step: a flag per tile and indexed
+            // loops keep this allocation-light.
+            var located = new bool[106]; var count = 0;
+            bool Place(TileId tile)
             {
-                if (!groupIds.Add(meld.Id)) return RuleResult<bool>.Fail(ErrorCode.InvalidState);
-                foreach (var tile in meld.Group.Tiles)
+                if (tile.Value < 0 || tile.Value >= located.Length || located[tile.Value]) return false;
+                located[tile.Value] = true; count++; return true;
+            }
+            if (!Place(state.Indicator)) return RuleResult<bool>.Fail(ErrorCode.InvalidState);
+            for (var i = 0; i < state.Stock.Count; i++)
+                if (!Place(state.Stock[i])) return RuleResult<bool>.Fail(ErrorCode.InvalidState);
+            for (var p = 0; p < state.Players.Count; p++)
+            {
+                var hand = state.Players[p].Hand;
+                for (var i = 0; i < hand.Count; i++) if (!Place(hand[i])) return RuleResult<bool>.Fail(ErrorCode.InvalidState);
+            }
+            for (var p = 0; p < state.Discards.Count; p++)
+            {
+                var pile = state.Discards[p];
+                for (var i = 0; i < pile.Count; i++) if (!Place(pile[i])) return RuleResult<bool>.Fail(ErrorCode.InvalidState);
+            }
+            var indicator = TileCatalog.Create()[state.Indicator.Value].PrintedFace.Value;
+            for (var m = 0; m < state.Table.Count; m++)
+            {
+                var meld = state.Table[m];
+                for (var other = 0; other < m; other++) if (state.Table[other].Id == meld.Id) return RuleResult<bool>.Fail(ErrorCode.InvalidState);
+                var tiles = meld.Group.Tiles;
+                for (var i = 0; i < tiles.Count; i++)
                 {
-                    if (!locations.Add(tile.Id) || !tile.RepresentedFace.IsValid)
+                    var tile = tiles[i];
+                    if (!Place(tile.Id) || !tile.RepresentedFace.IsValid)
                         return RuleResult<bool>.Fail(ErrorCode.InvalidState);
                     if (!TileCatalog.IsRealJoker(tile.Id, indicator) &&
                         TileCatalog.GetNonJokerFace(tile.Id, indicator) != tile.RepresentedFace)
                         return RuleResult<bool>.Fail(ErrorCode.InvalidState);
                 }
             }
-            return locations.Count == 106 ? RuleResult<bool>.Ok(true) : RuleResult<bool>.Fail(ErrorCode.InvalidState);
+            return count == 106 ? RuleResult<bool>.Ok(true) : RuleResult<bool>.Fail(ErrorCode.InvalidState);
         }
     }
 }

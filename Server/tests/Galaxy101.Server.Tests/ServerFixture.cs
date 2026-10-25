@@ -17,8 +17,12 @@ public sealed class ServerFixture : WebApplicationFactory<Program>, IAsyncLifeti
     private readonly PostgreSqlContainer postgres = new PostgreSqlBuilder("postgres:17-alpine").Build();
     public FakeTimeProvider Clock { get; } = new(new DateTimeOffset(2026, 10, 22, 9, 0, 0, TimeSpan.Zero));
     public FakeIdentityValidator Identities { get; } = new();
+    public FakeEmailSender Mail { get; } = new();
+    public const string AdminKey = "test-admin-key-0123456789-abcdefghij";
 
     public async Task InitializeAsync() => await postgres.StartAsync();
+    /// <summary>The test PostgreSQL server (migration tests create databases of their own on it).</summary>
+    public string DatabaseServer => postgres.GetConnectionString();
     async Task IAsyncLifetime.DisposeAsync() { await DisposeAsync(); await postgres.DisposeAsync(); }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -30,12 +34,15 @@ public sealed class ServerFixture : WebApplicationFactory<Program>, IAsyncLifeti
         builder.UseSetting("RateLimits:RequestBurst", "100000");
         builder.UseSetting("Game:HandsPerMatch", "2");
         builder.UseSetting("Game:TimeoutsBeforeAuto", "1");
+        builder.UseSetting("Admin:Key", AdminKey);
         builder.ConfigureServices(services =>
         {
             services.RemoveAll<TimeProvider>();
             services.AddSingleton<TimeProvider>(Clock);
             services.RemoveAll<IExternalIdentityValidator>();
             services.AddSingleton<IExternalIdentityValidator>(Identities);
+            services.RemoveAll<IEmailSender>();
+            services.AddSingleton<IEmailSender>(Mail);
         });
     }
 
@@ -59,6 +66,18 @@ public sealed class ServerFixture : WebApplicationFactory<Program>, IAsyncLifeti
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", renewed.AccessToken);
         return renewed;
     }
+}
+
+/// <summary>Keeps the e-mails the server would send.</summary>
+public sealed class FakeEmailSender : IEmailSender
+{
+    private readonly System.Collections.Concurrent.ConcurrentQueue<(string To, string Body)> sent = new();
+    public bool Configured => true;
+    public Task SendAsync(string to, string subject, string body, CancellationToken ct) { sent.Enqueue((to, body)); return Task.CompletedTask; }
+    public int CountFor(string to) => sent.Count(m => m.To == to);
+    /// <summary>The six-digit code in the latest e-mail to <paramref name="to"/>.</summary>
+    public string? CodeFor(string to) =>
+        sent.Where(m => m.To == to).Select(m => System.Text.RegularExpressions.Regex.Match(m.Body, @"[0-9]{6}").Value).LastOrDefault();
 }
 
 public sealed class FakeIdentityValidator : IExternalIdentityValidator

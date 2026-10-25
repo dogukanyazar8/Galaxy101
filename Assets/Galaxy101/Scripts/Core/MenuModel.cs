@@ -21,13 +21,15 @@ namespace Galaxy101
         public long Gems { get; set; } = 340;
         /// <summary>Player level and XP inside it (bot tables award XP; the level needs 500 × level XP, table_rules.json).</summary>
         public int Level { get; set; } = 24;
-        public long Xp { get; set; } = 11200;
+        public long Xp { get; set; } = 6240; // level 24 of 375 × level: 6.240 / 9.000 (profile reference)
         public HashSet<string> Invited { get; } = new HashSet<string>(StringComparer.Ordinal);
         public HashSet<string> RequestsHandled { get; } = new HashSet<string>(StringComparer.Ordinal);
         public HashSet<string> SentRequests { get; } = new HashSet<string>(StringComparer.Ordinal);
         public HashSet<int> QuestsClaimed { get; } = new HashSet<int>();
         public HashSet<string> OwnedSkins { get; } = new HashSet<string>(StringComparer.Ordinal);
         public bool DayClaimed { get; set; }
+        /// <summary>The player's friend code (the signed-in account's; the design's sample otherwise).</summary>
+        public string FriendCode { get; set; } = "DY-4821";
         public string LastPersistenceError { get; private set; }
         public event Action Changed;
         private readonly string persistencePath;

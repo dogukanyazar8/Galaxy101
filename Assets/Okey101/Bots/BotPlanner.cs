@@ -28,8 +28,9 @@ namespace Okey101.Bots
         public DrawDecision ChooseDraw(PlayerView view, CancellationToken token)
         {
             Validate(view, RoundPhase.AwaitingDraw, token);
-            if (view.Discards[(view.Actor + 3) % 4].Count == 0) return new DrawDecision(DrawSource.Stock);
-            var witness = DiscardTurnFinder.Find(view, token);
+            // Given back this turn, the pile tile cannot be taken again (engine: PreviousDiscardUnavailable).
+            if (view.Discards[(view.Actor + 3) % 4].Count == 0 || view.PreviousDiscardReturned) return new DrawDecision(DrawSource.Stock);
+            var witness = DiscardTurnFinder.Find(view, token, true);
             if (!witness.Success)
             {
                 if (witness.Error == ErrorCode.Cancelled) throw new OperationCanceledException(token);
@@ -53,7 +54,9 @@ namespace Okey101.Bots
             if (view.PendingDraw?.Source == DrawSource.PreviousDiscard && witness == null)
             {
                 var beforeDraw = ChangeDraw(view, false, view.PendingDraw.Tile);
-                var found = DiscardTurnFinder.Find(beforeDraw, token);
+                var found = DiscardTurnFinder.Find(beforeDraw, token, true);
+                // A draw made by a player (a timed-out human) may need a copy mix only the full pool holds.
+                if (found.Error == ErrorCode.NoLegalUse) found = DiscardTurnFinder.Find(beforeDraw, token, false);
                 if (found.Error == ErrorCode.Cancelled) throw new OperationCanceledException(token);
                 if (!found.Success) throw new InvalidOperationException("A committed previous discard has no legal continuation: " + found.Error);
                 witness = found.Value;
@@ -76,7 +79,7 @@ namespace Okey101.Bots
         private static PlayerView PlanningWithoutDraw(PlayerView view)
             => new PlayerView(view.RoundId, view.Version, view.Actor, view.ActivePlayer, RoundPhase.PlanningTurn, view.OwnHand,
                 view.OwnOpening, view.OwnPenalties, view.OwnLastSequence, view.Indicator, view.StockCount, view.Players, view.Table,
-                view.Discards, null, view.SeriesTilesUsed);
+                view.Discards, null, view.SeriesTilesUsed, null, view.Deal, view.Options);
         private static PlayerView ChangeDraw(PlayerView view, bool add, TileId tile)
         {
             var hand = view.OwnHand.ToList(); var piles = view.Discards.ToArray(); var previous = (view.Actor + 3) % 4;
@@ -85,31 +88,31 @@ namespace Okey101.Bots
             var players = view.Players.ToArray(); players[view.Actor] = new PublicPlayerInfo(hand.Count, view.OwnOpening, view.OwnPenalties);
             return new PlayerView(view.RoundId, view.Version, view.Actor, view.ActivePlayer, add ? RoundPhase.PlanningTurn : RoundPhase.AwaitingDraw,
                 hand, view.OwnOpening, view.OwnPenalties, view.OwnLastSequence, view.Indicator, view.StockCount, players, view.Table, piles,
-                add ? new DrawReceipt(DrawSource.PreviousDiscard, tile, false) : null, view.SeriesTilesUsed);
+                add ? new DrawReceipt(DrawSource.PreviousDiscard, tile, false) : null, view.SeriesTilesUsed, null, view.Deal, view.Options);
         }
         private sealed class RankedPlan
         {
             public TurnPlan Plan;
             public Rank Rank;
+            private string key;
+            /// <summary>The canonical tie-break between equally ranked plans, built only when a tie occurs.</summary>
+            public string Key => key ?? (key = Search.PlanKey(Plan));
         }
         private readonly struct Rank
         {
             public readonly bool Winning;
             private readonly int value, count, penalty;
-            private readonly string canonical;
-            public Rank(bool winning, int value, int count, int penalty, string canonical)
-            { Winning = winning; this.value = value; this.count = count; this.penalty = penalty; this.canonical = canonical; }
+            public Rank(bool winning, int value, int count, int penalty)
+            { Winning = winning; this.value = value; this.count = count; this.penalty = penalty; }
             public int CompareValue(Rank other)
             {
                 var compared = other.Winning.CompareTo(Winning); if (compared != 0) return compared;
                 compared = value.CompareTo(other.value); if (compared != 0) return compared;
                 compared = count.CompareTo(other.count); return compared != 0 ? compared : penalty.CompareTo(other.penalty);
             }
-            public int Compare(Rank other) { var compared = CompareValue(other); return compared != 0 ? compared : string.CompareOrdinal(canonical, other.canonical); }
         }
         private sealed class Search
         {
-            private static readonly FinishInfo HeuristicFinish = new FinishInfo(FinishReason.StockExhausted, null, OpeningKind.None, false, false);
             private readonly RoundState root;
             private readonly TileFace indicator;
             private readonly CancellationToken token;
@@ -142,30 +145,74 @@ namespace Okey101.Bots
                 token.ThrowIfCancellationRequested();
                 return best ?? throw new InvalidOperationException("No legal bot turn exists for this observation.");
             }
+            /// <summary>The tile taken from the pile this turn: it must be laid, so patterns bind it first among its copies.</summary>
+            private static TileId? Picked(RoundState state) => state.PendingDraw?.Source == DrawSource.PreviousDiscard ? state.PendingDraw.Tile : (TileId?)null;
             private bool Visit(int ceiling)
             { token.ThrowIfCancellationRequested(); if (nodes >= ceiling) return false; nodes++; return true; }
-            private IReadOnlyList<MeldProposal> Groups(IReadOnlyList<TileId> hand)
+            /// <summary>A pool group: the pattern, what each of its tiles needs from a hand (fixed per search), its face total.</summary>
+            private sealed class Pattern { public MeldProposal Group; public int[] Needs; public int Total; }
+            private IReadOnlyList<Pattern> Groups(IReadOnlyList<TileId> hand)
             {
                 var result = new List<MeldProposal>();
                 foreach (var kind in new[] { MeldKind.Run, MeldKind.Set, MeldKind.Pair })
-                    result.AddRange(MeldCandidateGenerator.Generate(hand, indicator, kind, token));
+                    result.AddRange(MeldCandidateGenerator.GenerateDistinct(hand, indicator, kind, token));
                 return result.OrderByDescending(g => g.Tiles.Count).ThenByDescending(g => g.Tiles.Sum(t => t.RepresentedFace.Number))
-                    .ThenBy(GroupKey, StringComparer.Ordinal).ToArray();
+                    .ThenBy(GroupKey, StringComparer.Ordinal)
+                    .Select(g => new Pattern { Group = g, Needs = MeldBinder.Needs(g, indicator), Total = g.Tiles.Sum(t => t.RepresentedFace.Number) }).ToArray();
             }
-            private void Open(OpeningKind opening, IReadOnlyList<MeldProposal> pool, int ceiling)
+            private void Open(OpeningKind opening, IReadOnlyList<Pattern> pool, int ceiling)
             {
                 var hand = root.Players[root.ActivePlayer].Hand;
-                // Optimistic face sum: if even both jokers at 13 cannot reach 101, do not
-                // spend the series branch's budget enumerating impossible subsets.
-                if (opening == OpeningKind.Series && hand.Sum(id => TileCatalog.IsRealJoker(id, indicator) ? 13 : TileCatalog.GetNonJokerFace(id, indicator).Number) < 101) return;
-                var positions = hand.Select((id, index) => (Id: id, Index: index)).ToDictionary(item => item.Id, item => item.Index);
-                var groups = pool.Where(g => (g.Kind == MeldKind.Pair) == (opening == OpeningKind.Pairs))
-                    .Select(g => (Group: g, Mask: g.Tiles.Aggregate(0u, (mask, tile) => mask | (1u << positions[tile.Id])), Total: g.Tiles.Sum(t => t.RepresentedFace.Number))).ToArray();
+                // 101 / 5 pairs, raised at a katlamalı table by the openings before this one.
+                var bar = TableEvaluator.OpeningBar(root, root.ActivePlayer, opening);
+                // Pool groups are patterns: each binds to the lowest free copies when picked (the pile tile first), so a
+                // packing that needs any copy mix is reachable. Positions are the binder's.
+                var binder = new MeldBinder(hand, indicator, Picked(root));
+                var full = hand.Count == 32 ? uint.MaxValue : (1u << hand.Count) - 1;
+                var groups = pool.Where(g => (g.Group.Kind == MeldKind.Pair) == (opening == OpeningKind.Pairs)).ToArray();
                 var selected = new List<MeldProposal>();
+                // spec/22 elden bitiş: every tile but one in series groups opens below 101. Pairs need no search of their own:
+                // fifteen or more tiles but one hold at least seven pairs.
+                if (opening == OpeningKind.Series && TableEvaluator.FinishesFromHand(hand.Count, hand.Count - 1))
+                {
+                    var coverCeiling = Math.Min(ceiling, nodes + ceiling / 4);
+                    var byKey = new List<Pattern>[53];
+                    foreach (var g in groups)
+                        foreach (var key in g.Needs.Distinct())
+                            (byKey[key] ?? (byKey[key] = new List<Pattern>())).Add(g);
+                    // Lowest uncovered tile first: it is either the one tile left to discard or the lowest of a group.
+                    void Cover(int pivot, uint covered, bool spared)
+                    {
+                        if (!Visit(coverCeiling)) return;
+                        while (pivot < hand.Count && (covered & (1u << pivot)) != 0) pivot++;
+                        if (pivot == hand.Count)
+                        {
+                            if (!spared) return;
+                            var action = new OpenGroups(opening, selected);
+                            var applied = TableEvaluator.Evaluate(root, new[] { action });
+                            if (applied.Success) Explore(applied.Value, new List<TableAction> { action }, pool, ceiling);
+                            return;
+                        }
+                        if (!spared) Cover(pivot + 1, covered | (1u << pivot), true);
+                        var options = byKey[binder.KeyAt(pivot)];
+                        if (options == null) return;
+                        // The pivot is the lowest free tile: a group needing its face binds that very tile.
+                        foreach (var group in options)
+                        {
+                            if (nodes >= coverCeiling) return;
+                            if (!binder.TryMask(group.Needs, covered, out var mask) || (mask & (1u << pivot)) == 0) continue;
+                            selected.Add(binder.Bind(group.Group, group.Needs, covered)); Cover(pivot + 1, covered | mask, spared); selected.RemoveAt(selected.Count - 1);
+                        }
+                    }
+                    Cover(0, 0, false);
+                }
+                // Optimistic face sum: if even both jokers at 13 cannot reach the bar, do not
+                // spend the series branch's budget enumerating impossible subsets.
+                if (opening == OpeningKind.Series && hand.Sum(id => TileCatalog.IsRealJoker(id, indicator) ? 13 : TileCatalog.GetNonJokerFace(id, indicator).Number) < bar) return;
                 void Select(int start, uint used, int total)
                 {
                     if (!Visit(ceiling)) return;
-                    if (opening == OpeningKind.Pairs ? selected.Count >= 5 : total >= 101)
+                    if (opening == OpeningKind.Pairs ? selected.Count >= bar : total >= bar)
                     {
                         var action = new OpenGroups(opening, selected);
                         var applied = TableEvaluator.Evaluate(root, new[] { action });
@@ -173,16 +220,17 @@ namespace Okey101.Bots
                             Explore(applied.Value, new List<TableAction> { action }, pool, ceiling);
                         return;
                     }
+                    // A pattern may be picked again (both copies of a run): indices never decrease, so each multiset once.
                     for (var i = start; i < groups.Length && nodes < ceiling; i++)
                     {
                         token.ThrowIfCancellationRequested(); var candidate = groups[i];
-                        if ((used & candidate.Mask) != 0 || (used | candidate.Mask) == (1u << hand.Count) - 1) continue;
-                        selected.Add(candidate.Group); Select(i + 1, used | candidate.Mask, total + candidate.Total); selected.RemoveAt(selected.Count - 1);
+                        if (!binder.TryMask(candidate.Needs, used, out var mask) || (used | mask) == full) continue;
+                        selected.Add(binder.Bind(candidate.Group, candidate.Needs, used)); Select(i, used | mask, total + candidate.Total); selected.RemoveAt(selected.Count - 1);
                     }
                 }
                 Select(0, 0, 0);
             }
-            private void Explore(RoundState state, List<TableAction> path, IReadOnlyList<MeldProposal> pool, int ceiling)
+            private void Explore(RoundState state, List<TableAction> path, IReadOnlyList<Pattern> pool, int ceiling)
             {
                 if (!Visit(ceiling)) return;
                 Consider(state, path);
@@ -199,18 +247,18 @@ namespace Okey101.Bots
                     path.RemoveAt(path.Count - 1);
                 }
             }
-            private IEnumerable<TableAction> Actions(RoundState state, IReadOnlyList<MeldProposal> pool)
+            private IEnumerable<TableAction> Actions(RoundState state, IReadOnlyList<Pattern> pool)
             {
-                var player = state.Players[state.ActivePlayer]; var hand = new HashSet<TileId>(player.Hand);
-                foreach (var group in pool)
-                    if (group.Tiles.Count < hand.Count && group.Tiles.All(t => hand.Contains(t.Id)) &&
-                        (group.Kind == MeldKind.Pair ? player.Opening == OpeningKind.Pairs || state.Players.Any(p => p.Opening == OpeningKind.Pairs) : player.Opening == OpeningKind.Series))
-                        yield return new AddGroup(group);
+                var player = state.Players[state.ActivePlayer]; var binder = new MeldBinder(player.Hand, indicator, Picked(state));
+                foreach (var pattern in pool)
+                    if (pattern.Group.Tiles.Count < player.Hand.Count && binder.TryMask(pattern.Needs, 0, out _) &&
+                        (pattern.Group.Kind == MeldKind.Pair ? player.Opening == OpeningKind.Pairs || state.Players.Any(p => p.Opening == OpeningKind.Pairs) : player.Opening == OpeningKind.Series))
+                        yield return new AddGroup(binder.Bind(pattern.Group, pattern.Needs, 0));
                 foreach (var meld in state.Table.OrderBy(m => m.Id))
                     foreach (var id in player.Hand.OrderBy(id => id.Value))
                     {
                         token.ThrowIfCancellationRequested(); var joker = TileCatalog.IsRealJoker(id, indicator);
-                        if (meld.Group.Kind != MeldKind.Pair && (player.Opening != OpeningKind.Pairs || state.SeriesTilesUsed < 2))
+                        if (meld.Group.Kind != MeldKind.Pair && state.Options.Processing && (player.Opening != OpeningKind.Pairs || state.SeriesTilesUsed < 2))
                             foreach (var face in ExtensionFaces(meld.Group))
                                 if (joker || TileCatalog.GetNonJokerFace(id, indicator) == face)
                                     yield return new ExtendMeld(meld.Id, meld.Group.Kind == MeldKind.Run && face.Number < meld.Group.Tiles.Min(t => t.RepresentedFace.Number), new[] { new PlacedTile(id, face) });
@@ -233,41 +281,56 @@ namespace Okey101.Bots
                         if (!group.Tiles.Any(t => (int)t.RepresentedFace.Color == color)) yield return new TileFace((TileColor)color, group.Tiles[0].RepresentedFace.Number);
             }
             private void Consider(RoundState state, IReadOnlyList<TableAction> path)
-            { foreach (var discard in state.Players[state.ActivePlayer].Hand.OrderBy(id => id.Value)) Consider(state, path, discard); }
+            {
+                var hand = state.Players[state.ActivePlayer].Hand; var (jokers, sum) = Count(hand);
+                // Ascending ids without sorting a copy: a set of at most 106 bits.
+                ulong low = 0, high = 0;
+                for (var i = 0; i < hand.Count; i++) { var v = hand[i].Value; if (v < 64) low |= 1UL << v; else high |= 1UL << (v - 64); }
+                for (var v = 0; v < 106; v++)
+                    if (((v < 64 ? low >> v : high >> (v - 64)) & 1UL) != 0)
+                        Consider(state, path, new TileId(v), jokers, sum);
+            }
             private void Consider(RoundState state, IReadOnlyList<TableAction> path, TileId discard)
+            { var (jokers, sum) = Count(state.Players[state.ActivePlayer].Hand); Consider(state, path, discard, jokers, sum); }
+            private (int Jokers, int Sum) Count(IReadOnlyList<TileId> hand)
+            {
+                int jokers = 0, sum = 0;
+                foreach (var id in hand) if (TileCatalog.IsRealJoker(id, indicator)) jokers++; else sum += TileCatalog.GetNonJokerFace(id, indicator).Number;
+                return (jokers, sum);
+            }
+            /// <summary>
+            /// Ranks one discard. Every explored state tries every discard, so the cheap parts of the rank decide first:
+            /// most lose to the best plan before a penalty is evaluated, a plan built or a tie-break key written.
+            /// </summary>
+            private void Consider(RoundState state, IReadOnlyList<TableAction> path, TileId discard, int handJokers, int handSum)
             {
                 token.ThrowIfCancellationRequested(); var player = state.Players[state.ActivePlayer];
                 if (!player.Hand.Contains(discard)) return;
                 var winning = player.Hand.Count == 1 && player.Opening != OpeningKind.None;
+                var joker = TileCatalog.IsRealJoker(discard, indicator);
+                int jokers = handJokers - (joker ? 1 : 0), sum = handSum - (joker ? 0 : TileCatalog.GetNonJokerFace(discard, indicator).Number);
+                // ScoreCalculator's B for a non-winner, an unopened rack counted as opened by series rather than the constant
+                // 202, so a safe fallback discards high-value tiles consistently.
+                var value = (sum + 101 * jokers) * (player.Opening == OpeningKind.Pairs ? 2 : 1);
+                var count = player.Hand.Count - 1;
+                if (best != null && new Rank(winning, value, count, 0).CompareValue(best.Rank) > 0) return; // no penalty can save it
                 var penalty = PenaltyEvaluator.GetDiscardPenalty(state, discard, winning);
-                var remaining = player.Hand.Where(id => id != discard).ToArray();
-                var jokers = remaining.Count(id => TileCatalog.IsRealJoker(id, indicator));
-                var sum = remaining.Where(id => !TileCatalog.IsRealJoker(id, indicator)).Sum(id => TileCatalog.GetNonJokerFace(id, indicator).Number);
-                // Rank unopened racks by their prospective opened penalty rather than the
-                // constant 202, so a safe fallback discards high-value tiles consistently.
-                var value = ScoreCalculator.Calculate(player.Opening == OpeningKind.None ? OpeningKind.Series : player.Opening,
-                    false, sum, jokers, 0, HeuristicFinish).B;
+                var rank = new Rank(winning, value, count, penalty);
+                var compared = best == null ? -1 : rank.CompareValue(best.Rank);
+                if (compared > 0) return;
                 var plan = new TurnPlan(path, discard, penalty != 0);
-                var rank = new Rank(winning, value, remaining.Length, penalty, PlanKey(plan));
-                if (best != null && rank.Compare(best.Rank) >= 0) return;
+                if (compared == 0 && string.CompareOrdinal(PlanKey(plan), best.Key) >= 0) return;
                 if (!TurnEvaluator.Evaluate(root, plan).Success) return;
                 best = new RankedPlan { Plan = plan, Rank = rank };
             }
             private static string GroupKey(MeldProposal group)
                 => ((int)group.Kind).ToString() + ":" + string.Join(",", group.Tiles.OrderBy(t => t.Id.Value).Select(t => $"{t.Id.Value:D3}/{(int)t.RepresentedFace.Color}/{t.RepresentedFace.Number:D2}"));
-            private static string PlanKey(TurnPlan plan)
+            internal static string PlanKey(TurnPlan plan)
                 => string.Join("|", plan.Actions.Select(a => a is OpenGroups open ? "0" + (int)open.Opening + string.Join(";", open.Groups.Select(GroupKey))
                     : a is AddGroup add ? "1" + GroupKey(add.Group)
                     : a is ExtendMeld extend ? $"2{extend.MeldId:D10}/{extend.Prepend}/" + string.Join(",", extend.Tiles.Select(t => $"{t.Id.Value:D3}/{(int)t.RepresentedFace.Color}/{t.RepresentedFace.Number:D2}"))
                     : a is SwapJoker swap ? $"3{swap.MeldId:D10}/{swap.JokerId.Value:D3}/{swap.ReplacementId.Value:D3}" : throw new InvalidOperationException("Unknown bot action."))) + $"D{plan.Discard.Value:D3}";
-            private static string StateKey(RoundState state)
-            {
-                var player = state.Players[state.ActivePlayer];
-                var key = new StringBuilder().Append((int)player.Opening).Append('/').Append(state.SeriesTilesUsed).Append(':');
-                foreach (var id in player.Hand.OrderBy(id => id.Value)) key.Append(id.Value).Append(',');
-                foreach (var meld in state.Table.OrderBy(m => m.Id)) key.Append('|').Append(meld.Id).Append('/').Append(meld.Owner).Append('/').Append(GroupKey(meld.Group));
-                return key.ToString();
-            }
+            private static string StateKey(RoundState state) => TableEvaluator.PositionKey(state);
         }
     }
 }

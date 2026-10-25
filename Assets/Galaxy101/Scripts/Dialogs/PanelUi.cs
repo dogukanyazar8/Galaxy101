@@ -164,7 +164,7 @@ namespace Galaxy101
         internal static VisualElement CodeStrip(MenuView v, int labelSize, int codeSize, int radius)
         {
             var label = v.Text(v.L("Kodun", "Your code"), labelSize, false, "mt");
-            var code = v.Text("DY-4821", codeSize, true, "a1"); MenuView.Tracking(code, 1, codeSize); code.style.whiteSpace = WhiteSpace.NoWrap;
+            var code = v.Text(v.Model.FriendCode, codeSize, true, "a1"); MenuView.Tracking(code, 1, codeSize); code.style.whiteSpace = WhiteSpace.NoWrap;
             var row = v.Row(label, code); row.style.flexShrink = 0; Dashed(v, row, radius); v.Decorate(row, "transparent", radius); return row;
         }
 
@@ -250,7 +250,7 @@ namespace Galaxy101
 
         internal static VisualElement Code(MenuView v, bool copyButton = true, bool compact = false, string background = "transparent")
         {
-            var row = v.Row(v.Text(v.L("Kodun", "Your code"), 12, false, "mt"), v.Text("DY-4821", 17, true, "a1"));
+            var row = v.Row(v.Text(v.L("Kodun", "Your code"), 12, false, "mt"), v.Text(v.Model.FriendCode, 17, true, "a1"));
             row.AddToClassList("g-panel-code");
             v.Decorate(row, background, 14);
             Gap(row, 10);
@@ -260,7 +260,7 @@ namespace Galaxy101
                 Button copy = null;
                 System.Action clicked = () =>
                 {
-                    v.Copy("DY-4821");
+                    v.Copy(v.Model.FriendCode);
                     copy.text = v.L("Kopyalandı", "Copied");
                     copy.schedule.Execute(() => copy.text = v.L("Kopyala", "Copy")).StartingIn(1500);
                 };

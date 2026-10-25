@@ -86,12 +86,13 @@ public static class Wire
         RoundId = v.RoundId, Version = v.Version, Seat = v.Actor, ActiveSeat = v.ActivePlayer, Phase = Name(v.Phase),
         Hand = [.. v.OwnHand.Select(t => t.Value)], Opening = Name(v.OwnOpening), Penalties = v.OwnPenalties,
         Indicator = v.Indicator.Value, StockCount = v.StockCount,
-        Players = [.. v.Players.Select(p => new PublicPlayerDto { HandCount = p.HandCount, Opening = Name(p.Opening), Penalties = p.Penalties })],
+        Players = [.. v.Players.Select(p => new PublicPlayerDto { HandCount = p.HandCount, Opening = Name(p.Opening), Penalties = p.Penalties, OpeningValue = p.OpeningValue })],
         Table = [.. v.Table.Select(m => ToDto(m.Group, m.Id, m.Owner))],
         Discards = [.. v.Discards.Select(d => d.Select(t => t.Value).ToList())],
         PendingDraw = v.PendingDraw is { } d ? new DrawReceiptDto { Source = d.Source == DrawSource.Stock ? "stock" : "discard", Tile = d.Tile.Value, WasLastStock = d.WasLastStock } : null,
-        SeriesTilesUsed = v.SeriesTilesUsed, Result = v.Result is { } r ? ToDto(r) : null,
-        Rules = v.Options.IsStandard ? null : new RulesDto { OkeyPenalty = v.Options.OkeyDiscardPenalty, PlayablePenalty = v.Options.PlayableDiscardPenalty },
+        PreviousDiscardReturned = v.PreviousDiscardReturned, SeriesTilesUsed = v.SeriesTilesUsed, Result = v.Result is { } r ? ToDto(r) : null,
+        Rules = v.Options.IsStandard ? null : new RulesDto { OkeyPenalty = v.Options.OkeyDiscardPenalty, PlayablePenalty = v.Options.PlayableDiscardPenalty, Processing = v.Options.Processing,
+            Doubling = v.Options.Doubling, PartnerRaises = v.Options.PartnerOpeningsRaise },
         Deal = v.Deal is { } deal ? new DealDto
         {
             Dealer = deal.Dealer, DieA = deal.DieA, DieB = deal.DieB, IndicatorStack = deal.IndicatorStack,

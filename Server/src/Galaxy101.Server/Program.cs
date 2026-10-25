@@ -42,6 +42,17 @@ services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme).Co
             return (notBefore is null || notBefore <= now.AddSeconds(30)) && expires is not null && expires > now.AddSeconds(-30);
         },
     };
+    // A deleted account's still-unexpired access tokens are refused.
+    jwt.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = context =>
+        {
+            if (Guid.TryParse(context.Principal?.FindFirst(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub)?.Value, out var account) &&
+                context.HttpContext.RequestServices.GetRequiredService<DeletedAccounts>().Contains(account))
+                context.Fail("Account deleted.");
+            return Task.CompletedTask;
+        },
+    };
 });
 services.AddAuthorization();
 services.AddGameRateLimits(configuration);
@@ -57,6 +68,11 @@ services.Configure<ForwardedHeadersOptions>(o =>
 services.AddSingleton(TimeProvider.System);
 services.AddSingleton<GameCalendar>();
 services.AddSingleton<RealtimeTickets>();
+services.AddSingleton<DeletedAccounts>();
+services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.Section));
+services.AddSingleton<IEmailSender, SmtpEmailSender>();
+services.AddSingleton<PasswordResetCodes>();
+services.Configure<Galaxy101.Server.Social.AdminOptions>(configuration.GetSection(Galaxy101.Server.Social.AdminOptions.Section));
 services.AddSingleton<IExternalIdentityValidator, OidcIdentityValidator>();
 services.AddScoped<TokenService>();
 services.AddScoped<AccountService>();

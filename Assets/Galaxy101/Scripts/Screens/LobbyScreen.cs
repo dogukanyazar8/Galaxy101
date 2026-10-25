@@ -232,7 +232,7 @@ namespace Galaxy101
         public List<TableSummary> Filter(IEnumerable<TableSummary> tables, long chips)
         {
             string q = query.Trim().ToLower(new System.Globalization.CultureInfo("tr-TR"));
-            int Rank(TableSummary t) { bool free = t.Seats.Any(s => s == null); return Mine(t) ? -1 : t.Status != "playing" && free ? 0 : t.Status == "playing" && free ? 1 : t.Status == "playing" ? 2 : 3; }
+            int Rank(TableSummary t) { bool free = Free(t); return Mine(t) ? -1 : t.Status != "playing" && free ? 0 : t.Status == "playing" && free ? 1 : t.Status == "playing" ? 2 : 3; }
             return tables.Where(t => (typeFilter == "all" || t.Type == typeFilter) && (!freeFilter || t.Seats.Any(s => s == null)) && (!doublingFilter || t.Doubling)
                     && (stakeFilter == 0 || t.Stake == stakeFilter) && (q.Length == 0 || (t.Name ?? "").ToLower(new System.Globalization.CultureInfo("tr-TR")).Contains(q)))
                 .OrderBy(Rank).ThenBy(t => t.Stake).ToList();
@@ -240,7 +240,7 @@ namespace Galaxy101
 
         private VisualElement Card(TableSummary t, long chips, int index)
         {
-            bool free = t.Seats.Any(s => s == null), playing = t.Status == "playing", low = t.Stake > chips, mine = Mine(t);
+            bool free = Free(t), playing = t.Status == "playing", low = t.Stake > chips, mine = Mine(t);
             int seated = t.Seats.Count(s => s != null);
             // The 6 px under-edge is a plain box behind the face: a drop-shadow filter here would nest the buttons' own
             // filters inside a filtered card, which UI Toolkit's nested render passes do not survive in a scroll view.
@@ -406,21 +406,35 @@ namespace Galaxy101
             _ = JoinAsync(new TableJoinMessage { TableId = t.Id }, t);
         }
 
-        private void Watch(TableSummary t) => Flash(L("Masayı izleme bir sonraki güncellemeyle açılıyor", "Watching tables arrives with the next update"), "info");
+        /// <summary>A seat to take: an empty one while waiting; one the server plays (a bot's, or left) while playing.</summary>
+        private static bool Free(TableSummary t) => t.Status == "playing" ? t.OpenSeats > 0 : t.Seats.Any(s => s == null);
 
-        private void JoinRunning(TableSummary t) => Flash(L("Oynanan masaya katılma bir sonraki güncellemeyle açılıyor", "Joining a game in play arrives with the next update"), "info");
+        /// <summary>İzle: the table opens as a spectator's (the server hands it over like a starting match).</summary>
+        private void Watch(TableSummary t)
+        {
+            if (t.Locked) { OpenDialog(new Dialog { Kind = "pin", Table = t, Watch = true }); return; }
+            _ = JoinAsync(new TableJoinMessage { TableId = t.Id }, t, watch: true);
+        }
+
+        /// <summary>Oyuna katıl: a seat the server plays; the stake is paid and the table opens mid-hand.</summary>
+        private void JoinRunning(TableSummary t)
+        {
+            if (t.Locked) { OpenDialog(new Dialog { Kind = "pin", Table = t }); return; }
+            _ = JoinAsync(new TableJoinMessage { TableId = t.Id }, t);
+        }
 
         /// <summary>Connecting dialog (≥ 850 ms), then the waiting room — or the full / closed / PIN / balance answer.</summary>
-        private async Task JoinAsync(TableJoinMessage join, TableSummary table)
+        private async Task JoinAsync(TableJoinMessage join, TableSummary table, bool watch = false)
         {
             // The PIN dialog stays up while its PIN is checked; a code dialog gives way to "Bağlanıyor" and comes back on an error.
             var origin = dialog?.Kind == "pin" || dialog?.Kind == "code" ? dialog : null;
             var pinDialog = origin?.Kind == "pin" ? origin : null;
             if (pinDialog == null) OpenDialog(new Dialog { Kind = "connect", Table = table });
             float began = Time.realtimeSinceStartup;
-            string error = await backend.JoinAsync(join);
+            string error = watch ? await backend.WatchAsync(join) : await backend.JoinAsync(join);
             while (Time.realtimeSinceStartup - began < ConnectSeconds && layer != null && pinDialog == null) await Task.Yield();
             if (layer == null) return;
+            // A waiting room shows here; a playing table (joined or watched) is handed over through the room state.
             if (error == null) { if (backend.Room != null) { CloseDialog(); screen = "wait"; Render(); } return; }
             Fail(error, table, origin, join);
         }
@@ -434,6 +448,8 @@ namespace Galaxy101
                     else OpenDialog(new Dialog { Kind = "pin", Table = table, Code = join.Code ?? "", Error = string.IsNullOrEmpty(join.Pin) ? null : L("Yanlış şifre. Tekrar dene.", "Wrong password. Try again.") });
                     return;
                 case TableErrors.Full: OpenDialog(new Dialog { Kind = "full", Table = table }); return;
+                case TableErrors.NotReady: CloseDialog(); Flash(L("Bu masada henüz oyun başlamadı", "The game at this table has not started yet"), "info"); return;
+                case ErrorCodes.Validation: CloseDialog(); Flash(L("Bu masa izleyiciye kapalı", "This table is closed to spectators"), "bad"); return;
                 case TableErrors.Closed:
                     if (origin?.Kind == "code") { origin.Error = L("Bu koda ait açık bir masa bulunamadı.", "No open table found for this code."); origin.Shake = Time.realtimeSinceStartup; dialog = origin; RenderDialog(); return; }
                     OpenDialog(new Dialog { Kind = "closed", Table = table }); return;

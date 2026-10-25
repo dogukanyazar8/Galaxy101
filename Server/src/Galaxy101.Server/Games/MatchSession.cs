@@ -26,6 +26,9 @@ public sealed class MatchSession
     private DateTimeOffset? dealUntil;
     private static readonly TimeSpan BotThinkLimit = TimeSpan.FromSeconds(2);
     private static readonly TimeSpan EmoteInterval = TimeSpan.FromSeconds(2);
+    private static readonly TimeSpan ChatInterval = TimeSpan.FromSeconds(1);
+    /// <summary>Ready chat phrases the client offers (quick.0 … quick.5).</summary>
+    private const int QuickPhrases = 6;
 
     private readonly MatchRecord record;
     private readonly MatchStore store;
@@ -38,6 +41,13 @@ public sealed class MatchSession
     private readonly Channel<Func<Task>> inbox = Channel.CreateUnbounded<Func<Task>>(new UnboundedChannelOptions { SingleReader = true });
 
     private Dictionary<Guid, PlayerSummary> players = [];
+    /// <summary>(blocker, blocked) among the seats: a blocked seat's chat and emotes do not reach its blocker.</summary>
+    private HashSet<(Guid Blocker, Guid Blocked)> blocks = [];
+    /// <summary>İzle: accounts watching (public view only, never anyone's tiles).</summary>
+    private readonly HashSet<Guid> spectators = [];
+    public const int MaxSpectators = 20;
+    /// <summary>The hand from which a seat's current player counts (a player who took the seat mid-match).</summary>
+    private readonly int[] joinedHand = new int[4];
     private RoundState state = null!;
     private int handIndex;
     private readonly List<GameCommand> handCommands = [];
@@ -48,6 +58,7 @@ public sealed class MatchSession
     private readonly SeatStatus[] status = new SeatStatus[4];
     private readonly int[] timeouts = new int[4];
     private readonly DateTimeOffset[] lastEmote = new DateTimeOffset[4];
+    private readonly DateTimeOffset[] lastChat = new DateTimeOffset[4];
     private (int Hand, int Turn, int Seat) turnKey = (-1, -1, -1);
     private DateTimeOffset? deadline;
     private DateTimeOffset? nextHandAt;
@@ -70,11 +81,20 @@ public sealed class MatchSession
     public int HandNumber => handIndex + 1;
     private readonly JsonElement rules;
     private bool Bot(int seat) => MatchManager.IsBot(record, seat);
+    private bool SpectatorsAllowed => !rules.TryGetProperty("spectators", out var v) || v.ValueKind != JsonValueKind.False;
+    /// <summary>Seats the server plays (a bot's, or left) that a player may take while the match runs.</summary>
+    public int OpenSeats => closed ? 0 : Enumerable.Range(0, 4).Count(s => Bot(s) || Left(s));
     private int TurnSeconds => record.TurnSeconds > 0 ? record.TurnSeconds : options.TurnSeconds;
     private string ChatRule => rules.TryGetProperty("chat", out var c) && c.ValueKind == JsonValueKind.String ? c.GetString()! : "on";
-    /// <summary>The room's penalty switches for the engine (missing = on).</summary>
+    /// <summary>
+    /// The room's rules for the engine: penalty and işleme switches (missing = on), katlamalı (the Katlamalı queue or a
+    /// table's option) and, at an Eşli table, whether the partner's opening raises the bar (missing = on).
+    /// </summary>
     private RuleOptions Rules => new(!rules.TryGetProperty("okeyPenalty", out var o) || o.ValueKind != JsonValueKind.False,
-        !rules.TryGetProperty("penalties", out var p) || p.ValueKind != JsonValueKind.False);
+        !rules.TryGetProperty("penalties", out var p) || p.ValueKind != JsonValueKind.False,
+        !rules.TryGetProperty("processing", out var k) || k.ValueKind != JsonValueKind.False,
+        record.Mode == GameModes.Doubling || (rules.TryGetProperty("doubling", out var d) && d.ValueKind == JsonValueKind.True),
+        record.Mode != GameModes.Pairs || !rules.TryGetProperty("partnerRaises", out var r) || r.ValueKind != JsonValueKind.False);
     private bool GiftsAllowed => !rules.TryGetProperty("gifts", out var g) || g.ValueKind != JsonValueKind.False;
 
     /// <summary>Bots of a Klasik table show as "Bot · Ayşe" etc. (no account behind them).</summary>
@@ -90,14 +110,28 @@ public sealed class MatchSession
 
     // ---- Public API: every call is queued onto the session loop -------------------------------------------------
 
+    /// <summary>
+    /// The match and its stakes are already stored: from here it must go on. A storage hiccup is retried on the session's
+    /// timer, never thrown back to the lobby, whose retry would charge the stakes again under a new match.
+    /// </summary>
     public Task StartAsync() => Run(async () =>
     {
-        players = await store.SummariesAsync(record.Seats);
+        try { players = await store.SummariesAsync(record.Seats); blocks = await store.BlocksAsync(record.Seats); }
+        catch (Exception error) when (error is not OperationCanceledException) { log.LogWarning(error, "Match {Match}: player cards unavailable", Id); }
         AddBotSummaries();
         for (var s = 0; s < 4; s++) if (!Bot(s)) live.SetPlaying(record.Seats[s], Id);
-        await StartHandAsync(0);
-        foreach (var s in Enumerable.Range(0, 4)) SendStart(s);
-        Broadcast();
+        async Task Deal()
+        {
+            await StartHandAsync(0);
+            foreach (var s in Enumerable.Range(0, 4)) SendStart(s);
+            Broadcast();
+        }
+        try { await Deal(); }
+        catch (Exception error) when (error is not OperationCanceledException)
+        {
+            log.LogWarning(error, "Match {Match}: first hand not stored; retrying", Id);
+            Arm(TimeSpan.FromSeconds(2), Deal);
+        }
         return true;
     });
 
@@ -105,6 +139,7 @@ public sealed class MatchSession
     public Task RestoreAsync(StoredMatch stored) => Run(async () =>
     {
         players = await store.SummariesAsync(record.Seats);
+        blocks = await store.BlocksAsync(record.Seats);
         AddBotSummaries();
         foreach (var hand in stored.Hands)
         {
@@ -156,6 +191,56 @@ public sealed class MatchSession
         return Task.FromResult(true);
     });
 
+    /// <summary>İzle: the spectator gets the match (seen from seat 0) and every public update until it stops watching.</summary>
+    public Task<string?> WatchAsync(Guid account) => Run<string?>(() =>
+    {
+        if (closed || state is null) return Task.FromResult<string?>(TableErrors.Closed);
+        if (!SpectatorsAllowed) return Task.FromResult<string?>(ErrorCodes.Validation);
+        if (SeatOf(account) is var seat && seat >= 0 && !Left(seat)) return Task.FromResult<string?>(ErrorCodes.Conflict);
+        if (!spectators.Contains(account) && spectators.Count >= MaxSpectators) return Task.FromResult<string?>(TableErrors.Full);
+        spectators.Add(account);
+        live.Send(account, MessageTypes.MatchStart, new MatchStartMessage
+        {
+            MatchId = Id, Mode = record.Mode, Stake = record.Stake, Hands = record.Hands, YourSeat = 0, TurnSeconds = TurnSeconds, Seats = SeatList(), Spectator = true,
+        });
+        live.Send(account, MessageTypes.MatchState, SpectatorState(SeatList()));
+        return Task.FromResult<string?>(null);
+    });
+
+    public Task UnwatchAsync(Guid account) => Run(() => Task.FromResult(spectators.Remove(account)));
+
+    /// <summary>
+    /// "Oyuna katıl": a person takes a seat the server plays — a bot's, or one its player left (that player's forfeit is
+    /// recorded) — pays the stake and plays on from the seat's running total. Null when seated, else the error code.
+    /// </summary>
+    public Task<string?> TakeSeatAsync(Guid account, int? wanted) => Run<string?>(async () =>
+    {
+        if (!InPlay) return TableErrors.Playing;
+        if (SeatOf(account) is var mine && mine >= 0 && !Left(mine)) return ErrorCodes.Conflict;
+        bool Open(int s) => Bot(s) || Left(s);
+        int seat = wanted is >= 0 and <= 3 && Open(wanted.Value) ? wanted.Value : Enumerable.Range(0, 4).Where(Open).DefaultIfEmpty(-1).First();
+        if (seat < 0) return TableErrors.Full;
+        Guid? leaver = Left(seat) && !Bot(seat) ? record.Seats[seat] : null;
+        if (await store.TakeSeatAsync(record, seat, account, leaver, totals[seat], handIndex) is { } error) return error;
+        var keep = ~(1 << seat);
+        record.Seats[seat] = account; record.BotMask &= keep; record.LeftMask &= keep;
+        status[seat] = SeatStatus.Connected; timeouts[seat] = 0; xp[seat] = 0; bestOpening[seat] = 0; joinedHand[seat] = handIndex;
+        spectators.Remove(account);
+        try
+        {
+            foreach (var (id, card) in await store.SummariesAsync([account])) players[id] = card;
+            blocks = await store.BlocksAsync(record.Seats);
+        }
+        catch (Exception error2) when (error2 is not OperationCanceledException) { log.LogWarning(error2, "Match {Match}: new player's card unavailable", Id); }
+        live.SetPlaying(account, Id);
+        SendStart(seat);
+        ToAll(MessageTypes.MatchSeats, new MatchSeatsMessage { MatchId = Id, Seats = SeatList() });
+        Broadcast();
+        // A turn the server was about to play becomes the newcomer's, with a full turn time.
+        if (InPlay && state.ActivePlayer == seat) { deadline = clock.GetUtcNow().AddSeconds(TurnSeconds); ScheduleTurn(); }
+        return null;
+    });
+
     public Task DisconnectedAsync(Guid account) => Run(() =>
     {
         var seat = SeatOf(account);
@@ -168,9 +253,10 @@ public sealed class MatchSession
     {
         var seat = SeatOf(account);
         if (seat < 0 || status[seat] == SeatStatus.Left) return false;
+        // Stored first: a failed write throws with the seat untouched, so memory and storage never disagree.
+        await store.SetLeftAsync(Id, record.LeftMask | 1 << seat);
         status[seat] = SeatStatus.Left;
         record.LeftMask |= 1 << seat;
-        await store.SetLeftAsync(Id, record.LeftMask);
         live.SetPlaying(account, null);
         if (record.LeftMask == 0b1111) { await FinishAsync(); return true; }
         Broadcast();
@@ -186,7 +272,26 @@ public sealed class MatchSession
         var now = clock.GetUtcNow();
         if (now - lastEmote[seat] < EmoteInterval) return Task.FromResult<string?>(ErrorCodes.RateLimited);
         lastEmote[seat] = now;
-        ToAll(MessageTypes.MatchEmote, new EmoteMessage { MatchId = Id, Seat = seat, Emote = emote });
+        ToAllFrom(seat, MessageTypes.MatchEmote, new EmoteMessage { MatchId = Id, Seat = seat, Emote = emote });
+        return Task.FromResult<string?>(null);
+    });
+
+    /// <summary>
+    /// Table chat by the room's rule: "off" none, "quick" ready phrases only (by index), "on" also text up to 80
+    /// characters. Everyone at the table gets it, the sender too (that is their confirmation).
+    /// </summary>
+    public Task<string?> ChatAsync(Guid account, string? text, int? quick) => Run<string?>(() =>
+    {
+        var seat = SeatOf(account);
+        if (seat < 0 || status[seat] == SeatStatus.Left || ChatRule == "off") return Task.FromResult<string?>(ErrorCodes.Validation);
+        text = text?.Trim();
+        if (quick is { } q) { if (q is < 0 or >= QuickPhrases) return Task.FromResult<string?>(ErrorCodes.Validation); text = null; }
+        else if (ChatRule == "quick" || string.IsNullOrEmpty(text) || text.Length > 80) return Task.FromResult<string?>(ErrorCodes.Validation);
+        var now = clock.GetUtcNow();
+        if (now - lastChat[seat] < ChatInterval) return Task.FromResult<string?>(ErrorCodes.RateLimited);
+        lastChat[seat] = now;
+        if (text is not null) text = Social.TextFilter.Mask(text);
+        ToAllFrom(seat, MessageTypes.MatchChat, new ChatMessage { MatchId = Id, Seat = seat, Text = text, Quick = quick });
         return Task.FromResult<string?>(null);
     });
 
@@ -297,28 +402,55 @@ public sealed class MatchSession
             DrawDecision decision;
             try { decision = planner.ChooseDraw(PlayerViewProjector.ForPlayer(state, seat), think.Token); }
             catch (OperationCanceledException) { decision = new DrawDecision(DrawSource.Stock); }
-            if (await AcceptAsync(seat, new DrawCommand(Meta(seat, state.Version), decision.Source), true) is not null)
-                await AcceptAsync(seat, new DrawCommand(Meta(seat, state.Version), DrawSource.Stock), true);
-            witness = decision.Witness;
+            catch (Exception error)
+            {
+                // A planner fault must not stall the table: the stock is always a legal draw.
+                log.LogError(error, "Match {Match}: bot draw failed for seat {Seat}", Id, seat);
+                decision = new DrawDecision(DrawSource.Stock);
+            }
+            if (await AcceptAsync(seat, new DrawCommand(Meta(seat, state.Version), decision.Source), true) is null) witness = decision.Witness;
+            // Refused (the pile tile): the stock instead, and the pile's witness no longer fits the hand.
+            else await AcceptAsync(seat, new DrawCommand(Meta(seat, state.Version), DrawSource.Stock), true);
         }
-        if (!InPlay || state.ActivePlayer != seat || state.Phase != RoundPhase.PlanningTurn) return;
-        TurnPlan? plan = null;
-        try { plan = planner.PlanTurn(PlayerViewProjector.ForPlayer(state, seat), witness, think.Token); }
-        catch (OperationCanceledException) { }
+        if (!Planning(seat)) return;
+        var plan = Plan(planner, seat, witness, think.Token);
+        // The player took a pile tile and the time ran out before it was used: it goes back, the stock is drawn and
+        // the turn is planned again from there.
+        if (plan is null && await ReturnPileTileAsync(seat)) plan = Plan(planner, seat, null, think.Token);
         if (plan is not null && await AcceptAsync(seat, new CommitTurnCommand(Meta(seat, state.Version), plan), true) is null) return;
         await FallbackTurnAsync(seat);
+    }
+
+    private bool Planning(int seat) => InPlay && state.ActivePlayer == seat && state.Phase == RoundPhase.PlanningTurn;
+
+    /// <summary>The bot's turn, or null when it has none in time. A pile tile with no legal use (taken by the player) is not a fault.</summary>
+    private TurnPlan? Plan(BotPlanner planner, int seat, TurnPlan? witness, CancellationToken token)
+    {
+        try { return planner.PlanTurn(PlayerViewProjector.ForPlayer(state, seat), witness, token); }
+        catch (OperationCanceledException) { return null; }
+        catch (InvalidOperationException) when (state.PendingDraw?.Source == DrawSource.PreviousDiscard && witness is null) { return null; }
+        catch (Exception error)
+        {
+            log.LogError(error, "Match {Match}: bot turn failed for seat {Seat}", Id, seat);
+            return null;
+        }
+    }
+
+    /// <summary>Puts a taken pile tile back and draws the stock; true when the seat is planning again with the stock tile.</summary>
+    private async Task<bool> ReturnPileTileAsync(int seat)
+    {
+        if (state.PendingDraw?.Source != DrawSource.PreviousDiscard) return false;
+        if (await AcceptAsync(seat, new ReturnDiscardCommand(Meta(seat, state.Version)), true) is not null) return false;
+        if (InPlay && state.ActivePlayer == seat && state.Phase == RoundPhase.AwaitingDraw)
+            await AcceptAsync(seat, new DrawCommand(Meta(seat, state.Version), DrawSource.Stock), true);
+        return Planning(seat);
     }
 
     /// <summary>Last resort when the planner gives nothing usable: put an unusable discard back, then discard any legal tile.</summary>
     private async Task FallbackTurnAsync(int seat)
     {
-        if (state.PendingDraw?.Source == DrawSource.PreviousDiscard)
-        {
-            await AcceptAsync(seat, new ReturnDiscardCommand(Meta(seat, state.Version)), true);
-            if (InPlay && state.Phase == RoundPhase.AwaitingDraw)
-                await AcceptAsync(seat, new DrawCommand(Meta(seat, state.Version), DrawSource.Stock), true);
-        }
-        if (!InPlay || state.ActivePlayer != seat || state.Phase != RoundPhase.PlanningTurn) return;
+        await ReturnPileTileAsync(seat);
+        if (!Planning(seat)) return;
         var hand = state.Players[seat].Hand;
         var candidates = state.PendingDraw is { } drawn ? hand.OrderByDescending(t => t == drawn.Tile) : hand.AsEnumerable();
         foreach (var tile in candidates.ToList())
@@ -332,14 +464,16 @@ public sealed class MatchSession
 
     private async Task StartHandAsync(int index)
     {
+        var seed = BitConverter.ToUInt32(RandomNumberGenerator.GetBytes(4));
+        var roundId = Guid.CreateVersion7();
+        var dealt = RoundFactory.Create(seed, roundId, Starter(index), Rules);
+        // Stored first: a failed write leaves the previous hand in place, so the retried timer deals this hand again.
+        await store.StartHandAsync(Id, index, seed, roundId);
         handIndex = index;
         handCommands.Clear();
         nextHandAt = null;
         lastEvent = null;
-        var seed = BitConverter.ToUInt32(RandomNumberGenerator.GetBytes(4));
-        var roundId = Guid.CreateVersion7();
-        state = RoundFactory.Create(seed, roundId, Starter(index), Rules);
-        await store.StartHandAsync(Id, index, seed, roundId);
+        state = dealt;
         dealUntil = clock.GetUtcNow().AddSeconds(options.DealSeconds);
         BeginTurnIfNew();
         ScheduleTurn();
@@ -350,7 +484,16 @@ public sealed class MatchSession
         timerGeneration++;
         deadline = null;
         var scores = Settlement.HandScores(state);
-        await store.FinishHandAsync(Id, handIndex, scores);
+        try { await store.FinishHandAsync(Id, handIndex, scores); }
+        catch (Exception error) when (error is not OperationCanceledException)
+        {
+            // The last move is stored, the scores are not: show the finished hand and keep trying instead of leaving
+            // the table without a timer.
+            log.LogWarning(error, "Match {Match} hand {Hand} scores not stored; retrying", Id, handIndex);
+            Broadcast();
+            Arm(TimeSpan.FromSeconds(2), EndHandAsync);
+            return;
+        }
         Tally(scores);
         await AfterHandAsync(true);
     }
@@ -382,39 +525,73 @@ public sealed class MatchSession
             });
         }
         if (!more) { await FinishAsync(); return; }
-        Arm(TimeSpan.FromSeconds(options.NextHandSeconds), async () => { await StartHandAsync(handIndex + 1); Broadcast(); });
+        var next = handIndex + 1;
+        Arm(TimeSpan.FromSeconds(options.NextHandSeconds), async () => { await StartHandAsync(next); Broadcast(); });
     }
 
+    /// <summary>
+    /// Settles and closes. The table counts as closed only once the settlement is stored: a failed write (all or
+    /// nothing) is retried, so the players are paid and released instead of staying "playing" forever.
+    /// </summary>
     private async Task FinishAsync()
     {
         if (closed) return;
-        closed = true;
         timerGeneration++;
-        var outcomes = Settlement.Settle(record.Mode, record.Stake, totals, record.LeftMask, options);
+        int[]? seasonLp = null;
+        if (record.Mode == GameModes.Ranked)
+            try { seasonLp = await store.SeasonLpAsync(record.Seats); }
+            catch (Exception error) when (error is not OperationCanceledException)
+            {
+                log.LogWarning(error, "Match {Match}: league points unavailable; retrying", Id);
+                Arm(TimeSpan.FromSeconds(5), FinishAsync);
+                return;
+            }
+        var outcomes = Settlement.Settle(record.Mode, record.Stake, totals, record.LeftMask, options, record.BotMask, seasonLp);
+        // The hands' XP plus the place bonus (computed afresh: a retried settlement must not add it twice).
+        var matchXp = Enumerable.Range(0, 4).Select(s => xp[s] + (Left(s) ? 0 : options.XpPlace[outcomes[s].Place - 1])).ToArray();
         var tallies = Enumerable.Range(0, 4).Select(s => new SeatTally(
-            new QuestCounters(counters.Sum(h => h[s].WinHands), counters.Sum(h => h[s].PairsOpenings), counters.Sum(h => h[s].HandsPlayed),
-                counters.Sum(h => h[s].OkeyFinishes), counters.Sum(h => h[s].TilesAdded)),
-            [.. counters.Where(h => h[s].HandsPlayed > 0).Select(h => h[s].WinHands > 0)], xp[s], bestOpening[s])).ToArray();
-        await store.SettleAsync(record, outcomes, tallies, totals);
+            new QuestCounters(Since(s).Sum(h => h[s].WinHands), Since(s).Sum(h => h[s].PairsOpenings), Since(s).Sum(h => h[s].HandsPlayed),
+                Since(s).Sum(h => h[s].OkeyFinishes), Since(s).Sum(h => h[s].TilesAdded)),
+            [.. Since(s).Where(h => h[s].HandsPlayed > 0).Select(h => h[s].WinHands > 0)], matchXp[s], bestOpening[s])).ToArray();
+        try { await store.SettleAsync(record, outcomes, tallies, totals); }
+        catch (Exception error) when (error is not OperationCanceledException)
+        {
+            log.LogWarning(error, "Match {Match} settlement not stored; retrying", Id);
+            Arm(TimeSpan.FromSeconds(5), FinishAsync);
+            return;
+        }
+        closed = true;
         ToAll(MessageTypes.MatchEnd, new MatchEndMessage
         {
             MatchId = Id,
-            Placements = [.. outcomes.Select(o => new PlacementDto { Seat = o.Seat, Place = o.Place, Total = totals[o.Seat], ChipDelta = o.ChipDelta, LpDelta = o.LpDelta, Xp = xp[o.Seat], Left = Left(o.Seat) })],
+            Placements = [.. outcomes.Select(o => new PlacementDto { Seat = o.Seat, Place = o.Place, Total = totals[o.Seat], ChipDelta = o.ChipDelta, LpDelta = o.LpDelta, Xp = matchXp[o.Seat], Left = Left(o.Seat) })],
         }, includeLeft: true);
-        foreach (var account in record.Seats)
+        try
         {
-            live.SetPlaying(account, null);
-            if (live.IsOnline(account)) live.Send(account, MessageTypes.Wallet, await store.WalletAsync(account));
+            foreach (var account in record.Seats)
+            {
+                live.SetPlaying(account, null);
+                if (!live.IsOnline(account)) continue;
+                // A fresh balance is a courtesy (the wallet endpoint has it too): a failed read must not keep the table open.
+                try { live.Send(account, MessageTypes.Wallet, await store.WalletAsync(account)); }
+                catch (Exception error) when (error is not OperationCanceledException) { log.LogWarning(error, "Match {Match}: wallet push failed", Id); }
+            }
         }
-        Close();
+        finally { Close(); }
     }
 
     private async Task AbortAsync()
     {
         if (closed) return;
-        closed = true;
         timerGeneration++;
-        await store.AbortAsync(record);
+        try { await store.AbortAsync(record); }
+        catch (Exception error) when (error is not OperationCanceledException)
+        {
+            log.LogWarning(error, "Match {Match} refunds not stored; retrying", Id);
+            Arm(TimeSpan.FromSeconds(5), AbortAsync);
+            return;
+        }
+        closed = true;
         ToAll(MessageTypes.MatchEnd, new MatchEndMessage { MatchId = Id, Aborted = true }, includeLeft: true);
         foreach (var account in record.Seats) live.SetPlaying(account, null);
         Close();
@@ -446,12 +623,48 @@ public sealed class MatchSession
                 LastEvent = lastEvent, TurnDeadline = InPlay ? deadline : nextHandAt, Seats = seats, Totals = [.. totals],
             });
         }
+        if (spectators.Count > 0)
+        {
+            var watched = SpectatorState(seats);
+            foreach (var watcher in spectators) live.Send(watcher, MessageTypes.MatchState, watched);
+        }
     }
+
+    /// <summary>The hands that count for a seat's current player (from the hand it took the seat in).</summary>
+    private IEnumerable<QuestCounters[]> Since(int seat) => counters.Skip(joinedHand[seat]);
+
+    /// <summary>What spectators see: seat 0's view without any tiles (its hand and its private draw stay with it).</summary>
+    private MatchStateMessage SpectatorState(List<SeatResponse> seats)
+    {
+        var view = Wire.ToDto(PlayerViewProjector.ForPlayer(state, 0));
+        view.Hand = []; view.PendingDraw = null;
+        return new MatchStateMessage
+        {
+            MatchId = Id, HandIndex = handIndex, View = view, LastEvent = lastEvent,
+            TurnDeadline = InPlay ? deadline : nextHandAt, Seats = seats, Totals = [.. totals],
+        };
+    }
+
+    /// <summary>A seat's own words (chat, emotes): every seat still playing except those who blocked it, and the spectators.</summary>
+    private void ToAllFrom<T>(int from, string type, T message)
+    {
+        for (var s = 0; s < 4; s++)
+            if (status[s] != SeatStatus.Left && !blocks.Contains((record.Seats[s], record.Seats[from]))) live.Send(record.Seats[s], type, message);
+        foreach (var watcher in spectators) live.Send(watcher, type, message);
+    }
+
+    /// <summary>A block placed or lifted while both sit at this table takes effect at once.</summary>
+    public Task BlockChangedAsync(Guid blocker, Guid blocked, bool on) => Run(() =>
+    {
+        if (on) blocks.Add((blocker, blocked)); else blocks.Remove((blocker, blocked));
+        return Task.FromResult(true);
+    });
 
     private void ToAll<T>(string type, T message, bool includeLeft = false)
     {
         for (var s = 0; s < 4; s++)
             if (includeLeft || status[s] != SeatStatus.Left) live.Send(record.Seats[s], type, message);
+        foreach (var watcher in spectators) live.Send(watcher, type, message);
     }
 
     private List<SeatResponse> SeatList() => [.. Enumerable.Range(0, 4).Select(s => new SeatResponse

@@ -43,12 +43,35 @@ namespace Okey101.Application
             [DataMember(IsRequired=true, Order=16)] public long[] LastAcceptedSequences;
             [DataMember(IsRequired=true, Order=17)] public ResultDto Result;
             [DataMember(IsRequired=false, EmitDefaultValue=false, Order=18)] public bool PreviousDiscardReturned; // omitted when false: fixture hashes stay stable
+            [DataMember(IsRequired=false, EmitDefaultValue=false, Order=19)] public OptionsDto Options; // omitted for the standard rules: fixture hashes stay stable
+            // The deal ceremony a dealt round came from (a random start's dice are not derivable from seed and starter).
+            // Absent for hand-built states and older documents, whose hashes therefore stay as they were.
+            [DataMember(IsRequired=false, EmitDefaultValue=false, Order=20)] public DealDto Deal;
+        }
+        [DataContract] internal sealed class DealDto
+        {
+            [DataMember(IsRequired=true)] public int Dealer;
+            [DataMember(IsRequired=true)] public int DieA;
+            [DataMember(IsRequired=true)] public int DieB;
+            [DataMember(IsRequired=true)] public int IndicatorStack;
+            [DataMember(IsRequired=true)] public int IndicatorPosition;
+            [DataMember(IsRequired=true)] public bool FakeOkeyShown;
+            [DataMember(IsRequired=true)] public int ExtraStack;
+        }
+        [DataContract] internal sealed class OptionsDto
+        {
+            [DataMember(IsRequired=true)] public bool OkeyDiscardPenalty;
+            [DataMember(IsRequired=true)] public bool PlayableDiscardPenalty;
+            [DataMember(IsRequired=false, EmitDefaultValue=false)] public bool NoProcessing; // absent in older documents: işleme on
+            [DataMember(IsRequired=false, EmitDefaultValue=false)] public bool Doubling; // katlamalı
+            [DataMember(IsRequired=false, EmitDefaultValue=false)] public bool NoPartnerRaise; // absent: the partner's opening raises the bar
         }
         [DataContract] internal sealed class PlayerDto
         {
             [DataMember(IsRequired=true)] public int[] Hand;
             [DataMember(IsRequired=true)] public int Opening;
             [DataMember(IsRequired=true)] public int Penalties;
+            [DataMember(IsRequired=false, EmitDefaultValue=false)] public int OpeningValue; // katlamalı tables only: classic hashes stay stable
         }
         [DataContract] internal sealed class DrawDto
         {
@@ -169,17 +192,21 @@ namespace Okey101.Application
         internal static StateDto Snapshot(RoundState s) => new StateDto {
             RoundId=s.RoundId.ToString("D"), Version=s.Version, Seed=s.Seed, StartingPlayer=s.StartingPlayer, ActivePlayer=s.ActivePlayer, TurnNumber=s.TurnNumber,
             Phase=(int)s.Phase, Indicator=s.Indicator.Value, Stock=s.Stock.Select(id=>id.Value).ToArray(),
-            Players=s.Players.Select(p=>new PlayerDto { Hand=p.Hand.Select(id=>id.Value).ToArray(), Opening=(int)p.Opening, Penalties=p.Penalties }).ToArray(),
+            Players=s.Players.Select(p=>new PlayerDto { Hand=p.Hand.Select(id=>id.Value).ToArray(), Opening=(int)p.Opening, Penalties=p.Penalties, OpeningValue=s.Options.Doubling ? p.OpeningValue : 0 }).ToArray(),
             Table=s.Table.Select(m=>new MeldDto { Id=m.Id, Owner=m.Owner, Group=Group(m.Group) }).ToArray(),
             Discards=s.Discards.Select(p=>p.Select(id=>id.Value).ToArray()).ToArray(),
             PendingDraw=s.PendingDraw==null ? null : new DrawDto { Source=(int)s.PendingDraw.Source, Tile=s.PendingDraw.Tile.Value, WasLastStock=s.PendingDraw.WasLastStock },
             OpeningAtTurnStart=(int)s.OpeningAtTurnStart, SeriesTilesUsed=s.SeriesTilesUsed, IsInitialTurn=s.IsInitialTurn, LastAcceptedSequences=s.LastAcceptedSequences.ToArray(), PreviousDiscardReturned=s.PreviousDiscardReturned,
+            Options=s.Options.IsStandard ? null : new OptionsDto { OkeyDiscardPenalty=s.Options.OkeyDiscardPenalty, PlayableDiscardPenalty=s.Options.PlayableDiscardPenalty, NoProcessing=!s.Options.Processing,
+                Doubling=s.Options.Doubling, NoPartnerRaise=!s.Options.PartnerOpeningsRaise },
+            Deal=s.Deal==null ? null : new DealDto { Dealer=s.Deal.Dealer, DieA=s.Deal.DieA, DieB=s.Deal.DieB, IndicatorStack=s.Deal.IndicatorStack,
+                IndicatorPosition=s.Deal.IndicatorPosition, FakeOkeyShown=s.Deal.FakeOkeyShown, ExtraStack=s.Deal.ExtraStack },
             Result=s.Result==null ? null : new ResultDto { Reason=(int)s.Result.FinishInfo.Reason, Winner=s.Result.FinishInfo.Winner, WinnerOpening=(int)s.Result.FinishInfo.WinnerOpening,
                 WinnerOpenedThisTurn=s.Result.FinishInfo.WinnerOpenedThisTurn, DiscardedRealJoker=s.Result.FinishInfo.DiscardedRealJoker,
                 Scores=s.Result.Scores.Select(x=>new ScoreDto { HasScore=x.HasScore,N=x.N,J=x.J,P=x.P,B=x.B,M=x.M,Total=x.Total }).ToArray() } };
         private static RoundState State(StateDto s)
         {
-            var players=Items(s.Players,4).Select(p=>new PlayerState(Items(p.Hand,22).Select(id=>new TileId(id)).ToArray(),(OpeningKind)p.Opening,p.Penalties)).ToArray();
+            var players=Items(s.Players,4).Select(p=>new PlayerState(Items(p.Hand,22).Select(id=>new TileId(id)).ToArray(),(OpeningKind)p.Opening,p.Penalties,p.OpeningValue)).ToArray();
             var table=Items(s.Table,53).Select(m=>new Meld(m.Id,m.Owner,Group(m.Group))).ToArray();
             var result=s.Result;
             return new RoundState(Guid.Parse(s.RoundId),s.Version,s.Seed,s.StartingPlayer,s.ActivePlayer,s.TurnNumber,(RoundPhase)s.Phase,new TileId(s.Indicator),
@@ -189,7 +216,9 @@ namespace Okey101.Application
                 (OpeningKind)s.OpeningAtTurnStart,s.SeriesTilesUsed,s.IsInitialTurn,Items(s.LastAcceptedSequences,4),
                 result==null?null:new RoundResult(new FinishInfo((FinishReason)result.Reason,result.Winner,(OpeningKind)result.WinnerOpening,result.WinnerOpenedThisTurn,result.DiscardedRealJoker),
                     Items(result.Scores,4).Select(x=>new ScoreBreakdown(x.HasScore,x.N,x.J,x.P,x.B,x.M,x.Total)).ToArray()),
-                s.PreviousDiscardReturned);
+                s.PreviousDiscardReturned,
+                s.Options==null?null:new RuleOptions(s.Options.OkeyDiscardPenalty,s.Options.PlayableDiscardPenalty,!s.Options.NoProcessing,s.Options.Doubling,!s.Options.NoPartnerRaise),
+                s.Deal==null?null:new DealInfo(s.Deal.Dealer,s.Deal.DieA,s.Deal.DieB,s.Deal.IndicatorStack,s.Deal.IndicatorPosition,s.Deal.FakeOkeyShown,s.Deal.ExtraStack));
         }
         private static PlacedDto Placed(PlacedTile t)=>new PlacedDto { Id=t.Id.Value,Color=(int)t.RepresentedFace.Color,Number=t.RepresentedFace.Number };
         private static PlacedTile Placed(PlacedDto t)=>new PlacedTile(new TileId(t.Id),new TileFace((TileColor)t.Color,t.Number));

@@ -1,0 +1,858 @@
+{
+ "version": "0.4.0",
+ "note": "Arayüzdeki satır içi SVG ikonlar, kopyalar birleştirildi. Renk currentColor (oyunda temanın --ic / --aT / --a1 rengi). Ad, ikonun kullanıldığı ilk öğe kimliğinden türetildi; usedBy tüm öğeleri listeler. İçinde {{ }} olan (veriye göre çizilen) SVG'ler burada yok; onlar kodla çizilir.",
+ "count": 69,
+ "icons": [
+  {
+   "file": "icons/app-splash-tip-box.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "app.splash.tipBox",
+    "load.bar"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:70",
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:280"
+   ]
+  },
+  {
+   "file": "icons/auth-guest.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "auth.guest"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:111"
+   ]
+  },
+  {
+   "file": "icons/auth-login.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "auth.login"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:115"
+   ]
+  },
+  {
+   "file": "icons/auth-register.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "auth.register"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:119"
+   ]
+  },
+  {
+   "file": "icons/form-back.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.8,
+   "usedBy": [
+    "form.back",
+    "lobby.back",
+    "ranked.back"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:137",
+    "G101-Lobi.dc.html:24",
+    "G101-Dereceli.dc.html:26"
+   ]
+  },
+  {
+   "file": "icons/form-field-eye.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "form.field[{{ $index }}].eye",
+    "lobby.b.go[{{ $index }}]"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:155",
+    "G101-Lobi.dc.html:94",
+    "G101-Masa.dc.html:176"
+   ]
+  },
+  {
+   "file": "icons/form-field-eye-7.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 3.6,
+   "usedBy": [
+    "form.field[{{ $index }}].eye",
+    "form.terms",
+    "form.errorText",
+    "menu.t.soon[{{ $index }}]",
+    "menu.dl.claimDay[{{ $index }}]",
+    "menu.k.claim[{{ $index }}]",
+    "menu.sh.copy",
+    "menu.sh.inviteSub",
+    "ranked.p.ini[{{ $index }}]",
+    "table.thank"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:158",
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:201",
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:214",
+    "G101-Menu.dc.html:108",
+    "G101-Menu.dc.html:679",
+    "G101-Menu.dc.html:693",
+    "G101-Menu.dc.html:706",
+    "G101-Menu.dc.html:929",
+    "G101-Menu.dc.html:949",
+    "G101-Menu.dc.html:957",
+    "G101-Lobi.dc.html:249",
+    "G101-Lobi.dc.html:518",
+    "G101-Dereceli.dc.html:281",
+    "G101-Masa.dc.html:349"
+   ]
+  },
+  {
+   "file": "icons/form-guest-chips.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "form.guest.chips"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:194"
+   ]
+  },
+  {
+   "file": "icons/load-fail.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "load.fail"
+   ],
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:288"
+   ]
+  },
+  {
+   "file": "icons/menu-open-settings.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "menu.openSettings",
+    "menu.closeSettings",
+    "table.openSettings",
+    "table.closeSettings"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:76",
+    "G101-Menu.dc.html:179",
+    "G101-Masa.dc.html:161",
+    "G101-Masa.dc.html:539"
+   ]
+  },
+  {
+   "file": "icons/menu-open-shop.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 1.9,
+   "usedBy": [
+    "menu.openShop"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:118",
+    "G101-Menu.dc.html:395"
+   ]
+  },
+  {
+   "file": "icons/menu-open-friends.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 1.9,
+   "usedBy": [
+    "menu.openFriends"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:125",
+    "G101-Menu.dc.html:396"
+   ]
+  },
+  {
+   "file": "icons/menu-open-leader.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 1.9,
+   "usedBy": [
+    "menu.openLeader"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:132",
+    "G101-Menu.dc.html:397"
+   ]
+  },
+  {
+   "file": "icons/menu-open-daily.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 1.9,
+   "usedBy": [
+    "menu.openDaily"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:138",
+    "G101-Menu.dc.html:398"
+   ]
+  },
+  {
+   "file": "icons/menu-open-rules.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 1.9,
+   "usedBy": [
+    "menu.openRules"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:145",
+    "G101-Menu.dc.html:399"
+   ]
+  },
+  {
+   "file": "icons/menu-ask-quit.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "menu.askQuit"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:190",
+    "G101-Menu.dc.html:831"
+   ]
+  },
+  {
+   "file": "icons/menu-close-settings.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.8,
+   "usedBy": [
+    "menu.closeSettings#2",
+    "menu.closePanel#2",
+    "menu.fr.clearQ",
+    "menu.closeDlg#2",
+    "menu.closeDlg#5",
+    "menu.closeDlg#6",
+    "lobby.clearQ",
+    "lobby.z.kick[{{ $index }}]",
+    "lobby.iv.close#2",
+    "lobby.closeCreate#2",
+    "ranked.z.kick[{{ $index }}]",
+    "ranked.closeInvite#2",
+    "table.closeCard[{{ $index }}]",
+    "table.closeGift#2",
+    "table.closeChat#2",
+    "table.closeSettings#2"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:202",
+    "G101-Menu.dc.html:414",
+    "G101-Menu.dc.html:592",
+    "G101-Menu.dc.html:766",
+    "G101-Menu.dc.html:861",
+    "G101-Menu.dc.html:898",
+    "G101-Lobi.dc.html:65",
+    "G101-Lobi.dc.html:163",
+    "G101-Lobi.dc.html:258",
+    "G101-Lobi.dc.html:421",
+    "G101-Dereceli.dc.html:130",
+    "G101-Dereceli.dc.html:253",
+    "G101-Masa.dc.html:100",
+    "G101-Masa.dc.html:372",
+    "G101-Masa.dc.html:429",
+    "G101-Masa.dc.html:557"
+   ]
+  },
+  {
+   "file": "icons/menu-sec-cur.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 3,
+   "usedBy": [
+    "menu.sec.cur[{{ $index }}]",
+    "lobby.cf.rulesSum"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:279",
+    "G101-Lobi.dc.html:394"
+   ]
+  },
+  {
+   "file": "icons/menu-v-pick.svg",
+   "viewBox": "0 0 96 62",
+   "stroke": 1.5,
+   "usedBy": [
+    "menu.v.pick[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:288"
+   ]
+  },
+  {
+   "file": "icons/icon-20.svg",
+   "viewBox": "0 0 96 62",
+   "stroke": 1.5,
+   "usedBy": [],
+   "uses": [
+    "G101-Menu.dc.html:289",
+    "G101-Masa.dc.html:597"
+   ]
+  },
+  {
+   "file": "icons/icon-21.svg",
+   "viewBox": "0 0 96 62",
+   "stroke": 1.5,
+   "usedBy": [],
+   "uses": [
+    "G101-Menu.dc.html:290"
+   ]
+  },
+  {
+   "file": "icons/menu-close-panel.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 1.9,
+   "usedBy": [
+    "menu.closePanel"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:394"
+   ]
+  },
+  {
+   "file": "icons/menu-open-profile.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "menu.openProfile#2"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:448"
+   ]
+  },
+  {
+   "file": "icons/menu-open-share.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "menu.openShare",
+    "lobby.w.share",
+    "lobby.d.share"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:449",
+    "G101-Menu.dc.html:895",
+    "G101-Lobi.dc.html:138",
+    "G101-Lobi.dc.html:530"
+   ]
+  },
+  {
+   "file": "icons/menu-shop-deal-title.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "menu.shop.dealTitle",
+    "menu.dl.doneCount"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:543",
+    "G101-Menu.dc.html:687"
+   ]
+  },
+  {
+   "file": "icons/icon-26.svg",
+   "viewBox": "0 0 60 100",
+   "stroke": 14,
+   "usedBy": [],
+   "uses": [
+    "G101-Menu.dc.html:570"
+   ]
+  },
+  {
+   "file": "icons/menu-i-price.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "menu.i.price[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:590"
+   ]
+  },
+  {
+   "file": "icons/menu-af-copy.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "menu.af.copy#2",
+    "menu.af.copy#3"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:597",
+    "G101-Menu.dc.html:886"
+   ]
+  },
+  {
+   "file": "icons/menu-open-add-friend.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "menu.openAddFriend"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:600",
+    "G101-Menu.dc.html:858"
+   ]
+  },
+  {
+   "file": "icons/icon-30.svg",
+   "viewBox": "0 0 34 24",
+   "stroke": null,
+   "usedBy": [],
+   "uses": [
+    "G101-Menu.dc.html:631"
+   ]
+  },
+  {
+   "file": "icons/lobby-t-name.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 3,
+   "usedBy": [
+    "lobby.t.name[{{ $index }}]",
+    "lobby.cf.passD",
+    "lobby.b.label[{{ $index }}]",
+    "lobby.cs.name",
+    "lobby.d.body",
+    "lobby.d.code"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:808",
+    "G101-Lobi.dc.html:75",
+    "G101-Lobi.dc.html:327",
+    "G101-Lobi.dc.html:348",
+    "G101-Lobi.dc.html:425",
+    "G101-Lobi.dc.html:467",
+    "G101-Lobi.dc.html:525"
+   ]
+  },
+  {
+   "file": "icons/icon-32.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [],
+   "uses": [
+    "G101-Menu.dc.html:829"
+   ]
+  },
+  {
+   "file": "icons/icon-33.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [],
+   "uses": [
+    "G101-Menu.dc.html:830"
+   ]
+  },
+  {
+   "file": "icons/menu-sh-link-label.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "menu.sh.linkLabel"
+   ],
+   "uses": [
+    "G101-Menu.dc.html:925"
+   ]
+  },
+  {
+   "file": "icons/lobby-open-code.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "lobby.openCode",
+    "lobby.d.submitPin"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:37",
+    "G101-Lobi.dc.html:487"
+   ]
+  },
+  {
+   "file": "icons/lobby-open-create.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 3,
+   "usedBy": [
+    "lobby.openCreate",
+    "lobby.closeCreate",
+    "ranked.openInvite[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:40",
+    "G101-Lobi.dc.html:295",
+    "G101-Dereceli.dc.html:143"
+   ]
+  },
+  {
+   "file": "icons/lobby-o-pick.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "lobby.o.pick[{{ $index }}]",
+    "lobby.g.label[{{ $index }}]",
+    "lobby.b.n[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:63",
+    "G101-Lobi.dc.html:109",
+    "G101-Lobi.dc.html:232"
+   ]
+  },
+  {
+   "file": "icons/lobby-w-leave.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "lobby.w.leave",
+    "table.askExit",
+    "table.stay"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:124",
+    "G101-Masa.dc.html:146",
+    "G101-Masa.dc.html:521"
+   ]
+  },
+  {
+   "file": "icons/lobby-w-open-inv.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "lobby.w.openInv"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:131"
+   ]
+  },
+  {
+   "file": "icons/lobby-z-ini.svg",
+   "viewBox": "0 0 26 20",
+   "stroke": null,
+   "usedBy": [
+    "lobby.z.ini[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:162"
+   ]
+  },
+  {
+   "file": "icons/lobby-z-invite.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "lobby.z.invite[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:174"
+   ]
+  },
+  {
+   "file": "icons/lobby-z-add-bot.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "lobby.z.addBot[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:177"
+   ]
+  },
+  {
+   "file": "icons/wait-summary-prize.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2,
+   "usedBy": [
+    "wait.summary.prize"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:208"
+   ]
+  },
+  {
+   "file": "icons/lobby-iv-close.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "lobby.iv.close"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:224"
+   ]
+  },
+  {
+   "file": "icons/lobby-w-share.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "lobby.w.share#2"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:278"
+   ]
+  },
+  {
+   "file": "icons/lobby-cf-toggle-rules.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "lobby.cf.toggleRules"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:392"
+   ]
+  },
+  {
+   "file": "icons/icon-47.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [],
+   "uses": [
+    "G101-Lobi.dc.html:504"
+   ]
+  },
+  {
+   "file": "icons/icon-48.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [],
+   "uses": [
+    "G101-Lobi.dc.html:505"
+   ]
+  },
+  {
+   "file": "icons/lobby-d-copy.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.2,
+   "usedBy": [
+    "lobby.d.copy"
+   ],
+   "uses": [
+    "G101-Lobi.dc.html:529"
+   ]
+  },
+  {
+   "file": "icons/icon-50.svg",
+   "viewBox": "0 0 40 40",
+   "stroke": null,
+   "usedBy": [],
+   "uses": [
+    "G101-Dereceli.dc.html:29"
+   ]
+  },
+  {
+   "file": "icons/ranked-me-next.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "ranked.me.next"
+   ],
+   "uses": [
+    "G101-Dereceli.dc.html:81"
+   ]
+  },
+  {
+   "file": "icons/ranked-to-progress.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "ranked.toProgress"
+   ],
+   "uses": [
+    "G101-Dereceli.dc.html:92"
+   ]
+  },
+  {
+   "file": "icons/ranked-m-pick.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": null,
+   "usedBy": [
+    "ranked.m.pick[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Dereceli.dc.html:103"
+   ]
+  },
+  {
+   "file": "icons/ranked-table-sub.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "ranked.table.sub"
+   ],
+   "uses": [
+    "G101-Dereceli.dc.html:122"
+   ]
+  },
+  {
+   "file": "icons/ranked-range-short.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "ranked.range.short[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Dereceli.dc.html:167"
+   ]
+  },
+  {
+   "file": "icons/ranked-close-invite.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "ranked.closeInvite"
+   ],
+   "uses": [
+    "G101-Dereceli.dc.html:251"
+   ]
+  },
+  {
+   "file": "icons/table-open-chat.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2,
+   "usedBy": [
+    "table.openChat"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:206"
+   ]
+  },
+  {
+   "file": "icons/table-open-gift-any.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2,
+   "usedBy": [
+    "table.openGiftAny",
+    "table.closeGift"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:210",
+    "G101-Masa.dc.html:368"
+   ]
+  },
+  {
+   "file": "icons/table-do-undo.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "table.doUndo"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:239"
+   ]
+  },
+  {
+   "file": "icons/table-do-return.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "table.doReturn"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:242"
+   ]
+  },
+  {
+   "file": "icons/table-do-bomb.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": null,
+   "usedBy": [
+    "table.doBomb"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:245"
+   ]
+  },
+  {
+   "file": "icons/table-t-indicator.svg",
+   "viewBox": "0 0 18 40",
+   "stroke": 2.4,
+   "usedBy": [
+    "table.t.indicator#2"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:298"
+   ]
+  },
+  {
+   "file": "icons/table-dh-roll.svg",
+   "viewBox": "0 0 26 26",
+   "stroke": null,
+   "usedBy": [
+    "table.dh.roll"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:308"
+   ]
+  },
+  {
+   "file": "icons/table-close-chat.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2,
+   "usedBy": [
+    "table.closeChat"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:425"
+   ]
+  },
+  {
+   "file": "icons/table-send-draft.svg",
+   "viewBox": "0 0 24 24",
+   "stroke": 2.4,
+   "usedBy": [
+    "table.sendDraft"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:459"
+   ]
+  },
+  {
+   "file": "icons/table-v-pick.svg",
+   "viewBox": "0 0 96 62",
+   "stroke": 1.5,
+   "usedBy": [
+    "table.v.pick[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:594"
+   ]
+  },
+  {
+   "file": "icons/icon-67.svg",
+   "viewBox": "0 0 96 62",
+   "stroke": 1.5,
+   "usedBy": [],
+   "uses": [
+    "G101-Masa.dc.html:600"
+   ]
+  },
+  {
+   "file": "icons/table-t-in-use.svg",
+   "viewBox": "0 0 60 100",
+   "stroke": 15,
+   "usedBy": [
+    "table.t.inUse[{{ $index }}]"
+   ],
+   "uses": [
+    "G101-Masa.dc.html:651",
+    "G101-Masa.dc.html:652"
+   ]
+  },
+  {
+   "file": "icons/icon-69.svg",
+   "viewBox": "0 0 76 62",
+   "stroke": 6,
+   "usedBy": [],
+   "uses": [
+    "G101-Masa.dc.html:678"
+   ]
+  }
+ ]
+}

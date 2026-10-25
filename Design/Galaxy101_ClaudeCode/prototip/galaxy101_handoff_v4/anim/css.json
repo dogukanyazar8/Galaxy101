@@ -1,0 +1,4616 @@
+{
+ "version": "0.4.0",
+ "unit": "ms; konumlar 1280×720 tasarım pikseli; yüzde = anahtar kare konumu",
+ "note": "Tüm CSS @keyframes ve kullanım yerleri, oyun sayfası ve içe aktardığı DC dosyalarından otomatik çıkarıldı. element = aynı etiketteki data-g101-id; null ise near en yakın önceki kimlik.",
+ "dynamic": {
+  "spAnim": "s.spOut ? 'splashOut .75s cubic-bezier(.7,0,.3,1) both' : 'fadeIn .5s both'",
+  "tilesAnim": "s.spOut ? 'tilesOut .75s cubic-bezier(.7,0,.3,1) both' : 'none'",
+  "menuAnim": "s.fromSplash ? 'menuIn 1.2s cubic-bezier(.16,1,.3,1) both' : 'fadeIn .35s both'"
+ },
+ "keyframes": {
+  "fadeIn": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+    "G101-Menu.dc.html",
+    "G101-Masa.dc.html"
+   ],
+   "uses": 15
+  },
+  "panelIn": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translateX(30px)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html"
+   ],
+   "uses": 2
+  },
+  "modalIn": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translateY(14px) scale(.96)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+    "G101-Menu.dc.html",
+    "G101-Masa.dc.html"
+   ],
+   "uses": 15
+  },
+  "dealIn": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translateY(-220px) rotate(-25deg) scale(.6)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html"
+   ],
+   "uses": 0
+  },
+  "floatA": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "transform": "translateY(0) rotate(var(--r,0deg))"
+     }
+    },
+    {
+     "at": [
+      50
+     ],
+     "props": {
+      "transform": "translateY(-12px) rotate(var(--r,0deg))"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+    "G101-Menu.dc.html",
+    "G101-Masa.dc.html"
+   ],
+   "uses": 2
+  },
+  "popScale": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "scale(.4)"
+     }
+    },
+    {
+     "at": [
+      70
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "scale(1.08)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "scale(1)"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html"
+   ],
+   "uses": 0
+  },
+  "pulseG": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "box-shadow": "0 6px 0 var(--aS),0 0 0 0 var(--gl)"
+     }
+    },
+    {
+     "at": [
+      50
+     ],
+     "props": {
+      "box-shadow": "0 6px 0 var(--aS),0 0 0 14px transparent"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+    "G101-Menu.dc.html",
+    "G101-Masa.dc.html"
+   ],
+   "uses": 3
+  },
+  "shine": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "transform": "translateX(-160%) skewX(-20deg)"
+     }
+    },
+    {
+     "at": [
+      60,
+      100
+     ],
+     "props": {
+      "transform": "translateX(520%) skewX(-20deg)"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+    "G101-Menu.dc.html",
+    "G101-Masa.dc.html"
+   ],
+   "uses": 3
+  },
+  "spin": {
+   "frames": [
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "transform": "rotate(360deg)"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+    "G101-Masa.dc.html"
+   ],
+   "uses": 5
+  },
+  "shake": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "transform": "translateX(0)"
+     }
+    },
+    {
+     "at": [
+      20,
+      60
+     ],
+     "props": {
+      "transform": "translateX(-7px)"
+     }
+    },
+    {
+     "at": [
+      40,
+      80
+     ],
+     "props": {
+      "transform": "translateX(7px)"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html"
+   ],
+   "uses": 1
+  },
+  "toastIn": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translate(-50%,-14px)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "translate(-50%,0)"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+    "G101-Masa.dc.html"
+   ],
+   "uses": 3
+  },
+  "g101Float": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "translate": "0 0"
+     }
+    },
+    {
+     "at": [
+      50
+     ],
+     "props": {
+      "translate": "0 -7px"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+    "G101-Menu.dc.html"
+   ],
+   "uses": 9
+  },
+  "g101Glint": {
+   "frames": [
+    {
+     "at": [
+      0,
+      62
+     ],
+     "props": {
+      "transform": "translateX(-200%) skewX(-18deg)",
+      "opacity": "0"
+     }
+    },
+    {
+     "at": [
+      66
+     ],
+     "props": {
+      "opacity": "1"
+     }
+    },
+    {
+     "at": [
+      86,
+      100
+     ],
+     "props": {
+      "transform": "translateX(330%) skewX(-18deg)",
+      "opacity": "0"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+    "G101-Menu.dc.html"
+   ],
+   "uses": 3
+  },
+  "g101TileIn": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translateY(46px) rotateX(-70deg) scale(.82)"
+     }
+    },
+    {
+     "at": [
+      55
+     ],
+     "props": {
+      "opacity": "1"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+    "G101-Menu.dc.html"
+   ],
+   "uses": 6
+  },
+  "tileIn": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translateY(80px) rotateX(-80deg) scale(.78)"
+     }
+    },
+    {
+     "at": [
+      45
+     ],
+     "props": {
+      "opacity": "1"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html"
+   ],
+   "uses": 3
+  },
+  "tileFloat": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "transform": "translateY(0) rotate(var(--r,0deg))"
+     }
+    },
+    {
+     "at": [
+      50
+     ],
+     "props": {
+      "transform": "translateY(-6px) rotate(calc(var(--r,0deg) * .6))"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html"
+   ],
+   "uses": 0
+  },
+  "tileShine": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "transform": "translateX(-180%) skewX(-18deg)"
+     }
+    },
+    {
+     "at": [
+      35,
+      100
+     ],
+     "props": {
+      "transform": "translateX(320%) skewX(-18deg)"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html"
+   ],
+   "uses": 0
+  },
+  "logoIn": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translateY(14px) scale(.94)",
+      "letter-spacing": "22px"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none",
+      "letter-spacing": "8px"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html"
+   ],
+   "uses": 1
+  },
+  "splashOut": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none",
+      "filter": "blur(0)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "scale(.96)",
+      "filter": "blur(10px)"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html"
+   ],
+   "uses": 1
+  },
+  "tilesOut": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "transform": "none"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "transform": "translateY(-36px) scale(1.14)"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html"
+   ],
+   "uses": 1
+  },
+  "menuIn": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "scale(1.05)",
+      "filter": "blur(12px)"
+     }
+    },
+    {
+     "at": [
+      60
+     ],
+     "props": {
+      "filter": "blur(0)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none",
+      "filter": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html"
+   ],
+   "uses": 1
+  },
+  "planetFloat": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "transform": "translate(-50%,-50%) rotate(-16deg)"
+     }
+    },
+    {
+     "at": [
+      50
+     ],
+     "props": {
+      "transform": "translate(-50%,-52%) rotate(-14deg)"
+     }
+    }
+   ],
+   "definedIn": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+    "G101-Menu.dc.html"
+   ],
+   "uses": 2
+  },
+  "twinkle": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "opacity": ".15"
+     }
+    },
+    {
+     "at": [
+      50
+     ],
+     "props": {
+      "opacity": ".9"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Menu.dc.html"
+   ],
+   "uses": 0
+  },
+  "spinS": {
+   "frames": [
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "transform": "rotate(360deg)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Menu.dc.html"
+   ],
+   "uses": 0
+  },
+  "bob": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "transform": "translateY(0)"
+     }
+    },
+    {
+     "at": [
+      50
+     ],
+     "props": {
+      "transform": "translateY(-4px)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Menu.dc.html"
+   ],
+   "uses": 1
+  },
+  "tableSpin": {
+   "frames": [
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "transform": "rotateX(62deg) rotateZ(360deg)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Menu.dc.html"
+   ],
+   "uses": 0
+  },
+  "planetSpin": {
+   "frames": [
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "transform": "translateX(-50%)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Menu.dc.html"
+   ],
+   "uses": 0
+  },
+  "iconShine": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "transform": "translateX(-14px) skewX(-20deg)",
+      "opacity": "0"
+     }
+    },
+    {
+     "at": [
+      8
+     ],
+     "props": {
+      "opacity": "1"
+     }
+    },
+    {
+     "at": [
+      30
+     ],
+     "props": {
+      "transform": "translateX(34px) skewX(-20deg)",
+      "opacity": "1"
+     }
+    },
+    {
+     "at": [
+      31,
+      100
+     ],
+     "props": {
+      "transform": "translateX(34px) skewX(-20deg)",
+      "opacity": "0"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Menu.dc.html",
+    "G101-Masa.dc.html"
+   ],
+   "uses": 3
+  },
+  "lbFade": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Lobi.dc.html"
+   ],
+   "uses": 6
+  },
+  "lbCard": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translateY(14px)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Lobi.dc.html"
+   ],
+   "uses": 1
+  },
+  "lbModal": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translateY(16px) scale(.96)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Lobi.dc.html"
+   ],
+   "uses": 7
+  },
+  "lbSpin": {
+   "frames": [
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "transform": "rotate(360deg)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Lobi.dc.html"
+   ],
+   "uses": 3
+  },
+  "lbShake": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "transform": "translateX(0)"
+     }
+    },
+    {
+     "at": [
+      20,
+      60
+     ],
+     "props": {
+      "transform": "translateX(-8px)"
+     }
+    },
+    {
+     "at": [
+      40,
+      80
+     ],
+     "props": {
+      "transform": "translateX(8px)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Lobi.dc.html"
+   ],
+   "uses": 1
+  },
+  "lbPop": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "scale(.5)"
+     }
+    },
+    {
+     "at": [
+      70
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "scale(1.08)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "scale(1)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Lobi.dc.html"
+   ],
+   "uses": 1
+  },
+  "lbPulse": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "box-shadow": "0 5px 0 var(--aS),0 0 0 0 var(--gl)"
+     }
+    },
+    {
+     "at": [
+      50
+     ],
+     "props": {
+      "box-shadow": "0 5px 0 var(--aS),0 0 0 12px transparent"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Lobi.dc.html"
+   ],
+   "uses": 1
+  },
+  "lbToast": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translate(-50%,-12px)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "translate(-50%,0)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Lobi.dc.html"
+   ],
+   "uses": 1
+  },
+  "lbDots": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "opacity": ".25"
+     }
+    },
+    {
+     "at": [
+      50
+     ],
+     "props": {
+      "opacity": "1"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Lobi.dc.html"
+   ],
+   "uses": 3
+  },
+  "rkFade": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Dereceli.dc.html"
+   ],
+   "uses": 5
+  },
+  "rkCard": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translateY(14px)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Dereceli.dc.html"
+   ],
+   "uses": 0
+  },
+  "rkModal": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translateY(16px) scale(.96)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Dereceli.dc.html"
+   ],
+   "uses": 3
+  },
+  "rkSpin": {
+   "frames": [
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "transform": "rotate(360deg)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Dereceli.dc.html"
+   ],
+   "uses": 4
+  },
+  "rkSeat": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "scale(.6)"
+     }
+    },
+    {
+     "at": [
+      70
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "scale(1.08)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Dereceli.dc.html"
+   ],
+   "uses": 2
+  },
+  "rkPulse": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "box-shadow": "0 6px 0 var(--aS),0 0 0 0 var(--gl)"
+     }
+    },
+    {
+     "at": [
+      50
+     ],
+     "props": {
+      "box-shadow": "0 6px 0 var(--aS),0 0 0 14px transparent"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Dereceli.dc.html"
+   ],
+   "uses": 1
+  },
+  "rkRays": {
+   "frames": [
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "transform": "rotate(360deg)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Dereceli.dc.html"
+   ],
+   "uses": 1
+  },
+  "rkPop": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "scale(.4) rotate(-12deg)"
+     }
+    },
+    {
+     "at": [
+      60
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "scale(1.08) rotate(2deg)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Dereceli.dc.html"
+   ],
+   "uses": 1
+  },
+  "rkUp": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translateY(16px)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Dereceli.dc.html"
+   ],
+   "uses": 4
+  },
+  "rkFloat": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "transform": "translateY(0)"
+     }
+    },
+    {
+     "at": [
+      50
+     ],
+     "props": {
+      "transform": "translateY(-6px)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Dereceli.dc.html"
+   ],
+   "uses": 2
+  },
+  "rkToast": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translate(-50%,-12px)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "translate(-50%,0)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Dereceli.dc.html"
+   ],
+   "uses": 1
+  },
+  "rkDots": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "opacity": ".25"
+     }
+    },
+    {
+     "at": [
+      50
+     ],
+     "props": {
+      "opacity": "1"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Dereceli.dc.html"
+   ],
+   "uses": 0
+  },
+  "ring": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "--p": "100"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "--p": "0"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 2
+  },
+  "drawerIn": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translateX(44px)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 3
+  },
+  "drawerInL": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translateX(-44px)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 1
+  },
+  "popIn": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "scale(.3)"
+     }
+    },
+    {
+     "at": [
+      70
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "scale(1.1)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "scale(1)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 2
+  },
+  "bubble": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translateY(8px) scale(.7)"
+     }
+    },
+    {
+     "at": [
+      12
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    },
+    {
+     "at": [
+      85
+     ],
+     "props": {
+      "opacity": "1"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translateY(-10px)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 2
+  },
+  "dhIn": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translateY(-14px) scale(.96)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 2
+  },
+  "dhSub": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "translateY(5px)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 1
+  },
+  "dhTile": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "rotateY(90deg) scale(.7)"
+     }
+    },
+    {
+     "at": [
+      60
+     ],
+     "props": {
+      "transform": "rotateY(-8deg) scale(1.06)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 2
+  },
+  "rollBob": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "transform": "translateY(0)"
+     }
+    },
+    {
+     "at": [
+      50
+     ],
+     "props": {
+      "transform": "translateY(-4px)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 1
+  },
+  "rollIcon": {
+   "frames": [
+    {
+     "at": [
+      0,
+      70,
+      100
+     ],
+     "props": {
+      "transform": "rotate(0)"
+     }
+    },
+    {
+     "at": [
+      80
+     ],
+     "props": {
+      "transform": "rotate(-16deg)"
+     }
+    },
+    {
+     "at": [
+      90
+     ],
+     "props": {
+      "transform": "rotate(12deg)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 1
+  },
+  "nukeFlash": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0"
+     }
+    },
+    {
+     "at": [
+      5
+     ],
+     "props": {
+      "opacity": "1"
+     }
+    },
+    {
+     "at": [
+      22
+     ],
+     "props": {
+      "opacity": ".85"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "0"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 1
+  },
+  "bombPulse": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "box-shadow": "0 5px 0 #8E1F12,0 0 0 0 rgba(255,106,46,.7)"
+     }
+    },
+    {
+     "at": [
+      50
+     ],
+     "props": {
+      "box-shadow": "0 5px 0 #8E1F12,0 0 0 12px rgba(255,106,46,0)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 1
+  },
+  "bombWiggle": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "transform": "rotate(0)"
+     }
+    },
+    {
+     "at": [
+      10
+     ],
+     "props": {
+      "transform": "rotate(-12deg)"
+     }
+    },
+    {
+     "at": [
+      20
+     ],
+     "props": {
+      "transform": "rotate(10deg)"
+     }
+    },
+    {
+     "at": [
+      30
+     ],
+     "props": {
+      "transform": "rotate(-6deg)"
+     }
+    },
+    {
+     "at": [
+      40
+     ],
+     "props": {
+      "transform": "rotate(0)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 1
+  },
+  "barFill": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "width": "0"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "width": "100%"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 2
+  },
+  "wifi": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "opacity": ".2"
+     }
+    },
+    {
+     "at": [
+      50
+     ],
+     "props": {
+      "opacity": "1"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 3
+  },
+  "rise": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "transform": "scaleY(0)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "transform": "none"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 0
+  },
+  "countPop": {
+   "frames": [
+    {
+     "at": [
+      0
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "scale(2.4)"
+     }
+    },
+    {
+     "at": [
+      25
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "scale(1)"
+     }
+    },
+    {
+     "at": [
+      80
+     ],
+     "props": {
+      "opacity": "1",
+      "transform": "scale(1)"
+     }
+    },
+    {
+     "at": [
+      100
+     ],
+     "props": {
+      "opacity": "0",
+      "transform": "scale(.7)"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 1
+  },
+  "dots": {
+   "frames": [
+    {
+     "at": [
+      0,
+      100
+     ],
+     "props": {
+      "opacity": ".25"
+     }
+    },
+    {
+     "at": [
+      50
+     ],
+     "props": {
+      "opacity": "1"
+     }
+    }
+   ],
+   "definedIn": [
+    "G101-Masa.dc.html"
+   ],
+   "uses": 1
+  }
+ },
+ "uses": [
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": null,
+   "near": "app.stage",
+   "line": 55,
+   "raw": "planetFloat 14s ease-in-out infinite",
+   "parts": [
+    {
+     "name": "planetFloat",
+     "durationMs": 14000,
+     "delayMs": 0,
+     "easing": "ease-in-out",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": "app.splash",
+   "line": 64,
+   "raw": "{{ spAnim }}",
+   "parts": [
+    {
+     "dynamic": "{{ spAnim }}"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": "app.splash.logo",
+   "line": 66,
+   "raw": "logoIn 1.1s .85s cubic-bezier(.16,1,.3,1) both",
+   "parts": [
+    {
+     "name": "logoIn",
+     "durationMs": 1100,
+     "delayMs": 850,
+     "easing": "cubic-bezier(.16,1,.3,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": "app.splash.tiles",
+   "line": 67,
+   "raw": "{{ tilesAnim }}",
+   "parts": [
+    {
+     "dynamic": "{{ tilesAnim }}"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": "app.splash.tile[0]",
+   "line": 68,
+   "raw": "tileIn 1.15s .1s cubic-bezier(.16,1,.3,1) both",
+   "parts": [
+    {
+     "name": "tileIn",
+     "durationMs": 1150,
+     "delayMs": 100,
+     "easing": "cubic-bezier(.16,1,.3,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": null,
+   "near": "app.splash.tile[0]",
+   "line": 68,
+   "raw": "g101Float 6s 0s cubic-bezier(.45,0,.55,1) infinite",
+   "parts": [
+    {
+     "name": "g101Float",
+     "durationMs": 6000,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.45,0,.55,1)",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": null,
+   "near": "app.splash.tile[0]",
+   "line": 68,
+   "raw": "g101Glint 7s 2.18s ease-in-out infinite",
+   "parts": [
+    {
+     "name": "g101Glint",
+     "durationMs": 7000,
+     "delayMs": 2180,
+     "easing": "ease-in-out",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": "app.splash.tile[1]",
+   "line": 69,
+   "raw": "tileIn 1.15s .3s cubic-bezier(.16,1,.3,1) both",
+   "parts": [
+    {
+     "name": "tileIn",
+     "durationMs": 1150,
+     "delayMs": 300,
+     "easing": "cubic-bezier(.16,1,.3,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": null,
+   "near": "app.splash.tile[1]",
+   "line": 69,
+   "raw": "g101Float 6s -2s cubic-bezier(.45,0,.55,1) infinite",
+   "parts": [
+    {
+     "name": "g101Float",
+     "durationMs": 6000,
+     "delayMs": -2000,
+     "easing": "cubic-bezier(.45,0,.55,1)",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": null,
+   "near": "app.splash.tile[1]",
+   "line": 69,
+   "raw": "g101Glint 7s 2.36s ease-in-out infinite",
+   "parts": [
+    {
+     "name": "g101Glint",
+     "durationMs": 7000,
+     "delayMs": 2360,
+     "easing": "ease-in-out",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": "app.splash.tile[2]",
+   "line": 70,
+   "raw": "tileIn 1.15s .5s cubic-bezier(.16,1,.3,1) both",
+   "parts": [
+    {
+     "name": "tileIn",
+     "durationMs": 1150,
+     "delayMs": 500,
+     "easing": "cubic-bezier(.16,1,.3,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": null,
+   "near": "app.splash.tile[2]",
+   "line": 70,
+   "raw": "g101Float 6s -4s cubic-bezier(.45,0,.55,1) infinite",
+   "parts": [
+    {
+     "name": "g101Float",
+     "durationMs": 6000,
+     "delayMs": -4000,
+     "easing": "cubic-bezier(.45,0,.55,1)",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": null,
+   "near": "app.splash.tile[2]",
+   "line": 70,
+   "raw": "g101Glint 7s 2.54s ease-in-out infinite",
+   "parts": [
+    {
+     "name": "g101Glint",
+     "durationMs": 7000,
+     "delayMs": 2540,
+     "easing": "ease-in-out",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": "app.splash.progress",
+   "line": 73,
+   "raw": "fadeIn .5s 1.1s both",
+   "parts": [
+    {
+     "name": "fadeIn",
+     "durationMs": 500,
+     "delayMs": 1100,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": "app.splash.tipBox",
+   "line": 77,
+   "raw": "fadeIn .5s 1.4s both",
+   "parts": [
+    {
+     "name": "fadeIn",
+     "durationMs": 500,
+     "delayMs": 1400,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": "auth.side",
+   "line": 90,
+   "raw": "fadeIn .6s both",
+   "parts": [
+    {
+     "name": "fadeIn",
+     "durationMs": 600,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": null,
+   "near": "auth.side.logo",
+   "line": 94,
+   "raw": "g101TileIn 1.1s 0.12s cubic-bezier(.16,1,.3,1) both,g101Float 6s 0s cubic-bezier(.45,0,.55,1) infinite",
+   "parts": [
+    {
+     "name": "g101TileIn",
+     "durationMs": 1100,
+     "delayMs": 120,
+     "easing": "cubic-bezier(.16,1,.3,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    },
+    {
+     "name": "g101Float",
+     "durationMs": 6000,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.45,0,.55,1)",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": null,
+   "near": "auth.side.logo",
+   "line": 95,
+   "raw": "g101TileIn 1.1s 0.26s cubic-bezier(.16,1,.3,1) both,g101Float 6s -2s cubic-bezier(.45,0,.55,1) infinite",
+   "parts": [
+    {
+     "name": "g101TileIn",
+     "durationMs": 1100,
+     "delayMs": 260,
+     "easing": "cubic-bezier(.16,1,.3,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    },
+    {
+     "name": "g101Float",
+     "durationMs": 6000,
+     "delayMs": -2000,
+     "easing": "cubic-bezier(.45,0,.55,1)",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": null,
+   "line": 96,
+   "raw": "g101TileIn 1.1s 0.4s cubic-bezier(.16,1,.3,1) both,g101Float 6s -4s cubic-bezier(.45,0,.55,1) infinite",
+   "parts": [
+    {
+     "name": "g101TileIn",
+     "durationMs": 1100,
+     "delayMs": 400,
+     "easing": "cubic-bezier(.16,1,.3,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    },
+    {
+     "name": "g101Float",
+     "durationMs": 6000,
+     "delayMs": -4000,
+     "easing": "cubic-bezier(.45,0,.55,1)",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": "auth.panel",
+   "line": 104,
+   "raw": "panelIn .45s cubic-bezier(.2,1,.4,1) both",
+   "parts": [
+    {
+     "name": "panelIn",
+     "durationMs": 450,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": "auth.guest",
+   "line": 117,
+   "raw": "pulseG 2.2s infinite",
+   "parts": [
+    {
+     "name": "pulseG",
+     "durationMs": 2200,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": null,
+   "near": "auth.guest",
+   "line": 118,
+   "raw": "shine 3s infinite",
+   "parts": [
+    {
+     "name": "shine",
+     "durationMs": 3000,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": null,
+   "near": "auth.google",
+   "line": 133,
+   "raw": "spin .8s linear infinite",
+   "parts": [
+    {
+     "name": "spin",
+     "durationMs": 800,
+     "delayMs": 0,
+     "easing": "linear",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": "form.panel",
+   "line": 143,
+   "raw": "panelIn .4s cubic-bezier(.2,1,.4,1) both",
+   "parts": [
+    {
+     "name": "panelIn",
+     "durationMs": 400,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": "form.error",
+   "line": 215,
+   "raw": "shake .4s both",
+   "parts": [
+    {
+     "name": "shake",
+     "durationMs": 400,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": null,
+   "near": "form.errorText",
+   "line": 221,
+   "raw": "fadeIn .3s both",
+   "parts": [
+    {
+     "name": "fadeIn",
+     "durationMs": 300,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": null,
+   "near": "form.submit",
+   "line": 229,
+   "raw": "spin .8s linear infinite",
+   "parts": [
+    {
+     "name": "spin",
+     "durationMs": 800,
+     "delayMs": 0,
+     "easing": "linear",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": null,
+   "near": "form.altLink",
+   "line": 253,
+   "raw": "{{ menuAnim }}",
+   "parts": [
+    {
+     "dynamic": "{{ menuAnim }}"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": null,
+   "near": "load.tip",
+   "line": 293,
+   "raw": "fadeIn .25s both",
+   "parts": [
+    {
+     "name": "fadeIn",
+     "durationMs": 250,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": "load.fail",
+   "line": 295,
+   "raw": "modalIn .3s both",
+   "parts": [
+    {
+     "name": "modalIn",
+     "durationMs": 300,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": "app.toast",
+   "line": 311,
+   "raw": "toastIn .35s both",
+   "parts": [
+    {
+     "name": "toastIn",
+     "durationMs": 350,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - Gerçek Ana Oyun.dc.html",
+   "element": "app.quit",
+   "line": 318,
+   "raw": "fadeIn .6s ease-out both",
+   "parts": [
+    {
+     "name": "fadeIn",
+     "durationMs": 600,
+     "delayMs": 0,
+     "easing": "ease-out",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "near": "menu.starsA",
+   "line": 47,
+   "raw": "planetFloat 14s ease-in-out infinite",
+   "parts": [
+    {
+     "name": "planetFloat",
+     "durationMs": 14000,
+     "delayMs": 0,
+     "easing": "ease-in-out",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "near": "menu.t.rank",
+   "line": 74,
+   "raw": "iconShine 3.2s ease-in-out infinite",
+   "parts": [
+    {
+     "name": "iconShine",
+     "durationMs": 3200,
+     "delayMs": 0,
+     "easing": "ease-in-out",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "near": "menu.buyChips",
+   "line": 79,
+   "raw": "iconShine 3.2s 1.6s ease-in-out infinite",
+   "parts": [
+    {
+     "name": "iconShine",
+     "durationMs": 3200,
+     "delayMs": 1600,
+     "easing": "ease-in-out",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "line": 91,
+   "raw": "g101TileIn 1.1s 0.15s cubic-bezier(.16,1,.3,1) both,g101Float 6s 0s cubic-bezier(.45,0,.55,1) infinite",
+   "parts": [
+    {
+     "name": "g101TileIn",
+     "durationMs": 1100,
+     "delayMs": 150,
+     "easing": "cubic-bezier(.16,1,.3,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    },
+    {
+     "name": "g101Float",
+     "durationMs": 6000,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.45,0,.55,1)",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "line": 92,
+   "raw": "g101TileIn 1.1s 0.29000000000000004s cubic-bezier(.16,1,.3,1) both,g101Float 6s -2s cubic-bezier(.45,0,.55,1) infinite",
+   "parts": [
+    {
+     "name": "g101TileIn",
+     "durationMs": 1100,
+     "delayMs": 290,
+     "easing": "cubic-bezier(.16,1,.3,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    },
+    {
+     "name": "g101Float",
+     "durationMs": 6000,
+     "delayMs": -2000,
+     "easing": "cubic-bezier(.45,0,.55,1)",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "line": 93,
+   "raw": "g101TileIn 1.1s 0.43000000000000005s cubic-bezier(.16,1,.3,1) both,g101Float 6s -4s cubic-bezier(.45,0,.55,1) infinite",
+   "parts": [
+    {
+     "name": "g101TileIn",
+     "durationMs": 1100,
+     "delayMs": 430,
+     "easing": "cubic-bezier(.16,1,.3,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    },
+    {
+     "name": "g101Float",
+     "durationMs": 6000,
+     "delayMs": -4000,
+     "easing": "cubic-bezier(.45,0,.55,1)",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": "menu.play",
+   "line": 98,
+   "raw": "pulseG 2.2s infinite",
+   "parts": [
+    {
+     "name": "pulseG",
+     "durationMs": 2200,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "near": "menu.play",
+   "line": 99,
+   "raw": "shine 2.8s infinite",
+   "parts": [
+    {
+     "name": "shine",
+     "durationMs": 2800,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": "menu.openDaily",
+   "line": 144,
+   "raw": "bob 1.6s infinite",
+   "parts": [
+    {
+     "name": "bob",
+     "durationMs": 1600,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "near": "menu.planetDesc",
+   "line": 182,
+   "raw": "fadeIn .2s ease-out both",
+   "parts": [
+    {
+     "name": "fadeIn",
+     "durationMs": 200,
+     "delayMs": 0,
+     "easing": "ease-out",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "near": "menu.closeSettings",
+   "line": 184,
+   "raw": "modalIn .28s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "modalIn",
+     "durationMs": 280,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "near": "menu.sec.cur[{{ $index }}]",
+   "line": 290,
+   "raw": "fadeIn .2s both",
+   "parts": [
+    {
+     "name": "fadeIn",
+     "durationMs": 200,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "near": "menu.closeSettings#4",
+   "line": 397,
+   "raw": "fadeIn .2s ease-out both",
+   "parts": [
+    {
+     "name": "fadeIn",
+     "durationMs": 200,
+     "delayMs": 0,
+     "easing": "ease-out",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "near": "menu.closePanel",
+   "line": 399,
+   "raw": "modalIn .28s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "modalIn",
+     "durationMs": 280,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "near": "menu.h.when[{{ $index }}]",
+   "line": 540,
+   "raw": "shine 3.6s infinite",
+   "parts": [
+    {
+     "name": "shine",
+     "durationMs": 3600,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "near": "menu.lb.me.pts",
+   "line": 672,
+   "raw": "{{ d.anim }}",
+   "parts": [
+    {
+     "dynamic": "{{ d.anim }}"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "near": "menu.rl.caption",
+   "line": 766,
+   "raw": "fadeIn .18s ease-out both",
+   "parts": [
+    {
+     "name": "fadeIn",
+     "durationMs": 180,
+     "delayMs": 0,
+     "easing": "ease-out",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "near": "menu.closeDlg",
+   "line": 770,
+   "raw": "modalIn .26s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "modalIn",
+     "durationMs": 260,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "near": "menu.pf.save",
+   "line": 835,
+   "raw": "modalIn .26s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "modalIn",
+     "durationMs": 260,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "near": "menu.cf.go",
+   "line": 864,
+   "raw": "modalIn .26s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "modalIn",
+     "durationMs": 260,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "near": "menu.af.copy#3",
+   "line": 901,
+   "raw": "modalIn .26s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "modalIn",
+     "durationMs": 260,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "near": "menu.sh.inviteSub",
+   "line": 957,
+   "raw": "modalIn .2s ease-out both",
+   "parts": [
+    {
+     "name": "modalIn",
+     "durationMs": 200,
+     "delayMs": 0,
+     "easing": "ease-out",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Menu.dc.html",
+   "element": null,
+   "line": 964,
+   "raw": "modalIn .26s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "modalIn",
+     "durationMs": 260,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": "lobby.openCreate",
+   "line": 47,
+   "raw": "lbPulse 2.4s infinite",
+   "parts": [
+    {
+     "name": "lbPulse",
+     "durationMs": 2400,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.clearQ",
+   "line": 80,
+   "raw": "lbCard .5s {{ t.delay }} cubic-bezier(.22,1,.36,1) backwards",
+   "parts": [
+    {
+     "dynamic": "lbCard .5s {{ t.delay }} cubic-bezier(.22,1,.36,1) backwards"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.g.label[{{ $index }}]",
+   "line": 116,
+   "raw": "lbFade .3s both",
+   "parts": [
+    {
+     "name": "lbFade",
+     "durationMs": 300,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.openCreate#2",
+   "line": 130,
+   "raw": "lbFade .3s both",
+   "parts": [
+    {
+     "name": "lbFade",
+     "durationMs": 300,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.w.status",
+   "line": 168,
+   "raw": "lbPop .4s both",
+   "parts": [
+    {
+     "name": "lbPop",
+     "durationMs": 400,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.z.team[{{ $index }}]",
+   "line": 178,
+   "raw": "lbDots 1.2s infinite",
+   "parts": [
+    {
+     "name": "lbDots",
+     "durationMs": 1200,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.z.team[{{ $index }}]",
+   "line": 178,
+   "raw": "lbDots 1.2s .2s infinite",
+   "parts": [
+    {
+     "name": "lbDots",
+     "durationMs": 1200,
+     "delayMs": 200,
+     "easing": "ease",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.z.team[{{ $index }}]",
+   "line": 178,
+   "raw": "lbDots 1.2s .4s infinite",
+   "parts": [
+    {
+     "name": "lbDots",
+     "durationMs": 1200,
+     "delayMs": 400,
+     "easing": "ease",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": "lobby.w.start",
+   "line": 220,
+   "raw": "{{ w.stAnim }}",
+   "parts": [
+    {
+     "dynamic": "{{ w.stAnim }}"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.w.start",
+   "line": 221,
+   "raw": "lbSpin .8s linear infinite",
+   "parts": [
+    {
+     "name": "lbSpin",
+     "durationMs": 800,
+     "delayMs": 0,
+     "easing": "linear",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.w.start",
+   "line": 227,
+   "raw": "lbFade .2s both",
+   "parts": [
+    {
+     "name": "lbFade",
+     "durationMs": 200,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.iv.close",
+   "line": 229,
+   "raw": "lbModal .32s cubic-bezier(.22,1,.36,1) both",
+   "parts": [
+    {
+     "name": "lbModal",
+     "durationMs": 320,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.22,1,.36,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.r.go[{{ $index }}]",
+   "line": 256,
+   "raw": "lbSpin .8s linear infinite",
+   "parts": [
+    {
+     "name": "lbSpin",
+     "durationMs": 800,
+     "delayMs": 0,
+     "easing": "linear",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.text.invNote",
+   "line": 298,
+   "raw": "lbFade .2s both",
+   "parts": [
+    {
+     "name": "lbFade",
+     "durationMs": 200,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.closeCreate",
+   "line": 300,
+   "raw": "lbModal .3s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "lbModal",
+     "durationMs": 300,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.b.label[{{ $index }}]",
+   "line": 363,
+   "raw": "lbShake .4s both",
+   "parts": [
+    {
+     "name": "lbShake",
+     "durationMs": 400,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.cf.rulesSum",
+   "line": 405,
+   "raw": "lbFade .2s both",
+   "parts": [
+    {
+     "name": "lbFade",
+     "durationMs": 200,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.closeCreate#3",
+   "line": 462,
+   "raw": "lbFade .18s both",
+   "parts": [
+    {
+     "name": "lbFade",
+     "durationMs": 180,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.closeDlg",
+   "line": 466,
+   "raw": "lbModal .25s both",
+   "parts": [
+    {
+     "name": "lbModal",
+     "durationMs": 250,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.closeDlg",
+   "line": 467,
+   "raw": "lbSpin .8s linear infinite",
+   "parts": [
+    {
+     "name": "lbSpin",
+     "durationMs": 800,
+     "delayMs": 0,
+     "easing": "linear",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.d.body",
+   "line": 474,
+   "raw": "lbModal .25s both",
+   "parts": [
+    {
+     "name": "lbModal",
+     "durationMs": 250,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.d.body#2",
+   "line": 478,
+   "raw": "{{ d.pinAnim }}",
+   "parts": [
+    {
+     "dynamic": "{{ d.pinAnim }}"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.d.submitPin",
+   "line": 493,
+   "raw": "lbModal .25s both",
+   "parts": [
+    {
+     "name": "lbModal",
+     "durationMs": 250,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.text.codeS",
+   "line": 498,
+   "raw": "{{ d.codeAnim }}",
+   "parts": [
+    {
+     "dynamic": "{{ d.codeAnim }}"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.d.submitCode",
+   "line": 510,
+   "raw": "lbModal .25s both",
+   "parts": [
+    {
+     "name": "lbModal",
+     "durationMs": 250,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.d.alt",
+   "line": 525,
+   "raw": "lbModal .3s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "lbModal",
+     "durationMs": 300,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Lobi.dc.html",
+   "element": null,
+   "near": "lobby.d.toRoom",
+   "line": 547,
+   "raw": "lbToast .3s both",
+   "parts": [
+    {
+     "name": "lbToast",
+     "durationMs": 300,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.v.pick[{{ $index }}]",
+   "line": 78,
+   "raw": "rkFade .25s both",
+   "parts": [
+    {
+     "name": "rkFade",
+     "durationMs": 250,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.text.seasonTag",
+   "line": 82,
+   "raw": "rkFloat 4s ease-in-out infinite",
+   "parts": [
+    {
+     "name": "rkFloat",
+     "durationMs": 4000,
+     "delayMs": 0,
+     "easing": "ease-in-out",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.z.kick[{{ $index }}]",
+   "line": 141,
+   "raw": "rkSeat .45s cubic-bezier(.2,1.3,.4,1) both",
+   "parts": [
+    {
+     "name": "rkSeat",
+     "durationMs": 450,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.3,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.z.ini[{{ $index }}]",
+   "line": 158,
+   "raw": "rkSpin .9s linear infinite",
+   "parts": [
+    {
+     "name": "rkSpin",
+     "durationMs": 900,
+     "delayMs": 0,
+     "easing": "linear",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.text.pending[{{ $index }}]",
+   "line": 165,
+   "raw": "rkSpin 1.1s linear infinite",
+   "parts": [
+    {
+     "name": "rkSpin",
+     "durationMs": 1100,
+     "delayMs": 0,
+     "easing": "linear",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": "ranked.cta.go",
+   "line": 182,
+   "raw": "{{ cta.anim }}",
+   "parts": [
+    {
+     "dynamic": "{{ cta.anim }}"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.cta.sub",
+   "line": 189,
+   "raw": "rkSpin .8s linear infinite",
+   "parts": [
+    {
+     "name": "rkSpin",
+     "durationMs": 800,
+     "delayMs": 0,
+     "easing": "linear",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.cancel",
+   "line": 204,
+   "raw": "rkFade .25s both",
+   "parts": [
+    {
+     "name": "rkFade",
+     "durationMs": 250,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.text.noHist",
+   "line": 255,
+   "raw": "rkFade .2s both",
+   "parts": [
+    {
+     "name": "rkFade",
+     "durationMs": 200,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.closeInvite",
+   "line": 257,
+   "raw": "rkModal .28s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "rkModal",
+     "durationMs": 280,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.f.go[{{ $index }}]",
+   "line": 280,
+   "raw": "rkFade .2s both",
+   "parts": [
+    {
+     "name": "rkFade",
+     "durationMs": 200,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.f.go[{{ $index }}]",
+   "line": 282,
+   "raw": "rkModal .3s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "rkModal",
+     "durationMs": 300,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.p.ini[{{ $index }}]",
+   "line": 289,
+   "raw": "rkSeat .3s both",
+   "parts": [
+    {
+     "name": "rkSeat",
+     "durationMs": 300,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.found.acceptLabel",
+   "line": 307,
+   "raw": "rkSpin .8s linear infinite",
+   "parts": [
+    {
+     "name": "rkSpin",
+     "durationMs": 800,
+     "delayMs": 0,
+     "easing": "linear",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.found.acceptLabel",
+   "line": 314,
+   "raw": "rkFade .2s both",
+   "parts": [
+    {
+     "name": "rkFade",
+     "durationMs": 200,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.found.acceptLabel",
+   "line": 317,
+   "raw": "rkModal .3s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "rkModal",
+     "durationMs": 300,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.res.again",
+   "line": 345,
+   "raw": "rkRays 24s linear infinite",
+   "parts": [
+    {
+     "name": "rkRays",
+     "durationMs": 24000,
+     "delayMs": 0,
+     "easing": "linear",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": "ranked.res.pKicker",
+   "line": 346,
+   "raw": "rkUp .4s .1s ease-out both",
+   "parts": [
+    {
+     "name": "rkUp",
+     "durationMs": 400,
+     "delayMs": 100,
+     "easing": "ease-out",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.res.pKicker",
+   "line": 347,
+   "raw": "rkPop .7s cubic-bezier(.2,1.3,.4,1) both",
+   "parts": [
+    {
+     "name": "rkPop",
+     "durationMs": 700,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.3,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.res.pKicker",
+   "line": 347,
+   "raw": "rkFloat 3s .8s ease-in-out infinite",
+   "parts": [
+    {
+     "name": "rkFloat",
+     "durationMs": 3000,
+     "delayMs": 800,
+     "easing": "ease-in-out",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": "ranked.res.pTitle",
+   "line": 348,
+   "raw": "rkUp .4s .25s ease-out both",
+   "parts": [
+    {
+     "name": "rkUp",
+     "durationMs": 400,
+     "delayMs": 250,
+     "easing": "ease-out",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": "ranked.res.pSub",
+   "line": 349,
+   "raw": "rkUp .4s .35s ease-out both",
+   "parts": [
+    {
+     "name": "rkUp",
+     "durationMs": 400,
+     "delayMs": 350,
+     "easing": "ease-out",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": "ranked.res.close#2",
+   "line": 350,
+   "raw": "rkUp .4s .45s ease-out both",
+   "parts": [
+    {
+     "name": "rkUp",
+     "durationMs": 400,
+     "delayMs": 450,
+     "easing": "ease-out",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.dc.html",
+   "element": null,
+   "near": "ranked.res.close#2",
+   "line": 357,
+   "raw": "rkToast .35s both",
+   "parts": [
+    {
+     "name": "rkToast",
+     "durationMs": 350,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": "table.p.open[{{ $index }}]",
+   "line": 70,
+   "raw": "popIn .5s both",
+   "parts": [
+    {
+     "name": "popIn",
+     "durationMs": 500,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.p.open[{{ $index }}]",
+   "line": 72,
+   "raw": "ring 4s linear forwards",
+   "parts": [
+    {
+     "name": "ring",
+     "durationMs": 4000,
+     "delayMs": 0,
+     "easing": "linear",
+     "iterations": 1,
+     "fill": "forwards",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.p.status[{{ $index }}]",
+   "line": 85,
+   "raw": "dots 1.2s infinite",
+   "parts": [
+    {
+     "name": "dots",
+     "durationMs": 1200,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": "table.p.bubble[{{ $index }}]",
+   "line": 92,
+   "raw": "bubble 2.8s forwards",
+   "parts": [
+    {
+     "name": "bubble",
+     "durationMs": 2800,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "forwards",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.p.bubble[{{ $index }}]",
+   "line": 97,
+   "raw": "modalIn .25s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "modalIn",
+     "durationMs": 250,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": "table.t.discHere",
+   "line": 141,
+   "raw": "floatA 1.4s ease-in-out infinite",
+   "parts": [
+    {
+     "name": "floatA",
+     "durationMs": 1400,
+     "delayMs": 0,
+     "easing": "ease-in-out",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.deckCount",
+   "line": 165,
+   "raw": "iconShine 3.2s ease-in-out infinite",
+   "parts": [
+    {
+     "name": "iconShine",
+     "durationMs": 3200,
+     "delayMs": 0,
+     "easing": "ease-in-out",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "line": 175,
+   "raw": "toastIn .3s both",
+   "parts": [
+    {
+     "name": "toastIn",
+     "durationMs": 300,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.leaveSpec",
+   "line": 193,
+   "raw": "ring {{ turnDur }} linear forwards",
+   "parts": [
+    {
+     "dynamic": "ring {{ turnDur }} linear forwards"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": "table.me.bubble",
+   "line": 203,
+   "raw": "bubble 2.8s forwards",
+   "parts": [
+    {
+     "name": "bubble",
+     "durationMs": 2800,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "forwards",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": "table.doBomb",
+   "line": 253,
+   "raw": "bombPulse 1.4s infinite",
+   "parts": [
+    {
+     "name": "bombPulse",
+     "durationMs": 1400,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.doBomb",
+   "line": 253,
+   "raw": "bombWiggle 1.6s ease-in-out infinite",
+   "parts": [
+    {
+     "name": "bombWiggle",
+     "durationMs": 1600,
+     "delayMs": 0,
+     "easing": "ease-in-out",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": "table.doOpen",
+   "line": 255,
+   "raw": "{{ ob.anim }}",
+   "parts": [
+    {
+     "dynamic": "{{ ob.anim }}"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.doIsle",
+   "line": 270,
+   "raw": "modalIn .4s both",
+   "parts": [
+    {
+     "name": "modalIn",
+     "durationMs": 400,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.countEl",
+   "line": 282,
+   "raw": "dhIn .55s cubic-bezier(.22,1,.36,1) both",
+   "parts": [
+    {
+     "name": "dhIn",
+     "durationMs": 550,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.22,1,.36,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": "table.dh.sub",
+   "line": 289,
+   "raw": "dhSub .4s both",
+   "parts": [
+    {
+     "name": "dhSub",
+     "durationMs": 400,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": "table.dh.ind.num",
+   "line": 305,
+   "raw": "dhTile .6s cubic-bezier(.22,1,.36,1) both",
+   "parts": [
+    {
+     "name": "dhTile",
+     "durationMs": 600,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.22,1,.36,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": "table.dh.ok.num",
+   "line": 307,
+   "raw": "dhTile .6s .25s cubic-bezier(.22,1,.36,1) both",
+   "parts": [
+    {
+     "name": "dhTile",
+     "durationMs": 600,
+     "delayMs": 250,
+     "easing": "cubic-bezier(.22,1,.36,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": "table.dh.roll",
+   "line": 315,
+   "raw": "dhIn .4s cubic-bezier(.22,1,.36,1) both,rollBob 2.2s 1s ease-in-out infinite",
+   "parts": [
+    {
+     "name": "dhIn",
+     "durationMs": 400,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.22,1,.36,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    },
+    {
+     "name": "rollBob",
+     "durationMs": 2200,
+     "delayMs": 1000,
+     "easing": "ease-in-out",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.dh.roll",
+   "line": 316,
+   "raw": "rollIcon 2.2s ease-in-out infinite",
+   "parts": [
+    {
+     "name": "rollIcon",
+     "durationMs": 2200,
+     "delayMs": 0,
+     "easing": "ease-in-out",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.dh.rollN",
+   "line": 327,
+   "raw": "popIn .55s cubic-bezier(.2,1.3,.4,1) both",
+   "parts": [
+    {
+     "name": "popIn",
+     "durationMs": 550,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.3,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.dh.rollN",
+   "line": 329,
+   "raw": "floatA 2s ease-in-out infinite",
+   "parts": [
+    {
+     "name": "floatA",
+     "durationMs": 2000,
+     "delayMs": 0,
+     "easing": "ease-in-out",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.dh.rollN",
+   "line": 330,
+   "raw": "spin 2.4s linear infinite",
+   "parts": [
+    {
+     "name": "spin",
+     "durationMs": 2400,
+     "delayMs": 0,
+     "easing": "linear",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.mo.sub",
+   "line": 344,
+   "raw": "drawerIn .35s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "drawerIn",
+     "durationMs": 350,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.thank",
+   "line": 356,
+   "raw": "toastIn .3s both",
+   "parts": [
+    {
+     "name": "toastIn",
+     "durationMs": 300,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.closeGift",
+   "line": 373,
+   "raw": "drawerIn .3s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "drawerIn",
+     "durationMs": 300,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.closeChat",
+   "line": 430,
+   "raw": "drawerInL .3s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "drawerInL",
+     "durationMs": 300,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.sendDraft",
+   "line": 475,
+   "raw": "fadeIn .3s both",
+   "parts": [
+    {
+     "name": "fadeIn",
+     "durationMs": 300,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.sendDraft",
+   "line": 477,
+   "raw": "modalIn .35s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "modalIn",
+     "durationMs": 350,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.t.colTotal",
+   "line": 493,
+   "raw": "drawerIn .35s {{ r.delay }} both",
+   "parts": [
+    {
+     "dynamic": "drawerIn .35s {{ r.delay }} both"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": "table.nextHand",
+   "line": 515,
+   "raw": "pulseG 2s infinite",
+   "parts": [
+    {
+     "name": "pulseG",
+     "durationMs": 2000,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.nextHand",
+   "line": 516,
+   "raw": "barFill 15s linear both",
+   "parts": [
+    {
+     "name": "barFill",
+     "durationMs": 15000,
+     "delayMs": 0,
+     "easing": "linear",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.nextLabel",
+   "line": 525,
+   "raw": "fadeIn .2s both",
+   "parts": [
+    {
+     "name": "fadeIn",
+     "durationMs": 200,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.stay",
+   "line": 527,
+   "raw": "modalIn .28s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "modalIn",
+     "durationMs": 280,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.leave",
+   "line": 542,
+   "raw": "fadeIn .2s both",
+   "parts": [
+    {
+     "name": "fadeIn",
+     "durationMs": 200,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.closeSettings",
+   "line": 544,
+   "raw": "modalIn .28s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "modalIn",
+     "durationMs": 280,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.closeSettings#3",
+   "line": 683,
+   "raw": "fadeIn .25s both",
+   "parts": [
+    {
+     "name": "fadeIn",
+     "durationMs": 250,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.closeSettings#3",
+   "line": 685,
+   "raw": "modalIn .28s cubic-bezier(.2,1.2,.4,1) both",
+   "parts": [
+    {
+     "name": "modalIn",
+     "durationMs": 280,
+     "delayMs": 0,
+     "easing": "cubic-bezier(.2,1.2,.4,1)",
+     "iterations": 1,
+     "fill": "both",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.closeSettings#3",
+   "line": 687,
+   "raw": "wifi 1.6s .6s infinite",
+   "parts": [
+    {
+     "name": "wifi",
+     "durationMs": 1600,
+     "delayMs": 600,
+     "easing": "ease",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.closeSettings#3",
+   "line": 688,
+   "raw": "wifi 1.6s .3s infinite",
+   "parts": [
+    {
+     "name": "wifi",
+     "durationMs": 1600,
+     "delayMs": 300,
+     "easing": "ease",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "line": 689,
+   "raw": "wifi 1.6s infinite",
+   "parts": [
+    {
+     "name": "wifi",
+     "durationMs": 1600,
+     "delayMs": 0,
+     "easing": "ease",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.netAttempt",
+   "line": 695,
+   "raw": "spin .8s linear infinite",
+   "parts": [
+    {
+     "name": "spin",
+     "durationMs": 800,
+     "delayMs": 0,
+     "easing": "linear",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "near": "table.retryNet",
+   "line": 708,
+   "raw": "spin .8s linear infinite",
+   "parts": [
+    {
+     "name": "spin",
+     "durationMs": 800,
+     "delayMs": 0,
+     "easing": "linear",
+     "iterations": "infinite",
+     "fill": "none",
+     "direction": "normal"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "line": 2051,
+   "raw": "countPop 1s both",
+   "source": "js",
+   "parts": [
+    {
+     "dynamic": "countPop 1s both"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "line": 2052,
+   "raw": "barFill 3s linear both",
+   "source": "js",
+   "parts": [
+    {
+     "dynamic": "barFill 3s linear both"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "line": 2082,
+   "raw": "nukeFlash 1.3s ease-out both",
+   "source": "js",
+   "parts": [
+    {
+     "dynamic": "nukeFlash 1.3s ease-out both"
+    }
+   ]
+  },
+  {
+   "file": "G101-Masa.dc.html",
+   "element": null,
+   "line": 2084,
+   "raw": "fadeIn .5s both",
+   "source": "js",
+   "parts": [
+    {
+     "dynamic": "fadeIn .5s both"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - G",
+   "element": null,
+   "raw": "isSplash: scr === 'splash', spAnim: s.spOut ? 'splashOut .75s cubic-bezier(.7,0,.3,1) both' : 'fadeIn .5s both', tilesAnim: s.spOut ? 't",
+   "source": "js",
+   "parts": [
+    {
+     "dynamic": "isSplash: scr === 'splash', spAnim: s.spOut ? 'splashOut .75s cubic-bezier(.7,0,.3,1) both' : 'fadeIn .5s both', tilesAnim: s.spOut ? 't"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - G",
+   "element": null,
+   "raw": ".7,0,.3,1) both' : 'fadeIn .5s both', tilesAnim: s.spOut ? 'tilesOut .75s cubic-bezier(.7,0,.3,1) both' : 'none', menuAnim: s.fromSplash ? 'menuIn 1",
+   "source": "js",
+   "parts": [
+    {
+     "dynamic": ".7,0,.3,1) both' : 'fadeIn .5s both', tilesAnim: s.spOut ? 'tilesOut .75s cubic-bezier(.7,0,.3,1) both' : 'none', menuAnim: s.fromSplash ? 'menuIn 1"
+    }
+   ]
+  },
+  {
+   "file": "Galaxy 101 - G",
+   "element": null,
+   "raw": "bezier(.7,0,.3,1) both' : 'none', menuAnim: s.fromSplash ? 'menuIn 1.2s cubic-bezier(.16,1,.3,1) both' : 'fadeIn .35s both', isAuthSide: scr === '",
+   "source": "js",
+   "parts": [
+    {
+     "dynamic": "bezier(.7,0,.3,1) both' : 'none', menuAnim: s.fromSplash ? 'menuIn 1.2s cubic-bezier(.16,1,.3,1) both' : 'fadeIn .35s both', isAuthSide: scr === '"
+    }
+   ]
+  },
+  {
+   "file": "G101-Dereceli.",
+   "element": null,
+   "raw": "t)', cur: ready ? 'pointer' : 'not-allowed', anim: ready ? 'rkPulse 2.2s infinite' : 'none', why,",
+   "source": "js",
+   "parts": [
+    {
+     "dynamic": "t)', cur: ready ? 'pointer' : 'not-allowed', anim: ready ? 'rkPulse 2.2s infinite' : 'none', why,"
+    }
+   ]
+  }
+ ],
+ "unused": [
+  "dealIn",
+  "popScale",
+  "tileFloat",
+  "tileShine",
+  "twinkle",
+  "spinS",
+  "tableSpin",
+  "planetSpin",
+  "rkCard",
+  "rkDots",
+  "rise"
+ ],
+ "unusedNote": "Tanımlı ama hiçbir yerde kullanılmayan keyframe'ler; Unity'ye taşınmaz."
+}

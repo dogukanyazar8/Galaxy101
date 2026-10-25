@@ -1,0 +1,320 @@
+{
+ "version": "0.4.0",
+ "source": "g101-sound.js (oyunda çalışan katalog)",
+ "categories": {
+  "ui": "arayüz",
+  "game": "oyun akışı",
+  "tile": "taş (ayar: tileSnd)",
+  "chat": "sohbet, ikram, hediye (ayar: chatSnd / notifSnd)",
+  "music": "müzik (ayar: music)"
+ },
+ "volume": "kazanç = master/100 × (müzikse music, değilse sfx)/100; kategori anahtarı kapalıysa 0. Varsayılan master 80, sfx 90, music 55.",
+ "mixing": {
+  "duck": "prio ≥ 5 (penalty, finish, finish.nuke) çalınca müzik %40'a iner (0,3 sn), 2,4 sn'de geri gelir",
+  "poly": "aynı olaydan eş zamanlı en çok poly kopya",
+  "crossfade": "menü ↔ masa müziği 1,2 sn geçiş",
+  "sync": "dice.roll 1450 ms, nuke 1750 ms, rocket 5600 ms (anim/ ve protocol/timings.md ile aynı)"
+ },
+ "music": [
+  {
+   "id": "music.menu",
+   "file": "music/music_menu_loop.wav",
+   "loop": true,
+   "seconds": 32,
+   "where": "açılış, giriş, menü, lobi, dereceli",
+   "chords": "C maj7 · A m7 · F maj7 · G7 (×2), 4 sn/akor, çan arpeji 0,5 sn"
+  },
+  {
+   "id": "music.table",
+   "file": "music/music_table_loop.wav",
+   "loop": true,
+   "seconds": 40,
+   "where": "masa (yükleme bitince → maç sonu)",
+   "chords": "D m9 · B♭ maj7 · F maj7 · C/E …, 5 sn/akor, çan 1,25 sn"
+  }
+ ],
+ "events": [
+  {
+   "id": "ui.tap",
+   "cat": "ui",
+   "prio": 1,
+   "poly": 2,
+   "ms": 45,
+   "file": "ui_tap",
+   "trigger": "İmleci pointer olan her öğeye basış (düğme, sekme, kart)",
+   "wav": "sfx/ui_tap.wav"
+  },
+  {
+   "id": "ui.open",
+   "cat": "ui",
+   "prio": 2,
+   "poly": 1,
+   "ms": 160,
+   "file": "ui_panel_open",
+   "trigger": "Panel/diyalog açılır (masa: hediye, sohbet, ayarlar, kalk onayı)",
+   "wav": "sfx/ui_panel_open.wav"
+  },
+  {
+   "id": "ui.close",
+   "cat": "ui",
+   "prio": 1,
+   "poly": 1,
+   "ms": 120,
+   "file": "ui_panel_close",
+   "trigger": "Panel/diyalog kapanır",
+   "wav": "sfx/ui_panel_close.wav"
+  },
+  {
+   "id": "ui.screen",
+   "cat": "ui",
+   "prio": 2,
+   "poly": 1,
+   "ms": 260,
+   "file": "ui_screen",
+   "trigger": "Ekran geçişi (açılış → giriş → menü → lobi → masa)",
+   "wav": "sfx/ui_screen.wav"
+  },
+  {
+   "id": "ui.error",
+   "cat": "ui",
+   "prio": 3,
+   "poly": 1,
+   "ms": 180,
+   "file": "ui_error",
+   "trigger": "Hata tostu / kırmızı sistem satırı (protocol ui: toast, shake, inline)",
+   "wav": "sfx/ui_error.wav"
+  },
+  {
+   "id": "ui.reward",
+   "cat": "ui",
+   "prio": 3,
+   "poly": 1,
+   "ms": 700,
+   "file": "ui_reward_coins",
+   "trigger": "Ödül alındı (günlük ödül, görev, maç kazancı; altın tost)",
+   "wav": "sfx/ui_reward_coins.wav"
+  },
+  {
+   "id": "turn.mine",
+   "cat": "game",
+   "prio": 4,
+   "poly": 1,
+   "ms": 420,
+   "file": "turn_mine",
+   "trigger": "turn olayı, seat = ben (dağıtım bitince)",
+   "wav": "sfx/turn_mine.wav"
+  },
+  {
+   "id": "turn.warn",
+   "cat": "game",
+   "prio": 4,
+   "poly": 1,
+   "ms": 300,
+   "file": "turn_warn_tick",
+   "trigger": "Tur sayacı uyarı eşiğine girdi (ayar warn, vars. 5 sn)",
+   "wav": "sfx/turn_warn_tick.wav"
+  },
+  {
+   "id": "count.tick",
+   "cat": "game",
+   "prio": 3,
+   "poly": 1,
+   "ms": 120,
+   "file": "count_tick",
+   "trigger": "Geri sayım rakamı 3, 2, 1",
+   "wav": "sfx/count_tick.wav"
+  },
+  {
+   "id": "count.go",
+   "cat": "game",
+   "prio": 3,
+   "poly": 1,
+   "ms": 380,
+   "file": "count_go",
+   "trigger": "Geri sayım bitti, dağıtım başlıyor",
+   "wav": "sfx/count_go.wav"
+  },
+  {
+   "id": "deal.shuffle",
+   "cat": "tile",
+   "prio": 3,
+   "poly": 1,
+   "ms": 900,
+   "file": "deal_shuffle",
+   "trigger": "dealStart: balyalar diziliyor",
+   "wav": "sfx/deal_shuffle.wav"
+  },
+  {
+   "id": "dice.roll",
+   "cat": "tile",
+   "prio": 3,
+   "poly": 1,
+   "ms": 1450,
+   "file": "dice_roll",
+   "trigger": "dealDie: zar yuvarlanıyor (1450 ms, 3 sekme)",
+   "wav": "sfx/dice_roll.wav"
+  },
+  {
+   "id": "deal.indicator",
+   "cat": "tile",
+   "prio": 3,
+   "poly": 1,
+   "ms": 400,
+   "file": "deal_indicator",
+   "trigger": "dealStep:indicator: gösterge çevrildi",
+   "wav": "sfx/deal_indicator.wav"
+  },
+  {
+   "id": "deal.distribute",
+   "cat": "tile",
+   "prio": 2,
+   "poly": 1,
+   "ms": 2400,
+   "file": "deal_distribute",
+   "trigger": "dealStep:distribute: balyalar oyunculara kayıyor",
+   "wav": "sfx/deal_distribute.wav"
+  },
+  {
+   "id": "tile.draw",
+   "cat": "tile",
+   "prio": 2,
+   "poly": 2,
+   "ms": 90,
+   "file": "tile_draw",
+   "trigger": "game.drew (ben ya da rakip; rakipte %70 ses)",
+   "wav": "sfx/tile_draw.wav"
+  },
+  {
+   "id": "tile.discard",
+   "cat": "tile",
+   "prio": 2,
+   "poly": 2,
+   "ms": 110,
+   "file": "tile_discard",
+   "trigger": "game.discarded (taş halkaya/yığına iner)",
+   "wav": "sfx/tile_discard.wav"
+  },
+  {
+   "id": "tile.slide",
+   "cat": "tile",
+   "prio": 1,
+   "poly": 2,
+   "ms": 60,
+   "file": "tile_slide",
+   "trigger": "Istakada taş yer değiştirdi (yerel)",
+   "wav": "sfx/tile_slide.wav"
+  },
+  {
+   "id": "meld.lay",
+   "cat": "tile",
+   "prio": 3,
+   "poly": 1,
+   "ms": 260,
+   "file": "meld_lay",
+   "trigger": "game.opened / game.laid (perler masaya)",
+   "wav": "sfx/meld_lay.wav"
+  },
+  {
+   "id": "meld.add",
+   "cat": "tile",
+   "prio": 2,
+   "poly": 1,
+   "ms": 120,
+   "file": "meld_add",
+   "trigger": "game.added (işleme)",
+   "wav": "sfx/meld_add.wav"
+  },
+  {
+   "id": "okey.swap",
+   "cat": "tile",
+   "prio": 3,
+   "poly": 1,
+   "ms": 380,
+   "file": "okey_swap",
+   "trigger": "game.okeySwapped",
+   "wav": "sfx/okey_swap.wav"
+  },
+  {
+   "id": "penalty",
+   "cat": "game",
+   "prio": 5,
+   "poly": 1,
+   "ms": 520,
+   "file": "penalty",
+   "trigger": "game.penalty (R-40…R-44)",
+   "wav": "sfx/penalty.wav"
+  },
+  {
+   "id": "finish",
+   "cat": "game",
+   "prio": 6,
+   "poly": 1,
+   "ms": 1200,
+   "file": "finish_fanfare",
+   "trigger": "game.finished (biri bitirdi)",
+   "wav": "sfx/finish_fanfare.wav"
+  },
+  {
+   "id": "finish.nuke",
+   "cat": "game",
+   "prio": 6,
+   "poly": 1,
+   "ms": 1750,
+   "file": "finish_nuke",
+   "trigger": "Okeyle / elden bitiş fırlatması (nuke) iniş anı",
+   "wav": "sfx/finish_nuke.wav"
+  },
+  {
+   "id": "hand.end",
+   "cat": "game",
+   "prio": 4,
+   "poly": 1,
+   "ms": 600,
+   "file": "hand_end",
+   "trigger": "game.handEnd: el sonu tablosu açıldı",
+   "wav": "sfx/hand_end.wav"
+  },
+  {
+   "id": "gift.send",
+   "cat": "chat",
+   "prio": 2,
+   "poly": 2,
+   "ms": 400,
+   "file": "gift_whoosh",
+   "trigger": "gift: ikram/hediye uçuşu başladı",
+   "wav": "sfx/gift_whoosh.wav"
+  },
+  {
+   "id": "gift.receive",
+   "cat": "chat",
+   "prio": 3,
+   "poly": 1,
+   "ms": 600,
+   "file": "gift_sparkle",
+   "trigger": "Sana ikram geldi (sağ üst kart)",
+   "wav": "sfx/gift_sparkle.wav"
+  },
+  {
+   "id": "gift.rocket",
+   "cat": "chat",
+   "prio": 3,
+   "poly": 1,
+   "ms": 5600,
+   "file": "gift_rocket",
+   "trigger": "Roket uçuşu (5,6 sn)",
+   "wav": "sfx/gift_rocket.wav"
+  },
+  {
+   "id": "chat.message",
+   "cat": "chat",
+   "prio": 1,
+   "poly": 1,
+   "ms": 140,
+   "file": "chat_pop",
+   "trigger": "chat: rakipten mesaj/balon",
+   "wav": "sfx/chat_pop.wav"
+  }
+ ],
+ "prototype": "Oyunda her olay g101-sound.js ile çalar; WAV dosyaları aynı sentezin birebir çıktısıdır (OfflineAudioContext, 44,1 kHz, 16 bit, stereo). Doğrulama: konsolda G101Sound.log.",
+ "format": "WAV · 44 100 Hz · 16 bit · stereo"
+}

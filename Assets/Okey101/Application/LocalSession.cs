@@ -34,7 +34,7 @@ namespace Okey101.Application
                 EnsureOpen();
                 if(state?.Result==null)throw new InvalidOperationException("Finish the current round before dealing again.");
                 var starter=(state.StartingPlayer+(state.Result.FinishInfo.Reason==FinishReason.AllPairs?0:1))%4;
-                var initial=RoundFactory.Create(seed,Guid.NewGuid(),starter);
+                var initial=RoundFactory.Create(seed,Guid.NewGuid(),starter,state.Options);
                 previous=epoch;epoch=new CancellationTokenSource();state=initial;paused=false;lastEvents=null;
                 replayInitial=initial;replayCommands.Clear();replayAvailable=true;
             }
@@ -111,9 +111,15 @@ namespace Okey101.Application
                 EnsureOpen();
                 if (state == null) throw new InvalidOperationException("Start the session before reading a view.");
                 workToken = epoch.Token;
-                return PlayerViewProjector.ForPlayer(state, actor);
+                // Views are immutable and a state never changes in place: one projection per seat per state, however
+                // often the table asks (every frame).
+                if (!ReferenceEquals(viewsOf, state)) { Array.Clear(views, 0, views.Length); viewsOf = state; }
+                if ((uint)actor >= (uint)views.Length) return PlayerViewProjector.ForPlayer(state, actor);
+                return views[actor] ?? (views[actor] = PlayerViewProjector.ForPlayer(state, actor));
             }
         }
+        private readonly PlayerView[] views = new PlayerView[4];
+        private RoundState viewsOf;
 
         public Task<CommandReceipt> SubmitAsync(GameCommand command, CancellationToken token)
         {

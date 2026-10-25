@@ -96,11 +96,14 @@ namespace Galaxy101
             return root;
         }
 
-        private static void Purchase(MenuView v, string id)
+        private static async void Purchase(MenuView v, string id)
         {
             if (v.Model.OwnedSkins.Contains(id)) { v.Toast(v.L("Sahipsin", "Owned")); return; }
-            if (v.Services.Economy.Purchase(id)) v.Toast(v.L("İşlem tamam", "Done"));
-            else v.Toast(v.L("Yetersiz elmas", "Not enough gems"));
+            // Signed in, the server answers (a gem item is charged there; paid packs wait for the platform store).
+            var error = await v.Services.Economy.PurchaseAsync(id);
+            if (error == null) v.Toast(v.L("İşlem tamam", "Done"));
+            else if (error == "insufficient_funds") v.Toast(v.L("Yetersiz elmas", "Not enough gems"));
+            else { var (tr, en) = OnlineMenu.Describe(error); v.Toast(v.L(tr, en)); }
         }
 
     }

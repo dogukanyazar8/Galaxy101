@@ -28,6 +28,8 @@ public sealed class MatchManager(MatchStore store, ConnectionRegistry live, Cata
     TimeProvider clock, ILoggerFactory logs) : IRealtimeHandler, IHostedService
 {
     private readonly ConcurrentDictionary<Guid, MatchSession> byAccount = new();
+    /// <summary>Who watches which match (İzle): one match at a time; a socket drop or match.leave stops it.</summary>
+    private readonly ConcurrentDictionary<Guid, MatchSession> watching = new();
     private readonly ILogger log = logs.CreateLogger<MatchManager>();
 
     public int ActiveCount => byAccount.Values.Distinct().Count();
@@ -60,14 +62,56 @@ public sealed class MatchManager(MatchStore store, ConnectionRegistry live, Cata
         var session = Register(record);
         for (var s = 0; s < 4; s++) if (!IsBot(record, s)) lobby.MoveToMatch(record.Seats[s]);
         Started?.Invoke(session);
-        await session.StartAsync();
+        try { await session.StartAsync(); } // storage hiccups are retried inside: only a fault in the session itself lands here
+        catch (Exception error)
+        {
+            log.LogError(error, "Match {Match} failed to start; refunding the stakes", record.Id);
+            Release(session);
+            try { await store.AbortAsync(record); }
+            catch (Exception refund)
+            {
+                // The stakes stay with the stored match, which the next start resumes: the lobby must not form it again.
+                log.LogError(refund, "Match {Match}: refund failed; the stored match resumes on restart", record.Id);
+                return [];
+            }
+            throw; // refunded: nothing is charged, the lobby may form the table again
+        }
         return [];
     }
 
     public static bool IsBot(MatchRecord record, int seat) => (record.BotMask & (1 << seat)) != 0;
 
-    /// <summary>A match began / closed (the lobby shows "Oynanıyor · N. el", then drops the table).</summary>
-    public event Action<MatchSession>? Started, Closed;
+    /// <summary>A match began / closed (the lobby shows "Oynanıyor · N. el", then drops the table); its free seats changed.</summary>
+    public event Action<MatchSession>? Started, Closed, SeatsChanged;
+
+    public async Task<string?> WatchAsync(Guid account, MatchSession session)
+    {
+        if (Current(account) is not null) return ErrorCodes.Conflict;
+        var error = await session.WatchAsync(account);
+        if (error is not null) return error;
+        if (watching.TryGetValue(account, out var before) && before != session) await Quietly(before.UnwatchAsync(account));
+        watching[account] = session;
+        return null;
+    }
+
+    /// <summary>"Oyuna katıl": the caller has passed the lobby's entry checks (not elsewhere, enough chips).</summary>
+    public async Task<string?> TakeSeatAsync(Guid account, MatchSession session, int? seat)
+    {
+        if (!lobby.TryEnter(account, LobbyPlace.Match)) return ErrorCodes.Conflict;
+        string? error;
+        try { error = await session.TakeSeatAsync(account, seat); }
+        catch (InvalidOperationException) { error = TableErrors.Closed; } // the match ended at the same moment
+        if (error is not null) { lobby.Exit(account, LobbyPlace.Match); return error; }
+        byAccount[account] = session;
+        watching.TryRemove(account, out _);
+        SeatsChanged?.Invoke(session);
+        return null;
+    }
+
+    private static async Task Quietly(Task task)
+    {
+        try { await task; } catch (InvalidOperationException) { } // already closed
+    }
 
     public bool Handles(string type) => type.StartsWith("match.", StringComparison.Ordinal);
 
@@ -75,6 +119,15 @@ public sealed class MatchManager(MatchStore store, ConnectionRegistry live, Cata
     {
         var session = Current(connection.Account);
         var matchId = message.Data.ValueKind == JsonValueKind.Object && message.Data.TryGetProperty("matchId", out var id) ? id.GetGuid() : Guid.Empty;
+        // A spectator only stops watching.
+        if (session is null && watching.TryGetValue(connection.Account, out var watched) && watched.Id == matchId)
+        {
+            // A spectator's table opens with match.sync (the match again from the start message) and closes with match.leave.
+            if (message.Type == MessageTypes.MatchSync) return await watched.WatchAsync(connection.Account);
+            if (message.Type != MessageTypes.MatchLeave) return ErrorCodes.NotFound;
+            if (watching.TryRemove(new KeyValuePair<Guid, MatchSession>(connection.Account, watched))) await Quietly(watched.UnwatchAsync(connection.Account));
+            return null;
+        }
         if (session is null || session.Id != matchId) return ErrorCodes.NotFound;
         switch (message.Type)
         {
@@ -88,6 +141,9 @@ public sealed class MatchManager(MatchStore store, ConnectionRegistry live, Cata
                 return null;
             case MessageTypes.MatchEmote:
                 return await session.EmoteAsync(connection.Account, message.Data.Deserialize<EmoteMessage>(Connection.Json)!.Emote ?? "");
+            case MessageTypes.MatchChat:
+                var chat = message.Data.Deserialize<ChatMessage>(Connection.Json)!;
+                return await session.ChatAsync(connection.Account, chat.Text, chat.Quick);
             case MessageTypes.MatchGift:
                 var gift = message.Data.Deserialize<GiftMessage>(Connection.Json)!;
                 return await session.GiftAsync(connection.Account, gift.Gift ?? "", gift.TargetSeat);
@@ -98,15 +154,19 @@ public sealed class MatchManager(MatchStore store, ConnectionRegistry live, Cata
 
     public async Task LeaveAsync(Guid account)
     {
-        if (byAccount.TryRemove(account, out var session))
-        {
-            lobby.Exit(account, LobbyPlace.Match);
-            try { await session.LeaveAsync(account); }
-            catch (InvalidOperationException) { } // the match ended at the same moment
-        }
+        if (Current(account) is not { } session) return;
+        try { await session.LeaveAsync(account); }
+        catch (InvalidOperationException) { } // the match ended at the same moment
+        // Reached only once the forfeit is stored: a failed write throws above and leaves the player seated to try again.
+        if (byAccount.TryRemove(new KeyValuePair<Guid, MatchSession>(account, session))) lobby.Exit(account, LobbyPlace.Match);
+        SeatsChanged?.Invoke(session); // a seat the server now plays can be taken
     }
 
-    public Task OnDisconnectedAsync(Guid account) => Current(account)?.DisconnectedAsync(account) ?? Task.CompletedTask;
+    public Task BlockChangedAsync(Guid blocker, Guid blocked, bool on) => Current(blocker)?.BlockChangedAsync(blocker, blocked, on) ?? Task.CompletedTask;
+
+    public Task OnDisconnectedAsync(Guid account) => watching.TryRemove(account, out var watched) ? Quietly(watched.UnwatchAsync(account)) : Seated(account);
+
+    private Task Seated(Guid account) => Current(account)?.DisconnectedAsync(account) ?? Task.CompletedTask;
 
     /// <summary>Resumes every match that was in play when the process stopped.</summary>
     public async Task StartAsync(CancellationToken ct)
@@ -139,6 +199,7 @@ public sealed class MatchManager(MatchStore store, ConnectionRegistry live, Cata
 
     private void Release(MatchSession session)
     {
+        foreach (var (account, watched) in watching) if (watched == session) watching.TryRemove(new KeyValuePair<Guid, MatchSession>(account, session));
         foreach (var account in session.Seats)
             if (byAccount.TryRemove(new KeyValuePair<Guid, MatchSession>(account, session))) lobby.Exit(account, LobbyPlace.Match);
         Closed?.Invoke(session);

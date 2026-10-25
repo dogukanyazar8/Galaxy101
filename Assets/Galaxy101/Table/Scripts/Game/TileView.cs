@@ -39,6 +39,8 @@ namespace Galaxy101.Table
         private GameObject barOwner; private MeshRenderer barRenderer;
         /// <summary>spec/23: the trail is authored as three points per 60 Hz frame; any frame rate emits that many per second.</summary>
         private const float TrailPerSecond = 180;
+        /// <summary>Efekt kalitesi: 1 as designed, ½ at Düşük.</summary>
+        public static float TrailScale = 1;
         private Pose from, to;
         private Vector3 c1, c2;
         private float t0, duration, arc, spin, pop = -10, lift;
@@ -139,7 +141,7 @@ namespace Galaxy101.Table
                 {
                     // spec/23: a soft light trail along the path (gold; green when laid on a meld), spaced evenly since the last point.
                     var color = landing == "meld" ? TableFx.TrailGreen : TableFx.TrailGold;
-                    trailDue += dt * TrailPerSecond;
+                    trailDue += dt * TrailPerSecond * TrailScale;
                     int n = Mathf.Min((int)trailDue, 12); trailDue -= n;
                     for (int i = 1; i <= n; i++) Fx.Trail(Vector3.Lerp(trailFrom.Value, transform.position, i / (float)n), color);
                     if (n > 0) trailFrom = transform.position;

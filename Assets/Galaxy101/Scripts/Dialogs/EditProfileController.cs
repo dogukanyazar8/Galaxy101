@@ -8,6 +8,10 @@ namespace Galaxy101
     public sealed class EditProfileController
     {
         private JObject draft;
+        // Each opening of the dialog; a save that returns after the dialog was closed or opened again leaves it alone.
+        private int opening, savingOpening = -1;
+        // Only the opening that sent a save waits for it: a reopened dialog is not blocked by an older request.
+        private bool Saving => savingOpening == opening;
         private static readonly string[] Colors = { "#FF8A5B", "#FF5E6C", "#E85D9A", "#8B5CF6", "#3D7BFF", "#16B6A8", "#3CCB6E", "#F5A623" };
 
         public static bool IsNameValid(string name)
@@ -16,7 +20,7 @@ namespace Galaxy101
             return value.Length >= 3 && value.Length <= 16 && Regex.IsMatch(value, @"^[\p{L}\p{N} ._]+$");
         }
 
-        public void OnOpen(MenuView v) { draft = v.Services.Profile.Get(); }
+        public void OnOpen(MenuView v) { draft = v.Services.Profile.Get(); opening++; }
 
         public VisualElement Build(MenuView v)
         {
@@ -46,12 +50,25 @@ namespace Galaxy101
             footer.style.backgroundColor = v.C("rgba(0,0,0,.12)"); footer.style.borderBottomLeftRadius = footer.style.borderBottomRightRadius = 25; footer.style.alignItems = Align.Center;
             var note = PanelUi.Wrap(v, v.L("Adını 30 günde bir değiştirebilirsin.", "You can change your name once every 30 days."), 12); PanelUi.Grow(note); footer.Add(note);
             footer.Add(PanelUi.CssButton(v, v.L("Vazgeç", "Cancel"), v.CloseTop, "secondary", 12, 22, 16));
-            var save = PanelUi.CssButton(v, v.L("Kaydet", "Save"), () =>
+            Button save = null;
+            // The dialog closes once the profile is saved (on the server too when signed in); a failure keeps the draft.
+            // Only the opening that sent the save is closed: the player may have cancelled and opened something else.
+            async void Save()
             {
-                if (!IsNameValid((string)draft["name"])) return;
-                if (v.Services.Profile.Save(((string)draft["name"]).Trim(), (string)draft["color"], (string)draft["status"], (int)draft["frame"])) { draft = null; v.CloseTop(); }
+                if (Saving || !IsNameValid((string)draft["name"])) return;
+                var sent = opening; savingOpening = sent; save.SetEnabled(false);
+                string error;
+                try { error = await v.Services.Profile.SaveAsync(((string)draft["name"]).Trim(), (string)draft["color"], (string)draft["status"], (int)draft["frame"]); }
+                finally { if (savingOpening == sent) savingOpening = -1; }
+                bool current = sent == opening && v.Modals.Dialog == "profile";
+                if (error == null) { if (current) { draft = null; v.CloseTop(); } return; }
+                if (!current) return;
+                (v.Root.Q<Button>("profile-save") ?? save).SetEnabled(true); // a rebuild during the save made a new button
+                if (error == "offline") v.Flash(v.L("Sunucuya ulaşılamadı, profil kaydedilmedi", "Server unreachable: the profile was not saved"), "bad");
+                else if (error == "inappropriate") v.Flash(v.L("Bu ad ya da durum mesajı uygun değil", "This name or status is not allowed"), "bad");
                 else PanelUi.SaveFailure(v);
-            }, "primary", 12, 28, 16);
+            }
+            save = PanelUi.CssButton(v, v.L("Kaydet", "Save"), Save, "primary", 12, 28, 16);
             save.name = "profile-save"; save.style.marginLeft = 12; footer.Add(save);
             void Preview()
             {
@@ -67,7 +84,7 @@ namespace Galaxy101
                 }
                 var valid = IsNameValid((string)draft["name"]);
                 nameCount.text = ((string)draft["name"] ?? "").Trim().Length + "/16";
-                nameField.EnableInClassList("invalid", !valid); save.SetEnabled(valid);
+                nameField.EnableInClassList("invalid", !valid); save.SetEnabled(valid && !Saving);
                 save.style.opacity = 1;
                 v.Decorate(save, valid ? "linear-gradient(var(--a1),var(--a2))" : "dp", 14, valid ? 4 : 0, "aS");
                 save.style.color = v.C(valid ? "aT" : "mt");

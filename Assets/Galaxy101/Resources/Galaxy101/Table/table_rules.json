@@ -6,7 +6,7 @@
     "handOther": 60,
     "place": [500, 200, 80, 0]
   },
-  "levelXpPerLevel": 500,
+  "levelXpPerLevel": 375,
   "decisions": {
     "okeyFeedsOpening": "Only the +101 for discarding the okey; no extra x10 (README open question 1, default).",
     "pairsFinish": "A pairs finish (all pairs) leaves the hand unscored, T44 (README open question 2, default).",

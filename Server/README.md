@@ -85,7 +85,9 @@ Kimlik: `Authorization: Bearer <access>`. Hatalar `{ "code": "...", "message": "
 - Hamle: `match.command { matchId, expectedVersion, kind: draw|return|shortOpening|commit, source, opening, plan }`. Kural ihlali `rule.<ErrorCode>` (ör. `rule.discardMustBeUsed`).
 - Yeniden bağlanınca: yeni bilet → `/v1/ws` → `GET /v1/matches/current` → `match.sync`.
 
-## Varsayılan ürün kararları (yapılandırılabilir, onay bekliyor)
+## Ürün kararları (yapılandırılabilir; 24 Ekim 2026 onaylandı)
+
+Dereceli LP ve lig eşikleri dereceli mod açılırken yeniden ele alınacak; Botlara karşı sonra eklenecek. Maç geçmişi ve hesap hareketleri süresiz saklanır. Bağlantı kopması, hesap kilidi ve günlük seri satırları 25 Ekim 2026'da onaylandı.
 
 | Konu | Varsayılan | Ayar |
 |---|---|---|
@@ -93,28 +95,58 @@ Kimlik: `Authorization: Bearer <access>`. Hatalar `{ "code": "...", "message": "
 | Hamle süresi / sonraki el | 30 sn / 15 sn | `Game:TurnSeconds`, `Game:NextHandSeconds` |
 | Otomatik oynatmaya geçiş | Art arda 2 zaman aşımı | `Game:TimeoutsBeforeAuto` |
 | Pot | Tekli: kazanan alır; Eşli: kazanan takım böler; komisyon %0 | `Game:SoloPayout`, `Game:RakePercent` |
-| Masadan kalkma | Bahis potta kalır, son sıra, ödül/XP yok; koltuğu sunucu oynar | — |
-| Dereceli | Bahissiz; LP +24 / +8 / −8 / −16, 0'ın altına inmez | `Game:RankedLp` |
+| Masadan kalkma | Bahis potta kalır, son sıra, ödül/XP yok; koltuğu sunucu oynar. Eşli: kalkanın yerine bot geçer, oyun devam eder; takım bu yüzden son sayılmaz, takım kazanırsa ödülün tamamını masada kalan ortak alır; kalkan bireysel olarak son sıradadır (25 Ekim 2026) | — |
+| Eşitlik | Eşitlik bozucu yok: berabere kalanlar sırayı paylaşır (1, 1, 3), ödül/LP/haftalık puanı bölüşür (25 Ekim 2026 onaylandı) | `Games/Settlement.cs` |
+| Bağlantı kopması | Maçta kopan oyuncu kalkmış sayılmaz: süresi normal işler, art arda 2 zaman aşımından sonra koltuğu sunucu oynar, maç bitene kadar dönebilir. Bekleme odasında kopan oyuncu odadan hemen çıkar | `Game:TimeoutsBeforeAuto` |
+| Hesap kilidi | 3 yanlış şifre → 5 dk kilit; şifre sıfırlama kilidi kaldırır | `Game:PasswordAttempts`, `Game:PasswordLockSeconds` |
+| Günlük seri | Kaçırılan gün seriyi 1. güne döndürür; 7. günden sonra baştan; gün Europe/Istanbul | `Economy/Daily.cs` |
+| Dereceli | Bahissiz; aşağıdaki "Dereceli" bölümü | `Profile/Ranked.cs`, `Game:SeasonStart`, `Game:SeasonWeeks` |
 | Haftalık puan | 30 / 15 / 5 / 1 (özel oda hariç) | `Game:WeeklyPoints` |
-| XP | El kazanan 340, diğerleri 60 (prototip değerleri) | `Game:XpHandWin`, `Game:XpHandPlayed` |
-| Başlangıç bakiyesi | 10.000 çip, 20 gem | `Game:StartingChips`, `Game:StartingGems` |
+| XP | El kazanan 340, diğerleri 60; maç sonu sıra bonusu 500 / 200 / 80 / 0 (kalkan almaz) | `Game:XpHandWin`, `Game:XpHandPlayed`, `Game:XpPlace` |
+| Başlangıç bakiyesi | Misafir 10.000 çip, e-posta/Google 25.000 çip; herkese 20 gem | `Game:StartingChips`, `Game:RegisteredStartingChips`, `Game:StartingGems` |
 | Bahis seviyeleri | Tekli/Eşli 1K–100K, Katlamalı 10K–250K, Özel 0–100K | `Game:Stakes` |
-| Ligler | b2 0, b1 150, s2 300, s1 450, g2 600, g1 800, d2 1000, d1 1300 LP | `Profile/Progression.cs` |
-| Seviye | n → n+1 için 375·n XP | `Profile/Progression.cs` |
+| Ligler | Bronz, Gümüş, Altın, Elmas, Usta × III/II/I (kademe 100 LP) + Galaksi | `Profile/Ranked.cs` |
+| Seviye | n → n+1 için 375·n XP (istemci `table_rules.json` aynı) | `Profile/Progression.cs` |
 | İkram | Katalog fiyatı; masaya ikram = 3 kişilik ücret | `Economy/catalog.json` |
 
 ## Bilinen sınırlar
 
 - **Tek örnek.** Maçlar, kuyruk, odalar, çevrimiçi durum bellekte. Yatay ölçek gerekirse maçları bir koordinatöre (ör. Redis + yapışkan yönlendirme) taşımak gerekir; şimdilik gereksiz.
-- **Katlamalı** kural farkı `docs/rules/101-v1.md`'de tanımlı değil; mod şimdilik yalnız bahis seviyesiyle ayrışır (çekirdek motorun çarpanları her modda aynı).
 - Dereceli eşleştirme LP aralığına bakmaz (aynı kuyrukta ilk gelen).
-- Ad araması `ILIKE` ile tablo taraması yapar; oyuncu sayısı büyürse `pg_trgm` dizini eklenmeli.
 - KVKK aydınlatma metninin kendisi hukuki içerik; sunucu yalnız kabul edilen sürümü kaydeder.
 - Gerçek Google/Apple kimlik ve mağaza bilgileri olmadan bu yollar yalnız birim testleriyle (kendi ürettiğimiz sertifika zinciri, sahte doğrulayıcı) doğrulandı.
 
+
+## v7 (25 Ekim 2026) — Katlamalı ve eşlide kalkma
+- **Katlamalı** (`docs/rules/101-v1.md`): bir elde sonradan açan, kendinden önce açanı geçmek zorunda — seri 101 → önceki + 1, çift 5 → önceki + 1 (üst sınır yok); seri ve çift eşikleri bağımsız, el bitince sıfırlanır. Katlamalı kuyruğu (`mode: doubling`) ve `table.create {doubling: true}` masaları bu kuralla oynar. Eşli masada `partnerRaises` (varsayılan açık; "Ortağın açılışı eşiği yükseltsin") kapalıysa yalnız rakip takımın açılışları eşiği yükseltir.
+- Tel: `match.state` → `rules.doubling`, `rules.partnerRaises`, her oyuncuda `openingValue` (açılış toplamı / çift sayısı); `TableSummary.partnerRaises`. İstemci aynı motorla eşiği gösterir (Aç kadranı "/ N", "Çift aç · n/N") ve eşik altında eksik açılış cezasına gider.
+- **Eşlide kalkma:** takım artık son sayılmaz; kalkanın koltuğunu sunucu oynar, takım toplamıyla sıralanır. Takım kazanırsa takımın ödülünün tamamını masada kalan ortak alır; kalkan bahsini kaybeder, son sıradadır (eşlide 2.); haftalık puan, sıra bonusu ve kalktıktan sonraki ellerin XP'sini almaz. Tekli masada kalkan yine son sırada.
+
+## v6 (24 Ekim 2026) — Dereceli
+- **Ligler:** Bronz, Gümüş, Altın, Elmas, Usta; her biri III → II → I, kademe başına 100 LP (`b3` 0 … `m1` 1400). **Galaksi** (`gx`): 1500 LP ve üstü olup sezon tablosunda ilk 100'de olanlar; sırasıyla gösterilir.
+- **LP:** Bronz–Altın 1. +30, 2. +10, 3. −10, 4. −20; Elmas ve üstü +25 / +5 / −12 / −22 (her oyuncu kendi liginin tablosuyla). LP 0'ın altına inmez. Yeni bir lige çıkınca 3 maç koruma: kayıp o ligin altına düşürmez.
+- **Eşleştirme:** `queue.join {mode: ranked, stake: 0}`; dörtlü en fazla 1 lig farkla kurulur, en eski bekleyen 30 sn'yi geçince 2 lig. 5 sn'de bir yeniden bakılır.
+- **Sezon:** `Game:SeasonStart` (Pazartesi, ev saat dilimi) itibarıyla `Game:SeasonWeeks` (8) haftalık sezonlar; ondan önce 1. sezon. Yeni sezonda oyuncunun ilk erişiminde (profil, kuyruk, maç sonu): geçen sezonun en iyi ligine göre ödül (Bronz 2.000 · Gümüş 5.000 · Altın 10.000 · Elmas 25.000 · Usta 50.000 · Galaksi 100.000 çip, bir kez), sonuç `season_results`'a yazılır, LP kademe başından 4 kademe aşağıya iner (Elmas II → Altın III), koruma biter.
+- **Profil:** `progress` → `league`, `nextLeague`, `divisionLp` (0–99), `season`, `seasonEndsAt`, `seasonRank`, `bestLeague`, `protected`.
+- Kilit sırası her yerde: günlük durum → istatistik → cüzdan.
+
+## v5 (24 Ekim 2026) — İzle ve Oyuna katıl
+- **İzle:** `table.watch {tableId | code, pin}` (masa izleyiciye açıksa; şifreli masada PIN). İzleyici `match.start {spectator: true}` alır ve maçı 0. koltuktan görür; **hiçbir elin taşı gönderilmez** (el ve özel çekiş boş), olaylar, sohbet ve emojiler gelir. Masa açılınca `match.sync`, çıkınca `match.leave`; soket kopunca izleme biter. Maç başına en çok 20 izleyici; izleyici hamle yapamaz.
+- **Oyuna katıl:** oynanan masada `table.join {tableId, seat?}` sunucunun oynadığı bir koltuğu (botun ya da kalkan oyuncunun) devralır: bahis o an ödenir, koltuğun toplam puanıyla devam edilir, sıra ondaysa tam tur süresi başlar. Kalkan oyuncunun kaybı (son sıra, −bahis) o anda kaydedilir. Diğer koltuklara `match.seats` gider; lobi listesinde `openSeats`.
+- Lobi, katılan ya da izleyen oyuncuya `table.state {closed, matchId, reason: joined | watch}` gönderir; istemci masayı maç başlamış gibi açar.
+- **Ödeme düzeltmesi:** pot yalnız bahis yatıranlardan oluşur (botlar yatırmaz, almaz); botun payı aynı sıradaki insana (eşli ortak, eşitlik) geçer, yoksa dağıtılmaz. Önceden pot hep bahis × 4 sayılıyordu: botlu masada yatırılmamış çip ödeniyordu.
+- **Kayıt sağlamlığı:** el ve hamle yazımı tekrarlanabilir (cevabı kaybolan yazma yeniden denenince anahtar hatasına takılmaz); `match_participants` satır anahtarı `id` (bir koltukta kalkan ve devralan iki satır).
+
+## v4 (24 Ekim 2026) — hesap kurtarma ve oyuncu güvenliği
+- **Şifremi unuttum:** `POST /v1/auth/password/forgot {email}` hesabın e-postasına 6 haneli kod gönderir (15 dk, 5 deneme, dakikada bir yeni kod; bilinmeyen e-postaya da aynı 204 cevabı). `POST /v1/auth/password/reset {email, code, password}` şifreyi değiştirir, kilidi kaldırır, hesabın bütün oturumlarını kapatır. Kodlar bellekte (tek örnek). E-posta: `Email:Host`, `Email:Port` (587), `Email:EnableSsl`, `Email:User`, `Email:Password`, `Email:From`. Yapılandırılmamışsa `503 email_unavailable`; Development ortamında kod loga yazılır.
+- **Küfür filtresi:** masa sohbeti maskelenir (`***`); oyuncu adı ve durum mesajı `400 inappropriate` ile reddedilir; lobi masa adı maskelenir. Türkçe/İngilizce, harf benzeri rakam/simge, tekrarlanan ve aralıklı harfler yakalanır; kelime bütün olarak karşılaştırılır ("götürmek" temiz).
+- **Engelle:** `POST/DELETE /v1/players/{id}/block`, `GET /v1/players/blocks`. Engellenenin masa sohbeti ve emojileri engelleyene gitmez (maç sırasında da anında); arkadaşlık biter; arkadaşlık isteği ve davet geçmez.
+- **Şikayet:** `POST /v1/players/{id}/report {reason: chat|name|cheating|other, details?, matchId?}` — aynı oyuncu için günde bir, kişi başı günde 10.
+- **Moderatör:** `X-Admin-Key` başlığı (`Admin:Key`, ≥ 32 karakter; boşsa uçlar 404): `GET /v1/admin/reports?open=`, `POST /v1/admin/reports/{id}/resolve`, `POST /v1/admin/accounts/{id}/ban {minutes, reason}` (oturumlar hemen düşer, maç terk edilir; giriş ve token yenileme `403 banned` + kalan saniye; refresh token harcanmaz, yasak bitince misafir de geri döner), `POST /v1/admin/accounts/{id}/unban`.
+- **Arama dizini:** `pg_trgm` + `accounts.name` GIN trigram dizini (ad aramasında tablo taraması yok).
 
 ## v3 (23 Ekim 2026)
 - **Kimlik:** `POST /v1/auth/register` (ad, e-posta, şifre ≥ 6, şartlar), `POST /v1/auth/login` (bilinmeyen e-posta 404, yanlış şifre 401 + kalan deneme, 3 yanlışta 423 kilit). Misafir girişi takma ad + avatar rengi alır. Başlangıç bakiyesi: misafir 10.000, e-posta/Google 25.000.
 - **Klasik lobi (WebSocket):** `lobby.subscribe` → `lobby.tables` (canlı liste; özel masalar listelenmez); `table.create {options}` (Tekli/Eşli, ad, açık/özel, 4 haneli PIN, 3/5/7 el, 1K–100K bahis, katlamalı, 15/20/30/45 sn, izleyici, sohbet açık/hızlı/kapalı, hediye, işleme, ceza), `table.join {tableId|code GX-XXXX, pin, seat}`, `table.leave`, `table.addBot {seat}`, `table.kick {seat}`, `table.start` → `table.state` (bekleme odası, geri sayım: dolunca 5 sn, sahip Başlat 3 sn). Maç masanın koltuk düzeni, el sayısı, tur süresi, sohbet/hediye kurallarıyla başlar; bot koltukları bahis yatırmaz ve ödeme almaz. Liste oynanan masayı "Oynanıyor · N. el" gösterir, maç kapanınca düşer.
 - **Davet:** `POST /v1/friends/{id}/invite {roomCode}` masa kodlarını da kabul eder; arkadaş ya da son 20 maçta birlikte oynanan oyuncu davet edilebilir. `GET /v1/players/recent` (Son oynadıkların).
-- Açık: izleyici modu (İzle) ve oynanan masaya katılma (Oyuna katıl) henüz yok; işleme/ceza seçenekleri kaydedilir, motor henüz uygulamaz.
+- İzle ve Oyuna katıl v5'te eklendi. İşleme ve iki +101 cezası masanın seçeneğiyle motorda uygulanır (`RulesDto`).

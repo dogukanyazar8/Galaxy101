@@ -77,6 +77,28 @@ namespace Okey101.Core.Tests
         }
 
         [Test]
+        public void DistinctPoolDropsEquivalentCopiesButKeepsDisjointRunsAndJokerChoices()
+        {
+            var hand = Enumerable.Range(1, 10)
+                .SelectMany(n => new[] { Id(TileColor.Red, n), Id(TileColor.Red, n, 1) })
+                .Concat(new[] { new TileId(52), new TileId(53) }).ToArray();
+            var groups = MeldCandidateGenerator.GenerateDistinct(hand, Indicator, MeldKind.Run, System.Threading.CancellationToken.None);
+            Assert.That(groups.Count, Is.LessThan(5000));
+            Assert.That(groups.Select(Key).Distinct().Count(), Is.EqualTo(groups.Count));
+            Assert.That(groups.All(g => MeldValidator.Validate(g, Indicator).Success), Is.True);
+            Assert.That(Score(groups[0]), Is.EqualTo(78));
+            // One R3-R4-R5 pattern binds twice to the two copies, and a joker may stand for a held R4.
+            var short345 = groups.Where(g => g.Tiles.Select(t => t.RepresentedFace.Number).SequenceEqual(new[] { 3, 4, 5 })).ToArray();
+            var natural = short345.First(g => g.Tiles.All(t => t.Id.Value < 52));
+            var binder = new MeldBinder(hand, Indicator);
+            Assert.That(binder.TryMask(natural, 0, out var first), Is.True);
+            Assert.That(binder.TryMask(natural, first, out var second), Is.True);
+            Assert.That(binder.TryMask(natural, first | second, out _), Is.False, "two copies, two runs");
+            Assert.That(binder.Bind(natural, first).Tiles.Select(t => t.Id), Is.Not.EquivalentTo(binder.Bind(natural, 0).Tiles.Select(t => t.Id)));
+            Assert.That(short345.Any(g => g.Tiles[1].Id.Value >= 52), Is.True);
+        }
+
+        [Test]
         public void CanUseJokerWhileMatchingNormalTileIsHeld()
         {
             var naturalThree = Id(TileColor.Red, 3);

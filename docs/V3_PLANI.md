@@ -6,7 +6,7 @@ Kaynak: `Design/galaxy101_unity_handoff` v3 (`spec/00`, `spec/18`–`25`, `refer
 - Sunucu bu hatta devralındı; geliştirme `main`'de, `Server/`. Yerel Docker PostgreSQL ile geliştirilir/test edilir; Railway dağıtımı sonra.
 - v3 3D modelleri dışa aktarma sayfasından GLB olarak indirilir, Blender (MCP) ile cilalanır.
 - "Botlara karşı" v3'teki gibi **YAKINDA**; botlar çevrimiçi masada boş koltuğu doldurur. Çevrimdışı bot masası yalnız geliştirici test menüsünde (spec/25).
-- Ürün kararı bekleyenler (en sonda kullanıcı belirleyecek), şimdilik önerilen varsayılanlar: Eşli puanı takım toplamı; ödül havuzu bahis × 4, kazanan hepsini alır (spec/20); cezalar çarpılmaz, elden bitişte rakip cezası × 2 (spec/22); oda sahibi çıkarsa sahiplik masadaki ilk insana geçer.
+- Ürün kararları (24 Ekim 2026 onaylandı): Eşli puanı takım toplamı, havuz iki ortağa bölünür; ödül havuzu bahis × 4, kazanan hepsini alır (spec/20); cezalar çarpılmaz, elden bitişte rakip cezası × 2 (spec/22); oda sahibi çıkarsa sahiplik masadaki ilk insana geçer. Diğerleri `Server/README.md` "Ürün kararları".
 
 ## Aşamalar (her biri derlenir, testlenir, v3 görüntüleriyle karşılaştırılır, yerelde commit edilir)
 | # | Kapsam | Belgeler | Durum |
@@ -40,4 +40,4 @@ Kaynak: `Design/galaxy101_unity_handoff` v3 (`spec/00`, `spec/18`–`25`, `refer
 - V7e (0f66b2c): 3D masa sunucu maçını oynar (NetworkTableSession, MatchWire, koltuk döndürme). Sözleşmeye DealDto ve kazananın açılış/elden bilgisi eklendi; sunucu ilk turdan önce `Game:DealSeconds` (22 sn) bekler. Lobide masa başlayınca masa sahnesi açılır, dönüşte giriş tekrarlanmaz, lobiye dönülür.
 - V8 (3f75c5e): F9 geliştirici test menüsü (spec/25 senaryoları) ve her senaryo için PlayMode testi + görüntü.
 - 3D: zar Blender'da üretildi (`tools/blender/make_die.py`, 30 mm, 5 mm köşe, gerçek çukur noktalar, kırmızı 1); masa/ıstaka/koltuk/ikram kaynakları (racks3d.js, gifts3d.js) v3'te değişmedi, mevcut cilalı GLB'ler geçerli; taş yüzleri v3'ten yeniden pişirildi.
-- Açık: izleme ve oynanan masaya katılma (sunucuda izleyici/katılma yok; lobide "bir sonraki güncelleme" tostu), Google girişi ve şifre sıfırlama yapılandırması, ürün kararları (eşli puanlama, havuz, sahip ayrılınca).
+- İzleme ve oynanan masaya katılma 24 Ekim 2026'da eklendi (Server/README v5). Açık: Google girişi ve şifre sıfırlama yapılandırması, ürün kararları (eşli puanlama, havuz, sahip ayrılınca).

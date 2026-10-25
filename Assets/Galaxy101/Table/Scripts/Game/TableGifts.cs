@@ -66,13 +66,12 @@ namespace Galaxy101.Table
             var spot = to == 0 ? MySlots[slot] : Slots[slot];
             var g2 = new Gift
             {
-                Kind = kind, From = from, To = to, Slot = slot, Go = Instantiate(prefab, root, false),
+                Kind = kind, From = from, To = to, Slot = slot, Go = Instantiate(Template(kind, prefab), root, false),
                 Start = Origin(from), End = scene.SeatPoint(to, spot.x, TY, spot.y),
                 Yaw = Yaw[to] + (Hash(kind + slot) - 0.5f) * 0.8f + (kind == "coffee" || kind == "tea" ? -0.6f : 0),
                 Scale = GiftScale.TryGetValue(kind, out var s) ? s : 1.4f, T0 = Time.time, Duration = kind == "rocket" ? 5.6f : 1.35f, Seed = UnityEngine.Random.value * 6,
             };
-            g2.Go.name = "hediye_" + kind;
-            MergeStill(kind, g2.Go);
+            g2.Go.name = "hediye_" + kind; g2.Go.SetActive(true);
             foreach (var t in g2.Go.GetComponentsInChildren<Transform>(true))
             {
                 if (t.name == "demet") g2.Sway = t;
@@ -99,6 +98,19 @@ namespace Galaxy101.Table
 
         private sealed class Merged { public int Lod; public Material Material; public Mesh Mesh; public UnityEngine.Rendering.ShadowCastingMode Shadows; public bool Receive; }
         private readonly Dictionary<string, List<Merged>> merged = new Dictionary<string, List<Merged>>();
+        private readonly Dictionary<string, GameObject> templates = new Dictionary<string, GameObject>();
+
+        /// <summary>
+        /// The kind's model with its still parts already merged, made once (inactive under the gifts' root): every gift of
+        /// that kind copies this slim tree instead of the GLB's hundreds of objects.
+        /// </summary>
+        private GameObject Template(string kind, GameObject prefab)
+        {
+            if (templates.TryGetValue(kind, out var template) && template != null) return template;
+            template = Instantiate(prefab, root, false); template.name = "sablon_" + kind; template.SetActive(false);
+            MergeStill(kind, template);
+            return templates[kind] = template;
+        }
 
         /// <summary>
         /// gifts3d.js draws a simit's 240 sesame seeds as one InstancedMesh; the GLB brings each as an object of its own
@@ -107,7 +119,7 @@ namespace Galaxy101.Table
         /// </summary>
         private void MergeStill(string kind, GameObject go)
         {
-            var group = go.GetComponentInChildren<LODGroup>();
+            var group = go.GetComponentInChildren<LODGroup>(true);
             var lods = group != null ? group.GetLODs() : new[] { new LOD(0, go.GetComponentsInChildren<Renderer>(true)) };
             var basis = go.transform.worldToLocalMatrix;
             bool Still(Renderer r)
@@ -141,12 +153,13 @@ namespace Galaxy101.Table
             }
             foreach (var r in still.SelectMany(x => x))
             {
-                if (r.transform.childCount == 0) { r.gameObject.SetActive(false); Destroy(r.gameObject); }
-                else { r.enabled = false; Destroy(r.GetComponent<MeshFilter>()); Destroy(r); }
+                // Immediately: the template is copied right after, and a deferred destroy would be copied with it.
+                if (r.transform.childCount == 0) DestroyImmediate(r.gameObject);
+                else { DestroyImmediate(r.GetComponent<MeshFilter>()); DestroyImmediate(r); }
             }
             var added = parts.Select(part =>
             {
-                var piece = new GameObject(part.Mesh.name); piece.transform.SetParent(go.transform, false);
+                var piece = new GameObject("birlesik_" + part.Lod + "_" + part.Material.name); piece.transform.SetParent(go.transform, false);
                 piece.AddComponent<MeshFilter>().sharedMesh = part.Mesh;
                 var r = piece.AddComponent<MeshRenderer>(); r.sharedMaterial = part.Material; r.shadowCastingMode = part.Shadows; r.receiveShadows = part.Receive;
                 return (part.Lod, Renderer: (Renderer)r);

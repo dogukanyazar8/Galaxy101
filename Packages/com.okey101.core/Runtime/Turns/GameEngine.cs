@@ -72,12 +72,12 @@ namespace Okey101.Core.Turns
             var players = CopyPlayers(state);
             var player = players[state.ActivePlayer];
             var hand = new List<TileId>(player.Hand) { tile };
-            players[state.ActivePlayer] = new PlayerState(hand, player.Opening, player.Penalties);
+            players[state.ActivePlayer] = new PlayerState(hand, player.Opening, player.Penalties, player.OpeningValue);
             return RuleResult<RoundState>.Ok(new RoundState(state.RoundId, state.Version + 1, state.Seed,
                 state.StartingPlayer, state.ActivePlayer, state.TurnNumber, RoundPhase.PlanningTurn, state.Indicator,
                 stock, players, state.Table, discards,
                 new DrawReceipt(command.Source, tile, command.Source == DrawSource.Stock && stock.Count == 0),
-                player.Opening, 0, false, AcceptedSequences(state, command.Meta), options: state.Options));
+                player.Opening, 0, false, AcceptedSequences(state, command.Meta), options: state.Options, deal: state.Deal));
         }
 
         private static RuleResult<RoundState> ReturnDiscard(RoundState state, ReturnDiscardCommand command)
@@ -88,14 +88,14 @@ namespace Okey101.Core.Turns
             var players = CopyPlayers(state);
             var hand = new List<TileId>(players[actor].Hand);
             if (!hand.Remove(draw.Tile)) return RuleResult<RoundState>.Fail(ErrorCode.InvalidState);
-            players[actor] = new PlayerState(hand, players[actor].Opening, players[actor].Penalties);
+            players[actor] = new PlayerState(hand, players[actor].Opening, players[actor].Penalties, players[actor].OpeningValue);
             var discards = CopyDiscards(state);
             var previous = (actor + 3) % 4;
             discards[previous] = new List<TileId>(discards[previous]) { draw.Tile };
             return RuleResult<RoundState>.Ok(new RoundState(state.RoundId, state.Version + 1, state.Seed,
                 state.StartingPlayer, actor, state.TurnNumber, RoundPhase.AwaitingDraw, state.Indicator, state.Stock,
                 players, state.Table, discards, null, state.OpeningAtTurnStart, 0, false,
-                AcceptedSequences(state, command.Meta), null, true, state.Options));
+                AcceptedSequences(state, command.Meta), null, true, state.Options, state.Deal));
         }
 
         /// <summary>Eksik açılış: +101 to a player who has not opened; nothing else changes.</summary>
@@ -110,7 +110,7 @@ namespace Okey101.Core.Turns
             return RuleResult<RoundState>.Ok(new RoundState(state.RoundId, state.Version + 1, state.Seed,
                 state.StartingPlayer, actor, state.TurnNumber, state.Phase, state.Indicator, state.Stock,
                 players, state.Table, state.Discards, state.PendingDraw, state.OpeningAtTurnStart, state.SeriesTilesUsed,
-                state.IsInitialTurn, AcceptedSequences(state, command.Meta), null, state.PreviousDiscardReturned, state.Options));
+                state.IsInitialTurn, AcceptedSequences(state, command.Meta), null, state.PreviousDiscardReturned, state.Options, state.Deal));
         }
 
         private static RuleResult<RoundState> Commit(RoundState state, CommitTurnCommand command)
@@ -159,7 +159,7 @@ namespace Okey101.Core.Turns
             return RuleResult<RoundState>.Ok(new RoundState(candidate.RoundId, state.Version + 1, candidate.Seed,
                 candidate.StartingPlayer, nextActor, turnNumber, phase, candidate.Indicator, candidate.Stock,
                 candidate.Players, candidate.Table, candidate.Discards, null, openingAtStart, 0, false,
-                AcceptedSequences(state, command.Meta), result, options: state.Options));
+                AcceptedSequences(state, command.Meta), result, options: state.Options, deal: state.Deal));
         }
 
         private static RuleResult<RoundResult> CalculateResult(RoundState state, FinishInfo finish)

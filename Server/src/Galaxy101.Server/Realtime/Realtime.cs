@@ -37,8 +37,7 @@ public sealed class ConnectionRegistry(IServiceScopeFactory scopes, TimeProvider
         connections.AddOrUpdate(connection.Account, connection, (_, old) => { previous = old; return connection; });
         if (previous is not null)
         {
-            previous.Send(MessageTypes.Replaced, new { });
-            previous.Close();
+            previous.Replace(Connection.Frame(MessageTypes.Replaced, new { }));
         }
         else Announce(connection.Account);
     }
@@ -53,6 +52,8 @@ public sealed class ConnectionRegistry(IServiceScopeFactory scopes, TimeProvider
     public string PresenceOf(Guid account) => !connections.ContainsKey(account) ? Presence.Offline : playing.ContainsKey(account) ? Presence.Playing : Presence.Online;
 
     public bool Send<T>(Guid account, string type, T data) => connections.TryGetValue(account, out var c) && c.Send(type, data);
+
+    public bool SendFrame(Guid account, byte[] frame) => connections.TryGetValue(account, out var c) && c.SendFrame(frame);
 
     public void Disconnect(Guid account)
     {
@@ -86,13 +87,16 @@ public sealed class ConnectionRegistry(IServiceScopeFactory scopes, TimeProvider
 public static class RealtimeEndpoint
 {
     public static void MapRealtime(this IEndpointRouteBuilder app) => app.MapGet("/v1/ws", async (HttpContext http, RealtimeTickets tickets,
-        ConnectionRegistry registry, IEnumerable<IRealtimeHandler> handlers, IHostApplicationLifetime lifetime, ILogger<Connection> log) =>
+        DeletedAccounts deleted, ConnectionRegistry registry, IEnumerable<IRealtimeHandler> handlers, IHostApplicationLifetime lifetime, ILogger<Connection> log) =>
     {
         if (!http.WebSockets.IsWebSocketRequest) return Results.BadRequest();
-        if (tickets.Redeem(http.Request.Query["ticket"]) is not { } account) return Results.Unauthorized();
+        // A ticket taken before its account was deleted is worthless afterwards.
+        if (tickets.Redeem(http.Request.Query["ticket"]) is not { } account || deleted.Contains(account)) return Results.Unauthorized();
         using var socket = await http.WebSockets.AcceptWebSocketAsync();
         var connection = new Connection(account, socket, log);
         registry.Register(connection);
+        // Deleted while this socket was being accepted: the deletion's disconnect may have run before it was registered.
+        if (deleted.Contains(account)) registry.Disconnect(account);
         try
         {
             await connection.RunAsync(async (c, message) =>

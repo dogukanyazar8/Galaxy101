@@ -30,6 +30,7 @@ public static class GamesEndpoints
             var (low, high) = Players.Pair(me, id);
             bool friends = await db.Friendships.AnyAsync(f => f.LowId == low && f.HighId == high && f.Accepted, ct);
             if (!friends && !await PlayedTogetherAsync(db, me, id, ct)) return Api.NotFound();
+            if (await Social.ModerationEndpoints.BlockedAsync(db, me, id, ct)) return Api.Conflict(ErrorCodes.InvitesDisabled);
             if (!live.IsOnline(id)) return Api.Conflict(ErrorCodes.NotOnline);
             var settings = await db.Accounts.Where(a => a.Id == id).Select(a => a.SettingsJson).FirstAsync(ct);
             if (!ProfileRules.ReadSettings(settings).Invites) return Api.Conflict(ErrorCodes.InvitesDisabled);

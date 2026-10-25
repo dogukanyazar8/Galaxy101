@@ -24,8 +24,22 @@ namespace Galaxy101.Contracts
         public long LevelXp { get; set; }
         public long NextLevelXp { get; set; }
         public int Lp { get; set; }
+        /// <summary>b3 … m1 (Bronz III … Usta I), or gx (Galaksi: past Usta I and in the season's top 100).</summary>
         public string League { get; set; }
+        /// <summary>The LP where the next division starts (equal to Lp at the top).</summary>
         public int NextLeagueLp { get; set; }
+        /// <summary>The next division's code; null at Usta I and Galaksi.</summary>
+        public string NextLeague { get; set; }
+        /// <summary>LP into the division (0–99), or above Usta I for Galaksi.</summary>
+        public int DivisionLp { get; set; }
+        public int Season { get; set; }
+        public DateTimeOffset SeasonEndsAt { get; set; }
+        /// <summary>Place on the season board (0 = no ranked match yet this season).</summary>
+        public int SeasonRank { get; set; }
+        /// <summary>The season's best league so far (code).</summary>
+        public string BestLeague { get; set; }
+        /// <summary>Protected matches left after reaching a new league (a loss cannot drop below it).</summary>
+        public int Protected { get; set; }
     }
 
     public sealed class ProfileUpdateRequest
@@ -63,6 +77,8 @@ namespace Galaxy101.Contracts
         public int Place { get; set; }
         public long ChipDelta { get; set; }
         public int? LpDelta { get; set; }
+        /// <summary>The table's stake per player (0 for ranked and stake-free rooms).</summary>
+        public long Stake { get; set; }
         public DateTimeOffset FinishedAt { get; set; }
     }
 

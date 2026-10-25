@@ -23,7 +23,7 @@ public static class LeaderboardEndpoints
             var (board, endsAt) = scope switch
             {
                 "weekly" => (calendar.WeeklyBoard, (DateTimeOffset?)calendar.WeekEnd),
-                "season" or "friends" => (SeasonBoard(game.Value.Season), null),
+                "season" or "friends" => (SeasonBoard(calendar.Season), (DateTimeOffset?)calendar.SeasonEnd),
                 _ => (null, null),
             };
             if (board is null) return Api.NotFound();
@@ -39,7 +39,7 @@ public static class LeaderboardEndpoints
             var mine = await scores.Where(x => x.AccountId == me).Select(x => (long?)x.Points).FirstOrDefaultAsync(ct);
             var myRank = mine is { } points ? 1 + await scores.CountAsync(x => x.Points > points, ct) : 0;
 
-            var cards = await Players.SummariesAsync(db, [.. top.Select(x => x.AccountId).Append(me)], ct);
+            var cards = await Players.SummariesAsync(db, [.. top.Select(x => x.AccountId).Append(me)], ct, calendar.Season);
             var response = new LeaderboardResponse { Scope = scope, EndsAt = endsAt };
             int rank = 0; long? previous = null;
             for (var i = 0; i < top.Count; i++)

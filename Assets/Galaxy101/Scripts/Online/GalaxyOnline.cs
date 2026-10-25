@@ -93,6 +93,13 @@ namespace Galaxy101.Online
             Changed?.Invoke();
         }
 
+        /// <summary>A balance the server returned with another answer (a claim, a purchase).</summary>
+        public void Apply(WalletResponse wallet)
+        {
+            if (wallet == null) return;
+            Wallet = wallet; Changed?.Invoke();
+        }
+
         public async Task RefreshAsync()
         {
             Profile = await Api.ProfileAsync();
@@ -105,7 +112,7 @@ namespace Galaxy101.Online
             Persist(Api.Tokens);
             await RefreshAsync();
             try { await Realtime.ConnectAsync(); }
-            catch (Exception e) { Debug.LogWarning("Realtime connection failed: " + e.Message); }
+            catch (Exception e) { Debug.LogWarning("Realtime connection failed: " + e.Message); OnRealtimeClosed("connect failed"); } // keep trying
         }
 
         private void Persist(TokenResponse tokens)

@@ -81,6 +81,8 @@ public sealed class RealtimeClient : IAsyncDisposable
     }
 
     public bool Closed => reader.IsCompleted;
+    /// <summary>Waits for the server to close the socket; its close description.</summary>
+    public async Task<string?> ClosedAsync(int seconds = 10) { await reader.WaitAsync(TimeSpan.FromSeconds(seconds)); return socket.CloseStatusDescription; }
 
     public async ValueTask DisposeAsync()
     {

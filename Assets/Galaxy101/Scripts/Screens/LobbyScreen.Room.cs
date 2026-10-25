@@ -437,6 +437,8 @@ namespace Galaxy101
             public InviteMessage Invite;
             public float Shake, OpenedAt;
             public bool First, Copied;
+            /// <summary>A PIN asked to watch the table (İzle), not to sit.</summary>
+            public bool Watch;
         }
 
         private Dialog dialog;
@@ -544,7 +546,7 @@ namespace Galaxy101
         private void SubmitPin(Dialog d)
         {
             if (d.Pin.Length != 4) { d.Error = L("4 rakam gir", "Enter 4 digits"); d.Shake = Time.realtimeSinceStartup; RenderDialog(); return; }
-            _ = JoinAsync(new TableJoinMessage { TableId = d.Table?.Id, Code = d.Table == null ? d.Code : null, Pin = d.Pin }, d.Table);
+            _ = JoinAsync(new TableJoinMessage { TableId = d.Table?.Id, Code = d.Table == null ? d.Code : null, Pin = d.Pin }, d.Table, d.Watch);
         }
 
         private void BuildCodeDialog(VisualElement card, Dialog d)

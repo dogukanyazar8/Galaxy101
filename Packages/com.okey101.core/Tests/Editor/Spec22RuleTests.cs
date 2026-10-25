@@ -45,6 +45,31 @@ namespace Okey101.Core.Tests
             Assert.Fail("No seed below 3000 showed a fake okey first.");
         }
 
+        [TestCase(1320u)]
+        [TestCase(2666u)]
+        [TestCase(3271u)]
+        public void TwoFakeOkeysInARowNeverBecomeTheIndicator(uint seed)
+        {
+            var plan = DealCeremony.Plan(seed, 0);
+            var stack = ShuffledDeck(seed).Skip((plan.Info.DieA - 1) * 7).Take(7).ToArray();
+            Assert.That(plan.Info.FakeOkeyShown, Is.True);
+            Assert.That(TileCatalog.Create()[plan.Indicator.Value].PrintedFace.HasValue, Is.True);
+            Assert.That(plan.Indicator, Is.EqualTo(stack[plan.Info.IndicatorPosition]));
+            Assert.DoesNotThrow(() => RoundFactory.Create(seed, Guid.NewGuid(), 0));
+        }
+
+        [Test]
+        public void ARandomStartDescribesTheDiceItWasDealtWith()
+        {
+            for (uint seed = 1; seed < 200; seed++)
+            {
+                var plan = DealCeremony.Plan(seed, null);
+                var described = DealCeremony.Describe(RoundFactory.Create(seed, Guid.NewGuid(), null));
+                Assert.That((described.Dealer, described.DieA, described.DieB, described.IndicatorPosition),
+                    Is.EqualTo((plan.Info.Dealer, plan.Info.DieA, plan.Info.DieB, plan.Info.IndicatorPosition)), "seed " + seed);
+            }
+        }
+
         [Test]
         public void StacksAreHandedOutFromDieAAndTheStockIsTheTowerThenTheIndicatorStack()
         {

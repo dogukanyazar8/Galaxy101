@@ -115,7 +115,7 @@ namespace Galaxy101
         /// <summary>Both accepted: the table opens (the server's match, or a local table for the demo season), "Dereceli · Solo".</summary>
         private void OnRankedMatched(RankedStart start)
         {
-            if(this==null||start==null)return;
+            if(this==null||start==null||!OpenMatchTable)return;
             var online=Galaxy101.Online.GalaxyOnline.Instance;
             if(start.Match is Galaxy101.Contracts.MatchStartMessage match&&online!=null)Galaxy101.Table.TableGame.PendingOnline=new Galaxy101.Table.NetworkTableSession(online,match.MatchId);
             Galaxy101.Table.TableGame.PendingRoom=View.L("Dereceli · ","Ranked · ")+(start.Mode=="duo"?"Duo":start.Mode=="squad"?"Squad":"Solo");

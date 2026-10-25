@@ -277,7 +277,7 @@ public sealed class MatchSession
     });
 
     /// <summary>
-    /// Table chat by the room's rule: "off" none, "quick" ready phrases only (by index), "on" also text up to 80
+    /// Table chat by the room's rule: "off" none, "quick" ready phrases only (by index), "on" also text up to 120 (D-32)
     /// characters. Everyone at the table gets it, the sender too (that is their confirmation).
     /// </summary>
     public Task<string?> ChatAsync(Guid account, string? text, int? quick) => Run<string?>(() =>
@@ -286,7 +286,7 @@ public sealed class MatchSession
         if (seat < 0 || status[seat] == SeatStatus.Left || ChatRule == "off") return Task.FromResult<string?>(ErrorCodes.Validation);
         text = text?.Trim();
         if (quick is { } q) { if (q is < 0 or >= QuickPhrases) return Task.FromResult<string?>(ErrorCodes.Validation); text = null; }
-        else if (ChatRule == "quick" || string.IsNullOrEmpty(text) || text.Length > 80) return Task.FromResult<string?>(ErrorCodes.Validation);
+        else if (ChatRule == "quick" || string.IsNullOrEmpty(text) || text.Length > Galaxy101.Table.TableEconomy.ChatMax) return Task.FromResult<string?>(ErrorCodes.Validation);
         var now = clock.GetUtcNow();
         if (now - lastChat[seat] < ChatInterval) return Task.FromResult<string?>(ErrorCodes.RateLimited);
         lastChat[seat] = now;
@@ -474,7 +474,7 @@ public sealed class MatchSession
         nextHandAt = null;
         lastEvent = null;
         state = dealt;
-        dealUntil = clock.GetUtcNow().AddSeconds(options.DealSeconds);
+        dealUntil = clock.GetUtcNow().AddMilliseconds(options.DealMilliseconds);
         BeginTurnIfNew();
         ScheduleTurn();
     }
@@ -548,7 +548,7 @@ public sealed class MatchSession
             }
         var outcomes = Settlement.Settle(record.Mode, record.Stake, totals, record.LeftMask, options, record.BotMask, seasonLp);
         // The hands' XP plus the place bonus (computed afresh: a retried settlement must not add it twice).
-        var matchXp = Enumerable.Range(0, 4).Select(s => xp[s] + (Left(s) ? 0 : options.XpPlace[outcomes[s].Place - 1])).ToArray();
+        var matchXp = Enumerable.Range(0, 4).Select(s => xp[s] + (Left(s) ? 0 : outcomes[s].XpBonus)).ToArray();
         var tallies = Enumerable.Range(0, 4).Select(s => new SeatTally(
             new QuestCounters(Since(s).Sum(h => h[s].WinHands), Since(s).Sum(h => h[s].PairsOpenings), Since(s).Sum(h => h[s].HandsPlayed),
                 Since(s).Sum(h => h[s].OkeyFinishes), Since(s).Sum(h => h[s].TilesAdded)),

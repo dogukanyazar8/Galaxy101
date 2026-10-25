@@ -28,7 +28,9 @@ public sealed class SettlementTests
         Assert.Equal([1, 1, 3, 4], o.Select(x => x.Place));
         Assert.Equal(0, o.Sum(x => x.ChipDelta));
         Assert.Equal([2002, 2002, 0, 0], o.Select(x => x.Payout));
-        Assert.Equal((30 + 15) / 2, o[0].WeeklyPoints);
+        // D-40: (30 + 15) / 2 = 22.5 rounds to nearest, 23 (was 22, rounded toward zero, before the v4 package).
+        Assert.Equal(23, o[0].WeeklyPoints);
+        Assert.Equal(350, o[0].XpBonus);
     }
 
     [Fact]
@@ -49,6 +51,9 @@ public sealed class SettlementTests
         var o = Settlement.Settle(GameModes.Pairs, 5000, [100, 30, 20, 40], 0, Options);
         Assert.Equal([2, 1, 2, 1], o.Select(x => x.Place));
         Assert.Equal([-5000, 5000, -5000, 5000], o.Select(x => x.ChipDelta));
+        // D-41: the winning team occupies positions 1–2, the losing one 3–4; each player takes the average.
+        Assert.Equal([3, 23, 3, 23], o.Select(x => x.WeeklyPoints));
+        Assert.Equal([40, 350, 40, 350], o.Select(x => x.XpBonus));
     }
 
     [Fact]
@@ -62,7 +67,8 @@ public sealed class SettlementTests
         Assert.Equal(0, o.Sum(x => x.ChipDelta));
         Assert.Equal(0, o[2].Payout);
         Assert.Equal(0, o[2].WeeklyPoints);
-        Assert.Equal((30 + 15) / 2, o[0].WeeklyPoints);
+        Assert.Equal(23, o[0].WeeklyPoints); // D-40/D-41: the team occupies places 1 and 2
+        Assert.Equal(0, o[2].XpBonus);
     }
 
     [Fact]

@@ -42,7 +42,7 @@ namespace Galaxy101
             View=new MenuView(document.rootVisualElement,Model,services,loc);View.BuildMain();
             var effects=new GameObject("Galaxy background");effects.transform.SetParent(transform,false);background=effects.AddComponent<GalaxyBackground>();background.Initialize(View.BackgroundTarget);
             View.BackgroundChanged+=background.Configure;View.PlayRequested+=OnPlay;Model.Changed+=ApplySettings;
-            Galaxy101.Audio.GalaxyAudio.TrackScreens(this,()=>Auth!=null&&Auth.Visible?Auth.Screen:Lobby!=null&&Lobby.Visible?"lobby":ranked!=null&&ranked.Visible?"ranked":"menu"); // v4 audio: screen music + ui.screen
+            Galaxy101.Audio.GalaxyAudio.TrackScreens(this,()=>Auth!=null&&Auth.Visible?Auth.Screen:Lobby!=null&&Lobby.Visible?"lobby":Ranked!=null&&Ranked.Visible?"ranked":"menu"); // v4 audio: screen music + ui.screen
             ApplySettings();background.Configure(Model.Planet,(bool)Model.Settings["motion"],(string)Model.Settings["quality"]);
             background.SetFocused(UnityEngine.Application.isFocused||UnityEngine.Application.isBatchMode);
             Debug.Log("GALAXY101_MENU_READY version="+UnityEngine.Application.version+" theme="+Model.Planet+" language="+(string)Model.Settings["lang"]);

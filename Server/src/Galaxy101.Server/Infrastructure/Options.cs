@@ -51,8 +51,11 @@ public sealed class GameOptions
     public int HandsPerMatch { get; set; } = 4;
     public int TurnSeconds { get; set; } = 30;
     public int NextHandSeconds { get; set; } = 15;
-    /// <summary>The clients' deal ceremony (spec/21) before a hand's first turn: no one plays and no deadline runs.</summary>
-    public int DealSeconds { get; set; } = 22;
+    /// <summary>
+    /// The clients' deal ceremony before a hand's first turn: no one plays and no deadline runs. The v4 package's server
+    /// schedule with a bot dealer (protocol/timings.md, D-24): 21 686 ms (was 22 s, an estimate).
+    /// </summary>
+    public int DealMilliseconds { get; set; } = Galaxy101.Table.TableTimings.DealTotalBotDealer;
     /// <summary>Consecutive timeouts after which the server keeps playing the seat until its owner acts again.</summary>
     public int TimeoutsBeforeAuto { get; set; } = 2;
     /// <summary>House share of the pot, in percent.</summary>

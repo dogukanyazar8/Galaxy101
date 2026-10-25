@@ -42,14 +42,14 @@ public static class FriendsEndpoints
             var me = http.User.AccountId();
             var code = Players.NormalizeCode(request.Code);
             var target = code is null ? null : await db.Accounts.AsNoTracking().Where(a => a.FriendCode == code).Select(a => new { a.Id, a.SettingsJson }).FirstOrDefaultAsync(ct);
-            if (target is null || target.Id == me) return Api.NotFound();
-            if (await ModerationEndpoints.BlockedAsync(db, me, target.Id, ct)) return Api.NotFound(); // a block reads as no such player
+            if (target is null || target.Id == me) return Api.NotFound(V4Errors.E_USER_UNKNOWN);
+            if (await ModerationEndpoints.BlockedAsync(db, me, target.Id, ct)) return Api.NotFound(V4Errors.E_USER_UNKNOWN); // a block reads as no such player
             var (low, high) = Players.Pair(me, target.Id);
             // Counted and changed under both accounts' row locks: parallel requests and accepts cannot pass the limit together.
             await using var tx = await db.Database.BeginTransactionAsync(ct);
             await LockPairAsync(db, low, high, ct);
             var existing = await db.Friendships.FirstOrDefaultAsync(f => f.LowId == low && f.HighId == high, ct);
-            if (existing is { Accepted: true }) return Api.Conflict(ErrorCodes.AlreadyFriends);
+            if (existing is { Accepted: true }) return Api.Conflict(ErrorCodes.AlreadyFriends, V4Errors.E_ALREADY_FRIENDS);
             if (existing is not null && existing.RequesterId == me) return Results.NoContent();
             if (await FriendCount(db, me, ct) >= game.Value.MaxFriends || await FriendCount(db, target.Id, ct) >= game.Value.MaxFriends)
                 return Api.Conflict(ErrorCodes.FriendLimit);
@@ -84,7 +84,7 @@ public static class FriendsEndpoints
                 return Api.Conflict(ErrorCodes.FriendLimit);
             var accepted = await db.Friendships.Where(f => f.LowId == low && f.HighId == high && !f.Accepted && f.RequesterId == id)
                 .ExecuteUpdateAsync(s => s.SetProperty(f => f.Accepted, true), ct);
-            if (accepted == 0) return Api.NotFound();
+            if (accepted == 0) return Api.NotFound(V4Errors.E_REQUEST_UNKNOWN);
             await tx.CommitAsync(ct);
             live.Send(id, MessageTypes.FriendAccepted, new FriendRequestResponse { Player = await Players.SummaryAsync(db, me, ct), SentAt = clock.GetUtcNow() });
             return Results.NoContent();
@@ -95,14 +95,14 @@ public static class FriendsEndpoints
         {
             var (low, high) = Players.Pair(http.User.AccountId(), id);
             var removed = await db.Friendships.Where(f => f.LowId == low && f.HighId == high && !f.Accepted).ExecuteDeleteAsync(ct);
-            return removed == 0 ? Api.NotFound() : Results.NoContent();
+            return removed == 0 ? Api.NotFound(V4Errors.E_REQUEST_UNKNOWN) : Results.NoContent();
         });
 
         friends.MapDelete("/{id:guid}", async (Guid id, HttpContext http, GameDb db, CancellationToken ct) =>
         {
             var (low, high) = Players.Pair(http.User.AccountId(), id);
             var removed = await db.Friendships.Where(f => f.LowId == low && f.HighId == high && f.Accepted).ExecuteDeleteAsync(ct);
-            return removed == 0 ? Api.NotFound() : Results.NoContent();
+            return removed == 0 ? Api.NotFound(V4Errors.E_NOT_FRIENDS) : Results.NoContent();
         });
 
         // Code lookup is exact; name lookup is a short prefix search over display names.

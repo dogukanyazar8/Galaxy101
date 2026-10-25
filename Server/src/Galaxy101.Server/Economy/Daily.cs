@@ -122,16 +122,18 @@ public static class DailyEndpoints
             Results.Ok(await service.DescribeAsync(http.User.AccountId(), ct)));
 
         daily.MapPost("/claim", async (HttpContext http, DailyService service, CancellationToken ct) =>
-            await Respond(http, service, await service.ClaimStreakAsync(http.User.AccountId(), ct), ct));
+            await Respond(http, service, await service.ClaimStreakAsync(http.User.AccountId(), ct), true, ct));
 
         daily.MapPost("/quests/{id}/claim", async (string id, HttpContext http, DailyService service, CancellationToken ct) =>
-            await Respond(http, service, await service.ClaimQuestAsync(http.User.AccountId(), id, ct), ct));
+            await Respond(http, service, await service.ClaimQuestAsync(http.User.AccountId(), id, ct), false, ct));
     }
 
-    private static async Task<IResult> Respond(HttpContext http, DailyService service, string? error, CancellationToken ct) => error switch
+    private static async Task<IResult> Respond(HttpContext http, DailyService service, string? error, bool streak, CancellationToken ct) => error switch
     {
         null => Results.Ok(await service.DescribeAsync(http.User.AccountId(), ct)),
-        ErrorCodes.NotFound => Api.NotFound(),
+        ErrorCodes.NotFound => Api.NotFound(streak ? null : V4Errors.E_QUEST_UNKNOWN),
+        ErrorCodes.AlreadyClaimed => Api.Conflict(error, streak ? V4Errors.E_DAILY_CLAIMED : V4Errors.E_QUEST_CLAIMED),
+        ErrorCodes.NotComplete => Api.Conflict(error, V4Errors.E_QUEST_INCOMPLETE),
         _ => Api.Conflict(error),
     };
 }

@@ -1,0 +1,14 @@
+{
+  "name": "Galaxy101.Table.Runtime",
+  "rootNamespace": "Galaxy101.Table",
+  "references": [
+    "Okey101.Core",
+    "Galaxy101.Contracts"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

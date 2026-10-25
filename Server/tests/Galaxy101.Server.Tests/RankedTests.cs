@@ -88,7 +88,8 @@ public sealed class RankedTests(ServerFixture server)
                 var mine = end.Placements.Single(x => x.Seat == starts[Array.IndexOf(players, p)].YourSeat);
                 var before = p == players[3] ? 650 : 0;
                 var table = Ranked.Table(before);
-                Assert.Equal(table[mine.Place - 1], mine.LpDelta);
+                // A tie shares the LP of the places it occupies, rounded to nearest (D-40).
+                Assert.Equal(Galaxy101.Table.TableSettlement.Shared(table, [.. Enumerable.Range(mine.Place - 1, end.Placements.Count(x => x.Place == mine.Place))]), mine.LpDelta);
                 var progress = (await p.Http.GetFromJsonAsync<ProfileResponse>("/v1/profile"))!.Progress;
                 Assert.Equal(Math.Max(0, before + mine.LpDelta!.Value), progress.Lp);
                 Assert.Equal(Ranked.Code(progress.Lp), progress.League);

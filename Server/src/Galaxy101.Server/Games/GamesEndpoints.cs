@@ -60,7 +60,7 @@ public static class GamesEndpoints
 }
 
 /// <summary>Before an account is deleted: out of queues and rooms, forfeits a running match, socket closed.</summary>
-public sealed class LiveAccountLifecycle(Matchmaker queue, PrivateRooms rooms, Tables tables, MatchManager matches, ConnectionRegistry live) : IAccountLifecycle
+public sealed class LiveAccountLifecycle(Matchmaker queue, PrivateRooms rooms, Tables tables, MatchManager matches, V4.Hub hub, ConnectionRegistry live) : IAccountLifecycle
 {
     public async Task BeforeDeleteAsync(Guid account, CancellationToken ct)
     {
@@ -68,6 +68,7 @@ public sealed class LiveAccountLifecycle(Matchmaker queue, PrivateRooms rooms, T
         rooms.Remove(account);
         tables.Remove(account, "deleted");
         await matches.LeaveAsync(account);
+        await hub.RemoveAsync(account);
         live.Disconnect(account);
     }
 }

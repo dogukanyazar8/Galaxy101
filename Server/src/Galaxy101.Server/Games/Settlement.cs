@@ -5,7 +5,8 @@ using Okey101.Core.Model;
 
 namespace Galaxy101.Server.Games;
 
-public sealed record SeatOutcome(int Seat, int Place, long Payout, long ChipDelta, int? LpDelta, int WeeklyPoints);
+/// <param name="XpBonus">Match-end place bonus (R-93), shared like the other place values (D-40, D-41); 0 for a leaver.</param>
+public sealed record SeatOutcome(int Seat, int Place, long Payout, long ChipDelta, int? LpDelta, int WeeklyPoints, int XpBonus = 0);
 
 /// <summary>
 /// End-of-match arithmetic, pure and deterministic. Lower 101 totals rank higher. In pairs (seats 0+2 vs 1+3) a seat's
@@ -38,6 +39,7 @@ public static class Settlement
         var payout = new long[4];
         var lp = new int[4];
         var weekly = new int[4];
+        var xpBonus = new int[4];
         var position = 0;
         for (var g = 0; g < groups.Count; g++)
         {
@@ -52,8 +54,11 @@ public static class Settlement
                 var table = Profile.Ranked.Table(seasonLp?[s] ?? 0);
                 if (Left(s)) { if (pairs) place[s] = 2; lp[s] = table[3]; continue; }
                 if (!Bot(s)) payout[s] = (long)Math.Floor(distributable * span.Average(p => payoutTable[p]) * seats.Length / people);
-                lp[s] = (int)Math.Round(span.Average(p => (double)table[p]), MidpointRounding.ToZero);
-                weekly[s] = (int)Math.Round(span.Average(p => (double)options.WeeklyPoints[p]), MidpointRounding.ToZero);
+                // D-40: the average of the positions the tie occupies, rounded to nearest (the package's Math.round); in pairs
+                // a team occupies two positions (D-41: +20 / −15 LP, 23 / 3 weekly, 350 / 40 XP).
+                lp[s] = Galaxy101.Table.TableSettlement.Shared(table, span);
+                weekly[s] = Galaxy101.Table.TableSettlement.Shared(options.WeeklyPoints, span);
+                xpBonus[s] = Galaxy101.Table.TableSettlement.Shared(options.XpPlace, span);
             }
             position += seats.Length;
         }
@@ -65,7 +70,7 @@ public static class Settlement
         var ranked = mode == GameModes.Ranked;
         var rated = mode != GameModes.Private;
         return [.. Enumerable.Range(0, 4).Select(s => new SeatOutcome(s, place[s], payout[s], payout[s] - (Bot(s) ? 0 : stake),
-            ranked ? lp[s] : null, rated ? weekly[s] : 0))];
+            ranked ? lp[s] : null, rated ? weekly[s] : 0, xpBonus[s]))];
     }
 
     /// <summary>What a finished hand contributes to each seat's quests and stats.</summary>

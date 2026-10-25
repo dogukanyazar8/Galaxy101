@@ -118,10 +118,10 @@ public static class PasswordResetEndpoints
         anonymous.MapPost("/password/reset", async (PasswordResetRequest request, GameDb db, PasswordResetCodes codes, TimeProvider clock, CancellationToken ct) =>
         {
             var email = Passwords.Normalize(request.Email);
-            if (!Passwords.ValidPassword(request.Password)) return Api.Error(ErrorCodes.Validation);
-            if (!codes.Redeem(email, request.Code?.Trim())) return Api.Error(ErrorCodes.CodeInvalid);
+            if (!Passwords.ValidPassword(request.Password)) return Api.Error(ErrorCodes.Validation, error: V4Errors.E_PASS_SHORT);
+            if (!codes.Redeem(email, request.Code?.Trim())) return Api.Error(ErrorCodes.CodeInvalid, error: V4Errors.E_RESET_CODE);
             var login = await db.PasswordLogins.FirstOrDefaultAsync(x => x.Email == email, ct);
-            if (login is null) return Api.Error(ErrorCodes.CodeInvalid);
+            if (login is null) return Api.Error(ErrorCodes.CodeInvalid, error: V4Errors.E_RESET_CODE);
             await using var tx = await db.Database.BeginTransactionAsync(ct);
             login.Hash = Passwords.Hash(request.Password!); login.FailedAttempts = 0; login.LockedUntil = null;
             await db.SaveChangesAsync(ct);

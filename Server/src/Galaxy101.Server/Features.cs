@@ -33,6 +33,11 @@ public static class Features
         services.AddSingleton<IRealtimeHandler>(sp => sp.GetRequiredService<Matchmaker>());
         services.AddSingleton<IRealtimeHandler>(sp => sp.GetRequiredService<PrivateRooms>());
         services.AddHostedService(sp => sp.GetRequiredService<MatchManager>());
+        // v4 protocol (docs/v4/KARARLAR.md K-04): lobby tables, invites, ranked and matches on the v4 rules engine.
+        services.AddSingleton<V4.Store>();
+        services.AddSingleton<V4.Hub>();
+        services.AddSingleton<IRealtimeHandler>(sp => sp.GetRequiredService<V4.Hub>());
+        services.AddHostedService(sp => sp.GetRequiredService<V4.Hub>());
         services.AddSingleton<IAccountLifecycle, LiveAccountLifecycle>();
         return services;
     }

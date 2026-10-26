@@ -22,7 +22,8 @@ Yeni dosyalar: `LobbyScreen.Strings.cs` (v4 metin anahtarları, hata kodu eşlem
 | `bad019d` | `v4/server` birleştirmesi |
 | `008d395` | `main` birleştirmesi (6565e6a) |
 | `dd24b37` | `LobbyClient` v4 protokolü; canlı sunucu testi `tableJoinCode` ve Başlat ile |
-| (son) | Bu belgeler ve referans kareleri |
+| `f451720` | Bu belgeler ve referans kareleri (main'deki kırmızı Hemen oyna testinin gerekçesi commit mesajında) |
+| (son) | Commit tablosu |
 
 ## 3. Durum ve görünüm başına değişiklikler
 

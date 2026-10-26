@@ -68,6 +68,22 @@ public sealed class Store(IServiceScopeFactory scopes, GameCalendar calendar)
         return await scope.ServiceProvider.GetRequiredService<Ledger>().ApplyAsync(account, chips, 0, reason, key, default);
     }
 
+    /// <summary>
+    /// A stake back (key <c>{stakeKey}:back</c>, applied at most once) — only if the ledger holds the stake: a stake write
+    /// that failed may or may not have landed. Null when there is nothing to give back.
+    /// </summary>
+    public async Task<LedgerResult?> RefundStakeAsync(Guid account, long amount, string stakeKey)
+    {
+        await using var scope = scopes.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<GameDb>();
+        var ledger = scope.ServiceProvider.GetRequiredService<Ledger>();
+        await using var tx = await db.Database.BeginTransactionAsync();
+        var charged = await db.Ledger.AnyAsync(l => l.AccountId == account && l.IdempotencyKey == stakeKey + "#chips" && l.Delta < 0);
+        var back = charged ? await ledger.ApplyAsync(account, amount, 0, "refund", stakeKey + ":back", default) : (LedgerResult?)null;
+        await tx.CommitAsync();
+        return back;
+    }
+
     public async Task<long> ChipsAsync(Guid account)
     {
         await using var scope = scopes.CreateAsyncScope();
@@ -134,7 +150,8 @@ public sealed class Store(IServiceScopeFactory scopes, GameCalendar calendar)
 
     /// <summary>
     /// After a restart: every v4 table still open lost its in-memory state. Each account gets back what the table holds of
-    /// it (its stakes minus refunds and payouts, from the table's ledger keys) and the record closes as aborted.
+    /// it (its stakes minus their refunds, from the table's <c>bet:</c> ledger keys) and the record closes as aborted. Gifts
+    /// sent at the table were spent, not held, and stay spent.
     /// </summary>
     public async Task<int> AbortOpenAsync(CancellationToken ct)
     {
@@ -146,8 +163,9 @@ public sealed class Store(IServiceScopeFactory scopes, GameCalendar calendar)
         foreach (var id in open)
         {
             var prefix = $"v4:{id}:";
+            var stakes = prefix + "bet:";
             await using var tx = await db.Database.BeginTransactionAsync(ct);
-            var held = await db.Ledger.Where(l => l.Currency == "chips" && l.IdempotencyKey.StartsWith(prefix))
+            var held = await db.Ledger.Where(l => l.Currency == "chips" && l.IdempotencyKey.StartsWith(stakes))
                 .GroupBy(l => l.AccountId).Select(g => new { Account = g.Key, Net = g.Sum(l => l.Delta) }).ToListAsync(ct);
             foreach (var h in held.Where(h => h.Net < 0))
                 await ledger.ApplyAsync(h.Account, -h.Net, 0, "refund", prefix + "abort", ct);
@@ -180,8 +198,11 @@ public sealed class Store(IServiceScopeFactory scopes, GameCalendar calendar)
         return (into, next, level, level - before);
     }
 
-    /// <summary>A leaver's quest progress and hands (their XP was written hand by hand), recorded when they leave.</summary>
-    public async Task LeaverAsync(Guid table, string mode, int seat, Guid account, int total, long stake, QuestCounters counters, int? lpDelta)
+    /// <summary>
+    /// A leaver's quest progress, the hands they finished (counts, wins, mode, streak) and LP, recorded when they leave;
+    /// their XP was written hand by hand. The match's own settlement later covers only whoever plays the seat then.
+    /// </summary>
+    public async Task LeaverAsync(Guid table, string mode, int seat, Guid account, int total, long stake, QuestCounters counters, IReadOnlyList<bool> handWins, int? lpDelta)
     {
         await using var scope = scopes.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<GameDb>();
@@ -193,11 +214,13 @@ public sealed class Store(IServiceScopeFactory scopes, GameCalendar calendar)
             MatchId = table, Seat = seat, AccountId = account, Mode = mode, Place = 4, Total = total, ChipDelta = -stake, LpDelta = lpDelta, Left = true, FinishedAt = calendar.Now,
         });
         await db.SaveChangesAsync();
+        // Lock order as everywhere: daily state, stats, wallet.
         await daily.AddProgressAsync(account, counters, default);
+        var stats = (await db.Stats.FromSql($"SELECT * FROM stats WHERE account_id = {account} FOR UPDATE").ToListAsync()).Single();
+        AddHands(stats, counters, handWins, Array.IndexOf(GameModes.Rated, mode));
         if (lpDelta is { } lp)
         {
             var season = calendar.Season;
-            var stats = (await db.Stats.FromSql($"SELECT * FROM stats WHERE account_id = {account} FOR UPDATE").ToListAsync()).Single();
             await Ranked.RollOverAsync(db, ledger, stats, season, default);
             (stats.Lp, stats.Shield) = Ranked.Apply(stats.Lp, stats.Shield, lp);
             stats.BestLp = Math.Max(stats.BestLp, stats.Lp);
@@ -205,13 +228,35 @@ public sealed class Store(IServiceScopeFactory scopes, GameCalendar calendar)
                 INSERT INTO leaderboard_scores (board, account_id, points) VALUES ({Social.LeaderboardEndpoints.SeasonBoard(season)}, {account}, {(long)stats.Lp})
                 ON CONFLICT (board, account_id) DO UPDATE SET points = EXCLUDED.points
                 """);
-            await db.SaveChangesAsync();
         }
+        await db.SaveChangesAsync();
         await tx.CommitAsync();
     }
 
-    /// <summary>Pays out, updates stats, leaderboards, LP and quests, records the participants and closes the match: all or nothing.</summary>
-    public async Task SettleAsync(Guid table, string mode, Guid[] seats, int botMask, IReadOnlyList<SeatSettlement> outcome)
+    /// <summary>Profile counts of the hands a person played at a table: hands, wins, okey finishes, pairs openings, streak, per mode.</summary>
+    private static void AddHands(PlayerStats stats, QuestCounters counters, IReadOnlyList<bool> handWins, int modeIndex)
+    {
+        stats.Hands += counters.HandsPlayed;
+        stats.Wins += counters.WinHands;
+        stats.OkeyFinishes += counters.OkeyFinishes;
+        stats.PairsOpenings += counters.PairsOpenings;
+        foreach (var won in handWins)
+        {
+            stats.CurrentStreak = won ? stats.CurrentStreak + 1 : 0;
+            stats.BestStreak = Math.Max(stats.BestStreak, stats.CurrentStreak);
+        }
+        if (modeIndex >= 0)
+        {
+            stats.ModeHands = [.. stats.ModeHands.Select((v, i) => i == modeIndex ? v + counters.HandsPlayed : v)];
+            stats.ModeWins = [.. stats.ModeWins.Select((v, i) => i == modeIndex ? v + counters.WinHands : v)];
+        }
+    }
+
+    /// <summary>
+    /// Pays out, updates stats, leaderboards, LP and quests, records the participants and closes the match: all or nothing,
+    /// and once — a retry after a failure that hid a commit finds the match completed and changes nothing (false).
+    /// </summary>
+    public async Task<bool> SettleAsync(Guid table, string mode, Guid[] seats, int botMask, IReadOnlyList<SeatSettlement> outcome)
     {
         await using var scope = scopes.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<GameDb>();
@@ -226,6 +271,10 @@ public sealed class Store(IServiceScopeFactory scopes, GameCalendar calendar)
         var existing = (await db.Accounts.Where(a => accounts.Contains(a.Id)).Select(a => a.Id).ToListAsync()).ToHashSet();
 
         await using var tx = await db.Database.BeginTransactionAsync();
+        // Closing the record first also locks it: a second settlement of the same match waits here and then finds it done.
+        var open = await db.Matches.Where(m => m.Id == table && m.Status != MatchStatus.Completed).ExecuteUpdateAsync(s => s
+            .SetProperty(m => m.Status, MatchStatus.Completed).SetProperty(m => m.FinishedAt, now).SetProperty(m => m.Seats, seats).SetProperty(m => m.BotMask, botMask));
+        if (open == 0) return false;
         foreach (var o in outcome)
         {
             var present = o.Account is { } id && existing.Contains(id);
@@ -241,20 +290,7 @@ public sealed class Store(IServiceScopeFactory scopes, GameCalendar calendar)
             var stats = (await db.Stats.FromSql($"SELECT * FROM stats WHERE account_id = {account} FOR UPDATE").ToListAsync()).Single();
             await Ranked.RollOverAsync(db, ledger, stats, season, default);
             if (o.Payout > 0) await ledger.ApplyAsync(account, o.Payout, 0, "payout", $"v4:{table}:payout", default);
-            stats.Hands += o.Counters.HandsPlayed;
-            stats.Wins += o.Counters.WinHands;
-            stats.OkeyFinishes += o.Counters.OkeyFinishes;
-            stats.PairsOpenings += o.Counters.PairsOpenings;
-            foreach (var won in o.HandWins)
-            {
-                stats.CurrentStreak = won ? stats.CurrentStreak + 1 : 0;
-                stats.BestStreak = Math.Max(stats.BestStreak, stats.CurrentStreak);
-            }
-            if (modeIndex >= 0)
-            {
-                stats.ModeHands = [.. stats.ModeHands.Select((v, i) => i == modeIndex ? v + o.Counters.HandsPlayed : v)];
-                stats.ModeWins = [.. stats.ModeWins.Select((v, i) => i == modeIndex ? v + o.Counters.WinHands : v)];
-            }
+            AddHands(stats, o.Counters, o.HandWins, modeIndex);
             if (o.LpDelta is { } lp)
             {
                 (stats.Lp, stats.Shield) = Ranked.Apply(stats.Lp, stats.Shield, lp);
@@ -271,9 +307,8 @@ public sealed class Store(IServiceScopeFactory scopes, GameCalendar calendar)
                     """);
             await db.SaveChangesAsync();
         }
-        await db.Matches.Where(m => m.Id == table).ExecuteUpdateAsync(s => s
-            .SetProperty(m => m.Status, MatchStatus.Completed).SetProperty(m => m.FinishedAt, now).SetProperty(m => m.Seats, seats).SetProperty(m => m.BotMask, botMask));
         await tx.CommitAsync();
+        return true;
     }
 
     /// <summary>The season LP of an account now (ranked LP table and rankChange before/after).</summary>

@@ -62,6 +62,7 @@ public sealed partial class Hub
         if (p.Queue is not null) return Reply.Fail(V4Errors.E_ALREADY_QUEUED);
         if (Busy(p)) return Reply.Fail(V4Errors.E_ALREADY_SEATED);
         if (m.Mode is not ("solo" or "duo" or "squad")) return Reply.Fail(V4Errors.E_MODE);
+        await CardAsync(p, refresh: true); // the league may have changed since the card was read (a match, the season)
         var party = new List<Person>();
         foreach (var id in (m.Party ?? []).Distinct())
             if (Guid.TryParse(id, out var g) && g != p.Id && await store.ExistsAsync(g) && !Busy(P(g))) party.Add(P(g));
@@ -69,7 +70,7 @@ public sealed partial class Hub
         if (party.Count != size || (m.Party?.Count ?? 0) != size) return Reply.Fail(V4Errors.E_PARTY_SIZE);
         foreach (var member in party)
         {
-            await CardAsync(member);
+            await CardAsync(member, refresh: true);
             // ±1 league (three divisions) between party members (mockServer rankedQueue).
             if (Math.Abs((member.Card?.RankIdx ?? 0) - (p.Card?.RankIdx ?? 0)) > 3) return Reply.Fail(V4Errors.E_PARTY_RANGE);
         }

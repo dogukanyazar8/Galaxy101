@@ -105,7 +105,11 @@ public sealed partial class Hub : IRealtimeReplyHandler, IHostedService
                 await RunDueAsync();
                 done.SetResult(result);
             }
-            catch (Exception error) { done.SetException(error); }
+            catch (Exception error)
+            {
+                done.SetException(error);
+                await RunDueAsync(); // work the failed item deferred (a stake to give back) runs now, not at the next message
+            }
         });
         if (!queued) done.SetException(new InvalidOperationException("The hub is stopped."));
         return done.Task;
@@ -165,10 +169,17 @@ public sealed partial class Hub : IRealtimeReplyHandler, IHostedService
         /// <summary>0–3 seated, -1 spectating (with <see cref="Table"/> set) or nowhere.</summary>
         public int Seat { get; set; } = -1;
         public RankedEntry? Queue { get; set; }
-        public bool Subscribed { get; set; }
     }
 
     private readonly Dictionary<Guid, Person> people = [];
+    /// <summary>Who follows the lobby list (lobbySubscribe): the lobby broadcasts go to them, not through everyone ever seen.</summary>
+    private readonly HashSet<Person> subscribers = [];
+
+    /// <summary>An offline account the hub holds nothing for is let go (its card is read again when it comes back).</summary>
+    private void ForgetIfIdle(Person p)
+    {
+        if (p.Table is null && p.Queue is null && !live.IsOnline(p.Id) && lobby.Where(p.Id) is null) { subscribers.Remove(p); people.Remove(p.Id); }
+    }
 
     private Person P(Guid id) => people.TryGetValue(id, out var p) ? p : people[id] = new Person(id);
 
@@ -287,13 +298,16 @@ public sealed partial class Hub : IRealtimeReplyHandler, IHostedService
     private async Task DisconnectedAsync(Guid account)
     {
         if (!people.TryGetValue(account, out var p)) return;
-        p.Subscribed = false;
-        if (p.Table is not { } t) return;
-        if (p.Seat < 0) { t.Spectators.Remove(p.Id); p.Table = null; return; }
-        // Waiting room: out at once, stake back (R-66, reconnectWaitRoom 0). In the match the seat is kept (R-66); a ranked
-        // table being prepared is already the match (its seat stays, the server plays it when its turns time out).
-        if (t.Status is "waiting" or "countdown" && !t.Ranked) { await LeaveWaitRoomAsync(t, p, "disconnect"); return; }
-        t.Run?.Disconnect(p.Seat);
+        subscribers.Remove(p);
+        if (p.Table is { } t)
+        {
+            if (p.Seat < 0) { t.Spectators.Remove(p.Id); p.Table = null; }
+            // Waiting room: out at once, stake back (R-66, reconnectWaitRoom 0). In the match the seat is kept (R-66); a ranked
+            // table being prepared is already the match (its seat stays, the server plays it when its turns time out).
+            else if (t.Status is "waiting" or "countdown" && !t.Ranked) await LeaveWaitRoomAsync(t, p, "disconnect");
+            else t.Run?.Disconnect(p.Seat);
+        }
+        ForgetIfIdle(p);
     }
 
     /// <summary>The account is deleted or banned: out of the queue, the waiting room or the match (a forfeit, R-60).</summary>
@@ -303,6 +317,17 @@ public sealed partial class Hub : IRealtimeReplyHandler, IHostedService
         if (p.Queue is { } q) { var f = q.Found; Unqueue(q, "cancel"); q.Found = null; if (f is not null) { Release(f, q); TryMatch(); } }
         if (p.Table is not null) await TableLeaveAsync(p);
         return true;
+    });
+
+    /// <summary>A block set or lifted over HTTP: the blocker's table chat filter follows at once (it was read when they sat).</summary>
+    public Task BlockChangedAsync(Guid blocker, Guid blocked, bool on) => Run(() =>
+    {
+        if (people.TryGetValue(blocker, out var p) && p.Table is { Closed: false } t)
+        {
+            if (on) t.Blocks.Add((blocker, blocked));
+            else t.Blocks.Remove((blocker, blocked));
+        }
+        return Task.FromResult(true);
     });
 
     // ---- Game intents ----------------------------------------------------------------------------------------------

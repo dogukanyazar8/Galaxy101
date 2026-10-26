@@ -33,8 +33,12 @@ public sealed partial class Hub
     {
         public long HandXp;
         public int WinHands, PairsOpenings, HandsPlayed, OkeyFinishes, TilesAdded;
+        /// <summary>This turn's openings and lay-offs: they count once the turn ends with them, an undo (R-34) or a returned side tile drops them.</summary>
+        public int TurnPairsOpenings, TurnTilesAdded;
         public List<bool> HandWins { get; } = [];
         public QuestCounters Counters => new(WinHands, PairsOpenings, HandsPlayed, OkeyFinishes, TilesAdded);
+        public void KeepTurn() { PairsOpenings += TurnPairsOpenings; TilesAdded += TurnTilesAdded; DropTurn(); }
+        public void DropTurn() { TurnPairsOpenings = 0; TurnTilesAdded = 0; }
     }
 
     private sealed class Table
@@ -60,6 +64,8 @@ public sealed partial class Hub
         public int Cd { get; set; }
         public Dictionary<string, object> Timers { get; } = [];
         public long BetsPaid { get; set; }
+        /// <summary>Stakes on their way back whose ledger write has not succeeded yet: the record stays open (restart refund) until 0.</summary>
+        public int RefundsOwed { get; set; }
         public int Sequence { get; set; }
         public required RngState ChatRng { get; init; }
         public TableRuntime? Run { get; set; }
@@ -110,11 +116,24 @@ public sealed partial class Hub
         return table;
     }
 
-    private Task RecordAsync(Table t) => store.CreateRecordAsync(t.Id, t.RecordMode, t.Bet, t.Hands, t.TurnSec, new
+    /// <summary>The table's durable record; without it the table is not opened (it would hold stakes no restart could find).</summary>
+    private async Task RecordAsync(Table t)
     {
-        engine = Store.Engine, ruleVersion = G101Rules.RuleVersion, shuffleVersion = G101Rules.ShuffleVersion, mode = t.Mode, @private = t.Private,
-        katlama = t.Katlama, katlamaPartner = t.KatlamaPartner, rules = t.Rules, ranked = t.Ranked, vsBots = t.VsBots,
-    });
+        try
+        {
+            await store.CreateRecordAsync(t.Id, t.RecordMode, t.Bet, t.Hands, t.TurnSec, new
+            {
+                engine = Store.Engine, ruleVersion = G101Rules.RuleVersion, shuffleVersion = G101Rules.ShuffleVersion, mode = t.Mode, @private = t.Private,
+                katlama = t.Katlama, katlamaPartner = t.KatlamaPartner, rules = t.Rules, ranked = t.Ranked, vsBots = t.VsBots,
+            });
+        }
+        catch (Exception)
+        {
+            t.Closed = true;
+            tables.Remove(t.Id);
+            throw;
+        }
+    }
 
     private V4User BotCard(int seat, int rankIdx = 0) => new()
     {
@@ -147,17 +166,17 @@ public sealed partial class Hub
     {
         if (!t.Listed) return;
         object payload = removed ? new V4IdEvent { Id = t.Id.ToString(), At = now } : new V4TableEvent { Table = TablePub(t), At = now };
-        foreach (var p in people.Values.Where(p => p.Subscribed)) Send(p.Id, removed ? V4Messages.LobbyTableRemoved : V4Messages.LobbyTable, payload);
+        foreach (var p in subscribers) Send(p.Id, removed ? V4Messages.LobbyTableRemoved : V4Messages.LobbyTable, payload);
     }
 
     private Reply LobbySubscribe(Person p)
     {
-        p.Subscribed = true;
+        subscribers.Add(p);
         Send(p.Id, V4Messages.Lobby, new V4LobbyEvent { Tables = [.. tables.Values.Where(t => t.Listed && !t.Closed).Select(TablePub)], At = now });
         return Reply.Ok;
     }
 
-    private Reply LobbyUnsubscribe(Person p) { p.Subscribed = false; return Reply.Ok; }
+    private Reply LobbyUnsubscribe(Person p) { subscribers.Remove(p); return Reply.Ok; }
 
     /// <summary>Somewhere already: a table, the ranked queue, or a quick match / room of the earlier protocol.</summary>
     private bool Busy(Person p) => p.Table is not null || p.Queue is not null || lobby.Where(p.Id) is not null;
@@ -178,12 +197,16 @@ public sealed partial class Hub
         if (!TableEconomy.Bets.Contains(m.Bet) || !TableEconomy.Hands.Contains(m.Hands) || !TableEconomy.TurnSec.Contains(m.TurnSec) ||
             m.Mode is not ("solo" or "pairs") || chat is not ("open" or "quick" or "off"))
             return Reply.Fail(V4Errors.E_TABLE_OPTIONS);
-        var chips = p.Card?.Chips ?? await store.ChipsAsync(p.Id);
+        // The wallet, not the cached card: chips may have come in over HTTP (daily reward, shop) since the card was read.
+        var chips = await store.ChipsAsync(p.Id);
         if (chips < m.Bet) return Reply.Fail(V4Errors.E_NO_CHIPS, new { missing = m.Bet - chips });
         m.Name = Social.TextFilter.Mask(name); // listed to everyone in the lobby (existing rule)
         var t = NewTable(p.Id, m);
         await RecordAsync(t);
-        if (await SeatAsync(t, p, 0) is { } error) { await CloseTableAsync(t, null); return error; }
+        Reply? error;
+        try { error = await SeatAsync(t, p, 0); }
+        catch (Exception) { await CloseTableAsync(t, null); throw; }
+        if (error is not null) { await CloseTableAsync(t, null); return error; }
         return Reply.With(("table", TablePub(t)));
     }
 
@@ -195,7 +218,7 @@ public sealed partial class Hub
         if (t.Bet > 0 && !t.Ranked && !t.VsBots)
         {
             var key = $"v4:{t.Id}:bet:{p.Id:N}:{++t.Sequence}";
-            var paid = await store.ApplyAsync(p.Id, -t.Bet, "stake", key);
+            var paid = await StakeAsync(t, p, key);
             if (paid.Outcome != LedgerOutcome.Applied)
             {
                 lobby.Exit(p.Id, LobbyPlace.Room);
@@ -213,14 +236,57 @@ public sealed partial class Hub
         return null;
     }
 
+    /// <summary>
+    /// Takes the stake (R-90). A failed write releases the room the person reserved and may still have landed, so it is
+    /// given back if the ledger holds it (<see cref="ReturnStakeAsync"/>) before the error goes on.
+    /// </summary>
+    private async Task<LedgerResult> StakeAsync(Table t, Person p, string key)
+    {
+        try { return await store.ApplyAsync(p.Id, -t.Bet, "stake", key); }
+        catch (Exception error) when (error is not OperationCanceledException)
+        {
+            lobby.Exit(p.Id, LobbyPlace.Room);
+            t.RefundsOwed++;
+            Defer(() => ReturnStakeAsync(t, p.Id, key, 0));
+            throw;
+        }
+    }
+
     /// <summary>The stake back to a person leaving before the match (R-90, D-11) or kicked.</summary>
     private async Task RefundAsync(Table t, Person p, Occupant o)
     {
         if (o.StakeKey is not { } key) return;
+        // The seat no longer holds it; the return below is retried until the ledger takes it.
         o.StakeKey = null;
-        var back = await store.ApplyAsync(p.Id, t.Bet, "refund", key + ":back");
         t.BetsPaid -= t.Bet;
-        if (back.Outcome == LedgerOutcome.Applied) Balance(p, back.Chips, back.Gems, t.Bet, "betRefund", t.Id.ToString());
+        t.RefundsOwed++;
+        await ReturnStakeAsync(t, p.Id, key, 0);
+    }
+
+    private const int RefundRetryMs = 5000;
+
+    /// <summary>
+    /// One owed stake (counted in <see cref="Table.RefundsOwed"/>) goes back under its idempotent key; a storage failure
+    /// retries later. When the last one is back and the table has closed before its match, its record closes too.
+    /// </summary>
+    private async Task ReturnStakeAsync(Table t, Guid account, string key, int attempt)
+    {
+        LedgerResult? back;
+        try { back = await store.RefundStakeAsync(account, t.Bet, key); }
+        catch (Exception error) when (error is not OperationCanceledException)
+        {
+            log.LogWarning(error, "v4 table {Table}: stake of {Account} not returned yet (attempt {Attempt})", t.Id, account, attempt + 1);
+            Schedule(now + RefundRetryMs * Math.Min(attempt + 1, 12), () => ReturnStakeAsync(t, account, key, attempt + 1));
+            return;
+        }
+        if (back is { Outcome: LedgerOutcome.Applied } b) Balance(P(account), b.Chips, b.Gems, t.Bet, "betRefund", t.Id.ToString());
+        if (--t.RefundsOwed == 0 && t.Closed && t.Status == "over" && t.Run is null) await CloseRecordAsync(t);
+    }
+
+    private async Task CloseRecordAsync(Table t)
+    {
+        try { await store.CloseRecordAsync(t.Id); }
+        catch (Exception error) when (error is not OperationCanceledException) { log.LogWarning(error, "v4 table {Table}: record not closed", t.Id); }
     }
 
     private Reply? JoinCheck(Table? t, Person p, string? pin, out int seat)
@@ -231,8 +297,7 @@ public sealed partial class Hub
         if (t.Pin is not null && pin != t.Pin) return Reply.Fail(V4Errors.E_PIN_WRONG);
         seat = Array.IndexOf(t.Seats, null);
         if (seat < 0 || t.Status != "waiting") return Reply.Fail(V4Errors.E_TABLE_FULL);
-        var chips = p.Card?.Chips ?? 0;
-        if (t.Bet > 0 && chips < t.Bet) return Reply.Fail(V4Errors.E_NO_CHIPS, new { missing = t.Bet - chips });
+        // Chips are checked by the stake itself (SeatAsync): the cached card can be behind the wallet.
         return null;
     }
 
@@ -270,14 +335,12 @@ public sealed partial class Hub
         if (t.Pin is not null && m.Pin != t.Pin) return Reply.Fail(V4Errors.E_PIN_WRONG);
         var k = m.Seat is >= 0 and <= 3 ? m.Seat.Value : Enumerable.Range(0, 4).Where(i => t.Seats[i] is { IsBot: true }).DefaultIfEmpty(-1).First();
         if (k < 0 || t.Seats[k] is not { IsBot: true } || t.Run is null || t.Run.Over) return Reply.Fail(V4Errors.E_TABLE_FULL);
-        var chips = p.Card?.Chips ?? 0;
-        if (t.Bet > 0 && chips < t.Bet) return Reply.Fail(V4Errors.E_NO_CHIPS, new { missing = t.Bet - chips });
         if (!lobby.TryEnter(p.Id, LobbyPlace.Room)) return Reply.Fail(V4Errors.E_ALREADY_SEATED);
         var occupant = new Occupant { Account = p.Id };
         if (t.Bet > 0)
         {
             var key = $"v4:{t.Id}:bet:{p.Id:N}:{++t.Sequence}";
-            var paid = await store.ApplyAsync(p.Id, -t.Bet, "stake", key);
+            var paid = await StakeAsync(t, p, key);
             if (paid.Outcome != LedgerOutcome.Applied) { lobby.Exit(p.Id, LobbyPlace.Room); return Reply.Fail(V4Errors.E_NO_CHIPS, new { missing = Math.Max(0, t.Bet - paid.Chips) }); }
             occupant.StakeKey = key;
             t.BetsPaid += t.Bet;
@@ -288,12 +351,7 @@ public sealed partial class Hub
         if (t.Run.TakeSeat(k) is { } engine)
         {
             t.Seats[k] = before;
-            if (occupant.StakeKey is { } paidKey)
-            {
-                var back = await store.ApplyAsync(p.Id, t.Bet, "refund", paidKey + ":back");
-                t.BetsPaid -= t.Bet;
-                Balance(p, back.Chips, back.Gems, t.Bet, "betRefund", t.Id.ToString());
-            }
+            await RefundAsync(t, p, occupant);
             lobby.Exit(p.Id, LobbyPlace.Room);
             return Reply.Fail(engine);
         }
@@ -351,7 +409,7 @@ public sealed partial class Hub
         }
         var book = t.Books[seat];
         t.Books[seat] = new SeatBook();
-        Defer(() => store.LeaverAsync(t.Id, t.RecordMode, seat, p.Id, t.Run.Match.Totals[seat], t.Bet, book.Counters, lp));
+        Defer(() => LeaverAsync(t.Id, t.RecordMode, seat, p.Id, t.Run.Match.Totals[seat], t.Bet, book.Counters, [.. book.HandWins], lp, 0));
         TableState(t);
         Send(p.Id, V4Messages.LeftTable, new V4LeftTable { Reason = "leave", ToLobbyIn = TableTimings.LeaveToLobby, At = now });
         LobbyEmit(t);
@@ -398,8 +456,8 @@ public sealed partial class Hub
         t.Closed = true;
         LobbyEmit(t, removed: true);
         tables.Remove(t.Id);
-        try { await store.CloseRecordAsync(t.Id); }
-        catch (Exception error) when (error is not OperationCanceledException) { log.LogWarning(error, "v4 table {Table}: record not closed", t.Id); }
+        // A stake still on its way back keeps the record open: a restart then returns it (Store.AbortOpenAsync).
+        if (t.RefundsOwed == 0) await CloseRecordAsync(t);
     }
 
     // ---- Waiting room ------------------------------------------------------------------------------------------------

@@ -49,10 +49,16 @@ public sealed partial class Hub
             switch (e.E)
             {
                 case "opened" when e.Str("mode") == G101Rules.KindPair:
-                    t.Books[e.Int("seat")].PairsOpenings++;
+                    t.Books[e.Int("seat")].TurnPairsOpenings++;
                     break;
                 case "added":
-                    t.Books[e.Int("seat")].TilesAdded++;
+                    t.Books[e.Int("seat")].TurnTilesAdded++;
+                    break;
+                case "undone" or "sideReturned":                // R-34 / R-32: the turn's table moves are taken back
+                    t.Books[e.Int("seat")].DropTurn();
+                    break;
+                case "discarded" or "finished":
+                    t.Books[e.Int("seat")].KeepTurn();
                     break;
                 case "handEnd":
                     var result = (Dictionary<string, object>)e["result"];
@@ -72,6 +78,17 @@ public sealed partial class Hub
                     }
                     break;
             }
+        }
+    }
+
+    /// <summary>A leaver's record (Store.LeaverAsync): a storage hiccup is retried a few times rather than losing their LP and counts.</summary>
+    private async Task LeaverAsync(Guid table, string mode, int seat, Guid account, int total, long stake, QuestCounters counters, List<bool> handWins, int? lp, int attempt)
+    {
+        try { await store.LeaverAsync(table, mode, seat, account, total, stake, counters, handWins, lp); }
+        catch (Exception error) when (error is not OperationCanceledException && attempt < 4)
+        {
+            log.LogWarning(error, "v4 table {Table}: leaver {Account} not stored yet (attempt {Attempt})", table, account, attempt + 1);
+            Schedule(now + 5000 * (attempt + 1), () => LeaverAsync(table, mode, seat, account, total, stake, counters, handWins, lp, attempt + 1));
         }
     }
 
@@ -97,31 +114,41 @@ public sealed partial class Hub
         var accounts = Enumerable.Range(0, 4).Select(k => person[k] ? t.Seats[k]!.Account : null).ToArray();
         var seasonLp = new int[4];
         var shields = new int[4];
-        if (t.Ranked)
-            for (var k = 0; k < 4; k++)
-                if (accounts[k] is { } a) (seasonLp[k], shields[k]) = await store.RankAsync(a);
         var pool = t.Ranked || t.VsBots ? 0 : t.BetsPaid;
-        var shares = TableSettlement.Compute(s.Ranking, person, pool, t.Ranked ? k => Profile.Ranked.Table(seasonLp[k]) : null,
-            t.VsBots || t.Private ? null : options.WeeklyPoints, options.XpPlace);
-        var outcome = Enumerable.Range(0, 4).Select(k => new SeatSettlement(
-            k, accounts[k], shares.Place(k), s.Totals[k], shares.Payouts[k], t.Seats[k]?.StakeKey is null ? 0 : t.Bet, shares.Lp[k], shares.Weekly[k],
-            t.Books[k].HandXp + shares.XpBonus[k], person[k] ? t.Books[k].Counters : new QuestCounters(0, 0, 0, 0, 0), person[k] ? t.Books[k].HandWins : [], false)).ToList();
-        try { await store.SettleAsync(t.Id, t.RecordMode, SeatIds(t), BotMask(t), outcome); }
+        SettlementShares shares;
+        // Everything up to the stored settlement is retried as one: a failed read (ranked LP) must not leave the table open.
+        try
+        {
+            if (t.Ranked)
+                for (var k = 0; k < 4; k++)
+                    if (accounts[k] is { } a) (seasonLp[k], shields[k]) = await store.RankAsync(a);
+            shares = TableSettlement.Compute(s.Ranking, person, pool, t.Ranked ? k => Profile.Ranked.Table(seasonLp[k]) : null,
+                t.VsBots || t.Private ? null : options.WeeklyPoints, options.XpPlace);
+            var outcome = Enumerable.Range(0, 4).Select(k => new SeatSettlement(
+                k, accounts[k], shares.Place(k), s.Totals[k], shares.Payouts[k], t.Seats[k]?.StakeKey is null ? 0 : t.Bet, shares.Lp[k], shares.Weekly[k],
+                t.Books[k].HandXp + shares.XpBonus[k], person[k] ? t.Books[k].Counters : new QuestCounters(0, 0, 0, 0, 0), person[k] ? t.Books[k].HandWins : [], false)).ToList();
+            if (!await store.SettleAsync(t.Id, t.RecordMode, SeatIds(t), BotMask(t), outcome))
+                log.LogWarning("v4 table {Table}: the match was already settled; closing it", t.Id);
+        }
         catch (Exception error) when (error is not OperationCanceledException)
         {
             log.LogWarning(error, "v4 table {Table}: settlement not stored; retrying", t.Id);
             Schedule(now + 5000, () => MatchOverAsync(t));
             return;
         }
+        // Stored: from here on a failing read only costs a stale line on someone's screen; the table always closes.
         for (var k = 0; k < 4; k++)
         {
             if (accounts[k] is not { } account) continue;
             var p = P(account);
-            if (shares.Payouts[k] > 0)
+            try
             {
+                // The fresh card carries the payout and the new league (the next ranked queue reads it).
                 var card = await store.CardAsync(account);
-                if (card is not null) { p.Card = card; Balance(p, card.Chips, card.Gems, shares.Payouts[k], "win", t.Id.ToString()); }
+                if (card is not null) p.Card = card;
+                if (card is not null && shares.Payouts[k] > 0) Balance(p, card.Chips, card.Gems, shares.Payouts[k], "win", t.Id.ToString());
             }
+            catch (Exception error) when (error is not OperationCanceledException) { log.LogWarning(error, "v4 table {Table}: card of {Account} not read", t.Id, account); }
             if (shares.Lp[k] is { } lp) RankChange(p, seasonLp[k], shields[k], lp, shares.Place(k));
         }
         TableEmit(t, V4Messages.MatchResult, new V4MatchResult
@@ -131,7 +158,12 @@ public sealed partial class Hub
         });
         // R-93 place bonus (the leaver gets none: their seat is a bot now).
         for (var k = 0; k < 4; k++)
-            if (accounts[k] is { } account && shares.XpBonus[k] > 0) await XpAsync(account, shares.XpBonus[k], "match");
+            if (accounts[k] is { } account && shares.XpBonus[k] > 0)
+            {
+                // The bonus is stored with the settlement (participant XP); this is the profile's running total and its event.
+                try { await XpAsync(account, shares.XpBonus[k], "match"); }
+                catch (Exception error) when (error is not OperationCanceledException) { log.LogWarning(error, "v4 table {Table}: match XP of {Account} not added", t.Id, account); }
+            }
         t.Status = "over";
         t.Closed = true;
         t.Run.Stop();

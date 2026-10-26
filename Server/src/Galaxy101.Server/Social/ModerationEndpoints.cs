@@ -39,7 +39,7 @@ public static class ModerationEndpoints
             return Results.Ok(ids.Where(cards.ContainsKey).Select(id => cards[id]).ToList());
         });
 
-        players.MapPost("/{id:guid}/block", async (Guid id, HttpContext http, GameDb db, MatchManager matches, TimeProvider clock, CancellationToken ct) =>
+        players.MapPost("/{id:guid}/block", async (Guid id, HttpContext http, GameDb db, MatchManager matches, V4.Hub hub, TimeProvider clock, CancellationToken ct) =>
         {
             var me = http.User.AccountId();
             if (id == me || !await db.Accounts.AnyAsync(a => a.Id == id, ct)) return Api.NotFound();
@@ -54,14 +54,16 @@ public static class ModerationEndpoints
             }
             await tx.CommitAsync(ct);
             await Quietly(matches.BlockChangedAsync(me, id, true));
+            await Quietly(hub.BlockChangedAsync(me, id, true));
             return Results.NoContent();
         });
 
-        players.MapDelete("/{id:guid}/block", async (Guid id, HttpContext http, GameDb db, MatchManager matches, CancellationToken ct) =>
+        players.MapDelete("/{id:guid}/block", async (Guid id, HttpContext http, GameDb db, MatchManager matches, V4.Hub hub, CancellationToken ct) =>
         {
             var me = http.User.AccountId();
             await db.Blocks.Where(b => b.BlockerId == me && b.BlockedId == id).ExecuteDeleteAsync(ct);
             await Quietly(matches.BlockChangedAsync(me, id, false));
+            await Quietly(hub.BlockChangedAsync(me, id, false));
             return Results.NoContent();
         });
 

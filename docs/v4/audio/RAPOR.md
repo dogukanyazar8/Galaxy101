@@ -73,7 +73,7 @@ Masa dosyalarına dokunulmadı. Ses nesnesi menüden gelir ve sahneler arası ka
 4. **Dağıtım töreni / protokol**: `dealStart` → `Table.DealStart()`; `dealDie` → `Table.DealDie()`; `dealStep` → `Table.DealStep(step)` (indicator, distribute; diğer adımlar sessiz); tören bitince sıra bendeyse `Table.Turn(seat, mySeat, dealing: false)`.
 5. **Masa olayları**: geri sayım `Table.Countdown(n)` (3-2-1 tik, bitince `null` → count.go) · tur uyarısı eşiği `Table.TurnWarning()` · ıstakada yer değişimi `Table.RackMove()` · hediye uçuşu `Table.GiftFlight(gift, from)` (roket `"rocket"`) · emoji uçuşu `Table.EmojiFlight(from)` · bana ikram kartı göründü (ikram uyarısı açıksa) `Table.GiftReceived(from)` · sohbet satırı `Table.Chat(seat, mySeat)` (benimki sessiz, sistem satırı −1 çalar) · hediye/sohbet/ayarlar/kalk onayı açıldı/kapandı `Table.Panel(open)` · kırmızı sistem satırı ya da protokol hatası `Table.ErrorUi(ui)` (toast/shake/inline → ui.error) veya doğrudan `GalaxyAudio.Play("ui.error")`.
 6. **İmleç**: 3D alanda `GalaxyCursor.World = "grab"` (oynanabilir taşın üstü) / `"default"`; taş sürüklenirken `GalaxyCursor.Hold("grabbing")`, geçerli bırakma alanında `Hold("drop")`, bırakınca `GalaxyCursor.Release()`. HUD'un saydam bölgeleri `PickingMode.Ignore` olmalı (yoksa 3D alan "UI" sayılır). HUD'daki özel tıklanırlar `GalaxyCursor.Mark(e, "pointer")` ya da `PressSink` (EK-909); meşgulken kök `GalaxyCursor.Lock(root, "wait")`.
-7. Eski `Okey101 TableAudio` (3 kayıt klibi) Galaxy masasında kullanılmıyor; taş sesi seçimi EK-413 (hat D).
+7. Eski `Okey101 TableAudio` Galaxy masasında kullanılmıyor. 2026-10-26 düzeltmesi: eski üç WAV kayıt değil sentez; gerçek kayıt depodaki `source-assets/audio` dosyası. Kullanıcının EK-413 kararıyla desteklenen beş Galaxy olayı bu kayıttan üretilen kesitlere bağlandı (§11).
 
 ## 6. Diğer hatların yapacakları
 
@@ -120,3 +120,39 @@ Unity'de bakılacaklar (koşulmadı): ses nesnesi menüde müziği açıyor mu, 
 | `cdc9fb2` | RAPOR, EKSIKLER, UNITY_FARKLARI |
 | `99735d6` | Hata veren ekran kaynağı düşürülür; imleç ad süzgeci önbellekte |
 | (bu commit) | RAPOR'da commit kimlikleri |
+
+## 11. EK-413 · gerçek taş kaydı kararı (2026-10-26)
+
+Bu ekin tabanı `main` **5cbc5e1**; `v4/audio` temizken fast-forward alındı. Kullanıcı gerçek taş kayıtlarını seçti. Önceki rapor ve EK-413'te eski üç WAV'ın kayıt olduğu varsayımı yanlıştı: `Assets/Okey101/Art/asset-sources.md` bunları sentez olarak tanımlar; dosyalar 0,15 / 0,11 / 0,14 sn. Gerçek kaynak `source-assets/audio/macif-329100-preview-decoded.wav`; kaynak kaydı Macif / **Domino pieces 2** / Freesound **329100**, CC0 1.0 (`source-assets/audio/README.md`). Lisans bilgisi depodaki kaynak kaydından; bu çalışmada dış servis sorgulanmadı.
+
+Mevcut `scripts/prepare-table-audio.py` değiştirilmeden geçici klasöre koşuldu. 1,50 / 2,69 / 3,40 sn temaslarından 44.100 Hz, 16 bit mono, **0,28 sn** draw/place/discard üretildi; yeni ton, perde değişimi veya ek ses katmanı yok. Yalnız bu üç WAV `Resources/Galaxy101/Audio/RecordedTiles` içine alındı. Importer mevcut efektlerden: Decompress On Load, preload açık. Kaynak ve çıktı SHA-256'ları `recorded_tiles_evidence.json` içinde.
+
+| Motor olayı | Ses olayı | Gerçek kesit | Eşleme dayanağı |
+|---|---|---|---|
+| drew | tile.draw | draw | `TableAudio.Play`: Draw |
+| discarded | tile.discard | discard | `TableAudio.Play`: Discard |
+| opened / laid | meld.lay | place | `TableAudio.Play`: GroupsOpened / GroupAdded |
+| added | meld.add | place | `TableAudio.Play`: GroupExtended |
+| okeySwapped | okey.swap | place | `TableAudio.Play`: JokerSwapped |
+
+`sound_events.json` içindeki beş `clip` ve beş `wavSeconds` değeri ile kaynak/format açıklaması değişti. Olay tetikleyicisi, kategori, gain, prio, poly, ms, rakip çekişinin %70 payı, müzik ve kanal kuralları aynı. `GalaxyAudioHost` kaynak yükleme ve oynatma kodu değişmedi. Üç küçük Resources klibi, editör/prefab üretimi gerektirmeden mevcut yükleyiciye uyuyor. `tile.slide`, `deal.shuffle`, `deal.indicator`, `deal.distribute` ve `dice.roll` için bu üç teması seçmeyi destekleyen eski kayıt eşlemesi yok; paket sesleri korunuyor.
+
+Günlük değerlendirmesi: `SoundEngine.Play` bilinen olayın **isteğini** `(Id, Time, Seat)` olarak sonuçtan önce yazar, son 200 kaydı tutar. `Muted`, `Silent` ve `Limited` istekleri de günlükte; bilinmeyen olaylar yazılmaz. Klip yükleme başarısı ve donanım çıkışı günlükte yok. Dolayısıyla `GalaxyAudio.Log` tetikleyici/zamanlama kanıtıdır; tek başına çalındı ya da duyuldu kanıtı değildir.
+
+Doğrulama:
+
+- **RED:** yeni `RecordedTileAudioTests.EngineTileEventsLoadThePhysicalRecording` altı motor olayı için eski sentez Resources yolunda beklenen nedenle 6/6 kırmızı.
+- **GREEN:** `AudioRulesTests.csproj` tam koşusu **17/17**, sıfır atlama. Gerçek motor-olay → klip yolu, üç üretilmiş WAV'ın SHA-256'sı, 0,28 sn katalog süresi, kategori kazancı/anahtarı, poly/ms penceresi, rakip çekişi ve sessiz/susturulmuş/sınırlanmış istek günlüğü.
+- `Galaxy101.PlayMode.Tests`, `Galaxy101.Service.Tests`, `Galaxy101.Editor.Tests`: `unity_compile.py`, **0 hata**. İlk Editor denemesinde test dosyasının doğrudan Newtonsoft kullanımı eksik derleme başvurusuna takıldı; o bağımlılık kaldırıldı, Editor tekrar temiz derlendi.
+- `AudioServiceTests` mevcut 28 olayın paket politika karşılaştırmasını ve üç gerçek klip istisnasını doğruluyor; Unity gerektirdiği için yalnız derlendi.
+- `AudioPlaybackTests` iki gerçek AudioSource PlayMode testi: menü/masa döngüsü ve çapraz geçiş; kayıt klibi/öncelik/SFX kazancı ve tile/chat/master anahtarları. Testler otomatik ekran izleyicisini etkisiz bırakıp gerçek Unity host'unu izole çağırır; Unity çalıştırılmadığından **koşulmadı**. Menü→masa sahne akışı, import sonucu, ses aygıtı ve kulağa gelen kalite henüz doğrulanmadı.
+
+Tekrar koşu (kök dizinden; `UnityCoreModule` kurulu editörün yolu, `ScratchRoot` her paralel koşuda ayrı olmalı):
+
+```powershell
+$scratch = Join-Path $env:TEMP ('g101-real-audio-check-' + [guid]::NewGuid().ToString('N'))
+dotnet test docs/v4/audio/tests/AudioRulesTests.csproj -p:ScratchRoot=$scratch -p:UnityCoreModule='C:/Program Files/Unity/Hub/Editor/6000.6.6f1/Editor/Data/Managed/UnityEngine/UnityEngine.CoreModule.dll'
+python tools/v4/unity_compile.py --repo C:/GD/Okey101-v4/audio --csproj-from 'C:/GD/Okey 101' --scratch "$scratch/compile" --project Galaxy101.PlayMode.Tests
+```
+
+Unity çalıştırması ana kopyada sırayla yapılmalı: `Galaxy101.Tests.AudioPlaybackTests` (PlayMode) ve ses EditMode testleri. Sonra gerçek menü→masa geçişi ve kayıtların dinlenmesi. Bu çalışmada Unity/editor/player, ana kopya, masa/HUD/ayar/model kodu ve dış durum değiştirilmedi.

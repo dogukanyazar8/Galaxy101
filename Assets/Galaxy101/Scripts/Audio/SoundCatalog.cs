@@ -16,9 +16,9 @@ namespace Galaxy101.Audio
         public int Priority { get; internal set; }
         /// <summary>poly: at most this many copies of the event at once.</summary>
         public int Poly { get; internal set; }
-        /// <summary>ms: how long one copy counts against <see cref="Poly"/> (the WAV runs longer: its synthesis tail).</summary>
+        /// <summary>ms: the v4 concurrency window, independent of the clip's recorded or synthesized duration.</summary>
         public int Ms { get; internal set; }
-        /// <summary>Resources path of the clip (Galaxy101/Audio/Sfx/…).</summary>
+        /// <summary>Resources path of the clip (Galaxy101/Audio/Sfx/… or RecordedTiles/… for EK-413).</summary>
         public string Clip { get; internal set; }
         public float WavSeconds { get; internal set; }
         public string Trigger { get; internal set; }

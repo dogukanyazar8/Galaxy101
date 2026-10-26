@@ -1,0 +1,45 @@
+{
+  "decision": "EK-413: real tile recordings, 2026-10-26",
+  "source": {
+    "file": "source-assets/audio/macif-329100-preview-decoded.wav",
+    "sha256": "8f13bdf82cc0736e6ee398c3e981bc5decf10cc322f1c7081737142444c011cc",
+    "work": "Domino pieces 2",
+    "author": "Macif",
+    "freesoundId": 329100,
+    "license": "CC0 1.0",
+    "provenance": "source-assets/audio/README.md; license not rechecked online in this run"
+  },
+  "preparation": {
+    "script": "scripts/prepare-table-audio.py",
+    "sha256": "c52a800bc5843094b1d6f77caddd5a7b70f2b63a90dbfab67f0717e6167ba883"
+  },
+  "clips": [
+    {
+      "file": "Assets/Galaxy101/Resources/Galaxy101/Audio/RecordedTiles/discard.wav",
+      "sha256": "66b4737c2798c44d72572a7df2f49ee0073e5fb59031b77c43b3b002babad9b0",
+      "sourceContactSeconds": 3.4,
+      "durationSeconds": 0.28,
+      "channels": 1,
+      "sampleRate": 44100,
+      "bits": 16
+    },
+    {
+      "file": "Assets/Galaxy101/Resources/Galaxy101/Audio/RecordedTiles/draw.wav",
+      "sha256": "ed9f02c5ac8ea7c37960bb991cab821e1da7c5fd5665ddf5be080a1aa712d2e4",
+      "sourceContactSeconds": 1.5,
+      "durationSeconds": 0.28,
+      "channels": 1,
+      "sampleRate": 44100,
+      "bits": 16
+    },
+    {
+      "file": "Assets/Galaxy101/Resources/Galaxy101/Audio/RecordedTiles/place.wav",
+      "sha256": "4309e7e2a8175612b556065613b0b1fc365adc2d59d466b218c7f7138fa854cc",
+      "sourceContactSeconds": 2.69,
+      "durationSeconds": 0.28,
+      "channels": 1,
+      "sampleRate": 44100,
+      "bits": 16
+    }
+  ]
+}

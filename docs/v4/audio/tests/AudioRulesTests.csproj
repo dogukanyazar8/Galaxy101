@@ -1,0 +1,40 @@
+<Project>
+  <PropertyGroup>
+    <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../../../..'))</RepoRoot>
+    <ScratchRoot Condition="'$(ScratchRoot)' == ''">$([System.IO.Path]::Combine($([System.IO.Path]::GetTempPath()), 'g101-real-audio-tests'))</ScratchRoot>
+    <BaseIntermediateOutputPath>$(ScratchRoot)/obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(ScratchRoot)/obj/</MSBuildProjectExtensionsPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsTestProject>true</IsTestProject>
+    <IsPackable>false</IsPackable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <OutputPath>$(ScratchRoot)/bin/</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>RepoRoot</_Parameter1>
+      <_Parameter2>$(RepoRoot)</_Parameter2>
+    </AssemblyAttribute>
+    <Compile Include="$(RepoRoot)/tools/v4/nunit/RepoRootSetUp.cs" />
+    <Compile Include="$(RepoRoot)/Assets/Galaxy101/Scripts/Audio/SoundCatalog.cs" />
+    <Compile Include="$(RepoRoot)/Assets/Galaxy101/Scripts/Audio/SoundLevels.cs" />
+    <Compile Include="$(RepoRoot)/Assets/Galaxy101/Scripts/Audio/SoundEngine.cs" />
+    <Compile Include="$(RepoRoot)/Assets/Galaxy101/Scripts/Audio/ParamCurve.cs" />
+    <Compile Include="$(RepoRoot)/Assets/Galaxy101/Scripts/Audio/TableSounds.cs" />
+    <Compile Include="$(RepoRoot)/Packages/com.okey101.core/Runtime/**/*.cs" />
+    <Compile Include="$(RepoRoot)/Assets/Galaxy101/Tests/Editor/RecordedTileAudioTests.cs" />
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(UnityCoreModule)</HintPath></Reference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

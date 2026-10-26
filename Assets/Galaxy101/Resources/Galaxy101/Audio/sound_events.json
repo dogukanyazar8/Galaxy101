@@ -1,7 +1,7 @@
 {
  "version": "0.4.0",
- "source": "pkg/sound/events.json (g101-sound.js (oyunda çalışan katalog)) + pkg/sound/README.md + prototip/g101-sound.js",
- "format": "WAV · 44 100 Hz · 16 bit · stereo",
+ "source": "pkg/sound/events.json (g101-sound.js (oyunda çalışan katalog)) + pkg/sound/README.md + prototip/g101-sound.js; EK-413: tile.draw/discard, meld.lay/add, okey.swap use RecordedTiles (source-assets/audio/README.md, scripts/prepare-table-audio.py)",
+ "format": "WAV · 44 100 Hz · 16 bit · stereo (RecordedTiles: mono)",
  "categories": {
   "ui": "arayüz",
   "game": "oyun akışı",
@@ -271,8 +271,8 @@
    "prio": 2,
    "poly": 2,
    "ms": 90,
-   "clip": "Galaxy101/Audio/Sfx/tile_draw",
-   "wavSeconds": 0.69,
+   "clip": "Galaxy101/Audio/RecordedTiles/draw",
+   "wavSeconds": 0.28,
    "trigger": "game.drew (ben ya da rakip; rakipte %70 ses)"
   },
   "tile.discard": {
@@ -280,8 +280,8 @@
    "prio": 2,
    "poly": 2,
    "ms": 110,
-   "clip": "Galaxy101/Audio/Sfx/tile_discard",
-   "wavSeconds": 0.71,
+   "clip": "Galaxy101/Audio/RecordedTiles/discard",
+   "wavSeconds": 0.28,
    "trigger": "game.discarded (taş halkaya/yığına iner)"
   },
   "tile.slide": {
@@ -298,8 +298,8 @@
    "prio": 3,
    "poly": 1,
    "ms": 260,
-   "clip": "Galaxy101/Audio/Sfx/meld_lay",
-   "wavSeconds": 0.86,
+   "clip": "Galaxy101/Audio/RecordedTiles/place",
+   "wavSeconds": 0.28,
    "trigger": "game.opened / game.laid (perler masaya)"
   },
   "meld.add": {
@@ -307,8 +307,8 @@
    "prio": 2,
    "poly": 1,
    "ms": 120,
-   "clip": "Galaxy101/Audio/Sfx/meld_add",
-   "wavSeconds": 0.72,
+   "clip": "Galaxy101/Audio/RecordedTiles/place",
+   "wavSeconds": 0.28,
    "trigger": "game.added (işleme)"
   },
   "okey.swap": {
@@ -316,8 +316,8 @@
    "prio": 3,
    "poly": 1,
    "ms": 380,
-   "clip": "Galaxy101/Audio/Sfx/okey_swap",
-   "wavSeconds": 0.98,
+   "clip": "Galaxy101/Audio/RecordedTiles/place",
+   "wavSeconds": 0.28,
    "trigger": "game.okeySwapped"
   },
   "penalty": {

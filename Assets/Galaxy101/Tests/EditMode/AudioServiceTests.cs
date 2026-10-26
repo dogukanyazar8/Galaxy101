@@ -21,7 +21,7 @@ namespace Galaxy101.Tests
         // ---------- catalogue ----------
 
         [Test]
-        public void TheCatalogueCarriesEveryPackageEventUnchanged()
+        public void TheCataloguePreservesPackageRulesAndAppliesTheRecordedTileDecision()
         {
             if (!File.Exists(PackageEvents)) Assert.Inconclusive("The v4 package is not in this checkout: " + PackageEvents);
             var package = JObject.Parse(File.ReadAllText(PackageEvents));
@@ -36,7 +36,15 @@ namespace Galaxy101.Tests
                 Assert.That(ev.Priority, Is.EqualTo((int)e["prio"]), id);
                 Assert.That(ev.Poly, Is.EqualTo((int)e["poly"]), id);
                 Assert.That(ev.Ms, Is.EqualTo((int)e["ms"]), id);
-                Assert.That(ev.Clip, Is.EqualTo("Galaxy101/Audio/Sfx/" + (string)e["file"]), id);
+                Assert.That(ev.Trigger, Is.EqualTo((string)e["trigger"]), id);
+                string expectedClip = id switch
+                {
+                    "tile.draw" => "Galaxy101/Audio/RecordedTiles/draw",
+                    "tile.discard" => "Galaxy101/Audio/RecordedTiles/discard",
+                    "meld.lay" or "meld.add" or "okey.swap" => "Galaxy101/Audio/RecordedTiles/place",
+                    _ => "Galaxy101/Audio/Sfx/" + (string)e["file"],
+                };
+                Assert.That(ev.Clip, Is.EqualTo(expectedClip), id);
             }
             foreach (JObject m in (JArray)package["music"])
                 Assert.That(Catalog.Music[(string)m["id"]].Clip, Is.EqualTo("Galaxy101/Audio/Music/" + Path.GetFileNameWithoutExtension((string)m["file"])));

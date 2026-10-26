@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Galaxy101.Audio;
 using Galaxy101.Contracts;
 using Okey101.Core.V4;
 using UnityEngine;
@@ -216,6 +217,8 @@ namespace Galaxy101.Table
         private void AttachModel()
         {
             Model.Applied += OnMessage;
+            // The socket: the reconnect card follows the session; a snapshot of another screen (the match is gone) leaves.
+            if (Session is Galaxy101.Online.V4TableSession net) net.ConnectionChanged += () => { if (this == null) return; Notify(); if (net.Closed && !leaving) LeaveAfter(0.5f); };
             // A session the menu opened may already hold the start of the match (and its snapshot).
             if (Model.Table != null) { ApplySeats(); if (Model.HasHand) { if (Model.Rack != null) Rack.Deal(TileIds.ToInts(Model.Rack)); Settle(true); } else if (Model.Status == G101Rules.StatusLobby) Current = Phase.Seating; }
         }
@@ -246,11 +249,11 @@ namespace Galaxy101.Table
                 var left = Model.Discards[G101Rules.LeftOf(Base)];
                 Fx.SetState(CanDiscard, CanDraw, CanDrawSide && left.Count > 0, Board.DeckShown);
             }
-            if (HumanTurn && !warned && warnSeconds > 0 && TurnLeftMs() <= warnSeconds * 1000) { warned = true; Notify(); } // "Süren bitiyor!"
+            if (HumanTurn && !warned && warnSeconds > 0 && TurnLeftMs() <= warnSeconds * 1000) { warned = true; Notify(); GalaxyAudio.Play(GalaxyAudio.Table.TurnWarning()); } // "Süren bitiyor!"
             if (Model != null && Model.Status == G101Rules.StatusLobby && Model.MatchStartAt > 0)
             {
                 int n = Mathf.Clamp(Mathf.CeilToInt((Model.MatchStartAt + Model.CountdownMs - Session.ServerNow) / 1000f), 0, 3);
-                if (n != countdown) { countdown = n; countdownAt = Time.realtimeSinceStartup; Notify(); }
+                if (n != countdown) { countdown = n; countdownAt = Time.realtimeSinceStartup; Notify(); GalaxyAudio.Play(GalaxyAudio.Table.Countdown(n > 0 ? n : (int?)null)); }
             }
             if (shortMelds != null && Time.time >= shortUntil) EndShortOpening();
             if (ExitOpen && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) CancelExit();
@@ -267,7 +270,9 @@ namespace Galaxy101.Table
             switch (m.Type)
             {
                 case V4Messages.MatchStart: ApplySeats(); Current = Phase.Seating; break;
-                case V4Messages.DealStart: BeginDeal(); break;
+                case V4Messages.DealStart: BeginDeal(); GalaxyAudio.Play(GalaxyAudio.Table.DealStart()); break;
+                case V4Messages.DealStep: GalaxyAudio.Play(GalaxyAudio.Table.DealStep(((V4DealStep)m.Payload).Step)); break;
+                case V4Messages.DealDie: GalaxyAudio.Play(GalaxyAudio.Table.DealDie()); break;
                 case V4Messages.HandDealt: if (Model.Rack != null) Rack.Deal(TileIds.ToInts(Model.Rack)); break;
                 case V4Messages.Turn: OnTurn(); break;
                 case V4Messages.Game: OnEvent(m.E, m.Ev); break;
@@ -319,12 +324,16 @@ namespace Galaxy101.Table
             if (instant) { table.CameraRig.GoTo(hud != null ? hud.PreferredView : TableCameraRig.View.Player, 0); OnTurn(); }
         }
 
+        private string soundedTurn;
+
         private void OnTurn()
         {
             if (Model.Deal != null || Ceremony.Running || !settled) return;
             if (Model.Status != G101Rules.StatusPlaying) return;
             int seat = LocalSeat(Model.TurnSeat);
             bool mine = Model.MyTurn;
+            string key = Model.HandNo + ":" + Model.TurnN;
+            if (mine && soundedTurn != key) { soundedTurn = key; GalaxyAudio.Play(GalaxyAudio.Table.Turn(Me, Me, false)); }
             if (Active != seat || !mine) { warned = false; }
             Active = seat;
             Current = mine ? (Model.TurnPhase == G101Rules.PhaseDraw ? Phase.Draw : Phase.Discard) : Phase.Opponent;
@@ -336,6 +345,9 @@ namespace Galaxy101.Table
             int seat = ev != null && ev.TryGetValue("seat", out var s) && s != null ? TableClient.I(s) : -1;
             int local = seat >= 0 ? LocalSeat(seat) : -1;
             bool me = seat >= 0 && seat == Model.Seat;
+            // Sound (docs/v4/audio/RAPOR.md §5): each engine event as it is animated; my turn's cue in OnTurn, the finish
+            // with the hand's result (nuke for an elden or okey finish, EK-908) and hand.end when the result card opens.
+            if (e != "turn" && e != "finished" && e != "handEnd") GalaxyAudio.Play(GalaxyAudio.Table.ForEngine(e, local, Me, false, Current == Phase.Deal));
             switch (e)
             {
                 case "handStart": break;
@@ -375,7 +387,7 @@ namespace Galaxy101.Table
                 case "matchEnd": MatchOver = true; break;
                 case "seatLeft": case "seatTaken": ApplySeats(); break;
             }
-            if (Model.HasHand && Model.Deal == null && settled && !Ceremony.Running)
+            if (Model.HasHand && Model.Deal == null && settled && !Ceremony.Running && shortMelds == null)
             {
                 SyncRack(); SyncBoard();
                 if (e == "turn" || e == "drew" || e == "sideReturned") OnTurn();
@@ -449,6 +461,7 @@ namespace Galaxy101.Table
             else if (c.Quick != null) text = TableStrings.Has(c.Quick) ? T(c.Quick) : c.Quick;
             if (string.IsNullOrEmpty(text)) return;
             if (local >= 0) hud.Say(local, text); else hud.SystemLine(text);
+            GalaxyAudio.Play(GalaxyAudio.Table.Chat(local, Me));
         }
 
         private void OnGift(V4Gift g)
@@ -457,6 +470,7 @@ namespace Galaxy101.Table
             if (hud == null) return;
             int from = LocalSeat(g.From);
             if (g.To == null || g.To.Count == 0) return;
+            GalaxyAudio.Play(GalaxyAudio.Table.GiftFlight(g.Gift, from));
             if (g.To.Count >= 3) hud.BotGift(from, g.Gift, -1);
             else foreach (var to in g.To) hud.BotGift(from, g.Gift, LocalSeat(to));
         }
@@ -467,6 +481,7 @@ namespace Galaxy101.Table
             var r = Model.Result; if (r == null) return;
             Current = Phase.Finished; Active = -1; ExitOpen = false;
             int finisher = TableClient.I(r["finisher"]); string reason = (string)r["reason"];
+            if (finisher >= 0) GalaxyAudio.Play(GalaxyAudio.Table.ForEngine("finished", LocalSeat(finisher), Me, TableSounds.IsNuke(r), false));
             var score = TableClient.Ints(r["score"]);
             bool elden = r["elden"] is bool el && el;
             if (finisher >= 0)
@@ -485,6 +500,7 @@ namespace Galaxy101.Table
             if (finisher >= 0 && LocalSeat(finisher) != Me) table.CameraRig.GoTo(table.CameraRig.Current, 1.1f);
             momentOn = false;
             ResultOpen = true; resultAt = Time.realtimeSinceStartup; Notify();
+            GalaxyAudio.Play(GalaxyAudio.Table.ForEngine("handEnd", null, Me, false, false));
             if (MatchOver && Model.MatchResult != null) { /* the last card counts down, then the table closes (Update) */ }
         }
 
@@ -519,6 +535,10 @@ namespace Galaxy101.Table
             Leave(Session.Online);
         }
 
+        /// <summary>The state router's "net" flow (T26, prototype dropNet): the reconnect card without a socket to lose.</summary>
+        private int netDemo;
+        public void ShowConnectionLost() { netDemo = 1; Notify(); }
+
         // ---------- player actions (one protocol step each) ----------
         public bool HumanTurn => Model != null && Model.MyTurn && settled && !Ceremony.Running;
         private LegalMoves Legal => Model?.Legal() ?? new LegalMoves();
@@ -552,6 +572,7 @@ namespace Galaxy101.Table
 
         private void Refused(string code)
         {
+            GalaxyAudio.Play("ui.error");
             switch (code)
             {
                 case V4Errors.E_SIDE_DISCARD: Message(TableHud.ToastKind.Error, T("msg.cantDiscardPicked")); break;
@@ -685,7 +706,7 @@ namespace Galaxy101.Table
         public void SortRack(bool runs) { if (!CanArrange) return; Rack.Sort(runs, TileCodes.FaceFor(Model)); SyncBoard(); Notify(); }
 
         /// <summary>Commit a rack rearrangement the input previewed (singlePlan / groupPlan); the arrangement is the client's.</summary>
-        public void ApplyRackPlan(IReadOnlyDictionary<int, RackSlot> plan) { Rack.Apply(plan); SyncBoard(); Notify(); }
+        public void ApplyRackPlan(IReadOnlyDictionary<int, RackSlot> plan) { Rack.Apply(plan); SyncBoard(); Notify(); GalaxyAudio.Play(GalaxyAudio.Table.RackMove()); }
 
         // ---------- okeys and lay-off targets (spec/23 işleme göstergeleri) ----------
         /// <summary>Every okey in a table meld with the face it stands for (its position, R-13).</summary>
@@ -857,6 +878,12 @@ namespace Galaxy101.Table
             if (ResultOpen && m.Result != null) s.Result = ResultInfo();
             s.Deal = DealCard();
             s.CanUndo = CanUndo; s.CanFromHand = CanFinishFromHand;
+            // G101-Masa openVals: Geri bırak, Yere çift aç (R-24: a series opener lays pairs too), İşle when something fits.
+            s.ShowReturn = CanDiscard && Legal.ReturnSide;
+            s.ShowLayPair = IOpened && eval.Pairs.Count > 0; s.CanLayPair = CanDiscard && s.ShowLayPair;
+            s.CanIsle = s.ShowIsle = CanDiscard && IOpened && Rack.Count > 1 && Addable() != null;
+            if (Session is Galaxy101.Online.V4TableSession net) { s.NetAttempt = net.Dropped ? Math.Max(1, net.Attempt) : 0; s.NetGaveUp = net.GaveUp; }
+            if (netDemo > 0) s.NetAttempt = netDemo;
             s.OpenBar = m.OpenNeed(G101Rules.KindRun); s.PairsBar = m.OpenNeed(G101Rules.KindPair);
             s.ShortOpen = CanDiscard && !IOpened && eval.Sum < s.OpenBar;
             s.ShortPairs = CanDiscard && !IOpened && eval.Pairs.Count < s.PairsBar;
@@ -950,6 +977,9 @@ namespace Galaxy101.Table
         {
             var s = hud.Settings;
             autoSort = s.AutoSort; doubleClickDiscard = s.DoubleClick; highlightSets = s.Highlight; warnSeconds = s.WarnSeconds; turnHint = s.TurnHints;
+            // The table's sliders and sound switches drive the sound service (docs/v4/audio/RAPOR.md §5.1, EK-902).
+            try { GalaxyAudio.SetLevels(new SoundLevels(s.Int("master"), s.Int("sfx"), s.Int("music"), s.Bool("tileSnd"), s.Bool("chatSnd"), GalaxyAudio.Engine.Levels?.NotificationSounds ?? true)); }
+            catch (Exception e) { Debug.LogWarning("GALAXY101_TABLE_SOUND_LEVELS " + e.Message); }
         }
 
         private void OnSetting(string key)
@@ -984,6 +1014,8 @@ namespace Galaxy101.Table
                 case "exit-leave": ConfirmExit(); break;
                 case "next": NextHand(); break;
                 case "lobby": Leave(Session.Online); break;
+                case "net-lobby": Leave(true); break;
+                case "net-retry": if (Session is Galaxy101.Online.V4TableSession net) net.RetryNow(); else if (netDemo > 0) { netDemo = Math.Min(5, netDemo + 1); Notify(); } break;
                 default:
                     if (command.StartsWith("invite:", StringComparison.Ordinal) && int.TryParse(command.Substring(7), out int seat)) Invite(seat);
                     break;

@@ -51,7 +51,7 @@ namespace Galaxy101.Tests
                 Assert.That(canvas.Q<VisualElement>(name), Is.Not.Null, name);
             Assert.That(canvas.Q<Label>("table-toast").text, Does.StartWith("Sıra sende"));
             Assert.That(canvas.Q<Label>("deck-count").text, Is.EqualTo("24"));
-            Assert.That(canvas.Q<Label>("table-open-sum").text, Is.EqualTo("88"));
+            Assert.That(canvas.Q<Label>("table.openSum").text, Is.EqualTo("88"));
 
             // T05: Ayşe (seat 2) sits above the table centre, Zeynep (seat 1) right, Burak (seat 3) left.
             float X(string key) => canvas.Q<VisualElement>("anchor-" + key).resolvedStyle.left;

@@ -188,8 +188,10 @@ namespace Galaxy101.Online
 
         private void Close()
         {
+            if (Closed) return;
             Closed = true;
             if (Current == this) Current = null;
+            ConnectionChanged?.Invoke();
         }
 
         public void Dispose()

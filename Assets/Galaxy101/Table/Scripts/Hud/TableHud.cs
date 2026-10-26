@@ -60,6 +60,10 @@ namespace Galaxy101.Table
             public bool CanUndo, CanFromHand, ShortOpen, ShortPairs;
             /// <summary>Online: the table's name ("Gece Kuşları · Tekli") and stake for the top bar; null at a bot table.</summary>
             public string RoomName; public long RoomStake;
+            /// <summary>v4 openVals: Geri bırak (R-32), İşle (R-25, something fits), Yere çift aç (R-24) and their states.</summary>
+            public bool ShowReturn, ShowIsle, CanIsle, ShowLayPair, CanLayPair;
+            /// <summary>protocol.json reconnect: "Bağlantı koptu · Deneme n/5" (0 = connected); GaveUp leaves only "Lobiye dön".</summary>
+            public int NetAttempt; public bool NetGaveUp;
         }
 
         public sealed class OkeyMark { public int Id; public string Number, Color; public bool Target, Invalid; }
@@ -348,6 +352,7 @@ namespace Galaxy101.Table
             if (state.Result != null) BuildResult(state.Result);
             if (state.Match != null) BuildMatchEnd(state.Match);
             if (state.ExitOpen) BuildExit();
+            if (state.NetAttempt > 0 || state.NetGaveUp) BuildNet(state);
             BuildPickedTile(state);
             BuildOkeys(state);
             BuildGlowTile(state);
@@ -1188,8 +1193,8 @@ namespace Galaxy101.Table
             MenuView.Place(arc, 0, 0, 62, 62); gauge.Add(arc);
             var dial = new VisualElement { pickingMode = PickingMode.Ignore }; MenuView.Place(dial, 6, 6, 50, 50); dial.style.alignItems = Align.Center; dial.style.justifyContent = Justify.Center;
             view.Decorate(dial, "var(--dp)", 25);
-            var sum = Text(s.OpenSum.ToString(), "Montserrat-700", 19, "#F4F1E8"); sum.name = "table-open-sum"; dial.Add(sum);
-            dial.Add(Text(opened ? L("AÇIK", "OPEN") : "/ " + s.OpenBar, "Baloo2-800", 9, "var(--mt)"));
+            var sum = Text(s.OpenSum.ToString(), "Montserrat-700", 19, "#F4F1E8"); sum.name = "table.openSum"; dial.Add(sum);
+            var gaugeSub = Text(opened ? L("AÇIK", "OPEN") : "/ " + s.OpenBar, "Baloo2-800", 9, "var(--mt)"); gaugeSub.name = "table.gaugeSub"; dial.Add(gaugeSub);
             gauge.Add(dial); meter.Add(gauge);
 
             var column = new VisualElement { pickingMode = PickingMode.Ignore };
@@ -1203,14 +1208,22 @@ namespace Galaxy101.Table
             var buttons = Row(6);
             if (s.CanUndo)
             {
-                var undo = Row(6); undo.name = "table-undo"; undo.focusable = true; Pad(undo, 12, 14, 12, 12);
+                var undo = Row(6); undo.name = "table.doUndo"; undo.focusable = true; Pad(undo, 12, 14, 12, 12);
                 view.Decorate(undo, "#3D7BFF", 15, 5, "#2148B0"); GalaxyFilters.HoverBrightness(undo, 1.1f);
                 undo.Add(Text("↓", "Montserrat-800", 15, "#fff")); undo.Add(Text(L("Geri topla", "Take back"), "Montserrat-800", 14, "#fff"));
                 buttons.Add(Clickable(undo, "undo"));
             }
+            if (s.ShowReturn)
+            {
+                // G101-Masa table.doReturn: Geri bırak (R-32) next to Geri topla, the same panel button.
+                var back = Row(6); back.name = "table.doReturn"; back.focusable = true; Pad(back, 12, 14, 12, 12);
+                view.Decorate(back, "var(--pnH)", 15, 5, "var(--pnS)"); GalaxyFilters.HoverBrightness(back, 1.2f); back.tooltip = TableStrings.Get("returnTip", Lang);
+                back.Add(Text("↑", "Montserrat-800", 15, "#F4F1E8")); back.Add(Text(L("Geri bırak", "Put back"), "Montserrat-800", 14, "#F4F1E8"));
+                buttons.Add(Clickable(back, "putback"));
+            }
             if (s.CanFromHand)
             {
-                var bomb = Row(6); bomb.name = "table-fromhand"; bomb.focusable = true; Pad(bomb, 12, 16, 12, 12);
+                var bomb = Row(6); bomb.name = "table.doBomb"; bomb.focusable = true; Pad(bomb, 12, 16, 12, 12);
                 view.Decorate(bomb, "linear-gradient(#FF6B5E,#D9343F)", 15, 5, "#8E1A24"); GalaxyFilters.HoverBrightness(bomb, 1.1f);
                 // The bomb: a dark round body with a gold fuse spark; it wobbles every 1.4 s.
                 var icon = new VisualElement { pickingMode = PickingMode.Ignore }; icon.style.width = icon.style.height = 18;
@@ -1219,16 +1232,16 @@ namespace Galaxy101.Table
                 motions.Add(t => icon.style.rotate = new Rotate(12 * Mathf.Sin(t * 9) * (Mathf.Repeat(t, 1.4f) < .5f ? 1 : 0)));
                 buttons.Add(Clickable(bomb, "fromhand"));
             }
-            if (!opened && s.Pairs >= 3 || s.OpenedPairs[0])
+            if (!opened && s.Pairs >= 3)
             {
-                var pairs = ActionButton("table-pairs", L("Çift aç · " + s.Pairs + "/" + s.PairsBar, "Open pairs · " + s.Pairs + "/" + s.PairsBar), s.CanPair, false, 14, "pairs");
+                var pairs = ActionButton("table.doPair", L("Çift aç · " + s.Pairs + "/" + s.PairsBar, "Open pairs · " + s.Pairs + "/" + s.PairsBar), s.CanPair, false, 14, "pairs");
                 // warnB(): fewer than five pairs is a short opening — the same orange-red as Aç.
                 if (s.ShortPairs && s.CanPair) { view.Decorate(pairs, "linear-gradient(#FF9A4D,#E8573A)", 15, 5, "#9E3418"); pairs.style.color = view.C("#fff"); pairs.EnableInClassList("short", true); }
                 buttons.Add(pairs);
             }
             if (!s.OpenedPairs[0])
             {
-                var open = ActionButton("table-open", opened ? L("Yere aç", "Lay down") : L("Aç", "Open"), s.CanOpen, true, 17, "open");
+                var open = ActionButton("table.doOpen", opened ? L("Yere aç", "Lay down") : L("Aç", "Open"), s.CanOpen, true, 17, "open");
                 if (s.ShortOpen && s.CanOpen)
                 {
                     // Hatalı açma: orange-red, with the warning as its tooltip.
@@ -1238,7 +1251,15 @@ namespace Galaxy101.Table
                 }
                 buttons.Add(open);
             }
-            column.Add(buttons); meter.Add(column);
+            if (s.ShowLayPair) buttons.Add(ActionButton("table.doLayPair", TableStrings.Get("layPair", Lang), s.CanLayPair, false, 14, "pairs"));
+            column.Add(buttons);
+            if (s.ShowIsle)
+            {
+                // table.doIsle: a full-width row under the buttons (flex 1 1 100%).
+                var isle = ActionButton("table.doIsle", TableStrings.Get("isle", Lang), s.CanIsle, true, 15, "isle");
+                isle.style.marginTop = 6; isle.style.unityTextAlign = TextAnchor.MiddleCenter; column.Add(isle);
+            }
+            meter.Add(column);
             actions.Add(meter);
             hudLayer.Add(actions);
         }

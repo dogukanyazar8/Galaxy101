@@ -16,6 +16,9 @@ param(
     [double]$FpsSeconds = 0
 )
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'Unity-ProcessLock.ps1')
+$operationMutex = Enter-GalaxyUnityProcess
+try {
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 # A whole-catalogue run repeatedly loads scenes. Keep each player lifetime bounded after the interrupted run13.
 $stateIds = @($States -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
@@ -53,23 +56,33 @@ if ($Ft -ge 0) { $arguments += "-g101Ft=$Ft" }
 $arguments += "-g101Size=$Size"
 if ($FpsSeconds -gt 0) { $arguments += "-g101Fps=$FpsSeconds" }
 foreach ($argument in $arguments) { $info.ArgumentList.Add($argument) }
+if (@(Get-Process -Name Unity, Galaxy101 -ErrorAction SilentlyContinue).Count -gt 0) { throw 'A Unity editor or Galaxy101 player started before capture; no process was stopped.' }
 $process = [Diagnostics.Process]::Start($info)
 $null = $process.StandardOutput.ReadToEndAsync(); $null = $process.StandardError.ReadToEndAsync()   # the player log has it all
 $startedUtc = [DateTime]::UtcNow
-$peakWorkingSet = 0L; $peakPrivateBytes = 0L
+$peakWorkingSet = 0L; $peakPrivateBytes = 0L; $timedOut = $false
 try {
     while (-not $process.WaitForExit(1000)) {
-        $process.Refresh()
-        $peakWorkingSet = [Math]::Max($peakWorkingSet, $process.WorkingSet64)
-        $peakPrivateBytes = [Math]::Max($peakPrivateBytes, $process.PrivateMemorySize64)
+        try {
+            $process.Refresh()
+            $peakWorkingSet = [Math]::Max($peakWorkingSet, $process.WorkingSet64)
+            $peakPrivateBytes = [Math]::Max($peakPrivateBytes, $process.PrivateMemorySize64)
+        } catch [InvalidOperationException] {
+            if ($process.HasExited) { break }
+            throw
+        }
         if (([DateTime]::UtcNow - $startedUtc).TotalSeconds -gt $TimeoutSeconds) {
-            $process.Kill($true); $process.WaitForExit(); throw "State capture exceeded $TimeoutSeconds s."
+            $timedOut = $true; break
         }
     }
+} finally {
+    if (-not $process.HasExited) { $process.Kill($true); $process.WaitForExit() }
     $exit = $process.ExitCode
-} finally { if (-not $process.HasExited) { $process.Kill($true) }; $process.Dispose() }
-@{ startedUtc = $startedUtc.ToString('o'); finishedUtc = [DateTime]::UtcNow.ToString('o'); states = $stateIds; size = $Size; exitCode = $exit; peakWorkingSetBytes = $peakWorkingSet; peakPrivateBytes = $peakPrivateBytes } |
-    ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputRoot 'process.json')
+    @{ startedUtc = $startedUtc.ToString('o'); finishedUtc = [DateTime]::UtcNow.ToString('o'); states = $stateIds; size = $Size; exitCode = $exit; timedOut = $timedOut; peakWorkingSetBytes = $peakWorkingSet; peakPrivateBytes = $peakPrivateBytes } |
+        ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputRoot 'process.json')
+    $process.Dispose()
+}
+if ($timedOut) { throw "State capture exceeded $TimeoutSeconds s." }
 $manifestPath = Join-Path $outputRoot 'manifest.json'
 if ($exit -ne 0 -or -not (Test-Path -LiteralPath $manifestPath)) { Get-Content -LiteralPath (Join-Path $outputRoot 'player.log') -Tail 40 | Write-Output; throw "State capture failed: exit $exit" }
 $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
@@ -82,3 +95,5 @@ foreach ($id in $stateIds) {
         if (-not (Test-Path -LiteralPath (Join-Path $outputRoot ($id + $suffix)) -PathType Leaf)) { throw "Capture is missing $id$suffix." }
     }
 }
+
+} finally { $operationMutex.ReleaseMutex(); $operationMutex.Dispose() }

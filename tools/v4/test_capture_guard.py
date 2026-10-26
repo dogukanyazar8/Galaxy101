@@ -45,6 +45,21 @@ class CaptureGuardTests(unittest.TestCase):
     def test_old_build_without_window_guard_is_rejected_before_player_start(self):
         self.assertIn("capture window guard", self.invoke("01", old_build=True))
 
+    def test_another_capture_holds_the_process_slot_before_any_build_or_player(self):
+        holder = subprocess.Popen(
+            [shutil.which("pwsh") or "pwsh", "-NoLogo", "-NoProfile", "-Command",
+             r"$m=[Threading.Mutex]::new($false,'Local\Galaxy101.UnityProcess');"
+             "$null=$m.WaitOne();[Console]::WriteLine('READY');"
+             "$null=[Console]::ReadLine();$m.ReleaseMutex();$m.Dispose()"],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, encoding="utf-8",
+        )
+        try:
+            self.assertEqual(holder.stdout.readline().strip(), "READY")
+            self.assertIn("Another Unity operation", self.invoke("01", old_build=True))
+        finally:
+            holder.communicate("done\n", timeout=10)
+
 
 if __name__ == "__main__":
     unittest.main()

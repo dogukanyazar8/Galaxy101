@@ -8,6 +8,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'Unity-ProcessLock.ps1')
+$operationMutex = Enter-GalaxyUnityProcess
+try {
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $unityExecutable = 'C:\Program Files\Unity\Hub\Editor\6000.6.6f1\Editor\Unity.exe'
 if (-not (Test-Path -LiteralPath $unityExecutable -PathType Leaf)) { throw 'Unity 6000.6.6f1 is not installed at the expected path.' }
@@ -68,3 +71,5 @@ foreach ($failure in $document.SelectNodes('//test-case[@result="Failed"]')) {
 if ($exitCode -ne 0 -or $total -le 0 -or $failed -ne 0 -or $skipped -ne 0 -or $inconclusive -ne 0 -or $passed -ne $total) {
     throw "Unity test verification failed. Results: $resultPath"
 }
+
+} finally { $operationMutex.ReleaseMutex(); $operationMutex.Dispose() }

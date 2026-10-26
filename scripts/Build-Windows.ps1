@@ -3,6 +3,9 @@
 param([ValidateSet('Development', 'Release', 'Acceptance')][string]$Configuration = 'Development', [switch]$FinalPackage)
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'Unity-ProcessLock.ps1')
+$operationMutex = Enter-GalaxyUnityProcess
+try {
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $unityExecutable = 'C:\Program Files\Unity\Hub\Editor\6000.6.6f1\Editor\Unity.exe'
 if (-not (Test-Path -LiteralPath $unityExecutable -PathType Leaf)) { throw 'Unity 6000.6.6f1 is not installed at the expected path.' }
@@ -41,3 +44,5 @@ if ($report.result -ne 'Succeeded' -or $report.configuration -ne $Configuration 
 & (Join-Path $PSScriptRoot 'Verify-DiagnosticsBuild.ps1') -BuildDirectory $runRoot -Configuration $Configuration
 Write-Output "Windows $Configuration build: $outputPath"
 Write-Output "Report: $reportPath"
+
+} finally { $operationMutex.ReleaseMutex(); $operationMutex.Dispose() }

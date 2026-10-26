@@ -31,6 +31,7 @@ namespace Galaxy101
 
         private Dialog dialog;
         public Dialog Current => dialog;
+        private float shadeShownAt;
 
         private void OpenDialog(Dialog next) { next.OpenedAt = Time.realtimeSinceStartup; dialog = next; RenderDialog(); }
         private void CloseDialog() { dialog = null; RenderDialog(); }
@@ -58,12 +59,19 @@ namespace Galaxy101
         private void RenderDialog()
         {
             if (dialogLayer == null) return;
-            dialogLayer.Clear();
-            var d = dialog; if (d == null) { dialogLayer.pickingMode = PickingMode.Ignore; return; }
+            var d = dialog; if (d == null) { dialogLayer.Clear(); dialogLayer.pickingMode = PickingMode.Ignore; return; }
             dialogLayer.pickingMode = PickingMode.Position;
-            var shade = Fill("lobby.closeDlg"); shade.pickingMode = PickingMode.Position; view.Decorate(shade, "rgba(0,0,0,.55)"); GalaxyFilters.BackdropBlur(shade, 6);
-            Tap(shade, CloseFromBackdrop); dialogLayer.Add(shade);
-            FadeIn(shade, d.OpenedAt, .18f);
+            // The blurred backdrop is made once per dialog session and kept while dialogs follow each other (PIN → shake →
+            // bağlanılıyor): only the card is rebuilt, so no element with a backdrop filter comes and goes during a change.
+            var shade = dialogLayer.Q<VisualElement>("lobby.closeDlg");
+            if (shade == null)
+            {
+                shade = Fill("lobby.closeDlg"); shade.pickingMode = PickingMode.Position; view.Decorate(shade, "rgba(0,0,0,.55)"); GalaxyFilters.BackdropBlur(shade, 6);
+                Tap(shade, CloseFromBackdrop); dialogLayer.Add(shade);
+                shadeShownAt = d.OpenedAt;
+            }
+            FadeShade(shade, shadeShownAt, .18f);
+            dialogLayer.Q<VisualElement>("lobby-dialog-frame")?.RemoveFromHierarchy();
             var frame = Fill("lobby-dialog-frame"); frame.style.alignItems = Align.Center; frame.style.justifyContent = Justify.Center; dialogLayer.Add(frame);
             // Card: --pn, 1px rgba(255,255,255,.1), radius 26, 0 10px 0 --pnS, 0 40px 90px rgba(0,0,0,.6).
             var card = Box("lobby-dialog-" + d.Kind); card.pickingMode = PickingMode.Position; card.style.alignItems = Align.Center;
@@ -108,7 +116,15 @@ namespace Galaxy101
             {
                 var slot = Box(); slot.style.width = 58; slot.style.height = 66; if (i > 0) slot.style.marginLeft = 10;
                 // The focused box's "0 0 14px --gl" glow: a twin behind it whose opacity follows (the filter itself never changes).
-                var halo = Box(); MenuView.Place(halo, 0, 0, 58, 66); view.Decorate(halo, "var(--dp)", 16); GalaxyFilters.Shadow(halo, 0, 0, 7, view.C("var(--gl)")); halo.style.opacity = 0; slot.Add(halo);
+                // The focused box's "0 0 14px --gl" glow as three widening outlines of falling strength: no filter (a filtered
+                // twin inside the dialog's own filtered card stacked render passes the renderer released while typing).
+                var halo = Box(); halo.style.position = Position.Absolute; halo.style.left = halo.style.top = halo.style.right = halo.style.bottom = 0; halo.style.display = DisplayStyle.None;
+                foreach (var (reach, alpha) in new[] { (3f, .5f), (7f, .28f), (11f, .12f) })
+                {
+                    var glow = view.C("var(--gl)"); glow.a *= alpha;
+                    var line = Box(); MenuView.Place(line, -reach, -reach, 58 + 2 * reach, 66 + 2 * reach); Radius(line, 16 + reach); Border(line, 4, glow); halo.Add(line);
+                }
+                slot.Add(halo);
                 var cell = Text("", 30, "Montserrat-700", "#F4F1E8", 0, "lobby.p.ch[" + i + "]"); MenuView.Place(cell, 0, 0, 58, 66); cell.style.unityTextAlign = TextAnchor.MiddleCenter;
                 view.Decorate(cell, "var(--dp)", 16); var ring = view.InsetRing(cell, 16); slot.Add(cell);
                 cells.Add((cell, ring, halo)); boxes.Add(slot);
@@ -125,7 +141,7 @@ namespace Galaxy101
                     cell.text = i < d.Pin.Length ? "•" : "";
                     bool next = !d.Error && i == d.Pin.Length;
                     ring(d.Error ? "bad" : next ? "focus" : i < d.Pin.Length ? "line" : "rest");
-                    halo.style.opacity = next ? 1 : 0;
+                    halo.style.display = next ? DisplayStyle.Flex : DisplayStyle.None;
                 }
                 if (submit != null) PaintPinSubmit(submit, d.Pin.Length == 4);
             }

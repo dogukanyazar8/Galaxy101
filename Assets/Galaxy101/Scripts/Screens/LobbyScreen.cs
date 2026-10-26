@@ -22,7 +22,7 @@ namespace Galaxy101
         public static readonly long[] Stakes = TableOptions.StakeChoices;
         private readonly MenuView view;
         private readonly ILobbyBackend backend;
-        private VisualElement layer, body, dialogLayer, toastLayer;
+        private VisualElement layer, body, veil, modalLayer, dialogLayer, toastLayer;
         private string screen = "list";
         // filt {type, free, kat, bet} and q of the prototype's state (S09).
         private string typeFilter = "all", query = "";
@@ -61,10 +61,17 @@ namespace Galaxy101
             if (modal?.parent != null) modal.parent.Insert(modal.parent.IndexOf(modal), layer); else canvas.Add(layer);
             view.Decorate(layer, "linear-gradient(180deg,rgba(5,8,22,.15),rgba(5,8,22,.5))");
             body = Fill("lobby-body"); body.pickingMode = PickingMode.Ignore; layer.Add(body);
+            // Masa aç and the invite panel: one blurred backdrop for the whole time either is open (it is not rebuilt with
+            // every redraw of the form: an element with a backdrop filter that comes and goes draws a frame without its
+            // blur), and the modal itself on a layer of its own above it.
+            veil = Fill("lobby-veil"); veil.pickingMode = PickingMode.Position; veil.style.display = DisplayStyle.None; GalaxyFilters.BackdropBlur(veil, 6);
+            Tap(veil, () => { if (create != null) CloseCreate(); else if (InviteOpen) CloseInvite(); }); layer.Add(veil);
+            modalLayer = Fill("lobby-modals"); modalLayer.pickingMode = PickingMode.Ignore; layer.Add(modalLayer);
             AppVersionLabel.Attach(layer);
             cardsSeen.Clear(); probes.Clear();
             dialogLayer = Fill("lobby-dialogs"); dialogLayer.pickingMode = PickingMode.Ignore; layer.Add(dialogLayer);
             toastLayer = Fill("lobby-toasts"); toastLayer.pickingMode = PickingMode.Ignore; layer.Add(toastLayer);
+            WarmGlyphs();
             backend.TablesChanged += OnTables; backend.RoomChanged += OnRoom; backend.ChipsChanged += OnChips; backend.InviteAnswered += OnInviteAnswered; backend.InviteReceived += OnInviteReceived;
             shownAt = Time.realtimeSinceStartup;
             screen = backend.Room != null ? "wait" : "list"; animateCards = true; Render();
@@ -150,17 +157,33 @@ namespace Galaxy101
             // A redraw is invisible: scroll positions and the focused text field carry over (no jump back to the top,
             // no lost caret), entrance animations only play for things that newly appear.
             var scrolls = new Dictionary<string, Vector2>();
-            body.Query<ScrollView>().ForEach(s => { if (!string.IsNullOrEmpty(s.name)) scrolls[s.name] = s.scrollOffset; });
+            foreach (var part in new[] { body, modalLayer })
+                part.Query<ScrollView>().ForEach(s => { if (!string.IsNullOrEmpty(s.name)) scrolls[s.name] = s.scrollOffset; });
+            if (body.Q<ScrollView>("lobby-list") is ScrollView shownList) listScrollerOpacity = shownList.verticalScroller.resolvedStyle.opacity;
             var focused = body.panel?.focusController?.focusedElement as VisualElement;
             string focusName = (focused as TextField)?.name ?? focused?.GetFirstAncestorOfType<TextField>()?.name;
-            body.Clear(); motions.Clear(); hovers.Clear();
+            body.Clear(); modalLayer.Clear(); motions.Clear(); hovers.Clear();
             if (screen == "wait" && backend.Room != null) BuildRoom(); else { if (screen != "list") cardsSeen.Clear(); screen = "list"; BuildList(); }
             if (create != null) BuildCreate();
+            Veil();
             RenderDialog();
             foreach (var pair in scrolls)
-                if (body.Q<ScrollView>(pair.Key) is ScrollView again && pair.Value != Vector2.zero) Restore(again, pair.Value);
-            if (focusName != null && body.Q<TextField>(focusName) is TextField field)
+                if ((body.Q<ScrollView>(pair.Key) ?? modalLayer.Q<ScrollView>(pair.Key)) is ScrollView again && pair.Value != Vector2.zero) Restore(again, pair.Value);
+            if (focusName != null && (body.Q<TextField>(focusName) ?? modalLayer.Q<TextField>(focusName)) is TextField field)
                 field.schedule.Execute(() => { field.Focus(); field.SelectRange(field.value.Length, field.value.Length); });
+        }
+
+        /// <summary>
+        /// The backdrop of Masa aç (lobby.closeCreate) or the invite panel (lobby.iv.close): rgba(0,0,0,.55) + blur(6px),
+        /// lbFade .2s from the moment the modal opened.
+        /// </summary>
+        private void Veil()
+        {
+            bool form = create != null, invitePanel = !form && screen == "wait" && backend.Room != null && InviteOpen;
+            if (!form && !invitePanel) { veil.style.display = DisplayStyle.None; return; }
+            veil.name = form ? "lobby.closeCreate" : "lobby.iv.close";
+            veil.style.display = DisplayStyle.Flex;
+            FadeShade(veil, form ? createShownAt : invite.OpenedAt, .2f);
         }
 
         /// <summary>Put a rebuilt scroll view back where it was as soon as its content has a size (same frame).</summary>
@@ -233,6 +256,7 @@ namespace Galaxy101
             var scroll = view.Scroll(); scroll.name = "lobby-list"; scroll.style.position = Position.Absolute; scroll.style.left = 0; scroll.style.right = 0; scroll.style.top = 146; scroll.style.bottom = 0;
             scroll.contentContainer.style.paddingTop = 6; scroll.contentContainer.style.paddingBottom = 26; scroll.contentContainer.style.paddingLeft = 28; scroll.contentContainer.style.paddingRight = 22;
             scroll.pickingMode = PickingMode.Position; body.Add(scroll);
+            scroll.verticalScroller.style.opacity = listScrollerOpacity;
             FillCards(scroll, list, chips);
             animateCards = false;
         }
@@ -249,6 +273,8 @@ namespace Galaxy101
             for (int pad = list.Count % 3; pad != 0 && pad < 3; pad++) { var spacer = Box(); spacer.style.flexGrow = 1; spacer.style.flexBasis = 0; if (pad < 2) spacer.style.marginRight = 16; row.Add(spacer); }
             row.style.marginBottom = 0;
         }
+
+        private float listScrollerOpacity;
 
         private bool Mine(TableSummary t) => t.Seats.Any(s => s?.Player != null && s.Player.Id == backend.Me);
 
@@ -302,7 +328,7 @@ namespace Galaxy101
             head.Add(Grow());
             string stText = playing ? S("sPlay", Math.Max(1, t.Hand), t.Hands) : free ? S("sWait") : S("sFull");
             string stBg = playing ? "rgba(255,201,74,.14)" : free ? "rgba(60,203,110,.15)" : "rgba(255,94,108,.14)", stFg = playing ? "var(--a1)" : free ? "#8EF0B0" : "#FF9AA3";
-            var status = Row(); status.style.marginLeft = 8; Pad(status, 4, 10, 4, 10); view.Decorate(status, stBg, 999); var sd = Dot(stFg, 7, 0); sd.style.marginRight = 6; status.Add(sd); status.Add(Text(stText, 12, "Baloo2-800", stFg)); head.Add(status);
+            var status = Row(); status.style.marginLeft = 8; Pad(status, 4, 10, 4, 10); Pill(status, stBg, 4 + 19 + 4); var sd = Dot(stFg, 7, 0); sd.style.marginRight = 6; status.Add(sd); status.Add(Text(stText, 12, "Baloo2-800", stFg)); head.Add(status);
             face.Add(head);
 
             // Money (gap 8): coin, bet (700 23px/1), meta, type label.
@@ -553,7 +579,7 @@ namespace Galaxy101
             bool ok = kind == "good" || kind == "ok";
             string bg = kind == "bad" ? "linear-gradient(#FF7A86,#E8455A)" : ok ? "#3CCB6E" : "rgba(5,8,22,.85)", fg = kind == "bad" ? "#fff" : ok ? "#062B14" : "#F4F1E8";
             var toast = Row(); toast.name = "lobby-toast"; toast.style.position = Position.Absolute; toast.style.top = 18; toast.style.left = 640; Pad(toast, 9, 18, 9, 10);
-            view.Decorate(toast, bg, 999); GalaxyFilters.Shadow(toast, 0, 10, 15, new Color(0, 0, 0, .4f));
+            Pill(toast, bg, 9 + 24 + 9); GalaxyFilters.Shadow(toast, 0, 10, 15, new Color(0, 0, 0, .4f));
             var mark = Box(); Square(mark, 24); view.Decorate(mark, "rgba(0,0,0,.18)", 12); var diamond = Box(); diamond.style.width = diamond.style.height = 8; diamond.style.rotate = new Rotate(45); view.Decorate(diamond, fg, 2); mark.Add(diamond); toast.Add(mark);
             var label = Text(text, 14, "Baloo2-800", fg); label.style.marginLeft = 10; toast.Add(label);
             toastLayer.Add(toast);
@@ -579,8 +605,10 @@ namespace Galaxy101
         /// <summary>The chips pill: padding 5px 5px 5px 6px (no "+": 5px 14px 5px 6px), gap 8, --dp, inset 0 2px 0 rgba(0,0,0,.3).</summary>
         private VisualElement Balance(long chips, bool plus)
         {
-            var box = Row(); box.name = "lobby-balance"; box.style.marginLeft = 14; Pad(box, 5, plus ? 5 : 14, 5, 6); view.Decorate(box, "var(--dp)", 999);
-            view.InsetRing(box, 19)("rest");
+            // 5 + the tallest child (the 28 px "+", else the 26 px coin) + 5.
+            float height = 5 + (plus ? 28 : 26) + 5;
+            var box = Row(); box.name = "lobby-balance"; box.style.marginLeft = 14; Pad(box, 5, plus ? 5 : 14, 5, 6); Pill(box, "var(--dp)", height);
+            view.InsetRing(box, height / 2)("rest");
             box.Add(Coin(26));
             var amount = Tabular(Text(view.N(chips), 17, "Montserrat-700", "#F4F1E8", 0, plus ? "lobby.chipsLabel" : "lobby.chipsLabel#2")); amount.style.marginLeft = 8; amount.style.minWidth = plus ? 78 : 0; box.Add(amount);
             if (plus)
@@ -634,6 +662,37 @@ namespace Galaxy101
         private readonly List<(Label Label, string Key, string Probe, string Text, float Pad)> pendingExact = new List<(Label, string, string, string, float)>();
         private bool exactScheduled;
 
+        /// <summary>
+        /// The lobby's fonts are dynamic atlases: a glyph met for the first time is added while a frame is drawn, and the
+        /// atlas texture that grows under the texts already on screen draws one frame wrong (a filtered dialog can even
+        /// point at the released texture). Every glyph the lobby shows is laid out once by the hidden probes while the
+        /// lobby fades in, so a later redraw (a filter, a shake) meets no new glyph.
+        /// </summary>
+        private const string LobbyGlyphs = "ABCÇDEFGĞHIİJKLMNOÖPQRSŞTUÜVWXYZabcçdefgğhıijklmnoöpqrsştuüvwxyzÂâÎîÛû0123456789 .,:;!?'’\"-–—+×/()[]·•…→↑%#&*=@_₺";
+
+        private void WarmGlyphs()
+        {
+            foreach (var font in new[] { "Montserrat-700", "Montserrat-800", "Montserrat-900", "Baloo2-700", "Baloo2-800" })
+            {
+                Probe(view.Font(font), 14, false, out string probeKey);
+                pendingExact.Add((null, null, probeKey, LobbyGlyphs, 0));
+            }
+            if (!exactScheduled) { exactScheduled = true; layer.schedule.Execute(MeasureExact); }
+        }
+
+        private Label Probe(Font font, float size, bool rich, out string probeKey)
+        {
+            probeKey = font.name + "|" + size.ToString("R", System.Globalization.CultureInfo.InvariantCulture) + "|" + (rich ? "rich" : "plain");
+            if (probes.TryGetValue(probeKey, out var probe)) return probe;
+            probe = new Label { pickingMode = PickingMode.Ignore, enableRichText = rich };
+            probe.style.position = Position.Absolute; probe.style.visibility = Visibility.Hidden; probe.style.whiteSpace = WhiteSpace.NoWrap;
+            probe.style.paddingLeft = probe.style.paddingRight = probe.style.paddingTop = probe.style.paddingBottom = 0;
+            probe.style.marginLeft = probe.style.marginRight = probe.style.marginTop = probe.style.marginBottom = 0;
+            probe.style.unityFont = font; probe.style.fontSize = size * 10;
+            layer.Add(probe); probes[probeKey] = probe;
+            return probe;
+        }
+
         private Label Exact(Label label)
         {
             var font = label.style.unityFont.value; float size = label.style.fontSize.value.value;
@@ -642,14 +701,13 @@ namespace Galaxy101
             string key = probeKey + "|" + label.text;
             float pad = label.style.paddingLeft.value.value + label.style.paddingRight.value.value;
             if (exactWidths.TryGetValue(key, out float width)) { label.style.width = width + pad; return label; }
-            if (!probes.ContainsKey(probeKey))
+            var probe = Probe(font, size, label.enableRichText, out probeKey);
+            // A probe already in use has its style resolved: measure now, so the label has its width from its first frame.
+            if (probe.panel != null && Mathf.Abs(probe.resolvedStyle.fontSize - size * 10) <= .01f)
             {
-                var probe = new Label { pickingMode = PickingMode.Ignore, enableRichText = label.enableRichText };
-                probe.style.position = Position.Absolute; probe.style.visibility = Visibility.Hidden; probe.style.whiteSpace = WhiteSpace.NoWrap;
-                probe.style.paddingLeft = probe.style.paddingRight = probe.style.paddingTop = probe.style.paddingBottom = 0;
-                probe.style.marginLeft = probe.style.marginRight = probe.style.marginTop = probe.style.marginBottom = 0;
-                probe.style.unityFont = font; probe.style.fontSize = size * 10;
-                layer.Add(probe); probes[probeKey] = probe;
+                width = probe.MeasureTextSize(label.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).x / 10;
+                if (width > 0) { exactWidths[key] = width; label.style.width = width + pad; }
+                return label;
             }
             pendingExact.Add((label, key, probeKey, label.text, pad));
             if (!exactScheduled) { exactScheduled = true; layer.schedule.Execute(MeasureExact); }
@@ -664,9 +722,15 @@ namespace Galaxy101
             foreach (var item in pendingExact)
             {
                 if (!probes.TryGetValue(item.Probe, out var probe) || probe.panel == null) continue;
+                float expected = probe.style.fontSize.value.value;
+                if (item.Key == null)
+                {
+                    // Glyph warm-up: laying the text out adds its glyphs to the font's atlas.
+                    if (Mathf.Abs(probe.resolvedStyle.fontSize - expected) > .01f) { waiting.Add(item); continue; }
+                    probe.MeasureTextSize(item.Text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined); continue;
+                }
                 if (!exactWidths.TryGetValue(item.Key, out float width))
                 {
-                    float expected = probe.style.fontSize.value.value;
                     if (Mathf.Abs(probe.resolvedStyle.fontSize - expected) > .01f) { waiting.Add(item); continue; }
                     width = probe.MeasureTextSize(item.Text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).x / 10;
                     if (width <= 0) continue;
@@ -676,6 +740,15 @@ namespace Galaxy101
             }
             pendingExact.Clear(); pendingExact.AddRange(waiting);
             if (waiting.Count > 0) { exactScheduled = true; layer.schedule.Execute(MeasureExact); }
+        }
+
+        /// <summary>
+        /// border-radius: 999px on a box of known height: half the height at once. (MenuView's 999 path fixes the radius in
+        /// a geometry callback, so a rebuilt pill draws its first frame with clamped elliptical corners.)
+        /// </summary>
+        private void Pill(VisualElement e, string background, float height)
+        {
+            view.Decorate(e, background, Mathf.RoundToInt(height / 2)); Radius(e, height / 2);
         }
 
         /// <summary>A round dot; <paramref name="glow"/> is the CSS box-shadow blur (0 0 Npx colour).</summary>
@@ -742,6 +815,16 @@ namespace Galaxy101
                 float f = MenuView.CssBezier(.25f, .1f, .25f, 1, p < .5f ? p * 2 : (p - .5f) * 2), out_ = p < .5f ? f : 1 - f;
                 var c = glow; c.a *= 1 - out_; ring(12 * out_, c);
             }, element);
+        }
+
+        /// <summary>
+        /// lbFade for a backdrop: its dim rgba(0,0,0,.55) comes in over <paramref name="seconds"/> (the colour, not the
+        /// opacity: the element carries a backdrop filter).
+        /// </summary>
+        private void FadeShade(VisualElement shade, float began, float seconds)
+        {
+            if (Time.realtimeSinceStartup - began >= seconds) { shade.style.backgroundColor = new Color(0, 0, 0, .55f); return; }
+            Animate(() => shade.style.backgroundColor = new Color(0, 0, 0, .55f * Mathf.Clamp01((Time.realtimeSinceStartup - began) / seconds)), shade);
         }
 
         /// <summary>lbFade: opacity 0 → 1 over <paramref name="seconds"/> from <paramref name="began"/>.</summary>

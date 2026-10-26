@@ -82,6 +82,24 @@ namespace Galaxy101.Tests
         }
 
         [Test]
+        public void CiftNeverFillsTheGapsBetweenPairs()
+        {
+            // Ten pairs and two singles (22 tiles) cannot all stand apart on 2 × 15: the most that can is eight pairs, the
+            // rest go after them, and no single lands in a gap between two pairs.
+            var hand = Enumerable.Range(1, 10).SelectMany(n => new[] { (R, n), (R, n) }).Concat(new[] { (B, 12), (K, 13) }).ToArray();
+            var (layout, faces) = Arrange(false, hand);
+            int pairs = 0;
+            foreach (var row in layout)
+                for (int x = 0; x < row.Length; x++)
+                {
+                    if (row[x] < 0 || (x > 0 && row[x - 1] >= 0)) continue;
+                    int end = x; while (end + 1 < row.Length && row[end + 1] >= 0) end++;
+                    if (end == x + 1 && faces[row[x]].Equals(faces[row[end]])) pairs++;
+                }
+            Assert.That(pairs, Is.EqualTo(8), Row(layout, faces, 0) + " / " + Row(layout, faces, 1));
+        }
+
+        [Test]
         public void EveryTileStaysOnTheRackAndBigHandsArrangeQuickly()
         {
             var random = new System.Random(101);

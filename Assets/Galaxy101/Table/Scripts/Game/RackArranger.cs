@@ -17,7 +17,8 @@ namespace Galaxy101.Table
     /// last.</item>
     /// <item>Placement: longer sets first, each into the first row with room (top first), one empty cell between sets;
     /// within a row the sets keep their own order left to right; leftover tiles fill the trailing cells of the bottom row,
-    /// then of the top row.</item>
+    /// then of the top row, one empty cell after the sets. When the leftovers do not fit there, the least valuable set
+    /// joins them (a gap between sets is never filled, so every set placed stays a set).</item>
     /// </list>
     /// Pure data (no Unity types), unit-tested directly.
     /// </summary>
@@ -30,6 +31,8 @@ namespace Galaxy101.Table
         {
             public readonly List<int> Ids = new List<int>();
             public int Key;
+            /// <summary>What the set is worth when the rack has no room for all of them: the sum of its numbers (seri), 0 (çift).</summary>
+            public int Value;
         }
 
         /// <summary>The 2 × 15 layout of <paramref name="tiles"/> for "Seri diz" (<paramref name="runs"/>) or "Çift diz".</summary>
@@ -76,7 +79,7 @@ namespace Galaxy101.Table
             {
                 var set = new Set();
                 foreach (var (c, n, w) in plan.Cells) set.Ids.Add(w ? wild.Dequeue() : ids[c * 100 + n].Dequeue());
-                var first = plan.Cells[0]; set.Key = first.Color * 100 + first.Number; sets.Add(set);
+                var first = plan.Cells[0]; set.Key = first.Color * 100 + first.Number; set.Value = plan.Cells.Sum(x => x.Number); sets.Add(set);
             }
             var rest = ids.OrderBy(p => p.Key).SelectMany(p => p.Value).ToList(); rest.AddRange(wild);
             return (sets, rest);
@@ -182,18 +185,38 @@ namespace Galaxy101.Table
 
         private static int[][] Place(List<Set> sets, List<int> rest)
         {
-            var rows = new[] { new List<Set>(), new List<Set>() }; var used = new int[2];
-            var leftover = new List<int>();
-            foreach (var set in sets.OrderByDescending(s => s.Ids.Count).ThenBy(s => s.Key))
+            var kept = sets.OrderByDescending(s => s.Ids.Count).ThenBy(s => s.Key).ToList();
+            var dropped = new List<int>();
+            while (true)
             {
-                int len = set.Ids.Count; bool placed = false;
-                for (int r = 0; r < 2 && !placed; r++)
+                var rows = new[] { new List<Set>(), new List<Set>() }; var used = new int[2];
+                var leftover = new List<int>(dropped);
+                foreach (var set in kept)
                 {
-                    int need = used[r] == 0 ? len : used[r] + 1 + len;
-                    if (need <= Columns) { rows[r].Add(set); used[r] = need; placed = true; }
+                    int len = set.Ids.Count; bool placed = false;
+                    for (int r = 0; r < 2 && !placed; r++)
+                    {
+                        int need = used[r] == 0 ? len : used[r] + 1 + len;
+                        if (need <= Columns) { rows[r].Add(set); used[r] = need; placed = true; }
+                    }
+                    if (!placed) leftover.AddRange(set.Ids);
                 }
-                if (!placed) leftover.AddRange(set.Ids);
+                int room = 0;
+                for (int r = 0; r < 2; r++) room += used[r] == 0 ? Columns : Math.Max(0, Columns - used[r] - 1);
+                var onRack = rows[0].Concat(rows[1]).ToList();
+                if (leftover.Count + rest.Count > room && onRack.Count > 0)
+                {
+                    // Each set given up frees one cell more than its tiles fill, so this ends.
+                    var drop = onRack.OrderBy(s => s.Value).ThenByDescending(s => s.Key).First();
+                    kept.Remove(drop); dropped.AddRange(drop.Ids);
+                    continue;
+                }
+                return Lay(rows, used, leftover.Concat(rest));
             }
+        }
+
+        private static int[][] Lay(List<Set>[] rows, int[] used, IEnumerable<int> loose)
+        {
             var layout = new[] { Enumerable.Repeat(Empty, Columns).ToArray(), Enumerable.Repeat(Empty, Columns).ToArray() };
             for (int r = 0; r < 2; r++)
             {
@@ -201,7 +224,7 @@ namespace Galaxy101.Table
                 foreach (var set in rows[r].OrderBy(s => s.Key)) { if (x > 0) x++; foreach (var id in set.Ids) layout[r][x++] = id; }
             }
             // Leftovers: the bottom row's trailing cells, then the top row's (after a one-cell gap from the sets).
-            var queue = new Queue<int>(leftover.Concat(rest));
+            var queue = new Queue<int>(loose);
             foreach (int r in new[] { 1, 0 })
             {
                 int x = used[r] == 0 ? 0 : used[r] + 1;

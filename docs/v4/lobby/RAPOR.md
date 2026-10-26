@@ -26,7 +26,9 @@ Yeni dosyalar: `LobbyScreen.Strings.cs` (v4 metin anahtarları, hata kodu eşlem
 | `3e0ceb4` | Commit tablosu |
 | (main fd64806 birleştirmesi) | run8 sonrası `main` |
 | `71deb03` | S09 süzgeç satırı kayması (tam metin genişlikleri); gelen davet (`inviteIn` / `inviteRespond`) |
-| (son) | Bu rapor: run8 sonucu |
+| `8750b37` | Rapor: run8 sonucu |
+| `0a28b8f` | PlayMode: ara kare ve bırakılmış render dokusu (§2b) |
+| (son) | Bu not |
 
 ## 2a. run8 sonucu ve sonrası
 
@@ -35,6 +37,21 @@ Orkestratörün Unity koşusu run8 (`artifacts/v4/unity/run8`, main fd64806): S1
 - **Neden:** UI Toolkit ölçülen her metin kutusunu tam piksele yukarı yuvarlıyor (tarayıcı kesirli genişliği tutuyor); süzgeç satırındaki 13 kısa etiket satır boyunca yarım piksel kadar birikiyor (sekme kutuları 103,41 → 104, 95,33 → 96 …).
 - **Düzeltme (71deb03):** segment seçenekleri (tip ve bahis sekmeleri; formdaki, kurallardaki ve davet panelindeki segmentler de), süzgeç çipleri (101↑ işaretiyle) ve üst çubuktaki Kodla katıl / Masa aç etiketleri genişliklerini aynı fontla on kat büyük ölçen gizli bir yoklama etiketinden alıyor (yuvarlama hatası onda bire iner; font + boyut + metin başına önbellekte). Ölçüm lobi açıldıktan sonraki ilk panel güncellemesinde, giriş solmasının (.3 s) içinde; sonraki yeniden çizimler önbellekten aynı karede.
 - **Beklenen:** süzgeç satırı ±1 px; UI pikselindeki kalan payın bir kısmı arka plandaki gezegen (Unity'de daha büyük / parlak; menü-arka plan hattı) ve yazı kenar yumuşatması — bu hattın dosyalarında değil. Unity'de yeniden çekimle doğrulanmalı.
+
+## 2b. PlayMode (main 46aab1c) ve düzeltmesi
+
+`artifacts/test-results/20261026T042255454Z-def9f069`: iki lobi testi kırmızı (ikisi de 0a86a4b birleştirmesinden beri, genişlik düzeltmesinden önce de):
+- `FiltersAndCreateOptionsRedrawWithoutInterimFrames`: tip süzgecine basınca ilk kare ne eski ne yeni resim (%7,7 / %2,2).
+- `PinAndCodeDialogsShakeOnWrongInputAndJoin`: PIN / kod pencerelerinde "Attempted to get a texture … that is not allocated" (`RenderNestedPasses`, süzgeç geçişleri).
+
+Düzeltme (0a28b8f) — yeniden çizimin bir kare geç çizdiği ya da render geçişlerini çalkaladığı her şey:
+- **Glifler:** lobinin gösterebileceği bütün glifler gizli yoklama etiketleriyle lobi açılırken (giriş solmasında) bir kez dizilir; sonraki çizimler dinamik font atlasına ekranda yazı varken glif eklemez. Tam genişlikler, yoklama çözülmüşse aynı karede ölçülür.
+- **Arka planlar:** Masa aç ile davet panelinin bulanık arka planı tek, kalıcı bir örtü (`lobby-veil`, adı açık olana göre `lobby.closeCreate` / `lobby.iv.close`); modal ayrı bir katmanda üstünde. Pencere arka planı (`lobby.closeDlg`) pencere oturumu boyunca bir kez kurulur; sallanma ya da PIN → bağlanılıyor yalnız kartı yeniden kurar. Arka plan solması opaklıkla değil renk alfasıyla (backdrop süzgeci taşıyan öğenin opaklığı değişmez).
+- **PIN parıltısı** süzgeçsiz (UF-803): her tuşta açılıp kapanan dört süzgeçli ikiz, kendisi süzgeçli kartın içindeydi.
+- **Hap köşeler** (kart durumu, bakiye, tost, oda havuzu) bilinen yüksekliğin yarısı, ilk karede (999 yolunda yarıçap geometri geri çağrısında düzeliyordu).
+- Yeniden kurulan masa listesi kaydırma çubuğunun önceki görünürlüğüyle başlar.
+
+Unity'de koşulmadı (derleme `OK (0 errors)`). Ara kare yine görülürse `GALAXY_STABILITY_DUMP=<klasör>` ile old / interim / new kareleri saklanır (`RebuildStabilityTests.cs` `FrameWatch`).
 
 ## 3. Durum ve görünüm başına değişiklikler
 

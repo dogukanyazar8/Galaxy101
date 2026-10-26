@@ -56,7 +56,7 @@ namespace Okey101.PlayMode.Tests
         [UnityTest] public IEnumerator MenuStartsOneHumanThreeBots()
         {
             var menu=root.AddComponent<MainMenuController>();menu.Initialize(menuStatePath);yield return null;
-            yield return Submit(menu.View.Root.Q<ToolkitButton>("mode-4"));yield return null;
+            yield return Submit(menu.View.Root.Q<ToolkitButton>("menu.m.pick[2]"));yield return null;
             Assert.That(menu.Model.SelectedMode,Is.EqualTo(4));
             var first=menu.StartLocalAsync(MainMenuController.LegacyTableScene);var repeated=menu.StartLocalAsync(MainMenuController.LegacyTableScene);
             yield return Await(first); yield return Await(repeated); yield return null;
@@ -198,17 +198,17 @@ namespace Okey101.PlayMode.Tests
         [UnityTest] public IEnumerator SettingsModalBlocksPlayAndPreservesDraftOnRepeatedShow()
         {
             var menu=root.AddComponent<MainMenuController>();menu.Initialize(menuStatePath);yield return null;
-            yield return Submit(menu.View.Root.Q<ToolkitButton>("settings-open"));yield return null;
+            yield return Submit(menu.View.Root.Q<ToolkitButton>("menu.openSettings"));yield return null;
             menu.View.SetTab("settings",1);yield return null;
             var slider=menu.View.Root.Q<GalaxySlider>("setting-master");Assert.That(slider,Is.Not.Null);slider.Value=15;
             menu.View.OpenPanel("settings");yield return null;
             slider=menu.View.Root.Q<GalaxySlider>("setting-master");
             Assert.That(slider.Value,Is.EqualTo(15));
-            Assert.That(menu.View.Root.Q<ToolkitButton>("play-now").enabledInHierarchy,Is.False);
+            Assert.That(menu.View.Root.Q<ToolkitButton>("menu.play").enabledInHierarchy,Is.False);
             yield return Await(menu.StartLocalAsync(MainMenuController.LegacyTableScene));Assert.That(menu!=null,Is.True);
             Assert.That(UnityEngine.Object.FindAnyObjectByType<GameBootstrap>(),Is.Null);
             menu.View.CloseTop();yield return null;
-            Assert.That(menu.View.Root.Q<ToolkitButton>("play-now").enabledInHierarchy,Is.True);
+            Assert.That(menu.View.Root.Q<ToolkitButton>("menu.play").enabledInHierarchy,Is.True);
             Assert.That(System.IO.File.Exists(menuStatePath),Is.False,"Cancel must not persist the settings draft.");
             menu.View.OpenPanel("settings",1);yield return null;
             Assert.That(menu.View.Root.Q<GalaxySlider>("setting-master").Value,Is.EqualTo(80));

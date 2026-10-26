@@ -162,7 +162,7 @@ namespace Galaxy101.Tests
         {
             var menu = Menu(); var root = menu.View.Root; yield return null;
             menu.Model.SelectedMode = 3;
-            var play = root.Q<Button>("play-now"); using (var evt = NavigationSubmitEvent.GetPooled()) { evt.target = play; play.SendEvent(evt); }
+            var play = root.Q<Button>("menu.play"); using (var evt = NavigationSubmitEvent.GetPooled()) { evt.target = play; play.SendEvent(evt); }
             yield return null; yield return null;
             Assert.That(menu.Ranked, Is.Not.Null); Assert.That(menu.Ranked.Visible, Is.True);
             Assert.That(root.Q<VisualElement>("main-layer").resolvedStyle.display, Is.EqualTo(DisplayStyle.None), "the menu hides under the ranked screen");

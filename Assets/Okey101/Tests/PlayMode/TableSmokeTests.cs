@@ -81,7 +81,7 @@ namespace Okey101.PlayMode.Tests
             Assert.That(UnityEngine.Object.FindAnyObjectByType<MainMenu>(),Is.Null);
             // Select bot mode in memory so authored-scene acceptance never changes user preferences.
             menu.Model.SelectedMode=4;menu.View.Refresh();yield return null;yield return null;
-            var play=menu.View.Root.Q<Button>("play-now");
+            var play=menu.View.Root.Q<Button>("menu.play");
             Assert.That(play,Is.Not.Null);Assert.That(play.enabledInHierarchy,Is.True);
             // "Botlara karşı" now opens the 3D Galaxy table; this acceptance covers the classic table entry.
             var open=menu.StartLocalAsync(MainMenuController.LegacyTableScene);

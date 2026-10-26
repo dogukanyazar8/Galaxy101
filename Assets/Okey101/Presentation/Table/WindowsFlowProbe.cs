@@ -51,13 +51,13 @@ namespace Okey101.Presentation
                 try
                 {
                     var menu=settingsOwner.AddComponent<MainMenuController>();menu.Initialize(settingsPath);
-                    await ClickNative(menu,"settings-open");menu.View.SetTab("settings",1);
+                    await ClickNative(menu,"menu.openSettings");menu.View.SetTab("settings",1);
                     await Wait(()=>menu.View.Root.Q<GalaxySlider>("setting-master")!=null);
                     menu.View.Root.Q<GalaxySlider>("setting-master").Value=25;
                     await ClickNative(menu,"settings-close");
                     Require(!File.Exists(settingsPath),"Cancel wrote native settings.");
                     Require((int)menu.Model.Settings["master"]==80,"Cancel changed the applied native volume.");
-                    await ClickNative(menu,"settings-open");
+                    await ClickNative(menu,"menu.openSettings");
                     await Wait(()=>menu.View.Root.Q<GalaxySlider>("setting-master")!=null);
                     Require(menu.View.Root.Q<GalaxySlider>("setting-master").Value==80,"Cancel retained an unsaved volume draft.");
                     menu.View.Root.Q<GalaxySlider>("setting-master").Value=25;

@@ -57,8 +57,8 @@ namespace Galaxy101.Tests
             var root = menu.View.Root;
             var rows = root.Query<VisualElement>(className: "g-settings-row").ToList();
             var titles = rows.Select(r => r.Query<Label>().First().text).ToList();
-            Assert.That(titles, Is.EqualTo(new[] { "Arka plan hareketi", "Görüntü modu", "Çözünürlük", "Kare hızı", "Efekt kalitesi" }).Or.EqualTo(new[] { "Background motion", "Display mode", "Resolution", "Frame rate", "Effect quality" }),
-                "spec/19 order; no planet row");
+            Assert.That(titles, Is.EqualTo(new[] { "Arka plan hareketi", "Görüntü modu", "Çözünürlük", "Kare hızı", "Efekt kalitesi", "İmleç" }).Or.EqualTo(new[] { "Background motion", "Display mode", "Resolution", "Frame rate", "Effect quality", "İmleç" }),
+                "v4 order (ref 12 / en 12): spec/19 rows + İmleç, which the prototype leaves untranslated in English");
             Assert.That(root.Q<VisualElement>("setting-wmode-fullscreen").ClassListContains("selected"), Is.True);
 
             Click(root, "setting-wmode-borderless"); yield return null;

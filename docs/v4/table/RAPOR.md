@@ -148,7 +148,7 @@ Yönlendirici yolu: `acct` → menü (Doğukan Y., 10.000 çip); `scenario` R43/
 
 - HUD eşliği (adım 7) kısmi: tören kartı, bitiş bandı, sonuç satırları, hediye/sohbet/ayar pencereleri ve oyuncu kartı eski adlarla; ölçüler referansla karşılaştırılmadı (EK-511).
 - Test akışlarında deste sayısı (UF-503), bitiş zamanlaması (UF-504), yükleme ekranının altı (UF-506).
-- Sunucu tarafı: `TableRuntime` hazır elden başlatma (EK-501), devralma/dönüşte yeni `deadline` yayılmıyor (EK-502), hazır mesaj anahtarları (EK-503).
+- Sunucu tarafı: `TableRuntime` hazır elden başlatma (EK-501) açık. EK-502 ve EK-503, 26 Ekim Faz 3 düzeltmesinde kapandı: aktif koltuk devralma/dönüşte yeni `deadline` kişiye özel `tableView` ve ortak `turn` ile yayınlanır; `quick.0…5` kimlikleri kaydırılmadan kabul edilir (eski 6…8 anahtarları korunur). Kanıt: Hat B raporu "Faz 3 · tur süresi, hazır mesajlar ve hediyeler".
 - Lobi/dereceli hatlarının v4 `matchStart`'a geçişi (EK-509).
 
 

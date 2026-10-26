@@ -320,18 +320,8 @@ namespace Galaxy101.Table
             var before = Match;
             Commit(r);
             if (wasAuto && Match.Status == G101Rules.StatusPlaying && deal == null && Match.Hand.Turn.Seat == seat && Match.Hand.Turn.N == before.Hand.Turn.N)
-            {
-                RestartTurnTimer(seat);
-                var turn = Match.Hand.Turn;
-                Emit(V4Messages.Turn, new V4Turn { Seat = turn.Seat, Phase = turn.Phase, N = turn.N, TurnMs = setup.TurnMs, Deadline = TurnDeadline, At = host.Now });
-            }
+                StartTurn();
             return null;
-        }
-
-        private void RestartTurnTimer(int seat)
-        {
-            TurnDeadline = host.Now + setup.TurnMs;
-            DriveTurn();
         }
 
         // ---- Hand end ----------------------------------------------------------------------------------------------
@@ -414,8 +404,8 @@ namespace Galaxy101.Table
             host.Applied(this, r.Events);
             if (Match.Status == G101Rules.StatusPlaying && deal == null)
             {
-                if (Match.Hand.Turn.Seat == seat) TurnDeadline = host.Now + setup.TurnMs;
-                DriveTurn();
+                if (Match.Hand.Turn.Seat == seat) StartTurn();
+                else DriveTurn();
             }
             return null;
         }
@@ -427,7 +417,7 @@ namespace Galaxy101.Table
             Timeouts[seat] = 0;
             if (!Autoplay[seat]) return;
             Autoplay[seat] = false;
-            if (Match != null && Match.Status == G101Rules.StatusPlaying && deal == null && Match.Hand.Turn.Seat == seat) RestartTurnTimer(seat);
+            if (Match != null && Match.Status == G101Rules.StatusPlaying && deal == null && Match.Hand.Turn.Seat == seat) StartTurn();
         }
 
         /// <summary>seatConnection to the table (after the returning player got their snapshot).</summary>

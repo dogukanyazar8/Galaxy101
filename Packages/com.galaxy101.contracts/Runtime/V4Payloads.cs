@@ -150,7 +150,7 @@ namespace Galaxy101.Contracts
     {
         /// <summary>Free text, at most 120 characters (D-32).</summary>
         public string Text { get; set; }
-        /// <summary>A ready message or emoji key (strings.csv: quick.1–quick.8, emoji.0–emoji.9).</summary>
+        /// <summary>A table string key (quick.0–quick.5) or emoji.0–emoji.9; earlier quick.6–quick.8 keys remain accepted without remapping.</summary>
         public string Quick { get; set; }
     }
 

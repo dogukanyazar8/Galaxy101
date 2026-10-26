@@ -67,8 +67,8 @@ namespace Galaxy101.Table
         public const int RankedHands = 5, RankedTurnSec = 30;
         /// <summary>D-32: free chat text limit.</summary>
         public const int ChatMax = 120;
-        /// <summary>Ready messages (strings.csv quick.1–quick.8); emoji keys are emoji.0–emoji.9.</summary>
-        public static readonly string[] Quick = { "quick.1", "quick.2", "quick.3", "quick.4", "quick.5", "quick.6", "quick.7", "quick.8" };
+        /// <summary>Table strings use quick.0–quick.5; quick.6–quick.8 remain accepted for earlier protocol clients. Emoji keys are emoji.0–emoji.9.</summary>
+        public static readonly string[] Quick = { "quick.0", "quick.1", "quick.2", "quick.3", "quick.4", "quick.5", "quick.6", "quick.7", "quick.8" };
 
         public static bool IsQuickKey(string key)
         {

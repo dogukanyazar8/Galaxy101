@@ -82,3 +82,23 @@ python tools/v4/unity_compile.py --repo C:/GD/Okey101-v4/server --csproj-from "C
 ```
 
 İstemci tostu yalnız C# derlemesiyle doğrulandı; Unity PlayMode/görsel doğrulama bu değişiklikte yapılmadı.
+
+## Faz 3 · tur süresi, hazır mesajlar ve hediyeler
+
+- **EK-502:** `TakeSeat` aktif bot koltuğunu devralınca ve `Reconnect` aktif otomatik koltuğu insana döndürünce tur süresi yenileniyor, ama diğer istemcilere yayınlanmıyordu. Üç reset yolu (`Move` dahil) mevcut `StartTurn` akışını kullanır: yeni deadline, kişiye özel `tableView`, ortak `turn`, aktif kişiye `legal`, zamanlayıcı. Oyuncu ve izleyici görünüm sınırları korunur. `TableRuntimeTests` iki yeni regresyonu gerçek runtime üzerinden sınar.
+- **EK-503:** `protocol.json` chat açıklaması `quick` alanını strings anahtarı olarak tanımlar. `strings/strings.json` anahtarları: `table.STR.quick.0` = "Kolay gelsin" / "Good luck", 1 = "Hadi bakalım" / "Let's go", 2 = "Güzel hamle!" / "Nice move!", 3 = "Şanslısın" / "Lucky you", 4 = "Çaylar benden!" / "Tea's on me!", 5 = "Bir el daha?" / "One more?". `mockServer.js` QUICK listesi 1…8 ile çelişir. Sayıları kaydırmak anlamı değiştirirdi; yalnız `quick.0` kabulü eklenerek 0…5 kimlikleri aynen taşınır, mevcut 6…8 uyumluluğu korunur. Bu üç anahtarın çevirisi pakette yok; çeviri uydurulmadı. HUD sender değişmedi.
+- **v4 `giftSend`:** `ChatGiftFlowTests` tek hedefte çay 100, herkese kahve 3 × 150 = 450; yalnız gönderenin bir bakiye olayı/işlem alması, alıcı listesi, masadaki oyuncu/izleyiciye uçuş, dışarıdaki hesaba yayın olmaması, izleyiciye ıstaka/legal/deck sırası gitmemesi, kapalı hediyeler, hedef doğrulaması ve yetersiz bakiyede sıfır tahsilatı sınar. Doğru hediye kaynak davranışı değiştirilmedi. Bu testler her başarılı istek başına tahsilatı doğrular; aynı wire request ID'sinin yeniden gönderilmesi için protokolde olmayan idempotence sözü eklenmedi.
+
+```
+dotnet build Server/tests/Galaxy101.Server.Tests/Galaxy101.Server.Tests.csproj -p:OutDir=<temp>/g101-phase3-flow-tests-1792993874506/ --no-restore -v:minimal
+  0 Uyarı, 0 Hata
+dotnet test <out>/Galaxy101.Server.Tests.dll --filter "FullyQualifiedName~TableRuntimeTests|FullyQualifiedName~ChatGiftFlowTests"
+  RED: Başarısız 3, Başarılı 23, Atlanan 0, Toplam 26
+  GREEN: Başarısız 0, Başarılı 26, Atlanan 0, Toplam 26
+dotnet test <out>/Galaxy101.Server.Tests.dll
+  Başarısız 0, Başarılı 158, Atlanan 0, Toplam 158
+dotnet test tools/v4/nunit-table/TableClientTests.csproj -p:ScratchRoot=<unique-temp> --no-restore --filter "TestCategory!=LiveServer"
+  Başarısız 0, Başarılı 36, Atlanan 0, Toplam 36 (C# 9)
+```
+
+Yeni 22 sunucu vakası: iki tur yayını regresyonu, dokuz hızlı mesaj kimliği, üç geçersiz anahtar, sekiz hediye vakası. Tam sunucu sayısı 136 → 158. Masa istemcisi bağımlılıkları mevcut NuGet disk önbelleğinden ayrı scratch dizinine restore edildi. Unity çalıştırılmadı; canlı `LiveServer` kategorisi bu koşuda dışarıda bırakıldı, 5173'teki sunucuya dokunulmadı.

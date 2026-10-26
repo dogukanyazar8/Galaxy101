@@ -122,4 +122,59 @@ public sealed class TableRuntimeTests
         // Leaving a solo match ranks the seat last (R-60).
         Assert.Equal(new[] { 0 }, run.Match.Ranking[^1].Seats);
     }
+
+    [Fact]
+    public void Taking_the_active_bot_seat_publishes_its_new_deadline_to_players_and_spectators()
+    {
+        var rig = G101Rules.RigFromHands(new ScenarioDeal { Dealer = 3, Dice = [4, 3], Indicator = "Y4a" });
+        var (run, host) = Start([true, false, true, true], rig);
+        Assert.Equal(0, run.Match.Hand.Turn.Seat);
+        var before = run.TurnDeadline;
+        bool advanced = false;
+        host.Schedule(host.Now + 1, () => advanced = true);
+        host.RunUntil(() => advanced);
+        host.Sent.Clear();
+
+        Assert.Null(run.TakeSeat(0));
+
+        Assert.True(run.TurnDeadline > before);
+        AssertRestartWasPublished(run, host, [0, 1, -1]);
+    }
+
+    [Fact]
+    public void Reconnecting_the_active_autoplay_seat_publishes_its_new_deadline_to_everyone()
+    {
+        var (run, host) = Start([false, false, false, false], seed: 7);
+        run.Disconnect(0);
+        host.RunUntil(() => run.Over || run.Autoplay[0] && run.Match.Hand.Turn.Seat == 0);
+        Assert.False(run.Over);
+        Assert.True(run.Autoplay[0]);
+        var before = run.TurnDeadline;
+        bool advanced = false;
+        host.Schedule(host.Now + 1, () => advanced = true);
+        host.RunUntil(() => advanced);
+        host.Sent.Clear();
+
+        run.Reconnect(0);
+
+        Assert.True(run.Connected[0]);
+        Assert.False(run.Autoplay[0]);
+        Assert.True(run.TurnDeadline > before);
+        AssertRestartWasPublished(run, host, [0, 1, 2, 3, -1]);
+    }
+
+    private static void AssertRestartWasPublished(TableRuntime run, FakeTableHost host, int[] seats)
+    {
+        Assert.Equal(host.Now + run.Setup.TurnMs, run.TurnDeadline);
+        foreach (var seat in seats)
+        {
+            var turn = (V4Turn)Assert.Single(host.Sent, m => m.Seat == seat && m.Type == M.Turn).Payload;
+            Assert.Equal(run.TurnDeadline, turn.Deadline);
+            Assert.Equal(run.Match.Hand.Turn.Seat, turn.Seat);
+            var view = (Dictionary<string, object>)((V4TableView)Assert.Single(host.Sent, m => m.Seat == seat && m.Type == M.TableView).Payload).View;
+            Assert.Equal(run.TurnDeadline, ((Dictionary<string, object>)view["turn"])["deadline"]);
+            Assert.False(view.ContainsKey("racks"));
+            if (seat == -1) { Assert.Null(view["rack"]); Assert.Null(view["legal"]); }
+        }
+    }
 }

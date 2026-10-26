@@ -549,15 +549,18 @@ namespace Galaxy101.Tests
             {
                 var guest = api.GuestAsync("Ikinci" + UnityEngine.Random.Range(1000, 9999), "#16B6A8"); yield return Until(() => guest.IsCompleted, 15, "second guest");
                 var connect = realtime.ConnectAsync(); yield return Until(() => connect.IsCompleted, 10, "second socket");
-                var wrong = realtime.RequestAsync(LobbyMessageTypes.Join, new TableJoinMessage { Code = code, Pin = "0000" }); yield return Until(() => wrong.IsCompleted, 10, "wrong PIN");
-                Assert.That(wrong.Result.Code, Is.EqualTo(TableErrors.WrongPin));
-                var join = realtime.RequestAsync(LobbyMessageTypes.Join, new TableJoinMessage { Code = code.Substring(3).ToLowerInvariant(), Pin = "4321" }); yield return Until(() => join.IsCompleted, 10, "joining by code");
+                // The lobby speaks the v4 package protocol (tableJoinCode {code, pin}); the server upper-cases the code.
+                var wrong = realtime.RequestAsync(V4Messages.TableJoinCode, new V4TableJoinCodeRequest { Code = code, Pin = "0000" }); yield return Until(() => wrong.IsCompleted, 10, "wrong PIN");
+                Assert.That(wrong.Result.Code, Is.EqualTo(V4Errors.E_PIN_WRONG));
+                var join = realtime.RequestAsync(V4Messages.TableJoinCode, new V4TableJoinCodeRequest { Code = code.ToLowerInvariant(), Pin = "4321" }); yield return Until(() => join.IsCompleted, 10, "joining by code");
                 Assert.That(join.Result.Ok, Is.True, join.Result.Code);
                 yield return Until(() => root.Q<Label>("lobby.w.status")?.text.Contains("2/4") == true, 10, "the second player in the room");
 
                 // Fill with bots and start; the table becomes a match (you are seat 0: seats 2 and 3 are spots 2 and 3).
                 Click(root, "lobby.z.addBot[2]"); yield return new WaitForSeconds(.5f);
-                Click(root, "lobby.z.addBot[3]");
+                Click(root, "lobby.z.addBot[3]"); yield return new WaitForSeconds(.5f);
+                // A table its seated owner runs counts down when the owner presses Başlat (tableStart → countdown 3-2-1).
+                Click(root, "lobby.w.start");
                 yield return Until(() => menu.Lobby.Countdown > 0 || started != null, 10, "the countdown");
                 yield return Until(() => started != null, 15, "the match start");
                 Assert.That(started.MatchId, Is.Not.Null); Assert.That(started.YourSeat, Is.EqualTo(0));

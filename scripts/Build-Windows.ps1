@@ -38,6 +38,7 @@ if ($exitCode -ne 0 -or -not (Test-Path -LiteralPath $reportPath -PathType Leaf)
     throw "Windows build failed. Inspect $logPath"
 }
 $report = Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json
+if ($report.tableRuleVersion -ne '101-v4') { throw "Windows build has no verified v4 table rules version. Inspect $reportPath" }
 if ($report.result -ne 'Succeeded' -or $report.configuration -ne $Configuration -or $report.errors -ne 0 -or $report.backend -ne 'Mono' -or $report.graphicsAPI -ne 'Direct3D11' -or $report.productName -ne 'Galaxy 101' -or $report.productVersion -ne '0.4.0' -or $report.ruleVersion -ne '101-v1' -or -not (Test-Path -LiteralPath $outputPath -PathType Leaf)) {
     throw "Windows build verification failed. Inspect $reportPath"
 }

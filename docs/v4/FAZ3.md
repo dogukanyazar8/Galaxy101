@@ -1,5 +1,7 @@
 # v4 · Faz 3 · uçtan uca doğrulama
 
+> Tarihsel Faz 3 ölçümleri. Aşağıdaki 160 Hz/FPS sonuçları güncel düzeltmenin yeniden ölçümü değildir. Güncel testler ve kalan doğrulama sınırları: [LOCAL_RELIABILITY.md](../LOCAL_RELIABILITY.md).
+
 Bu makinede (Windows 11, 160 Hz monitör, Docker Desktop) yapıldı. Sunucu: `scripts/Start-LocalServer.ps1` (PostgreSQL 17 konteyneri `galaxy101-dev-pg`, `http://localhost:5173`, `/v1/info` → 0.4.0 / 101-v4). İstemci: `scripts/Build-Windows.ps1 -Configuration Development`.
 
 ## 1 · Docker imajı

@@ -4,10 +4,12 @@ param(
     [ValidateSet('EditMode', 'PlayMode')][string]$Platform = 'EditMode',
     [string]$Filter,
     [string]$Category = '!Simulation',
-    [switch]$Graphics
+    [switch]$Graphics,
+    [switch]$NoGraphics
 )
 
 $ErrorActionPreference = 'Stop'
+if ($Graphics -and $NoGraphics) { throw 'Choose either -Graphics or -NoGraphics.' }
 . (Join-Path $PSScriptRoot 'Unity-ProcessLock.ps1')
 $operationMutex = Enter-GalaxyUnityProcess
 try {
@@ -28,7 +30,7 @@ New-Item -ItemType Directory -Path $runRoot -Force | Out-Null
 $resultPath = Join-Path $runRoot 'results.xml'
 $logPath = Join-Path $runRoot 'editor.log'
 $unityArguments = @('-batchmode', '-runTests', '-projectPath', $projectRoot, '-testPlatform', $Platform, '-testResults', $resultPath, '-logFile', $logPath)
-if ($Platform -eq 'EditMode' -and -not $Graphics) { $unityArguments += '-nographics' }
+if ($NoGraphics -or ($Platform -eq 'EditMode' -and -not $Graphics)) { $unityArguments += '-nographics' }
 if ($Graphics) { $unityArguments += '-force-d3d11' }
 if ($Filter) { $unityArguments += @('-testFilter', $Filter) }
 if ($Category) { $unityArguments += @('-testCategory', $Category) }

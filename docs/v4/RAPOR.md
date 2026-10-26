@@ -1,5 +1,7 @@
 # Galaxy 101 · v4 · rapor
 
+> Tarihsel v4 raporu. Sonraki Railway denemesinin ardından kullanıcı yerel geliştirmeye döndü; Railway askıda. Güncel düzeltmeler ve doğrulama sınırları: [LOCAL_RELIABILITY.md](../LOCAL_RELIABILITY.md).
+
 Görev: `Design/PROMPT_v4_OTONOM_GELISTIRME.md` (Faz 0 → Faz 4). Paket: `Design/Galaxy101_ClaudeCode/` v0.4.0. Çalışma 25–26 Ekim 2026; bütün commit'ler yerel (`main`), push / deploy / Railway yok. Ayrıntılı günlük: `ILERLEME.md`; kararlar `KARARLAR.md`; eksikler `EKSIKLER.md` (+ hat dosyaları); Unity farkları `UNITY_FARKLARI.md` (+ hat dosyaları); durum tablosu `DURUMLAR.md`; fark matrisi `FARK_MATRISI.md`; uçtan uca `FAZ3.md`.
 
 ## 1 · Ne yapıldı
@@ -37,12 +39,12 @@ Paralel çalışma: Faz 1'de dört hat (A/B/C/D), Faz 2'de beş kod hattı (men�
 
 Toplam kayıtlar ve dağılım `EKSIKLER.md` "Hatların eksik kayıtları" tablosunda. Öne çıkanlar:
 
-**Kullanıcı kararı gerekiyor (K)**
-- EK-211: Bekleme odasında sahip çıkınca masa kapanır (paket) ↔ önceki kararınız "sahiplik ilk insana geçer". Paket uygulandı.
-- EK-305: Masa modelleri — Blender cilalı mevcut GLB'ler mi, paketin ham v4 GLB'leri mi (geometri aynı; cila bevel/LOD/2K doku).
-- EK-413: Masa taş sesleri — mevcut gerçek domino kaydı (CC0) mı, paketin sentez WAV'ı mı.
-- EK-501/502/509 (masa): çalışma zamanına hazır elden başlatma girişi, `TakeSeat/Reconnect` sonrası `turn` yayını, eski protokol lobisinden v4 masasına geçiş.
-- K-10: "Botlara karşı" v4 gereği açıldı; önceki "YAKINDA kalsın" kararınızla çelişiyor.
+**Kullanıcının kesinleştirdiği kararlar**
+- EK-211: Bekleme odasında sahiplik ilk insan oyuncuya geçer.
+- EK-305: Mevcut cilalı modeller; v4 renkleri ve yerleşimi.
+- EK-413: Gerçek taş kayıtları.
+- K-10: "Botlara karşı" açık kalır.
+- EK-501/502/509 eski masa hattı notlarıdır; güncel canlı akış kanıtı ve sınırları yerel doğrulama belgesinde takip edilir.
 
 **Dış hizmet gerekiyor (D)**
 - Gerçek ödeme (mağaza makbuz doğrulaması), Google/Apple girişi, e-posta ile şifre sıfırlama: sunucu doğrulama sınırına kadar test edildi; sağlayıcı yok.

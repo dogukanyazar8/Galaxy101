@@ -12,7 +12,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from compare_ui import compare, load  # noqa: E402
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-FULL = ("app.stage", "menu.starsA", "menu.planetCanvas")
+# auth.side is a transparent layout column over the animated planet, not a painted UI panel.
+# Its independently named logo/tiles/text remain measured (EK-001 / K-08).
+FULL = ("app.stage", "menu.starsA", "menu.planetCanvas", "auth.side")
 # Texts Unity draws as artwork, not as a text element (docs/v4/UNITY_FARKLARI.md UF-03): never "missing".
 ARTWORK = {"GALAXY"}
 # Countdowns computed from the wall clock (EKSIKLER EK-003): compared by format, not by value.

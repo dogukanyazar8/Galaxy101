@@ -1,5 +1,7 @@
 # Galaxy 101 · Railway
 
+> 26 Ekim 2026: Railway çalışması kullanıcı kararıyla askıda. Aşağıdaki ayarlar önceki dağıtımın tarihsel kaydıdır; bu düzeltme çalışmasında push/deploy veya uzak veritabanı değişikliği yapılmadı. Güncel yerel doğrulama: [LOCAL_RELIABILITY.md](LOCAL_RELIABILITY.md).
+
 Tek API servisi + tek PostgreSQL yeterli. Unity Windows oyunu oyuncunun bilgisayarında çalışır; Railway API ve WebSocket sunucusunu barındırır.
 
 ## Servis ayarları

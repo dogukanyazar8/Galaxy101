@@ -1,669 +1,669 @@
 {
- "thresholds": "- Referans: `artifacts/v4/ref/<ID>.png` (Chrome, GPU, 1280×720, seed 42, ft = katalog `hold`); Unity: `scripts/Capture-G101States.ps1` (Development player, pencereli 1280×720, aynı ID/seed/ft).\n- Metin kutuları: `tools/compare_ui.py` ±3 px konum, genişlik/yükseklik ±%6 (en az 3 px), yazı boyutu ±0,5 px. \"eşleşti\" için referanstaki hiçbir metin eksik olmayacak ve en çok %5'i eşik dışında kalabilir.\n- Yerleşim dökümü: aynı `data-g101-id` adlı öğeler için kutu ±3 px; renk, font, harf aralığı, köşe birebir.\n- Piksel farkı: yalnız referansın UI öğe kutularında, gri ton farkı > 24 olan pikseller; tam ekran katmanlar ve Unity filigranı (UF-01) dışarıda. Referansın kendi tekrar farkı bu ölçüde %0. Eşik %12: yapısı birebir aynı bir karede (durum 40, run3) kalan fark yalnız yazı kenar yumuşatmasıdır (Chrome ↔ Unity). 3D masa kareleri ayrıca göz kontrolü + `tween3d`/`materials`/`lighting` değerleriyle.\n- \"eşleşti\": metin ve öğe eşikleri içinde; \"bilinçli fark\": nedeni `UNITY_FARKLARI.md`'de; \"eksik\": `EKSIKLER.md`'de kayıtlı.",
+ "thresholds": "- Referans: `artifacts/v4/ref/<ID>.png` (Chrome, GPU, 1280×720, seed 42, ft = katalog `hold`); Unity: `scripts/Capture-G101States.ps1` (Development player, pencereli 1280×720, aynı ID/seed/ft).\n- Metin kutuları: `tools/compare_ui.py` ±3 px konum, genişlik/yükseklik ±%6 (en az 3 px), yazı boyutu ±0,5 px. \"eşleşti\" için referanstaki hiçbir metin eksik olmayacak ve en çok %5'i eşik dışında kalabilir.\n- Yerleşim dökümü: aynı `data-g101-id` adlı öğeler için kutu ±3 px; renk, font, harf aralığı, köşe birebir.\n- Piksel farkı: yalnız referansın UI öğe kutularında, gri ton farkı > 24 olan pikseller; tam ekran katmanlar, boyanmayan `auth.side` yerleşim sütunu (logo/metin çocukları dahil kalır) ve Unity filigranı (UF-01) dışarıda. Referansın kendi tekrar farkı bu ölçüde %0. Eşik %12: yapısı birebir aynı bir karede (durum 40, run3) kalan fark yalnız yazı kenar yumuşatmasıdır (Chrome ↔ Unity). 3D masa kareleri ayrıca göz kontrolü + `tween3d`/`materials`/`lighting` değerleriyle.\n- \"eşleşti\": metin ve öğe eşikleri içinde; \"bilinçli fark\": nedeni `UNITY_FARKLARI.md`'de; \"eksik\": `EKSIKLER.md`'de kayıtlı.",
  "states": {
   "01": {
    "unity": "Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs",
-   "not": "[run12] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %11.28",
+   "not": "[safe18-all-tr] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.75",
    "durum": "eşleşti"
   },
   "02": {
    "unity": "Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs",
-   "not": "[run12] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %10.98",
+   "not": "[safe18-all-tr] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.57",
    "durum": "eşleşti"
   },
   "03": {
    "unity": "Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs",
-   "not": "[run12] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.64",
+   "not": "[safe18-all-tr] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.81",
    "durum": "eşleşti"
   },
   "04": {
    "unity": "Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs",
-   "not": "[run12] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.68",
+   "not": "[safe18-all-tr] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.84",
    "durum": "eşleşti"
   },
   "05": {
    "unity": "Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs",
-   "not": "[run12] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.65",
+   "not": "[safe18-all-tr] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.79",
    "durum": "eşleşti"
   },
   "06": {
    "unity": "Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs",
-   "not": "[run12] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.5",
+   "not": "[safe18-all-tr] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.5",
    "durum": "eşleşti"
   },
   "10": {
    "unity": "Scripts/Screens/SettingsController.cs",
-   "not": "[run12] metin 65/66 (kayık 0, eksik 0, fazla 0) · ad 65/81 · UI piksel %5.91",
+   "not": "[safe18-all-tr] metin 65/66 (kayık 0, eksik 0, fazla 0) · ad 65/81 · UI piksel %5.92",
    "durum": "eşleşti"
   },
   "11": {
    "unity": "Scripts/Screens/SettingsController.cs",
-   "not": "[run12] metin 62/63 (kayık 0, eksik 0, fazla 0) · ad 64/80 · UI piksel %5.21",
+   "not": "[safe18-all-tr] metin 62/63 (kayık 0, eksik 0, fazla 0) · ad 64/80 · UI piksel %5.21",
    "durum": "eşleşti"
   },
   "12": {
    "unity": "Scripts/Screens/SettingsController.cs",
-   "not": "UF-607 (menü hattı): \"Yerel · Monitör en fazla …\" gerçek monitörden okunur; prototip sabit 1280×720 yazar [run12] metin 74/77 (kayık 1, eksik 1, fazla 1) · ad 67/85 · UI piksel %10.9",
+   "not": "UF-607 (menü hattı): \"Yerel · Monitör en fazla …\" gerçek monitörden okunur; prototip sabit 1280×720 yazar [safe18-all-tr] metin 74/77 (kayık 1, eksik 1, fazla 1) · ad 67/85 · UI piksel %10.9",
    "durum": "bilinçli fark"
   },
   "13": {
    "unity": "Scripts/Screens/SettingsController.cs",
-   "not": "[run12] metin 55/56 (kayık 0, eksik 0, fazla 0) · ad 61/72 · UI piksel %3.0",
+   "not": "[safe18-all-tr] metin 55/56 (kayık 0, eksik 0, fazla 0) · ad 61/72 · UI piksel %3.0",
    "durum": "eşleşti"
   },
   "14": {
    "unity": "Scripts/Screens/SettingsController.cs",
-   "not": "[run12] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 61/74 · UI piksel %5.75",
+   "not": "[safe18-all-tr] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 61/74 · UI piksel %5.75",
    "durum": "eşleşti"
   },
   "15": {
    "unity": "Scripts/Dialogs/EditProfileController.cs",
-   "not": "[run12] metin 82/83 (kayık 0, eksik 0, fazla 1) · ad 98/112 · UI piksel %2.91",
+   "not": "[safe18-all-tr] metin 82/83 (kayık 0, eksik 0, fazla 1) · ad 98/112 · UI piksel %2.91",
    "durum": "eşleşti"
   },
   "16": {
    "unity": "Scripts/Dialogs/EditProfileController.cs",
-   "not": "[run12] metin 82/83 (kayık 0, eksik 0, fazla 1) · ad 98/112 · UI piksel %3.03",
+   "not": "[safe18-all-tr] metin 82/83 (kayık 0, eksik 0, fazla 1) · ad 98/112 · UI piksel %3.03",
    "durum": "eşleşti"
   },
   "17": {
    "unity": "Scripts/Dialogs/EditProfileController.cs",
-   "not": "[run12] metin 82/83 (kayık 0, eksik 0, fazla 1) · ad 98/112 · UI piksel %2.68",
+   "not": "[safe18-all-tr] metin 82/83 (kayık 0, eksik 0, fazla 1) · ad 98/112 · UI piksel %2.69",
    "durum": "eşleşti"
   },
   "18": {
    "unity": "Scripts/Dialogs/EditProfileController.cs",
-   "not": "[run12] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 61/74 · UI piksel %5.76",
+   "not": "[safe18-all-tr] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 61/74 · UI piksel %5.77",
    "durum": "eşleşti"
   },
   "19": {
    "unity": "Scripts/Dialogs/ConfirmController.cs, DoneController.cs",
-   "not": "[run12] metin 67/68 (kayık 0, eksik 0, fazla 0) · ad 65/79 · UI piksel %3.11",
+   "not": "[safe18-all-tr] metin 67/68 (kayık 0, eksik 0, fazla 0) · ad 65/79 · UI piksel %3.1",
    "durum": "eşleşti"
   },
   "20": {
    "unity": "Scripts/Dialogs/ConfirmController.cs, DoneController.cs",
-   "not": "[run12] metin 66/67 (kayık 0, eksik 0, fazla 0) · ad 64/78 · UI piksel %1.22",
+   "not": "[safe18-all-tr] metin 66/67 (kayık 0, eksik 0, fazla 0) · ad 64/78 · UI piksel %1.22",
    "durum": "eşleşti"
   },
   "21": {
    "unity": "Scripts/Dialogs/ConfirmController.cs, DoneController.cs",
-   "not": "EK-605 (menü hattı): prototip hesap silme metninde DEMO-04 sabiti \"125.400 çip ve 340 elmas\" yazar; Unity gerçek bakiyeyi gösterir [run12] metin 70/72 (kayık 0, eksik 1, fazla 1) · ad 67/81 · UI piksel %3.63",
+   "not": "EK-605 (menü hattı): prototip hesap silme metninde DEMO-04 sabiti \"125.400 çip ve 340 elmas\" yazar; Unity gerçek bakiyeyi gösterir [safe18-all-tr] metin 70/72 (kayık 0, eksik 1, fazla 1) · ad 67/81 · UI piksel %3.64",
    "durum": "bilinçli fark"
   },
   "22": {
    "unity": "Scripts/Dialogs/ConfirmController.cs, DoneController.cs",
-   "not": "EK-605 (menü hattı): prototip hesap silme metninde DEMO-04 sabiti \"125.400 çip ve 340 elmas\" yazar; Unity gerçek bakiyeyi gösterir [run12] metin 70/72 (kayık 0, eksik 1, fazla 2) · ad 67/81 · UI piksel %3.67",
+   "not": "EK-605 (menü hattı): prototip hesap silme metninde DEMO-04 sabiti \"125.400 çip ve 340 elmas\" yazar; Unity gerçek bakiyeyi gösterir [safe18-all-tr] metin 70/72 (kayık 0, eksik 1, fazla 2) · ad 67/81 · UI piksel %3.68",
    "durum": "bilinçli fark"
   },
   "30": {
    "unity": "Scripts/Screens/ShopController.cs",
-   "not": "[run12] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 33/70 · UI piksel %6.03",
+   "not": "[safe18-all-tr] metin 62/64 (kayık 1, eksik 0, fazla 0) · ad 33/70 · UI piksel %6.03",
    "durum": "eşleşti"
   },
   "31": {
    "unity": "Scripts/Screens/ShopController.cs",
-   "not": "[run12] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 33/70 · UI piksel %5.65",
+   "not": "[safe18-all-tr] metin 62/64 (kayık 1, eksik 0, fazla 0) · ad 33/70 · UI piksel %5.65",
    "durum": "eşleşti"
   },
   "32": {
    "unity": "Scripts/Screens/ShopController.cs",
-   "not": "[run12] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 33/67 · UI piksel %6.8",
+   "not": "[safe18-all-tr] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 33/67 · UI piksel %6.8",
    "durum": "eşleşti"
   },
   "40": {
    "unity": "Scripts/Screens/FriendsController.cs",
-   "not": "[run12] metin 59/60 (kayık 0, eksik 0, fazla 0) · ad 48/66 · UI piksel %3.6",
+   "not": "[safe18-all-tr] metin 59/60 (kayık 0, eksik 0, fazla 0) · ad 48/66 · UI piksel %3.61",
    "durum": "eşleşti"
   },
   "41": {
    "unity": "Scripts/Screens/FriendsController.cs",
-   "not": "[run12] metin 71/75 (kayık 3, eksik 0, fazla 0) · ad 60/78 · UI piksel %4.05",
+   "not": "[safe18-all-tr] metin 71/75 (kayık 3, eksik 0, fazla 0) · ad 60/78 · UI piksel %4.06",
    "durum": "eşleşti"
   },
   "42": {
    "unity": "Scripts/Screens/FriendsController.cs",
-   "not": "[run12] metin 49/50 (kayık 0, eksik 0, fazla 1) · ad 41/59 · UI piksel %2.88",
+   "not": "[safe18-all-tr] metin 49/50 (kayık 0, eksik 0, fazla 1) · ad 41/59 · UI piksel %2.89",
    "durum": "eşleşti"
   },
   "43": {
    "unity": "Scripts/Screens/FriendsController.cs",
-   "not": "[run12] metin 56/57 (kayık 0, eksik 0, fazla 0) · ad 44/63 · UI piksel %3.63",
+   "not": "[safe18-all-tr] metin 56/57 (kayık 0, eksik 0, fazla 0) · ad 44/63 · UI piksel %3.64",
    "durum": "eşleşti"
   },
   "44": {
    "unity": "Scripts/Dialogs/AddFriendController.cs",
-   "not": "[run12] metin 67/68 (kayık 0, eksik 0, fazla 0) · ad 56/75 · UI piksel %4.03",
+   "not": "[safe18-all-tr] metin 67/68 (kayık 0, eksik 0, fazla 0) · ad 56/75 · UI piksel %4.03",
    "durum": "eşleşti"
   },
   "45": {
    "unity": "Scripts/Dialogs/AddFriendController.cs",
-   "not": "[run12] metin 72/73 (kayık 0, eksik 0, fazla 1) · ad 59/78 · UI piksel %4.59",
+   "not": "[safe18-all-tr] metin 72/73 (kayık 0, eksik 0, fazla 1) · ad 59/78 · UI piksel %4.58",
    "durum": "eşleşti"
   },
   "46": {
    "unity": "Scripts/Dialogs/AddFriendController.cs",
-   "not": "[run12] metin 72/73 (kayık 0, eksik 0, fazla 1) · ad 59/78 · UI piksel %4.53",
+   "not": "[safe18-all-tr] metin 72/73 (kayık 0, eksik 0, fazla 1) · ad 59/78 · UI piksel %4.53",
    "durum": "eşleşti"
   },
   "47": {
    "unity": "Scripts/Dialogs/AddFriendController.cs",
-   "not": "[run12] metin 67/68 (kayık 0, eksik 0, fazla 1) · ad 56/75 · UI piksel %4.78",
+   "not": "[safe18-all-tr] metin 67/68 (kayık 0, eksik 0, fazla 1) · ad 56/75 · UI piksel %4.77",
    "durum": "eşleşti"
   },
   "50": {
    "unity": "Scripts/Screens/LeaderboardController.cs",
-   "not": "[run12] metin 97/98 (kayık 0, eksik 0, fazla 0) · ad 76/93 · UI piksel %4.97",
+   "not": "[safe18-all-tr] metin 97/98 (kayık 0, eksik 0, fazla 0) · ad 76/93 · UI piksel %4.97",
    "durum": "eşleşti"
   },
   "51": {
    "unity": "Scripts/Screens/LeaderboardController.cs",
-   "not": "[run12] metin 97/98 (kayık 0, eksik 0, fazla 0) · ad 76/93 · UI piksel %5.14",
+   "not": "[safe18-all-tr] metin 97/98 (kayık 0, eksik 0, fazla 0) · ad 76/93 · UI piksel %5.15",
    "durum": "eşleşti"
   },
   "52": {
    "unity": "Scripts/Screens/LeaderboardController.cs",
-   "not": "[run12] metin 77/78 (kayık 0, eksik 0, fazla 0) · ad 60/77 · UI piksel %4.08",
+   "not": "[safe18-all-tr] metin 77/78 (kayık 0, eksik 0, fazla 0) · ad 60/77 · UI piksel %4.09",
    "durum": "eşleşti"
   },
   "60": {
    "unity": "Scripts/Screens (DailyReward panel, MenuView)",
-   "not": "[safe15-menu-final] metin 79/80 (kayık 0, eksik 0, fazla 0) · ad 32/80 · UI piksel %5.89",
+   "not": "[safe18-all-tr] metin 79/80 (kayık 0, eksik 0, fazla 0) · ad 32/80 · UI piksel %5.89",
    "durum": "eşleşti"
   },
   "61": {
    "unity": "Scripts/Screens (DailyReward panel, MenuView)",
-   "not": "[safe15-menu-final] metin 79/80 (kayık 0, eksik 0, fazla 0) · ad 32/80 · UI piksel %5.91",
+   "not": "[safe18-all-tr] metin 79/80 (kayık 0, eksik 0, fazla 0) · ad 32/80 · UI piksel %5.91",
    "durum": "eşleşti"
   },
   "70": {
    "unity": "Scripts/Screens (Rules panel, MenuView)",
-   "not": "[run12] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 53/74 · UI piksel %4.7",
+   "not": "[safe18-all-tr] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 53/74 · UI piksel %4.7",
    "durum": "eşleşti"
   },
   "71": {
    "unity": "Scripts/Screens (Rules panel, MenuView)",
-   "not": "[run12] metin 54/55 (kayık 0, eksik 0, fazla 0) · ad 51/68 · UI piksel %4.81",
+   "not": "[safe18-all-tr] metin 54/55 (kayık 0, eksik 0, fazla 0) · ad 51/68 · UI piksel %4.81",
    "durum": "eşleşti"
   },
   "72": {
    "unity": "Scripts/Screens (Rules panel, MenuView)",
-   "not": "[run12] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 53/77 · UI piksel %4.86",
+   "not": "[safe18-all-tr] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 53/77 · UI piksel %4.87",
    "durum": "eşleşti"
   },
   "73": {
    "unity": "Scripts/Screens (Rules panel, MenuView)",
-   "not": "[run12] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 53/74 · UI piksel %4.22",
+   "not": "[safe18-all-tr] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 53/74 · UI piksel %4.22",
    "durum": "eşleşti"
   },
   "74": {
    "unity": "Scripts/Screens (Rules panel, MenuView)",
-   "not": "[run12] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 53/74 · UI piksel %3.92",
+   "not": "[safe18-all-tr] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 53/74 · UI piksel %3.92",
    "durum": "eşleşti"
   },
   "75": {
    "unity": "Scripts/Screens (Rules panel, MenuView)",
-   "not": "[run12] metin 55/56 (kayık 0, eksik 0, fazla 0) · ad 51/69 · UI piksel %5.52",
+   "not": "[safe18-all-tr] metin 55/56 (kayık 0, eksik 0, fazla 0) · ad 51/69 · UI piksel %5.53",
    "durum": "eşleşti"
   },
   "80": {
    "unity": "Scripts/Screens/ProfileController.cs (+ ShareProfile)",
-   "not": "[run12] metin 93/94 (kayık 0, eksik 0, fazla 0) · ad 88/105 · UI piksel %8.77",
+   "not": "[safe18-all-tr] metin 93/94 (kayık 0, eksik 0, fazla 0) · ad 88/105 · UI piksel %8.78",
    "durum": "eşleşti"
   },
   "81": {
    "unity": "Scripts/Screens/ProfileController.cs (+ ShareProfile)",
-   "not": "[safe15-menu-final] metin 82/83 (kayık 0, eksik 0, fazla 0) · ad 73/90 · UI piksel %7.22",
+   "not": "[safe18-all-tr] metin 82/83 (kayık 0, eksik 0, fazla 0) · ad 73/90 · UI piksel %7.22",
    "durum": "eşleşti"
   },
   "82": {
    "unity": "Scripts/Screens/ProfileController.cs (+ ShareProfile)",
-   "not": "[run12] metin 96/97 (kayık 0, eksik 0, fazla 0) · ad 87/104 · UI piksel %5.57",
+   "not": "[safe18-all-tr] metin 96/97 (kayık 0, eksik 0, fazla 0) · ad 87/104 · UI piksel %5.57",
    "durum": "eşleşti"
   },
   "83": {
    "unity": "Scripts/Screens/ProfileController.cs (+ ShareProfile)",
-   "not": "[run12] metin 124/127 (kayık 2, eksik 0, fazla 0) · ad 121/139 · UI piksel %6.13",
+   "not": "[safe18-all-tr] metin 124/127 (kayık 2, eksik 0, fazla 0) · ad 121/139 · UI piksel %6.13",
    "durum": "eşleşti"
   },
   "84": {
    "unity": "Scripts/Screens/ProfileController.cs (+ ShareProfile)",
-   "not": "[run12] metin 124/127 (kayık 2, eksik 0, fazla 0) · ad 121/139 · UI piksel %6.13",
+   "not": "[safe18-all-tr] metin 124/127 (kayık 2, eksik 0, fazla 0) · ad 121/139 · UI piksel %6.13",
    "durum": "eşleşti"
   },
   "90": {
    "unity": "Scripts/Screens/SettingsController.cs",
-   "not": "[run12] metin 55/56 (kayık 0, eksik 0, fazla 0) · ad 61/72 · UI piksel %3.43",
+   "not": "[safe18-all-tr] metin 55/56 (kayık 0, eksik 0, fazla 0) · ad 61/72 · UI piksel %3.43",
    "durum": "eşleşti"
   },
   "91": {
    "unity": "Scripts/Screens/SettingsController.cs",
-   "not": "[run12] metin 65/66 (kayık 0, eksik 0, fazla 0) · ad 65/81 · UI piksel %6.1",
+   "not": "[safe18-all-tr] metin 65/66 (kayık 0, eksik 0, fazla 0) · ad 65/81 · UI piksel %6.11",
    "durum": "eşleşti"
   },
   "92": {
    "unity": "Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs",
-   "not": "[run12] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %8.71",
+   "not": "[safe18-all-tr] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %8.88",
    "durum": "eşleşti"
   },
   "93": {
    "unity": "Scripts/Screens/ShopController.cs",
-   "not": "[run12] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 33/70 · UI piksel %5.98",
+   "not": "[safe18-all-tr] metin 62/64 (kayık 1, eksik 0, fazla 0) · ad 33/70 · UI piksel %5.99",
    "durum": "eşleşti"
   },
   "94": {
    "unity": "Scripts/Screens/FriendsController.cs",
-   "not": "[run12] metin 58/60 (kayık 1, eksik 0, fazla 0) · ad 48/66 · UI piksel %3.28",
+   "not": "[safe18-all-tr] metin 58/60 (kayık 1, eksik 0, fazla 0) · ad 48/66 · UI piksel %3.28",
    "durum": "eşleşti"
   },
   "95": {
    "unity": "Scripts/Screens (DailyReward panel, MenuView)",
-   "not": "[safe15-menu-final] metin 79/80 (kayık 0, eksik 0, fazla 0) · ad 32/80 · UI piksel %6.39",
+   "not": "[safe18-all-tr] metin 79/80 (kayık 0, eksik 0, fazla 0) · ad 32/80 · UI piksel %6.39",
    "durum": "eşleşti"
   },
   "96": {
    "unity": "Scripts/Screens (Rules panel, MenuView)",
-   "not": "[run12] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 53/74 · UI piksel %4.98",
+   "not": "[safe18-all-tr] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 53/74 · UI piksel %4.98",
    "durum": "eşleşti"
   },
   "97": {
    "unity": "Scripts/Screens/ProfileController.cs (+ ShareProfile)",
-   "not": "[run12] metin 93/94 (kayık 0, eksik 0, fazla 0) · ad 88/105 · UI piksel %8.5",
+   "not": "[safe18-all-tr] metin 93/94 (kayık 0, eksik 0, fazla 0) · ad 88/105 · UI piksel %8.5",
    "durum": "eşleşti"
   },
   "S01": {
    "unity": "Scripts/Screens/AuthFlow.cs",
-   "not": "UNITY_FARKLARI UF-02 / EKSIKLER EK-004: ilerleme yüzdesi, mesajı ve ipucu yükleme olaylarına ve çağrı sırasına bağlı [run12] metin 3/10 (kayık 3, eksik 3, fazla 36) · ad 0/14 · UI piksel %46.72",
+   "not": "UNITY_FARKLARI UF-02 / EKSIKLER EK-004: ilerleme yüzdesi, mesajı ve ipucu yükleme olaylarına ve çağrı sırasına bağlı [safe18-all-tr] metin 3/10 (kayık 3, eksik 3, fazla 36) · ad 0/14 · UI piksel %46.67",
    "durum": "bilinçli fark"
   },
   "S02": {
    "unity": "Scripts/Screens/AuthFlow.cs",
-   "not": "[run12] metin 18/19 (kayık 0, eksik 0, fazla 33) · ad 1/18 · UI piksel %9.46",
+   "not": "[safe18-all-tr] metin 18/19 (kayık 0, eksik 0, fazla 33) · ad 1/18 · UI piksel %9.67",
    "durum": "eşleşti"
   },
   "S03": {
    "unity": "Scripts/Screens/AuthFlow.cs",
-   "not": "[run12] metin 16/17 (kayık 0, eksik 0, fazla 33) · ad 1/24 · UI piksel %8.19",
+   "not": "[safe18-all-tr] metin 16/17 (kayık 0, eksik 0, fazla 33) · ad 1/24 · UI piksel %6.43",
    "durum": "eşleşti"
   },
   "S04": {
    "unity": "Scripts/Screens/AuthFlow.cs",
-   "not": "[run12] metin 15/16 (kayık 0, eksik 0, fazla 33) · ad 1/27 · UI piksel %8.04",
+   "not": "[safe18-all-tr] metin 15/16 (kayık 0, eksik 0, fazla 33) · ad 1/27 · UI piksel %6.13",
    "durum": "eşleşti"
   },
   "S05": {
    "unity": "Scripts/Screens/AuthFlow.cs",
-   "not": "[run12] metin 14/15 (kayık 0, eksik 0, fazla 34) · ad 1/27 · UI piksel %8.54",
+   "not": "[safe18-all-tr] metin 14/15 (kayık 0, eksik 0, fazla 34) · ad 1/27 · UI piksel %7.23",
    "durum": "eşleşti"
   },
   "S06": {
    "unity": "Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs",
-   "not": "[run12] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.32",
+   "not": "[safe18-all-tr] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.45",
    "durum": "eşleşti"
   },
   "S07": {
    "unity": "Scripts/Screens/SettingsController.cs",
-   "not": "UF-607 (menü hattı): \"Yerel · Monitör en fazla …\" gerçek monitörden okunur; prototip sabit 1280×720 yazar [run12] metin 74/77 (kayık 1, eksik 1, fazla 1) · ad 67/85 · UI piksel %10.9",
+   "not": "UF-607 (menü hattı): \"Yerel · Monitör en fazla …\" gerçek monitörden okunur; prototip sabit 1280×720 yazar [safe18-all-tr] metin 74/77 (kayık 1, eksik 1, fazla 1) · ad 67/85 · UI piksel %10.9",
    "durum": "bilinçli fark"
   },
   "S08": {
    "unity": "Scripts/Screens/SettingsController.cs",
-   "not": "[run12] metin 65/66 (kayık 0, eksik 0, fazla 0) · ad 65/81 · UI piksel %5.91",
+   "not": "[safe18-all-tr] metin 65/66 (kayık 0, eksik 0, fazla 0) · ad 65/81 · UI piksel %5.92",
    "durum": "eşleşti"
   },
   "S09": {
    "unity": "Scripts/Screens/LobbyScreen*.cs",
-   "not": "[run12] metin 155/155 (kayık 0, eksik 0, fazla 33) · ad 91/92 · UI piksel %11.82",
+   "not": "[safe18-all-tr] metin 155/155 (kayık 0, eksik 0, fazla 33) · ad 91/92 · UI piksel %11.89",
    "durum": "eşleşti"
   },
   "S10": {
    "unity": "Scripts/Screens/LobbyScreen*.cs",
-   "not": "[run12] metin 224/224 (kayık 0, eksik 0, fazla 42) · ad 161/162 · UI piksel %3.94",
+   "not": "[safe18-all-tr] metin 224/224 (kayık 0, eksik 0, fazla 42) · ad 161/162 · UI piksel %3.95",
    "durum": "eşleşti"
   },
   "S11": {
    "unity": "Scripts/Screens/LobbyScreen*.cs",
-   "not": "[run12] metin 159/159 (kayık 0, eksik 0, fazla 33) · ad 100/101 · UI piksel %0.84",
+   "not": "[safe18-all-tr] metin 159/159 (kayık 0, eksik 0, fazla 33) · ad 100/101 · UI piksel %0.84",
    "durum": "eşleşti"
   },
   "S12": {
    "unity": "Scripts/Screens/LobbyScreen*.cs",
-   "not": "[run12] metin 159/159 (kayık 0, eksik 0, fazla 33) · ad 98/99 · UI piksel %1.09",
+   "not": "[safe18-all-tr] metin 159/159 (kayık 0, eksik 0, fazla 33) · ad 98/99 · UI piksel %1.09",
    "durum": "eşleşti"
   },
   "S13": {
    "unity": "Scripts/Screens/LobbyScreen*.cs",
-   "not": "[run12] metin 48/49 (kayık 1, eksik 0, fazla 0) · ad 55/56 · UI piksel %7.59",
+   "not": "[safe18-all-tr] metin 48/49 (kayık 1, eksik 0, fazla 0) · ad 55/56 · UI piksel %7.59",
    "durum": "eşleşti"
   },
   "S14": {
    "unity": "Scripts/Screens/LobbyScreen*.cs",
-   "not": "EKSIKLER EK-007 / lobi EK-801: paket karesi davet panelini açmıyor; Unity başlıktaki paneli açar (doğru kare docs/v4/lobby/ref/S14) [run12] metin 48/49 (kayık 1, eksik 0, fazla 44) · ad 55/56 · UI piksel %47.74",
+   "not": "EKSIKLER EK-007 / lobi EK-801: paket karesi davet panelini açmıyor; Unity başlıktaki paneli açar (doğru kare docs/v4/lobby/ref/S14) [safe18-all-tr] metin 48/49 (kayık 1, eksik 0, fazla 44) · ad 55/56 · UI piksel %47.75",
    "durum": "bilinçli fark"
   },
   "S15": {
    "unity": "Scripts/Screens/LobbyScreen*.cs",
-   "not": "EKSIKLER EK-007 / lobi EK-801: paket karesi davet panelini açmıyor; Unity başlıktaki paneli açar (doğru kare docs/v4/lobby/ref/S15) [run12] metin 48/49 (kayık 1, eksik 0, fazla 33) · ad 55/56 · UI piksel %47.59",
+   "not": "EKSIKLER EK-007 / lobi EK-801: paket karesi davet panelini açmıyor; Unity başlıktaki paneli açar (doğru kare docs/v4/lobby/ref/S15) [safe18-all-tr] metin 48/49 (kayık 1, eksik 0, fazla 33) · ad 55/56 · UI piksel %47.59",
    "durum": "bilinçli fark"
   },
   "S16": {
    "unity": "Scripts/Screens/RankedQueue.cs (yalnız kuyruk; dereceli ana ekranı yok)",
-   "not": "[run12] metin 48/48 (kayık 0, eksik 0, fazla 0) · ad 48/49 · UI piksel %6.57",
+   "not": "[safe18-all-tr] metin 48/48 (kayık 0, eksik 0, fazla 0) · ad 48/49 · UI piksel %6.58",
    "durum": "eşleşti"
   },
   "G01": {
    "unity": "Scripts/Screens/TableLoadingOverlay.cs",
-   "not": "[run11] metin 22/30 (kayık 5, eksik 3, fazla 3) · ad 22/41 · UI piksel %13.0",
+   "not": "[safe18-all-tr] metin 26/30 (kayık 2, eksik 2, fazla 2) · ad 26/41 · UI piksel %4.44",
    "durum": "bekliyor"
   },
   "G02": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[run11] metin 22/28 (kayık 4, eksik 2, fazla 2) · ad 17/37 · UI piksel %14.06",
+   "not": "[safe18-all-tr] metin 26/28 (kayık 0, eksik 2, fazla 2) · ad 17/37 · UI piksel %12.68",
    "durum": "bekliyor"
   },
   "G03": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[run11] metin 21/28 (kayık 4, eksik 3, fazla 5) · ad 17/37 · UI piksel %14.26",
+   "not": "[safe18-all-tr] metin 25/28 (kayık 0, eksik 3, fazla 5) · ad 17/37 · UI piksel %12.22",
    "durum": "bekliyor"
   },
   "G04": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[run11] metin 21/28 (kayık 4, eksik 3, fazla 5) · ad 17/37 · UI piksel %15.35",
+   "not": "[safe18-all-tr] metin 25/28 (kayık 0, eksik 3, fazla 5) · ad 17/37 · UI piksel %14.67",
    "durum": "bekliyor"
   },
   "G05": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[run11] metin 21/28 (kayık 4, eksik 3, fazla 5) · ad 17/37 · UI piksel %15.86",
+   "not": "[safe18-all-tr] metin 25/28 (kayık 0, eksik 3, fazla 5) · ad 17/37 · UI piksel %15.11",
    "durum": "bekliyor"
   },
   "G06": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[run11] metin 21/28 (kayık 4, eksik 3, fazla 5) · ad 17/37 · UI piksel %15.31",
+   "not": "[safe18-all-tr] metin 25/28 (kayık 0, eksik 3, fazla 5) · ad 17/37 · UI piksel %14.77",
    "durum": "bekliyor"
   },
   "G07": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[run11] metin 22/32 (kayık 5, eksik 5, fazla 5) · ad 17/41 · UI piksel %14.65",
+   "not": "[safe18-all-tr] metin 26/32 (kayık 1, eksik 5, fazla 5) · ad 17/41 · UI piksel %15.97",
    "durum": "bekliyor"
   },
   "G08": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[run11] metin 24/32 (kayık 4, eksik 4, fazla 4) · ad 17/41 · UI piksel %15.33",
+   "not": "[safe18-all-tr] metin 28/32 (kayık 0, eksik 4, fazla 4) · ad 17/41 · UI piksel %14.42",
    "durum": "bekliyor"
   },
   "G09": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[run11] metin 24/32 (kayık 5, eksik 3, fazla 3) · ad 17/41 · UI piksel %14.68",
+   "not": "[safe18-all-tr] metin 28/32 (kayık 1, eksik 3, fazla 3) · ad 17/41 · UI piksel %14.36",
    "durum": "bekliyor"
   },
   "G10": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[run11] metin 24/32 (kayık 5, eksik 3, fazla 3) · ad 17/41 · UI piksel %13.05",
+   "not": "[safe18-all-tr] metin 28/32 (kayık 1, eksik 3, fazla 3) · ad 17/41 · UI piksel %12.87",
    "durum": "bekliyor"
   },
   "G11": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[run11] metin 15/32 (kayık 13, eksik 4, fazla 4) · ad 17/41 · UI piksel %38.77",
+   "not": "[safe18-all-tr] metin 19/32 (kayık 9, eksik 4, fazla 4) · ad 17/41 · UI piksel %38.52",
    "durum": "bekliyor"
   },
   "G12": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[run11] metin 23/30 (kayık 5, eksik 2, fazla 2) · ad 23/38 · UI piksel %17.63",
+   "not": "[safe18-all-tr] metin 28/30 (kayık 0, eksik 2, fazla 2) · ad 23/38 · UI piksel %15.79",
    "durum": "bekliyor"
   },
   "G13": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 24/33 (kayık 8, eksik 1, fazla 2) · ad 25/40 · UI piksel %17.64",
+   "not": "[safe18-all-tr] metin 31/33 (kayık 1, eksik 1, fazla 1) · ad 25/40 · UI piksel %15.86",
    "durum": "bekliyor"
   },
   "G14": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 21/34 (kayık 12, eksik 1, fazla 1) · ad 25/40 · UI piksel %17.18",
+   "not": "[safe18-all-tr] metin 28/34 (kayık 6, eksik 0, fazla 0) · ad 25/40 · UI piksel %17.39",
    "durum": "bekliyor"
   },
   "G15": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 21/34 (kayık 11, eksik 2, fazla 1) · ad 25/40 · UI piksel %20.79",
+   "not": "[safe18-all-tr] metin 28/34 (kayık 6, eksik 0, fazla 0) · ad 25/40 · UI piksel %14.62",
    "durum": "bekliyor"
   },
   "G16": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 21/34 (kayık 12, eksik 1, fazla 1) · ad 25/40 · UI piksel %16.13",
+   "not": "[safe18-all-tr] metin 28/34 (kayık 6, eksik 0, fazla 0) · ad 25/40 · UI piksel %14.67",
    "durum": "bekliyor"
   },
   "G17": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 19/36 (kayık 14, eksik 3, fazla 3) · ad 26/42 · UI piksel %24.86",
+   "not": "[safe18-all-tr] metin 35/36 (kayık 1, eksik 0, fazla 0) · ad 27/42 · UI piksel %13.16",
    "durum": "bekliyor"
   },
   "G18": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 23/34 (kayık 10, eksik 1, fazla 2) · ad 25/40 · UI piksel %17.47",
+   "not": "[safe18-all-tr] metin 33/34 (kayık 1, eksik 0, fazla 0) · ad 25/40 · UI piksel %14.89",
    "durum": "bekliyor"
   },
   "G19": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 21/34 (kayık 11, eksik 2, fazla 2) · ad 25/40 · UI piksel %19.19",
+   "not": "[safe18-all-tr] metin 28/34 (kayık 5, eksik 1, fazla 1) · ad 25/40 · UI piksel %14.2",
    "durum": "bekliyor"
   },
   "G20": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 24/32 (kayık 7, eksik 1, fazla 1) · ad 24/39 · UI piksel %19.12",
+   "not": "[safe18-all-tr] metin 30/32 (kayık 1, eksik 1, fazla 1) · ad 24/39 · UI piksel %13.8",
    "durum": "bekliyor"
   },
   "G21": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 21/33 (kayık 11, eksik 1, fazla 2) · ad 24/39 · UI piksel %17.87",
+   "not": "[safe18-all-tr] metin 28/33 (kayık 4, eksik 1, fazla 2) · ad 24/39 · UI piksel %13.82",
    "durum": "bekliyor"
   },
   "G22": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 25/32 (kayık 6, eksik 1, fazla 2) · ad 24/39 · UI piksel %18.07",
+   "not": "[safe18-all-tr] metin 30/32 (kayık 1, eksik 1, fazla 2) · ad 24/39 · UI piksel %15.46",
    "durum": "bekliyor"
   },
   "G23": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 21/34 (kayık 12, eksik 1, fazla 1) · ad 25/40 · UI piksel %17.31",
+   "not": "[safe18-all-tr] metin 28/34 (kayık 6, eksik 0, fazla 0) · ad 25/40 · UI piksel %15.63",
    "durum": "bekliyor"
   },
   "G24": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 22/32 (kayık 8, eksik 2, fazla 3) · ad 23/38 · UI piksel %15.12",
+   "not": "[safe18-all-tr] metin 27/32 (kayık 3, eksik 2, fazla 3) · ad 23/38 · UI piksel %12.71",
    "durum": "bekliyor"
   },
   "G25": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 24/31 (kayık 6, eksik 1, fazla 1) · ad 24/39 · UI piksel %16.68",
+   "not": "[safe18-all-tr] metin 30/31 (kayık 0, eksik 1, fazla 1) · ad 24/39 · UI piksel %14.09",
    "durum": "bekliyor"
   },
   "G26": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 24/31 (kayık 6, eksik 1, fazla 1) · ad 24/39 · UI piksel %16.71",
+   "not": "[safe18-all-tr] metin 30/31 (kayık 0, eksik 1, fazla 1) · ad 24/39 · UI piksel %14.48",
    "durum": "bekliyor"
   },
   "G27": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 24/31 (kayık 6, eksik 1, fazla 1) · ad 24/39 · UI piksel %17.44",
+   "not": "[safe18-all-tr] metin 30/31 (kayık 0, eksik 1, fazla 1) · ad 24/39 · UI piksel %13.73",
    "durum": "bekliyor"
   },
   "G28": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 24/31 (kayık 6, eksik 1, fazla 1) · ad 24/39 · UI piksel %19.07",
+   "not": "[safe18-all-tr] metin 29/31 (kayık 1, eksik 1, fazla 1) · ad 24/39 · UI piksel %14.54",
    "durum": "bekliyor"
   },
   "G29": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 24/31 (kayık 6, eksik 1, fazla 1) · ad 24/39 · UI piksel %17.98",
+   "not": "[safe18-all-tr] metin 29/31 (kayık 1, eksik 1, fazla 1) · ad 24/39 · UI piksel %17.01",
    "durum": "bekliyor"
   },
   "G30": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 25/31 (kayık 4, eksik 2, fazla 3) · ad 23/39 · UI piksel %15.05",
+   "not": "[safe18-all-tr] metin 28/31 (kayık 1, eksik 2, fazla 3) · ad 23/39 · UI piksel %16.91",
    "durum": "bekliyor"
   },
   "G31": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 24/33 (kayık 7, eksik 2, fazla 10) · ad 25/41 · UI piksel %16.85",
+   "not": "[safe18-all-tr] metin 29/33 (kayık 2, eksik 2, fazla 7) · ad 25/41 · UI piksel %15.87",
    "durum": "bekliyor"
   },
   "G32": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 27/88 (kayık 57, eksik 4, fazla 33) · ad 23/85 · UI piksel %26.88",
+   "not": "[safe18-all-tr] metin 83/88 (kayık 3, eksik 2, fazla 32) · ad 70/85 · UI piksel %6.58",
    "durum": "bekliyor"
   },
   "G33": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 25/34 (kayık 7, eksik 2, fazla 2) · ad 23/43 · UI piksel %10.62",
+   "not": "[safe18-all-tr] metin 27/34 (kayık 5, eksik 2, fazla 2) · ad 23/43 · UI piksel %10.17",
    "durum": "bekliyor"
   },
   "G34": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 24/68 (kayık 34, eksik 10, fazla 8) · ad 26/75 · UI piksel %19.75",
+   "not": "[safe18-all-tr] metin 61/68 (kayık 5, eksik 2, fazla 1) · ad 59/75 · UI piksel %7.03",
    "durum": "bekliyor"
   },
   "T01": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 14/19 (kayık 5, eksik 0, fazla 0) · ad 17/26 · UI piksel %11.28",
+   "not": "[safe18-all-tr] metin 18/19 (kayık 1, eksik 0, fazla 0) · ad 17/26 · UI piksel %9.19",
    "durum": "bekliyor"
   },
   "T02": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 13/26 (kayık 13, eksik 0, fazla 0) · ad 19/36 · UI piksel %32.68",
+   "not": "[safe18-all-tr] metin 16/26 (kayık 10, eksik 0, fazla 0) · ad 19/36 · UI piksel %43.94",
    "durum": "bekliyor"
   },
   "T03": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 22/28 (kayık 4, eksik 2, fazla 2) · ad 17/37 · UI piksel %15.22",
+   "not": "[safe18-all-tr] metin 26/28 (kayık 0, eksik 2, fazla 2) · ad 17/37 · UI piksel %13.98",
    "durum": "bekliyor"
   },
   "T04": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 24/30 (kayık 4, eksik 2, fazla 2) · ad 23/38 · UI piksel %14.95",
+   "not": "[safe18-all-tr] metin 26/30 (kayık 2, eksik 2, fazla 2) · ad 23/38 · UI piksel %14.95",
    "durum": "bekliyor"
   },
   "T05": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 25/31 (kayık 4, eksik 2, fazla 3) · ad 23/39 · UI piksel %15.43",
+   "not": "[safe18-all-tr] metin 28/31 (kayık 1, eksik 2, fazla 3) · ad 23/39 · UI piksel %14.01",
    "durum": "bekliyor"
   },
   "T06": {
    "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs",
-   "not": "[run11] metin 25/31 (kayık 4, eksik 2, fazla 6) · ad 23/39 · UI piksel %15.24",
+   "not": "[safe18-all-tr] metin 28/31 (kayık 1, eksik 2, fazla 3) · ad 23/39 · UI piksel %14.08",
    "durum": "bekliyor"
   },
   "T07": {
    "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs",
-   "not": "[run11] metin 28/47 (kayık 13, eksik 6, fazla 5) · ad 23/54 · UI piksel %19.87",
+   "not": "[safe18-all-tr] metin 44/47 (kayık 1, eksik 2, fazla 4) · ad 39/54 · UI piksel %11.67",
    "durum": "bekliyor"
   },
   "T08": {
    "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs",
-   "not": "[run11] metin 41/59 (kayık 7, eksik 11, fazla 5) · ad 23/72 · UI piksel %13.38",
+   "not": "[safe18-all-tr] metin 55/59 (kayık 2, eksik 2, fazla 3) · ad 56/72 · UI piksel %7.52",
    "durum": "bekliyor"
   },
   "T09": {
    "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs",
-   "not": "[run11] metin 41/55 (kayık 5, eksik 9, fazla 5) · ad 23/68 · UI piksel %13.43",
+   "not": "[safe18-all-tr] metin 51/55 (kayık 2, eksik 2, fazla 3) · ad 52/68 · UI piksel %8.14",
    "durum": "bekliyor"
   },
   "T10": {
    "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs",
-   "not": "[run11] metin 48/65 (kayık 13, eksik 4, fazla 3) · ad 23/78 · UI piksel %11.8",
+   "not": "[safe18-all-tr] metin 52/65 (kayık 11, eksik 2, fazla 3) · ad 62/78 · UI piksel %7.1",
    "durum": "bekliyor"
   },
   "T11": {
    "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs",
-   "not": "[run11] metin 16/34 (kayık 16, eksik 2, fazla 2) · ad 23/42 · UI piksel %19.09",
+   "not": "[safe18-all-tr] metin 30/34 (kayık 2, eksik 2, fazla 3) · ad 23/42 · UI piksel %17.81",
    "durum": "bekliyor"
   },
   "T12": {
    "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs",
-   "not": "[run11] metin 25/31 (kayık 4, eksik 2, fazla 2) · ad 23/39 · UI piksel %13.73",
+   "not": "[safe18-all-tr] metin 28/31 (kayık 1, eksik 2, fazla 2) · ad 23/39 · UI piksel %16.37",
    "durum": "bekliyor"
   },
   "T13": {
    "unity": "Table/Scripts/Hud/TableHud.Social.cs",
-   "not": "[run11] metin 30/49 (kayık 8, eksik 11, fazla 3) · ad 23/61 · UI piksel %17.2",
+   "not": "[safe18-all-tr] metin 46/49 (kayık 1, eksik 2, fazla 3) · ad 46/61 · UI piksel %7.65",
    "durum": "bekliyor"
   },
   "T14": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 24/33 (kayık 8, eksik 1, fazla 2) · ad 25/40 · UI piksel %15.81",
+   "not": "[safe18-all-tr] metin 31/33 (kayık 1, eksik 1, fazla 1) · ad 25/40 · UI piksel %13.03",
    "durum": "bekliyor"
   },
   "T15": {
    "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs",
-   "not": "[run11] metin 27/88 (kayık 57, eksik 4, fazla 33) · ad 23/85 · UI piksel %26.91",
+   "not": "[safe18-all-tr] metin 83/88 (kayık 3, eksik 2, fazla 32) · ad 70/85 · UI piksel %6.63",
    "durum": "bekliyor"
   },
   "T16": {
    "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs",
-   "not": "[run11] metin 28/55 (kayık 25, eksik 2, fazla 3) · ad 23/70 · UI piksel %14.3",
+   "not": "[safe18-all-tr] metin 51/55 (kayık 2, eksik 2, fazla 2) · ad 55/70 · UI piksel %4.95",
    "durum": "bekliyor"
   },
   "T17": {
    "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs",
-   "not": "[run11] metin 28/52 (kayık 22, eksik 2, fazla 3) · ad 23/71 · UI piksel %15.2",
+   "not": "[safe18-all-tr] metin 48/52 (kayık 2, eksik 2, fazla 2) · ad 56/71 · UI piksel %6.19",
    "durum": "bekliyor"
   },
   "T18": {
    "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs",
-   "not": "[run11] metin 28/47 (kayık 17, eksik 2, fazla 3) · ad 23/65 · UI piksel %13.19",
+   "not": "[safe18-all-tr] metin 43/47 (kayık 2, eksik 2, fazla 2) · ad 50/65 · UI piksel %4.84",
    "durum": "bekliyor"
   },
   "T19": {
    "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs",
-   "not": "[run11] metin 26/31 (kayık 4, eksik 1, fazla 2) · ad 23/39 · UI piksel %16.1",
+   "not": "[safe18-all-tr] metin 29/31 (kayık 1, eksik 1, fazla 2) · ad 23/39 · UI piksel %11.85",
    "durum": "bekliyor"
   },
   "T20": {
    "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs",
-   "not": "[run11] metin 26/31 (kayık 4, eksik 1, fazla 2) · ad 23/39 · UI piksel %18.66",
+   "not": "[safe18-all-tr] metin 29/31 (kayık 1, eksik 1, fazla 2) · ad 23/39 · UI piksel %14.54",
    "durum": "bekliyor"
   },
   "T21": {
    "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs",
-   "not": "[run11] metin 26/31 (kayık 4, eksik 1, fazla 2) · ad 23/39 · UI piksel %18.32",
+   "not": "[safe18-all-tr] metin 29/31 (kayık 1, eksik 1, fazla 2) · ad 23/39 · UI piksel %14.38",
    "durum": "bekliyor"
   },
   "T22": {
    "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs",
-   "not": "[run11] metin 26/31 (kayık 4, eksik 1, fazla 2) · ad 23/39 · UI piksel %21.38",
+   "not": "[safe18-all-tr] metin 29/31 (kayık 1, eksik 1, fazla 2) · ad 23/39 · UI piksel %16.4",
    "durum": "bekliyor"
   },
   "T23": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 24/33 (kayık 7, eksik 2, fazla 2) · ad 23/42 · UI piksel %30.06",
+   "not": "[safe18-all-tr] metin 29/33 (kayık 2, eksik 2, fazla 2) · ad 23/42 · UI piksel %28.37",
    "durum": "bekliyor"
   },
   "T24": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 24/68 (kayık 34, eksik 10, fazla 8) · ad 26/75 · UI piksel %19.67",
+   "not": "[safe18-all-tr] metin 61/68 (kayık 5, eksik 2, fazla 1) · ad 59/75 · UI piksel %6.95",
    "durum": "bekliyor"
   },
   "T25": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 25/34 (kayık 7, eksik 2, fazla 2) · ad 23/43 · UI piksel %10.61",
+   "not": "[safe18-all-tr] metin 27/34 (kayık 5, eksik 2, fazla 2) · ad 23/43 · UI piksel %10.29",
    "durum": "bekliyor"
   },
   "T26": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 27/36 (kayık 8, eksik 1, fazla 1) · ad 29/44 · UI piksel %13.3",
+   "not": "[safe18-all-tr] metin 30/36 (kayık 5, eksik 1, fazla 1) · ad 29/44 · UI piksel %13.52",
    "durum": "bekliyor"
   },
   "T27": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 24/31 (kayık 3, eksik 4, fazla 5) · ad 23/39 · UI piksel %18.93",
+   "not": "[safe18-all-tr] metin 26/31 (kayık 1, eksik 4, fazla 5) · ad 23/39 · UI piksel %14.35",
    "durum": "bekliyor"
   },
   "T28": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 20/31 (kayık 9, eksik 2, fazla 4) · ad 23/39 · UI piksel %19.77",
+   "not": "[safe18-all-tr] metin 24/31 (kayık 5, eksik 2, fazla 4) · ad 23/39 · UI piksel %15.82",
    "durum": "bekliyor"
   },
   "T30": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 20/34 (kayık 12, eksik 2, fazla 3) · ad 23/43 · UI piksel %11.81",
+   "not": "[safe18-all-tr] metin 23/34 (kayık 9, eksik 2, fazla 3) · ad 23/43 · UI piksel %11.15",
    "durum": "bekliyor"
   },
   "T33": {
@@ -673,27 +673,27 @@
   },
   "T34": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 24/35 (kayık 8, eksik 3, fazla 6) · ad 23/42 · UI piksel %20.18",
+   "not": "[safe18-all-tr] metin 26/35 (kayık 8, eksik 1, fazla 4) · ad 23/42 · UI piksel %16.65",
    "durum": "bekliyor"
   },
   "T35": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 21/33 (kayık 11, eksik 1, fazla 2) · ad 24/39 · UI piksel %18.3",
+   "not": "[safe18-all-tr] metin 28/33 (kayık 4, eksik 1, fazla 2) · ad 24/39 · UI piksel %14.57",
    "durum": "bekliyor"
   },
   "T36": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 21/36 (kayık 12, eksik 3, fazla 5) · ad 23/42 · UI piksel %17.6",
+   "not": "[safe18-all-tr] metin 27/36 (kayık 8, eksik 1, fazla 3) · ad 23/42 · UI piksel %14.81",
    "durum": "bekliyor"
   },
   "T38": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 24/33 (kayık 7, eksik 2, fazla 10) · ad 25/41 · UI piksel %18.02",
+   "not": "[safe18-all-tr] metin 29/33 (kayık 2, eksik 2, fazla 7) · ad 25/41 · UI piksel %15.88",
    "durum": "bekliyor"
   },
   "T39": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 27/36 (kayık 7, eksik 2, fazla 7) · ad 25/44 · UI piksel %18.48",
+   "not": "[safe18-all-tr] metin 32/36 (kayık 2, eksik 2, fazla 7) · ad 25/44 · UI piksel %15.51",
    "durum": "bekliyor"
   },
   "T40": {
@@ -708,12 +708,12 @@
   },
   "T42": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 20/68 (kayık 38, eksik 10, fazla 9) · ad 26/75 · UI piksel %19.31",
+   "not": "[safe18-all-tr] metin 57/68 (kayık 9, eksik 2, fazla 2) · ad 59/75 · UI piksel %6.87",
    "durum": "bekliyor"
   },
   "T43": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 24/68 (kayık 34, eksik 10, fazla 8) · ad 26/75 · UI piksel %19.77",
+   "not": "[safe18-all-tr] metin 61/68 (kayık 5, eksik 2, fazla 1) · ad 59/75 · UI piksel %6.91",
    "durum": "bekliyor"
   },
   "T44": {
@@ -733,7 +733,7 @@
   },
   "T47": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 21/34 (kayık 12, eksik 1, fazla 1) · ad 25/40 · UI piksel %17.45",
+   "not": "[safe18-all-tr] metin 27/34 (kayık 6, eksik 1, fazla 1) · ad 25/40 · UI piksel %14.97",
    "durum": "bekliyor"
   },
   "T48": {
@@ -743,17 +743,17 @@
   },
   "T49": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[run11] metin 21/34 (kayık 11, eksik 2, fazla 2) · ad 25/40 · UI piksel %16.31",
+   "not": "[safe18-all-tr] metin 28/34 (kayık 5, eksik 1, fazla 1) · ad 25/40 · UI piksel %14.42",
    "durum": "bekliyor"
   },
   "T50": {
    "unity": "Scripts/Screens/TableLoadingOverlay.cs",
-   "not": "[run11] metin 22/30 (kayık 6, eksik 2, fazla 2) · ad 22/41 · UI piksel %16.69",
+   "not": "[safe18-all-tr] metin 25/30 (kayık 2, eksik 3, fazla 3) · ad 26/41 · UI piksel %5.62",
    "durum": "bekliyor"
   },
   "T51": {
    "unity": "Scripts/Screens/TableLoadingOverlay.cs",
-   "not": "[run11] metin 3/10 (kayık 3, eksik 4, fazla 23) · ad 1/14 · UI piksel %17.17",
+   "not": "[safe18-all-tr] metin 7/10 (kayık 1, eksik 2, fazla 26) · ad 13/14 · UI piksel %4.57",
    "durum": "bekliyor"
   }
  }

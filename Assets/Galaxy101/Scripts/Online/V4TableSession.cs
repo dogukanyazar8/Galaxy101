@@ -199,6 +199,8 @@ namespace Galaxy101.Online
             foreach (var off in subscriptions) off();
             subscriptions.Clear();
             Close();
+            // The table gave up reconnecting (or left while offline): the session's own reconnect takes over.
+            if (!online.Realtime.Connected) online.ReconnectNow();
         }
     }
 }

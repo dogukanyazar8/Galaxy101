@@ -137,7 +137,7 @@ namespace Galaxy101.Table
             Launch = Pending ?? new TableLaunch(); Pending = null;
             if (Launch.Session == null && Launch.Flow == null && PendingScenario != null) { Launch.Flow = TableScenarios.Has(PendingScenario) ? TableScenarios.Flow(PendingScenario) : PendingScenario; }
             PendingScenario = null;
-            Session = Launch.Session ?? new LocalTableSession(Launch.Setup ?? DefaultSetup(), Launch.Table ?? DefaultTable(), Launch.Clock ?? (() => GameClock.NowMs));
+            Session = Launch.Session ?? new LocalTableSession(Launch.Setup ?? DefaultSetup(), Launch.Table ?? DefaultTable(), Launch.Clock ?? (() => GameClock.NowMs), 0, Launch.Clock == null ? () => GameClock.Frozen : (Func<bool>)null);
 
             if (hud != null)
             {
@@ -172,6 +172,7 @@ namespace Galaxy101.Table
         {
             offline.Host.Xp += (gained, reason) => { AddXp(gained); if (reason == "hand") LastXp = (int)gained; };
             AttachModel();
+            ApplySeats();   // the seats are known before matchStart (the waiting room, the loading screen)
             if (!Launch.Manual) RunFlow(Launch.Flow);
         }
 
@@ -185,6 +186,7 @@ namespace Galaxy101.Table
             if (flow == "seat") { _ = SeatThenStart(offline); return; }
             if (flow != null && TableScenarios.Has(flow))
             {
+                preparedHand = true;
                 var sc = TableScenarios.Create(flow);
                 offline.Resume(sc.State());
                 // The prototype's rack layout of the flow, slot for slot.
@@ -214,6 +216,7 @@ namespace Galaxy101.Table
                 await Seconds(0.05f); if (life.IsCancellationRequested) return;
             }
             await Seconds(TableTimings.SeatedToCountdown / 1000f);
+            if (this == null || life.IsCancellationRequested) return;
             seating = false;
             table.CameraRig.GoTo(hud != null ? hud.PreferredView : TableCameraRig.View.Player, 3f);
             offline.Begin();
@@ -252,7 +255,9 @@ namespace Galaxy101.Table
         private void OnDestroy()
         {
             life?.Cancel(); ceremonyLife?.Cancel();
-            foreach (var t in timers) t.Done.TrySetCanceled(); timers.Clear();
+            // Pending waits end quietly (their async methods check life after each await); cancelling them would log
+            // TaskCanceledException from every async void still waiting when the scene unloads.
+            foreach (var t in timers) t.Done.TrySetResult(false); timers.Clear();
             if (Model != null) Model.Applied -= OnMessage;
             if (hud != null) { hud.Command -= OnHudCommand; hud.GiftSent -= OnGiftSent; if (hud.Settings != null) hud.Settings.Changed -= OnSetting; }
             Board?.Clear();
@@ -317,6 +322,7 @@ namespace Galaxy101.Table
 
         private void BeginDeal()
         {
+            preparedHand = false;
             Current = Phase.Deal; Active = -1; settled = false; ResultOpen = false; momentOn = false;
             Gifts.Clear(); hud?.NewHand();
             foreach (var list in penaltyWhy) list.Clear();
@@ -332,7 +338,7 @@ namespace Galaxy101.Table
         {
             try { await Ceremony.Run(Model, LocalSeat, () => { if (Rack.Count == 0 && Model.Rack != null) Rack.Deal(TileIds.ToInts(Model.Rack)); return BuildBoard(); }, token); }
             catch (OperationCanceledException) { return; }
-            catch (Exception e) { Debug.LogException(e); }
+            catch (Exception e) { if (life != null && !life.IsCancellationRequested) Debug.LogException(e); return; }   // the scene going away mid-roll is not an error
             finally { Ceremony.Clear(); }
             if (token.IsCancellationRequested) return;
             Settle(false);
@@ -531,7 +537,7 @@ namespace Galaxy101.Table
             momentOn = true; momentAt = Time.realtimeSinceStartup; Notify();
             Debug.Log("GALAXY101_TABLE_HAND_END hand=" + Model.HandNo + " reason=" + reason + " finisher=" + finisher + " scores=" + string.Join(",", score));
             await Seconds(finisher >= 0 ? 3.8f : 2.4f);
-            if (this == null || life.IsCancellationRequested) return;
+            if (this == null || life == null || life.IsCancellationRequested) return;
             if (finisher >= 0 && LocalSeat(finisher) != Me) table.CameraRig.GoTo(table.CameraRig.Current, 1.1f);
             momentOn = false;
             ResultOpen = true; resultAt = Time.realtimeSinceStartup; Notify();
@@ -572,6 +578,20 @@ namespace Galaxy101.Table
 
         /// <summary>The state router's "net" flow (T26, prototype dropNet): the reconnect card without a socket to lose.</summary>
         private int netDemo;
+        /// <summary>The hand was prepared by a test flow (TableScenarios), not dealt.</summary>
+        private bool preparedHand;
+
+        /// <summary>
+        /// The state router's loading states (G01, T50, T51): the Test masası full and about to start ("Masa doldu · oyun
+        /// başlıyor", 106 tiles) under the loading screen, as the prototype draws the table behind it.
+        /// </summary>
+        public void ShowTableFull()
+        {
+            seating = true; for (int k = 0; k < 4; k++) seated[k] = true;
+            Current = Phase.Seating; Board.Clear(); Board.LayoutDeck(106);
+            table.CameraRig.GoTo(TableCameraRig.View.Lobby, 0);
+            ApplySeats(); Notify();
+        }
         public void ShowConnectionLost() { netDemo = 1; Notify(); }
 
         /// <summary>
@@ -703,6 +723,7 @@ namespace Galaxy101.Table
                 var impact = table.DeckTop(Board.DeckShown).position;
                 float wait = Fx.Nuclear(bomb.transform, impact, table.CameraRig, () => hud?.NuclearFlash());
                 await Seconds(wait + 0.9f);
+                if (this == null || life.IsCancellationRequested) return;
                 if (bomb != null) bomb.enabled = true;
             }
             await Do(Session.Discard(last));
@@ -870,8 +891,9 @@ namespace Galaxy101.Table
 
         private void ApplySeats()
         {
-            if (hud == null || Model?.Table == null) return;
-            var seats = Model.Table.Seats;
+            var tableInfo = Model?.Table ?? (Session is LocalTableSession offline ? offline.Table : null);
+            if (hud == null || tableInfo == null) return;
+            var seats = tableInfo.Seats;
             for (int k = 1; k < 4; k++)
             {
                 int abs = Abs(k);
@@ -883,7 +905,8 @@ namespace Galaxy101.Table
                     continue;
                 }
                 var user = abs < seats.Count ? seats[abs]?.User : null;
-                if (user != null && !string.IsNullOrEmpty(user.Name)) hud.SetSeat(k, user.Name, user.Color, user.Level, Model.SeatBot[abs] || Model.Autoplay[abs]);
+                bool bot = Model.Table != null ? Model.SeatBot[abs] || Model.Autoplay[abs] : seats[abs]?.Bot ?? true;
+                if (user != null && !string.IsNullOrEmpty(user.Name)) hud.SetSeat(k, user.Name, user.Color, user.Level, bot);
             }
         }
 
@@ -906,7 +929,10 @@ namespace Galaxy101.Table
             {
                 Phase = Current == Phase.Seating ? "seat" : dealing ? "deal" : Current == Phase.Draw ? "draw" : Current == Phase.Discard ? "discard" : Current == Phase.Finished ? "fin" : "opp",
                 Active = Active, DeckCount = Current == Phase.Seating ? 106 : dealing ? 0 : m.Deck, TurnSeconds = Mathf.RoundToInt(m.TurnMs / 1000f), TurnStartedAt = turnStartedReal,
-                Warn = HumanTurn && warned, TurnHint = turnHint, ShowIndicator = !dealing && Current != Phase.Seating, FirstTurn = m.TurnN == 1 && m.TurnPhase == G101Rules.PhasePlay,
+                Warn = HumanTurn && warned, TurnHint = turnHint, ShowIndicator = !dealing && Current != Phase.Seating,
+                // tDiscardFirst only on a dealt hand's first move (a prepared flow's hand is past it: the prototype's _turns ≥ 1).
+                FirstTurn = m.TurnN == 1 && m.TurnPhase == G101Rules.PhasePlay && !preparedHand,
+                OpenedThisTurn = HumanTurn && IOpened && m.OpenedTurn[m.Seat] == m.TurnN,
                 Pairs = eval.Pairs.Count, PickedTile = PickedTile, DeckOnly = HumanTurn && m.TurnPhase == G101Rules.PhaseDraw && m.SideReturned, ShowPutBack = PickedTile >= 0 && CanDiscard && Legal.ReturnSide,
                 Countdown = m.Status == G101Rules.StatusLobby ? countdown : 0, CountdownAt = countdownAt, ExitOpen = ExitOpen,
                 Hand = Math.Max(1, m.HandNo), MatchHands = m.Hands,
@@ -953,6 +979,7 @@ namespace Galaxy101.Table
             s.RoomStake = Launch.Stake > 0 ? Launch.Stake : m.Table?.Bet ?? 0;
             if (Launch.Chips.HasValue) s.Chips = (int)Math.Min(int.MaxValue, Launch.Chips.Value);
             else if (Session.Online && Galaxy101.Online.GalaxyOnline.Instance?.Wallet is { } wallet) s.Chips = (int)Math.Min(int.MaxValue, wallet.Chips);
+            else if (hud?.Model != null) s.Chips = (int)Math.Min(int.MaxValue, hud.Model.Chips);
             return s;
         }
 
@@ -1094,6 +1121,7 @@ namespace Galaxy101.Table
             ExitOpen = false;
             Message(TableHud.ToastKind.Success, L("Masadan kalktın · lobiye dönülüyor", "You left the table · returning to the lobby"));
             await Session.Leave();
+            if (this == null) return;
             LeaveAfter(TableTimings.LeaveToLobby / 1000f + 0.4f);
         }
 

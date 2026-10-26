@@ -34,7 +34,7 @@ Kaldırılan eski testler (eski motor akışını sınıyorlardı; yerlerine v4 
 
 ```
 dotnet test tools/v4/nunit-table/TableClientTests.csproj
-  → Başarılı: 36, Toplam: 36
+  → Başarılı: 38, Toplam: 38   (36 + 2 LiveServer, yerel sunucu açıkken; sunucusuz: --filter "Category!=LiveServer" → 36/36)
 ```
 - `TableClientTests` (18): 12 tam maç (tekli/eşli, katlamalı, katlamalı yalnız rakip, cezasız/işlemesiz, 6 seed) — kişi koltuğu karışık politikayla oynar (botun hamlesi, soldan alma, geri bırak, geri topla, yanlış hamle, zaman aşımı, zar, hazır); sunucunun her adımından sonra (her zamanlayıcı, her hamle) kişinin ve izleyicinin modeli yalnız olaylardan (`tableView` uygulanmadan) runtime'ın `GameView(seat)`'iyle kanonik JSON olarak aynı; `legal` olayı modelin hesabıyla aynı. Ayrıca: bütün motor olaylarının kapsandığı, iki kişi + kalkma/koltuk devralma, kopma → otomatik oyun → `snapshot` ile dönüş, JSON tel gidiş-dönüşü (`V4Wire`), güvenilen görünüm kipi, `TileIds` eşlemesi. Bir mutasyon denemesi (okeySwapped'da okeyi ıstakaya koymamak) testleri kırdı.
 - `TableScenarioTests` (18): 7 akış yasal el (invariants), referans sayıları (88/101, 131, 89 ve Elden bit yok, 66), açılış/geri topla, eksik açılış +101, okey alma (Y4 evet, K5 hayır) + İşle 5 taş + geri topla, işlek atış +101, Ayşe'nin işleyip bitirmesi (−101 / +202), soldan alma + geri bırakma, R43 (+90 P_OPENED_WITH) ve R44 (+101 P_OKEY_TAKEN) gerçek runtime ve botlarla, botlara karşı 2 elli maç → `matchResult` (havuz 0) + XP, tören adım sırası ve 21 686 ms.
@@ -48,97 +48,97 @@ Unity PlayMode/EditMode testleri koşturulmadı (EK-508).
 
 ## 4 · Durumlar
 
-Yönlendirici yolu: `acct` → menü (Doğukan Y., 10.000 çip); `scenario` R43/R44 → ilk elin rig'i (seed 7); `table {flow, bots, noWait}` → Test masası (Ayşe K. #FF6B9A Sv 31, Burak T. #4FC3F7 Sv 18, Zeynep A. #9CCC65 Sv 42; bahis 5.000, 5 el, 30 sn; çip 5.000) ya da Botlara karşı (Bot Ayla/Cem/Defne); masa açılınca 400 ms sonra `go(flow)` ve prototipin zamanlı ekleri (open 1,1 sn openHand; gift 0,3/0,6 sn; chat 0,3/1,4 sn; exit 0,4 sn; net 0,5 sn; settings 0,3 sn; play 1,6 sn çay; gerçek dağıtımdan 2,6 sn sonra çay); `waitDeal` törenin görsel adımı; `masa …`, `set Masa {…}`, `set App` (T51), `wait`, `waitMy`, `waitPen`. Seed 42 (senaryolar 7). Hiçbir kare Unity'de çekilmedi — son sütun yazılan yolu ve beklenen farkı verir.
+Yönlendirici yolu: `acct` → menü (Doğukan Y., 10.000 çip); `scenario` R43/R44 → ilk elin rig'i (seed 7); `table {flow, bots, noWait}` → Test masası (Ayşe K. #FF6B9A Sv 31, Burak T. #4FC3F7 Sv 18, Zeynep A. #9CCC65 Sv 42; bahis 5.000, 5 el, 30 sn; çip 5.000) ya da Botlara karşı (Bot Ayla/Cem/Defne); masa açılınca 400 ms sonra `go(flow)` ve prototipin zamanlı ekleri (open 1,1 sn openHand; gift 0,3/0,6 sn; chat 0,3/1,4 sn; exit 0,4 sn; net 0,5 sn; settings 0,3 sn; play 1,6 sn çay; gerçek dağıtımdan 2,6 sn sonra çay); `waitDeal` törenin görsel adımı; `masa …`, `set Masa {…}`, `set App` (T51), `wait`, `waitMy`, `waitPen`. Seed 42 (senaryolar 7). Son sütun: orkestratörün run9 çekimindeki eşleşen metin / toplam metin ve UI piksel farkı (`artifacts/v4/unity/run9/compare.json`, düzeltmelerden ÖNCE) ve beklenen fark. run9'daki sapmaların çoğu §7'deki saat sıçramasından geliyordu; yeniden çekim gerekir.
 
 | Kimlik | Başlık | Akış | Yol adımları | Durum · fark |
 |---|---|---|---|---|
-| G01 | Masa yükleniyor | — · noWait | — | yazıldı, Unity'de çekilmedi · UF-506 (yükleme menünün üstünde) |
-| G02 | Bot balyaları diziyor | deal | — | yazıldı, Unity'de çekilmedi · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
-| G03 | Sen diziyorsun | deal | — | yazıldı, Unity'de çekilmedi · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
-| G04 | Zar at düğmesi | deal | — | yazıldı, Unity'de çekilmedi · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
-| G05 | Zar yuvarlanıyor | deal | waitDeal dice; masa rollDice | yazıldı, Unity'de çekilmedi · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
-| G06 | 1. zar · Tekrar at | deal | waitDeal dice; masa rollDice; wait 2200 | yazıldı, Unity'de çekilmedi · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
-| G07 | Gösterge açılıyor | deal | waitDeal dice; masa rollDice; wait 2200; masa rollDice; waitDeal ind | yazıldı, Unity'de çekilmedi · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
-| G08 | Gösterge → okey kartı, fazla taş | deal | waitDeal dice; masa rollDice; wait 2200; masa rollDice; waitDeal extra | yazıldı, Unity'de çekilmedi · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
-| G09 | Balyalar dağıtılıyor | deal | waitDeal dice; masa rollDice; wait 2200; masa rollDice; waitDeal dist | yazıldı, Unity'de çekilmedi · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
-| G10 | Kalan balyalar ortaya | deal | waitDeal dice; masa rollDice; wait 2200; masa rollDice; waitDeal center | yazıldı, Unity'de çekilmedi · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
-| G11 | Istakalar doluyor | deal | waitDeal dice; masa rollDice; wait 2200; masa rollDice; waitDeal fill | yazıldı, Unity'de çekilmedi · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
-| G12 | Oyun başladı (22 taş) | deal | waitDeal dice; masa rollDice; wait 2200; masa rollDice; waitDeal None | yazıldı, Unity'de çekilmedi · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
-| G13 | El açıldı: perler ortada | open | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| G14 | İşleme testi (herkes açık) | isle | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| G15 | Altın işleme göstergeleri | isle | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| G16 | Yeşil okey alma göstergesi (Y4 seçili) | isle | wait 1300; masa scSel ["Y4"] | yazıldı, Unity'de çekilmedi · UF-503 |
-| G17 | Okey alındı (Y4 ↔ okey) | isle | wait 1300; masa scSwap ["Y4", 2, 0] | yazıldı, Unity'de çekilmedi · UF-503 |
-| G18 | İşleme yapıldı + Geri topla | isle | wait 1500; masa isle | yazıldı, Unity'de çekilmedi · UF-503 |
-| G19 | Geri toplandı | isle | wait 1500; masa isle; wait 900; masa undoTurn | yazıldı, Unity'de çekilmedi · UF-503 |
-| G20 | Hatalı açma (turuncu Aç) | penOpen | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| G21 | Hatalı per masada | penOpen | wait 1500; masa openHand | yazıldı, Unity'de çekilmedi · UF-505 (badOpen görüntüsü 1,5 sn) |
-| G22 | Ceza tostu | penOpen | wait 1500; masa openHand | yazıldı, Unity'de çekilmedi · UF-505 (badOpen görüntüsü 1,5 sn) |
-| G23 | İşlek taş testi | penIslek | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| G24 | İşlek taş cezası (B4 atıldı) | penIslek | wait 1500; masa scDiscardCode ["B4"] | yazıldı, Unity'de çekilmedi · UF-503 |
-| G25 | Elden bit düğmesi | bomb | — | yazıldı, Unity'de çekilmedi · UF-502 (R-53: Elden bit yok, 89/101) |
-| G26 | Taş fırlatılıyor | bomb | wait 1500; masa bomb | yazıldı, Unity'de çekilmedi · UF-502 (R-53: Elden bit yok, 89/101) |
-| G27 | Nükleer patlama | bomb | wait 1500; masa bomb | yazıldı, Unity'de çekilmedi · UF-502 (R-53: Elden bit yok, 89/101) |
-| G28 | ELDEN BİTTİN | bomb | wait 1500; masa bomb | yazıldı, Unity'de çekilmedi · UF-502 (R-53: Elden bit yok, 89/101) |
-| G29 | El sonu (kazandın) | bomb | wait 1500; masa bomb | yazıldı, Unity'de çekilmedi · UF-502 (R-53: Elden bit yok, 89/101) |
-| G30 | Sıra sende | play | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| G31 | Soldan alındı + Geri bırak | play | wait 2000; masa drawFrom ["side"] | yazıldı, Unity'de çekilmedi · UF-503 |
-| G32 | Masa ayarları | settings | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| G33 | Masadan kalk onayı | exit | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| G34 | El sonu (Ayşe kazandı) | end | — | yazıldı, Unity'de çekilmedi · UF-504 (bitiş ≈ 1,5 sn), UF-503 |
-| T01 | Bekleme: 2/4 oyuncu | seat | — | yazıldı, Unity'de çekilmedi · bekleme odası (yerel) |
-| T02 | Masa doldu, geri sayım | seat | — | yazıldı, Unity'de çekilmedi · bekleme odası → 3-2-1 |
-| T03 | Dağıtım: girdap, karma | deal | — | yazıldı, Unity'de çekilmedi · — |
-| T04 | Dağıtım bitti, İlk hamle senin | play | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| T05 | Çekme aşaması, Ayşe'nin perleri | play | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| T06 | Çay ısmarlandı bildirimi | play | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| T07 | Oyuncu kartı (Zeynep), hızlı ikram | play | wait 1500; set Masa {"card": 3} | yazıldı, Unity'de çekilmedi · UF-503 |
-| T08 | Hediye paneli · İkram | gift | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| T09 | Hediye paneli · Hediye (Pasta) | gift | wait 700; set Masa {"giftTab": 1, "giftSel": "cake"} | yazıldı, Unity'de çekilmedi · UF-503 |
-| T10 | Hediye paneli · Emoji | gift | wait 700; set Masa {"giftTab": 2, "giftSel": null} | yazıldı, Unity'de çekilmedi · UF-503 |
-| T11 | Roket uçuşu | play | wait 1500; masa botGift [3, "rocket", 2, ""] | yazıldı, Unity'de çekilmedi · UF-503 |
-| T12 | Roket indi + teşekkür balonu | play | wait 1500; masa botGift [3, "rocket", 2, ""] | yazıldı, Unity'de çekilmedi · UF-503 |
-| T13 | Sohbet paneli | chat | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| T14 | El açıldı · Yere aç / İşle | open | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| T15 | Ayarlar · Görünüm | settings | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| T16 | Masa ayarları · Oyun | settings | wait 500; set Masa {"setTab": 0} | yazıldı, Unity'de çekilmedi · UF-503 |
-| T17 | Masa ayarları · Ses | settings | wait 500; set Masa {"setTab": 1} | yazıldı, Unity'de çekilmedi · UF-503 |
-| T18 | Masa ayarları · Bildirimler | settings | wait 500; set Masa {"setTab": 3} | yazıldı, Unity'de çekilmedi · UF-503 |
-| T19 | Tema: Ceviz salon + Klasik ceviz ıstaka | play | wait 600; masa setSet [{"tableSkin": "wood", "rackSkin": "walnut"}, true] | yazıldı, Unity'de çekilmedi · UF-503 |
-| T20 | Tema: Hologram + Neon cam ıstaka | play | wait 600; masa setSet [{"tableSkin": "holo", "rackSkin": "neon"}, true] | yazıldı, Unity'de çekilmedi · UF-503 |
-| T21 | Tema: Andromeda masa + ıstaka | play | wait 600; masa setSet [{"tableSkin": "andromeda", "rackSkin": "andromeda"}, true] | yazıldı, Unity'de çekilmedi · UF-503 |
-| T22 | Kuşbakışı görünüm (Andromeda) | play | wait 600; masa setSet [{"tableSkin": "andromeda", "rackSkin": "andromeda", "view": "top"}, true] | yazıldı, Unity'de çekilmedi · UF-503 |
-| T23 | Bitiş anı: Ayşe bitirdi | end | — | yazıldı, Unity'de çekilmedi · UF-504 (bitiş ≈ 1,5 sn), UF-503 |
-| T24 | El sonu tablosu | end | — | yazıldı, Unity'de çekilmedi · UF-504 (bitiş ≈ 1,5 sn), UF-503 |
-| T25 | Masadan kalk onayı | exit | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| T26 | Bağlantı koptu | net | — | yazıldı, Unity'de çekilmedi · UF-511 |
-| T27 | EN — oyun sırasında | play | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| T28 | Botlara karşı: başlık, ANTRENMAN, el sayacı | play · bots | — | yazıldı, Unity'de çekilmedi · UF-503 |
-| T30 | Botlara karşı · masadan kalk onayı | exit · bots | — | yazıldı, Unity'de çekilmedi · UF-503 |
+| G01 | Masa yükleniyor | — · noWait | — | run9: metin 0/30, px %13.01 · UF-506 (yükleme menünün üstünde) |
+| G02 | Bot balyaları diziyor | deal | — | run9: metin 16/28, px %21.58 · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
+| G03 | Sen diziyorsun | deal | — | run9: metin 16/28, px %22.02 · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
+| G04 | Zar at düğmesi | deal | — | run9: metin 16/28, px %18.91 · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
+| G05 | Zar yuvarlanıyor | deal | waitDeal dice; masa rollDice | run9: metin 16/28, px %19.24 · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
+| G06 | 1. zar · Tekrar at | deal | waitDeal dice; masa rollDice; wait 2200 | run9: metin 16/28, px %21.83 · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
+| G07 | Gösterge açılıyor | deal | waitDeal dice; masa rollDice; wait 2200; masa rollDice; waitDeal ind | run9: metin 16/32, px %22.4 · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
+| G08 | Gösterge → okey kartı, fazla taş | deal | waitDeal dice; masa rollDice; wait 2200; masa rollDice; waitDeal extra | run9: metin 16/32, px %23.13 · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
+| G09 | Balyalar dağıtılıyor | deal | waitDeal dice; masa rollDice; wait 2200; masa rollDice; waitDeal dist | run9: metin 16/32, px %23.09 · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
+| G10 | Kalan balyalar ortaya | deal | waitDeal dice; masa rollDice; wait 2200; masa rollDice; waitDeal center | run9: metin 16/32, px %23.27 · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
+| G11 | Istakalar doluyor | deal | waitDeal dice; masa rollDice; wait 2200; masa rollDice; waitDeal fill | run9: metin 9/32, px %47.97 · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
+| G12 | Oyun başladı (22 taş) | deal | waitDeal dice; masa rollDice; wait 2200; masa rollDice; waitDeal None | run9: metin 16/30, px %21.68 · UF-501 (seed 42 dağıtımı, sunucu takvimi) |
+| G13 | El açıldı: perler ortada | open | — | run9: metin 16/33, px %26.89 · UF-503 |
+| G14 | İşleme testi (herkes açık) | isle | — | run9: metin 14/34, px %30.49 · UF-503 |
+| G15 | Altın işleme göstergeleri | isle | — | run9: metin 14/34, px %33.63 · UF-503 |
+| G16 | Yeşil okey alma göstergesi (Y4 seçili) | isle | wait 1300; masa scSel ["Y4"] | run9: metin 14/34, px %34.08 · UF-503 |
+| G17 | Okey alındı (Y4 ↔ okey) | isle | wait 1300; masa scSwap ["Y4", 2, 0] | run9: metin 14/36, px %31.92 · UF-503 |
+| G18 | İşleme yapıldı + Geri topla | isle | wait 1500; masa isle | run9: metin 14/34, px %32.81 · UF-503 |
+| G19 | Geri toplandı | isle | wait 1500; masa isle; wait 900; masa undoTurn | run9: metin 14/34, px %30.24 · UF-503 |
+| G20 | Hatalı açma (turuncu Aç) | penOpen | — | run9: metin 14/32, px %29.5 · UF-503 |
+| G21 | Hatalı per masada | penOpen | wait 1500; masa openHand | run9: metin 15/33, px %29.01 · UF-505 (badOpen görüntüsü 1,5 sn) |
+| G22 | Ceza tostu | penOpen | wait 1500; masa openHand | run9: metin 14/32, px %29.21 · UF-505 (badOpen görüntüsü 1,5 sn) |
+| G23 | İşlek taş testi | penIslek | — | run9: metin 14/34, px %33.12 · UF-503 |
+| G24 | İşlek taş cezası (B4 atıldı) | penIslek | wait 1500; masa scDiscardCode ["B4"] | run9: metin 19/32, px %26.96 · UF-503 |
+| G25 | Elden bit düğmesi | bomb | — | run9: metin 14/31, px %30.02 · UF-502 (R-53: Elden bit yok, 89/101) |
+| G26 | Taş fırlatılıyor | bomb | wait 1500; masa bomb | run9: metin 14/31, px %28.77 · UF-502 (R-53: Elden bit yok, 89/101) |
+| G27 | Nükleer patlama | bomb | wait 1500; masa bomb | run9: metin 14/31, px %26.87 · UF-502 (R-53: Elden bit yok, 89/101) |
+| G28 | ELDEN BİTTİN | bomb | wait 1500; masa bomb | run9: metin 14/31, px %27.35 · UF-502 (R-53: Elden bit yok, 89/101) |
+| G29 | El sonu (kazandın) | bomb | wait 1500; masa bomb | run9: metin 14/31, px %29.7 · UF-502 (R-53: Elden bit yok, 89/101) |
+| G30 | Sıra sende | play | — | run9: metin 17/31, px %29.5 · UF-503 |
+| G31 | Soldan alındı + Geri bırak | play | wait 2000; masa drawFrom ["side"] | run9: metin 16/33, px %31.92 · UF-503 |
+| G32 | Masa ayarları | settings | — | run9: metin 19/88, px %29.14 · UF-503 |
+| G33 | Masadan kalk onayı | exit | — | run9: metin 16/34, px %16.29 · UF-503 |
+| G34 | El sonu (Ayşe kazandı) | end | — | run9: metin 14/68, px %68.3 · UF-504 (bitiş ≈ 1,5 sn), UF-503 |
+| T01 | Bekleme: 2/4 oyuncu | seat | — | run9: metin 10/19, px %17.85 · bekleme odası (yerel) |
+| T02 | Masa doldu, geri sayım | seat | — | run9: metin 8/26, px %36.78 · bekleme odası → 3-2-1 |
+| T03 | Dağıtım: girdap, karma | deal | — | run9: metin 16/28, px %27.03 · — |
+| T04 | Dağıtım bitti, İlk hamle senin | play | — | run9: metin 16/30, px %28.35 · UF-503 |
+| T05 | Çekme aşaması, Ayşe'nin perleri | play | — | run9: metin 17/31, px %29.52 · UF-503 |
+| T06 | Çay ısmarlandı bildirimi | play | — | run9: metin 17/31, px %28.49 · UF-503 |
+| T07 | Oyuncu kartı (Zeynep), hızlı ikram | play | wait 1500; set Masa {"card": 3} | run9: metin 20/47, px %28.37 · UF-503 |
+| T08 | Hediye paneli · İkram | gift | — | run9: metin 33/59, px %16.94 · UF-503 |
+| T09 | Hediye paneli · Hediye (Pasta) | gift | wait 700; set Masa {"giftTab": 1, "giftSel": "cake"} | run9: metin 33/55, px %17.17 · UF-503 |
+| T10 | Hediye paneli · Emoji | gift | wait 700; set Masa {"giftTab": 2, "giftSel": null} | run9: metin 40/65, px %14.71 · UF-503 |
+| T11 | Roket uçuşu | play | wait 1500; masa botGift [3, "rocket", 2, ""] | run9: metin 16/34, px %27.93 · UF-503 |
+| T12 | Roket indi + teşekkür balonu | play | wait 1500; masa botGift [3, "rocket", 2, ""] | run9: metin 17/31, px %28.43 · UF-503 |
+| T13 | Sohbet paneli | chat | — | run9: metin 22/49, px %28.14 · UF-503 |
+| T14 | El açıldı · Yere aç / İşle | open | — | run9: metin 16/33, px %30.31 · UF-503 |
+| T15 | Ayarlar · Görünüm | settings | — | run9: metin 19/88, px %29.22 · UF-503 |
+| T16 | Masa ayarları · Oyun | settings | wait 500; set Masa {"setTab": 0} | run9: metin 20/55, px %16.59 · UF-503 |
+| T17 | Masa ayarları · Ses | settings | wait 500; set Masa {"setTab": 1} | run9: metin 20/52, px %17.48 · UF-503 |
+| T18 | Masa ayarları · Bildirimler | settings | wait 500; set Masa {"setTab": 3} | run9: metin 20/47, px %15.49 · UF-503 |
+| T19 | Tema: Ceviz salon + Klasik ceviz ıstaka | play | wait 600; masa setSet [{"tableSkin": "wood", "rackSkin": "walnut"}, true] | run9: metin 17/31, px %25.11 · UF-503 |
+| T20 | Tema: Hologram + Neon cam ıstaka | play | wait 600; masa setSet [{"tableSkin": "holo", "rackSkin": "neon"}, true] | run9: metin 17/31, px %28.69 · UF-503 |
+| T21 | Tema: Andromeda masa + ıstaka | play | wait 600; masa setSet [{"tableSkin": "andromeda", "rackSkin": "andromeda"}, true] | run9: metin 17/31, px %29.3 · UF-503 |
+| T22 | Kuşbakışı görünüm (Andromeda) | play | wait 600; masa setSet [{"tableSkin": "andromeda", "rackSkin": "andromeda", "view": "top"}, true] | run9: metin 11/31, px %33.28 · UF-503 |
+| T23 | Bitiş anı: Ayşe bitirdi | end | — | run9: metin 14/33, px %43.91 · UF-504 (bitiş ≈ 1,5 sn), UF-503 |
+| T24 | El sonu tablosu | end | — | run9: metin 14/68, px %68.23 · UF-504 (bitiş ≈ 1,5 sn), UF-503 |
+| T25 | Masadan kalk onayı | exit | — | run9: metin 16/34, px %16.17 · UF-503 |
+| T26 | Bağlantı koptu | net | — | run9: metin 18/36, px %15.92 · UF-511 |
+| T27 | EN — oyun sırasında | play | — | run9: metin 11/31, px %28.33 · UF-503 |
+| T28 | Botlara karşı: başlık, ANTRENMAN, el sayacı | play · bots | — | run9: metin 14/31, px %29.53 · UF-503 |
+| T30 | Botlara karşı · masadan kalk onayı | exit · bots | — | run9: metin 13/34, px %19.4 · UF-503 |
 | T33 | Okey rozeti masada | kaldırıldı (REMOVED.md) | — | yönlendirici atlar |
-| T34 | Ceza: attığın K9 ile bot açtı (+90, R-43) | — · bots | scenario R43; waitMy; masa scDiscard ["K9b"]; waitPen | yazıldı, Unity'de çekilmedi · gerçek tören + R43/R44 rig; UF-510 |
-| T35 | Eksik açılış cezası (+101) | penOpen | wait 1500; masa openHand | yazıldı, Unity'de çekilmedi · UF-505 (badOpen görüntüsü 1,5 sn) |
-| T36 | Ceza: masadaki okeyin alındı (+101, R-44) | — · bots | scenario R44; waitMy; masa scOpen [[["R10a", "R11a", "Y5a", "R13a"], ["K13a", "B13a", "Y13a"], ["K10a", "K11a", "K12a"]]]; wait 900; masa scDiscard ["R6a"]; waitPen | yazıldı, Unity'de çekilmedi · gerçek tören + R43/R44 rig; UF-510 |
-| T38 | Yerden alındı + Geri bırak | play | wait 2000; masa drawFrom ["side"] | yazıldı, Unity'de çekilmedi · UF-503 |
-| T39 | Soldan alınan taş halkaya geri sürükleniyor | play | wait 2000; masa drawFrom ["side"]; wait 700; masa scDrag ["$side", "ring", 0.9] | yazıldı, Unity'de çekilmedi · UF-508, UF-503 |
+| T34 | Ceza: attığın K9 ile bot açtı (+90, R-43) | — · bots | scenario R43; waitMy; masa scDiscard ["K9b"]; waitPen | run9: metin 18/35, px %29.44 · gerçek tören + R43/R44 rig; UF-510 |
+| T35 | Eksik açılış cezası (+101) | penOpen | wait 1500; masa openHand | run9: metin 15/33, px %31.26 · UF-505 (badOpen görüntüsü 1,5 sn) |
+| T36 | Ceza: masadaki okeyin alındı (+101, R-44) | — · bots | scenario R44; waitMy; masa scOpen [[["R10a", "R11a", "Y5a", "R13a"], ["K13a", "B13a", "Y13a"], ["K10a", "K11a", "K12a"]]]; wait 900; masa scDiscard ["R6a"]; waitPen | run9: metin 17/36, px %28.7 · gerçek tören + R43/R44 rig; UF-510 |
+| T38 | Yerden alındı + Geri bırak | play | wait 2000; masa drawFrom ["side"] | run9: metin 16/33, px %32.65 · UF-503 |
+| T39 | Soldan alınan taş halkaya geri sürükleniyor | play | wait 2000; masa drawFrom ["side"]; wait 700; masa scDrag ["$side", "ring", 0.9] | run9: metin 19/36, px %30.59 · UF-508, UF-503 |
 | T40 | Mesaj kataloğu | kaldırıldı (REMOVED.md) | — | yönlendirici atlar |
 | T41 | Mesaj kuyruğu | kaldırıldı (REMOVED.md) | — | yönlendirici atlar |
-| T42 | El sonu · botlara karşı | end · bots | — | yazıldı, Unity'de çekilmedi · UF-504 (bitiş ≈ 1,5 sn), UF-503 |
-| T43 | El sonu · çevrimiçi masa | end | — | yazıldı, Unity'de çekilmedi · UF-504 (bitiş ≈ 1,5 sn), UF-503 |
+| T42 | El sonu · botlara karşı | end · bots | — | run9: metin 11/68, px %68.08 · UF-504 (bitiş ≈ 1,5 sn), UF-503 |
+| T43 | El sonu · çevrimiçi masa | end | — | run9: metin 14/68, px %68.24 · UF-504 (bitiş ≈ 1,5 sn), UF-503 |
 | T44 | El sonu puansız (çiftle bitiş) | kaldırıldı (REMOVED.md) | — | yönlendirici atlar |
 | T45 | Maç sonu · kazandın | kaldırıldı (REMOVED.md) | — | yönlendirici atlar |
 | T46 | Maç sonu · 2. sıra | kaldırıldı (REMOVED.md) | — | yönlendirici atlar |
-| T47 | Okeyi al: Y4 sürükleniyor, uygun hedefler parlıyor | isle | wait 1300; masa scDrag ["Y4", "target", 0.55] | yazıldı, Unity'de çekilmedi · UF-508 |
+| T47 | Okeyi al: Y4 sürükleniyor, uygun hedefler parlıyor | isle | wait 1300; masa scDrag ["Y4", "target", 0.55] | run9: metin 14/34, px %35.45 · UF-508 |
 | T48 | Okey alma ipucu | kaldırıldı (REMOVED.md) | — | yönlendirici atlar |
-| T49 | Okeyi al: yanlış taşla deneme (K5) | isle | wait 1300; masa scSwap ["K5", 2, 0, true] | yazıldı, Unity'de çekilmedi · UF-503 |
-| T50 | Menü → masa yükleme ekranı | — · noWait | — | yazıldı, Unity'de çekilmedi · UF-506 (yükleme menünün üstünde) |
-| T51 | Masa açılamadı hatası | — · noWait | wait 300; set App {"gameOn": false} | yazıldı, Unity'de çekilmedi · UF-506 (yükleme menünün üstünde) |
+| T49 | Okeyi al: yanlış taşla deneme (K5) | isle | wait 1300; masa scSwap ["K5", 2, 0, true] | run9: metin 14/34, px %30.1 · UF-503 |
+| T50 | Menü → masa yükleme ekranı | — · noWait | — | run9: metin 0/30, px %17.95 · UF-506 (yükleme menünün üstünde) |
+| T51 | Masa açılamadı hatası | — · noWait | wait 300; set App {"gameOn": false} | run9: metin 2/10, px %17.07 · UF-506 (yükleme menünün üstünde) |
 
 
 ## 5 · Orkestratörün Unity'de doğrulayacakları
 
 1. Derleme: yeni asmdef'ler `Galaxy101.Table.Client` (Assets/Galaxy101/Table/Scripts/Client, motor referanssız) ve `Galaxy101.Table.Tests` (Editor); `Galaxy101.Runtime` artık `Galaxy101.Table.Runtime` ve `Galaxy101.Table.Client`'a başvurur.
-2. Test Runner: `Galaxy101.Table.Tests` (36, NUnit ile aynı), `TableV4RuntimeTests` (5), `TableHudRuntimeTests`, `RackGridTests`, `LobbyTests.TheDeveloperMenuListsTheSpec25Scenarios`.
+2. Test Runner: `Galaxy101.Table.Tests` (36, NUnit ile aynı; LiveServer sınıfı Unity dışında), `TableV4RuntimeTests` (5), `TableLiveServerTests` (2, yerel sunucuyla), `TableHudRuntimeTests`, `RackGridTests`, `LobbyTests.TheDeveloperMenuListsTheSpec25Scenarios`.
 3. Botlara karşı: menü → "Botlara karşı" → 3-2-1 → tören (bot dağıtıcıda ~21,7 sn: balyalar, zar, gösterge, fazla taş, dağıtım, orta, ıstakalar) → ilk tur; çek/at, aç (eşik altı turuncu → taşlar 1,5 sn tahtada, sonra +101), işle, okey al, geri topla, soldan al + geri bırak, zaman aşımı ("Süren doldu"), el sonu kartı + "Sonraki el", 5. elden sonra lobiye dönüş ve tost; ses olayları.
 4. Durumlar: `-g101State=G01,…,G34,T01,…,T51 -g101Seed=42` (kaldırılanlar atlanır) ve `compare_states.py`; önce G02–G12 (tören), G13, G16–G19 (okey/işle/geri topla), G20–G22 + T35 (eksik açılış), G24, G25–G29 (Elden bit yok), T23/T24/G34 (bitiş + el sonu), T26 (yeniden bağlanma kartı), T34/T36 (gerçek tören + R43/R44; waitMy ~25 sn), T47/T49.
 5. Çevrimiçi: v4 sunucuyla `vsBotsStart` ya da bekleme odası `tableStart` → `matchStart` masayı açmalı (lobi hattı v4'e geçince); soket koparılınca kart, 3 sn arayla 5 deneme, dönüşte `snapshot` ile masa animasyonsuz kurulur.
@@ -150,3 +150,24 @@ Yönlendirici yolu: `acct` → menü (Doğukan Y., 10.000 çip); `scenario` R43/
 - Test akışlarında deste sayısı (UF-503), bitiş zamanlaması (UF-504), yükleme ekranının altı (UF-506).
 - Sunucu tarafı: `TableRuntime` hazır elden başlatma (EK-501), devralma/dönüşte yeni `deadline` yayılmıyor (EK-502), hazır mesaj anahtarları (EK-503).
 - Lobi/dereceli hatlarının v4 `matchStart`'a geçişi (EK-509).
+
+
+## 7 · run9 (ilk Unity çekimi) ve düzeltmeler
+
+| Bulgu (run9) | Neden | Düzeltme |
+|---|---|---|
+| Test akışlarında "Süren bitiyor!" / "Süren doldu · senin yerine oynandı", rakipler çift açmış, deste 8–9, G34/T24/T42/T43'te el sonu yerine yeni dağıtım ("2/5. el") | Yönlendirici kareyi dondururken `GameClock`'u kanonik 100000 ms'ye atlatıyor (EK-005); çevrimdışı oturum bu ~97 sn'lik sıçramayı oynadı (turlar, zaman aşımları, el sonu, sonraki el) | `LocalTableSession` saat donukken hiç ilerlemez (`850e4c6`) |
+| Geliştirici konsolu `TaskCanceledException` ile dolu (TableGame.HandEnd:533) | Sahne kapanınca bekleyen zamanlayıcılar iptal edilip async void'lerden fırlıyordu | Beklemeler sessizce biter, her bekleme sonrası `life` denetlenir; tören yok olan nesneler için hata yazmaz (`850e4c6`) |
+| G13 ve sonrakilerde çay/ikram kartı | Önceki durumun (G12) zamanlı çay adımı sonraki durumun masasına ulaşıyordu | Zamanlı ekler durum koşusuna bağlı (`tableRun`) (`850e4c6`) |
+| Üst çubukta XP hapı ve "1/5. el" | Eski bot masası tasarımı | Prototipteki gibi oda etiketi + bahis ("Antrenman · bahis yok"), deste hapı, çip hapı `table.chipsLabel` (`850e4c6`) |
+| Dağıtımda eylem paneli ve "Taşlar dağıtılıyor…" | Prototip `showActions = playing && phase != deal`, `s.deal` iken tost yok | Gizlendi (`8562200`) |
+| T01'de varsayılan koltuk adları (Ayşe Y., BOT) | Koltuklar `matchStart`'ta uygulanıyordu | Masa açılır açılmaz (`8562200`) |
+| G01/T50/T51 menünün üstünde | Yükleme katmanı menüdeydi | Masa sahnesi yüklenir, "Masa doldu · oyun başlıyor" bekleme kartı ve yükleme ekranı masanın üstünde (`8562200`) |
+| "Elini açtın · şimdi bir taş at", test ipuçları, ilk hamle metni | Eksikti | `tOpened`, isle/penIslek/penOpen 600 ms ipucu, "İlk hamle senin" yalnız dağıtılan elde (`8562200`) |
+| Eylem paneli ölçüleri (Seri diz/Çift diz −102…−177 px) | Eski yerleşim | G101-Masa sütunu: üstte iki sıralama düğmesi, 50 px gösterge, 13 px düğmeler (`fe3c59b`) |
+
+## 8 · Gerçek v4 sunucusuna karşı testler
+
+- `tools/v4/nunit-table` içinde `TableLiveServerProtocolTests` (Category `LiveServer`, sunucu yoksa Inconclusive): misafir → bilet → soket → `hello` → `vsBotsStart` → D-24 dağıtımı → `gDraw` + `gDiscard` → yanlış hamle reddi → yalnız olaylardan kurulan gölge model her `tableView`'de (bu koşuda 14) ve `snapshot.game`'de sunucuyla aynı → `tableLeave` → `snapshot.screen = menu`; ayrıca soket koparılıp yeni bilet + `hello` → `snapshot{table}`. Bu makinedeki yerel sunucuya (`scripts/Start-LocalServer.ps1`, 5173) karşı **2/2** geçti; tam takım **38/38**.
+- `Tests/PlayMode/TableLiveServerTests` (Unity): aynı akış gerçek `V4TableSession` ve 3D masa üzerinden (zar düğmesi, çek/at, model = sunucu görünümü, kalkış); ikinci test soketi `GalaxyRealtime.SimulateDrop` ile koparır, "Bağlantı koptu · Deneme n/5" kartını ve `hello` sonrası masaya dönüşü denetler. Unity'de koşturulmadı (orkestratör).
+- `GalaxyOnline` açık bir v4 masası varken kendi yeniden bağlanmasını başlatmaz (iki döngü iki soket açıyordu); masa kapanınca bağlantıyı geri alır.

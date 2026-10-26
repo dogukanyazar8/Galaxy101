@@ -61,13 +61,13 @@ namespace Galaxy101.Tests
             Assert.That(X("ind"), Is.InRange(560f, 720f));
 
             // A rebuild under a resting pointer keeps the hovered button lit (UI Toolkit re-targets the hover).
-            var settings = canvas.Q<VisualElement>("table-settings"); var centre = settings.worldBound.center;
+            var settings = canvas.Q<VisualElement>("table.openSettings"); var centre = settings.worldBound.center;
             using (var move = PointerMoveEvent.GetPooled(new Event { type = EventType.MouseMove, mousePosition = centre })) canvas.panel.visualTree.SendEvent(move);
             for (int i = 0; i < 3; i++) yield return null;
-            Assert.That(canvas.Q<VisualElement>("table-settings").style.filter.value, Is.Not.Null.And.Not.Empty, "hovered before the rebuild");
+            Assert.That(canvas.Q<VisualElement>("table.openSettings").style.filter.value, Is.Not.Null.And.Not.Empty, "hovered before the rebuild");
             hud.Render(hud.Current); for (int i = 0; i < 3; i++) yield return null;
-            Assert.That(canvas.Q<VisualElement>("table-settings"), Is.Not.SameAs(settings), "the HUD was rebuilt");
-            Assert.That(canvas.Q<VisualElement>("table-settings").style.filter.value, Is.Not.Null.And.Not.Empty, "still hovered after the rebuild");
+            Assert.That(canvas.Q<VisualElement>("table.openSettings"), Is.Not.SameAs(settings), "the HUD was rebuilt");
+            Assert.That(canvas.Q<VisualElement>("table.openSettings").style.filter.value, Is.Not.Null.And.Not.Empty, "still hovered after the rebuild");
             using (var away = PointerMoveEvent.GetPooled(new Event { type = EventType.MouseMove, mousePosition = new Vector2(640, 400) })) canvas.panel.visualTree.SendEvent(away);
             for (int i = 0; i < 3; i++) yield return null;
 

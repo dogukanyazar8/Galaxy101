@@ -48,6 +48,12 @@ namespace Galaxy101.Online
             _ = Task.Run(() => ReceiveAsync(socket, life.Token));
         }
 
+        /// <summary>
+        /// Tests and diagnostics: the connection drops as if the network went away (the socket is aborted, <see cref="Closed"/>
+        /// fires), so the reconnect paths can be exercised against a real server.
+        /// </summary>
+        public void SimulateDrop() { try { socket?.Abort(); } catch (Exception e) { Debug.LogWarning("SimulateDrop: " + e.Message); } }
+
         /// <summary>Subscribe to a server message type; returns an unsubscribe action.</summary>
         public Action On(string type, Action<JToken> handler)
         {

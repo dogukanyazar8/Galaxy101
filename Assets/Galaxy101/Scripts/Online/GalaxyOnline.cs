@@ -53,7 +53,8 @@ namespace Galaxy101.Online
         /// taken over by another device stays closed.</summary>
         private async void OnRealtimeClosed(string reason)
         {
-            if (reason == GalaxyRealtime.ReplacedReason || reconnecting || SuspendReconnect) return;
+            // A v4 table reconnects by itself (protocol.json reconnect); two loops would open two sockets.
+            if (reason == GalaxyRealtime.ReplacedReason || reconnecting || SuspendReconnect || V4TableSession.Current is { Closed: false }) return;
             reconnecting = true;
             try
             {
@@ -70,6 +71,9 @@ namespace Galaxy101.Online
         }
 
         private void Update() => Realtime?.Pump();
+
+        /// <summary>Start the backoff reconnect now (a v4 table that gave up hands the socket back to the session).</summary>
+        public void ReconnectNow() { if (!Realtime.Connected) OnRealtimeClosed("table"); }
 
         private void OnDestroy() { Realtime?.Dispose(); if (Instance == this) Instance = null; }
 

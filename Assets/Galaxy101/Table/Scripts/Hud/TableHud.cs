@@ -63,6 +63,8 @@ namespace Galaxy101.Table
             public bool ShowReturn, ShowIsle, CanIsle, ShowLayPair, CanLayPair;
             /// <summary>protocol.json reconnect: "Bağlantı koptu · Deneme n/5" (0 = connected); GaveUp leaves only "Lobiye dön".</summary>
             public int NetAttempt; public bool NetGaveUp;
+            /// <summary>G101-Masa tOpened: I opened this turn and have not discarded yet ("Elini açtın · şimdi bir taş at").</summary>
+            public bool OpenedThisTurn;
         }
 
         public sealed class OkeyMark { public int Id; public string Number, Color; public bool Target, Invalid; }
@@ -194,6 +196,8 @@ namespace Galaxy101.Table
         /// <summary>The menu profile (level, XP) the table writes to.</summary>
         public MenuModel Model => model;
         public VisualElement Canvas => canvas;
+        /// <summary>The HUD's view (themes, fonts, texts): the table scene's own screens (the loading screen of G01/T50/T51) draw with it.</summary>
+        public MenuView View => view;
         public TableScene Table => table;
 
         private void Start() { if (view == null) Initialize(); }
@@ -343,7 +347,8 @@ namespace Galaxy101.Table
             BuildTopBar(state);
             BuildToast(state);
             BuildMe(state);
-            BuildActions(state);
+            // G101-Masa showActions: playing (not the waiting room) and not dealing.
+            if (state.Phase != "seat" && state.Phase != "deal") BuildActions(state);
             if (state.Phase == "seat") BuildWaiting(state);
             if (state.Phase == "deal" && state.Deal != null) BuildDeal(state.Deal);
             if (state.Countdown > 0) BuildCountdown(state);
@@ -831,7 +836,7 @@ namespace Galaxy101.Table
 
         private void BuildDiscardLabel()
         {
-            var label = Text(L("BURAYA AT", "DISCARD HERE"), "Baloo2-800", 10, "var(--aT)"); MenuView.Tracking(label, 1.4f, 10);
+            var label = Text(L("BURAYA AT", "DISCARD HERE"), "Baloo2-800", 10, "var(--aT)"); label.name = "table.t.discHere"; MenuView.Tracking(label, 1.4f, 10);
             Pad(label, 4, 9, 4, 9); view.Decorate(label, "var(--a1)", 8, 3, "var(--aS)");
             var holder = Anchor("disc"); var box = Centered(holder, -62, false); box.Add(label);
             // floatA 1.4s ease-in-out: 0 → −8px → 0 (support.js keyframes).
@@ -840,7 +845,7 @@ namespace Galaxy101.Table
 
         private void BuildIndicatorLabel()
         {
-            var label = Text(L("GÖSTERGE", "INDICATOR"), "Baloo2-800", 9, "var(--ic)"); MenuView.Tracking(label, 1.4f, 9);
+            var label = Text(L("GÖSTERGE", "INDICATOR"), "Baloo2-800", 9, "var(--ic)"); label.name = "table.t.indicator"; MenuView.Tracking(label, 1.4f, 9);
             Pad(label, 3, 8, 3, 8); view.Decorate(label, "rgba(5,8,22,.6)", 7);
             Centered(Anchor("ind"), 4, false).Add(label);
         }
@@ -861,73 +866,40 @@ namespace Galaxy101.Table
             bar.style.flexDirection = FlexDirection.Row; bar.style.alignItems = Align.Center; Pad(bar, 14, 20, 14, 20); bar.userData = 12f;
             hudLayer.Add(bar);
 
-            bar.Add(Clickable(IconButton("table-exit", 22, L("Masadan çık", "Leave table"), "table-exit"), "exit"));
+            bar.Add(Clickable(IconButton("table-exit", 22, L("Masadan çık", "Leave table"), "table.askExit"), "exit"));
             var logo = Text("GALAXY 101", "Montserrat-800", 19, "var(--a1)"); MenuView.Tracking(logo, 3, 19);
             // CSS paints the logo with linear-gradient(lg1, a1 50%, a2) clipped to the glyphs; UI Toolkit text takes
             // one colour, so the mid stop carries it. drop-shadow(0 2px 0 var(--lS)) is a hard text shadow.
             logo.style.textShadow = new TextShadow { offset = new Vector2(0, 2), blurRadius = 0, color = view.C("var(--lS)") };
             bar.Add(logo);
 
-            var room = Row(8); room.name = "table-room"; Pad(room, 7, 13, 7, 13); view.Decorate(room, "var(--dp)", 15);
-            if (s.RoomName != null)
-            {
-                // A server table (G13): its name and type, then the stake.
-                room.Add(Text(s.RoomName, "Baloo2-800", 12, "var(--ic)"));
-                var dot = new VisualElement { pickingMode = PickingMode.Ignore }; dot.style.width = dot.style.height = 4; view.Decorate(dot, "var(--mt)", 2); room.Add(dot);
-                room.Add(Text(L("Bahis ", "Bet ") + view.N(s.RoomStake), "Baloo2-800", 12, "var(--ic)"));
-            }
-            else
-            {
-                room.Add(Text(TableStrings.Get("botRoom", Lang), "Baloo2-800", 12, "var(--ic)"));
-                var practice = Text(TableStrings.Get("botTag", Lang), "Baloo2-800", 9, "var(--aT)"); MenuView.Tracking(practice, 1.2f, 9); practice.name = "bot-tag";
-                Pad(practice, 2, 7, 2, 7); view.Decorate(practice, "var(--a1)", 6); room.Add(practice);
-                var dot = new VisualElement { pickingMode = PickingMode.Ignore }; dot.style.width = dot.style.height = 4; view.Decorate(dot, "var(--mt)", 2); room.Add(dot);
-                room.Add(Text(TableStrings.Get("botStake", Lang), "Baloo2-800", 12, "var(--ic)"));
-            }
+            // G101-Masa table.roomLabel: "Test masası · Tekli" · "Bahis 5.000" (against bots "Botlara karşı · Tekli" · "Antrenman · bahis yok").
+            var room = Row(8); room.name = "table-room"; Pad(room, 7, 13, 7, 13); view.Decorate(room, "var(--dp)", 999);
+            var roomName = Text(s.RoomName ?? L("Botlara karşı · Tekli", "Vs bots · Singles"), "Baloo2-800", 12, "var(--ic)"); roomName.name = "table.roomLabel"; room.Add(roomName);
+            var dot = new VisualElement { pickingMode = PickingMode.Ignore }; dot.style.width = dot.style.height = 4; view.Decorate(dot, "var(--mt)", 2); room.Add(dot);
+            var bet = Text(s.RoomName != null ? L("Bahis ", "Bet ") + view.N(s.RoomStake) : L("Antrenman · bahis yok", "Practice · no stake"), "Baloo2-800", 12, "var(--ic)"); bet.name = "table.roomLabel"; room.Add(bet);
             bar.Add(room);
-            BuildHandCounter(s);
 
             var spacer = new VisualElement { pickingMode = PickingMode.Ignore }; spacer.style.flexGrow = 1; bar.Add(spacer);
 
-            var deck = Row(8); Pad(deck, 5, 13, 5, 6); view.Decorate(deck, "var(--dp)", 18);
-            var mini = new VisualElement { pickingMode = PickingMode.Ignore }; mini.style.width = 20; mini.style.height = 27; mini.style.overflow = Overflow.Hidden;
+            // Deck pill: height 44, padding 0 16 0 8, gap 9, inset shadow; the mini tile 21×28.
+            var deck = Row(9); deck.style.height = 44; Pad(deck, 0, 16, 0, 8); view.Decorate(deck, "var(--dp)", 999);
+            var mini = new VisualElement { pickingMode = PickingMode.Ignore }; mini.style.width = 21; mini.style.height = 28; mini.style.overflow = Overflow.Hidden;
             view.Decorate(mini, "linear-gradient(var(--tf1),var(--tf2))", 5);
-            var edge = new VisualElement { pickingMode = PickingMode.Ignore }; MenuView.Place(edge, 0, 24, 20, 3); edge.style.backgroundColor = view.C("var(--te)"); mini.Add(edge);
+            var edge = new VisualElement { pickingMode = PickingMode.Ignore }; MenuView.Place(edge, 0, 25, 21, 3); edge.style.backgroundColor = view.C("var(--te)"); mini.Add(edge);
             deck.Add(mini);
-            deck.Add(Text(L("Taş", "Deck"), "Baloo2-800", 12, "var(--mt)"));
-            var count = Text(s.DeckCount.ToString(), "Montserrat-700", 16, "#F4F1E8"); count.name = "table.deckCount"; count.style.minWidth = 22; deck.Add(count);
+            var deckLabel = Text(L("Taş", "Deck"), "Baloo2-800", 12, "var(--mt)"); deckLabel.name = "table.t.deck"; deck.Add(deckLabel);
+            var count = Text(s.DeckCount.ToString(), "Montserrat-700", 17, "#F4F1E8"); count.name = "table.deckCount"; count.style.minWidth = 26; count.style.unityTextAlign = TextAnchor.MiddleRight; deck.Add(count);
             bar.Add(deck);
 
-            // XP pill instead of chips (T28): level disc, 100×7 bar, "6.240 / 9.000 XP".
-            var xp = Row(8); xp.name = "xp-pill"; Pad(xp, 5, 14, 5, 5); view.Decorate(xp, "var(--dp)", 18);
-            var levelDisc = new VisualElement { pickingMode = PickingMode.Ignore }; levelDisc.style.width = levelDisc.style.height = 30; levelDisc.style.alignItems = Align.Center; levelDisc.style.justifyContent = Justify.Center;
-            view.Decorate(levelDisc, "linear-gradient(var(--a1),var(--a2))", 15); levelDisc.Add(Text(s.Level.ToString(), "Montserrat-800", 12, "var(--aT)")); xp.Add(levelDisc);
-            var xpColumn = new VisualElement { pickingMode = PickingMode.Ignore };
-            var track = new VisualElement { pickingMode = PickingMode.Ignore }; track.style.width = 100; track.style.height = 7; track.style.overflow = Overflow.Hidden; view.Decorate(track, "rgba(255,255,255,.14)", 4);
-            var fill = new VisualElement { pickingMode = PickingMode.Ignore }; fill.style.position = Position.Absolute; fill.style.left = 0; fill.style.top = 0; fill.style.bottom = 0;
-            fill.style.width = Length.Percent(Mathf.Clamp01(s.XpNeed > 0 ? (float)s.XpInLevel / s.XpNeed : 0) * 100); view.Decorate(fill, "linear-gradient(90deg,var(--a2),var(--a1))", 4);
-            track.Add(fill); xpColumn.Add(track);
-            var xpText = Text(TableStrings.Get("xpPill", Lang, view.N(s.XpInLevel), view.N(s.XpNeed)), "Baloo2-800", 10, "var(--mt)"); xpText.name = "xp-text"; xpText.style.marginTop = 2; xpColumn.Add(xpText);
-            xp.Add(xpColumn);
-            bar.Add(xp);
+            // Chips pill (table.chipsLabel): the dashed gold coin and the balance, as at every table of the prototype (T28 too).
+            var chips = Row(9); chips.name = "table-chips"; chips.style.height = 44; Pad(chips, 0, 16, 0, 8); view.Decorate(chips, "var(--dp)", 999);
+            var coin = new VisualElement { pickingMode = PickingMode.Ignore }; coin.style.width = coin.style.height = 28;
+            view.Decorate(coin, "radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)", 14); Border(coin, 2, view.C("#FFF3C8")); chips.Add(coin);
+            var balance = Text(view.N(s.Chips), "Montserrat-700", 17, "#F4F1E8"); balance.name = "table.chipsLabel"; balance.style.minWidth = 80; balance.style.unityTextAlign = TextAnchor.MiddleRight; chips.Add(balance);
+            bar.Add(chips);
 
-            var settings = Clickable(IconButton("settings", 24, L("Ayarlar", "Settings"), "table-settings"), "settings"); bar.Add(settings);
-        }
-
-        /// <summary>Hand counter under the room pill (T28): played hands as gold dots, then "2 / 5. el".</summary>
-        private void BuildHandCounter(State s)
-        {
-            var counter = Row(6); counter.name = "hand-counter"; counter.style.position = Position.Absolute; counter.style.left = 232; counter.style.top = 62;
-            Pad(counter, 3, 10, 3, 8); view.Decorate(counter, "var(--dp)", 12);
-            var dots = Row(3);
-            for (int i = 1; i <= s.MatchHands; i++)
-            {
-                var dot = new VisualElement { pickingMode = PickingMode.Ignore }; dot.style.width = dot.style.height = 6;
-                view.Decorate(dot, i <= s.Hand ? "var(--a1)" : "rgba(255,255,255,.22)", 3); dots.Add(dot);
-            }
-            counter.Add(dots);
-            counter.Add(Text(TableStrings.Get("handCounter", Lang, Mathf.Clamp(s.Hand, 1, s.MatchHands), s.MatchHands), "Baloo2-800", 10, "var(--ic)"));
-            hudLayer.Add(counter);
+            var settings = Clickable(IconButton("settings", 24, L("Ayarlar", "Settings"), "table.openSettings"), "settings"); bar.Add(settings);
         }
 
         private VisualElement IconButton(string icon, int size, string tooltip, string name)
@@ -945,11 +917,12 @@ namespace Galaxy101.Table
             if (s.DragBanner != null) { text = s.DragBanner; bg = "linear-gradient(var(--a1),var(--a2))"; fg = "var(--aT)"; }
             else if (s.Phase == "draw" && s.Active == 0 && s.DeckOnly) { text = TableStrings.Get("drawDeckOnly", Lang); bg = "linear-gradient(var(--a1),var(--a2))"; fg = "var(--aT)"; }
             else if (s.Phase == "discard" && s.Active == 0 && s.ShowPutBack) { text = TableStrings.Get("putBackHint", Lang); bg = "rgba(5,8,22,.75)"; fg = "var(--ic)"; }
-            else if (s.Phase == "deal") { text = L("Taşlar dağıtılıyor…", "Dealing tiles…"); bg = "rgba(5,8,22,.75)"; fg = "var(--ic)"; }
+            else if (s.Phase == "deal" && s.Deal == null) { text = L("Taşlar dağıtılıyor…", "Dealing tiles…"); bg = "rgba(5,8,22,.75)"; fg = "var(--ic)"; }
             else if (s.Phase == "draw" && s.Active == 0) { string n = FirstName(3); text = L("Sıra sende · desteden ya da " + n + "'ın taşından çek", "Your turn · draw from the deck or " + n + "'s tile"); bg = "linear-gradient(var(--a1),var(--a2))"; fg = "var(--aT)"; }
             else if (s.Phase == "discard" && s.Active == 0)
             {
-                text = s.FirstTurn ? L("İlk hamle senin · ıstakadan bir taş at", "You start · discard a tile from your rack") : L("Atacağın taşı halkaya sürükle ya da çift tıkla", "Drag a tile onto the ring or double-click it");
+                text = s.FirstTurn ? L("İlk hamle senin · ıstakadan bir taş at", "You start · discard a tile from your rack")
+                    : s.OpenedThisTurn ? TableStrings.Get("tOpened", Lang) : L("Atacağın taşı halkaya sürükle ya da çift tıkla", "Drag a tile onto the ring or double-click it");
                 bg = "#3CCB6E"; fg = "#062B14";
             }
             else if (s.Active > 0) { string n = FirstName(s.Active); text = L(n + " oynuyor…", n + " is playing…"); bg = "rgba(5,8,22,.75)"; fg = "var(--ic)"; }
@@ -1106,7 +1079,7 @@ namespace Galaxy101.Table
             var myName = Text((string)Seat(0)["name"], "Montserrat-700", 16, "#F4F1E8"); myName.name = "table.me.name"; column.Add(myName);
             var status = Text(Status(0, s, true), "Baloo2-800", 12, s.Opened[0] > 0 ? "#8EF0B0" : "var(--mt)"); status.name = "table.me.status"; status.style.marginTop = 1; column.Add(status);
             var buttons = Row(8); buttons.style.marginTop = 6; buttons.pickingMode = PickingMode.Position;
-            var chat = Square("table-chat-open", "linear-gradient(160deg,#7AA6FF,#3D6BF0)", "#2448B8", L("Sohbet", "Chat"));
+            var chat = Square("table.openChat", "linear-gradient(160deg,#7AA6FF,#3D6BF0)", "#2448B8", L("Sohbet", "Chat"));
             chat.Add(view.Icon("table-chat", 22, "#fff"));
             if (Unread > 0)
             {
@@ -1115,7 +1088,7 @@ namespace Galaxy101.Table
                 chat.Add(badge);
             }
             buttons.Add(Clickable(chat, "chat"));
-            var gift = Square("table-gift-open", "linear-gradient(160deg,var(--a1),var(--a2))", "var(--aS)", L("Hediye gönder", "Send a gift"));
+            var gift = Square("table.openGiftAny", "linear-gradient(160deg,var(--a1),var(--a2))", "var(--aS)", L("Hediye gönder", "Send a gift"));
             GalaxyFilters.Shadow(gift, 0, 0, 9, view.C("var(--gl)")); gift.Add(view.Icon("table-gift", 22, "var(--aT)")); buttons.Add(Clickable(gift, "gift"));
             column.Add(buttons); panel.Add(column);
             hudLayer.Add(panel);
@@ -1170,22 +1143,24 @@ namespace Galaxy101.Table
         // ---------- actions ----------
         private void BuildActions(State s)
         {
-            var actions = Row(12); actions.name = "table-actions"; actions.style.alignItems = Align.FlexEnd;
-            actions.style.position = Position.Absolute; actions.style.right = 18; actions.style.bottom = 16;
-            var sorts = new VisualElement { pickingMode = PickingMode.Ignore };
-            sorts.Add(Clickable(SortButton("table-sort-run", L("Seri diz", "Sort runs")), "sort-run")); var pair = Clickable(SortButton("table-sort-pair", L("Çift diz", "Sort pairs")), "sort-pair"); pair.style.marginTop = 7; sorts.Add(pair);
+            // G101-Masa: a column at right 16, bottom 14 (gap 6): the two sort buttons side by side, then the meter.
+            var actions = new VisualElement { name = "table-actions", pickingMode = PickingMode.Ignore }; actions.style.alignItems = Align.FlexEnd;
+            actions.style.position = Position.Absolute; actions.style.right = 16; actions.style.bottom = 14;
+            var sorts = Row(6); sorts.style.marginBottom = 6;
+            sorts.Add(Clickable(SortButton("table.sortRun", L("Seri diz", "Sort runs")), "sort-run")); sorts.Add(Clickable(SortButton("table.sortPair", L("Çift diz", "Sort pairs")), "sort-pair"));
             actions.Add(sorts);
 
-            var meter = Row(10); meter.name = "table-open-meter"; Pad(meter, 8, 8, 8, 10);
-            view.Decorate(meter, "rgba(5,8,22,.62)", 22); Border(meter, 1, new Color(1, 1, 1, .08f)); GalaxyFilters.BackdropBlur(meter, 6);
-            var gauge = new VisualElement { pickingMode = PickingMode.Ignore }; gauge.style.width = gauge.style.height = 62;
+            var meter = Row(8); meter.name = "table-open-meter"; Pad(meter, 7, 8, 7, 8);
+            view.Decorate(meter, "rgba(5,8,22,.62)", 18); Border(meter, 1, new Color(1, 1, 1, .08f)); GalaxyFilters.BackdropBlur(meter, 6);
+            // The gauge: 50 px, the dial inset 5 px (openSum 16 px, gaugeSub 7 px).
+            var gauge = new VisualElement { pickingMode = PickingMode.Ignore }; gauge.style.width = gauge.style.height = 50;
             bool opened = s.Opened[0] > 0;
             var arc = new ArcRing(view.C(s.OpenSum >= s.OpenBar || opened ? "#3CCB6E" : "#FF5E6C"), new Color(1, 1, 1, .1f)) { Fraction = Mathf.Min(100, Mathf.Round(s.OpenSum / (float)s.OpenBar * 100)) / 100f };
-            MenuView.Place(arc, 0, 0, 62, 62); gauge.Add(arc);
-            var dial = new VisualElement { pickingMode = PickingMode.Ignore }; MenuView.Place(dial, 6, 6, 50, 50); dial.style.alignItems = Align.Center; dial.style.justifyContent = Justify.Center;
-            view.Decorate(dial, "var(--dp)", 25);
-            var sum = Text(s.OpenSum.ToString(), "Montserrat-700", 19, "#F4F1E8"); sum.name = "table.openSum"; dial.Add(sum);
-            var gaugeSub = Text(opened ? L("AÇIK", "OPEN") : "/ " + s.OpenBar, "Baloo2-800", 9, "var(--mt)"); gaugeSub.name = "table.gaugeSub"; dial.Add(gaugeSub);
+            MenuView.Place(arc, 0, 0, 50, 50); gauge.Add(arc);
+            var dial = new VisualElement { pickingMode = PickingMode.Ignore }; MenuView.Place(dial, 5, 5, 40, 40); dial.style.alignItems = Align.Center; dial.style.justifyContent = Justify.Center;
+            view.Decorate(dial, "var(--dp)", 20);
+            var sum = Text(s.OpenSum.ToString(), "Montserrat-700", 16, "#F4F1E8"); sum.name = "table.openSum"; dial.Add(sum);
+            var gaugeSub = Text(opened ? L("AÇIK", "OPEN") : "/ " + s.OpenBar, "Baloo2-800", 7, "var(--mt)"); gaugeSub.name = "table.gaugeSub"; dial.Add(gaugeSub);
             gauge.Add(dial); meter.Add(gauge);
 
             var column = new VisualElement { pickingMode = PickingMode.Ignore };
@@ -1199,40 +1174,42 @@ namespace Galaxy101.Table
             var buttons = Row(6);
             if (s.CanUndo)
             {
-                var undo = Row(6); undo.name = "table.doUndo"; undo.focusable = true; Pad(undo, 12, 14, 12, 12);
-                view.Decorate(undo, "#3D7BFF", 15, 5, "#2148B0"); GalaxyFilters.HoverBrightness(undo, 1.1f);
-                undo.Add(Text("↓", "Montserrat-800", 15, "#fff")); undo.Add(Text(L("Geri topla", "Take back"), "Montserrat-800", 14, "#fff"));
+                // G101-Masa table.doUndo: 800 13px, padding 8px 11px 8px 9px, radius 12, the panel colour.
+                var undo = Row(7); undo.name = "table.doUndo"; undo.focusable = true; Pad(undo, 8, 11, 8, 9); undo.tooltip = TableStrings.Get("undoTip", Lang);
+                view.Decorate(undo, "var(--pnH)", 12, 3, "var(--pnS)"); GalaxyFilters.HoverBrightness(undo, 1.2f);
+                undo.Add(Text("↓", "Montserrat-800", 13, "#F4F1E8")); undo.Add(Text(L("Geri topla", "Take back"), "Montserrat-800", 13, "#F4F1E8"));
                 buttons.Add(Clickable(undo, "undo"));
             }
             if (s.ShowReturn)
             {
                 // G101-Masa table.doReturn: Geri bırak (R-32) next to Geri topla, the same panel button.
-                var back = Row(6); back.name = "table.doReturn"; back.focusable = true; Pad(back, 12, 14, 12, 12);
-                view.Decorate(back, "var(--pnH)", 15, 5, "var(--pnS)"); GalaxyFilters.HoverBrightness(back, 1.2f); back.tooltip = TableStrings.Get("returnTip", Lang);
-                back.Add(Text("↑", "Montserrat-800", 15, "#F4F1E8")); back.Add(Text(L("Geri bırak", "Put back"), "Montserrat-800", 14, "#F4F1E8"));
+                var back = Row(7); back.name = "table.doReturn"; back.focusable = true; Pad(back, 8, 11, 8, 9);
+                view.Decorate(back, "var(--pnH)", 12, 3, "var(--pnS)"); GalaxyFilters.HoverBrightness(back, 1.2f); back.tooltip = TableStrings.Get("returnTip", Lang);
+                back.Add(Text("↑", "Montserrat-800", 13, "#F4F1E8")); back.Add(Text(L("Geri bırak", "Put back"), "Montserrat-800", 13, "#F4F1E8"));
                 buttons.Add(Clickable(back, "putback"));
             }
             if (s.CanFromHand)
             {
-                var bomb = Row(6); bomb.name = "table.doBomb"; bomb.focusable = true; Pad(bomb, 12, 16, 12, 12);
-                view.Decorate(bomb, "linear-gradient(#FF6B5E,#D9343F)", 15, 5, "#8E1A24"); GalaxyFilters.HoverBrightness(bomb, 1.1f);
+                // G101-Masa table.doBomb: 800 13px, padding 7px 11px 7px 8px, radius 12, linear-gradient(#FF8A3D,#E2361F), shadow #8E1F12.
+                var bomb = Row(7); bomb.name = "table.doBomb"; bomb.focusable = true; Pad(bomb, 7, 11, 7, 8); bomb.tooltip = TableStrings.Get("bombTip", Lang);
+                view.Decorate(bomb, "linear-gradient(#FF8A3D,#E2361F)", 12, 3, "#8E1F12"); GalaxyFilters.HoverBrightness(bomb, 1.1f);
                 // The bomb: a dark round body with a gold fuse spark; it wobbles every 1.4 s.
                 var icon = new VisualElement { pickingMode = PickingMode.Ignore }; icon.style.width = icon.style.height = 18;
                 view.Decorate(icon, "#2A1A1E", 9); var spark = new VisualElement { pickingMode = PickingMode.Ignore }; MenuView.Place(spark, 12, -3, 6, 6); view.Decorate(spark, "#FFC94A", 3); icon.Add(spark);
-                bomb.Add(icon); bomb.Add(Text(L("Elden bit", "Finish from hand"), "Montserrat-800", 15, "#fff"));
+                bomb.Add(icon); bomb.Add(Text(L("Elden bit", "Finish from hand"), "Montserrat-800", 13, "#fff"));
                 motions.Add(t => icon.style.rotate = new Rotate(12 * Mathf.Sin(t * 9) * (Mathf.Repeat(t, 1.4f) < .5f ? 1 : 0)));
                 buttons.Add(Clickable(bomb, "fromhand"));
             }
             if (!opened && s.Pairs >= 3)
             {
-                var pairs = ActionButton("table.doPair", L("Çift aç · " + s.Pairs + "/" + s.PairsBar, "Open pairs · " + s.Pairs + "/" + s.PairsBar), s.CanPair, false, 14, "pairs");
+                var pairs = ActionButton("table.doPair", L("Çift aç · " + s.Pairs + "/" + s.PairsBar, "Open pairs · " + s.Pairs + "/" + s.PairsBar), s.CanPair, false, 13, "pairs");
                 // warnB(): fewer than five pairs is a short opening — the same orange-red as Aç.
                 if (s.ShortPairs && s.CanPair) { view.Decorate(pairs, "linear-gradient(#FF9A4D,#E8573A)", 15, 5, "#9E3418"); pairs.style.color = view.C("#fff"); pairs.EnableInClassList("short", true); }
                 buttons.Add(pairs);
             }
             if (!s.OpenedPairs[0])
             {
-                var open = ActionButton("table.doOpen", opened ? L("Yere aç", "Lay down") : L("Aç", "Open"), s.CanOpen, true, 17, "open");
+                var open = ActionButton("table.doOpen", opened ? L("Yere aç", "Lay down") : L("Aç", "Open"), s.CanOpen, true, 13, "open");
                 if (s.ShortOpen && s.CanOpen)
                 {
                     // Hatalı açma: orange-red, with the warning as its tooltip.
@@ -1242,12 +1219,12 @@ namespace Galaxy101.Table
                 }
                 buttons.Add(open);
             }
-            if (s.ShowLayPair) buttons.Add(ActionButton("table.doLayPair", TableStrings.Get("layPair", Lang), s.CanLayPair, false, 14, "pairs"));
+            if (s.ShowLayPair) buttons.Add(ActionButton("table.doLayPair", TableStrings.Get("layPair", Lang), s.CanLayPair, false, 13, "pairs"));
             column.Add(buttons);
             if (s.ShowIsle)
             {
                 // table.doIsle: a full-width row under the buttons (flex 1 1 100%).
-                var isle = ActionButton("table.doIsle", TableStrings.Get("isle", Lang), s.CanIsle, true, 15, "isle");
+                var isle = ActionButton("table.doIsle", TableStrings.Get("isle", Lang), s.CanIsle, true, 14, "isle");
                 isle.style.marginTop = 6; isle.style.unityTextAlign = TextAnchor.MiddleCenter; column.Add(isle);
             }
             meter.Add(column);
@@ -1258,10 +1235,12 @@ namespace Galaxy101.Table
         /// <summary>btn(on, primary): gold (primary) or green when enabled, muted pnH at 75 % otherwise.</summary>
         private VisualElement ActionButton(string name, string text, bool on, bool primary, int size, string command)
         {
+            // G101-Masa btn(): 800 13px, padding 8px 11px (Aç 13 px, İşle 9px 14px), radius 12, a 3 px shadow.
             var button = Text(text, "Montserrat-800", size, on ? primary ? "var(--aT)" : "#05301A" : "var(--mt)");
             button.name = name; button.focusable = true; button.pickingMode = PickingMode.Position;
-            Pad(button, 12, primary ? 20 : 14, 12, primary ? 20 : 14);
-            view.Decorate(button, on ? primary ? "linear-gradient(var(--a1),var(--a2))" : "linear-gradient(#5BE38A,#2BB45F)" : "var(--pnH)", 15, 5, on ? primary ? "var(--aS)" : "#18793F" : "var(--pnS)");
+            float v = size >= 14 ? 9 : 8, h = size >= 14 ? 14 : primary ? 13 : 11;
+            Pad(button, v, h, v, h);
+            view.Decorate(button, on ? primary ? "linear-gradient(var(--a1),var(--a2))" : "linear-gradient(#5BE38A,#2BB45F)" : "var(--pnH)", 12, 3, on ? primary ? "var(--aS)" : "#18793F" : "var(--pnS)");
             button.style.opacity = on ? 1 : .75f;
             if (on)
             {
@@ -1281,9 +1260,9 @@ namespace Galaxy101.Table
 
         private VisualElement SortButton(string name, string text)
         {
-            var button = Text(text, "Montserrat-700", 13, "#F4F1E8"); button.name = name; button.focusable = true; button.pickingMode = PickingMode.Position;
-            button.style.unityTextAlign = TextAnchor.MiddleCenter; Pad(button, 9, 14, 9, 14);
-            view.Decorate(button, "var(--pnH)", 13, 4, "var(--pnS)"); GalaxyFilters.HoverBrightness(button, 1.25f);
+            var button = Text(text, "Montserrat-700", 12, "#F4F1E8"); button.name = name; button.focusable = true; button.pickingMode = PickingMode.Position;
+            button.style.unityTextAlign = TextAnchor.MiddleCenter; Pad(button, 6, 12, 6, 12);
+            view.Decorate(button, "var(--pnH)", 11, 3, "var(--pnS)"); GalaxyFilters.HoverBrightness(button, 1.25f);
             return button;
         }
 

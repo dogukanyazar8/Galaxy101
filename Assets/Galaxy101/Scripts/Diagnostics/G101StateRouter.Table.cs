@@ -24,6 +24,8 @@ namespace Galaxy101.Diagnostics
         private TableHud Hud => FindAnyObjectByType<TableHud>();
         private string scenarioId;
         private string tableFlow;
+        /// <summary>The table state being run: timed extras of an earlier state never reach the next state's table.</summary>
+        private int tableRun;
 
         /// <summary>
         /// A table state: its states.json path step by step (g101-state.js step()): acct → [scenario] → table {flow, bots,
@@ -33,7 +35,7 @@ namespace Galaxy101.Diagnostics
         private IEnumerator TableState(string id, string theme, string lang)
         {
             var path = (JArray)Entry(id)["path"];
-            scenarioId = null; tableFlow = null;
+            scenarioId = null; tableFlow = null; tableRun++;
             TableSettings.DesignDefaultsOnly = true;
             foreach (JObject step in path)
             {
@@ -75,18 +77,20 @@ namespace Galaxy101.Diagnostics
                 launch.Table = table; launch.Room = L("Test masası · Tekli", "Test table · Singles"); launch.Stake = TestBet; launch.Chips = AccountChips - TestBet; launch.Seats = TestSeats;
             }
             TableGame.Pending = launch;
+            _ = Menu.StartLocalAsync(MainMenuController.GalaxyTableScene);
+            float until = Time.realtimeSinceStartup + 30;
+            while (Game == null || Game.Model == null || Hud == null || Hud.View == null) { if (Time.realtimeSinceStartup > until) throw new TimeoutException("table did not open"); yield return null; }
             if (noWait)
             {
-                // T50 / G01 / T51: the loading screen over the menu (the table scene is not loaded: UF-506).
-                var loading = new TableLoadingOverlay(Menu.View, Menu.transform);
+                // T50 / G01 / T51: the loading screen over the table, which waits full ("Masa doldu · oyun başlıyor"), as the
+                // prototype's loading layer lies over G101-Masa.
+                Game.ShowTableFull();
+                var loading = new TableLoadingOverlay(Hud.View, Hud.transform);
                 loading.Show(5, bots ? null : L("KLASİK · TEKLİ · 101 · 5 EL", "CLASSIC · SINGLES · 101 · 5 HANDS"));
                 Loading = loading;
                 StartCoroutine(LoadingProgress(loading));
                 yield break;
             }
-            _ = Menu.StartLocalAsync(MainMenuController.GalaxyTableScene);
-            float until = Time.realtimeSinceStartup + 30;
-            while (Game == null || Game.Model == null || Hud == null) { if (Time.realtimeSinceStartup > until) throw new TimeoutException("table did not open"); yield return null; }
             yield return Settle(.4f);
             yield return Go(tableFlow);
             // DEMO (G101-Masa dealFinish): 2.6 s after a real deal ends, seat 2 treats the table to tea.
@@ -95,10 +99,10 @@ namespace Galaxy101.Diagnostics
 
         private IEnumerator TeaAfterDeal()
         {
-            var game = Game;
-            while (game != null && !(game.Model.HasHand && game.Model.Deal == null && !game.Ceremony.Running && game.Current != TableGame.Phase.Deal)) { if (GameClock.Frozen) yield break; yield return null; }
-            if (game == null) yield break;
-            yield return After(2.6f, () => { var hud = Hud; hud?.BotGift(2, "tea", -1, TableStrings.Get("quick.4", hud.L("tr", "en"))); });
+            var game = Game; var hud = Hud; int run = tableRun;
+            while (game != null && run == tableRun && !(game.Model.HasHand && game.Model.Deal == null && !game.Ceremony.Running && game.Current != TableGame.Phase.Deal)) { if (GameClock.Frozen) yield break; yield return null; }
+            if (game == null || run != tableRun) yield break;
+            yield return After(2.6f, () => { if (run == tableRun && hud != null) hud.BotGift(2, "tea", -1, TableStrings.Get("quick.4", hud.L("tr", "en"))); });
         }
 
         private TableLoadingOverlay Loading;
@@ -124,7 +128,8 @@ namespace Galaxy101.Diagnostics
             game.RunFlow(key);
             if (flow == null || flow == "seat") yield break;
             // Timed extras run alongside the path's next steps (the prototype's this.at).
-            void At(float seconds, Action action) => StartCoroutine(After(seconds, action));
+            int run = tableRun;
+            void At(float seconds, Action action) => StartCoroutine(After(seconds, () => { if (run == tableRun && game != null) action(); }));
             string quick4 = TableStrings.Get("quick.4", hud.L("tr", "en"));
             switch (flow)
             {
@@ -134,6 +139,9 @@ namespace Galaxy101.Diagnostics
                 case "exit": At(.4f, () => game.RequestExit()); break;
                 case "net": At(.5f, () => game.ShowConnectionLost()); break;
                 case "settings": At(.3f, () => hud.OpenSettings(2)); break;
+                case "isle": At(.6f, () => hud.Post(TableHud.ToastKind.Info, TableStrings.Get("isleTestHint", hud.L("tr", "en")))); break;
+                case "penIslek": At(.6f, () => hud.Post(TableHud.ToastKind.Info, TableStrings.Get("penIslekTest", hud.L("tr", "en")))); break;
+                case "penOpen": At(.6f, () => hud.Post(TableHud.ToastKind.Info, TableStrings.Get("penOpenTest", hud.L("tr", "en")))); break;
             }
             // DEMO (DEMO_LIST.md "Bot ikramı"): the prototype's tea from seat 2 on the play and gift flows.
             if (flow == "play") At(1.6f, () => hud.BotGift(2, "tea", -1, quick4));

@@ -184,8 +184,8 @@ namespace Galaxy101
                 else { var glow = v.C(color); glow.a = .4f; GalaxyFilters.Shadow(art, 0, 0, 8, glow); }
                 art.Add(v.Text((string)badge["glyph"], 18, true, "#fff"));
                 // 700 15px/1.2 name over a 700 12px description (line-height normal, 19.2 px) 2px below.
-                var name = PanelUi.Wrap(v, v.L((string)badge["tr"], (string)badge["en"]), 15, "#F4F1E8", true); name.name = "menu.b.name[" + index + "]"; MenuView.CssParagraph(name, 18, false);
-                var description = PanelUi.Wrap(v, v.L((string)badge["desc_tr"], (string)badge["desc_en"]), 12); description.name = "menu.b.desc[" + index + "]"; description.style.marginTop = 2; MenuView.CssParagraph(description, 19.2f, false);
+                var name = PanelUi.Wrap(v, v.L((string)badge["tr"], (string)badge["en"]), 15, "#F4F1E8", true); name.name = "menu.b.name[" + index + "]"; MenuView.CssLines(name, 18);
+                var description = PanelUi.Wrap(v, v.L((string)badge["desc_tr"], (string)badge["desc_en"]), 12); description.name = "menu.b.desc[" + index + "]"; description.style.marginTop = 2; MenuView.CssLines(description, 19.2f);
                 var text = v.Column(name, description); PanelUi.Grow(text);
                 if (locked)
                 {

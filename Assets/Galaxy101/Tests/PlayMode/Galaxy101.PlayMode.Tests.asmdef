@@ -6,7 +6,9 @@
         "Okey101.Core",
         "Okey101.Application",
         "Unity.InputSystem",
-        "Galaxy101.Contracts"
+        "Galaxy101.Contracts",
+        "Galaxy101.Table.Client",
+        "Galaxy101.Table.Runtime"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"

@@ -10,7 +10,9 @@
         "Okey101.Core",
         "Okey101.Application",
         "Okey101.Bots",
-        "Galaxy101.Contracts"
+        "Galaxy101.Contracts",
+        "Galaxy101.Table.Runtime",
+        "Galaxy101.Table.Client"
     ],
     "autoReferenced": true
 }

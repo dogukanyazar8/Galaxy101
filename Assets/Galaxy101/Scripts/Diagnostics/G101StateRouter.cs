@@ -203,6 +203,7 @@ namespace Galaxy101.Diagnostics
         {
             if (MenuStates.Contains(id)) return MenuState(id, theme, lang);
             if (id.StartsWith("S", StringComparison.Ordinal)) return ShellState(id, theme, lang);
+            if (IsTableState(id)) return TableState(id, theme, lang);
             throw new NotSupportedException("no Unity path for this state yet");
         }
 

@@ -32,6 +32,8 @@ namespace Galaxy101.Online
         /// subscribe and resync again.</summary>
         public event Action Reconnected;
         private bool reconnecting;
+        /// <summary>A v4 table reconnects by itself (protocol.json reconnect: 5 × 3 s, then "Lobiye dön"); the session's backoff waits meanwhile.</summary>
+        public bool SuspendReconnect { get; set; }
 
         public static GalaxyOnline Ensure(string server = null)
         {
@@ -43,6 +45,7 @@ namespace Galaxy101.Online
             Instance.Api.TokensChanged += Instance.Persist;
             Instance.Realtime.On<WalletResponse>(MessageTypes.Wallet, w => { Instance.Wallet = w; Instance.Changed?.Invoke(); });
             Instance.Realtime.Closed += Instance.OnRealtimeClosed;
+            V4TableSession.Watch(Instance);   // a v4 matchStart opens the table (waiting room, invite, ranked, vsBotsStart)
             return Instance;
         }
 
@@ -50,7 +53,7 @@ namespace Galaxy101.Online
         /// taken over by another device stays closed.</summary>
         private async void OnRealtimeClosed(string reason)
         {
-            if (reason == GalaxyRealtime.ReplacedReason || reconnecting) return;
+            if (reason == GalaxyRealtime.ReplacedReason || reconnecting || SuspendReconnect) return;
             reconnecting = true;
             try
             {

@@ -1,0 +1,48 @@
+<Project>
+  <!--
+    SDK NUnit project for the table lane's pure C# (Faz 2 · Masa): the v4 client model, the offline host and the
+    scenarios (Assets/Galaxy101/Table/Scripts/Client) against the server's match runtime (Packages/com.galaxy101.table)
+    and the v4 rules engine, without Unity. Output goes to the temp folder, outside the repo. Run from the repo root:
+      dotnet test tools/v4/nunit-table/TableClientTests.csproj
+  -->
+  <PropertyGroup>
+    <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../../..'))</RepoRoot>
+    <ScratchRoot>$([System.IO.Path]::Combine($([System.IO.Path]::GetTempPath()), 'galaxy101-v4-table-nunit'))</ScratchRoot>
+    <BaseIntermediateOutputPath>$(ScratchRoot)/obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(ScratchRoot)/obj/</MSBuildProjectExtensionsPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <OutputPath>$(ScratchRoot)/bin/</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <RootNamespace>Galaxy101.Table.Tests</RootNamespace>
+    <AssemblyName>Galaxy101.Table.NUnit</AssemblyName>
+    <NoWarn>$(NoWarn);CS1591;NU1603</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>RepoRoot</_Parameter1>
+      <_Parameter2>$(RepoRoot)</_Parameter2>
+    </AssemblyAttribute>
+    <Compile Include="$(RepoRoot)/tools/v4/nunit/RepoRootSetUp.cs" Link="RepoRootSetUp.cs" />
+    <Compile Include="$(RepoRoot)/Packages/com.okey101.core/Runtime/**/*.cs" Link="Core/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(RepoRoot)/Packages/com.galaxy101.contracts/Runtime/**/*.cs" Link="Contracts/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(RepoRoot)/Packages/com.galaxy101.table/Runtime/**/*.cs" Link="TableRuntime/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(RepoRoot)/Assets/Galaxy101/Table/Scripts/Client/**/*.cs" Link="Client/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(RepoRoot)/Assets/Galaxy101/Tests/Table/**/*.cs" Link="Tests/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

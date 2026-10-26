@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Okey101.Core.Model;
-using Okey101.Core.Turns;
+using Okey101.Core.V4;
 using UnityEngine;
 using static Galaxy101.Table.TableConstants;
 
@@ -86,20 +85,37 @@ namespace Galaxy101.Table
         }
 
         // ---------- the ceremony ----------
-        /// <param name="roll">Waits for the dealer's roll (index 0 / 1): my "Zar at" button or a bot's pause.</param>
-        public async Task Run(DealInfo info, BoardState state, string indicatorCode, Func<int, Task> roll, CancellationToken token)
+        private static readonly string[] Order = { "build", "dice", "afterDice", "indicator", "extra", "distribute", "center", "fill" };
+        private static int Rank(string step) { int i = Array.IndexOf(Order, step); return i < 0 ? 0 : i; }
+
+        /// <summary>The indicator was a fake okey's neighbour (D-03, dealStep indicator fakeSkip).</summary>
+        public bool Fake { get; private set; }
+
+        /// <summary>
+        /// Plays the server's deal (D-24) as its steps arrive: the client never times the ceremony, it animates each step when
+        /// the model reaches it (dealStart → dealStep dice → dealDie × 2 → indicator → extra → distribute → center →
+        /// handDealt) and catches up when the server is ahead (timings.md §2: a later event skips what is left).
+        /// </summary>
+        /// <param name="model">The seat's model; its <see cref="TableClient.Deal"/> carries the announced steps.</param>
+        /// <param name="local">Absolute seat → the table's seat (0 = me at the bottom).</param>
+        /// <param name="fill">The board as the hand starts (my rack laid out, the others' counts, the stock).</param>
+        public async Task Run(TableClient model, Func<int, int> local, Func<BoardState> fill, CancellationToken token)
         {
-            Running = true; Revealed = false; Dice[0] = Dice[1] = 0; LastDie = -1;
-            int dealer = info.Dealer;
+            Running = true; Revealed = false; Fake = false; Dice[0] = Dice[1] = 0; LastDie = -1;
+            DealProgress D() => model.Deal;
+            bool Past(string step) => D() == null || Rank(D().Step) >= Rank(step);
+            async Task Until(Func<bool> done) { while (!done()) { await wait(0.05f); token.ThrowIfCancellationRequested(); } }
+            int dealerAbs = D()?.Dealer ?? model.Dealer;
+            int dealer = local(dealerAbs);
             try
             {
                 // 1. 106 tiles from the centre heap into 15 stacks of 7 + the extra tile (450 ms, 15 ms apart, 0.6–0.9 s flights).
                 Set("stack");
-                var stacks = new List<GameObject>[DealCeremony.Stacks];
+                var stacks = new List<GameObject>[G101Rules.Const.Stacks];
                 for (int s = 0; s < stacks.Length; s++) stacks[s] = new List<GameObject>();
                 int n = 0;
-                for (int level = 0; level < DealCeremony.StackHeight; level++)
-                    for (int s = 0; s < DealCeremony.Stacks; s++)
+                for (int level = 0; level < G101Rules.Const.StackH; level++)
+                    for (int s = 0; s < G101Rules.Const.Stacks; s++)
                     {
                         var go = Tile(scene.DeckPose(105 - n, 106));
                         Fly(go, StackPose(dealer, s, level), 0.45f + n * 0.015f, 0.6f + (n % 7) * 0.05f, 0.08f, 90); stacks[s].Add(go); n++;
@@ -108,26 +124,31 @@ namespace Galaxy101.Table
                 Fly(extraTile, StackPose(dealer, 15.3f, 0), 0.45f + n * 0.015f, 0.8f, 0.08f, 90);
                 await wait(0.45f + n * 0.015f + 1.0f); token.ThrowIfCancellationRequested();
 
-                // 2. Two rolls.
+                // 2. Two rolls, each when the server announces its die (dealDie).
                 for (int i = 0; i < 2; i++)
                 {
                     Set("roll");
-                    await roll(i); token.ThrowIfCancellationRequested();
-                    Set("rolling");
-                    await Roll(dealer, i, i == 0 ? info.DieA : info.DieB);
-                    Dice[i] = i == 0 ? info.DieA : info.DieB; LastDie = i; Changed?.Invoke();
-                    await wait(0.35f); token.ThrowIfCancellationRequested();
+                    int k = i;
+                    await Until(() => Past("indicator") || D().Dice.Count > k);
+                    bool announced = D() != null && D().Dice.Count > i;
+                    int value = announced ? D().Dice[i].Value : Mathf.Max(1, Dice[i]);
+                    if (announced && !Past("indicator")) { Set("rolling"); await Roll(dealer, i, value); }
+                    Dice[i] = value; LastDie = i; Changed?.Invoke();
+                    if (!Past("indicator")) { await wait(0.35f); token.ThrowIfCancellationRequested(); }
                 }
 
                 // 3. The indicator: out of stack a at height b, a 1.15 s somersault onto the same stack; the tiles above settle.
-                await wait(0.65f);
-                int a = info.IndicatorStack, b = Mathf.Clamp(info.IndicatorPosition, 0, stacks[a].Count - 1);
+                await Until(() => Past("indicator"));
+                var d = D();
+                int a = d != null && d.IndicatorStack >= 0 ? d.IndicatorStack : Mathf.Clamp(Dice[0] - 1, 0, 14);
+                int b = Mathf.Clamp(d != null && d.IndicatorLevel >= 0 ? d.IndicatorLevel : Dice[1] - 1, 0, stacks[a].Count - 1);
+                Fake = d != null && d.FakeSkip;
                 var indicator = stacks[a][b]; stacks[a].RemoveAt(b);
                 var outside = StackPose(dealer, a, b); outside.position += scene.SeatDirection(dealer) * 0.07f;
                 Fly(indicator, outside, 0, 0.3f, 0.01f);
                 for (int j = b; j < stacks[a].Count; j++) Fly(stacks[a][j], StackPose(dealer, a, j), 0.42f + (j - b) * 0.045f, 0.25f, 0.004f);
                 await wait(0.32f);
-                scene.Tiles.SetFace(indicator, indicatorCode); scene.Tiles.SetLying(indicator, true);
+                scene.Tiles.SetFace(indicator, model.Indicator != null ? TileIds.Code(TileIds.ToInt(model.Indicator)) : null); scene.Tiles.SetLying(indicator, true);
                 var top = StackPose(dealer, a, stacks[a].Count); top.rotation = scene.FlatForMe;
                 Fly(indicator, top, 0, 1.15f, 0.12f, 360); stacks[a].Add(indicator);
                 fx?.Wave(StackPose(dealer, a, 0).position, new Color(1, .84f, .35f), 0.9f);
@@ -135,42 +156,46 @@ namespace Galaxy101.Table
                 Revealed = true; Set("indicator");
 
                 // 4. The extra tile onto stack a+1.
-                await wait(1.1f);
+                await Until(() => Past("extra"));
                 Set("extra");
-                int extraStack = info.ExtraStack;
+                int extraStack = D() != null && D().ExtraStack >= 0 ? D().ExtraStack : (a + 1) % 15;
                 Fly(extraTile, StackPose(dealer, extraStack, stacks[extraStack].Count), 0, 0.65f, 0.05f); stacks[extraStack].Add(extraTile);
-                await wait(1.3f); token.ThrowIfCancellationRequested();
+                await wait(0.65f); token.ThrowIfCancellationRequested();
 
-                // 5. Hand out: S(1+j) and S(5+j), then S(9+j), to the dealer's right first.
+                // 5. Hand out (dealStep distribute's plan): S(1+j) and S(5+j), then S(9+j), to the dealer's right first.
+                await Until(() => Past("distribute"));
                 Set("deal");
                 var delivered = new List<GameObject>[4];
                 for (int k = 0; k < 4; k++) delivered[k] = new List<GameObject>();
-                for (int round = 0; round < 2; round++)
+                var plan = D()?.Plan;
+                for (int step = 0; step < 8; step++)
                 {
-                    for (int j = 0; j < 4; j++)
+                    int round = step / 4, j = step % 4;
+                    bool planned = plan != null && step < plan.Count;
+                    int receiver = local(planned ? plan[step].Seat : (dealerAbs + 1 + j) % 4);
+                    var picks = planned ? plan[step].Stacks.ToArray() : round == 0 ? new[] { (a + 1 + j) % 15, (a + 5 + j) % 15 } : new[] { (a + 9 + j) % 15 };
+                    for (int p = 0; p < picks.Length; p++)
                     {
-                        int receiver = DealCeremony.Receiver(dealer, j);
-                        var picks = round == 0 ? new[] { DealCeremony.StackOf(info.DieA, 1 + j), DealCeremony.StackOf(info.DieA, 5 + j) } : new[] { DealCeremony.StackOf(info.DieA, 9 + j) };
-                        for (int p = 0; p < picks.Length; p++)
-                        {
-                            int slot = round == 0 ? p : 2; var stack = stacks[picks[p]];
-                            for (int level = 0; level < stack.Count; level++)
-                                Fly(stack[level], DeliveryPose(receiver, slot, level), p * 0.11f, 0.5f + 0.3f * Mathf.Abs(receiver - dealer) / 3f, 0.03f + 0.04f * (receiver == dealer ? 0 : 1));
-                            delivered[receiver].AddRange(stack); stack.Clear();
-                        }
-                        await wait(round == 0 ? 0.62f : 0.48f); token.ThrowIfCancellationRequested();
+                        int slot = round == 0 ? p : 2; var stack = stacks[picks[p]];
+                        for (int level = 0; level < stack.Count; level++)
+                            Fly(stack[level], DeliveryPose(receiver, slot, level), p * 0.11f, 0.5f + 0.3f * Mathf.Abs(receiver - dealer) / 3f, 0.03f + 0.04f * (receiver == dealer ? 0 : 1));
+                        delivered[receiver].AddRange(stack); stack.Clear();
                     }
+                    if (!Past("center")) { await wait(round == 0 ? 0.62f : 0.48f); token.ThrowIfCancellationRequested(); }
                 }
-                await wait(0.6f);
 
                 // 6. The last two stacks onto each other, then with the indicator stack to the centre (they become the deck).
+                await Until(() => Past("center"));
                 Set("centre");
-                var left = stacks[DealCeremony.StackOf(info.DieA, 13)]; var right = stacks[DealCeremony.StackOf(info.DieA, 14)];
-                int baseCount = right.Count;
-                for (int j = 0; j < left.Count; j++) Fly(left[j], StackPose(dealer, DealCeremony.StackOf(info.DieA, 14), baseCount + j), 0, 0.6f, 0.06f);
+                var centre = D()?.CenterStacks;
+                int right = centre != null && centre.Count == 3 ? centre[1] : Mathf.Max((a + 13) % 15, (a + 14) % 15);
+                int leftStack = centre != null && centre.Count == 3 ? centre[2] : Mathf.Min((a + 13) % 15, (a + 14) % 15);
+                var left = stacks[leftStack]; var rightTiles = stacks[right];
+                int baseCount = rightTiles.Count;
+                for (int j = 0; j < left.Count; j++) Fly(left[j], StackPose(dealer, right, baseCount + j), 0, 0.6f, 0.06f);
                 await wait(0.8f);
-                var rest = right.Concat(left).Concat(stacks[a].Where(t => t != indicator)).ToList();
-                int stock = Mathf.Max(state.Stock, 0);
+                var rest = rightTiles.Concat(left).Concat(stacks[a].Where(t => t != indicator)).ToList();
+                int stock = Mathf.Max(model.Deck, 0);
                 for (int j = 0; j < rest.Count; j++)
                 {
                     if (j < stock) Fly(rest[j], scene.DeckPose(j, stock), 0, 0.85f, 0.05f);
@@ -179,8 +204,10 @@ namespace Galaxy101.Table
                 Fly(indicator, scene.IndicatorPose(), 0.1f, 0.85f, 0.06f);
                 await wait(1.0f); token.ThrowIfCancellationRequested();
 
-                // 7. To the racks: mine turn their faces to me (48 ms apart), the others' stay hidden (40 ms).
+                // 7. To the racks (handDealt): mine turn their faces to me (48 ms apart), the others' stay hidden (40 ms).
+                await Until(() => Past("fill"));
                 Set("fill");
+                var state = fill();
                 var mine = state.Rack.Tiles.OrderBy(id => { state.Rack.TryFind(id, out var s); return s.Row * RackGrid.Columns + s.Index; }).ToList();
                 float last = 0;
                 for (int k = 0; k < 4; k++)

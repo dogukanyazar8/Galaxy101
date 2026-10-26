@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Okey101.Core.Model;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
@@ -110,9 +109,10 @@ namespace Galaxy101.Table
 
         private TileView SideTop()
         {
-            var view = game.Session.GetView(TableGame.Me);
-            var pile = view.Discards[3];
-            return pile.Count > 0 ? game.Board.ViewOf(pile[pile.Count - 1].Value) : null;
+            // R-30: the left player's pile (the table's seat 3).
+            var model = game.Model; if (model == null || !model.HasHand) return null;
+            var pile = model.Discards[game.Abs(3)];
+            return pile.Count > 0 ? game.Board.ViewOf(TileIds.ToInt(pile[pile.Count - 1])) : null;
         }
 
         private bool InZone(Ray ray) => table.TableHit(ray, out var p) && Vector3.Distance(p, table.DiscardCenter(0)) < 0.1f;
@@ -147,7 +147,7 @@ namespace Galaxy101.Table
                 return;
             }
             drag = new Drag { Kind = hit.Value.Kind, View = hit.Value.View, Start = screen };
-            if (drag.Kind == Kind.Okey) { drag.Id = drag.View.Id; drag.HoldAt = Time.unscaledTime + 0.5f; return; }
+            if (drag.Kind == Kind.Okey) { drag.Id = drag.View.Id; return; }
             if (drag.Kind == Kind.Rack)
             {
                 drag.Id = drag.View.Id; game.Rack.TryFind(drag.Id, out drag.From);
@@ -159,7 +159,7 @@ namespace Galaxy101.Table
             }
         }
 
-        private bool InValidSet(int id) => HandEvaluation.Of(game.Rack, game.Indicator).ValidTiles.Contains(id);
+        private bool InValidSet(int id) => RackEval.Of(game.Rack, game.Model).ValidTiles.Contains(id);
 
         private void OnMove(Ray ray, bool hasRay, Vector2 screen)
         {
@@ -169,11 +169,10 @@ namespace Galaxy101.Table
                 if (screen == hoverScreen && Time.unscaledTime < hoverAt) return;
                 hoverScreen = screen; hoverAt = Time.unscaledTime + 0.1f;
                 var hit = hasRay ? Pick(ray) : null;
-                hover = hit?.Kind == Kind.Okey ? null : hit?.View;
-                if (hit?.Kind == Kind.Okey) game.ShowOkeyTip(hit.Value.View.Id, false); else game.HideOkeyTip();
+                hover = hit?.Kind == Kind.Okey ? null : hit?.View;   // T33 / T48 removed: no okey badge or long-press tip
                 return;
             }
-            if (drag.Kind == Kind.Okey) { if (drag.HoldAt > 0 && Time.unscaledTime >= drag.HoldAt) { drag.HoldAt = -1; game.ShowOkeyTip(drag.Id, true); } return; }
+            if (drag.Kind == Kind.Okey) return;
             if (!hasRay) return;
             if (!drag.Moved && Vector2.Distance(screen, drag.Start) > 5)
             {
@@ -255,8 +254,8 @@ namespace Galaxy101.Table
             }
             if (!d.Moved)
             {
-                if (d.Kind == Kind.Deck) { _ = game.Draw(DrawSource.Stock, null); return; }
-                if (d.Kind == Kind.Side) { _ = game.Draw(DrawSource.PreviousDiscard, null); return; }
+                if (d.Kind == Kind.Deck) { _ = game.Draw(false, null); return; }
+                if (d.Kind == Kind.Side) { _ = game.Draw(true, null); return; }
                 float now = Time.unscaledTime;
                 if (game.DoubleClickDiscard && lastClickId == d.Id && now - lastClickAt < 0.38f && game.CanDiscard) { selected = -1; lastClickId = -1; game.Discard(d.Id); return; }
                 lastClickId = d.Id; lastClickAt = now; selected = selected == d.Id ? -1 : d.Id;
@@ -284,7 +283,7 @@ namespace Galaxy101.Table
             // Drawing by drag: the new tile starts where the ghost / dragged side tile was released.
             if (d.Ghost != null) { game.Board.SpawnFrom(new Pose(d.Ghost.transform.position, d.Ghost.transform.rotation)); Destroy(d.Ghost); }
             if (d.View != null) d.View.Release(TileView.Motion.Travel);
-            _ = game.Draw(d.Kind == Kind.Deck ? DrawSource.Stock : DrawSource.PreviousDiscard, target);
+            _ = game.Draw(d.Kind != Kind.Deck, target);
         }
 
         /// <summary>An okey on the table within 4 cm of the drop point (closer than any other meld tile counts as aiming at it).</summary>
@@ -313,6 +312,9 @@ namespace Galaxy101.Table
             }
             return meld;
         }
+
+        /// <summary>Select a rack tile as a click would (the state router's scSel; G15/G16 show its targets).</summary>
+        public void Select(int id) { selected = id; drag = null; }
 
         private void UpdateLift()
         {

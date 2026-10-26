@@ -35,6 +35,12 @@ namespace Galaxy101.Table
                 foreach (var row in Rows(asset.text))
                     if (row.Count >= 3 && row[0] != "key") table[row[0]] = (row[1], row[2]);
             }
+            // The v4 package's strings (hat D: Resources/Galaxy101/Strings/strings_v4.csv), by their package keys
+            // ("app.STR.ldMsg.0", "table.STR.quick.0", …); the table's own tables above keep their keys.
+            var v4 = Resources.Load<TextAsset>("Galaxy101/Strings/strings_v4");
+            if (v4 != null)
+                foreach (var row in Rows(v4.text.TrimStart((char)0xFEFF)))
+                    if (row.Count >= 3 && row[0] != "key" && !table.ContainsKey(row[0])) table[row[0]] = (row[1], row[2]);
         }
 
         /// <summary>Minimal RFC 4180 reader: quoted fields, doubled quotes, commas inside quotes.</summary>

@@ -191,11 +191,11 @@ namespace Galaxy101
         /// </summary>
         private void CursorRow(MenuView v, VisualElement list)
         {
-            var group = v.Row(); group.AddToClassList("g-segment"); group.name = "setting-cursor"; var current = GalaxyCursor.Mode;
-            for (var i = 0; i < GalaxyCursor.Modes.Length; i++)
+            var group = v.Row(); group.AddToClassList("g-segment"); group.name = "setting-cursor"; var current = Galaxy101.Audio.GalaxyCursor.Mode;
+            for (var i = 0; i < Galaxy101.Audio.GalaxyCursor.Modes.Length; i++)
             {
-                var mode = GalaxyCursor.Modes[i];
-                var button = PanelUi.CustomButton(v, mode, () => { GalaxyCursor.Mode = mode; v.Refresh(); }, "g-segment-button"); button.name = "menu.o.pick[" + i + "]";
+                var mode = Galaxy101.Audio.GalaxyCursor.Modes[i];
+                var button = PanelUi.CustomButton(v, mode, () => { Galaxy101.Audio.GalaxyCursor.Mode = mode; v.Refresh(); }, "g-segment-button"); button.name = "menu.o.pick[" + i + "]";
                 button.EnableInClassList("selected", mode == current);
                 if (mode == current) v.Decorate(button, "linear-gradient(var(--a1),var(--a2))", 10, 3, "aS");
                 group.Add(button);

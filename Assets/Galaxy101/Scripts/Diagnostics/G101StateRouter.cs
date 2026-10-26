@@ -29,6 +29,10 @@ namespace Galaxy101.Diagnostics
             public uint Seed = 42;
             public string Theme, Lang, Out;
             public int? Ft;
+            /// <summary>-g101Size=WxH: the window the frames are captured in (Faz 3 resolutions); default 1280×720.</summary>
+            public int Width = 1280, Height = 720;
+            /// <summary>-g101Fps=seconds: before freezing, measure the frame times for this long (Faz 3, 60 FPS at 1080p).</summary>
+            public float FpsSeconds;
         }
 
         public static readonly IReadOnlyDictionary<string, string> Planets = new Dictionary<string, string>
@@ -63,6 +67,13 @@ namespace Galaxy101.Diagnostics
             var o = new Options { Theme = Value("g101Theme"), Lang = Value("g101Lang"), Out = Value("g101Out") };
             if (uint.TryParse(Value("g101Seed"), NumberStyles.None, CultureInfo.InvariantCulture, out uint seed)) o.Seed = seed;
             if (int.TryParse(Value("g101Ft"), NumberStyles.None, CultureInfo.InvariantCulture, out int ft)) o.Ft = ft;
+            var size = Value("g101Size");
+            if (size != null)
+            {
+                var wh = size.Split('x', 'X', '×');
+                if (wh.Length != 2 || !int.TryParse(wh[0], out o.Width) || !int.TryParse(wh[1], out o.Height) || o.Width < 640 || o.Height < 360) throw new ArgumentException("-g101Size must be WxH, e.g. 1920x1080.");
+            }
+            if (float.TryParse(Value("g101Fps"), NumberStyles.Float, CultureInfo.InvariantCulture, out float fps)) o.FpsSeconds = fps;
             o.States.AddRange(state.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()));
             if (o.Theme != null && !Planets.ContainsKey(o.Theme)) throw new ArgumentException("-g101Theme must be saturn, mars, neptun, jupiter or venus.");
             if (o.Lang != null && o.Lang != "tr" && o.Lang != "en") throw new ArgumentException("-g101Lang must be tr or en.");
@@ -141,18 +152,35 @@ namespace Galaxy101.Diagnostics
             float holdUntil = (holdOrigin ?? Time.realtimeSinceStartup) + hold / 1000f; holdOrigin = null;
             while (Time.realtimeSinceStartup < holdUntil) yield return null;
             // A settings screen may apply its display draft; the frame is always the 1280×720 window.
-            if (!UnityEngine.Application.isEditor && (Screen.width != 1280 || Screen.height != 720))
+            if (!UnityEngine.Application.isEditor && (Screen.width != options.Width || Screen.height != options.Height))
             {
-                Screen.SetResolution(1280, 720, FullScreenMode.Windowed);
-                for (int i = 0; i < 30 && (Screen.width != 1280 || Screen.height != 720); i++) yield return null;
+                Screen.SetResolution(options.Width, options.Height, FullScreenMode.Windowed);
+                for (int i = 0; i < 30 && (Screen.width != options.Width || Screen.height != options.Height); i++) yield return null;
                 yield return Settle(.3f);
             }
             // g101-state.js run(): G101Clock.freeze() without an argument — every reference frame sits at the canonical
             // 100000 ms (DECISIONS D-61 says 100000 + ft; the code that made the references does not: EKSIKLER EK-005).
+            if (options.FpsSeconds > 0) yield return MeasureFrames(record);
             GameClock.Freeze(0);
             yield return null; yield return new WaitForEndOfFrame();
             yield return Capture(id, record);
             Time.timeScale = 1;
+        }
+
+        /// <summary>Frame times over FpsSeconds of real time with the state live: average FPS, 95th percentile and worst frame (ms).</summary>
+        private IEnumerator MeasureFrames(JObject record)
+        {
+            var times = new List<float>(); float until = Time.realtimeSinceStartup + options.FpsSeconds;
+            yield return null;
+            while (Time.realtimeSinceStartup < until) { times.Add(Time.unscaledDeltaTime * 1000f); yield return null; }
+            if (times.Count == 0) yield break;
+            times.Sort(); float total = 0; foreach (var t in times) total += t;
+            record["fps"] = new JObject
+            {
+                ["frames"] = times.Count, ["avgFps"] = Math.Round(1000.0 * times.Count / total, 1),
+                ["p95Ms"] = Math.Round(times[(int)(times.Count * .95f)], 2), ["worstMs"] = Math.Round(times[times.Count - 1], 2),
+                ["screen"] = Screen.width + "x" + Screen.height, ["vSync"] = QualitySettings.vSyncCount, ["targetFrameRate"] = UnityEngine.Application.targetFrameRate
+            };
         }
 
         /// <summary>Run a nested coroutine and report its exception instead of stopping the router.</summary>

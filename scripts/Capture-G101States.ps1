@@ -11,7 +11,9 @@ param(
     [ValidateSet('tr', 'en')][string]$Lang,
     [int]$Seed = 42,
     [int]$Ft = -1,
-    [int]$TimeoutSeconds = 3600
+    [int]$TimeoutSeconds = 3600,
+    [string]$Size = '1280x720',
+    [double]$FpsSeconds = 0
 )
 $ErrorActionPreference = 'Stop'
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
@@ -30,11 +32,14 @@ $info = [Diagnostics.ProcessStartInfo]::new($executable)
 $info.UseShellExecute = $false
 $info.RedirectStandardOutput = $true
 $info.RedirectStandardError = $true
-$arguments = @('-screen-width', '1280', '-screen-height', '720', '-screen-fullscreen', '0', '-popupwindow', '-force-d3d11',
+$w, $h = $Size -split 'x'
+$arguments = @('-screen-width', $w, '-screen-height', $h, '-screen-fullscreen', '0', '-popupwindow', '-force-d3d11',
     "-g101State=$States", "-g101Seed=$Seed", "-g101Out=$outputRoot", '-logFile', (Join-Path $outputRoot 'player.log'))
 if ($Theme) { $arguments += "-g101Theme=$Theme" }
 if ($Lang) { $arguments += "-g101Lang=$Lang" }
 if ($Ft -ge 0) { $arguments += "-g101Ft=$Ft" }
+$arguments += "-g101Size=$Size"
+if ($FpsSeconds -gt 0) { $arguments += "-g101Fps=$FpsSeconds" }
 foreach ($argument in $arguments) { $info.ArgumentList.Add($argument) }
 $process = [Diagnostics.Process]::Start($info)
 $null = $process.StandardOutput.ReadToEndAsync(); $null = $process.StandardError.ReadToEndAsync()   # the player log has it all

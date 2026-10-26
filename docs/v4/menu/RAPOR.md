@@ -96,6 +96,13 @@ Run8: 50 durum eşleşti, 7 bilinçli fark; kuralı geçemeyen 12 durum için (`
 | 81 | Rozet ızgarası dy −5/−6/−13, +4/+5 | Kartlar içeriği üstten diziyordu; CSS'te her satırın kartları aynı yükseklikte ve içerik ortada | Kart = satır, `align-items: center`; ad 15px/1.2, açıklama 12 px (19,2 px satır, 2 px üst), ilerleme satırı 6 px üstte | G101-Menu 505–516 |
 | S02–S05 | Yan logo "1" taşları dy +9/+11; slogan h +4; S04 koşullar metni dy +5 | Rakam taşın üstüne hizalıydı (font Npx/1 ortalar); süzülme gerçek zamandan kosinüsle (donukken 100000 ms, `g101Float` eğrisi değil); slogan 20 px doğal satırla (29 olmalı); alan başlıkları 20 px (19,2 olmalı: alan başına +1) | Rakam ortada; `g101Float` cubic-bezier(.45,0,.55,1), gecikme 0/−2/−4 sn, donukken 100000 ms; `g101TileIn` saydamlığı eğriyle; slogan 20px/1.45 (29 px); alan başlık satırı 19,2 px | Gerçek Ana Oyun 34, 89–100, 158, 210 |
 
+### 6.1 Run12 sonrası
+
+| Durum | Run12 farkı | Neden | Düzeltme |
+|---|---|---|---|
+| 60, 61, 95 | 4.–7. gün kartlarının metinleri dx +4…+6 | Günler USS'teki `flex-basis: 0` ile değil içerik genişliğinden büyüyordu: 1–6. günler 117–118 px, 7. gün 168 px (tasarım: `repeat(6, minmax(0,1fr)) 1.5fr` → 116,27 ve 174,4) | Her güne satır içi `flex-basis: 0`, `min-width: 0` |
+| 81 | 2. ve 3. satır rozetleri dy +4…+7 | Tek satırlık ad ve açıklama 19 / 20 px doğal satırla duruyordu (CSS 18 / 19,2): her kart satırı 2–3 px uzadı | `MenuView.CssLines`: n satır × tam satır yüksekliği (n, etiket genişliğindeki metinden), negatif kenar boşluğu yok; rozet adı 18 px, açıklama 19,2 px |
+
 ## 5. Commit'ler
 
 | Commit | İçerik |
@@ -108,4 +115,5 @@ Run8: 50 durum eşleşti, 7 bilinçli fark; kuralı geçemeyen 12 durum için (`
 | `119d6c9` | Mağaza taş görünümleri, "Buy" düğmesi, İngilizce sabitler |
 | `137ae5f` | `docs/v4/menu/RAPOR.md`, `EKSIKLER.md`, `UNITY_FARKLARI.md` |
 | `fd64806` | (orkestratör) `main`: run8, `G101Dump` dönüşüm ve satır kırılımı ölçümü; `MenuView.Main.cs` rozet ve `ShopController.cs` "Satın al" satırlarında yorumun yuttuğu kod düzeltildi |
-| (bu commit) | Run8 sonrası: günlük ödül, kurallar, rozetler, giriş ekranları (§6) |
+| `5043d5e` | Run8 sonrası: günlük ödül, kurallar, rozetler, giriş ekranları (§6) |
+| (bu commit) | Run12 sonrası: gün kartı genişlikleri, rozet satır yükseklikleri (§6.1) |

@@ -18,6 +18,9 @@ namespace Galaxy101
                 var today = (bool)day["today"];
                 var claimed = (bool)day["claimed"];
                 var card = v.Box("g-day"); card.name = "streak-day-" + index;
+                // grid repeat(6, minmax(0,1fr)) 1.5fr: every card from a zero basis (the USS basis alone let the content widen
+                // days 1–6 to 117–118 px and narrow day 7 to 168; the design gives 116.27 and 174.4).
+                card.style.flexBasis = 0; card.style.flexGrow = 1; card.style.minWidth = 0;
                 if (index < 7) card.style.marginRight = 10;
                 else
                 {

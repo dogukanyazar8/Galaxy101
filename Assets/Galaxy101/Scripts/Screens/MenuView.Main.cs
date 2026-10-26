@@ -422,6 +422,30 @@ namespace Galaxy101
             return label;
         }
         private static readonly Dictionary<string,string> prettyBreaks=new Dictionary<string,string>();
+        /// <summary>
+        /// CSS line boxes for a wrapping label whose height must be exact: n lines of <paramref name="lineHeight"/> px each,
+        /// the glyphs centred in every line (half-leading top and bottom), n read from the text at the label's width.
+        /// Unlike <see cref="CssParagraph"/> it needs no negative margins, so a one-line label is exactly one line box too.
+        /// </summary>
+        public static Label CssLines(Label label,float lineHeight)
+        {
+            string plain=label.text??"";label.enableRichText=true;label.style.whiteSpace=WhiteSpace.Normal;label.style.flexShrink=0;
+            label.text="<line-height="+lineHeight.ToString("0.##",System.Globalization.CultureInfo.InvariantCulture)+"px><noparse>"
+                +System.Text.RegularExpressions.Regex.Replace(plain,"</noparse",m=>"<\u200B/noparse",System.Text.RegularExpressions.RegexOptions.IgnoreCase)+"</noparse>";
+            var align=label.style.unityTextAlign.value;
+            label.style.unityTextAlign=align==TextAnchor.UpperCenter||align==TextAnchor.MiddleCenter||align==TextAnchor.LowerCenter?TextAnchor.MiddleCenter
+                :align==TextAnchor.UpperRight||align==TextAnchor.MiddleRight||align==TextAnchor.LowerRight?TextAnchor.MiddleRight:TextAnchor.MiddleLeft;
+            var font=label.style.unityFont.value;float natural=NaturalLineHeight(font!=null?font.name:null,label.style.fontSize.value.value);
+            label.style.height=lineHeight;float laidFor=-1;
+            label.RegisterCallback<GeometryChangedEvent>(_=>
+            {
+                float width=label.contentRect.width;if(width<=1||Mathf.Abs(width-laidFor)<.5f)return;laidFor=width;
+                var size=label.MeasureTextSize(label.text,width,VisualElement.MeasureMode.Exactly,0,VisualElement.MeasureMode.Undefined);
+                int lines=Mathf.Max(1,Mathf.RoundToInt((size.y-natural)/lineHeight)+1);
+                if(Mathf.Abs(label.style.height.value.value-lines*lineHeight)>.01f)label.style.height=lines*lineHeight;
+            });
+            return label;
+        }
         /// <summary>A label's single-line height: the font's ascent + descent (<see cref="CssLineHeight"/>'s metrics), rounded up.</summary>
         private static float NaturalLineHeight(string font,float size)
         {

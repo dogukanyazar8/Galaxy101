@@ -17,22 +17,23 @@ namespace Galaxy101
                 var index = i; var entry = (JObject)rules[i];
                 var text = v.L((string)entry["tr"][0], (string)entry["en"][0]);
                 var button = PanelUi.CustomButton(v, "", () => v.SetTab("rules", index), "g-rule-nav");
-                button.name = "rule-section-" + index;
+                button.name = "menu.n.pick[" + index + "]"; button.style.height = StyleKeyword.Auto; button.style.minHeight = 50; // 11px padding around a 28px tile; a wrapped title grows it
                 button.EnableInClassList("selected", selected == index);
                 button.style.flexDirection = FlexDirection.Row; button.style.alignItems = Align.Center; button.style.justifyContent = Justify.FlexStart;
                 // Reference: 28px number tile (radius 9, 700 14px heading font), gap 12, 700 16px/1.2 label; inset bar marks the section.
                 if (index == selected) PanelUi.InsetBar(v, button, 14);
                 var number = v.Box(); number.style.width = number.style.height = 28; number.style.flexShrink = 0; number.style.marginRight = 12; number.style.alignItems = Align.Center; number.style.justifyContent = Justify.Center;
                 v.Decorate(number, index == selected ? "linear-gradient(var(--a1),var(--a2))" : "dp", 9);
-                var digit = v.Text((index + 1).ToString(), 14, true, index == selected ? "aT" : "mt"); digit.style.unityTextAlign = UnityEngine.TextAnchor.MiddleCenter; number.Add(digit);
-                var label = v.Text(text, 16, true); label.style.color = StyleKeyword.Null; label.style.height = 19.2f; label.style.unityTextAlign = UnityEngine.TextAnchor.MiddleLeft;
+                var digit = v.Text((index + 1).ToString(), 14, true, index == selected ? "aT" : "mt"); digit.name = "menu.n.i[" + index + "]"; digit.style.unityTextAlign = UnityEngine.TextAnchor.MiddleCenter; number.Add(digit);
+                // 700 16px/1.2, wraps in the 162 px beside the tile (EN "Opening your hand" takes two lines).
+                var label = PanelUi.Wrap(v, text, 16, null, true); label.name = "menu.n.name[" + index + "]"; label.style.color = StyleKeyword.Null; label.style.unityTextAlign = UnityEngine.TextAnchor.MiddleLeft; MenuView.CssParagraph(label, 16 * 1.2f, false); PanelUi.Grow(label); label.style.flexShrink = 1;
                 button.Add(number); button.Add(label); nav.Add(button);
             }
             var data = (JObject)rules[selected];
             var language = v.Loc.Language == "en" ? "en" : "tr";
             var content = v.Scroll(); content.AddToClassList("g-panel-card"); PanelUi.Pad(content, 24, 28);
             root.Q<VisualElement>("content").Add(content);
-            var title = v.Text((string)data[language][0], 28, true); title.style.height = 28 * 1.15f; title.style.unityTextAlign = UnityEngine.TextAnchor.MiddleLeft; title.style.flexShrink = 0; title.style.marginBottom = 18; content.Add(title); // 700 28px/1.15
+            var title = v.Text((string)data[language][0], 28, true); title.name = "menu.rl.title"; title.style.height = 28 * 1.15f; title.style.unityTextAlign = UnityEngine.TextAnchor.MiddleLeft; title.style.flexShrink = 0; title.style.marginBottom = 18; content.Add(title); // 700 28px/1.15
             foreach (var point in data[language][1])
             {
                 var dot = v.Box(); dot.style.width = dot.style.height = 9; dot.style.marginTop = 8; dot.style.marginRight = 14; dot.style.flexShrink = 0; dot.style.rotate = new Rotate(45); v.Decorate(dot, "a1", 2);
@@ -45,7 +46,7 @@ namespace Galaxy101
             {
                 content.Add(PanelUi.Spacer(v));
                 var example = v.Box(); PanelUi.Pad(example, 18, 20); example.style.flexShrink = 0; v.Decorate(example, "dp", 18);
-                var exampleLabel = v.Text(v.L("ÖRNEK", "EXAMPLE"), 11, false, "mt"); exampleLabel.style.unityFont = v.Font("Baloo2-800"); MenuView.Tracking(exampleLabel, 1.5f, 11); example.Add(exampleLabel);
+                var exampleLabel = v.Text(v.L("ÖRNEK", "EXAMPLE"), 11, false, "mt"); exampleLabel.name = "menu.rl.exLabel"; exampleLabel.style.unityFont = v.Font("Baloo2-800"); MenuView.Tracking(exampleLabel, 1.5f, 11); MenuView.CssLine(exampleLabel); example.Add(exampleLabel);
                 var row = v.Row(); row.style.marginTop = 14; row.style.marginBottom = 20; row.style.alignItems = Align.FlexEnd;
                 foreach (var code in tiles)
                 {
@@ -56,7 +57,8 @@ namespace Galaxy101
                     }
                 }
                 example.Add(row);
-                example.Add(PanelUi.Wrap(v, (string)data[language][2], 14)); content.Add(example);
+                // rl.caption: 700 14px/1.5 (21 px lines), margin-top 6.
+                var caption = PanelUi.Wrap(v, (string)data[language][2], 14); caption.name = "menu.rl.caption"; caption.style.marginTop = 6; MenuView.CssParagraph(caption, 21, false); example.Add(caption); content.Add(example);
             }
             return root;
         }

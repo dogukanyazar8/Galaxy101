@@ -263,7 +263,8 @@ namespace Galaxy101
             var logo = Logo(60, 7); logo.style.position = Position.Absolute; logo.style.top = LogoCapOffset(60, 69); logoLine.Add(logo); column.Add(logoLine);
             column.Add(SideTiles());
             var tag = Text(L("Masalar dolu, taşlar hazır.\nArkadaşlarınla otur, 101 açıp eli bitir.", "Tables are full, tiles are racked.\nSit with your friends, open 101 and finish."), 20, "Baloo2-700", "var(--ic)");
-            tag.style.whiteSpace = WhiteSpace.Normal; tag.style.unityTextAlign = TextAnchor.MiddleCenter; tag.style.width = 440; tag.style.height = 58; tag.style.marginTop = 150; column.Add(tag);
+            // auth.side.tag: 700 20px/1.45 (29 px lines), centred, max-width 440, margin-top 150, pre-line.
+            tag.style.unityTextAlign = TextAnchor.UpperCenter; tag.style.width = 440; tag.style.marginTop = 150; MenuView.CssParagraph(tag, 29, false); column.Add(tag);
         }
 
         private VisualElement Panel(float top, float bottom, int padY, int padX)
@@ -382,10 +383,11 @@ namespace Galaxy101
         {
             var errors = Errors; errors.TryGetValue(key, out var hint);
             var column = Box("auth-field-" + key); column.style.flexShrink = 0;
-            var top = Row(); top.style.justifyContent = Justify.SpaceBetween;
-            var cap = Text(label, 12, "Baloo2-800", "var(--mt)"); MenuView.Tracking(cap, 0.6f, 12); top.Add(cap);
+            // 800 12px Baloo 2 at line-height normal: a 19.2 px row (form.field[i].label h 19, fields 75 px apart + 12 gap).
+            var top = Row(); top.style.justifyContent = Justify.SpaceBetween; top.style.height = 19.2f;
+            var cap = MenuView.CssLine(Text(label, 12, "Baloo2-800", "var(--mt)"), 19.2f); MenuView.Tracking(cap, 0.6f, 12); top.Add(cap);
             string shown = hint ?? goodHint;
-            if (shown != null) { var h = Text(shown, 12, "Baloo2-800", hint != null ? "#FF8A94" : "#8EF0B0"); h.name = "auth-hint-" + key; top.Add(h); }
+            if (shown != null) { var h = MenuView.CssLine(Text(shown, 12, "Baloo2-800", hint != null ? "#FF8A94" : "#8EF0B0"), 19.2f); h.name = "auth-hint-" + key; top.Add(h); }
             column.Add(top);
             var boxRow = Row(); boxRow.name = "auth-box-" + key; boxRow.style.height = 50; boxRow.style.marginTop = 6; Pad(boxRow, 0, 8, 0, 14); view.Decorate(boxRow, "var(--dp)", 14);
             // ring: error inset 2px #FF5E6C; focus inset 2px --a1 + 0 0 0 4px rgba(255,201,74,.12); rest inset 0 2px 0 — no layout.
@@ -765,14 +767,17 @@ namespace Galaxy101
                 tile.style.alignItems = Align.Center; tile.style.paddingTop = 7; if (i > 0) tile.style.marginLeft = 11;
                 view.Decorate(tile, "linear-gradient(var(--tf1),var(--tf2))", i == 1 ? 12 : 11, i == 1 ? 6 : 5, "var(--te2)");
                 tile.style.borderBottomWidth = i == 1 ? 7 : 6; tile.style.borderBottomColor = view.C("var(--te)");
-                var number = view.Text(i == 1 ? "0" : "1", font[i], true, "var(--" + tint[i] + ")"); number.style.unityTextAlign = TextAnchor.UpperCenter; number.style.height = font[i]; number.pickingMode = PickingMode.Ignore; tile.Add(number);
+                // font Npx/1: the glyph's content box centred on the N px line (as the menu's logo tiles).
+                var number = view.Text(i == 1 ? "0" : "1", font[i], true, "var(--" + tint[i] + ")"); number.style.unityTextAlign = TextAnchor.MiddleCenter; number.style.height = font[i]; number.pickingMode = PickingMode.Ignore; tile.Add(number);
                 var pip = Box(); pip.style.width = pip.style.height = dot[i]; pip.style.marginTop = 3; view.Decorate(pip, "var(--" + tint[i] + ")", 99); tile.Add(pip);
                 float delay = .12f + i * .14f, phase = i * 2f;
                 Animate(() =>
                 {
-                    float t = Time.realtimeSinceStartup - began, u = Mathf.Clamp01((t - delay) / 1.1f), k = CubicBezier(.16f, 1, .3f, 1, u);
-                    float bob = -7 * (0.5f - 0.5f * Mathf.Cos((t + phase) / 6f * Mathf.PI * 2));
-                    tile.style.translate = new Translate(0, 46 * (1 - k) + bob); tile.style.opacity = Mathf.Clamp01(u / .55f); tile.style.scale = new Scale(Vector2.one * Mathf.Lerp(.82f, 1, k));
+                    // Frozen (state router): every CSS animation sits at 100000 ms (g101-state.js freeze(), EKSIKLER EK-602).
+                    float t = GameClock.Frozen ? (float)(GameClock.CanonMs / 1000) : Time.realtimeSinceStartup - began, u = Mathf.Clamp01((t - delay) / 1.1f), k = CubicBezier(.16f, 1, .3f, 1, u);
+                    // g101Float 6 s cubic-bezier(.45,0,.55,1) on each half: translate 0 → -7px (50 %) → 0, delays 0 / -2 / -4 s.
+                    float p = Mathf.Repeat(t + phase, 6) / 6, bob = -7 * (p < .5f ? CubicBezier(.45f, 0, .55f, 1, p * 2) : 1 - CubicBezier(.45f, 0, .55f, 1, p * 2 - 1));
+                    tile.style.translate = new Translate(0, 46 * (1 - k) + bob); tile.style.opacity = u >= .55f ? 1 : CubicBezier(.16f, 1, .3f, 1, u / .55f); tile.style.scale = new Scale(Vector2.one * Mathf.Lerp(.82f, 1, k));
                 });
                 row.Add(tile);
             }

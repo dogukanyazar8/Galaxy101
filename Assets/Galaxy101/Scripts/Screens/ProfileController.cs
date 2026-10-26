@@ -158,6 +158,8 @@ namespace Galaxy101
 
         private static void Badges(MenuView v, VisualElement parent)
         {
+            // grid repeat(3, minmax(0,1fr)), gap 10; a card: flex, align-items centre, gap 12, padding 14, radius 18, --sd,
+            // opacity .75 when locked — the cards of a row share its height and centre their content in it.
             var grid = v.Column(); parent.Add(grid);
             VisualElement badgeRow = null; int index = 0;
             foreach (JObject badge in v.Services.Profile.GetBadges())
@@ -169,35 +171,32 @@ namespace Galaxy101
                     grid.Add(badgeRow);
                 }
                 var locked = (bool)badge["locked"];
-                var card = v.Box("g-profile-badge"); card.style.alignItems = Align.Stretch;
+                var card = v.Row(); card.AddToClassList("g-profile-badge"); card.style.alignItems = Align.Center;
                 if (index % 3 < 2) card.style.marginRight = 10;
                 if (locked) card.style.opacity = .75f;
-                var art = v.Box(); art.style.width = art.style.height = 46; art.style.flexShrink = 0;
+                // 46px tile, radius 14: locked --dp inside a 1px rgba(255,255,255,.08) ring; else the colour's gradient,
+                // 0 3px 0 rgba(0,0,0,.3) and a 0 0 16px glow; 700 18px glyph.
+                var art = v.Box(); art.name = "menu.b.g[" + index + "]"; art.style.width = art.style.height = 46; art.style.flexShrink = 0;
                 art.style.alignItems = Align.Center; art.style.justifyContent = Justify.Center; art.style.marginRight = 12;
                 var color = (string)badge["color"];
                 v.Decorate(art, locked ? "dp" : "linear-gradient(160deg," + color + "," + color + "AA)", 14, locked ? 0 : 3, "rgba(0,0,0,.3)");
-                if (locked)
-                {
-                    var ring = v.Box(); ring.pickingMode = PickingMode.Ignore; ring.style.position = Position.Absolute;
-                    ring.style.left = ring.style.right = ring.style.top = ring.style.bottom = 0;
-                    ring.style.borderTopWidth = ring.style.borderRightWidth = ring.style.borderBottomWidth = ring.style.borderLeftWidth = 1;
-                    ring.style.borderTopColor = ring.style.borderRightColor = ring.style.borderBottomColor = ring.style.borderLeftColor = v.C("rgba(255,255,255,.08)");
-                    ring.style.borderTopLeftRadius = ring.style.borderTopRightRadius = ring.style.borderBottomLeftRadius = ring.style.borderBottomRightRadius = 14;
-                    art.Add(ring);
-                }
+                if (locked) art.Add(PanelUi.Ring(v, 1, "rgba(255,255,255,.08)", 14));
                 else { var glow = v.C(color); glow.a = .4f; GalaxyFilters.Shadow(art, 0, 0, 8, glow); }
                 art.Add(v.Text((string)badge["glyph"], 18, true, "#fff"));
-                var description = PanelUi.Wrap(v, v.L((string)badge["desc_tr"], (string)badge["desc_en"]), 12); description.style.marginTop = 2;
-                var text = v.Column(PanelUi.Wrap(v, v.L((string)badge["tr"], (string)badge["en"]), 15, "#F4F1E8", true), description); PanelUi.Grow(text);
+                // 700 15px/1.2 name over a 700 12px description (line-height normal, 19.2 px) 2px below.
+                var name = PanelUi.Wrap(v, v.L((string)badge["tr"], (string)badge["en"]), 15, "#F4F1E8", true); name.name = "menu.b.name[" + index + "]"; MenuView.CssParagraph(name, 18, false);
+                var description = PanelUi.Wrap(v, v.L((string)badge["desc_tr"], (string)badge["desc_en"]), 12); description.name = "menu.b.desc[" + index + "]"; description.style.marginTop = 2; MenuView.CssParagraph(description, 19.2f, false);
+                var text = v.Column(name, description); PanelUi.Grow(text);
                 if (locked)
                 {
+                    // margin-top 6, gap 8: a 6px bar (radius 3, --dp, a square --mt fill) and the count, 800 11px.
                     var progress = v.Progress((float)badge["cur"] / (float)badge["max"], "mt"); progress.style.height = 6; PanelUi.Grow(progress); progress.style.marginRight = 8;
                     var fill = progress.Q<VisualElement>(className: "progress-fill");
                     fill.style.borderTopLeftRadius = fill.style.borderTopRightRadius = fill.style.borderBottomLeftRadius = fill.style.borderBottomRightRadius = 0;
-                    var count = v.Text(v.N((int)badge["cur"]) + "/" + v.N((int)badge["max"]), 11, false, "mt"); count.style.unityFont = v.Font("Baloo2-800");
+                    var count = v.Text(v.N((int)badge["cur"]) + "/" + v.N((int)badge["max"]), 11, false, "mt"); count.name = "menu.b.prog[" + index + "]"; count.style.unityFont = v.Font("Baloo2-800"); MenuView.CssLine(count);
                     var row = v.Row(progress, count); row.style.marginTop = 6; text.Add(row);
                 }
-                card.Add(v.Row(art, text)); badgeRow.Add(card); index++;
+                card.Add(art); card.Add(text); badgeRow.Add(card); index++;
             }
         }
 

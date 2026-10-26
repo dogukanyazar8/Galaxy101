@@ -54,6 +54,11 @@ Görev: `Design/PROMPT_v4_OTONOM_GELISTIRME.md`. Bağlam sıfırlanırsa buradan
 
 - 23:09 Unity EditMode `-Graphics`: **946/946**. Docker: `.dockerignore`/`railway.json` paket kaynaklarını içermiyordu (imaj derlenmezdi) → düzeltildi; `docker build -f Server/Dockerfile` tamam, PostgreSQL 17 ile `/health` 200, misafir 10.000 çip / 20 elmas; `/v1/info` artık 0.4.0 / 101-v4 (`451b53d`).
 
+- 26 Ekim 06:55 (kullanım sınırından sonra): menü (`d7eb810`), Dereceli (v4 protokolü), lobi (v4 istemci) ana kopyaya birleşti; çift `GalaxyCursor` tekleştirildi (`6565e6a`); menü birleşmesindeki iki "satır ortası yorum" hatası düzeltildi (`f7e440f`).
+- Döküm düzeltmeleri: döndürülmüş metin kutusu, çok satırlı metin ölçümü; geri sayımlar biçimle karşılaştırılır (EK-003); EK-006 (Masa sekmesi EN), EK-007 (S14/S15 paket yolu).
+- run8 (Unity, 70 durum: menü + giriş + lobi + S16): **50 eşleşti, 7 bilinçli fark**, 13 bekliyor (küçük kaymalar) → menü ve lobi hatlarına geri verildi.
+- Masa hattı (`v4/table`) kullanım sınırında kesilmişti; devam ettirildi.
+
 ## Sıradaki
 
 - Referans yakalamanın bitmesi → `capture_report.json` özetinin buraya ve DURUMLAR'a girmesi.

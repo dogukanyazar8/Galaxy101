@@ -7,6 +7,15 @@ namespace Galaxy101.Tests
     public sealed class TableSpaceTests
     {
         [Test]
+        public void PackageLoadingAndCameraTextsResolveInBothLanguages()
+        {
+            Assert.That(TableStrings.Has("app.STR.ldMsg.0"), Is.True, "The loading UI must read the v4 string table, not parse JSON as CSV.");
+            Assert.That(TableStrings.Get("app.STR.ldMsg.0", "tr"), Is.EqualTo("Masaya bağlanılıyor…"));
+            Assert.That(TableStrings.Get("table.STR.views.1.0", "tr"), Is.EqualTo("Yarı yüksek"));
+            Assert.That(TableStrings.Get("table.STR.views.1.0", "en"), Is.EqualTo("Mid view"));
+        }
+
+        [Test]
         public void HashMatchesThePrototype()
         {
             // Reference values from table3d.js hash(): ((h * 31 + c) | 0) >>> 0) % 1000 / 1000, h0 = 7.

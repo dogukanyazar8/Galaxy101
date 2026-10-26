@@ -218,7 +218,7 @@ def section_strings() -> None:
     missing = [x['key'] for x in entries if not x['tr'] or not x['en']]
 
     rows = [['key', 'tr', 'en']] + [[x['key'], x['tr'], x['en']] for x in entries]
-    path = folder / 'strings_v4.csv'
+    path = folder / 'strings_v4_flat.csv'
     write_text(path, csv_text(rows), bom=True)
     ensure_meta(path, 'text')
 

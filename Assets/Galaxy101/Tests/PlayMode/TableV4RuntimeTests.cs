@@ -57,6 +57,16 @@ namespace Galaxy101.Tests
         };
 
         [UnityTest]
+        public IEnumerator ALocalReferenceTableKeepsGiftPricesWhenItIsNotAVsBotsTable()
+        {
+            var launch = Offline("play"); launch.Table.VsBots = false;
+            var game = Build(launch);
+            yield return Until(() => game.Board != null && game.Model.HasHand, 10, "the reference table");
+            Assert.That(game.Session.Online, Is.False, "the diagnostic table uses the local host");
+            Assert.That(hudOwner.GetComponent<TableHud>().FreeGifts, Is.False, "R-94 exempts bot mode, not every offline transport");
+        }
+
+        [UnityTest]
         [Timeout(120000)]
         public IEnumerator TheCeremonyFollowsTheServerAndHandsOverToTheBoard()
         {

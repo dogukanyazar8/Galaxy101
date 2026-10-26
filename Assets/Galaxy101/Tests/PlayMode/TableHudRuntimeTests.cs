@@ -32,6 +32,37 @@ namespace Galaxy101.Tests
         }
 
         [UnityTest]
+        public IEnumerator HandResultIncludesPenaltiesAndKeepsHandXpSeparateFromTheMatchTotal()
+        {
+            statePath = Path.Combine(Path.GetTempPath(), "galaxy-result-" + Guid.NewGuid().ToString("N") + ".json");
+            sceneOwner = new GameObject("GalaxyTable"); sceneOwner.AddComponent<TableScene>();
+            hudOwner = new GameObject("TableHud"); hudOwner.SetActive(false);
+            hudOwner.AddComponent<UIDocument>().panelSettings = Resources.Load<PanelSettings>("Galaxy101/UI/PanelSettings");
+            var hud = hudOwner.AddComponent<TableHud>(); hudOwner.SetActive(true); hud.Initialize(statePath);
+            var result = new TableHud.ResultInfo
+            {
+                Title = "2. EL BİTTİ", Sub = "BURAK BİTİRDİ", Head = "Burak kazandı", Winner = 1,
+                Xp = 60, TotalXp = 400, StartedAt = Time.realtimeSinceStartup,
+            };
+            result.Rows.Add(new TableHud.ResultRow { Seat = 1, Hand = -101, Total = -202, Note = "bitirdi" });
+            result.Rows.Add(new TableHud.ResultRow { Seat = 0, Hand = 123, Penalty = 101, Total = 426, Note = "açtı" });
+            hud.Render(new TableHud.State { Phase = "end", Hand = 2, MatchHands = 5, Result = result });
+            yield return null; yield return null;
+            var canvas = hud.Canvas;
+            Assert.That(canvas.Q<Label>("table.r.hand[1]")?.text, Is.EqualTo("+224"), "R-58: this hand includes its +101 penalty");
+            Assert.That(canvas.Q<Label>("table.r.total[1]")?.text, Is.EqualTo("426"), "the running score is supplied by the engine");
+            Assert.That(canvas.Q<Label>("table.res.xp")?.text, Is.EqualTo("+60 XP"), "the card shows hand XP, not accumulated XP");
+            Assert.That(canvas.Q<Label>("table.t.chipsCap")?.text, Is.EqualTo("EL"));
+            Assert.That(canvas.Q<Label>("table.res.chips")?.text, Is.EqualTo("2 / 5"));
+            Assert.That(canvas.Q<Label>("table.r.name[1]")?.text, Is.EqualTo(hud.SeatName(0)), "the package has no extra '(sen)' suffix");
+
+            result.LastHand = true;
+            hud.Render(new TableHud.State { Phase = "end", Hand = 5, MatchHands = 5, Result = result });
+            yield return null;
+            Assert.That(canvas.Q<Label>("table.nextLabel")?.text, Is.EqualTo("Maçı bitir"));
+        }
+
+        [UnityTest]
         public IEnumerator TableHudComposesBackgroundViewAndAnchors()
         {
             statePath = Path.Combine(Path.GetTempPath(), "galaxy-table-" + Guid.NewGuid().ToString("N") + ".json");

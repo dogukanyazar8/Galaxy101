@@ -135,7 +135,7 @@ namespace Galaxy101.Table
         /// <summary>Hand result card (T24). Bot tables are offline: XP only, no chips.</summary>
         public sealed class ResultInfo
         {
-            public string Title, Sub, Head;
+            public string Title, Sub, Head, Chips, ChipColor;
             public int Xp, TotalXp, Winner, Seconds = 15, Multiplier = 1;
             public bool Unscored, LastHand;
             public float StartedAt;
@@ -507,96 +507,59 @@ namespace Galaxy101.Table
         }
 
         /// <summary>
-        /// Hand result v2 (T42–T44, replaces T24): CEZA column with reasons, multiplier badges and the explained hand points;
-        /// an unscored pairs finish; XP only on bot tables; "Sonraki el · 15" (the last hand leads to the match end).
+        /// G101-Masa result card (G34/T24/T42/T43): rank, player, full hand score and total; hand XP beside the treats.
         /// </summary>
         private void BuildResult(ResultInfo r)
         {
             var layer = Backdrop("table-result", null);
-            var card = Card(900, 30, "result"); card.name = "table-result-card"; card.style.overflow = Overflow.Hidden;
-            var header = Row(18); Pad(header, 22, 30, 14, 30);
+            var card = Card(782, 30, "result"); card.name = "table-result-card"; card.style.overflow = Overflow.Hidden;
+            var header = Row(18); Pad(header, 26, 30, 18, 30);
+            view.Decorate(header, "linear-gradient(180deg,rgba(255,255,255,.06),transparent)", 0);
             var left = new VisualElement { pickingMode = PickingMode.Ignore }; left.style.flexGrow = 1;
-            var caption = Text(r.Title + " · " + r.Sub, "Baloo2-800", 11, "var(--mt)"); MenuView.Tracking(caption, 2, 11); left.Add(caption);
-            var headRow = Row(12); headRow.style.marginTop = 4;
-            var head = Text(r.Head, "Montserrat-800", 36, "var(--a1)"); head.name = "table.res.head";
-            head.style.textShadow = new TextShadow { offset = new Vector2(0, 3), blurRadius = 0, color = view.C("var(--lS)") }; headRow.Add(head);
-            if (r.Multiplier > 1) { var mul = Text("×" + r.Multiplier, "Montserrat-800", 15, "var(--aT)"); mul.name = "result-multiplier"; Pad(mul, 3, 10, 3, 10); view.Decorate(mul, "linear-gradient(var(--a1),var(--a2))", 10, 3, "var(--aS)"); headRow.Add(mul); }
-            left.Add(headRow); header.Add(left);
+            var caption = Text(r.Title + " · " + r.Sub, "Baloo2-800", 11, "var(--mt)"); caption.name = "table.res.title"; caption.style.height = 18; MenuView.Tracking(caption, 2, 11); left.Add(caption);
+            var head = Text(r.Head, "Montserrat-800", 40, "var(--a1)"); head.name = "table.res.head"; head.style.height = 44; head.style.marginTop = 4;
+            head.style.textShadow = new TextShadow { offset = new Vector2(0, 3), blurRadius = 0, color = view.C("var(--lS)") }; left.Add(head); header.Add(left);
             var right = new VisualElement { pickingMode = PickingMode.Ignore }; right.style.alignItems = Align.FlexEnd;
-            var xpCap = Text("XP", "Baloo2-800", 10, "var(--mt)"); MenuView.Tracking(xpCap, 1.4f, 10); right.Add(xpCap);
-            var xp = Text("+" + view.N(r.Xp) + " XP", "Montserrat-800", 28, "#6BE8B0"); xp.name = "table.res.xp"; xp.style.marginTop = 2; right.Add(xp);
+            var chipsCap = Caption(r.LastHand ? L("ÇİP", "CHIPS") : L("EL", "HAND")); chipsCap.name = "table.t.chipsCap"; right.Add(chipsCap);
+            var chipsRow = Row(8); chipsRow.style.marginTop = 2;
+            var coin = new VisualElement { pickingMode = PickingMode.Ignore }; coin.style.width = coin.style.height = 26;
+            view.Decorate(coin, "radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)", 13); Border(coin, 2, view.C("#FFF3C8")); chipsRow.Add(coin);
+            var chips = Text(r.Chips ?? Current.Hand + " / " + Current.MatchHands, "Montserrat-700", 30, r.ChipColor ?? "var(--ic)"); chips.name = "table.res.chips"; chips.style.height = 30; chipsRow.Add(chips); right.Add(chipsRow);
             header.Add(right); card.Add(header);
 
             var body = new VisualElement { pickingMode = PickingMode.Ignore }; Pad(body, 0, 30, 0, 30);
             var cols = Row(10); Pad(cols, 0, 14, 0, 14);
-            cols.Add(Cell(Text("", "Baloo2-800", 10, "var(--mt)"), 36, false));
             cols.Add(Cell(Text("", "Baloo2-800", 10, "var(--mt)"), 40, false));
-            var player = Caption(L("OYUNCU", "PLAYER")); var pc = Cell(player, 0, false); pc.style.flexGrow = 1; cols.Add(pc);
-            var penaltyCap = Caption(TableStrings.Get("heCPen", Lang)); var penCell = Cell(penaltyCap, 80, false); penCell.style.justifyContent = Justify.Center; cols.Add(penCell);
-            cols.Add(Cell(Caption(L("EL PUANI", "HAND")), 180, true));
-            cols.Add(Cell(Caption(L("TOPLAM", "TOTAL")), 80, true));
+            var player = Caption(L("OYUNCU", "PLAYER")); player.name = "table.t.colPlayer"; player.style.flexGrow = 1; player.style.flexBasis = 0; cols.Add(player);
+            var handCap = Caption(L("EL PUANI", "HAND")); handCap.name = "table.t.colHand"; handCap.style.width = 110; handCap.style.unityTextAlign = TextAnchor.MiddleRight; cols.Add(handCap);
+            var totalCap = Caption(L("TOPLAM", "TOTAL")); totalCap.name = "table.t.colTotal"; totalCap.style.width = 110; totalCap.style.unityTextAlign = TextAnchor.MiddleRight; cols.Add(totalCap);
             body.Add(cols);
             int index = 0;
             foreach (var row in r.Rows)
             {
-                var line = Row(10); line.name = "result-row-" + row.Seat; line.style.marginTop = 6; Pad(line, 9, 14, 9, 14); line.style.minHeight = 58;
+                var line = Row(10); line.name = "result-row-" + row.Seat; line.style.marginTop = 6; Pad(line, 9, 14, 9, 14);
                 view.Decorate(line, row.Seat == 0 ? "var(--pnH)" : "var(--dp)", 16);
-                if (row.Seat == r.Winner) Border(line, 2, view.C("var(--a1)"));
-                line.Add(Cell(Text(index + 1 + ".", "Montserrat-700", 20, index == 0 ? "var(--a1)" : "var(--mt)"), 36, false));
-                var dot = new VisualElement { pickingMode = PickingMode.Ignore }; dot.style.width = dot.style.height = 34; dot.style.alignItems = Align.Center; dot.style.justifyContent = Justify.Center;
-                view.Decorate(dot, (string)Seat(row.Seat)["color"], 17); dot.Add(Text((string)Seat(row.Seat)["ini"], "Montserrat-700", 12, "#fff")); line.Add(Cell(dot, 40, false));
-                var who = new VisualElement { pickingMode = PickingMode.Ignore }; who.style.flexGrow = 1;
-                var nameRow = Row(8);
-                nameRow.Add(Text((string)Seat(row.Seat)["name"] + (row.Seat == 0 ? L(" (sen)", " (you)") : ""), "Montserrat-700", 16, "#F4F1E8"));
-                nameRow.Add(Text(row.Note, "Baloo2-800", 11, "var(--mt)"));
-                who.Add(nameRow);
-                if (row.Badges.Count > 0)
-                {
-                    var badges = Row(6); badges.style.marginTop = 4;
-                    foreach (var (text, gold) in row.Badges)
-                    {
-                        var badge = Text(text, "Baloo2-800", 10, gold ? "var(--aT)" : "var(--ic)"); Pad(badge, 2, 8, 2, 8);
-                        view.Decorate(badge, gold ? "linear-gradient(var(--a1),var(--a2))" : "rgba(255,255,255,.12)", 8); badges.Add(badge);
-                    }
-                    who.Add(badges);
-                }
+                // CSS's inset ring does not change the row's content box.
+                if (index == 0) { var ring = Layer("result-winner-ring"); Radius(ring, 16); Border(ring, 2, view.C("var(--a1)")); line.Add(ring); }
+                var rank = Text(index + 1 + ".", "Montserrat-700", 20, index == 0 ? "var(--a1)" : "var(--mt)"); rank.name = "table.r.rank[" + index + "]"; rank.style.width = 40; line.Add(rank);
+                var who = Row(10); who.style.flexGrow = 1; who.style.flexBasis = 0; who.style.minWidth = 0;
+                var dot = new VisualElement { name = "table.r.ini[" + index + "]", pickingMode = PickingMode.Ignore }; dot.style.width = dot.style.height = 36; dot.style.flexShrink = 0; dot.style.alignItems = Align.Center; dot.style.justifyContent = Justify.Center;
+                view.Decorate(dot, (string)Seat(row.Seat)["color"], 18); dot.Add(Text((string)Seat(row.Seat)["ini"], "Montserrat-700", 13, "#fff")); who.Add(dot);
+                var name = Text((string)Seat(row.Seat)["name"], "Montserrat-700", 16, "#F4F1E8"); name.name = "table.r.name[" + index + "]"; who.Add(name);
+                var note = Text(row.Note, "Baloo2-800", 11, "var(--mt)"); note.name = "table.r.note[" + index + "]"; who.Add(note);
                 line.Add(who);
-                var penalty = new VisualElement { pickingMode = PickingMode.Ignore }; penalty.style.width = 80; penalty.style.alignItems = Align.Center; penalty.style.flexShrink = 0;
-                if (row.Penalty > 0)
-                {
-                    var pill = AmountPill("+" + view.N(row.Penalty), 12); pill.name = "result-penalty-" + row.Seat; penalty.Add(pill);
-                    if (!string.IsNullOrEmpty(row.PenaltyWhy)) { var why = Text(row.PenaltyWhy, "Baloo2-800", 10, "#FF8A95"); why.style.marginTop = 3; penalty.Add(why); }
-                }
-                else penalty.Add(Text("—", "Montserrat-700", 14, "var(--mt)"));
-                line.Add(penalty);
-                var hand = new VisualElement { pickingMode = PickingMode.Ignore }; hand.style.width = 180; hand.style.alignItems = Align.FlexEnd; hand.style.flexShrink = 0;
-                if (r.Unscored || !row.Hand.HasValue) hand.Add(Text("—", "Montserrat-700", 18, "var(--mt)"));
-                else
-                {
-                    int v = row.Hand.Value;
-                    hand.Add(Text(v > 0 ? "+" + view.N(v) : v < 0 ? "−" + view.N(-v) : "0", "Montserrat-800", 18, v < 0 ? "#6BE8B0" : v > 0 ? "#FF8A95" : "#F4F1E8"));
-                    if (!string.IsNullOrEmpty(row.Explain)) { var ex = Text(row.Explain, "Baloo2-700", 10, "var(--mt)"); ex.name = "result-explain-" + row.Seat; hand.Add(ex); }
-                }
-                line.Add(hand);
-                line.Add(Cell(Text(row.Total < 0 ? "−" + view.N(-row.Total) : view.N(row.Total), "Montserrat-800", 18, "#F4F1E8"), 80, true));
+                int score = (row.Hand ?? 0) + row.Penalty;
+                var hand = Text(row.Hand.HasValue ? (score > 0 ? "+" : score < 0 ? "-" : "") + view.N(Math.Abs(score)) : "—", "Montserrat-700", 18, score < 0 ? "#8EF0B0" : score >= 202 ? "#FF8A94" : "#F4F1E8"); hand.name = "table.r.hand[" + index + "]"; hand.style.width = 110; hand.style.unityTextAlign = TextAnchor.MiddleRight; line.Add(hand);
+                var totalScore = Text(view.N(row.Total), "Montserrat-700", 18, "#F4F1E8"); totalScore.name = "table.r.total[" + index + "]"; totalScore.style.width = 110; totalScore.style.unityTextAlign = TextAnchor.MiddleRight; line.Add(totalScore);
                 float began = r.StartedAt + index * .09f;
                 motions.Add(t => { float u = TableConstants.EaseOutCubic(Mathf.Clamp01((t - began) / .35f)); line.style.translate = new Translate(-44 * (1 - u), 0); line.style.opacity = u; });
                 body.Add(line); index++;
             }
-            if (r.Unscored)
-            {
-                // T44: dashed a1 box.
-                var box = new VisualElement { name = "result-unscored", pickingMode = PickingMode.Ignore }; box.style.marginTop = 10; box.style.alignItems = Align.Center; Pad(box, 10, 14, 10, 14);
-                Border(box, 2, view.C("var(--a1)")); box.style.borderTopLeftRadius = box.style.borderTopRightRadius = box.style.borderBottomLeftRadius = box.style.borderBottomRightRadius = 14;
-                box.Add(Text(TableStrings.Get("unscored", Lang), "Montserrat-800", 15, "var(--a1)"));
-                var sub = Text(TableStrings.Get("unscoredSub", Lang), "Baloo2-800", 11, "var(--mt)"); sub.style.marginTop = 2; box.Add(sub);
-                body.Add(box);
-            }
             card.Add(body);
 
-            var strip = Row(12); strip.style.marginTop = 14; strip.style.marginLeft = 30; strip.style.marginRight = 30; Pad(strip, 10, 14, 10, 14); view.Decorate(strip, "var(--dp)", 16);
-            var gifts = Caption(L("ALDIĞIN İKRAMLAR", "TREATS RECEIVED")); strip.Add(gifts);
-            if (received.Count == 0) { var none = Text(L("Bu elde ikram gelmedi", "No treats this hand"), "Baloo2-700", 13, "var(--mt)"); none.style.flexGrow = 1; none.style.flexShrink = 1; strip.Add(none); }
+            var strip = Row(12); strip.style.marginTop = 16; strip.style.marginLeft = 30; strip.style.marginRight = 30; Pad(strip, 10, 14, 10, 14); view.Decorate(strip, "var(--dp)", 16);
+            var gifts = Caption(L("ALDIĞIN İKRAMLAR", "TREATS RECEIVED")); gifts.name = "table.t.giftsGot"; strip.Add(gifts);
+            if (received.Count == 0) { var none = Text(L("Bu elde ikram gelmedi", "No treats this hand"), "Baloo2-700", 13, "var(--mt)"); none.name = "table.t.noGifts"; none.style.flexGrow = 1; none.style.flexShrink = 1; strip.Add(none); }
             else
             {
                 // spec/13 §3: the treats I received this hand, 38 px pictures.
@@ -604,25 +567,25 @@ namespace Galaxy101.Table
                 foreach (var kind in received) { var img = new VisualElement { pickingMode = PickingMode.Position, tooltip = GiftName(kind, false) }; img.style.width = img.style.height = 38; img.style.flexShrink = 0; if (GiftThumb(kind) is Texture2D thumb) img.style.backgroundImage = thumb; got.Add(img); }
                 strip.Add(got);
             }
-            strip.Add(Text(L("Toplam ", "Total ") + "+" + view.N(r.TotalXp) + " XP", "Baloo2-800", 13, "#6BE8B0"));
+            var xp = Text("+" + view.N(r.Xp) + " XP", "Baloo2-800", 13, "#8EF0B0"); xp.name = "table.res.xp"; strip.Add(xp);
             card.Add(strip);
 
-            var buttons = Row(12); buttons.style.justifyContent = Justify.FlexEnd; Pad(buttons, 18, 30, 24, 30);
-            var leave = Text(L("Masadan kalk", "Leave table"), "Montserrat-700", 17, "#F4F1E8"); leave.name = "result-leave"; Pad(leave, 15, 24, 15, 24);
+            var buttons = Row(12); buttons.style.justifyContent = Justify.FlexEnd; Pad(buttons, 20, 30, 26, 30);
+            var leave = Text(L("Masadan kalk", "Leave table"), "Montserrat-700", 17, "#F4F1E8"); leave.name = "table.askExit#2"; Pad(leave, 15, 24, 15, 24);
             view.Decorate(leave, "var(--pnH)", 18, 5, "var(--pnS)"); GalaxyFilters.HoverBrightness(leave, 1.2f); buttons.Add(Clickable(leave, "exit"));
-            var next = new VisualElement { name = "result-next", pickingMode = PickingMode.Position }; next.style.overflow = Overflow.Hidden; Pad(next, 15, 34, 15, 34);
+            var next = new VisualElement { name = "table.nextHand", pickingMode = PickingMode.Position }; next.style.overflow = Overflow.Hidden; Pad(next, 15, 34, 15, 34);
             view.Decorate(next, "linear-gradient(var(--a1),var(--a2))", 18, 5, "var(--aS)");
             var bar = new VisualElement { pickingMode = PickingMode.Ignore }; bar.style.position = Position.Absolute; bar.style.left = 0; bar.style.top = 0; bar.style.bottom = 0; bar.style.backgroundColor = new Color(1, 1, 1, .32f);
             next.Add(bar);
             bool last = r.LastHand;
-            var label = Text((last ? L("Maç sonucu · ", "Match result · ") : L("Sonraki el · ", "Next hand · ")) + r.Seconds, "Montserrat-800", 18, "var(--aT)"); label.name = "table.nextLabel"; next.Add(label);
+            var label = Text(last ? L("Maçı bitir", "Finish match") : L("Sonraki el · ", "Next hand · ") + r.Seconds, "Montserrat-800", 18, "var(--aT)"); label.name = "table.nextLabel"; next.Add(label);
             float start = r.StartedAt; int total = r.Seconds;
             // barFill 15s + the countdown in the label ("Sonraki el · 11"); the last hand leads to the match end.
             motions.Add(t =>
             {
                 float elapsed = Mathf.Max(0, t - start);
-                bar.style.width = Length.Percent(Mathf.Clamp01(elapsed / total) * 100);
-                label.text = (last ? L("Maç sonucu · ", "Match result · ") : L("Sonraki el · ", "Next hand · ")) + Mathf.Max(0, total - Mathf.FloorToInt(elapsed));
+                bar.style.width = Length.Percent(total <= 0 ? 100 : Mathf.Clamp01(elapsed / total) * 100);
+                label.text = last ? L("Maçı bitir", "Finish match") : L("Sonraki el · ", "Next hand · ") + Mathf.Max(0, total - Mathf.FloorToInt(elapsed));
             });
             buttons.Add(Clickable(next, "next"));
             card.Add(buttons);

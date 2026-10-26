@@ -149,7 +149,7 @@ namespace Galaxy101.Table
                 hud.SendChatOnline = (text, quick) => Session.Chat(text, quick.HasValue ? "quick." + quick.Value : null);
                 hud.SendGiftOnline = (gift, to) => Session.Gift(gift, to.HasValue ? Abs(to.Value) : (int?)null);
                 hud.SendEmoteOnline = emote => { int i = Array.IndexOf(Emoji, emote); return i >= 0 ? Session.Chat(null, "emoji." + i) : Session.Chat(emote, null); };
-                hud.FreeGifts = !Session.Online;   // R-94: nothing costs chips against bots
+                hud.FreeGifts = (Model.Table ?? (Session as LocalTableSession)?.Table)?.VsBots == true;   // R-94 exempts bot mode, not the local transport used for reference states.
             }
             if (Session is LocalTableSession offline) StartOffline(offline);
             else AttachModel();
@@ -1023,6 +1023,13 @@ namespace Galaxy101.Table
                 Xp = LastXp, TotalXp = (int)Math.Min(int.MaxValue, XpEarned), Winner = LocalSeat(winner), StartedAt = resultAt, Seconds = Mathf.RoundToInt(seconds),
                 Multiplier = mul, Unscored = false, LastHand = hand >= hands,
             };
+            if (result.LastHand && Model.MatchResult != null && !Watching && Model.Table?.VsBots != true)
+            {
+                long bet = Model.Table?.Bet ?? 0;
+                long payout = Model.Seat < Model.MatchResult.Payouts.Count ? Model.MatchResult.Payouts[Model.Seat] : 0;
+                result.Chips = payout > 0 ? "+" + Fmt(payout) : "−" + Fmt(bet);
+                result.ChipColor = payout > 0 ? "#8EF0B0" : "#FF8A94";
+            }
             foreach (int k in Enumerable.Range(0, 4).OrderBy(k => score[k]).ThenBy(k => k))
             {
                 int local = LocalSeat(k);
@@ -1030,7 +1037,7 @@ namespace Galaxy101.Table
                 var row = new TableHud.ResultRow
                 {
                     Seat = local, Total = Model.Totals[k], Penalty = pen[k], Hand = score[k] - pen[k],
-                    Note = finished ? T("noteFin") : pairs ? T("notePairs") : Model.Opened[k] > 0 ? T("noteOpen") : T("noteClosed"),
+                    Note = finished ? T("noteFin") : Model.Opened[k] > 0 ? T("noteOpen") : T("noteClosed"),
                     PenaltyWhy = string.Join(", ", penaltyWhy[local].Distinct()),
                 };
                 if (finished)

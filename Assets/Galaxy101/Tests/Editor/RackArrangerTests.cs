@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using Galaxy101.Table;
 using NUnit.Framework;
+using Okey101.Core.V4;
 
 namespace Galaxy101.Tests
 {
@@ -97,6 +98,36 @@ namespace Galaxy101.Tests
                     if (end == x + 1 && faces[row[x]].Equals(faces[row[end]])) pairs++;
                 }
             Assert.That(pairs, Is.EqualTo(8), Row(layout, faces, 0) + " / " + Row(layout, faces, 1));
+        }
+
+        [TestCase(1)]
+        [TestCase(2)]
+        public void PackedPairsStayAvailableAtHighOpeningBarsAndForFinishing(int singles)
+        {
+            var names = Enumerable.Range(1, 10).SelectMany(n => new[] { "R" + n + "a", "R" + n + "b" })
+                .Concat(new[] { "B12a", "K13a" }.Take(singles)).ToArray();
+            var grid = new RackGrid();
+            (int, int)? Face(int id) => ("RBYK".IndexOf(names[id - 100][0]), G101Rules.NumOf(names[id - 100]));
+            grid.Sync(Enumerable.Range(100, names.Length), Face, false);
+            grid.Sort(false, Face);
+            var eval = RackMelds.Of(grid.Segments().Select(s => (IList<string>)s.Ids.Select(id => names[id - 100]).ToList()), G101Rules.OkeyFromIndicator("B1a"));
+            Assert.That(eval.Pairs.Count, Is.EqualTo(10), "layout capacity must not hide real available pairs");
+            var state = G101Rules.FromSpec(new HandSpec
+            {
+                Opts = new MatchOptions { Mode = "solo", Katlama = true }, Indicator = "B1a", TurnSeat = 0, TurnPhase = "play", TurnN = 9,
+                Opened = new[] { 0, 8, 0, 0 }, OpenMode = new[] { (string)null, "pair", null, null },
+                Racks = new List<List<string>> { names.ToList(), new List<string>(), new List<string>(), new List<string>() }
+            });
+            var opened = G101Rules.Apply(state, GameAction.Open(0, eval.Pairs));
+            Assert.That(opened.Ok, Is.True, opened.Error);
+            Assert.That(opened.State.Hand.Pen[0], Is.Zero);
+            Assert.That(opened.State.Hand.Opened[0], Is.EqualTo(10));
+            if (singles == 1)
+            {
+                var finish = eval.FromHand(101, 9);
+                Assert.That(finish.HasValue, Is.True);
+                Assert.That(finish.Value.Last, Is.EqualTo("B12a"));
+            }
         }
 
         [Test]

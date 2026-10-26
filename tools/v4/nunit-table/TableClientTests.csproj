@@ -37,6 +37,9 @@
     <Compile Include="$(RepoRoot)/Packages/com.galaxy101.table/Runtime/**/*.cs" Link="TableRuntime/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="$(RepoRoot)/Assets/Galaxy101/Table/Scripts/Client/**/*.cs" Link="Client/%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="$(RepoRoot)/Assets/Galaxy101/Tests/Table/**/*.cs" Link="Tests/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(RepoRoot)/Assets/Galaxy101/Table/Scripts/Game/RackGrid.cs" Link="Rack/RackGrid.cs" />
+    <Compile Include="$(RepoRoot)/Assets/Galaxy101/Table/Scripts/Game/RackArranger.cs" Link="Rack/RackArranger.cs" />
+    <Compile Include="$(RepoRoot)/Assets/Galaxy101/Tests/Editor/RackArrangerTests.cs" Link="Rack/RackArrangerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />

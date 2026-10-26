@@ -34,17 +34,25 @@ namespace Galaxy101.Table
                     var tiles = new List<string>(seg);
                     var run = G101Rules.AnalyzeMeld(okey, G101Rules.KindRun, tiles);
                     var group = G101Rules.AnalyzeMeld(okey, G101Rules.KindGroup, tiles);
-                    if (!run.Ok && !group.Ok) continue;
-                    // segVal takes the better value; engKind names a run when the tiles make one.
-                    bool asGroup = group.Ok && (!run.Ok || group.Value > run.Value);
-                    o.Groups.Add(new MeldSpec(asGroup ? G101Rules.KindGroup : G101Rules.KindRun, tiles));
-                    o.Sum += asGroup ? group.Value : run.Value;
-                    foreach (var id in tiles) o.Valid.Add(id);
+                    if (run.Ok || group.Ok)
+                    {
+                        // Preserve explicit series/group segments, including their chosen joker interpretation.
+                        bool asGroup = group.Ok && (!run.Ok || group.Value > run.Value);
+                        o.Groups.Add(new MeldSpec(asGroup ? G101Rules.KindGroup : G101Rules.KindRun, tiles));
+                        o.Sum += asGroup ? group.Value : run.Value;
+                        foreach (var id in tiles) o.Valid.Add(id);
+                        continue;
+                    }
                 }
-                else if (seg.Count == 2 && G101Rules.AnalyzeMeld(okey, G101Rules.KindPair, new List<string>(seg)).Ok)
+                // A full rack has too few cells to separate every pair and the loose tiles. "Cift diz" keeps
+                // its surplus pairs adjacent in the loose tail; they remain usable for opening and finishing.
+                for (int i = 0; i + 1 < seg.Count; i++)
                 {
-                    o.Pairs.Add(new MeldSpec(G101Rules.KindPair, new List<string>(seg)));
-                    foreach (var id in seg) o.Paired.Add(id);
+                    var pair = new List<string> { seg[i], seg[i + 1] };
+                    if (!G101Rules.AnalyzeMeld(okey, G101Rules.KindPair, pair).Ok) continue;
+                    o.Pairs.Add(new MeldSpec(G101Rules.KindPair, pair));
+                    foreach (var id in pair) o.Paired.Add(id);
+                    i++;
                 }
             }
             return o;

@@ -239,6 +239,11 @@ namespace Galaxy101.Diagnostics
         private IEnumerator OpenMenu(string theme, string lang, bool auth)
         {
             MainMenuController.AuthOnStart = auth;
+            // Language and planet go into the isolated save before the menu exists (the prototype's ?lang/?theme apply
+            // before the first frame); switching them afterwards rebuilds the menu and drops a sign-in layer already shown.
+            var seed = MenuModel.LoadResources(GalaxyPreferencesBridge.OverridePath);
+            seed.Settings["lang"] = lang; seed.Planet = Planets[theme];
+            if (!seed.Persist()) Debug.LogWarning("G101 router could not pre-write the save: " + seed.LastPersistenceError);
             SceneManager.LoadScene(0, LoadSceneMode.Single);
             yield return null;
             MainMenuController menu = null;

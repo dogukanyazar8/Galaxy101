@@ -6,11 +6,11 @@ Durum kataloğu: 151 kimlik, 144 etkin, 7 kaldırılmış.
 
 | Durum | Sayı |
 |---|---|
-| eşleşti | 50 |
+| eşleşti | 59 |
 | bilinçli fark | 7 |
 | eksik | 0 |
 | kaldırıldı | 7 |
-| bekliyor | 87 |
+| bekliyor | 78 |
 
 ## Eşikler ve yöntem
 
@@ -26,154 +26,154 @@ Ref: `artifacts/v4/ref/<ID>.png` + `.layout.json` (✓ çekildi; `tekrar Δ` = a
 
 | Kimlik | Grup | Başlık | Ref | Unity karşılığı | Durum | Not |
 |---|---|---|---|---|---|---|
-| 01 | menu | Ana menü, Satürn, Tekli seçili | ✓ · tekrar Δ12042px | Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs | eşleşti | [run8] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.75 |
-| 02 | menu | Ana menü · tema mars | ✓ · tekrar Δ26458px | Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs | eşleşti | [run8] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.58 |
-| 03 | menu | Ana menü · tema neptun | ✓ · tekrar Δ13356px | Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs | eşleşti | [run8] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.82 |
-| 04 | menu | Ana menü · tema jupiter | ✓ · tekrar Δ16965px | Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs | eşleşti | [run8] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.84 |
-| 05 | menu | Ana menü · tema venus | ✓ · tekrar Δ16832px | Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs | eşleşti | [run8] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.79 |
-| 06 | menu | Eşli modu seçili | ✓ · tekrar Δ4156px | Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs | eşleşti | [run8] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.35 |
-| 10 | menu | Ayarlar → Oyun | ✓ · tekrar Δ353px | Scripts/Screens/SettingsController.cs | eşleşti | [run8] metin 65/66 (kayık 0, eksik 0, fazla 0) · ad 65/81 · UI piksel %5.91 |
-| 11 | menu | Ayarlar → Ses | ✓ · tekrar Δ288px | Scripts/Screens/SettingsController.cs | eşleşti | [run8] metin 62/63 (kayık 0, eksik 0, fazla 0) · ad 64/80 · UI piksel %5.21 |
-| 12 | menu | Ayarlar → Görüntü | ✓ · tekrar Δ76px | Scripts/Screens/SettingsController.cs | bilinçli fark | UF-607 (menü hattı): "Yerel · Monitör en fazla …" gerçek monitörden okunur; prototip sabit 1280×720 yazar [run8] metin 74/77 (kayık 1, eksik 1, fazla 1) · ad 67/85 · UI piksel %10.9 |
-| 13 | menu | Ayarlar → Dil | ✓ · tekrar Δ442px | Scripts/Screens/SettingsController.cs | eşleşti | [run8] metin 55/56 (kayık 0, eksik 0, fazla 0) · ad 61/72 · UI piksel %3.0 |
-| 14 | menu | Ayarlar → Hesap | ✓ · tekrar Δ353px | Scripts/Screens/SettingsController.cs | eşleşti | [run8] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 61/74 · UI piksel %5.75 |
-| 15 | menu | Profili düzenle | ✓ · tekrar Δ125px | Scripts/Dialogs/EditProfileController.cs | eşleşti | [run8] metin 82/83 (kayık 0, eksik 0, fazla 1) · ad 98/112 · UI piksel %2.91 |
-| 16 | menu | Profili düzenle · Altın çerçeve seçili | ✓ · tekrar Δ156px | Scripts/Dialogs/EditProfileController.cs | eşleşti | [run8] metin 82/83 (kayık 0, eksik 0, fazla 1) · ad 98/112 · UI piksel %3.03 |
-| 17 | menu | Profili düzenle · geçersiz ad | ✓ · tekrar Δ36px | Scripts/Dialogs/EditProfileController.cs | eşleşti | [run8] metin 82/83 (kayık 0, eksik 0, fazla 1) · ad 98/112 · UI piksel %2.68 |
-| 18 | menu | Ayarlar → Hesap · kaydedildi (altın çerçeve) | hata: Page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5 | Scripts/Dialogs/EditProfileController.cs | eşleşti | [run8] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 61/74 · UI piksel %5.76 |
-| 19 | menu | Çıkış onayı | ✓ · tekrar Δ195px | Scripts/Dialogs/ConfirmController.cs, DoneController.cs | eşleşti | [run8] metin 67/68 (kayık 0, eksik 0, fazla 0) · ad 65/79 · UI piksel %3.11 |
-| 20 | menu | Çıkış yapıldı | ✓ · tekrar Δ37px | Scripts/Dialogs/ConfirmController.cs, DoneController.cs | eşleşti | [run8] metin 66/67 (kayık 0, eksik 0, fazla 0) · ad 64/78 · UI piksel %1.22 |
-| 21 | menu | Hesap silme onayı (pasif) | ✓ · tekrar Δ52px | Scripts/Dialogs/ConfirmController.cs, DoneController.cs | bilinçli fark | EK-605 (menü hattı): prototip hesap silme metninde DEMO-04 sabiti "125.400 çip ve 340 elmas" yazar; Unity gerçek bakiyeyi gösterir [run8] metin 70/72 (kayık 0, eksik 1, fazla 1) · ad 67/81 · UI piksel %3.63 |
-| 22 | menu | SİL yazıldı (aktif) | ✓ · tekrar Δ56px | Scripts/Dialogs/ConfirmController.cs, DoneController.cs | bilinçli fark | EK-605 (menü hattı): prototip hesap silme metninde DEMO-04 sabiti "125.400 çip ve 340 elmas" yazar; Unity gerçek bakiyeyi gösterir [run8] metin 70/72 (kayık 0, eksik 1, fazla 2) · ad 67/81 · UI piksel %3.67 |
-| 30 | menu | Mağaza → Çip | ✓ · tekrar Δ735px | Scripts/Screens/ShopController.cs | eşleşti | [run8] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 33/70 · UI piksel %6.03 |
-| 31 | menu | Mağaza → Elmas | ✓ · tekrar Δ948px | Scripts/Screens/ShopController.cs | eşleşti | [run8] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 33/70 · UI piksel %5.65 |
-| 32 | menu | Mağaza → Görünüm | ✓ · tekrar Δ14330px | Scripts/Screens/ShopController.cs | eşleşti | [run8] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 33/67 · UI piksel %6.8 |
-| 40 | menu | Arkadaşlar → Çevrimiçi | ✓ · tekrar Δ98px | Scripts/Screens/FriendsController.cs | eşleşti | [run8] metin 59/60 (kayık 0, eksik 0, fazla 0) · ad 48/66 · UI piksel %3.6 |
-| 41 | menu | Arkadaşlar → Tümü | ✓ · tekrar Δ50px | Scripts/Screens/FriendsController.cs | eşleşti | [run8] metin 71/75 (kayık 3, eksik 0, fazla 0) · ad 60/78 · UI piksel %4.05 |
-| 42 | menu | "ay" araması | ✓ · tekrar Δ120px | Scripts/Screens/FriendsController.cs | eşleşti | [run8] metin 49/50 (kayık 0, eksik 0, fazla 1) · ad 41/59 · UI piksel %2.88 |
-| 43 | menu | İstekler | ✓ · tekrar Δ128px | Scripts/Screens/FriendsController.cs | eşleşti | [run8] metin 56/57 (kayık 0, eksik 0, fazla 0) · ad 44/63 · UI piksel %3.63 |
-| 44 | menu | Arkadaş ekle — boş | ✓ · tekrar Δ34px | Scripts/Dialogs/AddFriendController.cs | eşleşti | [run8] metin 67/68 (kayık 0, eksik 0, fazla 0) · ad 56/75 · UI piksel %4.04 |
-| 45 | menu | Arkadaş ekle · MK-3321 bulundu | ✓ · tekrar Δ239px | Scripts/Dialogs/AddFriendController.cs | eşleşti | [run8] metin 72/73 (kayık 0, eksik 0, fazla 1) · ad 59/78 · UI piksel %4.59 |
-| 46 | menu | Arkadaş ekle · istek gönderildi | ✓ · tekrar Δ41px | Scripts/Dialogs/AddFriendController.cs | eşleşti | [run8] metin 72/73 (kayık 0, eksik 0, fazla 1) · ad 59/78 · UI piksel %4.53 |
-| 47 | menu | Arkadaş ekle · bulunamadı | ✓ · tekrar Δ78px | Scripts/Dialogs/AddFriendController.cs | eşleşti | [run8] metin 67/68 (kayık 0, eksik 0, fazla 1) · ad 56/75 · UI piksel %4.78 |
-| 50 | menu | Liderlik → Haftalık | ✓ · tekrar Δ7px | Scripts/Screens/LeaderboardController.cs | eşleşti | [run8] metin 97/98 (kayık 0, eksik 0, fazla 0) · ad 76/93 · UI piksel %4.97 |
-| 51 | menu | Liderlik → Sezon | ✓ · tekrar Δ83px | Scripts/Screens/LeaderboardController.cs | eşleşti | [run8] metin 97/98 (kayık 0, eksik 0, fazla 0) · ad 76/93 · UI piksel %5.14 |
-| 52 | menu | Liderlik → Arkadaşlar | ✓ · tekrar Δ16px | Scripts/Screens/LeaderboardController.cs | eşleşti | [run8] metin 77/78 (kayık 0, eksik 0, fazla 0) · ad 60/77 · UI piksel %4.08 |
-| 60 | menu | Günlük ödül | ✓ · tekrar Δ1268px | Scripts/Screens (DailyReward panel, MenuView) | bekliyor | [run8] metin 68/80 (kayık 11, eksik 0, fazla 0) · ad 32/80 · UI piksel %8.19 |
-| 61 | menu | Gün toplandı | ✓ · tekrar Δ13938px | Scripts/Screens (DailyReward panel, MenuView) | bekliyor | [run8] metin 68/80 (kayık 11, eksik 0, fazla 0) · ad 32/80 · UI piksel %8.22 |
-| 70 | menu | Kurallar 1 | ✓ · tekrar Δ966px | Scripts/Screens (Rules panel, MenuView) | bekliyor | [run8] metin 55/61 (kayık 5, eksik 0, fazla 0) · ad 32/74 · UI piksel %5.59 |
-| 71 | menu | Kurallar 2 | ✓ · tekrar Δ108px | Scripts/Screens (Rules panel, MenuView) | eşleşti | [run8] metin 54/55 (kayık 0, eksik 0, fazla 0) · ad 32/68 · UI piksel %4.81 |
-| 72 | menu | Kurallar 3 | ✓ · tekrar Δ81px | Scripts/Screens (Rules panel, MenuView) | bekliyor | [run8] metin 55/64 (kayık 8, eksik 0, fazla 0) · ad 32/77 · UI piksel %7.1 |
-| 73 | menu | Kurallar 4 | ✓ · tekrar Δ51px | Scripts/Screens (Rules panel, MenuView) | eşleşti | [run8] metin 58/61 (kayık 2, eksik 0, fazla 0) · ad 32/74 · UI piksel %5.7 |
-| 74 | menu | Kurallar 5 | ✓ · tekrar Δ17px | Scripts/Screens (Rules panel, MenuView) | bekliyor | [run8] metin 54/61 (kayık 6, eksik 0, fazla 0) · ad 32/74 · UI piksel %5.42 |
-| 75 | menu | Kurallar 6 | ✓ · tekrar Δ21px | Scripts/Screens (Rules panel, MenuView) | eşleşti | [run8] metin 55/56 (kayık 0, eksik 0, fazla 0) · ad 32/69 · UI piksel %5.52 |
-| 80 | menu | Profilim → Genel | ✓ · tekrar Δ67px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | eşleşti | [run8] metin 93/94 (kayık 0, eksik 0, fazla 0) · ad 88/105 · UI piksel %8.77 |
-| 81 | menu | Profilim → Rozetler | ✓ · tekrar Δ199px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | bekliyor | [run8] metin 60/83 (kayık 22, eksik 0, fazla 0) · ad 42/90 · UI piksel %10.37 |
-| 82 | menu | Profilim → Maç geçmişi | ✓ · tekrar Δ144px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | eşleşti | [run8] metin 96/97 (kayık 0, eksik 0, fazla 0) · ad 87/104 · UI piksel %5.57 |
-| 83 | menu | Profili paylaş | ✓ · tekrar Δ24px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | eşleşti | [run8] metin 124/127 (kayık 2, eksik 0, fazla 0) · ad 121/139 · UI piksel %6.13 |
-| 84 | menu | Bağlantı kopyalandı | ✓ · tekrar Δ6839px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | eşleşti | [run8] metin 124/127 (kayık 2, eksik 0, fazla 0) · ad 121/139 · UI piksel %6.13 |
-| 90 | menu | EN — Ayarlar → Dil | ✓ · tekrar Δ19px | Scripts/Screens/SettingsController.cs | eşleşti | [run8] metin 55/56 (kayık 0, eksik 0, fazla 0) · ad 61/72 · UI piksel %3.43 |
-| 91 | menu | EN — Ayarlar → Oyun | ✓ · tekrar Δ86px | Scripts/Screens/SettingsController.cs | eşleşti | [run8] metin 65/66 (kayık 0, eksik 0, fazla 0) · ad 65/81 · UI piksel %6.1 |
-| 92 | menu | EN — Ana menü, Satürn, Tekli seçili | ✓ · tekrar Δ1564px | Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs | eşleşti | [run8] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %8.87 |
-| 93 | menu | EN — Mağaza → Çip | ✓ · tekrar Δ574px | Scripts/Screens/ShopController.cs | eşleşti | [run8] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 33/70 · UI piksel %5.99 |
-| 94 | menu | EN — Arkadaşlar → Çevrimiçi | ✓ · tekrar Δ115px | Scripts/Screens/FriendsController.cs | eşleşti | [run8] metin 58/60 (kayık 1, eksik 0, fazla 0) · ad 48/66 · UI piksel %3.28 |
-| 95 | menu | EN — Günlük ödül | ✓ · tekrar Δ560px | Scripts/Screens (DailyReward panel, MenuView) | bekliyor | [run8] metin 68/80 (kayık 11, eksik 0, fazla 0) · ad 32/80 · UI piksel %8.51 |
-| 96 | menu | EN — Kurallar 1 | ✓ · tekrar Δ50px | Scripts/Screens (Rules panel, MenuView) | bekliyor | [run8] metin 49/61 (kayık 11, eksik 0, fazla 0) · ad 32/74 · UI piksel %7.39 |
-| 97 | menu | EN — Profilim → Genel | ✓ · tekrar Δ46px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | eşleşti | [run8] metin 93/94 (kayık 0, eksik 0, fazla 0) · ad 88/105 · UI piksel %8.5 |
-| S01 | acilis | Açılış / yükleme (GALAXY + 1 0 1, ilerleme) | ✓ · tekrar Δ631px | Scripts/Screens/AuthFlow.cs | bilinçli fark | UNITY_FARKLARI UF-02 / EKSIKLER EK-004: ilerleme yüzdesi, mesajı ve ipucu yükleme olaylarına ve çağrı sırasına bağlı [run8] metin 3/10 (kayık 3, eksik 3, fazla 36) · ad 0/14 · UI piksel %46.69 |
-| S02 | acilis | Giriş seçimi | ✓ · tekrar Δ706px | Scripts/Screens/AuthFlow.cs | bekliyor | [run8] metin 15/19 (kayık 3, eksik 0, fazla 33) · ad 1/18 · UI piksel %10.24 |
-| S03 | acilis | Giriş yap formu | ✓ · tekrar Δ384px | Scripts/Screens/AuthFlow.cs | bekliyor | [run8] metin 13/17 (kayık 3, eksik 0, fazla 33) · ad 1/24 · UI piksel %9.35 |
-| S04 | acilis | Kayıt ol formu | ✓ · tekrar Δ1468px | Scripts/Screens/AuthFlow.cs | bekliyor | [run8] metin 11/16 (kayık 4, eksik 0, fazla 33) · ad 1/27 · UI piksel %10.3 |
-| S05 | acilis | Misafir girişi formu | ✓ · tekrar Δ1140px | Scripts/Screens/AuthFlow.cs | bekliyor | [run8] metin 11/15 (kayık 3, eksik 0, fazla 34) · ad 1/27 · UI piksel %9.77 |
-| S06 | menu | Ana menü | ✓ · tekrar Δ2398px | Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs | eşleşti | [run8] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.45 |
-| S07 | menu | Ayarlar → Görüntü | ✓ · tekrar Δ410px | Scripts/Screens/SettingsController.cs | bilinçli fark | UF-607 (menü hattı): "Yerel · Monitör en fazla …" gerçek monitörden okunur; prototip sabit 1280×720 yazar [run8] metin 74/77 (kayık 1, eksik 1, fazla 1) · ad 67/85 · UI piksel %10.9 |
-| S08 | menu | Ayarlar → Oyun | ✓ · tekrar Δ147px | Scripts/Screens/SettingsController.cs | eşleşti | [run8] metin 65/66 (kayık 0, eksik 0, fazla 0) · ad 65/81 · UI piksel %5.91 |
-| S09 | lobi | Lobi masa listesi | ✓ · tekrar Δ367px | Scripts/Screens/LobbyScreen*.cs | bekliyor | [run8] metin 148/155 (kayık 7, eksik 0, fazla 33) · ad 91/92 · UI piksel %12.74 |
-| S10 | lobi | Masa aç formu | ✓ · tekrar Δ64px | Scripts/Screens/LobbyScreen*.cs | eşleşti | [run8] metin 217/224 (kayık 7, eksik 0, fazla 42) · ad 161/162 · UI piksel %4.05 |
-| S11 | lobi | Şifreli masa PIN | ✓ · tekrar Δ213px | Scripts/Screens/LobbyScreen*.cs | eşleşti | [run8] metin 152/159 (kayık 7, eksik 0, fazla 33) · ad 100/101 · UI piksel %0.98 |
-| S12 | lobi | Kodla katıl | ✓ · tekrar Δ117px | Scripts/Screens/LobbyScreen*.cs | eşleşti | [run8] metin 152/159 (kayık 7, eksik 0, fazla 33) · ad 98/99 · UI piksel %1.22 |
-| S13 | lobi | Bekleme odası (kurucu) | ✓ · tekrar Δ1712px | Scripts/Screens/LobbyScreen*.cs | eşleşti | [run8] metin 48/49 (kayık 1, eksik 0, fazla 0) · ad 55/56 · UI piksel %7.59 |
-| S14 | lobi | Bekleme odası · arkadaş davet (Arkadaşlar) | ✓ · tekrar Δ1745px | Scripts/Screens/LobbyScreen*.cs | bilinçli fark | EKSIKLER EK-007 / lobi EK-801: paket karesi davet panelini açmıyor; Unity başlıktaki paneli açar (doğru kare docs/v4/lobby/ref/S14) [run8] metin 48/49 (kayık 1, eksik 0, fazla 44) · ad 55/56 · UI piksel %47.74 |
-| S15 | lobi | Bekleme odası · davet (Son oynadıkların) | ✓ · tekrar Δ1219px | Scripts/Screens/LobbyScreen*.cs | bilinçli fark | EKSIKLER EK-007 / lobi EK-801: paket karesi davet panelini açmıyor; Unity başlıktaki paneli açar (doğru kare docs/v4/lobby/ref/S15) [run8] metin 48/49 (kayık 1, eksik 0, fazla 33) · ad 55/56 · UI piksel %47.59 |
-| S16 | dereceli | Dereceli ana ekran | ✓ · tekrar Δ1605px | Scripts/Screens/RankedQueue.cs (yalnız kuyruk; dereceli ana ekranı yok) | eşleşti | [run8] metin 48/48 (kayık 0, eksik 0, fazla 0) · ad 48/49 · UI piksel %6.77 |
-| G01 | dagitim | Masa yükleniyor | ✓ · tekrar Δ1317px | Scripts/Screens/TableLoadingOverlay.cs | bekliyor |  |
-| G02 | dagitim | Bot balyaları diziyor | ✓ · tekrar Δ4920px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor |  |
-| G03 | dagitim | Sen diziyorsun | ✓ · tekrar Δ48354px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor |  |
-| G04 | dagitim | Zar at düğmesi | ✓ · tekrar Δ5309px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor |  |
-| G05 | dagitim | Zar yuvarlanıyor | ✓ · tekrar Δ4836px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor |  |
-| G06 | dagitim | 1. zar · Tekrar at | ✓ · tekrar Δ5391px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor |  |
-| G07 | dagitim | Gösterge açılıyor | ✓ · tekrar Δ10001px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor |  |
-| G08 | dagitim | Gösterge → okey kartı, fazla taş | ✓ · tekrar Δ9675px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor |  |
-| G09 | dagitim | Balyalar dağıtılıyor | ✓ · tekrar Δ3865px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor |  |
-| G10 | dagitim | Kalan balyalar ortaya | ✓ · tekrar Δ42477px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor |  |
-| G11 | dagitim | Istakalar doluyor | ✓ · tekrar Δ56290px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor |  |
-| G12 | dagitim | Oyun başladı (22 taş) | ✓ · tekrar Δ7569px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor |  |
-| G13 | oyun | El açıldı: perler ortada | ✓ · tekrar Δ4801px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G14 | oyun | İşleme testi (herkes açık) | ✓ · tekrar Δ3048px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G15 | oyun | Altın işleme göstergeleri | ✓ · tekrar Δ5367px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G16 | oyun | Yeşil okey alma göstergesi (Y4 seçili) | ✓ · tekrar Δ6661px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G17 | oyun | Okey alındı (Y4 ↔ okey) | ✓ · tekrar Δ15548px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G18 | oyun | İşleme yapıldı + Geri topla | ✓ · tekrar Δ8622px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G19 | oyun | Geri toplandı | ✓ · tekrar Δ2396px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G20 | oyun | Hatalı açma (turuncu Aç) | ✓ · tekrar Δ6904px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G21 | oyun | Hatalı per masada | ✓ · tekrar Δ8976px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G22 | oyun | Ceza tostu | ✓ · tekrar Δ6312px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G23 | oyun | İşlek taş testi | ✓ · tekrar Δ2212px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G24 | oyun | İşlek taş cezası (B4 atıldı) | ✓ · tekrar Δ3132px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G25 | oyun | Elden bit düğmesi | ✓ · tekrar Δ4374px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G26 | oyun | Taş fırlatılıyor | ✓ · tekrar Δ3204px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G27 | oyun | Nükleer patlama | ✓ · tekrar Δ4339px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G28 | oyun | ELDEN BİTTİN | ✓ · tekrar Δ17439px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G29 | oyun | El sonu (kazandın) | ✓ · tekrar Δ4869px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G30 | oyun | Sıra sende | ✓ · tekrar Δ10568px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G31 | oyun | Soldan alındı + Geri bırak | ✓ · tekrar Δ8990px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G32 | oyun | Masa ayarları | ✓ · tekrar Δ574px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G33 | oyun | Masadan kalk onayı | ✓ · tekrar Δ6751px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| G34 | oyun | El sonu (Ayşe kazandı) | ✓ · tekrar Δ2147px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T01 | masa | Bekleme: 2/4 oyuncu | ✓ · tekrar Δ2409px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T02 | masa | Masa doldu, geri sayım | ✓ · tekrar Δ5550px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T03 | masa | Dağıtım: girdap, karma | ✓ · tekrar Δ4530px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T04 | masa | Dağıtım bitti, İlk hamle senin | ✓ · tekrar Δ36071px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T05 | masa | Çekme aşaması, Ayşe'nin perleri | ✓ · tekrar Δ10377px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T06 | masa | Çay ısmarlandı bildirimi | ✓ · tekrar Δ9892px | Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs | bekliyor |  |
-| T07 | masa | Oyuncu kartı (Zeynep), hızlı ikram | ✓ · tekrar Δ5394px | Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs | bekliyor |  |
-| T08 | masa | Hediye paneli · İkram | ✓ · tekrar Δ3275px | Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs | bekliyor |  |
-| T09 | masa | Hediye paneli · Hediye (Pasta) | ✓ · tekrar Δ4522px | Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs | bekliyor |  |
-| T10 | masa | Hediye paneli · Emoji | ✓ · tekrar Δ6835px | Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs | bekliyor |  |
-| T11 | masa | Roket uçuşu | ✓ · tekrar Δ333754px | Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs | bekliyor |  |
-| T12 | masa | Roket indi + teşekkür balonu | ✓ · tekrar Δ4521px | Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs | bekliyor |  |
-| T13 | masa | Sohbet paneli | ✓ · tekrar Δ3030px | Table/Scripts/Hud/TableHud.Social.cs | bekliyor |  |
-| T14 | masa | El açıldı · Yere aç / İşle | ✓ · tekrar Δ3339px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T15 | masa | Ayarlar · Görünüm | ✓ · tekrar Δ1895px | Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs | bekliyor |  |
-| T16 | masa | Masa ayarları · Oyun | ✓ · tekrar Δ4027px | Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs | bekliyor |  |
-| T17 | masa | Masa ayarları · Ses | ✓ · tekrar Δ913px | Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs | bekliyor |  |
-| T18 | masa | Masa ayarları · Bildirimler | ✓ · tekrar Δ1556px | Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs | bekliyor |  |
-| T19 | masa | Tema: Ceviz salon + Klasik ceviz ıstaka | ✓ · tekrar Δ17451px | Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs | bekliyor |  |
-| T20 | masa | Tema: Hologram + Neon cam ıstaka | ✓ · tekrar Δ27754px | Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs | bekliyor |  |
-| T21 | masa | Tema: Andromeda masa + ıstaka | ✓ · tekrar Δ8418px | Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs | bekliyor |  |
-| T22 | masa | Kuşbakışı görünüm (Andromeda) | ✓ · tekrar Δ24252px | Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs | bekliyor |  |
-| T23 | masa | Bitiş anı: Ayşe bitirdi | ✓ · tekrar Δ4648px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T24 | masa | El sonu tablosu | ✓ · tekrar Δ684px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T25 | masa | Masadan kalk onayı | ✓ · tekrar Δ8886px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T26 | masa | Bağlantı koptu | ✓ · tekrar Δ4172px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T27 | masa | EN — oyun sırasında | ✓ · tekrar Δ8171px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T28 | masa | Botlara karşı: başlık, ANTRENMAN, el sayacı | ✓ · tekrar Δ9183px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T30 | masa | Botlara karşı · masadan kalk onayı | ✓ · tekrar Δ5009px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
+| 01 | menu | Ana menü, Satürn, Tekli seçili | ✓ · tekrar Δ21490px | Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs | eşleşti | [run9] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.74 |
+| 02 | menu | Ana menü · tema mars | ✓ · tekrar Δ21016px | Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs | eşleşti | [run9] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.57 |
+| 03 | menu | Ana menü · tema neptun | ✓ · tekrar Δ22786px | Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs | eşleşti | [run9] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.81 |
+| 04 | menu | Ana menü · tema jupiter | ✓ · tekrar Δ23884px | Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs | eşleşti | [run9] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.84 |
+| 05 | menu | Ana menü · tema venus | ✓ · tekrar Δ17506px | Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs | eşleşti | [run9] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.79 |
+| 06 | menu | Eşli modu seçili | ✓ · tekrar Δ2759px | Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs | eşleşti | [run9] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.35 |
+| 10 | menu | Ayarlar → Oyun | ✓ · tekrar Δ72px | Scripts/Screens/SettingsController.cs | eşleşti | [run9] metin 65/66 (kayık 0, eksik 0, fazla 0) · ad 65/81 · UI piksel %5.92 |
+| 11 | menu | Ayarlar → Ses | ✓ · tekrar Δ533px | Scripts/Screens/SettingsController.cs | eşleşti | [run9] metin 62/63 (kayık 0, eksik 0, fazla 0) · ad 64/80 · UI piksel %5.21 |
+| 12 | menu | Ayarlar → Görüntü | ✓ · tekrar Δ150px | Scripts/Screens/SettingsController.cs | bilinçli fark | UF-607 (menü hattı): "Yerel · Monitör en fazla …" gerçek monitörden okunur; prototip sabit 1280×720 yazar [run9] metin 74/77 (kayık 1, eksik 1, fazla 1) · ad 67/85 · UI piksel %10.9 |
+| 13 | menu | Ayarlar → Dil | ✓ · tekrar Δ867px | Scripts/Screens/SettingsController.cs | eşleşti | [run9] metin 55/56 (kayık 0, eksik 0, fazla 0) · ad 61/72 · UI piksel %3.0 |
+| 14 | menu | Ayarlar → Hesap | ✓ · tekrar Δ365px | Scripts/Screens/SettingsController.cs | eşleşti | [run9] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 61/74 · UI piksel %5.75 |
+| 15 | menu | Profili düzenle | ✓ · tekrar Δ184px | Scripts/Dialogs/EditProfileController.cs | eşleşti | [run9] metin 82/83 (kayık 0, eksik 0, fazla 1) · ad 98/112 · UI piksel %2.91 |
+| 16 | menu | Profili düzenle · Altın çerçeve seçili | ✓ · tekrar Δ11538px | Scripts/Dialogs/EditProfileController.cs | eşleşti | [run9] metin 82/83 (kayık 0, eksik 0, fazla 1) · ad 98/112 · UI piksel %3.03 |
+| 17 | menu | Profili düzenle · geçersiz ad | ✓ · tekrar Δ10902px | Scripts/Dialogs/EditProfileController.cs | eşleşti | [run9] metin 82/83 (kayık 0, eksik 0, fazla 1) · ad 98/112 · UI piksel %2.68 |
+| 18 | menu | Ayarlar → Hesap · kaydedildi (altın çerçeve) | ✓ · tekrar Δ242px | Scripts/Dialogs/EditProfileController.cs | eşleşti | [run9] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 61/74 · UI piksel %5.76 |
+| 19 | menu | Çıkış onayı | ✓ · tekrar Δ70px | Scripts/Dialogs/ConfirmController.cs, DoneController.cs | eşleşti | [run9] metin 67/68 (kayık 0, eksik 0, fazla 0) · ad 65/79 · UI piksel %3.11 |
+| 20 | menu | Çıkış yapıldı | ✓ · tekrar Δ47px | Scripts/Dialogs/ConfirmController.cs, DoneController.cs | eşleşti | [run9] metin 66/67 (kayık 0, eksik 0, fazla 0) · ad 64/78 · UI piksel %1.22 |
+| 21 | menu | Hesap silme onayı (pasif) | ✓ · tekrar Δ28px | Scripts/Dialogs/ConfirmController.cs, DoneController.cs | bilinçli fark | EK-605 (menü hattı): prototip hesap silme metninde DEMO-04 sabiti "125.400 çip ve 340 elmas" yazar; Unity gerçek bakiyeyi gösterir [run9] metin 70/72 (kayık 0, eksik 1, fazla 1) · ad 67/81 · UI piksel %3.63 |
+| 22 | menu | SİL yazıldı (aktif) | ✓ · tekrar Δ78px | Scripts/Dialogs/ConfirmController.cs, DoneController.cs | bilinçli fark | EK-605 (menü hattı): prototip hesap silme metninde DEMO-04 sabiti "125.400 çip ve 340 elmas" yazar; Unity gerçek bakiyeyi gösterir [run9] metin 70/72 (kayık 0, eksik 1, fazla 2) · ad 67/81 · UI piksel %3.67 |
+| 30 | menu | Mağaza → Çip | ✓ · tekrar Δ988px | Scripts/Screens/ShopController.cs | eşleşti | [run9] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 33/70 · UI piksel %6.03 |
+| 31 | menu | Mağaza → Elmas | ✓ · tekrar Δ485px | Scripts/Screens/ShopController.cs | eşleşti | [run9] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 33/70 · UI piksel %5.65 |
+| 32 | menu | Mağaza → Görünüm | ✓ · tekrar Δ14166px | Scripts/Screens/ShopController.cs | eşleşti | [run9] metin 59/61 (kayık 1, eksik 0, fazla 0) · ad 33/67 · UI piksel %6.8 |
+| 40 | menu | Arkadaşlar → Çevrimiçi | ✓ · tekrar Δ191px | Scripts/Screens/FriendsController.cs | eşleşti | [run9] metin 59/60 (kayık 0, eksik 0, fazla 0) · ad 48/66 · UI piksel %3.6 |
+| 41 | menu | Arkadaşlar → Tümü | ✓ · tekrar Δ14067px | Scripts/Screens/FriendsController.cs | eşleşti | [run9] metin 71/75 (kayık 3, eksik 0, fazla 0) · ad 60/78 · UI piksel %4.06 |
+| 42 | menu | "ay" araması | ✓ · tekrar Δ185px | Scripts/Screens/FriendsController.cs | eşleşti | [run9] metin 49/50 (kayık 0, eksik 0, fazla 1) · ad 41/59 · UI piksel %2.89 |
+| 43 | menu | İstekler | ✓ · tekrar Δ67px | Scripts/Screens/FriendsController.cs | eşleşti | [run9] metin 56/57 (kayık 0, eksik 0, fazla 0) · ad 44/63 · UI piksel %3.63 |
+| 44 | menu | Arkadaş ekle — boş | ✓ · tekrar Δ17px | Scripts/Dialogs/AddFriendController.cs | eşleşti | [run9] metin 67/68 (kayık 0, eksik 0, fazla 0) · ad 56/75 · UI piksel %4.04 |
+| 45 | menu | Arkadaş ekle · MK-3321 bulundu | ✓ · tekrar Δ196px | Scripts/Dialogs/AddFriendController.cs | eşleşti | [run9] metin 72/73 (kayık 0, eksik 0, fazla 1) · ad 59/78 · UI piksel %4.59 |
+| 46 | menu | Arkadaş ekle · istek gönderildi | ✓ · tekrar Δ8390px | Scripts/Dialogs/AddFriendController.cs | eşleşti | [run9] metin 72/73 (kayık 0, eksik 0, fazla 1) · ad 59/78 · UI piksel %4.53 |
+| 47 | menu | Arkadaş ekle · bulunamadı | ✓ · tekrar Δ8297px | Scripts/Dialogs/AddFriendController.cs | eşleşti | [run9] metin 67/68 (kayık 0, eksik 0, fazla 1) · ad 56/75 · UI piksel %4.78 |
+| 50 | menu | Liderlik → Haftalık | ✓ · tekrar Δ107px | Scripts/Screens/LeaderboardController.cs | eşleşti | [run9] metin 97/98 (kayık 0, eksik 0, fazla 0) · ad 76/93 · UI piksel %4.97 |
+| 51 | menu | Liderlik → Sezon | ✓ · tekrar Δ83px | Scripts/Screens/LeaderboardController.cs | eşleşti | [run9] metin 97/98 (kayık 0, eksik 0, fazla 0) · ad 76/93 · UI piksel %5.15 |
+| 52 | menu | Liderlik → Arkadaşlar | ✓ · tekrar Δ13326px | Scripts/Screens/LeaderboardController.cs | eşleşti | [run9] metin 77/78 (kayık 0, eksik 0, fazla 0) · ad 60/77 · UI piksel %4.09 |
+| 60 | menu | Günlük ödül | ✓ · tekrar Δ14384px | Scripts/Screens (DailyReward panel, MenuView) | bekliyor | [run9] metin 72/80 (kayık 7, eksik 0, fazla 0) · ad 32/80 · UI piksel %6.74 |
+| 61 | menu | Gün toplandı | ✓ · tekrar Δ13893px | Scripts/Screens (DailyReward panel, MenuView) | bekliyor | [run9] metin 72/80 (kayık 7, eksik 0, fazla 0) · ad 32/80 · UI piksel %6.68 |
+| 70 | menu | Kurallar 1 | ✓ · tekrar Δ989px | Scripts/Screens (Rules panel, MenuView) | eşleşti | [run9] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 53/74 · UI piksel %4.7 |
+| 71 | menu | Kurallar 2 | ✓ · tekrar Δ93px | Scripts/Screens (Rules panel, MenuView) | eşleşti | [run9] metin 54/55 (kayık 0, eksik 0, fazla 0) · ad 51/68 · UI piksel %4.81 |
+| 72 | menu | Kurallar 3 | ✓ · tekrar Δ97px | Scripts/Screens (Rules panel, MenuView) | eşleşti | [run9] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 53/77 · UI piksel %4.86 |
+| 73 | menu | Kurallar 4 | ✓ · tekrar Δ100px | Scripts/Screens (Rules panel, MenuView) | eşleşti | [run9] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 53/74 · UI piksel %4.22 |
+| 74 | menu | Kurallar 5 | ✓ · tekrar Δ162px | Scripts/Screens (Rules panel, MenuView) | eşleşti | [run9] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 53/74 · UI piksel %3.92 |
+| 75 | menu | Kurallar 6 | ✓ · tekrar Δ117px | Scripts/Screens (Rules panel, MenuView) | eşleşti | [run9] metin 55/56 (kayık 0, eksik 0, fazla 0) · ad 51/69 · UI piksel %5.52 |
+| 80 | menu | Profilim → Genel | ✓ · tekrar Δ39px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | eşleşti | [run9] metin 93/94 (kayık 0, eksik 0, fazla 0) · ad 88/105 · UI piksel %8.77 |
+| 81 | menu | Profilim → Rozetler | ✓ · tekrar Δ707px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | bekliyor | [run9] metin 65/83 (kayık 17, eksik 0, fazla 0) · ad 73/90 · UI piksel %10.03 |
+| 82 | menu | Profilim → Maç geçmişi | ✓ · tekrar Δ1007px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | eşleşti | [run9] metin 96/97 (kayık 0, eksik 0, fazla 0) · ad 87/104 · UI piksel %5.57 |
+| 83 | menu | Profili paylaş | ✓ · tekrar Δ6738px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | eşleşti | [run9] metin 124/127 (kayık 2, eksik 0, fazla 0) · ad 121/139 · UI piksel %6.13 |
+| 84 | menu | Bağlantı kopyalandı | ✓ · tekrar Δ6881px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | eşleşti | [run9] metin 124/127 (kayık 2, eksik 0, fazla 0) · ad 121/139 · UI piksel %6.13 |
+| 90 | menu | EN — Ayarlar → Dil | ✓ · tekrar Δ260px | Scripts/Screens/SettingsController.cs | eşleşti | [run9] metin 55/56 (kayık 0, eksik 0, fazla 0) · ad 61/72 · UI piksel %3.43 |
+| 91 | menu | EN — Ayarlar → Oyun | ✓ · tekrar Δ136px | Scripts/Screens/SettingsController.cs | eşleşti | [run9] metin 65/66 (kayık 0, eksik 0, fazla 0) · ad 65/81 · UI piksel %6.1 |
+| 92 | menu | EN — Ana menü, Satürn, Tekli seçili | ✓ · tekrar Δ3164px | Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs | eşleşti | [run9] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %8.88 |
+| 93 | menu | EN — Mağaza → Çip | ✓ · tekrar Δ966px | Scripts/Screens/ShopController.cs | eşleşti | [run9] metin 62/64 (kayık 1, eksik 0, fazla 0) · ad 33/70 · UI piksel %5.98 |
+| 94 | menu | EN — Arkadaşlar → Çevrimiçi | ✓ · tekrar Δ161px | Scripts/Screens/FriendsController.cs | eşleşti | [run9] metin 58/60 (kayık 1, eksik 0, fazla 0) · ad 48/66 · UI piksel %3.28 |
+| 95 | menu | EN — Günlük ödül | ✓ · tekrar Δ14235px | Scripts/Screens (DailyReward panel, MenuView) | bekliyor | [run9] metin 72/80 (kayık 7, eksik 0, fazla 0) · ad 32/80 · UI piksel %7.32 |
+| 96 | menu | EN — Kurallar 1 | ✓ · tekrar Δ364px | Scripts/Screens (Rules panel, MenuView) | eşleşti | [run9] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 53/74 · UI piksel %4.98 |
+| 97 | menu | EN — Profilim → Genel | ✓ · tekrar Δ28px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | eşleşti | [run9] metin 93/94 (kayık 0, eksik 0, fazla 0) · ad 88/105 · UI piksel %8.5 |
+| S01 | acilis | Açılış / yükleme (GALAXY + 1 0 1, ilerleme) | ✓ · tekrar Δ3357px | Scripts/Screens/AuthFlow.cs | bilinçli fark | UNITY_FARKLARI UF-02 / EKSIKLER EK-004: ilerleme yüzdesi, mesajı ve ipucu yükleme olaylarına ve çağrı sırasına bağlı [run9] metin 3/10 (kayık 3, eksik 3, fazla 36) · ad 0/14 · UI piksel %46.73 |
+| S02 | acilis | Giriş seçimi | ✓ · tekrar Δ1148px | Scripts/Screens/AuthFlow.cs | eşleşti | [run9] metin 18/19 (kayık 0, eksik 0, fazla 33) · ad 1/18 · UI piksel %9.5 |
+| S03 | acilis | Giriş yap formu | ✓ · tekrar Δ1828px | Scripts/Screens/AuthFlow.cs | eşleşti | [run9] metin 16/17 (kayık 0, eksik 0, fazla 33) · ad 1/24 · UI piksel %8.18 |
+| S04 | acilis | Kayıt ol formu | ✓ · tekrar Δ2651px | Scripts/Screens/AuthFlow.cs | eşleşti | [run9] metin 15/16 (kayık 0, eksik 0, fazla 33) · ad 1/27 · UI piksel %8.04 |
+| S05 | acilis | Misafir girişi formu | ✓ · tekrar Δ963px | Scripts/Screens/AuthFlow.cs | eşleşti | [run9] metin 14/15 (kayık 0, eksik 0, fazla 34) · ad 1/27 · UI piksel %8.54 |
+| S06 | menu | Ana menü | ✓ · tekrar Δ1685px | Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs | eşleşti | [run9] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %9.45 |
+| S07 | menu | Ayarlar → Görüntü | ✓ · tekrar Δ547px | Scripts/Screens/SettingsController.cs | bilinçli fark | UF-607 (menü hattı): "Yerel · Monitör en fazla …" gerçek monitörden okunur; prototip sabit 1280×720 yazar [run9] metin 74/77 (kayık 1, eksik 1, fazla 1) · ad 67/85 · UI piksel %10.9 |
+| S08 | menu | Ayarlar → Oyun | ✓ · tekrar Δ17049px | Scripts/Screens/SettingsController.cs | eşleşti | [run9] metin 65/66 (kayık 0, eksik 0, fazla 0) · ad 65/81 · UI piksel %5.92 |
+| S09 | lobi | Lobi masa listesi | ✓ · tekrar Δ255px | Scripts/Screens/LobbyScreen*.cs | eşleşti | [run9] metin 155/155 (kayık 0, eksik 0, fazla 33) · ad 91/92 · UI piksel %11.91 |
+| S10 | lobi | Masa aç formu | ✓ · tekrar Δ16px | Scripts/Screens/LobbyScreen*.cs | eşleşti | [run9] metin 224/224 (kayık 0, eksik 0, fazla 42) · ad 161/162 · UI piksel %3.94 |
+| S11 | lobi | Şifreli masa PIN | ✓ · tekrar Δ93px | Scripts/Screens/LobbyScreen*.cs | eşleşti | [run9] metin 159/159 (kayık 0, eksik 0, fazla 33) · ad 100/101 · UI piksel %0.86 |
+| S12 | lobi | Kodla katıl | ✓ · tekrar Δ1392px | Scripts/Screens/LobbyScreen*.cs | eşleşti | [run9] metin 159/159 (kayık 0, eksik 0, fazla 33) · ad 98/99 · UI piksel %1.1 |
+| S13 | lobi | Bekleme odası (kurucu) | ✓ · tekrar Δ939px | Scripts/Screens/LobbyScreen*.cs | eşleşti | [run9] metin 48/49 (kayık 1, eksik 0, fazla 0) · ad 55/56 · UI piksel %7.59 |
+| S14 | lobi | Bekleme odası · arkadaş davet (Arkadaşlar) | ✓ · tekrar Δ2128px | Scripts/Screens/LobbyScreen*.cs | bilinçli fark | EKSIKLER EK-007 / lobi EK-801: paket karesi davet panelini açmıyor; Unity başlıktaki paneli açar (doğru kare docs/v4/lobby/ref/S14) [run9] metin 48/49 (kayık 1, eksik 0, fazla 44) · ad 55/56 · UI piksel %47.74 |
+| S15 | lobi | Bekleme odası · davet (Son oynadıkların) | ✓ · tekrar Δ5858px | Scripts/Screens/LobbyScreen*.cs | bilinçli fark | EKSIKLER EK-007 / lobi EK-801: paket karesi davet panelini açmıyor; Unity başlıktaki paneli açar (doğru kare docs/v4/lobby/ref/S15) [run9] metin 48/49 (kayık 1, eksik 0, fazla 33) · ad 55/56 · UI piksel %47.59 |
+| S16 | dereceli | Dereceli ana ekran | ✓ · tekrar Δ1598px | Scripts/Screens/RankedQueue.cs (yalnız kuyruk; dereceli ana ekranı yok) | eşleşti | [run9] metin 48/48 (kayık 0, eksik 0, fazla 0) · ad 48/49 · UI piksel %6.77 |
+| G01 | dagitim | Masa yükleniyor | ✓ · tekrar Δ1309px | Scripts/Screens/TableLoadingOverlay.cs | bekliyor | [run9] metin 0/30 (kayık 6, eksik 24, fazla 32) · ad 3/41 · UI piksel %13.01 |
+| G02 | dagitim | Bot balyaları diziyor | ✓ · tekrar Δ5188px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor | [run9] metin 16/28 (kayık 5, eksik 7, fazla 14) · ad 10/37 · UI piksel %21.58 |
+| G03 | dagitim | Sen diziyorsun | ✓ · tekrar Δ4978px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor | [run9] metin 16/28 (kayık 5, eksik 7, fazla 14) · ad 10/37 · UI piksel %22.02 |
+| G04 | dagitim | Zar at düğmesi | ✓ · tekrar Δ2869px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor | [run9] metin 16/28 (kayık 5, eksik 7, fazla 14) · ad 10/37 · UI piksel %18.91 |
+| G05 | dagitim | Zar yuvarlanıyor | ✓ · tekrar Δ46456px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor | [run9] metin 16/28 (kayık 5, eksik 7, fazla 14) · ad 10/37 · UI piksel %19.24 |
+| G06 | dagitim | 1. zar · Tekrar at | ✓ · tekrar Δ4562px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor | [run9] metin 16/28 (kayık 5, eksik 7, fazla 14) · ad 10/37 · UI piksel %21.83 |
+| G07 | dagitim | Gösterge açılıyor | ✓ · tekrar Δ60352px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor | [run9] metin 16/32 (kayık 5, eksik 11, fazla 14) · ad 10/41 · UI piksel %22.4 |
+| G08 | dagitim | Gösterge → okey kartı, fazla taş | ✓ · tekrar Δ5854px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor | [run9] metin 16/32 (kayık 5, eksik 11, fazla 14) · ad 10/41 · UI piksel %23.13 |
+| G09 | dagitim | Balyalar dağıtılıyor | ✓ · tekrar Δ4372px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor | [run9] metin 16/32 (kayık 5, eksik 11, fazla 14) · ad 10/41 · UI piksel %23.09 |
+| G10 | dagitim | Kalan balyalar ortaya | ✓ · tekrar Δ4698px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor | [run9] metin 16/32 (kayık 5, eksik 11, fazla 14) · ad 10/41 · UI piksel %23.27 |
+| G11 | dagitim | Istakalar doluyor | ✓ · tekrar Δ5574px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor | [run9] metin 9/32 (kayık 12, eksik 11, fazla 14) · ad 10/41 · UI piksel %47.97 |
+| G12 | dagitim | Oyun başladı (22 taş) | ✓ · tekrar Δ72214px | Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs | bekliyor | [run9] metin 16/30 (kayık 10, eksik 4, fazla 10) · ad 13/38 · UI piksel %21.68 |
+| G13 | oyun | El açıldı: perler ortada | ✓ · tekrar Δ4639px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 16/33 (kayık 10, eksik 7, fazla 16) · ad 13/40 · UI piksel %26.89 |
+| G14 | oyun | İşleme testi (herkes açık) | ✓ · tekrar Δ3509px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/34 (kayık 5, eksik 15, fazla 10) · ad 13/40 · UI piksel %30.49 |
+| G15 | oyun | Altın işleme göstergeleri | ✓ · tekrar Δ4575px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/34 (kayık 5, eksik 15, fazla 10) · ad 13/40 · UI piksel %33.63 |
+| G16 | oyun | Yeşil okey alma göstergesi (Y4 seçili) | ✓ · tekrar Δ3904px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/34 (kayık 5, eksik 15, fazla 10) · ad 13/40 · UI piksel %34.08 |
+| G17 | oyun | Okey alındı (Y4 ↔ okey) | ✓ · tekrar Δ16884px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/36 (kayık 5, eksik 17, fazla 11) · ad 13/42 · UI piksel %31.92 |
+| G18 | oyun | İşleme yapıldı + Geri topla | ✓ · tekrar Δ3085px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/34 (kayık 5, eksik 15, fazla 10) · ad 13/40 · UI piksel %32.81 |
+| G19 | oyun | Geri toplandı | ✓ · tekrar Δ2855px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/34 (kayık 5, eksik 15, fazla 10) · ad 13/40 · UI piksel %30.24 |
+| G20 | oyun | Hatalı açma (turuncu Aç) | ✓ · tekrar Δ7076px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/32 (kayık 8, eksik 10, fazla 15) · ad 13/39 · UI piksel %29.5 |
+| G21 | oyun | Hatalı per masada | ✓ · tekrar Δ3838px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 15/33 (kayık 10, eksik 8, fazla 13) · ad 13/39 · UI piksel %29.01 |
+| G22 | oyun | Ceza tostu | ✓ · tekrar Δ9020px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/32 (kayık 8, eksik 10, fazla 15) · ad 13/39 · UI piksel %29.21 |
+| G23 | oyun | İşlek taş testi | ✓ · tekrar Δ6029px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/34 (kayık 5, eksik 15, fazla 10) · ad 13/40 · UI piksel %33.12 |
+| G24 | oyun | İşlek taş cezası (B4 atıldı) | ✓ · tekrar Δ4094px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 19/32 (kayık 10, eksik 3, fazla 6) · ad 13/38 · UI piksel %26.96 |
+| G25 | oyun | Elden bit düğmesi | ✓ · tekrar Δ19579px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/31 (kayık 7, eksik 10, fazla 8) · ad 13/39 · UI piksel %30.02 |
+| G26 | oyun | Taş fırlatılıyor | ✓ · tekrar Δ4280px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/31 (kayık 7, eksik 10, fazla 8) · ad 13/39 · UI piksel %28.77 |
+| G27 | oyun | Nükleer patlama | ✓ · tekrar Δ5804px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/31 (kayık 7, eksik 10, fazla 8) · ad 13/39 · UI piksel %26.87 |
+| G28 | oyun | ELDEN BİTTİN | ✓ · tekrar Δ19872px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/31 (kayık 7, eksik 10, fazla 8) · ad 13/39 · UI piksel %27.35 |
+| G29 | oyun | El sonu (kazandın) | ✓ · tekrar Δ5701px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/31 (kayık 7, eksik 10, fazla 8) · ad 13/39 · UI piksel %29.7 |
+| G30 | oyun | Sıra sende | ✓ · tekrar Δ14166px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 17/31 (kayık 8, eksik 6, fazla 12) · ad 13/39 · UI piksel %29.5 |
+| G31 | oyun | Soldan alındı + Geri bırak | ✓ · tekrar Δ14967px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 16/33 (kayık 8, eksik 9, fazla 16) · ad 13/41 · UI piksel %31.92 |
+| G32 | oyun | Masa ayarları | ✓ · tekrar Δ2687px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 19/88 (kayık 61, eksik 8, fazla 41) · ad 13/85 · UI piksel %29.14 |
+| G33 | oyun | Masadan kalk onayı | ✓ · tekrar Δ11697px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 16/34 (kayık 11, eksik 7, fazla 12) · ad 13/43 · UI piksel %16.29 |
+| G34 | oyun | El sonu (Ayşe kazandı) | ✓ · tekrar Δ2274px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/68 (kayık 7, eksik 47, fazla 7) · ad 13/75 · UI piksel %68.3 |
+| T01 | masa | Bekleme: 2/4 oyuncu | ✓ · tekrar Δ2723px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 10/19 (kayık 4, eksik 5, fazla 13) · ad 10/26 · UI piksel %17.85 |
+| T02 | masa | Masa doldu, geri sayım | ✓ · tekrar Δ5250px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 8/26 (kayık 9, eksik 9, fazla 16) · ad 10/36 · UI piksel %36.78 |
+| T03 | masa | Dağıtım: girdap, karma | ✓ · tekrar Δ2048px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 16/28 (kayık 5, eksik 7, fazla 14) · ad 10/37 · UI piksel %27.03 |
+| T04 | masa | Dağıtım bitti, İlk hamle senin | ✓ · tekrar Δ5518px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 16/30 (kayık 8, eksik 6, fazla 11) · ad 13/38 · UI piksel %28.35 |
+| T05 | masa | Çekme aşaması, Ayşe'nin perleri | ✓ · tekrar Δ12249px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 17/31 (kayık 8, eksik 6, fazla 12) · ad 13/39 · UI piksel %29.52 |
+| T06 | masa | Çay ısmarlandı bildirimi | ✓ · tekrar Δ9093px | Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs | bekliyor | [run9] metin 17/31 (kayık 8, eksik 6, fazla 15) · ad 13/39 · UI piksel %28.49 |
+| T07 | masa | Oyuncu kartı (Zeynep), hızlı ikram | ✓ · tekrar Δ8203px | Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs | bekliyor | [run9] metin 20/47 (kayık 17, eksik 10, fazla 14) · ad 13/54 · UI piksel %28.37 |
+| T08 | masa | Hediye paneli · İkram | ✓ · tekrar Δ7176px | Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs | bekliyor | [run9] metin 33/59 (kayık 11, eksik 15, fazla 14) · ad 13/72 · UI piksel %16.94 |
+| T09 | masa | Hediye paneli · Hediye (Pasta) | ✓ · tekrar Δ5543px | Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs | bekliyor | [run9] metin 33/55 (kayık 9, eksik 13, fazla 14) · ad 13/68 · UI piksel %17.17 |
+| T10 | masa | Hediye paneli · Emoji | ✓ · tekrar Δ5838px | Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs | bekliyor | [run9] metin 40/65 (kayık 17, eksik 8, fazla 12) · ad 13/78 · UI piksel %14.71 |
+| T11 | masa | Roket uçuşu | ✓ · tekrar Δ261144px | Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs | bekliyor | [run9] metin 16/34 (kayık 12, eksik 6, fazla 11) · ad 13/42 · UI piksel %27.93 |
+| T12 | masa | Roket indi + teşekkür balonu | ✓ · tekrar Δ9570px | Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs | bekliyor | [run9] metin 17/31 (kayık 8, eksik 6, fazla 11) · ad 13/39 · UI piksel %28.43 |
+| T13 | masa | Sohbet paneli | ✓ · tekrar Δ3972px | Table/Scripts/Hud/TableHud.Social.cs | bekliyor | [run9] metin 22/49 (kayık 12, eksik 15, fazla 11) · ad 13/61 · UI piksel %28.14 |
+| T14 | masa | El açıldı · Yere aç / İşle | ✓ · tekrar Δ3915px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 16/33 (kayık 10, eksik 7, fazla 11) · ad 13/40 · UI piksel %30.31 |
+| T15 | masa | Ayarlar · Görünüm | ✓ · tekrar Δ1022px | Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs | bekliyor | [run9] metin 19/88 (kayık 61, eksik 8, fazla 41) · ad 13/85 · UI piksel %29.22 |
+| T16 | masa | Masa ayarları · Oyun | ✓ · tekrar Δ2449px | Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs | bekliyor | [run9] metin 20/55 (kayık 29, eksik 6, fazla 12) · ad 13/70 · UI piksel %16.59 |
+| T17 | masa | Masa ayarları · Ses | ✓ · tekrar Δ1689px | Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs | bekliyor | [run9] metin 20/52 (kayık 26, eksik 6, fazla 12) · ad 13/71 · UI piksel %17.48 |
+| T18 | masa | Masa ayarları · Bildirimler | ✓ · tekrar Δ2346px | Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs | bekliyor | [run9] metin 20/47 (kayık 21, eksik 6, fazla 12) · ad 13/65 · UI piksel %15.49 |
+| T19 | masa | Tema: Ceviz salon + Klasik ceviz ıstaka | ✓ · tekrar Δ14955px | Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs | bekliyor | [run9] metin 17/31 (kayık 8, eksik 6, fazla 12) · ad 13/39 · UI piksel %25.11 |
+| T20 | masa | Tema: Hologram + Neon cam ıstaka | ✓ · tekrar Δ25799px | Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs | bekliyor | [run9] metin 17/31 (kayık 8, eksik 6, fazla 12) · ad 13/39 · UI piksel %28.69 |
+| T21 | masa | Tema: Andromeda masa + ıstaka | ✓ · tekrar Δ10346px | Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs | bekliyor | [run9] metin 17/31 (kayık 8, eksik 6, fazla 12) · ad 13/39 · UI piksel %29.3 |
+| T22 | masa | Kuşbakışı görünüm (Andromeda) | ✓ · tekrar Δ5317px | Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs | bekliyor | [run9] metin 11/31 (kayık 14, eksik 6, fazla 12) · ad 13/39 · UI piksel %33.28 |
+| T23 | masa | Bitiş anı: Ayşe bitirdi | ✓ · tekrar Δ6455px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/33 (kayık 7, eksik 12, fazla 7) · ad 13/42 · UI piksel %43.91 |
+| T24 | masa | El sonu tablosu | ✓ · tekrar Δ3153px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/68 (kayık 7, eksik 47, fazla 7) · ad 13/75 · UI piksel %68.23 |
+| T25 | masa | Masadan kalk onayı | ✓ · tekrar Δ8869px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 16/34 (kayık 11, eksik 7, fazla 12) · ad 13/43 · UI piksel %16.17 |
+| T26 | masa | Bağlantı koptu | ✓ · tekrar Δ5520px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 18/36 (kayık 12, eksik 6, fazla 11) · ad 19/44 · UI piksel %15.92 |
+| T27 | masa | EN — oyun sırasında | ✓ · tekrar Δ12860px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 11/31 (kayık 1, eksik 19, fazla 25) · ad 13/39 · UI piksel %28.33 |
+| T28 | masa | Botlara karşı: başlık, ANTRENMAN, el sayacı | ✓ · tekrar Δ32733px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/31 (kayık 9, eksik 8, fazla 16) · ad 13/39 · UI piksel %29.53 |
+| T30 | masa | Botlara karşı · masadan kalk onayı | ✓ · tekrar Δ8555px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 13/34 (kayık 12, eksik 9, fazla 16) · ad 13/43 · UI piksel %19.4 |
 | T33 | masa | Okey rozeti masada | — | Table/Scripts/Hud/TableHud.cs + Game/RackInput.cs okey ipucu (ShowOkeyTip) | kaldırıldı | kaldırıldı: masada okey temsil rozeti yok; okeyin değeri perdeki konumundan çıkar (R-13) · Unity karşılığı kaldırılacak |
-| T34 | masa | Ceza: attığın K9 ile bot açtı (+90, R-43) | ✓ · tekrar Δ7345px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T35 | masa | Eksik açılış cezası (+101) | ✓ · tekrar Δ5636px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T36 | masa | Ceza: masadaki okeyin alındı (+101, R-44) | ✓ · tekrar Δ10893px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T38 | masa | Yerden alındı + Geri bırak | ✓ · tekrar Δ7296px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T39 | masa | Soldan alınan taş halkaya geri sürükleniyor | ✓ · tekrar Δ8596px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
+| T34 | masa | Ceza: attığın K9 ile bot açtı (+90, R-43) | ✓ · tekrar Δ9560px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 18/35 (kayık 10, eksik 7, fazla 15) · ad 13/42 · UI piksel %29.44 |
+| T35 | masa | Eksik açılış cezası (+101) | ✓ · tekrar Δ7821px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 15/33 (kayık 10, eksik 8, fazla 13) · ad 13/39 · UI piksel %31.26 |
+| T36 | masa | Ceza: masadaki okeyin alındı (+101, R-44) | ✓ · tekrar Δ10113px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 17/36 (kayık 12, eksik 7, fazla 13) · ad 13/42 · UI piksel %28.7 |
+| T38 | masa | Yerden alındı + Geri bırak | ✓ · tekrar Δ14244px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 16/33 (kayık 8, eksik 9, fazla 16) · ad 13/41 · UI piksel %32.65 |
+| T39 | masa | Soldan alınan taş halkaya geri sürükleniyor | ✓ · tekrar Δ9928px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 19/36 (kayık 8, eksik 9, fazla 13) · ad 13/44 · UI piksel %30.59 |
 | T40 | masa | Mesaj kataloğu | — | — | kaldırıldı | kaldırıldı: Mesaj kataloğu bir referans sayfası: Referans - Masa Ek Durumlar |
 | T41 | masa | Mesaj kuyruğu | — | — | kaldırıldı | kaldırıldı: Mesaj kuyruğu referans sayfasında; oyunda tek satırlık sistem mesajı + tost |
-| T42 | masa | El sonu · botlara karşı | ✓ · tekrar Δ569px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T43 | masa | El sonu · çevrimiçi masa | ✓ · tekrar Δ1102px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
+| T42 | masa | El sonu · botlara karşı | ✓ · tekrar Δ4261px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 11/68 (kayık 8, eksik 49, fazla 11) · ad 13/75 · UI piksel %68.08 |
+| T43 | masa | El sonu · çevrimiçi masa | ✓ · tekrar Δ1293px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/68 (kayık 7, eksik 47, fazla 7) · ad 13/75 · UI piksel %68.24 |
 | T44 | masa | El sonu puansız (çiftle bitiş) | — | Table/Scripts/Hud/TableHud.cs el sonu | kaldırıldı | kaldırıldı: Çiftle bitiş artık puanlanır (×2, R-50…R-56); "Bu el puanlanmadı" yok · Unity karşılığı kaldırılacak |
 | T45 | masa | Maç sonu · kazandın | — | Table/Scripts/Hud/TableHud.cs BuildMatchEnd + Game/TableGame.cs ShowMatchEnd | kaldırıldı | kaldırıldı: Ayrı maç sonu ekranı yok; maç sonu lobide tost (dereceli: S16 sonuç) · Unity karşılığı kaldırılacak |
 | T46 | masa | Maç sonu · 2. sıra | — | Table/Scripts/Hud/TableHud.cs BuildMatchEnd | kaldırıldı | kaldırıldı: Ayrı maç sonu ekranı yok (T45 ile aynı) · Unity karşılığı kaldırılacak |
-| T47 | masa | Okeyi al: Y4 sürükleniyor, uygun hedefler parlıyor | ✓ · tekrar Δ5011px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
+| T47 | masa | Okeyi al: Y4 sürükleniyor, uygun hedefler parlıyor | ✓ · tekrar Δ4881px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/34 (kayık 5, eksik 15, fazla 10) · ad 13/40 · UI piksel %35.45 |
 | T48 | masa | Okey alma ipucu | — | Table/Scripts/Game/TableGame.cs ShowOkeyTip | kaldırıldı | kaldırıldı: Okeye uzun basma ipucu yok · Unity karşılığı kaldırılacak |
-| T49 | masa | Okeyi al: yanlış taşla deneme (K5) | ✓ · tekrar Δ7553px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor |  |
-| T50 | masa | Menü → masa yükleme ekranı | ✓ · tekrar Δ7250px | Scripts/Screens/TableLoadingOverlay.cs | bekliyor |  |
-| T51 | masa | Masa açılamadı hatası | ✓ · tekrar Δ522px | Scripts/Screens/TableLoadingOverlay.cs | bekliyor |  |
+| T49 | masa | Okeyi al: yanlış taşla deneme (K5) | ✓ · tekrar Δ7299px | Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs | bekliyor | [run9] metin 14/34 (kayık 5, eksik 15, fazla 10) · ad 13/40 · UI piksel %30.1 |
+| T50 | masa | Menü → masa yükleme ekranı | ✓ · tekrar Δ7217px | Scripts/Screens/TableLoadingOverlay.cs | bekliyor | [run9] metin 0/30 (kayık 7, eksik 23, fazla 31) · ad 3/41 · UI piksel %17.95 |
+| T51 | masa | Masa açılamadı hatası | ✓ · tekrar Δ658px | Scripts/Screens/TableLoadingOverlay.cs | bekliyor | [run9] metin 2/10 (kayık 2, eksik 6, fazla 33) · ad 0/14 · UI piksel %17.07 |

@@ -20,8 +20,13 @@ Her hat kendi kayıtlarını tutar; kimlik aralıkları: 0xx ana, 1xx kural, 2xx
 
 | Dosya | Kayıt | T | K | D | U | P |
 |---|---|---|---|---|---|---|
-| `EKSIKLER.md` | 4 (EK-001…EK-004) | 0 | 0 | 0 | 0 | 4 |
+| `EKSIKLER.md` | 7 (EK-001…EK-007) | 0 | 0 | 0 | 0 | 7 |
+| `audio/EKSIKLER.md` | 10 (EK-901…EK-910) | 0 | 0 | 0 | 5 | 5 |
 | `hat-a/EKSIKLER.md` | 8 (EK-101…EK-108) | 1 | 0 | 0 | 2 | 5 |
 | `hat-b/EKSIKLER.md` | 25 (EK-201…EK-225) | 16 | 1 | 1 | 1 | 6 |
 | `hat-c/EKSIKLER.md` | 11 (EK-301…EK-311) | 0 | 1 | 0 | 4 | 6 |
 | `hat-d/EKSIKLER.md` | 13 (EK-401…EK-413) | 0 | 1 | 0 | 7 | 5 |
+| `lobby/EKSIKLER.md` | 13 (EK-801…EK-813) | 3 | 0 | 1 | 2 | 7 |
+| `menu/EKSIKLER.md` | 14 (EK-601…EK-614) | 1 | 0 | 2 | 0 | 11 |
+| `ranked/EKSIKLER.md` | 15 (EK-701…EK-715) | 7 | 0 | 4 | 1 | 3 |
+| `table/EKSIKLER.md` | 12 (EK-501…EK-512) | 4 | 3 | 1 | 1 | 3 |

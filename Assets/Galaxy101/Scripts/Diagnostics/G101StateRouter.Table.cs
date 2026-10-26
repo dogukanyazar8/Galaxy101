@@ -89,6 +89,16 @@ namespace Galaxy101.Diagnostics
             while (Game == null || Game.Model == null || Hud == null) { if (Time.realtimeSinceStartup > until) throw new TimeoutException("table did not open"); yield return null; }
             yield return Settle(.4f);
             yield return Go(tableFlow);
+            // DEMO (G101-Masa dealFinish): 2.6 s after a real deal ends, seat 2 treats the table to tea.
+            if (tableFlow == null || tableFlow == "deal" || tableFlow == "seat") StartCoroutine(TeaAfterDeal());
+        }
+
+        private IEnumerator TeaAfterDeal()
+        {
+            var game = Game;
+            while (game != null && !(game.Model.HasHand && game.Model.Deal == null && !game.Ceremony.Running && game.Current != TableGame.Phase.Deal)) { if (GameClock.Frozen) yield break; yield return null; }
+            if (game == null) yield break;
+            yield return After(2.6f, () => { var hud = Hud; hud?.BotGift(2, "tea", -1, TableStrings.Get("quick.4", hud.L("tr", "en"))); });
         }
 
         private TableLoadingOverlay Loading;

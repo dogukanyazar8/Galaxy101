@@ -35,7 +35,11 @@ namespace Galaxy101.Online
             watched = online;
             unwatch = online.Realtime.On(V4Messages.MatchStart, data =>
             {
-                if (Current != null && !Current.Closed && Current.Client.Status != G101Rules.StatusMatchOver) return;   // its own subscription has it
+                // A session left open for another table (one nobody opened, e.g. a lobby test that keeps the lobby on
+                // screen) gives way to the new match; the same table's start is already its own.
+                var id = (string)data?["table"]?["id"];
+                if (Current != null && !Current.Closed && Current.Client.Status != G101Rules.StatusMatchOver && Current.Client.Table?.Id == id) return;
+                Current?.Dispose();
                 var session = new V4TableSession(online);
                 session.Receive(V4Messages.MatchStart, data);
                 Started?.Invoke(session);

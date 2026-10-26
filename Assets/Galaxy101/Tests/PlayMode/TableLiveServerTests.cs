@@ -64,6 +64,7 @@ namespace Galaxy101.Tests
                 if (probe.responseCode != 200) Assert.Inconclusive("No game server at " + GalaxyApi.ResolveServer() + " (scripts/Start-LocalServer.ps1).");
             }
             MainMenuController.OpenMatchTable = false;   // no menu here: the test opens the table itself
+            V4TableSession.Current?.Dispose();             // a session an earlier test left open (lobby tests keep the lobby on screen)
             var online = GalaxyOnline.Ensure();
             // A fresh guest per test: an account left seated by an earlier live test (lobby, auth) answers E_ALREADY_SEATED.
             if (online.SignedIn) { var signOut = online.SignOutAsync(); yield return Until(() => signOut.IsCompleted, 10, "sign-out"); }
@@ -158,6 +159,7 @@ namespace Galaxy101.Tests
             V4TableSession.Started += shadowStart; offs.Add(() => V4TableSession.Started -= shadowStart);
             V4TableSession session = null; yield return StartAgainstBots(online, 3, s => session = s);
             var game = Build(session);
+            yield return Until(() => game.Board != null && game.Ceremony != null, 10, "the table built");
             var model = session.Client;
 
             // D-24: the deal ceremony (a bot dealer ~21.7 s; when I deal, "Zar at" rolls each die).
@@ -225,6 +227,7 @@ namespace Galaxy101.Tests
             GalaxyOnline online = null; yield return SignIn(o => online = o);
             V4TableSession session = null; yield return StartAgainstBots(online, 1, s => session = s);
             var game = Build(session);
+            yield return Until(() => game.Board != null && game.Ceremony != null, 10, "the table built");
             yield return Until(() => session.Client.HasHand, 30, "the first hand");
 
             bool back = false;

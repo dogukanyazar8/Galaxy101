@@ -923,6 +923,7 @@ namespace Galaxy101.Table
         public TableHud.State HudState()
         {
             var m = Model;
+            if (m == null || Ceremony == null || Board == null) return new TableHud.State();   // before Start built the table
             var eval = RackEval.Of(Rack, m);
             bool dealing = Current == Phase.Deal || Ceremony.Running;
             var s = new TableHud.State

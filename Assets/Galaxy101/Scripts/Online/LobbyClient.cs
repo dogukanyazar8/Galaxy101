@@ -49,6 +49,21 @@ namespace Galaxy101.Online
         Task<string> InviteAsync(Guid player, int? seat, bool recent);
         /// <summary>inviteCancel: take back a pending invite (the prototype's "İptal etmek için tıkla").</summary>
         Task<string> CancelInviteAsync(Guid player);
+        /// <summary>inviteIn: someone invites you to their table (shown while the lobby is open).</summary>
+        event Action<IncomingInvite> InviteReceived;
+        /// <summary>inviteRespond{inviteId, accept}: accepting seats you (the waiting room follows as tableState).</summary>
+        Task<string> RespondInviteAsync(IncomingInvite invite, bool accept);
+    }
+
+    /// <summary>An invite to someone else's table (protocol inviteIn: inviteId, from, table, expiresAt).</summary>
+    public sealed class IncomingInvite
+    {
+        public string InviteId { get; set; }
+        public PlayerSummary From { get; set; }
+        public TableSummary Table { get; set; }
+        /// <summary>The table's code when the server sends one (private tables), for an invite answered by joining with it.</summary>
+        public string Code { get; set; }
+        public DateTimeOffset ExpiresAt { get; set; }
     }
 
     /// <summary>A Son oynadıkların row: the player with presence, and when you last played together (null when unknown).</summary>
@@ -92,6 +107,16 @@ namespace Galaxy101.Online
             subscriptions.Add(rt.On<V4Snapshot>(V4Messages.Snapshot, OnSnapshot));
             // balance{chips} (bet on sitting R-90, betRefund on leaving the waiting room D-11): the session's wallet follows.
             subscriptions.Add(rt.On<V4Balance>(V4Messages.Balance, m => { if (m != null) online.Apply(new WalletResponse { Chips = m.Chips, Gems = m.Gems, OwnedItems = online.Wallet?.OwnedItems ?? new List<string>() }); }));
+            subscriptions.Add(rt.On<V4InviteIn>(V4Messages.InviteIn, m =>
+            {
+                if (m?.InviteId == null || m.Table == null) return;
+                var t = Summary(m.Table);
+                InviteReceived?.Invoke(new IncomingInvite
+                {
+                    InviteId = m.InviteId, Table = t, Code = m.Table.Code, ExpiresAt = DateTimeOffset.FromUnixTimeMilliseconds(m.ExpiresAt),
+                    From = m.From == null ? null : new PlayerSummary { Id = Id(m.From.Id), Name = m.From.Name, Color = m.From.Color, Level = m.From.Level, Frame = m.From.Frame },
+                });
+            }));
             subscriptions.Add(rt.On<V4InviteResult>(V4Messages.InviteResult, m => { if (m?.UserId == null) return; var who = Id(m.UserId); invites.Remove(who); InviteAnswered?.Invoke(who, m.Result); }));
             online.Changed += OnChanged;
             rt.Closed += OnClosed;
@@ -136,6 +161,7 @@ namespace Galaxy101.Online
         public event Action<TableStateMessage> RoomChanged;
         public event Action ChipsChanged;
         public event Action<Guid, string> InviteAnswered;
+        public event Action<IncomingInvite> InviteReceived;
 
         private void OnChanged() => ChipsChanged?.Invoke();
 
@@ -222,6 +248,8 @@ namespace Galaxy101.Online
         /// stops waiting here and the invite lapses on the server after its 30 s.
         /// </summary>
         public Task<string> CancelInviteAsync(Guid player) { invites.Remove(player); return Task.FromResult<string>(null); }
+
+        public Task<string> RespondInviteAsync(IncomingInvite invite, bool accept) => Request(V4Messages.InviteRespond, new V4InviteRespondRequest { InviteId = invite?.InviteId, Accept = accept });
 
         private async Task<string> Request(string type, object data)
         {

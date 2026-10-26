@@ -38,6 +38,16 @@ namespace Galaxy101.Tests
             public event Action ChipsChanged;
             public event Action<Guid, string> InviteAnswered;
             public void Answer(Guid player, string result) => InviteAnswered?.Invoke(player, result);
+            public event Action<IncomingInvite> InviteReceived;
+            public void Receive(IncomingInvite invite) => InviteReceived?.Invoke(invite);
+            public (IncomingInvite Invite, bool Accept)? Responded;
+            public Task<string> RespondInviteAsync(IncomingInvite invite, bool accept)
+            {
+                Responded = (invite, accept); if (!accept) return Task.FromResult<string>(null);
+                var t = invite.Table; int seat = t.Seats.FindIndex(s => s == null); t.Seats[seat] = new TableSeat { Player = Player(Me, "Test Oyuncu", "#FF8A5B") };
+                Set(new TableStateMessage { Table = t, Code = "GX-EF56", YourSeat = seat });
+                return Task.FromResult<string>(null);
+            }
             public TableOptions Created;
             public TableJoinMessage Joined;
             public string JoinAnswer, CreateAnswer;
@@ -488,6 +498,20 @@ namespace Galaxy101.Tests
             Click(root, "lobby.iv.close#2"); yield return null;
             Assert.That(menu.Lobby.InviteOpen, Is.False);
             Assert.That(root.Q<VisualElement>("lobby.z.kick[1]"), Is.Not.Null, "the host can remove a seated player");
+        }
+
+        /// <summary>inviteIn while the lobby is open: the invite dialog; Katıl answers inviteRespond and the waiting room follows.</summary>
+        [UnityTest]
+        public IEnumerator IncomingInviteJoinsThroughInviteRespond()
+        {
+            var menu = Menu(); var root = menu.View.Root; yield return null;
+            menu.OpenLobby(); menu.Lobby.ConnectSeconds = .05f; yield return null;
+            var table = fake.List.First(t => t.Name == "Hızlı Eller");
+            fake.Receive(new IncomingInvite { InviteId = "i1", From = Player(Guid.NewGuid(), "Mert K.", "#16B6A8"), Table = table, ExpiresAt = DateTimeOffset.UtcNow.AddSeconds(30) }); yield return null;
+            Assert.That(menu.Lobby.DialogKind, Is.EqualTo("invited"));
+            Click(root, "lobby.d.alt");
+            yield return Until(() => menu.Lobby.Screen == "wait", 3, "the waiting room after accepting");
+            Assert.That(fake.Responded?.Invite.InviteId, Is.EqualTo("i1")); Assert.That(fake.Responded?.Accept, Is.True);
         }
 
         [UnityTest]

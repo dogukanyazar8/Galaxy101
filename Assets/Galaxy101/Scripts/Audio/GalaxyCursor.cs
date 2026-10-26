@@ -57,6 +57,9 @@ namespace Galaxy101.Audio
 
         public static event Action Changed;
 
+        /// <summary>The setting's options in the order of Ayarlar → Görüntü → İmleç (G101-Menu cursorRow).</summary>
+        public static readonly string[] Modes = { CursorSet.Normal, CursorSet.Large, CursorSet.System };
+
         public static bool IsMode(string value) => value == CursorSet.Normal || value == CursorSet.Large || value == CursorSet.System;
 
         public static void Hold(string name) => held = string.IsNullOrEmpty(name) ? null : name;

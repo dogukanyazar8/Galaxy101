@@ -45,20 +45,49 @@ namespace Galaxy101
 
         internal static VisualElement PriceGem(MenuView v) => Gem(v, 13, 3, "linear-gradient(135deg,#C8F6FF,#3D7BFF)");
 
+        /// <summary>
+        /// G101-Menu panelVals, Görünüm items (st 2): face, inset edge, ledge, glyph colour and glow of the four tile skins —
+        /// v4 made Altın taş black onyx with a gold rim.
+        /// </summary>
+        private static readonly System.Collections.Generic.Dictionary<string, (string face, string edge, string edge2, string col, string glow)> SkinLooks =
+            new System.Collections.Generic.Dictionary<string, (string, string, string, string, string)>
+            {
+                ["skin-0"] = ("linear-gradient(#3B2F7A,#1C1648)", "#120E30", "#0A0820", "#FFD964", "rgba(140,110,255,.5)"),
+                ["skin-1"] = ("linear-gradient(#1d1d24,#050507)", "#D9B25A", "#8A6A20", "#FFC83D", "rgba(255,201,74,.45)"),
+                ["skin-2"] = ("linear-gradient(#14202E,#0A1018)", "#06090E", "#000", "#3DF5E0", "rgba(61,245,224,.45)"),
+                ["skin-3"] = ("linear-gradient(#FFFFFF,#E4E6EC)", "#C9CCD6", "#9499A8", "#2B3A55", "transparent"),
+            };
+
         internal static VisualElement Tile(MenuView v, JObject offer)
         {
+            if (!SkinLooks.TryGetValue((string)offer["id"] ?? "", out (string face, string edge, string edge2, string col, string glow) look)) look = ((string)offer["face"], (string)offer["edge"], (string)offer["edge2"], (string)offer["col"], (string)offer["glow"]);
+            // 60 × 82, radius 11, inset 0 -6px 0 edge, 0 5px 0 edge2, 0 0 18px glow; padding-top 8, gap 5: the "7" path
+            // (svg 25 × 42, viewBox 0 0 60 100, M7 7H53L22 93, stroke 14, round) and an 11px dot.
             var tile = Canvas(v, 60, 82);
-            v.Decorate(tile, (string)offer["face"], 11, 5, (string)offer["edge2"]);
+            v.Decorate(tile, look.face, 11, 5, look.edge2);
             tile.style.overflow = Overflow.Hidden;
-            tile.Add(new InsetPaint(60, 82, 11, 0, -6, v.C((string)offer["edge"])));
-            var glow = v.C((string)offer["glow"]);
+            tile.Add(new InsetPaint(60, 82, 11, 0, -6, v.C(look.edge)));
+            var glow = v.C(look.glow);
             if (glow.a > 0) GalaxyFilters.Shadow(tile, 0, 0, 9, glow);
             tile.style.alignItems = Align.Center; tile.style.paddingTop = 8;
-            var number = v.Text("7", 46, true, (string)offer["col"]); number.style.height = 46; number.style.flexShrink = 0;
-            tile.Add(number);
-            var dot = v.Box(); dot.style.width = dot.style.height = 10; dot.style.marginTop = 3;
-            v.Decorate(dot, (string)offer["col"], 5); tile.Add(dot);
+            tile.Add(new Seven(v.C(look.col)));
+            var dot = v.Box(); dot.style.width = dot.style.height = 11; dot.style.marginTop = 5;
+            v.Decorate(dot, look.col, 6); tile.Add(dot);
             return tile;
+        }
+
+        /// <summary>The skin card's "7": an open stroke path, not a font glyph.</summary>
+        private sealed class Seven : VisualElement
+        {
+            private readonly Color color;
+            internal Seven(Color color) { this.color = color; pickingMode = PickingMode.Ignore; style.width = 25; style.height = 42; style.flexShrink = 0; generateVisualContent += Draw; }
+            private void Draw(MeshGenerationContext context)
+            {
+                // viewBox 0 0 60 100 in 25 × 42 (meet): scale 25/60, centred vertically.
+                float k = 25f / 60f, dy = (42 - 100 * k) / 2; var p = context.painter2D;
+                p.strokeColor = color; p.lineWidth = 14 * k; p.lineCap = LineCap.Round; p.lineJoin = LineJoin.Round;
+                p.BeginPath(); p.MoveTo(new Vector2(7 * k, 7 * k + dy)); p.LineTo(new Vector2(53 * k, 7 * k + dy)); p.LineTo(new Vector2(22 * k, 93 * k + dy)); p.Stroke();
+            }
         }
 
         internal static void ProductRing(MenuView v, VisualElement card, bool popular)

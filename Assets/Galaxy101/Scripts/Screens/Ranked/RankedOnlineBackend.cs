@@ -4,27 +4,50 @@ using System.Linq;
 using System.Threading.Tasks;
 using Galaxy101.Contracts;
 using Galaxy101.Online;
+using UnityEngine;
 
 namespace Galaxy101
 {
     /// <summary>
-    /// The Dereceli screen on today's game server (<see cref="GalaxyOnline"/> / <see cref="GalaxyRealtime"/>): the standing comes
-    /// from the profile's season progress, MAÇ ARA is <c>queue.join {mode: ranked}</c>, İptal <c>queue.leave</c>, and
-    /// <c>match.start</c> opens the table; <c>match.end</c> of that match becomes the result card (LP from the server's
-    /// placement). This server matches Solo only and has no ready check: there is no rankedFound / rankedAccept phase yet.
-    /// <para>ADAPTER SEAM (docs/v4/ranked/RAPOR.md): when lane B's package protocol lands (protocol.json rankedQueue {mode, party},
-    /// rankedAccept {matchId, accept}, rankedCancel; s2c rankedSearch, rankedFound, rankedAccepted, rankedCancelled, rankedReady,
-    /// rankChange), each of those maps one to one onto <see cref="IRankedBackend"/>: replace the bodies of QueueAsync / CancelAsync /
-    /// AcceptAsync and raise Searching / Found / Accepted / Cancelled / Ready / RankChanged from the s2c messages.</para>
+    /// The Dereceli screen on the v4 game server (lane B, docs/v4/hat-b/ISTEMCI_NOTU.md §3): c2s <c>rankedQueue {mode, party}</c>,
+    /// <c>rankedAccept {matchId, accept}</c>, <c>rankedCancel</c>; s2c <c>rankedSearch</c> (±2 after 30 s), <c>rankedFound</c>
+    /// (10 s), <c>rankedAccepted</c>, <c>rankedCancelled</c>, <c>rankedReady</c> (loadingMs 1800) → <c>matchStart</c>, and at the
+    /// match's end <c>rankChange</c> → the result card. The standing comes from the profile's season progress (HTTP), the party
+    /// from the friends list (<c>/v1/friends</c>).
+    /// <para>One instance per <see cref="GalaxyOnline"/> (<see cref="For"/>): it listens for the whole session, so a rankChange that
+    /// arrives while the table is up, or a queue a party leader put this player in while the screen was closed, is not lost.</para>
     /// </summary>
     public sealed class RankedOnlineBackend : IRankedBackend
     {
-        private readonly GalaxyOnline online;
-        private Action offStart;
-        private int queueRun;
-        private static readonly List<RankedPlayer> NoFriends = new List<RankedPlayer>();
+        private static RankedOnlineBackend current;
 
-        public RankedOnlineBackend(GalaxyOnline online) { this.online = online ?? throw new ArgumentNullException(nameof(online)); }
+        /// <summary>The session's backend (made on first use, again for a new session).</summary>
+        public static RankedOnlineBackend For(GalaxyOnline online)
+        {
+            if (current != null && current.online == online && online != null) return current;
+            current?.Detach();
+            return current = new RankedOnlineBackend(online);
+        }
+
+        private readonly GalaxyOnline online;
+        private readonly List<Action> offs = new List<Action>();
+        private List<RankedPlayer> friends = new List<RankedPlayer>();
+        private string mode = "solo", readyTable;
+
+        private RankedOnlineBackend(GalaxyOnline online)
+        {
+            this.online = online ?? throw new ArgumentNullException(nameof(online));
+            var r = online.Realtime;
+            offs.Add(r.On<V4RankedSearch>(V4Messages.RankedSearch, OnSearch));
+            offs.Add(r.On<V4RankedFoundEvent>(V4Messages.RankedFound, e => OnFound(e?.Found, e?.At ?? 0)));
+            offs.Add(r.On<V4RankedAccepted>(V4Messages.RankedAccepted, OnAccepted));
+            offs.Add(r.On<V4RankedCancelled>(V4Messages.RankedCancelled, OnCancelled));
+            offs.Add(r.On<V4RankedReady>(V4Messages.RankedReady, OnReady));
+            offs.Add(r.On<V4MatchStart>(V4Messages.MatchStart, OnMatchStart));
+            offs.Add(r.On<V4RankChange>(V4Messages.RankChange, OnRankChange));
+        }
+
+        private void Detach() { foreach (var off in offs) off(); offs.Clear(); }
 
         public string MeId => online.Profile?.Id.ToString() ?? "me";
 
@@ -38,82 +61,150 @@ namespace Galaxy101
             p.Idx = RankedLadder.FromCode(g.League); p.Lp = Math.Max(0, g.DivisionLp); p.Protected = g.Protected; p.SeasonRank = g.SeasonRank;
             p.Peak = Math.Max(p.Idx, RankedLadder.FromCode(g.BestLeague)); p.Season = Math.Max(1, g.Season);
             p.DaysLeft = g.SeasonEndsAt == default ? 0 : Math.Max(0, (int)Math.Ceiling((g.SeasonEndsAt - DateTimeOffset.UtcNow).TotalDays));
+            // games / top / hist are not kept by the server (lane B EK-213): EK-703.
             return p;
         }
 
-        /// <summary>Party invites have no message in today's protocol (EK-702): Duo / Squad cannot fill.</summary>
-        public IReadOnlyList<RankedPlayer> Friends => NoFriends;
+        public IReadOnlyList<RankedPlayer> Friends => friends;
+        public RankedSearch Queue { get; private set; }
+        public RankedFound Pending { get; private set; }
 
         public event Action Changed { add { online.Changed += value; } remove { online.Changed -= value; } }
-        public event Action<string, bool> PartyAnswered { add { } remove { } }
+        public event Action<string, bool> PartyAnswered;
         public event Action<RankedSearch> Searching;
-        public event Action<RankedFound> Found { add { } remove { } }
-        public event Action<IReadOnlyList<bool>> Accepted { add { } remove { } }
-        public event Action<string> Cancelled { add { } remove { } }
-        public event Action<int> Ready { add { } remove { } }
+        public event Action<RankedFound> Found;
+        public event Action<IReadOnlyList<bool>> Accepted;
+        public event Action<string> Cancelled;
+        public event Action<int> Ready;
         public event Action<RankedStart> Started;
-        public event Action<RankedResult> RankChanged { add { } remove { } }
+        public event Action<RankedResult> RankChanged;
+        /// <summary>The server put this player in a ranked search or match while no screen listens (a party leader queued them): the menu opens the screen.</summary>
+        public event Action Incoming;
 
-        public Task<string> InviteAsync(RankedPlayer friend) => Task.FromResult("E_MODE");
-
-        public async Task<string> QueueAsync(string mode, IReadOnlyList<string> party)
+        /// <summary>The screen opened: the standing (profile) and the friends who can join a party.</summary>
+        public async void Refresh()
         {
-            if (mode != "solo") return "E_MODE";
-            int run = ++queueRun;
-            offStart?.Invoke();
-            offStart = online.Realtime.On<MatchStartMessage>(MessageTypes.MatchStart, m =>
+            try
             {
-                if (run != queueRun || m == null || m.Spectator || m.Mode != GameModes.Ranked) return;
-                offStart?.Invoke(); offStart = null; queueRun++;
-                Watch(m, Profile);
-                Started?.Invoke(new RankedStart { Mode = "solo", Match = m, Players = m.Seats.Where(s => s?.Player != null).Select(s => new RankedPlayer
+                var list = await online.Api.GetAsync<FriendsResponse>("/v1/friends");
+                friends = (list?.Friends ?? new List<FriendResponse>()).Where(f => f?.Player != null).Select(f => new RankedPlayer
                 {
-                    Id = s.Player.Id.ToString(), Name = s.Player.Name, Color = s.Player.Color, Idx = RankedLadder.FromCode(s.Player.League), Me = s.Seat == m.YourSeat
-                }).ToList() });
-            });
-            var ack = await online.Realtime.RequestAsync(MessageTypes.QueueJoin, new QueueJoinMessage { Mode = GameModes.Ranked, Stake = 0 });
-            if (!ack.Ok)
-            {
-                if (run == queueRun) { offStart?.Invoke(); offStart = null; }
-                return ack.Code ?? "error"; // conflict, offline, timeout: RankedScreen.ErrorText
+                    Id = f.Player.Id.ToString(), Name = f.Player.Name, Color = f.Player.Color, Idx = RankedLadder.FromCode(f.Player.League),
+                    Online = f.Presence == "online" // in a game or a queue the server leaves them out of the party (Hub.RankedQueueAsync)
+                }).ToList();
+                await online.RefreshAsync(); // raises Changed
             }
-            Searching?.Invoke(new RankedSearch { Range = 1 });
-            Widen(run);
-            return null;
+            catch (ApiException e) { if (!e.Offline) Debug.LogWarning("Ranked data not loaded: " + e.Code); }
+            catch (Exception e) { Debug.LogException(e); }
         }
-
-        /// <summary>The server widens the window itself after rankedWiden (30 000 ms, protocol/timings.md) without saying so.</summary>
-        private async void Widen(int run)
-        {
-            await Task.Delay(30000);
-            if (run == queueRun) Searching?.Invoke(new RankedSearch { Range = 2 });
-        }
-
-        public Task CancelAsync()
-        {
-            queueRun++; offStart?.Invoke(); offStart = null;
-            return online.Realtime.RequestAsync(MessageTypes.QueueLeave, new { });
-        }
-
-        public Task<string> AcceptAsync(string matchId, bool accept) => Task.FromResult<string>(null);
 
         /// <summary>
-        /// match.end of the ranked match, while the table is up: the placement's LP (RankedRules for the tier / league event and
-        /// D-30 protection) waits in <see cref="RankedScreen.Pending"/> for the menu, which opens the screen again on return.
+        /// There is no party invite in the protocol (EK-702): the leader's rankedQueue names the party and the server puts the
+        /// friends straight into the search (lane B EK-218). The seat fills at once.
         /// </summary>
-        private void Watch(MatchStartMessage start, RankedProfile before)
+        public Task<string> InviteAsync(RankedPlayer friend)
         {
-            Action off = null;
-            off = online.Realtime.On<MatchEndMessage>(MessageTypes.MatchEnd, end =>
+            PartyAnswered?.Invoke(friend.Id, true);
+            return Task.FromResult<string>(null);
+        }
+
+        public async Task<string> QueueAsync(string queueMode, IReadOnlyList<string> party)
+        {
+            mode = queueMode;
+            var ack = await online.Realtime.RequestAsync(V4Messages.RankedQueue, new V4RankedQueueRequest { Mode = queueMode, Party = party.ToList() });
+            return ack.Ok ? null : ack.Code ?? "error";
+        }
+
+        public async Task CancelAsync()
+        {
+            Queue = null; Pending = null;
+            await online.Realtime.RequestAsync(V4Messages.RankedCancel, new { });
+        }
+
+        public async Task<string> AcceptAsync(string matchId, bool accept)
+        {
+            if (!accept) { Queue = null; Pending = null; }
+            var ack = await online.Realtime.RequestAsync(V4Messages.RankedAccept, new V4RankedAcceptRequest { MatchId = matchId, Accept = accept });
+            return ack.Ok ? null : ack.Code ?? "error";
+        }
+
+        // ---------- server events ----------
+        private void OnSearch(V4RankedSearch s)
+        {
+            if (s == null) return;
+            if (s.Mode != null) mode = s.Mode;
+            Pending = null;
+            // filled counts this party's own seats until the match is found (Hub.QueuePub): no opponent is known before rankedFound.
+            Queue = new RankedSearch { Mode = s.Mode, Range = s.Range, Filled = 0 };
+            if (Searching == null) Incoming?.Invoke();
+            Searching?.Invoke(Queue);
+        }
+
+        private void OnFound(V4RankedFound f, long at)
+        {
+            if (f == null) return;
+            string me = MeId;
+            Queue = null;
+            Pending = new RankedFound
             {
-                if (end == null || end.MatchId != start.MatchId) return;
-                off?.Invoke();
-                var mine = end.Placements?.FirstOrDefault(p => p.Seat == start.YourSeat);
-                if (end.Aborted || mine == null) return;
-                var result = RankedRules.Apply(before.Clone(), mine.Left ? 4 : mine.Place, "solo", mine.LpDelta);
-                result.Left = mine.Left;
-                RankedScreen.Pending = result; // the screen is gone with the menu scene; it shows this when it opens again
-            });
+                MatchId = f.MatchId,
+                Players = (f.Players ?? new List<V4RankedPlayer>()).Select(p => Player(p.User, me, p.Bot)).ToList(),
+                Accepted = (f.Accepted ?? new List<bool>()).ToList(),
+                // expiresAt is the server's clock: the window is expiresAt − at (rankedAccept 10 000 ms).
+                Seconds = f.ExpiresAt > at && at > 0 ? (f.ExpiresAt - at) / 1000f : 10,
+            };
+            while (Pending.Accepted.Count < Pending.Players.Count) Pending.Accepted.Add(false);
+            if (Found == null) Incoming?.Invoke();
+            Found?.Invoke(Pending);
+        }
+
+        private static RankedPlayer Player(V4User u, string me, bool bot) => u == null ? new RankedPlayer { Id = "?", Name = "?", Bot = bot }
+            : new RankedPlayer { Id = u.Id, Name = u.Name, Color = u.Color, Idx = u.RankIdx, Me = u.Id == me, Bot = bot };
+
+        private void OnAccepted(V4RankedAccepted a)
+        {
+            if (a?.Accepted == null) return;
+            if (Pending != null) Pending.Accepted = a.Accepted.ToList();
+            Accepted?.Invoke(a.Accepted);
+        }
+
+        private void OnCancelled(V4RankedCancelled c)
+        {
+            Queue = null; Pending = null;
+            Cancelled?.Invoke(c?.Reason ?? "cancel");
+        }
+
+        private void OnReady(V4RankedReady r)
+        {
+            readyTable = r?.Table?.Id;
+            Ready?.Invoke((int)(r?.LoadingMs ?? 0));
+        }
+
+        /// <summary>matchStart of the table rankedReady announced (lobby and bot tables send matchStart too).</summary>
+        private void OnMatchStart(V4MatchStart m)
+        {
+            if (m?.Table == null || readyTable == null || m.Table.Id != readyTable) return;
+            readyTable = null; Pending = null; Queue = null;
+            string me = MeId;
+            var seats = m.Table.Seats ?? new List<V4Seat>();
+            var start = new RankedStart { Mode = mode, Match = m, Seat = seats.FindIndex(s => s?.User?.Id == me) };
+            start.Players = seats.Select(s => s?.User == null ? null : Player(s.User, me, s.Bot)).Where(p => p != null).ToList();
+            Started?.Invoke(start);
+        }
+
+        /// <summary>rankChange at the match's end: the result card now, or when the menu opens the screen again.</summary>
+        private void OnRankChange(V4RankChange c)
+        {
+            if (c?.Before == null || c.After == null) return;
+            var result = RankedRules.FromChange(c.Before.Idx, c.Before.Lp, c.After.Idx, c.After.Lp, c.Delta, c.Place, c.TierUp, c.LeagueUp, c.Down, c.ProtectedLeft, mode);
+            if (RankChanged == null) RankedScreen.Pending = result; else RankChanged.Invoke(result);
+            _ = RefreshProfile();
+        }
+
+        private async Task RefreshProfile()
+        {
+            try { await online.RefreshAsync(); }
+            catch (Exception e) { Debug.LogWarning("Profile not refreshed after rankChange: " + e.Message); }
         }
     }
 }

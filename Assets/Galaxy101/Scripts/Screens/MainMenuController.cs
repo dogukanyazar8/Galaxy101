@@ -107,21 +107,35 @@ namespace Galaxy101
                 {
                     var online=Galaxy101.Online.GalaxyOnline.Instance;
                     if(online==null||!online.SignedIn){View.Toast(View.L("Dereceli için giriş yapmalısın","Sign in to play ranked"));return;}
-                    backend=new RankedOnlineBackend(online);
+                    backend=RankedOnlineBackend.For(online);
                 }
                 Ranked=new RankedScreen(View,backend);Ranked.Matched+=OnRankedMatched;
             }
             Ranked.Show();
         }
-        /// <summary>Both accepted: the table opens (the server's match, or a local table for the demo season), "Dereceli · Solo".</summary>
+        /// <summary>
+        /// The ranked match the table opens with (v4 protocol): RankedStart.Match is the server's V4MatchStart (table id, seats,
+        /// countdownMs), Seat your seat, Mode solo / duo / squad. The table lane (v4/table) takes it from here at scene start
+        /// (docs/v4/ranked/RAPOR.md §4); null for the demo season's local table.
+        /// </summary>
+        public static RankedStart PendingRanked;
+        /// <summary>Everyone accepted and matchStart came: the table opens, "Dereceli · Solo".</summary>
         private void OnRankedMatched(RankedStart start)
         {
             if(this==null||start==null||!OpenMatchTable)return;
-            var online=Galaxy101.Online.GalaxyOnline.Instance;
-            if(start.Match is Galaxy101.Contracts.MatchStartMessage match&&online!=null)Galaxy101.Table.TableGame.PendingOnline=new Galaxy101.Table.NetworkTableSession(online,match.MatchId);
+            PendingRanked=start.Match!=null?start:null;
             Galaxy101.Table.TableGame.PendingRoom=View.L("Dereceli · ","Ranked · ")+(start.Mode=="duo"?"Duo":start.Mode=="squad"?"Squad":"Solo");
             FromRanked=true;
             _=StartLocalAsync(GalaxyTableScene);
+        }
+        private Action rankedOff;
+        /// <summary>A party leader put this player in a ranked search (or a match was found) while the screen was closed: open it.</summary>
+        private void HookRanked(Galaxy101.Online.GalaxyOnline online)
+        {
+            rankedOff?.Invoke();
+            var ranked=RankedOnlineBackend.For(online);
+            Action open=()=>{if(this!=null&&RankedBackend==null&&(Auth==null||!Auth.Visible))OpenRanked();};
+            ranked.Incoming+=open;rankedOff=()=>ranked.Incoming-=open;
         }
         private System.Action onlineChanged;
         private void HookOnline(Galaxy101.Online.GalaxyOnline online)
@@ -129,6 +143,7 @@ namespace Galaxy101
             View.Services.Online.Load(null); // stats, daily rewards, friends and settings for the menu and its badges
             if(onlineChanged==null){onlineChanged=()=>{if(this!=null)ApplyOnline(online);};online.Changed+=onlineChanged;}
             if(!invitesHooked){invitesHooked=true;inviteOff=online.Realtime.On<Galaxy101.Contracts.InviteMessage>(Galaxy101.Contracts.MessageTypes.Invite,message=>{if(this==null||Auth!=null&&Auth.Visible)return;OpenLobby();Lobby.ShowInvite(message);});}
+            HookRanked(online); // ranked: a party leader's queue opens the Dereceli screen here too
         }
         private System.Action inviteOff;
         /// <summary>The Klasik lobby (spec/20); its backend is the signed-in session unless a test supplies one.</summary>
@@ -223,7 +238,7 @@ namespace Galaxy101
         {
             if(Model!=null)Model.Changed-=ApplySettings;
             if(View!=null){if(background!=null)View.BackgroundChanged-=background.Configure;View.PlayRequested-=OnPlay;View.Dispose();}
-            localization?.Dispose();lobbyClient?.Dispose();inviteOff?.Invoke();
+            localization?.Dispose();lobbyClient?.Dispose();inviteOff?.Invoke();rankedOff?.Invoke();
             var online=Galaxy101.Online.GalaxyOnline.Instance;if(online!=null&&onlineChanged!=null)online.Changed-=onlineChanged;
         }
     }

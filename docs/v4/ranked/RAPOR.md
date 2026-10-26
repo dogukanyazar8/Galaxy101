@@ -1,11 +1,11 @@
 # Faz 2 · Dereceli · rapor
 
-Dal `v4/ranked` (taban `main` `59aa81c`), worktree `C:/GD/Okey101-v4/ranked`. Unity çalıştırılmadı; derleme `tools/v4/unity_compile.py --project Galaxy101.PlayMode.Tests` ile her commit öncesi **OK (0 hata)**. Push yok.
+Dal `v4/ranked`, worktree `C:/GD/Okey101-v4/ranked`. Unity bu hatta çalıştırılmadı; derleme `tools/v4/unity_compile.py --project Galaxy101.PlayMode.Tests` ile her commit öncesi **OK (0 hata)**. Orkestratörün Unity koşusu (main `9606a80`, `artifacts/v4/unity/run5/S16*`) S16'yı referansla kutu kutu eşleşmiş buldu; tek sapma `ranked.text.seasonTag` (x 150 / 145,78) idi, `c372219` ile düzeltildi (UF-715). Push yok.
 
-- `v4/data` birleştirildi (`68a044d`): lig amblemleri (`Resources/Galaxy101/Rank/*.png` + `ranks.json`), v4 metinleri, ikonlar, Nunito-700.
-- `v4/server` **birleştirilmedi**: `docs/v4/hat-b/RAPOR.md` yok (hat sürüyor). Ekran bugünkü sunucuya bağlı; paket protokolüne geçiş için ayrı bir bağdaştırıcı yüzeyi bırakıldı (§4).
+- Birleştirilenler: `v4/data` (`68a044d`), sonra main `74b9ebe` (içinde `v4/server`, `v4/assets3d`, `v4/audio`, bu hattın ilk teslimi) ve main `6565e6a` (`v4/menu`, tek `Galaxy101.Audio.GalaxyCursor`).
+- Ekran artık **v4 dereceli protokolüyle** konuşur (`315d829`); eski `queue.join` / `queue.leave` / `match.start` yolu kaldırıldı.
 
-Referans: `Design/Galaxy101_ClaudeCode/prototip/G101-Dereceli.dc.html` (aşağıda `Dereceli`), `g101-rank.js`, paket `galaxy101_handoff_v4/` (`ranks.json`, `strings` `ranked.*`, `anim/css.json` `rk*`, `protocol/timings.md`, R-94, D-29, D-30, D-62), S16 referans karesi `artifacts/v4/ref/S16.{png,layout.json,text.json}`.
+Referans: `Design/Galaxy101_ClaudeCode/prototip/G101-Dereceli.dc.html` (aşağıda `Dereceli`), `g101-rank.js`, paket `galaxy101_handoff_v4/` (`ranks.json`, `strings` `ranked.*`, `anim/css.json` `rk*`, `protocol/timings.md`, R-94, D-29, D-30, D-62), S16 referansı `artifacts/v4/ref/S16.{png,layout.json,text.json}`; sunucu `docs/v4/hat-b/ISTEMCI_NOTU.md`, `docs/v4/PROTOKOL_ESLEME.md`, `Server/src/Galaxy101.Server/V4/Hub.Ranked.cs`.
 
 ## 1. Yapılanlar
 
@@ -15,82 +15,83 @@ UI Toolkit, kodla kurulan tek katman (lobi deseni: `view.Decorate`, `view.Text`,
 |---|---|---|
 | Üst çubuk | 86 px: geri, 52 px turkuaz rozet (laurel + taş), "Dereceli" + "Sezon N · K gün kaldı · Solo / Duo / Squad", bakiye hapı, Maç ara / İlerleme | `RankedScreen.Home.cs` `BuildHeader`, `Badge` |
 | Ana ekran (S16) | 360 px lig kartı (sezon etiketi, 150 px yüzen amblem, lig adı, LP çubuğu, "Altın I'e 28 LP", düşme koruması, MAÇ / 1.LİK / 1.LİK ORANI, "Dereceli ilerlemem"); Solo / Duo / Squad kartları (seçili: −4 px, 6 + 9 px halka, 0 14 30 parıltı; diğerleri saturate .7 brightness .78); "Masan" 4 koltuk (SEN / RAKİP / ARKADAŞ / TAKIM; dolu, davet, bekleyen, "?" rakip + arama halkası, takımdan çıkar); eşleşme aralığı (±1, 30 sn sonra ±2; Squad: takım aralığı); MAÇ ARA / MASAYI KUR (rkPulse 2,2 sn) ya da "Rakip aranıyor" saat + İptal | `BuildHome`, `MeCard`, `ModeCard`, `TablePanel`, `Seat`, `Cta`, `SearchBox` |
-| İlerleme | Lig yolu (6 lig, BURADASIN, kademe hapları, ulaşılmamış lig gri), Sezon ödülleri (çerçeveli avatar, çip, Ulaşıldı / Kazanacağın / Kilitli), Son maçlar (yer, mod, lig, ±LP; boşsa açıklama) + LP kuralı "1. +30 · 2. +10 · 3. −10 · 4. −20" | `RankedScreen.Progress.cs` |
-| Davet (Duo / Squad) | 520 px pencere: arkadaşlar, lig amblemi, çevrim içi noktası, Davet et / Gönderildi / Takımda / Çevrimdışı / Aralık dışı (±1 lig, D-29 eşli koltuk) | `BuildInvite` |
-| Maç bulundu | 640 px: MAÇ BULUNDU / SQUAD HAZIR, 4 oyuncu (kabul rozeti, TAKIM A / B, SEN), Reddet / "Kabul et · 10" (10 sn çubuk), kabulden sonra "Oyuncular bekleniyor…" → "Masa hazırlanıyor…" (rankedReady, 1800 ms) | `BuildFound` |
-| Sonuç | 520 px: DERECELİ · SOLO, yer kutusu (altın / gümüş / bronz), Galibiyet! / "N. oldun", ±LP, amblem + LP çubuğu (350 ms sonra .9 sn, kademe geçişinde dolup boşalır), not (düştün / koruma / ayrıldın), Tamam·Devam / Tekrar ara; yükselişte promosyon (ışınlar, rkPop amblem, KADEME / LİG ATLADIN, ZİRVEYE ULAŞTIN, alt metin, Devam) | `BuildResult`, `BuildPromo`, `Rays` |
+| İlerleme | Lig yolu (6 lig, BURADASIN, kademe hapları, ulaşılmamış lig gri), Sezon ödülleri (çerçeveli avatar, çip, Ulaşıldı / Kazanacağın / Kilitli), Son maçlar + LP kuralı "1. +30 · 2. +10 · 3. −10 · 4. −20" | `RankedScreen.Progress.cs` |
+| Davet (Duo / Squad) | 520 px pencere: arkadaşlar, lig amblemi, çevrim içi noktası, Davet et / Gönderildi / Takımda / Çevrimdışı / Aralık dışı (±1 lig) | `BuildInvite` |
+| Maç bulundu | 640 px: MAÇ BULUNDU / SQUAD HAZIR, 4 oyuncu (kabul rozeti, TAKIM A / B — D-29 Duo 0 + 2, SEN), Reddet / "Kabul et · 10" (10 sn çubuk), kabulden sonra "Oyuncular bekleniyor…" → "Masa hazırlanıyor…" (rankedReady 1800 ms) | `BuildFound` |
+| Sonuç | 520 px: DERECELİ · SOLO, yer kutusu, Galibiyet! / "N. oldun", ±LP, amblem + LP çubuğu (350 ms sonra .9 sn; kademe geçişinde dolup boşalır), not (düştün / koruma / ayrıldın), Tamam·Devam / Tekrar ara; yükselişte promosyon (ışınlar, rkPop amblem, KADEME / LİG ATLADIN, ZİRVEYE ULAŞTIN, Devam) | `BuildResult`, `BuildPromo`, `Rays` |
 | Tost | üst orta hap, ok / bad / info, 2,6 sn | `RankedScreen.Flash` |
 
-Veri ve kurallar (`RankedData.cs`): `RankedLadder` (`ranks.json`'dan ligler, `at`, `label`, `leagueOf`, `deltas`, sunucu kodları b3…m1 / gx, amblem dosyası seçimi), `RankedRules.Apply` (Ana Oyun `applyRanked()`: kademe, lig, Galaksi, D-30 3 maç koruma), `RankedProfile` / `RankedPlayer` / `RankedSearch` / `RankedFound` / `RankedResult` / `RankedStart`.
+Veri ve kurallar (`RankedData.cs`): `RankedLadder` (`ranks.json` ligleri, `at`, `label`, `leagueOf`, `deltas`, sunucu kodları b3…m1 / gx, amblem dosyası), `RankedRules.Apply` (Ana Oyun `applyRanked()`, D-30) ve `RankedRules.FromChange` (`rankChange` → sonuç kartı olayı), `RankedProfile` / `RankedPlayer` / `RankedSearch` / `RankedFound` / `RankedResult` / `RankedStart`.
 
-Menü (`MainMenuController`, yalnız dereceli girişi): HEMEN OYNA + Dereceli → `OpenRanked()` ekranı açar (eskiden doğrudan kuyruk); MAÇ ARA kuyruğu başlatır; maç başlayınca masa "Dereceli · Solo" adıyla açılır; dereceli masadan dönüşte (`FromRanked`) ekran yeniden açılır ve sonuç kartını gösterir (`RankedScreen.Pending`). Eski `RankedQueue` katmanı kaldırıldı.
+Menü (`MainMenuController`, yalnız dereceli kısmı): HEMEN OYNA + Dereceli → `OpenRanked()`; MAÇ ARA kuyruğu başlatır; maç başlayınca `OnRankedMatched` maçı masa hattına bırakır (§4); dereceli masadan dönüşte (`FromRanked`) ekran yeniden açılır ve sonuç kartını gösterir (`RankedScreen.Pending`); oturum açılınca `HookRanked` bir parti liderinin kuyruğa soktuğu oyuncuda ekranı açar.
 
 Görseller: başlık rozeti (`icon-50`) ve 6 sezon çerçevesi (`g101-rank.js ring()`), `docs/v4/ranked/ranked_art.py` ile prototip kaynağından @2x PNG (`Assets/Galaxy101/Scripts/Screens/Ranked/Resources/Galaxy101/Ranked/`).
 
 ## 2. Sunucu mu, demo mu
 
-| Parça | Çevrimiçi (`RankedOnlineBackend`, bugünkü sunucu) | Demo (`G101DemoRanked`, yalnız editör / development) |
+| Parça | Çevrimiçi (`RankedOnlineBackend`, v4 sunucu) | Demo (`G101DemoRanked`, yalnız editör / development, durum yönlendiricisi) |
 |---|---|---|
-| Lig, LP, koruma, en iyi lig, sezon, kalan gün, Galaksi sırası | `ProgressResponse` (League, DivisionLp, Protected, BestLeague, Season, SeasonEndsAt, SeasonRank) | prototipin `rankedOf()` varsayılanı: Altın II 72 LP, koruma 0, en iyi Altın II, 0 maç; Sezon 3, 18 gün |
-| Maç / 1.lik sayısı, son maçlar | yok → 0 / "—" / boş (EK-703) | 0 (S16 böyle) |
-| Bakiye | `MenuModel.Chips` (cüzdan) | 10.000 (durum hesabı) |
-| Arkadaşlar, Duo / Squad daveti | yok (EK-702) | `FRIENDS` (7 kişi), 1,3–2,2 sn sonra katılır |
-| MAÇ ARA / İptal | `queue.join {mode: ranked}` / `queue.leave` (yalnız Solo) | 1,5 sn + 1–3,2 sn'de bir rakip (`OPP`, ±1 lig, 30 sn sonra ±2) |
-| Maç bulundu, 10 sn kabul, reddet, zaman aşımı | yok: `match.start` gelince masa açılır (EK-701) | diğerleri 0,6–3,2 sn'de kabul eder, 10 000 ms'de "timeout" |
-| Masa hazırlanıyor → başla | `match.start` → `NetworkTableSession` | `rankedReady` 1800 ms → yerel masa |
-| Sonuç kartı | `match.end` yerleşimi + LP farkı → `RankedRules` (D-30) → menüye dönüşte | `G101DemoRanked.Finish(place)` |
+| Lig, LP, koruma, en iyi lig, sezon, kalan gün, Galaksi sırası | `ProgressResponse` (League, DivisionLp, Protected, BestLeague, Season, SeasonEndsAt, SeasonRank); ekran açılınca ve `rankChange`'ten sonra yenilenir | prototipin `rankedOf()` varsayılanı: Altın II 72 LP, 0 maç; Sezon 3, 18 gün |
+| Maç / 1.lik sayısı, son maçlar | sunucu tutmuyor → 0 / "—" / boş (**EK-703 açık**) | 0 (S16 böyle) |
+| Arkadaşlar, Duo / Squad | `/v1/friends` (lig, çevrim içi); parti liderin `rankedQueue {party}`'siyle kurulur, onay adımı yok (**EK-702 kısmen**) | `FRIENDS`, 1,3–2,2 sn'de katılır |
+| MAÇ ARA / İptal | `rankedQueue {mode, party}` / `rankedCancel`; hatalar paket metinleriyle (E_PARTY_RANGE, E_ALREADY_SEATED tost; E_ALREADY_QUEUED, E_MODE, E_PARTY_SIZE, E_NOT_QUEUED sessiz) | rakipler 1,5 sn + 1–3,2 sn'de bir |
+| Arama | `rankedSearch {mode, range, filled}`: ±1 / ±2 (30 sn, sunucu söyler); parti üyesi modu buradan öğrenir; rakip sayısı bilinmez (EK-714) | ±1, 30 sn sonra ±2, rakipler koltuklarda |
+| Maç bulundu | `rankedFound` (pencere = `expiresAt − at`, 10 sn), `rankedAccept`, `rankedAccepted`; `E_MATCH_EXPIRED` ve aramaya geri dönüş (`rankedSearch` maç beklerken) → "Eşleşme süresi doldu · aramaya dönülüyor"; `rankedCancelled` timeout → "Maç zamanında kabul edilmedi", cancel → "Arama iptal edildi", eşin reddi sessiz (EK-712) | diğerleri 0,6–3,2 sn'de kabul eder, 10 sn'de timeout |
+| Masa hazırlanıyor → başla | `rankedReady {table, loadingMs: 1800}` → aynı masanın `matchStart` → `OnRankedMatched` (§4) | 1800 ms → yerel masa |
+| Sonuç kartı | `rankChange {before, after, delta, place, tierUp, leagueUp, down, protectedLeft}` → `RankedRules.FromChange`; ekran yoksa `RankedScreen.Pending` | `G101DemoRanked.Finish(place)` |
+
+`RankedOnlineBackend` oturum başına tektir (`For(online)`) ve oturum boyu dinler: masa açıkken gelen `rankChange` kaybolmaz, ekran kapalıyken gelen arama / maç (`Incoming`) menüye ekranı açtırır, açılan ekran süren aramayı ya da bekleyen maçı (`Queue`, `Pending`) devralır. Ekran paneli giderken (sahne değişimi) dinlemeyi bırakır.
 
 ## 3. Durum yönlendirici
 
-`G101StateRouter.Shell.cs` `case "S16"` → `G101StateRouter.Ranked.cs` `RankedState`: states.json yolu `acct → go ranked → waitFor Dereceli` = hesabı aç (Doğukan Y., #FF8A5B, 10.000 çip), menüyü kur, `MainMenuController.RankedBackend` = demo, `OpenRanked()`, ekran görünür olana dek bekle.
+`G101StateRouter.Shell.cs` `case "S16"` → `G101StateRouter.Ranked.cs` `RankedState`: states.json yolu `acct → go ranked → waitFor Dereceli` = hesabı aç (Doğukan Y., #FF8A5B, 10.000 çip), menüyü kur, `MainMenuController.RankedBackend` = demo, `OpenRanked()`, ekran görünene dek bekle. Kare 100 000 ms'de donar (main `74b9ebe`, EK-005; UF-709 çözüldü).
 
 ```
 Galaxy101.exe -screen-width 1280 -screen-height 720 -screen-fullscreen 0 -g101State=S16 -g101Seed=42 -g101Out=C:\out
 ```
 
-S16 kutuları `RankedTests.HemenOynaOpensTheDereceliHomeAsS16` içinde `S16.layout.json` değerleriyle (±1,5 px; ortalanmış metinlerde ±3–4 px) denetlenir: geri, başlık, sekmeler, sezon etiketi, lig adı, LP, istatistik, ilerleme düğmesi, üç mod kartı (seçili −4 px), masa başlığı, koltuk etiketi, SEN avatarı (492, 381.91), rakip etiketi, aralık, MAÇ ARA (932, 612, 300×64). Hesap: lig kartı 28…388, sağ sütun 408…1252, kartlar 272 px, koltuklar 192 px (287…598), alt satır 612.
+## 4. Masaya devir: `OnRankedMatched` (masa hattı `v4/table` için)
 
-## 4. Paket protokolüne bağlama (Hat B bitince)
+`matchStart` geldiğinde `MainMenuController.OnRankedMatched(RankedStart)`:
 
-Ekran yalnız `IRankedBackend` görür; arayüz paket mesajlarıyla birebir:
+1. `MainMenuController.PendingRanked = start` — `start.Match` sunucunun **`V4MatchStart`**'ı (`Table`: id, `Seats[0..3].User` {id, name, color, rankIdx}, `Mode` "solo" / "pairs" (Duo), `Hands` 5, `TurnSec` 30, `Bet` 0, `Ranked` true, `Rules` {spectate false, chat "quick", gifts false}; `CountdownMs` 3000), `start.Seat` senin koltuğun (0–3), `start.Mode` solo / duo / squad, `start.Players` koltuk sırasıyla oyuncular. Demo maçında `PendingRanked` null.
+2. `TableGame.PendingRoom = "Dereceli · Solo|Duo|Squad"`, `FromRanked = true`, masa sahnesi açılır (`StartLocalAsync(GalaxyTableScene)`).
 
-| Paket mesajı | `IRankedBackend` | Ekranda |
-|---|---|---|
-| c2s `rankedQueue {mode, party}` | `QueueAsync(mode, party)` (hata kodu döner) | MAÇ ARA / MASAYI KUR |
-| c2s `rankedCancel` | `CancelAsync()` | İptal, geri |
-| c2s `rankedAccept {matchId, accept}` | `AcceptAsync(matchId, accept)` (`E_MATCH_EXPIRED` → tost) | Kabul et / Reddet |
-| s2c `rankedSearch {mode, since, range, filled}` | `Searching(RankedSearch{Range, Filled})` | aralık ±1/±2, "n/3 bulundu" |
-| s2c `rankedFound {found}` | `Found(RankedFound{MatchId, Players, Accepted, Seconds})` (oyuncu sırası koltuk sırası; Duo'da 0 ve 2 sen + eşin, D-29) | Maç bulundu |
-| s2c `rankedAccepted {index, accepted}` | `Accepted(accepted)` | kabul rozetleri |
-| s2c `rankedCancelled {reason}` | `Cancelled(reason)` | "timeout" / "declined" tostları |
-| s2c `rankedReady {table, loadingMs}` | `Ready(loadingMs)` | "Masa hazırlanıyor…" |
-| s2c `matchStart` | `Started(RankedStart{Mode, Players, Match})` | masa açılır |
-| s2c `rankChange {before, after, delta, place, tierUp, leagueUp, down, protectedLeft}` | `RankChanged(RankedRules.FromChange(...))` | sonuç kartı, promosyon |
+Masa hattının yapması gerekenler:
 
-Yapılacak: `v4/server` birleşince `RankedOnlineBackend`'in `QueueAsync` / `CancelAsync` / `AcceptAsync` gövdelerini `V4Messages.RankedQueue` / `RankedCancel` / `RankedAccept` isteklerine çevirmek, s2c mesajlarını `online.Realtime.On<V4…>` ile yukarıdaki olaylara bağlamak (`V4RankedFound.Players[i].User` → `RankedPlayer`, lig adımı `User.League`'den), `rankChange`'i masa açıkken `RankedScreen.Pending`'e yazmak. Ekran koduna dokunmak gerekmez.
+- Sahne açılırken `PendingRanked`'ı alıp temizlemek ve masayı **v4 adım protokolüyle** kurmak (yerel motor değil): `TableClient` aynı soketin `dealStart` … `turn` / `game` / `legal` / `handWait` / `matchResult` olaylarını dinler, hamleleri `g*` mesajlarıyla gönderir (ISTEMCI_NOTU §4).
+- `dealStart` `matchStart`'tan `countdownMs` (3000 ms) sonra gelir; sahne yüklemesi bunu kaçırabilir: yüklenince `resync` gönderip `snapshot {screen: "table", game}` ile masayı animasyonsuz kurmak (sunucu `Hub.Snapshot` bunu verir).
+- Maç sonunda `matchResult`'ın ardından gelen `rankChange`'i masa işlemez: `RankedOnlineBackend` yakalar ve `RankedScreen.Pending`'e koyar. Masa kapanırken `MainMenuController.ReturnToLobby = true` vermek yeter; menü `FromRanked` ile Dereceli ekranını açar ve sonuç kartını gösterir.
+- Dereceli masada sohbet yalnız hazır mesaj, hediye ve izleyici kapalı (masa kuralları `Table.Rules`).
+
+Masa hattı bağlayana kadar (EK-713): masa sahnesi yerel motorla açılır, sunucu koltuğu süre aşımlarından sonra otomatik oynar; LP sunucunun sonucudur ve dönüşte sonuç kartında görünür.
 
 ## 5. Testler
 
-`Assets/Galaxy101/Tests/PlayMode/RankedTests.cs` (Unity'de koşulmadı, derleniyor):
+`Assets/Galaxy101/Tests/PlayMode/RankedTests.cs` (bu hatta Unity'de koşulmadı, derleniyor; orkestratör koşusunda yalnız `HemenOynaOpensTheDereceliHomeAsS16` seasonTag x'inden düşmüştü):
 
-- `LadderFollowsTheRankScript`: etiketler, kodlar (gidiş-dönüş), LP tabloları, ödül çipleri, amblem dosyaları.
-- `LpRulesMatchApplyRanked`: kademe, lig (+3 koruma), korumalı düşmeme, lig düşüşü, Galaksi, Bronz III tabanı.
-- `HemenOynaOpensTheDereceliHomeAsS16`: HEMEN OYNA → ekran, metinler ve S16 kutuları, geri.
+- `LadderFollowsTheRankScript`, `LpRulesMatchApplyRanked`: lig etiketleri, kodlar, LP tabloları, ödüller, amblemler; kademe / lig / koruma / düşüş / Galaksi / taban.
+- `HemenOynaOpensTheDereceliHomeAsS16`: HEMEN OYNA → ekran, metinler ve S16 kutuları (±1,5 px; ortalanmış metinde ±3–4 px), geri.
 - `SoloSearchFoundAcceptAndStart`, `DeclineTimeoutAndCancelFlash`, `DuoNeedsAFriendInRange`, `ResultCardThenPromotion`: senaryolu arka uçla akışlar.
+- `OpeningOnAFoundMatchAndFallingBackToTheSearch`: ekran bekleyen maçla açılır, maç düşünce aramaya döner (tost, Duo modu), liderin iptali.
+- `OnlineBackendSpeaksTheV4RankedMessages`: gerçek `GalaxyRealtime` kutusuna v4 çerçeveleri (`rankedSearch`, `rankedFound`, `rankedAccepted`, `rankedReady`, başka masanın ve dereceli masanın `matchStart`'ı, `rankChange`, `rankedCancelled`) verilir; olaylar, koltuk, mod, 10 sn pencere ve `Incoming` denetlenir; soketsiz `rankedQueue` "offline" döner.
 
 ## 6. Kalan farklar
 
-- Eksikler: `docs/v4/ranked/EKSIKLER.md` (EK-701…EK-711) — başlıcaları Hat B protokolü (EK-701), dereceli takım daveti mesajı (EK-702), çevrimiçi maç sayısı / geçmiş (EK-703), yükleme ekranının dereceli başlığı (EK-706).
-- Unity farkları: `docs/v4/ranked/UNITY_FARKLARI.md` (UF-701…UF-714) — amblem / rozet / çerçeve PNG, box-shadow karşılıkları, saturate yaklaşımı, ışınlar, saatler (yönlendiricinin 100 000 + ft donması), imleç yok.
-- Görsel karşılaştırma yapılmadı (Unity yok): orkestratörün S16 yakalaması bekleniyor. Dikkat edilecekler: rozet / amblem PNG ölçeklemesi, seçili mod kartının halka katmanları, MAÇ ARA nabız fazı (UF-709).
+- Eksikler `docs/v4/ranked/EKSIKLER.md`: EK-701 **çözüldü**; açık olanlar EK-702 (onaylı parti daveti yok), EK-703 (çevrimiçi maç sayısı / geçmiş), EK-706 (yükleme ekranının dereceli başlığı), EK-712 (eşin reddi metni), EK-713 (v4 masa oturumu, §4), EK-714 (aramada rakip sayısı yok), EK-715 (kopunca `snapshot` ile dönüş).
+- Unity farkları `docs/v4/ranked/UNITY_FARKLARI.md` (UF-701…UF-715): amblem / rozet / çerçeve PNG, box-shadow karşılıkları, saturate yaklaşımı, ışınlar, imleç durumları, **UF-715** letter-spacing düzeltmesi; UF-709'un donma farkı çözüldü.
 
 ## 7. Commit'ler
 
 | Commit | İçerik |
 |---|---|
 | `68a044d` | `v4/data` birleştirmesi |
-| `ae326ba` | Dereceli ekranı (ana, İlerleme, davet, bulundu, sonuç), `IRankedBackend`, `RankedOnlineBackend`, `G101DemoRanked`, S16 yolu, menü girişi, `RankedQueue` kaldırıldı, rozet / çerçeve PNG'leri |
+| `ae326ba` | Dereceli ekranı (ana, İlerleme, davet, bulundu, sonuç), `IRankedBackend`, ilk çevrimiçi bağdaştırıcı, `G101DemoRanked`, S16 yolu, menü girişi, `RankedQueue` kaldırıldı, rozet / çerçeve PNG'leri |
 | `c51e1dc` | `RankedTests` (7 test); dereceli başlangıcı `OpenMatchTable` kapalıyken masa açmaz |
 | `d725a7d` | Paketin hata metinleri (sessiz kodlar), `E_MATCH_EXPIRED`, koltuk girişi görünüm başına |
 | `b5d30da` | Bakiye / dil / tema değişince yeniden çizim; EKSIKLER, UNITY_FARKLARI |
-| (bu rapor) | RAPOR |
+| `286b21a` | İlk RAPOR |
+| `315d829` | **v4 protokolü**: `rankedQueue` / `rankedAccept` / `rankedCancel`, `rankedSearch` / `rankedFound` / `rankedAccepted` / `rankedCancelled` / `rankedReady` / `matchStart` / `rankChange`; oturum başına arka uç, `HookRanked`, `PendingRanked`; 2 yeni test |
+| `c62c8c4` | main `6565e6a` birleştirmesi (`v4/menu`, tek `GalaxyCursor`) |
+| `c372219` | letter-spacing Chrome gibi (boşluk ve son karakter): S16 `seasonTag` x 145,78 (UF-715) |
+| (bu commit) | RAPOR, EKSIKLER (EK-701 çözüldü, EK-702 kısmen, EK-703 açık, EK-712…715), UNITY_FARKLARI (UF-709 çözüldü, UF-715) |

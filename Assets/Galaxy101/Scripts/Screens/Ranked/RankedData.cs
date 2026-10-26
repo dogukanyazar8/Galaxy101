@@ -114,6 +114,8 @@ namespace Galaxy101
     /// <summary>rankedSearch: seats filling while the queue searches.</summary>
     public sealed class RankedSearch
     {
+        /// <summary>solo, duo or squad (a party member queued by the leader learns the mode from here).</summary>
+        public string Mode;
         /// <summary>1: ±1 league, 2: ±2 after rankedWiden (30 s).</summary>
         public int Range = 1;
         public int Filled;
@@ -137,7 +139,9 @@ namespace Galaxy101
     {
         public string Mode = "solo";
         public List<RankedPlayer> Players = new List<RankedPlayer>();
-        /// <summary>The server's MatchStartMessage (null for a local demo table).</summary>
+        /// <summary>Your seat (0–3) at the ranked table; −1 when unknown.</summary>
+        public int Seat = -1;
+        /// <summary>The server's matchStart (V4MatchStart: the table, its seats and countdownMs); null for a local demo table.</summary>
         public object Match;
     }
 

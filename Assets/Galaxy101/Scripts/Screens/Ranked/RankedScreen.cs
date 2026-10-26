@@ -69,13 +69,35 @@ namespace Galaxy101
             AppVersionLabel.Attach(layer);
             modalLayer = Fill("ranked-modals"); modalLayer.pickingMode = PickingMode.Ignore; layer.Add(modalLayer);
             toastLayer = Fill("ranked-toasts"); layer.Add(toastLayer);
+            Hook();
+            // The menu scene unloading (the table opens) takes the panel away without Hide: stop listening then too, so a
+            // session-long backend hands its rankChange to the next screen (Pending) instead of this dead one.
+            layer.RegisterCallback<DetachFromPanelEvent>(_ => Unhook());
+            shownAt = viewShownAt = Time.realtimeSinceStartup;
+            Render();
+            backend.Refresh();
+            // Opened mid-search or on a found match (a party leader queued this player): pick the state up.
+            if (backend.Pending != null) OnFound(backend.Pending); else if (backend.Queue != null) OnSearching(backend.Queue);
+            if (Pending != null) { var r = Pending; Pending = null; OnRankChanged(r); }
+        }
+
+        private bool hooked;
+        private void Hook()
+        {
+            if (hooked) return; hooked = true;
             backend.Changed += OnChanged; backend.PartyAnswered += OnPartyAnswered; backend.Searching += OnSearching; backend.Found += OnFound;
             backend.Accepted += OnAccepted; backend.Cancelled += OnCancelled; backend.Ready += OnReady; backend.Started += OnStarted; backend.RankChanged += OnRankChanged;
             view.Root.RegisterCallback<KeyDownEvent>(OnKey, TrickleDown.TrickleDown);
             view.Model.Changed += OnChanged; view.Loc.Changed += OnChanged; // balance, profile, language, theme
-            shownAt = viewShownAt = Time.realtimeSinceStartup;
-            Render();
-            if (Pending != null) { var r = Pending; Pending = null; OnRankChanged(r); }
+        }
+
+        private void Unhook()
+        {
+            if (!hooked) return; hooked = false;
+            backend.Changed -= OnChanged; backend.PartyAnswered -= OnPartyAnswered; backend.Searching -= OnSearching; backend.Found -= OnFound;
+            backend.Accepted -= OnAccepted; backend.Cancelled -= OnCancelled; backend.Ready -= OnReady; backend.Started -= OnStarted; backend.RankChanged -= OnRankChanged;
+            view.Root.UnregisterCallback<KeyDownEvent>(OnKey, TrickleDown.TrickleDown);
+            view.Model.Changed -= OnChanged; view.Loc.Changed -= OnChanged;
         }
 
         /// <summary>A result that arrived while the table was up (the menu shows it when it opens the screen again).</summary>
@@ -84,10 +106,7 @@ namespace Galaxy101
         public void Hide()
         {
             if (layer == null) return;
-            backend.Changed -= OnChanged; backend.PartyAnswered -= OnPartyAnswered; backend.Searching -= OnSearching; backend.Found -= OnFound;
-            backend.Accepted -= OnAccepted; backend.Cancelled -= OnCancelled; backend.Ready -= OnReady; backend.Started -= OnStarted; backend.RankChanged -= OnRankChanged;
-            view.Root.UnregisterCallback<KeyDownEvent>(OnKey, TrickleDown.TrickleDown);
-            view.Model.Changed -= OnChanged; view.Loc.Changed -= OnChanged;
+            Unhook();
             ticker?.Pause(); ticker = null; motions.Clear();
             var canvas = layer.parent; layer.RemoveFromHierarchy(); layer = null; body = modalLayer = toastLayer = null;
             var main = canvas?.Q<VisualElement>("main-layer"); if (main != null) main.style.display = DisplayStyle.Flex;
@@ -198,9 +217,16 @@ namespace Galaxy101
         // ---------- backend events ----------
         private void OnChanged() => Render();
 
+        /// <summary>
+        /// rankedSearch: the search (again). A party member learns the mode here. While a match was waiting for accepts it means
+        /// that match fell through (another player timed out or declined) and the server put this party back in the search
+        /// (lane B EK-219): E_MATCH_EXPIRED's text "Eşleşme süresi doldu · aramaya dönülüyor".
+        /// </summary>
         private void OnSearching(RankedSearch s)
         {
-            if (Found != null || s == null) return;
+            if (s == null) return;
+            if (s.Mode == "solo" || s.Mode == "duo" || s.Mode == "squad") Mode = s.Mode;
+            if (Found != null) { Found = null; Flash(L("Eşleşme süresi doldu · aramaya dönülüyor", "Match expired · back to search"), "info"); }
             if (!Searching) { Searching = true; searchStartedAt = Time.realtimeSinceStartup; }
             search = s; Render();
         }
@@ -222,8 +248,10 @@ namespace Galaxy101
         {
             bool had = Found != null || Searching;
             Found = null; Searching = false;
+            // timeout: you did not accept in time; cancel: your party's leader stopped the search; declined: a member of your party
+            // declined (your own decline already said "Maçı reddettin"; the package has no text for a partner's, EK-712).
             if (had && reason == "timeout") Flash(L("Maç zamanında kabul edilmedi", "Match not accepted in time"), "bad");
-            else if (had && reason == "declined") Flash(L("Maçı reddettin", "You declined the match"), "bad");
+            else if (had && reason == "cancel") Flash(L("Arama iptal edildi", "Search cancelled"), "info");
             Render();
         }
 

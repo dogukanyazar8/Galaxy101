@@ -23,6 +23,25 @@ namespace Galaxy101
             return label;
         }
 
+        /// <summary>
+        /// CSS letter-spacing laid out as Chrome does: <see cref="MenuView.Tracking"/> sets the spacing, but UI Toolkit's text adds
+        /// it after neither a space nor the last glyph, where Chrome adds it after every character (S16 run: "SEZON 3 · DERECELİ"
+        /// at 1.6 px came out 6.4 px = 4 × 1.6 narrower, "4 OYUNCU" at 1 px 2 px narrower). The spaces get it back as rich-text
+        /// space, the last character as right padding. Call after <see cref="Pad"/>.
+        /// </summary>
+        private static Label Track(Label label, float px, float size)
+        {
+            MenuView.Tracking(label, px, size);
+            string text = label.text ?? "";
+            if (text.IndexOf(' ') >= 0 && text.IndexOf('<') < 0)
+            {
+                label.enableRichText = true;
+                label.text = text.Replace(" ", " <space=" + (px / size).ToString("0.####", System.Globalization.CultureInfo.InvariantCulture) + "em>");
+            }
+            label.style.paddingRight = label.style.paddingRight.value.value + px;
+            return label;
+        }
+
         /// <summary>white-space: nowrap; overflow: hidden; text-overflow: ellipsis.</summary>
         private static Label Clip(Label label) { label.style.flexShrink = 1; label.style.overflow = Overflow.Hidden; label.style.textOverflow = TextOverflow.Ellipsis; label.style.minWidth = 0; return label; }
 

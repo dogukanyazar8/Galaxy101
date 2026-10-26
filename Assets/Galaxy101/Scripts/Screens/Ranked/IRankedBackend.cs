@@ -20,6 +20,12 @@ namespace Galaxy101
         IReadOnlyList<RankedPlayer> Friends { get; }
         /// <summary>Profile, friends or balance changed.</summary>
         event Action Changed;
+        /// <summary>The screen opened: fetch the standing and the friends again.</summary>
+        void Refresh();
+        /// <summary>The search in progress (null when not queued): a screen that opens mid-search picks it up.</summary>
+        RankedSearch Queue { get; }
+        /// <summary>The match waiting for accepts (null when none): a screen that opens on rankedFound picks it up.</summary>
+        RankedFound Pending { get; }
 
         /// <summary>Ask a friend into the party. Null = sent; the answer comes as <see cref="PartyAnswered"/>.</summary>
         Task<string> InviteAsync(RankedPlayer friend);

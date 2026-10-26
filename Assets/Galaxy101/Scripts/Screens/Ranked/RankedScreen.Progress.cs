@@ -32,7 +32,7 @@ namespace Galaxy101
                 if (isHere) InsetRing(item, 2, l.Text, 18);
                 if (isHere)
                 {
-                    var you = Text(L("BURADASIN", "YOU ARE HERE"), 10, "Baloo2-800", "var(--aT)", 0, "ranked.text.youHere[" + i + "]"); MenuView.Tracking(you, 1, 10); Pad(you, 3, 10, 3, 10); view.Decorate(you, "var(--a1)", 8);
+                    var you = Text(L("BURADASIN", "YOU ARE HERE"), 10, "Baloo2-800", "var(--aT)", 0, "ranked.text.youHere[" + i + "]"); Pad(you, 3, 10, 3, 10); Track(you, 1, 10); view.Decorate(you, "var(--a1)", 8);
                     you.style.position = Position.Absolute; you.style.top = -11; you.style.left = Length.Percent(50); you.style.translate = new Translate(Length.Percent(-50), 0); item.Add(you);
                 }
                 var emblem = Emblem(l.Key, 0, 72); if (!reached) GalaxyFilters.SaturationAndBrightness(emblem, .3f, .7f); item.Add(emblem); // grayscale(.7) brightness(.7)

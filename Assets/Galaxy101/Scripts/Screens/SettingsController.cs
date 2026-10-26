@@ -16,7 +16,7 @@ namespace Galaxy101
         private int toggles, sliders, segments;
         /// <summary>The sidebar order of the tabs (G101-Menu setTabs).</summary>
         public static readonly int[] Order = { 0, 1, 2, 5, 3, 4 };
-        public static string[] Titles(MenuView v) => new[] { v.L("Oyun", "Game"), v.L("Ses", "Sound"), v.L("Görüntü", "Display"), v.L("Dil", "Language"), v.L("Hesap", "Account"), v.L("Masa", "Table") };
+        public static string[] Titles(MenuView v) => new[] { v.L("Oyun", "Game"), v.L("Ses", "Sound"), v.L("Görüntü", "Display"), v.L("Dil", "Language"), v.L("Hesap", "Account"), "Masa" };   // SET_EN has no entry for the Masa tab: the prototype shows "Masa" in English too (EKSIKLER EK-006)
         public static string[] Subtitles(MenuView v) => new[]
         {
             v.L("Taş hareketleri ve masa davranışı", "Tile movement and table behavior"),
@@ -24,7 +24,7 @@ namespace Galaxy101
             v.L("Tema, çözünürlük ve görsel efektler", "Theme, resolution and visual effects"),
             v.L("Uygulamanın dili", "App language"),
             v.L("Profil, bağlı hesaplar ve bildirimler", "Profile, linked accounts and notifications"),
-            v.L("Görüş açısı ve masa görünümü", "Camera view and table look")
+            "Görüş açısı ve masa görünümü"   // untranslated in the prototype too (EK-006)
         };
 
         public void OnOpen(MenuView view)

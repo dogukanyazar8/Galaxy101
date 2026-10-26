@@ -15,6 +15,21 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 FULL = ("app.stage", "menu.starsA", "menu.planetCanvas")
 # Texts Unity draws as artwork, not as a text element (docs/v4/UNITY_FARKLARI.md UF-03): never "missing".
 ARTWORK = {"GALAXY"}
+# Countdowns computed from the wall clock (EKSIKLER EK-003): compared by format, not by value.
+import re as _re
+CLOCK = [_re.compile(p) for p in (r"^\d\d:\d\d:\d\d$", r"^Yenilenmeye \d+ sa \d+ dk$", r"^Resets in \d+h \d+m$")]
+
+
+def clock_kind(text):
+    return next((i for i, rx in enumerate(CLOCK) if rx.match(str(text).strip())), None)
+
+
+def split_clock(items):
+    keep, clocks = [], []
+    for t in items:
+        k = clock_kind(t[0])
+        (clocks if k is not None else keep).append(t)
+    return keep, clocks
 
 
 def boxes(layout):
@@ -62,7 +77,19 @@ def main():
         if not os.path.exists(rt): results[sid] = {"error": "no reference text dump"}; continue
         # Text inside an SVG (league emblems, icons) is artwork: Unity shows those as images (docs/v4/hat-d EK-404).
         ref_texts = [t for t in load(rt) if not (len(t) > 10 and t[10])]
-        res = compare(ref_texts, load(os.path.join(a.unity, f)))
+        uni_texts = load(os.path.join(a.unity, f))
+        ref_texts, ref_clock = split_clock(ref_texts); uni_texts, uni_clock = split_clock(uni_texts)
+        res = compare(ref_texts, uni_texts)
+        # A countdown matches a Unity countdown of the same format near the same place (±3 px like any text).
+        for rc in ref_clock:
+            hit = next((u for u in uni_clock if clock_kind(u[0]) == clock_kind(rc[0]) and abs(u[1] - rc[1]) <= 3 and abs(u[2] - rc[2]) <= 3), None)
+            if hit is not None: uni_clock.remove(hit); res["matched"] += 1
+            else:
+                near = next((u for u in uni_clock if clock_kind(u[0]) == clock_kind(rc[0])), None)
+                if near is not None: uni_clock.remove(near); res["off"].append({"text": rc[0], "ref": rc[1:6], "unity": near[1:6], "d": [near[1] - rc[1], near[2] - rc[2], 0, 0, 0]})
+                else: res["missing"].append(rc[0])
+            res["total"] += 1
+        res["extra"] += [u[0] for u in uni_clock]
         res["missing"] = [m for m in res["missing"] if m not in ARTWORK]
         with open(rl, encoding="utf-8") as h: ref_layout = json.load(h)
         ul = os.path.join(a.unity, sid + ".layout.json")

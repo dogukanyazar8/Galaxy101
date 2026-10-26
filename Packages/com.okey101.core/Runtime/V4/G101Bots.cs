@@ -358,7 +358,7 @@ namespace Okey101.Core.V4
                 var bm = BestMelds(ok, rack);
                 if (bm.Melds.Count > 0) { lay = bm.Melds; if (bm.Left.Count == 0) lay = KeepOne(ok, lay, null, null); }
             }
-            if (lay != null && lay.Count > 0) return GameAction.Lay(seat, lay);
+            if (lay != null && lay.Count > 0 && !OnlySideLeft(rack, t.SideTake, Used(lay))) return GameAction.Lay(seat, lay);
             if (s.Opts.Isle)
             {
                 int i, m;
@@ -368,6 +368,7 @@ namespace Okey101.Core.V4
                     for (i = 0; i < ids.Count; i++)
                     {
                         if (G101Rules.IsOkey(ok, ids[i]) && rack.Count > 2) continue;                              // add the okey only when about to finish
+                        if (OnlySideLeft(rack, t.SideTake, new HashSet<string> { ids[i] })) continue;
                         for (m = 0; m < h.Melds.Count; m++)
                         {
                             var sides = G101Rules.AddSides(s, h.Melds[m].Id, ids[i]);
@@ -385,7 +386,23 @@ namespace Okey101.Core.V4
                     }
                 }
             }
-            return GameAction.Discard(seat, G101Rules.AutoDiscardTile(s, seat));
+            var discard = G101Rules.AutoDiscardTile(s, seat);
+            if (discard == null && t.SideTake != null && rack.Contains(t.SideTake)) return GameAction.ReturnSide(seat);   // R-32: the side tile alone cannot be discarded
+            return GameAction.Discard(seat, discard);
+        }
+
+        private static HashSet<string> Used(List<MeldSpec> melds)
+        {
+            var used = new HashSet<string>();
+            foreach (var m in melds) foreach (var id in m.Tiles) used.Add(id);
+            return used;
+        }
+        // Would playing <paramref name="used"/> leave only the side tile, which may not be discarded (R-32)?
+        private static bool OnlySideLeft(List<string> rack, string side, HashSet<string> used)
+        {
+            if (side == null || used.Contains(side) || !rack.Contains(side)) return false;
+            foreach (var id in rack) if (id != side && !used.Contains(id)) return false;
+            return true;
         }
 
         /// <summary>D-20 delay before <paramref name="next"/> after <paramref name="prev"/> (null at turn start).</summary>

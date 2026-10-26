@@ -155,11 +155,12 @@
     var lay = null;
     if (H.openMode[seat] === 'pair') { var bp = bestPairs(ok, rack); if (bp.pairs.length) { lay = bp.pairs; if (!bp.left.length) lay = lay.slice(0, -1); } }
     else { var bm = bestMelds(ok, rack); if (bm.melds.length) { lay = bm.melds; if (!bm.left.length) lay = keepOne(ok, lay, null, null); } }
-    if (lay && lay.length) return { t: 'lay', seat: seat, melds: lay };
+    if (lay && lay.length && !onlySideLeft(rack, T.sideTake, [].concat.apply([], lay.map(function (g) { return g.tiles; })))) return { t: 'lay', seat: seat, melds: lay };
     if (S.opts.isle) {
       var i, m, ids = rack.slice().sort();
       if (rack.length >= 2) for (i = 0; i < ids.length; i++) {
         if (R.isOkey(ok, ids[i]) && rack.length > 2) continue;                              // okeyi yalnız bitişe yakın işle
+        if (onlySideLeft(rack, T.sideTake, [ids[i]])) continue;
         for (m = 0; m < H.melds.length; m++) { var sides = R.addSides(S, H.melds[m].id, ids[i]); if (sides.length) return { t: 'add', seat: seat, tile: ids[i], meld: H.melds[m].id, side: sides[0] }; }
       }
       for (m = 0; m < H.melds.length; m++) {
@@ -171,7 +172,15 @@
         }
       }
     }
-    return { t: 'discard', seat: seat, tile: R.autoDiscardTile(S, seat) };
+    var discard = R.autoDiscardTile(S, seat);
+    if (discard == null && T.sideTake != null && rack.indexOf(T.sideTake) >= 0) return { t: 'returnSide', seat: seat };   // R-32: tek kalan yan taş atılamaz
+    return { t: 'discard', seat: seat, tile: discard };
+  }
+  // used oynanınca ıstakada yalnız atılamayan yan taş mı kalır (R-32)?
+  function onlySideLeft(rack, side, used) {
+    if (side == null || used.indexOf(side) >= 0 || rack.indexOf(side) < 0) return false;
+    for (var i = 0; i < rack.length; i++) if (rack[i] !== side && used.indexOf(rack[i]) < 0) return false;
+    return true;
   }
 
   function delayFor(prev, next) {

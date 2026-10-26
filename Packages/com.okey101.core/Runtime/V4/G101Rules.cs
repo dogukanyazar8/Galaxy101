@@ -400,7 +400,7 @@ namespace Okey101.Core.V4
         {
             var o = new List<string>();
             if (meld.Kind == KindPair) return o;
-            if (meld.Kind == KindGroup) { if (AnalyzeMeld(h.Okey, KindGroup, Concat(meld.Tiles, tile)).Ok) o.Add("post"); return o; }
+            if (meld.Kind == KindGroup) { if (GroupKeepsOkeys(h.Okey, meld.Tiles, Concat(meld.Tiles, tile))) o.Add("post"); return o; }
             if (AnalyzeMeld(h.Okey, KindRun, Prepend(tile, meld.Tiles)).Ok) o.Add("pre");
             if (AnalyzeMeld(h.Okey, KindRun, Concat(meld.Tiles, tile)).Ok) o.Add("post");
             return o;
@@ -411,7 +411,25 @@ namespace Okey101.Core.V4
             if (meld.Kind == KindPair || IsOkey(h.Okey, tile) || !IsOkey(h.Okey, meld.Tiles[index])) return false;
             var t2 = new List<string>(meld.Tiles);
             t2[index] = tile;
+            if (meld.Kind == KindGroup)
+            {                                                                                                      // R08/R09: only the tile the okey stands for, and the other okey keeps its face
+                var was = AnalyzeMeld(h.Okey, KindGroup, meld.Tiles);
+                var real = RealOf(h.Okey, tile);
+                if (!was.Ok || was.Repr[index].C != real.C || was.Repr[index].N != real.N) return false;
+                return GroupKeepsOkeys(h.Okey, meld.Tiles, t2);
+            }
             return AnalyzeMeld(h.Okey, meld.Kind, t2).Ok;
+        }
+        // R08: a group's okey keeps the face it took when the group was laid; a change that would give it another colour is refused.
+        private static bool GroupKeepsOkeys(ColorNum ok, List<string> before, List<string> after)
+        {
+            var a = AnalyzeMeld(ok, KindGroup, after);
+            if (!a.Ok) return false;
+            var b = AnalyzeMeld(ok, KindGroup, before);
+            if (!b.Ok) return true;
+            for (var i = 0; i < before.Count; i++)
+                if (IsOkey(ok, before[i]) && IsOkey(ok, after[i]) && (a.Repr[i].C != b.Repr[i].C || a.Repr[i].N != b.Repr[i].N)) return false;
+            return true;
         }
         private static bool IsIslek(HandState h, string tile)
         {
@@ -797,6 +815,12 @@ namespace Okey101.Core.V4
             if (t.Phase == PhasePlay && t.SideMust && h.Racks[k].Contains(t.SideTake)) { r = DoReturnSide(s, ev); if (r != null) return r; }
             if (h.Turn.Phase == PhaseDraw) { r = DoDraw(s, new GameAction { T = "draw", Seat = k, Src = "deck" }, ev); if (r != null) return r; }
             var id = AutoDiscardTile(s, k);
+            if (id == null && h.Turn.SideTake != null)
+            {                                                                                                      // only the side tile is left (R-32 forbids discarding it): return it, draw from the deck
+                r = DoReturnSide(s, ev); if (r != null) return r;
+                r = DoDraw(s, new GameAction { T = "draw", Seat = k, Src = "deck" }, ev); if (r != null) return r;
+                id = AutoDiscardTile(s, k);
+            }
             return DoDiscard(s, id, ev);
         }
 

@@ -91,6 +91,70 @@ namespace Okey101.Core.V4.Tests
             Assert.That(ok.State.Hand.Turn.Pending.Single().Code, Is.EqualTo("P_OKEY_TAKEN"));
         }
 
+        // An opened player took the side tile R4a; laying off B4a would leave only R4a, which may not be discarded (R-32).
+        private static MatchState SideTileLeftAlone(string phase) => G101Rules.FromSpec(new HandSpec
+        {
+            Indicator = "K13a", TurnSeat = 0, TurnPhase = phase, TurnN = 9,
+            Opened = new[] { 101, 101, 0, 0 }, OpenMode = new[] { "run", "run", null, null },
+            Racks = new List<List<string>> { new List<string> { "B4a" }, new List<string>(), new List<string>(), new List<string>() },
+            Discards = new List<List<string>> { new List<string>(), new List<string>(), new List<string>(), new List<string> { "R4a" } },
+            Melds = new List<SpecMeld>
+            {
+                new SpecMeld { Owner = 1, Kind = "run", Tiles = new List<string> { "B1a", "B2a", "B3a" } },
+                new SpecMeld { Owner = 1, Kind = "run", Tiles = new List<string> { "R1a", "R2a", "R3a" } },
+            },
+            Deck = new List<string> { "Y13a", "Y12a" }
+        });
+
+        [Test]
+        public void ABotThatTakesTheSideTileNeverStrandsIt()
+        {
+            var s = SideTileLeftAlone("draw");
+            for (var step = 0; step < 6 && s.Hand.Turn.Seat == 0 && s.Status == G101Rules.StatusPlaying; step++)
+            {
+                var a = G101Bots.NextAction(s, 0);
+                var r = G101Rules.Apply(s, a);
+                Assert.That(r.Ok, Is.True, $"{a.T} {a.Tile}: {r.Error}");
+                s = r.State;
+            }
+            Assert.That(s.Hand == null || s.Hand.Turn.Seat != 0 || s.Status != G101Rules.StatusPlaying, Is.True, "the bot's turn ended");
+        }
+
+        [Test]
+        public void ATimeoutWithOnlyTheSideTileLeftReturnsItAndDrawsFromTheDeck()
+        {
+            var s = G101Rules.Apply(SideTileLeftAlone("draw"), GameAction.Draw(0, "side")).State;
+            s = G101Rules.Apply(s, GameAction.Add(0, "B4a", "m1", "post")).State;
+            Assert.That(G101Rules.AutoDiscardTile(s, 0), Is.Null);
+            var r = G101Rules.Apply(s, GameAction.Timeout(0));
+            Assert.That(r.Ok, Is.True, r.Error);
+            Assert.That(r.Events.Select(e => e.E), Is.EqualTo(new[] { "auto", "sideReturned", "drew", "discarded", "turn" }));
+            Assert.That(r.State.Hand.Discards[3].Last(), Is.EqualTo("R4a"));
+            Assert.That(r.State.Hand.Melds[0].Tiles, Is.EqualTo(new[] { "B1a", "B2a", "B3a" }), "the lay-off of the turn is undone");
+            Assert.That(r.State.Hand.Turn.Seat, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void AGroupOkeyIsTakenOnlyWithTheTileItStandsFor()
+        {
+            // R08/R09: in R5 B5 okey the okey stands for Y5 (shown so); K5 would also make a group but is not its face.
+            var s = G101Rules.FromSpec(new HandSpec
+            {
+                Indicator = "K13a", TurnSeat = 0, TurnPhase = "play", TurnN = 9,
+                Opened = new[] { 101, 101, 0, 0 }, OpenMode = new[] { "run", "run", null, null },
+                Racks = new List<List<string>> { new List<string> { "K5a", "Y5a", "B12a" }, new List<string>(), new List<string>(), new List<string>() },
+                Melds = new List<SpecMeld> { new SpecMeld { Owner = 1, Kind = "group", Tiles = new List<string> { "R5a", "B5a", "K1a" } } }
+            });
+            Assert.That(G101Rules.AnalyzeMeld(s.Hand.Okey, "group", s.Hand.Melds[0].Tiles).Repr[2].C, Is.EqualTo("Y"));
+            Assert.That(G101Rules.SwapFits(s, "m1", 2, "Y5a"), Is.True);
+            Assert.That(G101Rules.SwapFits(s, "m1", 2, "K5a"), Is.False);
+            var wrong = G101Rules.Apply(s, GameAction.Swap(0, "K5a", "m1", 2));
+            Assert.That(wrong.Error, Is.EqualTo("E_SWAP_INVALID"));
+            // Adding Y5 would turn the okey into K5: refused; K5 keeps it Y5.
+            Assert.That(G101Rules.AddSides(s, "m1", "Y5a"), Is.Empty);
+            Assert.That(G101Rules.AddSides(s, "m1", "K5a"), Is.EqualTo(new[] { "post" }));
+        }
+
         [Test]
         public void CanonicalJsonSortsKeysAndEscapesLikeJsonStringify()
         {

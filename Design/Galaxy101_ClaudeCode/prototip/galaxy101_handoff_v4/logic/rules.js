@@ -244,7 +244,7 @@
   function addSides(H, meld, tile) {
     var out = [];
     if (meld.kind === 'pair') return out;
-    if (meld.kind === 'group') { if (analyzeMeld(H.okey, 'group', meld.tiles.concat([tile])).ok) out.push('post'); return out; }
+    if (meld.kind === 'group') { if (groupKeepsOkeys(H.okey, meld.tiles, meld.tiles.concat([tile]))) out.push('post'); return out; }
     if (analyzeMeld(H.okey, 'run', [tile].concat(meld.tiles)).ok) out.push('pre');
     if (analyzeMeld(H.okey, 'run', meld.tiles.concat([tile])).ok) out.push('post');
     return out;
@@ -252,7 +252,20 @@
   function swapFits(H, meld, index, tile) {
     if (meld.kind === 'pair' || isOkey(H.okey, tile) || !isOkey(H.okey, meld.tiles[index])) return false;
     var t2 = meld.tiles.slice(); t2[index] = tile;
+    if (meld.kind === 'group') {                                                         // R08/R09: yalnız okeyin temsil ettiği taş; diğer okey yüzünü korur
+      var was = analyzeMeld(H.okey, 'group', meld.tiles), real = realOf(H.okey, tile);
+      if (!was.ok || was.repr[index].c !== real.c || was.repr[index].n !== real.n) return false;
+      return groupKeepsOkeys(H.okey, meld.tiles, t2);
+    }
     return analyzeMeld(H.okey, meld.kind, t2).ok;
+  }
+  // R08: gruptaki okey masaya konduğu andaki yüzünü korur; onu başka renge çevirecek değişiklik reddedilir.
+  function groupKeepsOkeys(ok, before, after) {
+    var a = analyzeMeld(ok, 'group', after); if (!a.ok) return false;
+    var b = analyzeMeld(ok, 'group', before); if (!b.ok) return true;
+    for (var i = 0; i < before.length; i++)
+      if (isOkey(ok, before[i]) && isOkey(ok, after[i]) && (a.repr[i].c !== b.repr[i].c || a.repr[i].n !== b.repr[i].n)) return false;
+    return true;
   }
   function isIslek(H, tile) {
     for (var m = 0; m < H.melds.length; m++) {
@@ -524,6 +537,11 @@
     if (T.phase === 'play' && T.sideMust && idxOf(H.racks[k], T.sideTake) >= 0) { r = doReturnSide(S, ev); if (r) return r; }
     if (H.turn.phase === 'draw') { r = doDraw(S, { src: 'deck' }, ev); if (r) return r; }
     var id = autoDiscardTile(S, k);
+    if (id == null && H.turn.sideTake != null) {                                         // yalnız yandan alınan taş kaldı (R-32 atılamaz): geri ver, desteden çek
+      r = doReturnSide(S, ev); if (r) return r;
+      r = doDraw(S, { src: 'deck' }, ev); if (r) return r;
+      id = autoDiscardTile(S, k);
+    }
     return doDiscard(S, { tile: id }, ev);
   }
 

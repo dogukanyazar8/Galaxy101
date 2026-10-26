@@ -60,7 +60,7 @@
    "seed": 31676,
    "steps": 275,
    "fails": 0,
-   "events": "8e4cea40eccfab59e77c338b4c42699237debb8a267ad4ba9bdafff0a1056b92",
+   "events": "2e67f094fb382c1d705e58cb3833b48c4d917ec650549924762dc8749c7919d5",
    "state": "f1d7845b13dc7dc95e6932158bd38c0e0f1a5f2d4d4212aa13a62ce86c47bc1b",
    "totals": [
     591,
@@ -77,12 +77,12 @@
    "seed": 39595,
    "steps": 267,
    "fails": 0,
-   "events": "5efdfeab363121e8dd896ac3640b844756ea32a1434ab74b79e9c58342b8714a",
-   "state": "af3bc06943b75b510c6aa3196d479df10438a5a22bc7b8f92041c46db71a362e",
+   "events": "133e9245ff95b133dd44bf7a761dea5d3d043ed772e95642fb32ba61882ddbba",
+   "state": "63e415395372497d7c19ab7216b58a3e79d7bdf57729b863cad7491a1fd39da1",
    "totals": [
-    308,
+    294,
     667,
-    708,
+    824,
     716
    ]
   },
@@ -194,15 +194,15 @@
     "hands": 5
    },
    "seed": 95028,
-   "steps": 293,
+   "steps": 264,
    "fails": 0,
-   "events": "0d2ebf8e9d76c09a4dcee414c54afc991c4138042285edff643187264d6278b3",
-   "state": "53dbe8b0bdcd7c22285b966b3947efdc921bc72fd2795ed797376b528f00c116",
+   "events": "31011d423f0ac19ff13d27d38803798f1a28767694f9baa4f00df0dc3d625c7d",
+   "state": "a7a5b98ddc7cb820f947622132ef6bb97d625fc496b72070f5d01fa7e862fee1",
    "totals": [
-    583,
-    375,
-    343,
-    442
+    480,
+    779,
+    441,
+    437
    ]
   },
   {
@@ -211,15 +211,15 @@
     "hands": 5
    },
    "seed": 7920,
-   "steps": 262,
+   "steps": 264,
    "fails": 0,
-   "events": "32666dd0357d97c3a29ee330c8321a19fe4cd9a528c8fa102dbe5cce3c45ebcc",
-   "state": "645618fe66d4035bdf17adc783a378a8ed17188d92a6730fc0ffb808910f17fc",
+   "events": "800b32f9dad10e2499ec97dc3028530fe6f457ab1222f8be37bb1563d8fcbc07",
+   "state": "02b4cf26763197e7935a7fa4f095aba69e7f5efe8cd6373583aed605d5fb3142",
    "totals": [
-    1308,
+    1305,
     307,
-    542,
-    205
+    643,
+    286
    ]
   },
   {
@@ -228,14 +228,14 @@
     "hands": 5
    },
    "seed": 15839,
-   "steps": 277,
+   "steps": 279,
    "fails": 0,
-   "events": "2b5712a98dba06eae51682a6a93b2490261909d959d126ad7b18ccec0e2d2f45",
-   "state": "3a53cb8478d39ef7d8d058d209c88ec81aa5e39f8706383f4d726bcc56074a6a",
+   "events": "10a62adb3c5640498f45e1a4983639385e138955b0466443201b4d1adaf39df8",
+   "state": "f6642359f8f20e0e387a4fe45159faf012288d512fff060a756c5ec92fd2493a",
    "totals": [
-    650,
-    836,
-    353,
+    751,
+    825,
+    454,
     248
    ]
   },
@@ -245,15 +245,15 @@
     "hands": 5
    },
    "seed": 23758,
-   "steps": 268,
+   "steps": 278,
    "fails": 0,
-   "events": "a994d16c763221d1ea590c7dda1a38c45ea632a551d5d6a21dc976e65313bac9",
-   "state": "b6729e34212e797e3d0b697d2038e7a984b0a77e0b4768084076239b134f61c2",
+   "events": "9e69dabc09ade8e4906c0d511f7ad32331fc68b8d1b71ca879ebaf5f16be722f",
+   "state": "cdb8d3046af07f74932f89140933d6a883760219c0b23bcc32772581acc654d4",
    "totals": [
-    364,
-    319,
-    288,
-    255
+    360,
+    521,
+    389,
+    365
    ]
   },
   {
@@ -262,15 +262,15 @@
     "hands": 5
    },
    "seed": 31677,
-   "steps": 264,
+   "steps": 275,
    "fails": 0,
-   "events": "3a91eac290caaa4b11b1cf684e9017e30aaa61548ba41592c24c068b80e815c8",
-   "state": "a6ff7a34384a986fa576899009ae3fb028fc65207fdb1782d0a9b46ccb06d3d8",
+   "events": "91a821e1ab7de795933dc96fe02203fa4a5e0a0c9602154c436248866374dc4d",
+   "state": "b1ca9521fb1082d327718396357bdc1eb06178d40a5329feca83c1faec5784ba",
    "totals": [
-    753,
-    237,
-    263,
-    501
+    956,
+    336,
+    83,
+    375
    ]
   },
   {
@@ -296,15 +296,15 @@
     "hands": 5
    },
    "seed": 47515,
-   "steps": 271,
+   "steps": 273,
    "fails": 0,
-   "events": "0435586b8b2ac3e166e417adde23dafdc5f52788c542232bfb6c1e0cf927c2e3",
-   "state": "0081954c3032882b190de0b9ce70796d46263758237e965576ecc67b8c1e0a1d",
+   "events": "2bbc2ecf0aa09adb2017a751162c6fc72b35df7935a08d333257c7ff8fa224ce",
+   "state": "2dad616e213012833eb459ecca02df05478e8583e3ae1113f214f4bee510a03a",
    "totals": [
     717,
-    748,
-    731,
-    267
+    744,
+    933,
+    366
    ]
   },
   {
@@ -330,15 +330,15 @@
     "hands": 5
    },
    "seed": 63353,
-   "steps": 275,
+   "steps": 262,
    "fails": 0,
-   "events": "a0fccbae7b59f67d840b692f20a1fa431cacb51dc9e17bde835ea2d4dac6a58c",
-   "state": "e5f154e26974684ff936765cb0edb4d6c322d8afdfb4f9b104316dd898b54dcf",
+   "events": "6f459777970711ff45dff40bf92f66a489d1356b8c7f8aaf0bcf1efd58b5329a",
+   "state": "4871960a19c648f47f0d68aafd21568f20d6a1afbad362689d722089acfe751e",
    "totals": [
-    329,
-    750,
-    146,
-    679
+    323,
+    649,
+    242,
+    860
    ]
   },
   {
@@ -349,7 +349,7 @@
    "seed": 71272,
    "steps": 251,
    "fails": 0,
-   "events": "3258cc09b42b521b9d5e9bf40f4dd860e22321d9fec95b58c04912b75d4c72fa",
+   "events": "86556067dc5b8929a71b7be9c619fad6570376c917b78e77e3e601d3ec461946",
    "state": "48efc14b235ec5c9c2b82b08d12dc5015463664c131b8e60357403cfbbc7be13",
    "totals": [
     637,
@@ -366,13 +366,13 @@
    "seed": 79191,
    "steps": 232,
    "fails": 0,
-   "events": "d0e5756c5bd51b8c5cde0f6b52ae27dc16b6a3df7407b1c9ece172f8dce407b7",
-   "state": "2a051779a1a5da90d1625999f1f1eba6aa541e5a1e993580728d76876cbce921",
+   "events": "c97e93c23c2e3e7d1740ae30c3c02c08aaa9758059836094d5df05f9643282cb",
+   "state": "29a53e0ba5e3b8728ff06d328d059f8a9566ec6dce71cd8aeb2f524d19b0d8f3",
    "totals": [
     580,
     764,
-    349,
-    546
+    450,
+    647
    ]
   },
   {
@@ -381,15 +381,15 @@
     "hands": 5
    },
    "seed": 87110,
-   "steps": 285,
+   "steps": 279,
    "fails": 0,
-   "events": "9724c41e7319b789b6c37b357b9b88cb80d439f02727cd62443c54a765e9fe68",
-   "state": "e953589ba2e49d512e94d81a8c48b0e6fe4a2e172dd846affd91e4246da2e077",
+   "events": "ce937bd3884eee405a627f5d0df8a8e00e5951618f4449b3f18275c8f019e961",
+   "state": "a61cca7e43c4b707c196e61d3af871118f3f8803ce97cb74e6a0512572ba689c",
    "totals": [
-    914,
-    578,
-    907,
-    377
+    884,
+    726,
+    906,
+    379
    ]
   },
   {
@@ -398,15 +398,15 @@
     "hands": 5
    },
    "seed": 95029,
-   "steps": 271,
+   "steps": 272,
    "fails": 0,
-   "events": "2344f545e1b4205c21787ab9c35509fadc675c884ce4157fd0da6dc68e9484d0",
-   "state": "adee04ea90c15f8d4d4564b6b456158cdfafa6f984706d544e935f834dc69b30",
+   "events": "b533927efccf0c308b53dfc816665962756159569608cee0fdd0d0078d3149cb",
+   "state": "94aa27cbc2859cdb112b30d7da10deccb6ffcb6cb7017013f533ff3333da3e5c",
    "totals": [
     104,
-    667,
-    581,
-    285
+    677,
+    480,
+    290
    ]
   },
   {
@@ -470,15 +470,15 @@
     "katlama": true
    },
    "seed": 31678,
-   "steps": 160,
+   "steps": 161,
    "fails": 0,
-   "events": "a16fa2e4ba7de657bff060c4d14ac028247d46b98943b39bb037ffdb5ada024b",
-   "state": "1cb94d508bc0c9dbd48e471ff04095223fbc5e7c3fe7e7e0c0b48c2a3d7842ed",
+   "events": "31183150deb01134e2b13d5ecadf7f30ffa5b1ccdc8eb40b9d6395e6391cb765",
+   "state": "078469286f048b0b29803bccc545cefed587457c241da54ec4e87d1af9a78f88",
    "totals": [
-    413,
+    393,
     339,
     514,
-    285
+    386
    ]
   },
   {
@@ -542,10 +542,10 @@
     "katlama": true
    },
    "seed": 63354,
-   "steps": 156,
+   "steps": 157,
    "fails": 0,
-   "events": "4db2a74365b912e4a61cf742e8524046f14f994305bda051fe6a28edadb06f99",
-   "state": "cbff064426bb5a33d0aa157f5019f170ebee9024fa7a006c845785602c941855",
+   "events": "06af2ab864b798485dab4a6d33eaa1477a07a244c33672dd3d3aecebd1a10541",
+   "state": "664de6f0c56cbbb657f264999053736f68664cd0e9ee2ab38e9cb11dd92f1ba8",
    "totals": [
     513,
     274,
@@ -614,15 +614,15 @@
     "katlama": true
    },
    "seed": 95030,
-   "steps": 159,
+   "steps": 161,
    "fails": 0,
-   "events": "443e26bbc9ccedf31f06dbffb71164f92a926def6448e2673013febf33616b28",
-   "state": "cce8c5a137adcf3329419e40152deafd67272524773a85db59a2dfc4fdbd11a6",
+   "events": "71100867958e9665c6dab6bed7f33ab3b07299fdb2f729b12a333183287adacf",
+   "state": "97e9c2b24062897c86b3e32f4f6886b262d2480fbaacb1ae05a559da3ead2af4",
    "totals": [
     462,
-    274,
+    258,
     -55,
-    480
+    581
    ]
   },
   {
@@ -766,15 +766,15 @@
     "katlamaPartner": false
    },
    "seed": 63355,
-   "steps": 159,
+   "steps": 161,
    "fails": 0,
-   "events": "340b9cc917491cbf9aadb4db12ba3da6476c46ffd0816f7a6e4ef6031f8f9c83",
-   "state": "e5aadd28fb4c3a4c03d776d091dc5ae1e5832bf8aef372bc8443b940bdb9fc92",
+   "events": "b4469da386bc0b6b06edb51b6ea433d55a5da56b47c3e0dfc5f0ceff8fb9eb18",
+   "state": "68d71a340b9461c4f9d09ff8164e0d2eae9463f26a2c27f032fb8fb96aad8b02",
    "totals": [
     411,
-    136,
-    214,
-    123
+    206,
+    212,
+    19
    ]
   },
   {
@@ -787,10 +787,10 @@
    "seed": 71274,
    "steps": 161,
    "fails": 0,
-   "events": "aeab3399dc4852a0b1b60a186a18cd40a77aa2597686c0050515404e27ba6332",
-   "state": "3d4b8b10274e3a5e1cda251b3fde2aa4e45d567a0baaad7f163076c63f01d0a4",
+   "events": "c172be898d7654dfc6a82d61ac027121256337aede0a033039533f52370398fe",
+   "state": "d1d088b40c1a4d9071c1750b205992fc86759564b76aa9e2a6b9b696eef17396",
    "totals": [
-    260,
+    265,
     198,
     539,
     449
@@ -804,15 +804,15 @@
     "katlamaPartner": false
    },
    "seed": 79193,
-   "steps": 149,
+   "steps": 150,
    "fails": 0,
-   "events": "03b254fd54d2d724edeb444f0e9fc1fe574c0abc6a9dfe43e3e1e020d5af8834",
-   "state": "9f2d69bd5cd852acf570970d018326990af01df59bae2859afdee907755e05a9",
+   "events": "6635320dd78472112d112c41bb8bd6e658ffcaaee8eb6c7fc0a0557a84e9ea00",
+   "state": "535b337093eeec7eef9da8f089bdcf414e0b683cdce47d62c804cf5230bec09e",
    "totals": [
-    562,
+    663,
     542,
     542,
-    331
+    323
    ]
   },
   {
@@ -1096,8 +1096,8 @@
    "seed": 15843,
    "steps": 172,
    "fails": 0,
-   "events": "f886c969305661771c190bca0cf2edbbc0b0a91e3a0a27f6ef40d6ee614def79",
-   "state": "ab9688c53d242f829ed611a6878b40423f21eddcbb297f6c7d9fedcc918fb508",
+   "events": "750ad58799f0b4fba0ac65af5ab20430c4295ef77b412c72eccaad7923a5a492",
+   "state": "6478c22a29a3cad90a11690d79f89bb93ca1fefcf747a4b1da540f3d8338ea1b",
    "totals": [
     -4,
     428,
@@ -1112,15 +1112,15 @@
     "penalties": false
    },
    "seed": 23762,
-   "steps": 151,
+   "steps": 154,
    "fails": 0,
-   "events": "61e24ec55768f17a3db1d9a205551374f5dd60ed1a6d62a68451bf5e194f9fea",
-   "state": "603a771f0f871fb4d87535460f94a341499db9fd135d5f62e54a0c0531508d8a",
+   "events": "cac1014f6e81d9b264885dcfe0cf2ee132c7abdf83a259f951e89faf301d0542",
+   "state": "4104f69f4703cdf9fc7a965c9ae9e079373f6a12e8aadd726d26d6962583cb73",
    "totals": [
     241,
     33,
     -303,
-    261
+    253
    ]
   },
   {
@@ -1166,13 +1166,13 @@
     "penalties": false
    },
    "seed": 47519,
-   "steps": 154,
+   "steps": 155,
    "fails": 0,
-   "events": "721af9946010e0be393dc8e06dbec330a65b6d6e7cb2f5e794a7d896a0b3b8da",
-   "state": "1a8da91a9004273978e3b480d0c1bf3dc7c14740f8823b720488b178f428eb21",
+   "events": "2869dddbaac36ecc14875cbd20d2013c1f07a45c4926de1cdc6fa9ba9fa0d7cd",
+   "state": "daabf7cb3fc770cd12c2f9014c432ffa803d89cc06f952ff68d737f65a33ca81",
    "totals": [
     117,
-    101,
+    69,
     246,
     606
    ]
@@ -1238,15 +1238,15 @@
     "penalties": false
    },
    "seed": 79195,
-   "steps": 179,
+   "steps": 181,
    "fails": 0,
-   "events": "8aee6aa06858b6dbd136eaaab6d831fa565e96e35b00996ba42693db97716ad0",
-   "state": "fffbcf7d78fff764c0db8f5da831f4f9e17c4e7a4a0e2e8940a3fef7f64edc9f",
+   "events": "0a30e453b4b586dbe346c13bc8359536b2d9891eb57978b007b4cb170a9b921f",
+   "state": "19bef9b53fdcbeb77e9880ef6c8fa243ba9b344a1c67d1cc04eeb1c76d435a69",
    "totals": [
     405,
-    71,
+    63,
     213,
-    248
+    234
    ]
   },
   {

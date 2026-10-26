@@ -26,7 +26,8 @@ namespace Galaxy101
 
         private string Lang => view.Loc.Language;
 
-        public void Show(int hands)
+        /// <param name="kick">The line above the logo (prototype g.kick: "KLASİK · TEKLİ · 101 · 5 EL", "DERECELİ · SOLO · …"); null = against bots.</param>
+        public void Show(int hands, string kick = null)
         {
             Hide();
             var canvas = view.Root.Q<VisualElement>("galaxy-canvas") ?? view.Root;
@@ -41,14 +42,14 @@ namespace Galaxy101
 
             var column = new VisualElement { name = "table-loading-content", pickingMode = PickingMode.Ignore };
             MenuView.Place(column, 112, 196, 548, 320);
-            var kick = view.Text(TableStrings.Get("ldKick", Lang, hands), 11, false, "var(--a1)"); kick.style.unityFont = view.Font("Baloo2-800"); MenuView.Tracking(kick, 2, 11);
-            column.Add(kick);
+            var kicker = view.Text(kick ?? TableStrings.Get("ldKick", Lang, hands), 11, false, "var(--a1)"); kicker.name = "load.kick"; kicker.style.unityFont = view.Font("Baloo2-800"); MenuView.Tracking(kicker, 2, 11);
+            column.Add(kicker);
             var logo = view.Text("GALAXY 101", 76, true, "var(--a1)"); logo.style.unityFont = view.Font("Montserrat-800"); MenuView.Tracking(logo, 3, 76);
             logo.style.textShadow = new TextShadow { offset = new Vector2(0, 5), blurRadius = 0, color = view.C("var(--lS)") }; logo.style.marginTop = 2;
             column.Add(logo);
             var labels = view.Row(); labels.style.marginTop = 22; labels.style.justifyContent = Justify.SpaceBetween;
-            var loading = view.Text(view.L("3D masa yükleniyor…", "Loading the 3D table…"), 12, false, "var(--ic)"); loading.style.unityFont = view.Font("Baloo2-800"); labels.Add(loading);
-            percent = view.Text("0%", 12, false, "var(--a1)"); percent.name = "table-loading-percent"; percent.style.unityFont = view.Font("Baloo2-800"); labels.Add(percent);
+            message = view.Text(Message(0), 12, false, "var(--ic)"); message.name = "load.msg"; message.style.unityFont = view.Font("Baloo2-800"); labels.Add(message);
+            percent = view.Text("0%", 12, false, "var(--a1)"); percent.name = "load.pct"; percent.style.unityFont = view.Font("Baloo2-800"); labels.Add(percent);
             column.Add(labels);
             var track = new VisualElement { pickingMode = PickingMode.Ignore }; track.style.height = 12; track.style.marginTop = 8; track.style.overflow = Overflow.Hidden;
             view.Decorate(track, "rgba(255,255,255,.14)", 6);
@@ -64,10 +65,23 @@ namespace Galaxy101
             layer.Add(column);
         }
 
+        private Label message;
+
+        /// <summary>The prototype's ld.msg by the percentage: connecting (≤ 25), loading (≤ 70), shuffling, ready (100).</summary>
+        private string Message(float pct)
+        {
+            int i = pct >= 100 ? 3 : pct > 70 ? 2 : pct > 25 ? 1 : 0;
+            string key = "app.STR.ldMsg." + i;
+            return TableStrings.Has(key) ? TableStrings.Get(key, Lang) : view.L("3D masa yükleniyor…", "Loading the 3D table…");
+        }
+
         /// <summary>A tip from the string table (ldTip.0, ldTip.1, …), different on each load.</summary>
         private string RandomTip()
         {
             int count = 0; while (TableStrings.Has("ldTip." + count)) count++;
+            // The package's tips (app.STR.tips.*, strings_v4) when present; the shared clock's stream picks one (D-60).
+            int v4 = 0; while (TableStrings.Has("app.STR.tips." + v4)) v4++;
+            if (v4 > 0) return TableStrings.Get("app.STR.tips." + (int)(GameClock.Random() * v4), Lang);
             return TableStrings.Get("ldTip." + UnityEngine.Random.Range(0, Mathf.Max(1, count)), Lang);
         }
 
@@ -75,7 +89,8 @@ namespace Galaxy101
         {
             if (fill == null) return;
             value = Mathf.Clamp01(value);
-            fill.style.width = Length.Percent(value * 100); percent.text = Mathf.RoundToInt(value * 100) + "%";
+            fill.style.width = Length.Percent(value * 100); percent.text = Mathf.FloorToInt(value * 100) + "%";
+            if (message != null) message.text = Message(value * 100);
         }
 
         /// <summary>"Masa açılamadı" (T51): the loading screen dims, a card offers "Lobiye dön" and "Yeniden dene".</summary>

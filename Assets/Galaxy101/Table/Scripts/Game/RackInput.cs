@@ -313,6 +313,9 @@ namespace Galaxy101.Table
             return meld;
         }
 
+        /// <summary>Select a rack tile as a click would (the state router's scSel; G15/G16 show its targets).</summary>
+        public void Select(int id) { selected = id; drag = null; }
+
         private void UpdateLift()
         {
             game.SetSelected(drag == null ? selected : -1);

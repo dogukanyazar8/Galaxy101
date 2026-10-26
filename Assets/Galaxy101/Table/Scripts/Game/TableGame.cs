@@ -34,6 +34,8 @@ namespace Galaxy101.Table
         public (string Name, string Color, int Level)[] Seats;
         /// <summary>Offline clock in ms (default the shared GameClock, D-60); tests pass a scaled one.</summary>
         public Func<double> Clock;
+        /// <summary>The offline match waits for <see cref="TableGame.RunFlow"/> (the state router starts it when its path says).</summary>
+        public bool Manual;
     }
 
     /// <summary>
@@ -169,7 +171,16 @@ namespace Galaxy101.Table
         {
             offline.Host.Xp += (gained, reason) => { AddXp(gained); if (reason == "hand") LastXp = (int)gained; };
             AttachModel();
-            var flow = Launch.Flow;
+            if (!Launch.Manual) RunFlow(Launch.Flow);
+        }
+
+        /// <summary>
+        /// Starts the offline match: a prepared hand of a test flow (TableScenarios), the waiting room ("seat"), the deal at
+        /// once ("deal") or a normal start (matchStart, 3-2-1, deal).
+        /// </summary>
+        public void RunFlow(string flow)
+        {
+            if (!(Session is LocalTableSession offline) || offline.Started && flow != null && !TableScenarios.Has(flow)) return;
             if (flow == "seat") { _ = SeatThenStart(offline); return; }
             if (flow != null && TableScenarios.Has(flow))
             {
@@ -181,7 +192,7 @@ namespace Galaxy101.Table
                 Settle(true);
                 return;
             }
-            offline.Begin(Launch.SkipCountdown);
+            offline.Begin(Launch.SkipCountdown || flow == "deal");
         }
 
         /// <summary>
@@ -539,6 +550,22 @@ namespace Galaxy101.Table
         private int netDemo;
         public void ShowConnectionLost() { netDemo = 1; Notify(); }
 
+        /// <summary>
+        /// The state router's drag simulation (g101-state.js scDrag → table3d debugDrag): the rack tile follows the pointer
+        /// <paramref name="k"/> of the way to <paramref name="to"/> while it is the dragged tile (its targets glow, T39, T47).
+        /// </summary>
+        public void SimulateDrag(int id, Pose to, float k)
+        {
+            if (!(Board.ViewOf(id) is TileView v) || v == null) return;
+            SetDragTile(id);
+            var from = new Pose(v.transform.position, v.transform.rotation);
+            v.Follow(new Pose(Vector3.Lerp(from.position, to.position, k) + Vector3.up * 0.03f, Quaternion.Slerp(from.rotation, to.rotation, k)));
+            Notify();
+        }
+
+        /// <summary>The left pile's ring (R-30) as a drop target (T39: the side tile dragged back).</summary>
+        public Pose SideRing() => new Pose(table.DiscardCenter(3), table.DiscardPose(3, 0, "ring").rotation);
+
         // ---------- player actions (one protocol step each) ----------
         public bool HumanTurn => Model != null && Model.MyTurn && settled && !Ceremony.Running;
         private LegalMoves Legal => Model?.Legal() ?? new LegalMoves();
@@ -613,6 +640,15 @@ namespace Galaxy101.Table
             if (e.Groups.Count == 0) return;
             lastOpen = e.Groups;
             _ = Do(IOpened ? Session.Lay(e.Groups) : Session.Open(e.Groups));
+        }
+
+        /// <summary>The state router's scOpen: open with the given tile groups, each named by the engine's analysis.</summary>
+        public void OpenWith(IEnumerable<IList<string>> groups)
+        {
+            if (!CanDiscard) return;
+            var melds = groups.Select(g => new MeldSpec(Model.Analyze(G101Rules.KindRun, g).Ok ? G101Rules.KindRun : g.Count == 2 ? G101Rules.KindPair : G101Rules.KindGroup, g.ToList())).ToList();
+            lastOpen = melds;
+            _ = Do(IOpened ? Session.Lay(melds) : Session.Open(melds));
         }
 
         /// <summary>Çift aç / Yere çift aç: the rack's pair segments (R-21; a series opener may lay pairs too, R-24).</summary>

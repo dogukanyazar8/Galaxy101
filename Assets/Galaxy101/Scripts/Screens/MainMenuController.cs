@@ -189,6 +189,15 @@ namespace Galaxy101
             try{await StartLocalAsync(scene);}
             catch(Exception exception){Debug.LogException(exception);if(this!=null)View.Toast(View.L("Masa açılamadı. Yeniden deneyin.","Could not open the table. Try again."));}
         }
+        /// <summary>The loading screen's line (prototype g.kick): classic table, ranked or (null) against bots.</summary>
+        private string LoadingKick(Galaxy101.Table.TableLaunch launch)
+        {
+            var table=launch?.Session?.Client?.Table??launch?.Table;
+            if(table==null||table.VsBots&&!table.Ranked)return null;
+            string hands=" · 101 · "+table.Hands+View.L(" EL"," HANDS");
+            if(table.Ranked)return View.L("DERECELİ","RANKED")+hands;
+            return View.L("KLASİK · ","CLASSIC · ")+(table.Mode=="pairs"?View.L("EŞLİ","PAIRS"):View.L("TEKLİ","SINGLES"))+hands;
+        }
         /// <summary>Seconds before the loading screen gives up and shows "Masa açılamadı" (spec/17 §9).</summary>
         public float TableLoadTimeout {get;set;}=15;
         public TableLoadingOverlay Loading {get;private set;}
@@ -198,7 +207,7 @@ namespace Galaxy101
             bool overlay=scene==GalaxyTableScene;
             try
             {
-                if(overlay){Loading=Loading??new TableLoadingOverlay(View,transform);Loading.Show(Galaxy101.Table.TableRules.Current.MatchHands);}
+                if(overlay){Loading=Loading??new TableLoadingOverlay(View,transform);Loading.Show(Galaxy101.Table.TableGame.Pending?.Table?.Hands??Galaxy101.Table.TableRules.Current.MatchHands,LoadingKick(Galaxy101.Table.TableGame.Pending));}
                 else View.Root.SetEnabled(false);
                 var load=SceneManager.LoadSceneAsync(scene,LoadSceneMode.Single);
                 if(load==null)

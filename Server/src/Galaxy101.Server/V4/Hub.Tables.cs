@@ -19,6 +19,7 @@ public sealed partial class Hub
 
     private sealed class Occupant
     {
+        public Guid ParticipationId { get; } = Guid.NewGuid();
         public Guid? Account { get; init; }
         public V4User? Bot { get; init; }
         /// <summary>The bot plays a seat its player left (D-31: under the player's name, no payout, no points).</summary>
@@ -66,12 +67,15 @@ public sealed partial class Hub
         public long BetsPaid { get; set; }
         /// <summary>Stakes on their way back whose ledger write has not succeeded yet: the record stays open (restart refund) until 0.</summary>
         public int RefundsOwed { get; set; }
+        public int HandXpOwed { get; set; }
+        public int LeaversOwed { get; set; }
         public int Sequence { get; set; }
         public required RngState ChatRng { get; init; }
         public TableRuntime? Run { get; set; }
         public required TableHost Host { get; set; }
         public SeatBook[] Books { get; } = [new(), new(), new(), new()];
         public HashSet<(Guid Blocker, Guid Blocked)> Blocks { get; set; } = [];
+        public bool ChatReady { get; set; }
         public bool Closed { get; set; }
         public bool Listed => !Ranked && !VsBots && !Private;
         public bool Human(int k) => Seats[k] is { IsBot: false };
@@ -96,6 +100,28 @@ public sealed partial class Hub
     }
 
     private readonly Dictionary<Guid, Table> tables = [];
+
+    private async Task RefreshBlocksAsync(Table t, Guid? joining = null)
+    {
+        var accounts = t.HumanSeats.Select(k => t.Seats[k]!.Account!.Value).Concat(t.Spectators);
+        if (joining is { } account) accounts = accounts.Append(account);
+        t.Blocks = await store.BlocksAsync(accounts.Distinct().ToArray());
+        t.ChatReady = true;
+        if (t.Timers.Remove("blocks", out var retry)) Cancel(retry);
+    }
+
+    private async Task RefreshChatAsync(Table t)
+    {
+        if (t.Closed) return;
+        try { await RefreshBlocksAsync(t); }
+        catch (Exception error) when (error is not OperationCanceledException)
+        {
+            t.ChatReady = false;
+            log.LogWarning(error, "v4 table {Table}: chat block rules unavailable; retrying", t.Id);
+            if (t.Timers.Remove("blocks", out var retry)) Cancel(retry);
+            t.Timers["blocks"] = Schedule(now + 5000, () => RefreshChatAsync(t));
+        }
+    }
 
     private Table NewTable(Guid owner, V4TableCreateRequest m, bool ranked = false, bool vsBots = false, int? hands = null, int? turnSec = null)
     {
@@ -213,6 +239,7 @@ public sealed partial class Hub
     /// <summary>Sits a person: stake (R-90), seat, tableState, lobby. A reply on failure (the stake could not be taken).</summary>
     private async Task<Reply?> SeatAsync(Table t, Person p, int seat)
     {
+        await RefreshBlocksAsync(t, p.Id);
         if (!lobby.TryEnter(p.Id, LobbyPlace.Room)) return Reply.Fail(V4Errors.E_ALREADY_SEATED);
         var occupant = new Occupant { Account = p.Id };
         if (t.Bet > 0 && !t.Ranked && !t.VsBots)
@@ -280,6 +307,7 @@ public sealed partial class Hub
             return;
         }
         if (back is { Outcome: LedgerOutcome.Applied } b) Balance(P(account), b.Chips, b.Gems, t.Bet, "betRefund", t.Id.ToString());
+        if (people.TryGetValue(account, out var person)) ForgetIfIdle(person);
         if (--t.RefundsOwed == 0 && t.Closed && t.Status == "over" && t.Run is null) await CloseRecordAsync(t);
     }
 
@@ -335,6 +363,7 @@ public sealed partial class Hub
         if (t.Pin is not null && m.Pin != t.Pin) return Reply.Fail(V4Errors.E_PIN_WRONG);
         var k = m.Seat is >= 0 and <= 3 ? m.Seat.Value : Enumerable.Range(0, 4).Where(i => t.Seats[i] is { IsBot: true }).DefaultIfEmpty(-1).First();
         if (k < 0 || t.Seats[k] is not { IsBot: true } || t.Run is null || t.Run.Over) return Reply.Fail(V4Errors.E_TABLE_FULL);
+        await RefreshBlocksAsync(t, p.Id);
         if (!lobby.TryEnter(p.Id, LobbyPlace.Room)) return Reply.Fail(V4Errors.E_ALREADY_SEATED);
         var occupant = new Occupant { Account = p.Id };
         if (t.Bet > 0)
@@ -358,19 +387,19 @@ public sealed partial class Hub
         p.Table = t; p.Seat = k;
         t.Books[k] = new SeatBook();
         live.SetPlaying(p.Id, t.Id);
-        t.Blocks = await store.BlocksAsync([.. t.HumanSeats.Select(i => t.Seats[i]!.Account!.Value)]);
         TableState(t);
         LobbyEmit(t);
         Send(p.Id, V4Messages.Snapshot, new V4Snapshot { Me = Me(p), Screen = "table", Table = TablePub(t), Game = t.Run.GameView(k), At = now });
         return Reply.With(("table", TablePub(t)), ("seat", k));
     }
 
-    private Reply TableSpectate(Person p, V4TableSpectateRequest m)
+    private async Task<Reply> TableSpectateAsync(Person p, V4TableSpectateRequest m)
     {
         var t = Find(m.TableId);
         if (t is null) return Reply.Fail(V4Errors.E_TABLE_CLOSED);
         if (!t.Rules.Spectate) return Reply.Fail(V4Errors.E_SPECTATE_OFF);
         if (Busy(p)) return Reply.Fail(V4Errors.E_ALREADY_SEATED);
+        await RefreshBlocksAsync(t, p.Id);
         t.Spectators.Add(p.Id);
         p.Table = t; p.Seat = -1;
         Send(p.Id, V4Messages.Snapshot, new V4Snapshot
@@ -385,12 +414,15 @@ public sealed partial class Hub
     private async Task<Reply> TableLeaveAsync(Person p)
     {
         if (p.Table is not { } t) return Reply.Fail(V4Errors.E_NOT_SEATED);
-        if (p.Seat < 0) { t.Spectators.Remove(p.Id); p.Table = null; return Reply.Ok; }
+        if (p.Seat < 0) { t.Spectators.Remove(p.Id); p.Table = null; ForgetIfIdle(p); return Reply.Ok; }
         if (t.Status is "waiting" or "countdown") { await LeaveWaitRoomAsync(t, p, "leave"); return Reply.Ok; }
         var seat = p.Seat;
         // R-60 in the match: the stake stays in the pot, last place (solo), a bot plays the seat under the player's name (D-31).
         if (t.Run is null) return Reply.Fail(V4Errors.E_LEAVE_INVALID);
+        // A failed rank read must leave the person's seat intact so the leave can be retried.
+        var (before, shield) = t.Ranked ? await store.RankAsync(p.Id) : (0, 0);
         if (t.Run.Leave(seat) is { } error) return Reply.Fail(error);
+        var operationKey = $"v4:{t.Id}:leaver:{t.Seats[seat]!.ParticipationId:N}";
         var bot = BotCard(seat);
         bot.Name = p.Card?.Name ?? bot.Name;
         bot.Ini = p.Card?.Ini ?? bot.Ini;
@@ -403,16 +435,18 @@ public sealed partial class Hub
         if (t.Ranked)
         {
             // Ranked: leaving the match is fourth place (mockServer tableLeave → rankApply(u, 3)).
-            var (before, shield) = await store.RankAsync(p.Id);
             lp = Profile.Ranked.Table(before)[3];
             RankChange(p, before, shield, lp.Value, 4);
         }
         var book = t.Books[seat];
         t.Books[seat] = new SeatBook();
-        Defer(() => LeaverAsync(t.Id, t.RecordMode, seat, p.Id, t.Run.Match.Totals[seat], t.Bet, book.Counters, [.. book.HandWins], lp, 0));
+        var total = t.Run.Match.Totals[seat];
+        t.LeaversOwed++;
+        Defer(() => LeaverAsync(t, t.RecordMode, seat, p.Id, total, t.Bet, book.Counters, [.. book.HandWins], lp, operationKey, 0));
         TableState(t);
         Send(p.Id, V4Messages.LeftTable, new V4LeftTable { Reason = "leave", ToLobbyIn = TableTimings.LeaveToLobby, At = now });
         LobbyEmit(t);
+        ForgetIfIdle(p);
         return Reply.Ok;
     }
 
@@ -424,6 +458,7 @@ public sealed partial class Hub
         t.Seats[seat] = null;
         p.Table = null; p.Seat = -1;
         lobby.Exit(p.Id, LobbyPlace.Room);
+        ForgetIfIdle(p);
         Send(p.Id, V4Messages.LeftTable, new V4LeftTable { Reason = reason, ToLobbyIn = 0, At = now });
         // K-12: transfer ownership to the first remaining human in seat order; bots and spectators cannot own it.
         if (t.Owner == p.Id)
@@ -448,9 +483,11 @@ public sealed partial class Hub
             await RefundAsync(t, p, t.Seats[k]!);
             p.Table = null; p.Seat = -1;
             lobby.Exit(p.Id, LobbyPlace.Room);
+            ForgetIfIdle(p);
         }
         if (reason is not null) TableEmit(t, V4Messages.TableClosed, new V4TableClosed { Id = t.Id.ToString(), Reason = reason, At = now });
-        foreach (var s in t.Spectators) if (people.TryGetValue(s, out var w)) w.Table = null;
+        foreach (var s in t.Spectators)
+            if (people.TryGetValue(s, out var w)) { w.Table = null; ForgetIfIdle(w); }
         t.Spectators.Clear();
         t.Status = "over";
         t.Closed = true;
@@ -493,6 +530,7 @@ public sealed partial class Hub
             await RefundAsync(t, v, o);
             v.Table = null; v.Seat = -1;
             lobby.Exit(v.Id, LobbyPlace.Room);
+            ForgetIfIdle(v);
             Send(v.Id, V4Messages.Kicked, new V4Kicked { TableId = t.Id.ToString(), At = now });
         }
         t.Seats[m.Seat] = null;
@@ -579,6 +617,7 @@ public sealed partial class Hub
         if (m.Text is not null && (m.Text.Trim().Length == 0 || m.Text.Length > TableEconomy.ChatMax)) return Reply.Fail(V4Errors.E_CHAT_LENGTH);
         if (m.Quick is not null && !TableEconomy.IsQuickKey(m.Quick)) return Reply.Fail(V4Errors.E_CHAT_QUICK_UNKNOWN);
         if (m.Text is null && m.Quick is null) return Reply.Fail(V4Errors.E_CHAT_LENGTH);
+        if (!t.ChatReady) return Reply.Fail("server_error");
         var line = new V4Chat
         {
             Seat = p.Seat, User = p.Id.ToString(), Text = m.Text is null ? null : Social.TextFilter.Mask(m.Text), Quick = m.Quick,
@@ -587,7 +626,8 @@ public sealed partial class Hub
         // Existing rule: a blocked player's words do not reach the blocker.
         foreach (var k in t.HumanSeats)
             if (t.Seats[k]!.Account is { } to && !t.Blocks.Contains((to, p.Id))) Send(to, V4Messages.Chat, line);
-        foreach (var s in t.Spectators) Send(s, V4Messages.Chat, line);
+        foreach (var s in t.Spectators)
+            if (!t.Blocks.Contains((s, p.Id))) Send(s, V4Messages.Chat, line);
         if (t.Rules.Chat != "off") BotChat.Reply(t.Host, t.ChatRng, p.Seat, t.BotSeat, () => !t.Closed);
         return Reply.Ok;
     }

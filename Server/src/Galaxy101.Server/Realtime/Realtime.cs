@@ -51,7 +51,14 @@ public sealed class ConnectionRegistry(IServiceScopeFactory scopes, TimeProvider
     public void Register(Connection connection)
     {
         Connection? previous = null;
-        connections.AddOrUpdate(connection.Account, connection, (_, old) => { previous = old; return connection; });
+        var registered = connections.AddOrUpdate(connection.Account, connection, (_, old) =>
+        {
+            if (old.SessionVersion > connection.SessionVersion) return old;
+            previous = old;
+            return connection;
+        });
+        // A handshake started before reset must not replace a newer, authenticated session.
+        if (!ReferenceEquals(registered, connection)) { connection.Close(); return; }
         if (previous is not null)
         {
             previous.Replace(Connection.Frame(MessageTypes.Replaced, new { }));
@@ -75,9 +82,10 @@ public sealed class ConnectionRegistry(IServiceScopeFactory scopes, TimeProvider
 
     public bool SendFrame(Guid account, byte[] frame) => connections.TryGetValue(account, out var c) && c.SendFrame(frame);
 
-    public void Disconnect(Guid account)
+    public void Disconnect(Guid account, long? beforeVersion = null)
     {
-        if (connections.TryRemove(account, out var c)) c.Close();
+        if (connections.TryGetValue(account, out var c) && (beforeVersion is null || c.SessionVersion < beforeVersion.Value) &&
+            connections.TryRemove(new KeyValuePair<Guid, Connection>(account, c))) c.Close();
     }
 
     public void SetPlaying(Guid account, Guid? match)
@@ -107,18 +115,22 @@ public sealed class ConnectionRegistry(IServiceScopeFactory scopes, TimeProvider
 public static class RealtimeEndpoint
 {
     public static void MapRealtime(this IEndpointRouteBuilder app) => app.MapGet("/v1/ws", async (HttpContext http, RealtimeTickets tickets,
-        DeletedAccounts deleted, ConnectionRegistry registry, IEnumerable<IRealtimeHandler> handlers, IHostApplicationLifetime lifetime, TimeProvider clock, ILogger<Connection> log) =>
+        DeletedAccounts deleted, GameDb db, ConnectionRegistry registry, IEnumerable<IRealtimeHandler> handlers, IHostApplicationLifetime lifetime, TimeProvider clock, ILogger<Connection> log) =>
     {
         if (!http.WebSockets.IsWebSocketRequest) return Results.BadRequest();
-        // A ticket taken before its account was deleted is worthless afterwards.
-        if (tickets.Redeem(http.Request.Query["ticket"]) is not { } account || deleted.Contains(account)) return Results.Unauthorized();
+        // Tickets keep the access token's epoch, so reset or deletion invalidates them before upgrade.
+        if (tickets.Redeem(http.Request.Query["ticket"]) is not { } session || deleted.Contains(session.Account) ||
+            !await db.Accounts.AnyAsync(a => a.Id == session.Account && a.SessionVersion == session.Version, http.RequestAborted)) return Results.Unauthorized();
+        var account = session.Account;
         using var socket = await http.WebSockets.AcceptWebSocketAsync();
-        var connection = new Connection(account, socket, log);
+        var connection = new Connection(account, socket, log, session.Version);
         registry.Register(connection);
-        // Deleted while this socket was being accepted: the deletion's disconnect may have run before it was registered.
-        if (deleted.Contains(account)) registry.Disconnect(account);
         try
         {
+            // Reset or deletion may have committed during accept, before their disconnect could find this connection.
+            // Close this exact connection; a newer socket may already have replaced it.
+            if (deleted.Contains(account) || !await db.Accounts.AnyAsync(a => a.Id == account && a.SessionVersion == session.Version, http.RequestAborted))
+                connection.Close();
             await connection.RunAsync(async (c, message) =>
             {
                 if (message.Type == MessageTypes.Ping)

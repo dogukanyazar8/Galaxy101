@@ -30,9 +30,9 @@ public sealed partial class Hub
         foreach (var account in humans) live.SetPlaying(account, t.Id);
         t.Run.Start(TablePub(t));
         LobbyEmit(t);
+        await RefreshChatAsync(t);
         try
         {
-            t.Blocks = await store.BlocksAsync(humans);
             await store.SeatsAsync(t.Id, SeatIds(t), BotMask(t), -1);
         }
         catch (Exception error) when (error is not OperationCanceledException) { log.LogWarning(error, "v4 table {Table}: seats not stored", t.Id); }
@@ -74,32 +74,47 @@ public sealed partial class Hub
                         long gained = finisher == k ? options.XpHandWin : options.XpHandPlayed;
                         book.HandXp += gained;
                         var account = t.Seats[k]!.Account!.Value;
-                        Defer(() => XpAsync(account, gained, "hand"));
+                        if (gained > 0)
+                        {
+                            t.HandXpOwed++;
+                            var key = $"v4:{t.Id}:xp:{account:N}:{t.Run!.Match.HandNo}";
+                            Defer(() => HandXpAsync(t, account, gained, key, 0));
+                        }
                     }
                     break;
             }
         }
     }
 
-    /// <summary>A leaver's record (Store.LeaverAsync): a storage hiccup is retried a few times rather than losing their LP and counts.</summary>
-    private async Task LeaverAsync(Guid table, string mode, int seat, Guid account, int total, long stake, QuestCounters counters, List<bool> handWins, int? lp, int attempt)
+    /// <summary>A leaver's record remains owed until its idempotent transaction succeeds.</summary>
+    private async Task LeaverAsync(Table t, string mode, int seat, Guid account, int total, long stake, QuestCounters counters, List<bool> handWins, int? lp, string operationKey, int attempt)
     {
-        try { await store.LeaverAsync(table, mode, seat, account, total, stake, counters, handWins, lp); }
-        catch (Exception error) when (error is not OperationCanceledException && attempt < 4)
+        try { await store.LeaverAsync(t.Id, mode, seat, account, total, stake, counters, handWins, lp, operationKey); }
+        catch (Exception error) when (error is not OperationCanceledException)
         {
-            log.LogWarning(error, "v4 table {Table}: leaver {Account} not stored yet (attempt {Attempt})", table, account, attempt + 1);
-            Schedule(now + 5000 * (attempt + 1), () => LeaverAsync(table, mode, seat, account, total, stake, counters, handWins, lp, attempt + 1));
+            log.LogWarning(error, "v4 table {Table}: leaver {Account} not stored yet (attempt {Attempt})", t.Id, account, attempt + 1);
+            Schedule(now + 5000 * Math.Min(attempt + 1, 12), () => LeaverAsync(t, mode, seat, account, total, stake, counters, handWins, lp, operationKey, attempt + 1));
+            return;
         }
+        t.LeaversOwed--;
     }
 
-    private async Task XpAsync(Guid account, long gained, string reason)
+    private async Task HandXpAsync(Table t, Guid account, long gained, string operationKey, int attempt)
     {
-        if (gained <= 0) return;
-        var line = await store.AddXpAsync(account, gained);
+        (long Xp, long Next, int Level, int LevelUp)? line;
+        try { line = await store.AddXpAsync(account, gained, operationKey); }
+        catch (Exception error) when (error is not OperationCanceledException)
+        {
+            log.LogWarning(error, "v4 table {Table}: hand XP of {Account} not stored yet (attempt {Attempt})", t.Id, account, attempt + 1);
+            Schedule(now + 5000 * Math.Min(attempt + 1, 12), () => HandXpAsync(t, account, gained, operationKey, attempt + 1));
+            return;
+        }
+        t.HandXpOwed--;
         if (line is not { } x) return;
         var p = P(account);
         if (p.Card is { } c) p.Card = c with { Xp = x.Xp, XpNext = x.Next, Level = x.Level };
-        Send(account, V4Messages.Xp, new V4Xp { Gained = gained, Xp = x.Xp, XpNext = x.Next, Level = x.Level, LevelUp = x.LevelUp, Reason = reason, At = now });
+        Send(account, V4Messages.Xp, new V4Xp { Gained = gained, Xp = x.Xp, XpNext = x.Next, Level = x.Level, LevelUp = x.LevelUp, Reason = "hand", At = now });
+        ForgetIfIdle(p);
     }
 
     /// <summary>
@@ -110,25 +125,46 @@ public sealed partial class Hub
     private async Task MatchOverAsync(Table t)
     {
         if (t.Closed || t.Run?.Match is not { } s) return;
+        // Pending money or earned XP keeps the match recoverable; restart recovery scans Active records.
+        if (t.RefundsOwed > 0 || t.HandXpOwed > 0 || t.LeaversOwed > 0)
+        {
+            Schedule(now + RefundRetryMs, () => MatchOverAsync(t));
+            return;
+        }
         var person = Enumerable.Range(0, 4).Select(t.Human).ToArray();
         var accounts = Enumerable.Range(0, 4).Select(k => person[k] ? t.Seats[k]!.Account : null).ToArray();
         var seasonLp = new int[4];
         var shields = new int[4];
         var pool = t.Ranked || t.VsBots ? 0 : t.BetsPaid;
         SettlementShares shares;
+        SettlementReceipt receipt;
         // Everything up to the stored settlement is retried as one: a failed read (ranked LP) must not leave the table open.
         try
         {
-            if (t.Ranked)
-                for (var k = 0; k < 4; k++)
-                    if (accounts[k] is { } a) (seasonLp[k], shields[k]) = await store.RankAsync(a);
-            shares = TableSettlement.Compute(s.Ranking, person, pool, t.Ranked ? k => Profile.Ranked.Table(seasonLp[k]) : null,
-                t.VsBots || t.Private ? null : options.WeeklyPoints, options.XpPlace);
-            var outcome = Enumerable.Range(0, 4).Select(k => new SeatSettlement(
-                k, accounts[k], shares.Place(k), s.Totals[k], shares.Payouts[k], t.Seats[k]?.StakeKey is null ? 0 : t.Bet, shares.Lp[k], shares.Weekly[k],
-                t.Books[k].HandXp + shares.XpBonus[k], person[k] ? t.Books[k].Counters : new QuestCounters(0, 0, 0, 0, 0), person[k] ? t.Books[k].HandWins : [], false)).ToList();
-            if (!await store.SettleAsync(t.Id, t.RecordMode, SeatIds(t), BotMask(t), outcome))
-                log.LogWarning("v4 table {Table}: the match was already settled; closing it", t.Id);
+            var committed = await store.SettlementAsync(t.Id);
+            if (committed is null)
+            {
+                if (t.Ranked)
+                    for (var k = 0; k < 4; k++)
+                        if (accounts[k] is { } a) (seasonLp[k], shields[k]) = await store.RankAsync(a);
+                shares = TableSettlement.Compute(s.Ranking, person, pool, t.Ranked ? k => Profile.Ranked.Table(seasonLp[k]) : null,
+                    t.VsBots || t.Private ? null : options.WeeklyPoints, options.XpPlace);
+                var outcome = Enumerable.Range(0, 4).Select(k => new SeatSettlement(
+                    k, accounts[k], shares.Place(k), s.Totals[k], shares.Payouts[k], t.Seats[k]?.StakeKey is null ? 0 : t.Bet, shares.Lp[k], shares.Weekly[k],
+                    t.Books[k].HandXp + shares.XpBonus[k], person[k] ? t.Books[k].Counters : new QuestCounters(0, 0, 0, 0, 0), person[k] ? t.Books[k].HandWins : [], false, shares.XpBonus[k])).ToArray();
+                await store.SettleAsync(t.Id, t.RecordMode, SeatIds(t), BotMask(t), outcome, new SettlementReceipt(outcome, seasonLp, shields, pool));
+                committed = await store.SettlementAsync(t.Id) ?? throw new InvalidOperationException($"Table {t.Id} has no committed settlement receipt.");
+            }
+            receipt = committed;
+            pool = receipt.Pool;
+            seasonLp = receipt.BeforeLp;
+            shields = receipt.BeforeShield;
+            shares = new SettlementShares
+            {
+                Payouts = [.. receipt.Outcome.Select(o => o.Payout)], XpBonus = [.. receipt.Outcome.Select(o => checked((int)o.BonusXp))],
+                Lp = [.. receipt.Outcome.Select(o => o.LpDelta)], Weekly = [.. receipt.Outcome.Select(o => o.Weekly)],
+                Occupied = [.. receipt.Outcome.Select(o => new[] { o.Place - 1 })],
+            };
         }
         catch (Exception error) when (error is not OperationCanceledException)
         {
@@ -158,11 +194,12 @@ public sealed partial class Hub
         });
         // R-93 place bonus (the leaver gets none: their seat is a bot now).
         for (var k = 0; k < 4; k++)
-            if (accounts[k] is { } account && shares.XpBonus[k] > 0)
+            if (accounts[k] is { } account && receipt.Xp[k] is { } x)
             {
-                // The bonus is stored with the settlement (participant XP); this is the profile's running total and its event.
-                try { await XpAsync(account, shares.XpBonus[k], "match"); }
-                catch (Exception error) when (error is not OperationCanceledException) { log.LogWarning(error, "v4 table {Table}: match XP of {Account} not added", t.Id, account); }
+                // Persistence is part of settlement; publication never adds the bonus again.
+                var p = P(account);
+                if (p.Card is { } card) p.Card = card with { Xp = x.Xp, XpNext = x.Next, Level = x.Level };
+                Send(account, V4Messages.Xp, new V4Xp { Gained = shares.XpBonus[k], Xp = x.Xp, XpNext = x.Next, Level = x.Level, LevelUp = x.LevelUp, Reason = "match", At = now });
             }
         t.Status = "over";
         t.Closed = true;
@@ -174,8 +211,10 @@ public sealed partial class Hub
             p.Table = null; p.Seat = -1;
             lobby.Exit(account, LobbyPlace.Room);
             live.SetPlaying(account, null);
+            ForgetIfIdle(p);
         }
-        foreach (var w in t.Spectators) if (people.TryGetValue(w, out var watcher)) watcher.Table = null;
+        foreach (var w in t.Spectators)
+            if (people.TryGetValue(w, out var watcher)) { watcher.Table = null; ForgetIfIdle(watcher); }
         tables.Remove(t.Id);
     }
 

@@ -137,6 +137,7 @@ public sealed partial class Hub
             var p = P(id);
             if (p.Queue == q) p.Queue = null;
             lobby.Exit(id, LobbyPlace.Queue);
+            if (reason is not null) ForgetIfIdle(p);
         }
         if (reason is not null) ToEntry(q, V4Messages.RankedCancelled, new V4RankedCancelled { Reason = reason, At = now });
     }
@@ -194,7 +195,8 @@ public sealed partial class Hub
             t.Seats[k] = new Occupant { Account = p.Id };
             p.Table = t; p.Seat = k;
         }
-        TableEmit(t, V4Messages.RankedReady, new V4RankedReady { Table = TablePub(t), LoadingMs = TableTimings.RankedLoading, At = now });
         t.Timers["load"] = Schedule(now + TableTimings.RankedLoading, () => StartMatchAsync(t));
+        await RefreshChatAsync(t);
+        TableEmit(t, V4Messages.RankedReady, new V4RankedReady { Table = TablePub(t), LoadingMs = TableTimings.RankedLoading, At = now });
     }
 }

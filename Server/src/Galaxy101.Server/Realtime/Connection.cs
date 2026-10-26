@@ -12,7 +12,7 @@ public readonly record struct Inbound(string Type, string? Id, JsonElement Data)
 /// One player's socket. Writes go through a bounded queue drained by a single loop (WebSocket allows one writer);
 /// a client too slow to drain it is disconnected rather than buffered without limit.
 /// </summary>
-public sealed class Connection(Guid account, WebSocket socket, ILogger log)
+public sealed class Connection(Guid account, WebSocket socket, ILogger log, long sessionVersion = 0)
 {
     public const int MaxMessageBytes = 16 * 1024;
     private const int QueueLimit = 512;
@@ -27,6 +27,7 @@ public sealed class Connection(Guid account, WebSocket socket, ILogger log)
     private long lastRefill = Environment.TickCount64;
 
     public Guid Account { get; } = account;
+    public long SessionVersion { get; } = sessionVersion;
     public CancellationToken Closing => closing.Token;
 
     public bool Send<T>(string type, T data) => SendFrame(Frame(type, data));

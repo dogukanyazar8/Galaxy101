@@ -93,6 +93,12 @@ namespace Galaxy101.Server.Data.Migrations
                         .HasColumnType("character varying(16)")
                         .HasColumnName("platform");
 
+                    b.Property<long>("SessionVersion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(0L)
+                        .HasColumnName("session_version");
+
                     b.Property<string>("SettingsJson")
                         .IsRequired()
                         .HasColumnType("jsonb")
@@ -396,6 +402,11 @@ namespace Galaxy101.Server.Data.Migrations
                         .HasColumnType("character varying(12)")
                         .HasColumnName("mode");
 
+                    b.Property<string>("OperationKey")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)")
+                        .HasColumnName("operation_key");
+
                     b.Property<int>("Place")
                         .HasColumnType("integer")
                         .HasColumnName("place");
@@ -414,6 +425,10 @@ namespace Galaxy101.Server.Data.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_match_participants");
+
+                    b.HasIndex("OperationKey")
+                        .IsUnique()
+                        .HasDatabaseName("ix_match_participants_operation_key");
 
                     b.HasIndex("AccountId", "FinishedAt")
                         .IsDescending(false, true)
@@ -471,6 +486,10 @@ namespace Galaxy101.Server.Data.Migrations
                         .IsRequired()
                         .HasColumnType("uuid[]")
                         .HasColumnName("seats");
+
+                    b.Property<string>("SettlementJson")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("settlement_json");
 
                     b.Property<long>("Stake")
                         .HasColumnType("bigint")

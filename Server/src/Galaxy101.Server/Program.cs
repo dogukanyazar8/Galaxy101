@@ -45,17 +45,18 @@ services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme).Co
     // A deleted account's still-unexpired access tokens are refused, and so are those issued before a password reset.
     jwt.Events = new JwtBearerEvents
     {
-        OnTokenValidated = context =>
+        OnTokenValidated = async context =>
         {
-            if (Guid.TryParse(context.Principal?.FindFirst(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub)?.Value, out var account))
+            if (!Guid.TryParse(context.Principal?.FindFirst(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub)?.Value, out var account) ||
+                !TokenService.TrySessionVersion(context.Principal, out var version))
             {
-                var services = context.HttpContext.RequestServices;
-                if (services.GetRequiredService<DeletedAccounts>().Contains(account)) context.Fail("Account deleted.");
-                else if (context.SecurityToken is Microsoft.IdentityModel.JsonWebTokens.JsonWebToken token &&
-                         services.GetRequiredService<SessionCutoffs>().Refuses(account, token.IssuedAt))
-                    context.Fail("Session ended.");
+                context.Fail("Invalid session.");
+                return;
             }
-            return Task.CompletedTask;
+            var services = context.HttpContext.RequestServices;
+            if (services.GetRequiredService<DeletedAccounts>().Contains(account) ||
+                !await services.GetRequiredService<GameDb>().Accounts.AnyAsync(a => a.Id == account && a.SessionVersion == version, context.HttpContext.RequestAborted))
+                context.Fail("Session ended.");
         },
     };
 });
@@ -74,7 +75,6 @@ services.AddSingleton(TimeProvider.System);
 services.AddSingleton<GameCalendar>();
 services.AddSingleton<RealtimeTickets>();
 services.AddSingleton<DeletedAccounts>();
-services.AddSingleton<SessionCutoffs>();
 services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.Section));
 services.AddSingleton<IEmailSender, SmtpEmailSender>();
 services.AddSingleton<PasswordResetCodes>();

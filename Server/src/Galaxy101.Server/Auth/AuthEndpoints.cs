@@ -16,6 +16,7 @@ public static class AuthEndpoints
         {
             try { return await next(context); }
             catch (AccountBannedException banned) { return Social.ModerationEndpoints.Banned(banned.Until, context.HttpContext.RequestServices.GetRequiredService<TimeProvider>()); }
+            catch (AccountSessionEndedException) { return Api.Error(ErrorCodes.InvalidToken, StatusCodes.Status401Unauthorized, error: V4Errors.E_SESSION_EXPIRED); }
         });
 
         // Misafir (spec/18 S05): optional nickname (≤ 16) and avatar colour; guest balance.
@@ -42,7 +43,7 @@ public static class AuthEndpoints
         anonymous.MapPost("/login", async (PasswordLoginRequest request, Passwords passwords, TokenService tokens, TimeProvider clock, CancellationToken ct) =>
         {
             var outcome = await passwords.LoginAsync(request, ct);
-            if (outcome.Account is { } id) return Results.Ok(await tokens.IssueAsync(id, false, ct));
+            if (outcome.Account is { } id) return Results.Ok(await tokens.IssueAsync(id, false, ct, outcome.SessionVersion));
             int status = outcome.Error == ErrorCodes.AccountNotFound ? StatusCodes.Status404NotFound
                 : outcome.Error == ErrorCodes.AccountLocked ? StatusCodes.Status423Locked : StatusCodes.Status401Unauthorized;
             object? detail = outcome.V4 == V4Errors.E_PASS_WRONG ? new { left = outcome.Remaining }
@@ -104,9 +105,9 @@ public static class AuthEndpoints
         app.MapPost("/v1/realtime/ticket", async (HttpContext http, RealtimeTickets tickets, GameDb db, CancellationToken ct) =>
         {
             var me = http.User.AccountId();
-            // An access token outlives its account's deletion: no socket (queues, tables, matches) for an account that is gone.
-            if (!await db.Accounts.AnyAsync(a => a.Id == me, ct)) return Results.Unauthorized();
-            return Results.Ok(new RealtimeTicketResponse { Ticket = tickets.Issue(me), ExpiresIn = (int)RealtimeTickets.Lifetime.TotalSeconds });
+            if (!TokenService.TrySessionVersion(http.User, out var version) ||
+                !await db.Accounts.AnyAsync(a => a.Id == me && a.SessionVersion == version, ct)) return Results.Unauthorized();
+            return Results.Ok(new RealtimeTicketResponse { Ticket = tickets.Issue(me, version), ExpiresIn = (int)RealtimeTickets.Lifetime.TotalSeconds });
         }).RequireAuthorization();
     }
 }
@@ -132,45 +133,25 @@ public sealed class DeletedAccounts(TimeProvider clock, Microsoft.Extensions.Opt
 }
 
 /// <summary>
-/// Accounts whose sessions were ended at a moment (a password reset): access tokens issued before it are refused for as
-/// long as they could still be valid. In memory like <see cref="DeletedAccounts"/> (single instance).
-/// </summary>
-public sealed class SessionCutoffs(TimeProvider clock, Microsoft.Extensions.Options.IOptions<AuthOptions> auth)
-{
-    private readonly ConcurrentDictionary<Guid, (DateTime At, DateTimeOffset Until)> cutoffs = new();
-
-    public void Cut(Guid account)
-    {
-        var now = clock.GetUtcNow();
-        foreach (var (id, entry) in cutoffs) if (entry.Until <= now) cutoffs.TryRemove(id, out _);
-        // Whole seconds, as a token's "iat": a token signed in the same second after the cut stays valid.
-        var at = new DateTime(now.UtcDateTime.Ticks - now.UtcDateTime.Ticks % TimeSpan.TicksPerSecond, DateTimeKind.Utc);
-        cutoffs[account] = (at, now.AddMinutes(auth.Value.AccessTokenMinutes + 1));
-    }
-
-    public bool Refuses(Guid account, DateTime issuedUtc) =>
-        cutoffs.TryGetValue(account, out var entry) && entry.Until > clock.GetUtcNow() && issuedUtc < entry.At;
-}
-
-/// <summary>
 /// One-time, 30-second tickets for opening the WebSocket, so access tokens never travel in URLs (and logs).
 /// In memory: the game runs as a single instance (see README).
 /// </summary>
 public sealed class RealtimeTickets(TimeProvider clock)
 {
     public static readonly TimeSpan Lifetime = TimeSpan.FromSeconds(30);
-    private readonly ConcurrentDictionary<string, (Guid Account, DateTimeOffset Expires)> tickets = new();
+    public readonly record struct Session(Guid Account, long Version);
+    private readonly ConcurrentDictionary<string, (Session Session, DateTimeOffset Expires)> tickets = new();
 
-    public string Issue(Guid account)
+    public string Issue(Guid account, long sessionVersion)
     {
         var now = clock.GetUtcNow();
         if (tickets.Count > 1024)
             foreach (var (key, value) in tickets) if (value.Expires <= now) tickets.TryRemove(key, out _);
         var ticket = Base64UrlEncoder.Encode(RandomNumberGenerator.GetBytes(24));
-        tickets[ticket] = (account, now + Lifetime);
+        tickets[ticket] = (new Session(account, sessionVersion), now + Lifetime);
         return ticket;
     }
 
-    public Guid? Redeem(string? ticket) =>
-        ticket is not null && tickets.TryRemove(ticket, out var entry) && entry.Expires > clock.GetUtcNow() ? entry.Account : null;
+    public Session? Redeem(string? ticket) =>
+        ticket is not null && tickets.TryRemove(ticket, out var entry) && entry.Expires > clock.GetUtcNow() ? entry.Session : null;
 }

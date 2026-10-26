@@ -1,4 +1,6 @@
 using System.Security.Cryptography;
+using System.Globalization;
+using System.Security.Claims;
 using Galaxy101.Contracts;
 using Galaxy101.Server.Data;
 using Galaxy101.Server.Infrastructure;
@@ -15,10 +17,16 @@ public sealed class AccountBannedException(DateTimeOffset until) : Exception("Ac
     public DateTimeOffset Until { get; } = until;
 }
 
+public sealed class AccountSessionEndedException() : Exception("Session ended.");
+
 public sealed class TokenService(GameDb db, TimeProvider clock, IOptions<AuthOptions> options)
 {
     private readonly AuthOptions auth = options.Value;
     private static readonly JsonWebTokenHandler Handler = new();
+    public const string SessionVersionClaim = "session_version";
+
+    public static bool TrySessionVersion(ClaimsPrincipal? principal, out long version) =>
+        long.TryParse(principal?.FindFirst(SessionVersionClaim)?.Value, NumberStyles.None, CultureInfo.InvariantCulture, out version) && version >= 0;
 
     public static SymmetricSecurityKey SigningKey(AuthOptions auth)
     {
@@ -27,22 +35,32 @@ public sealed class TokenService(GameDb db, TimeProvider clock, IOptions<AuthOpt
         return new SymmetricSecurityKey(bytes);
     }
 
-    /// <summary>Issues an access token and starts a new refresh family (sign-in). Caller saves changes.</summary>
-    public async Task<TokenResponse> IssueAsync(Guid accountId, bool isNew, CancellationToken ct)
+    /// <summary>Issues an access token and starts a new refresh family, serialized with password reset.</summary>
+    public async Task<TokenResponse> IssueAsync(Guid accountId, bool isNew, CancellationToken ct, long? expectedVersion = null)
     {
-        await ThrowIfBannedAsync(accountId, clock.GetUtcNow(), ct);
+        await using var tx = await db.Database.BeginTransactionAsync(ct);
+        var account = await LockAccountAsync(db, accountId, ct) ?? throw new AccountSessionEndedException();
+        if (expectedVersion is { } expected && account.SessionVersion != expected) throw new AccountSessionEndedException();
+        ThrowIfBanned(account, clock.GetUtcNow());
         await PurgeExpiredAsync(accountId, ct);
         var providers = await ProvidersAsync(accountId, ct);
         var refresh = NewRefresh(accountId, Guid.NewGuid(), out var raw);
         db.RefreshTokens.Add(refresh);
         await db.SaveChangesAsync(ct);
-        return Response(accountId, raw, isNew, providers);
+        var response = Response(accountId, account.SessionVersion, raw, isNew, providers);
+        await tx.CommitAsync(ct);
+        return response;
     }
 
-    private async Task ThrowIfBannedAsync(Guid accountId, DateTimeOffset now, CancellationToken ct)
+    // Reset, sign-in and refresh take the same account lock before changing any session rows. A refresh read before
+    // reset must re-read its revocation state after acquiring this lock; it cannot resurrect a revoked family.
+    internal static Task<Account?> LockAccountAsync(GameDb db, Guid accountId, CancellationToken ct) =>
+        db.Accounts.FromSqlInterpolated($"SELECT * FROM accounts WHERE id = {accountId} FOR UPDATE")
+            .AsNoTracking().SingleOrDefaultAsync(ct);
+
+    private static void ThrowIfBanned(Account account, DateTimeOffset now)
     {
-        var until = await db.Accounts.Where(a => a.Id == accountId).Select(a => a.BannedUntil).FirstOrDefaultAsync(ct);
-        if (until is { } u && u > now) throw new AccountBannedException(u);
+        if (account.BannedUntil is { } until && until > now) throw new AccountBannedException(until);
     }
 
     /// <summary>Rotates a refresh token. Presenting an already rotated token revokes its whole family.</summary>
@@ -53,15 +71,20 @@ public sealed class TokenService(GameDb db, TimeProvider clock, IOptions<AuthOpt
         var current = await db.RefreshTokens.AsNoTracking().FirstOrDefaultAsync(x => x.TokenHash == hash, ct);
         var now = clock.GetUtcNow();
         if (current is null || current.RevokedAt is not null || current.ExpiresAt <= now) return null;
+        await using var tx = await db.Database.BeginTransactionAsync(ct);
+        var account = await LockAccountAsync(db, current.AccountId, ct);
+        if (account is null) return null;
+        current = await db.RefreshTokens.AsNoTracking().SingleOrDefaultAsync(x => x.Id == current.Id, ct);
+        now = clock.GetUtcNow();
+        if (current is null || current.RevokedAt is not null || current.ExpiresAt <= now) return null;
         // A banned account keeps its token (unspent) for after the ban: nothing is rotated.
-        await ThrowIfBannedAsync(current.AccountId, now, ct);
+        ThrowIfBanned(account, now);
         // Housekeeping and reads come first: once the rotation commits, nothing may fail before the client has its new
         // token (retrying with the spent one would look like reuse and revoke the family).
         await PurgeExpiredAsync(current.AccountId, ct);
         var providers = await ProvidersAsync(current.AccountId, ct);
         // Rotation and its successor commit together: a failed insert must not leave the token spent with no heir (the
         // next refresh would then look like reuse and revoke the family).
-        await using var tx = await db.Database.BeginTransactionAsync(ct);
         // The conditional update is the single winner between concurrent refreshes of one token.
         var rotated = await db.RefreshTokens.Where(x => x.Id == current.Id && x.RotatedAt == null && x.RevokedAt == null)
             .ExecuteUpdateAsync(s => s.SetProperty(x => x.RotatedAt, now), ct);
@@ -73,8 +96,9 @@ public sealed class TokenService(GameDb db, TimeProvider clock, IOptions<AuthOpt
         }
         db.RefreshTokens.Add(NewRefresh(current.AccountId, current.FamilyId, out var next));
         await db.SaveChangesAsync(ct);
+        var response = Response(current.AccountId, account.SessionVersion, next, false, providers);
         await tx.CommitAsync(ct);
-        return Response(current.AccountId, next, false, providers);
+        return response;
     }
 
     public async Task RevokeAsync(Guid accountId, string raw, CancellationToken ct)
@@ -103,14 +127,18 @@ public sealed class TokenService(GameDb db, TimeProvider clock, IOptions<AuthOpt
     private Task<List<string>> ProvidersAsync(Guid accountId, CancellationToken ct) =>
         db.ExternalLogins.Where(x => x.AccountId == accountId).Select(x => x.Provider).ToListAsync(ct);
 
-    private TokenResponse Response(Guid accountId, string refresh, bool isNew, List<string> providers)
+    private TokenResponse Response(Guid accountId, long sessionVersion, string refresh, bool isNew, List<string> providers)
     {
         var now = clock.GetUtcNow();
         var access = Handler.CreateToken(new SecurityTokenDescriptor
         {
             Issuer = auth.Issuer,
             Audience = auth.Audience,
-            Claims = new Dictionary<string, object> { [JwtRegisteredClaimNames.Sub] = accountId.ToString() },
+            Claims = new Dictionary<string, object>
+            {
+                [JwtRegisteredClaimNames.Sub] = accountId.ToString(),
+                [SessionVersionClaim] = sessionVersion.ToString(CultureInfo.InvariantCulture),
+            },
             IssuedAt = now.UtcDateTime,
             NotBefore = now.UtcDateTime,
             Expires = now.AddMinutes(auth.AccessTokenMinutes).UtcDateTime,

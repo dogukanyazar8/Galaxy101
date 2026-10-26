@@ -13,6 +13,8 @@ public sealed class Account
     public int PlanetsTried { get; set; }
     public string SettingsJson { get; set; } = "{}";
     public long SettingsRevision { get; set; }
+    /// <summary>Durable authentication epoch. Password reset invalidates older JWTs and socket tickets.</summary>
+    public long SessionVersion { get; set; }
     public string? AcceptedPrivacyVersion { get; set; }
     public string? Platform { get; set; }
     public string? DeviceId { get; set; }
@@ -193,6 +195,8 @@ public sealed class MatchRecord
     public int TurnSeconds { get; set; }
     /// <summary>Table rules the session enforces: "chat" (on/quick/off), "gifts" (bool). JSON object.</summary>
     public string OptionsJson { get; set; } = "{}";
+    /// <summary>The exact committed v4 settlement, reused after an uncertain commit response.</summary>
+    public string? SettlementJson { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? FinishedAt { get; set; }
 }
@@ -219,6 +223,8 @@ public sealed class MatchMove
 
 public sealed class MatchParticipant
 {
+    /// <summary>One participation operation; null for historical and legacy entries.</summary>
+    public string? OperationKey { get; set; }
     public long Id { get; set; }
     public Guid MatchId { get; set; }
     public int Seat { get; set; }

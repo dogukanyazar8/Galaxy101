@@ -14,7 +14,15 @@ public sealed record Card(Guid Id, string Name, string Ini, string Color, int Le
 
 /// <summary>A seat's share of a finished v4 match, as stored (participants, stats, ledger, leaderboards, quests).</summary>
 public sealed record SeatSettlement(int Seat, Guid? Account, int Place, int Total, long Payout, long Stake, int? LpDelta, int Weekly, long Xp,
-    QuestCounters Counters, IReadOnlyList<bool> HandWins, bool Left);
+    QuestCounters Counters, IReadOnlyList<bool> HandWins, bool Left, long BonusXp = 0);
+
+public sealed record SettlementXp(long Xp, long Next, int Level, int LevelUp);
+
+/// <summary>The original committed outcome, including rank inputs and XP event values, survives a lost commit acknowledgement.</summary>
+public sealed record SettlementReceipt(SeatSettlement[] Outcome, int[] BeforeLp, int[] BeforeShield, long Pool)
+{
+    public SettlementXp?[] Xp { get; init; } = new SettlementXp?[4];
+}
 
 /// <summary>
 /// Durable side of the v4 tables. Every call uses its own short-lived DbContext (the hub is a long-lived singleton).
@@ -187,14 +195,32 @@ public sealed class Store(IServiceScopeFactory scopes, GameCalendar calendar)
     }
 
     /// <summary>Hand XP (R-93) at once, so a player who leaves keeps what the hands gave: the new level line for the xp event.</summary>
-    public async Task<(long Xp, long Next, int Level, int LevelUp)?> AddXpAsync(Guid account, long gained)
+    public async Task<(long Xp, long Next, int Level, int LevelUp)?> AddXpAsync(Guid account, long gained, string? operationKey = null)
     {
         await using var scope = scopes.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<GameDb>();
-        var rows = await db.Database.SqlQuery<long>($"UPDATE stats SET xp = xp + {gained} WHERE account_id = {account} RETURNING xp AS \"Value\"").ToListAsync();
-        if (rows.Count == 0) return null;
-        var before = Progression.Level(rows[0] - gained).Level;
-        var (level, into, next) = Progression.Level(rows[0]);
+        await using var tx = await db.Database.BeginTransactionAsync();
+        // A delete locks the account before cascading to stats. Take the FK-compatible account lock first too.
+        var accountRows = await db.Database.SqlQuery<Guid>($"SELECT id AS \"Value\" FROM accounts WHERE id = {account} FOR KEY SHARE").ToListAsync();
+        if (accountRows.Count == 0) return null;
+        // The stats lock precedes the ledger's wallet lock, matching settlement and daily/ranked updates.
+        var stats = (await db.Stats.FromSql($"SELECT * FROM stats WHERE account_id = {account} FOR UPDATE").ToListAsync()).SingleOrDefault();
+        if (stats is null) return null;
+        if (operationKey is not null && await db.Ledger.AnyAsync(l => l.AccountId == account && l.IdempotencyKey == operationKey + "#none"))
+        {
+            var current = Progression.Level(stats.Xp);
+            return (current.Into, current.Next, current.Level, 0);
+        }
+        var before = Progression.Level(stats.Xp).Level;
+        stats.Xp = checked(stats.Xp + gained);
+        if (operationKey is not null)
+        {
+            var marker = await scope.ServiceProvider.GetRequiredService<Ledger>().ApplyAsync(account, 0, 0, "xp", operationKey, default);
+            if (marker.Outcome != LedgerOutcome.Applied) throw new InvalidOperationException($"XP operation {operationKey} could not be recorded.");
+        }
+        else await db.SaveChangesAsync();
+        var (level, into, next) = Progression.Level(stats.Xp);
+        await tx.CommitAsync();
         return (into, next, level, level - before);
     }
 
@@ -202,18 +228,26 @@ public sealed class Store(IServiceScopeFactory scopes, GameCalendar calendar)
     /// A leaver's quest progress, the hands they finished (counts, wins, mode, streak) and LP, recorded when they leave;
     /// their XP was written hand by hand. The match's own settlement later covers only whoever plays the seat then.
     /// </summary>
-    public async Task LeaverAsync(Guid table, string mode, int seat, Guid account, int total, long stake, QuestCounters counters, IReadOnlyList<bool> handWins, int? lpDelta)
+    public async Task LeaverAsync(Guid table, string mode, int seat, Guid account, int total, long stake, QuestCounters counters, IReadOnlyList<bool> handWins, int? lpDelta, string? operationKey = null)
     {
         await using var scope = scopes.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<GameDb>();
         var daily = scope.ServiceProvider.GetRequiredService<DailyService>();
         var ledger = scope.ServiceProvider.GetRequiredService<Ledger>();
         await using var tx = await db.Database.BeginTransactionAsync();
+        // The hub supplies a distinct key for every occupation, even when the same account retakes the same seat.
+        // The fallback preserves idempotency for callers of the original single-participation API.
+        operationKey ??= $"v4:{table}:leaver:{account:N}:{seat}";
+        await db.Matches.FromSql($"SELECT * FROM matches WHERE id = {table} FOR UPDATE").AsNoTracking().ToListAsync();
+        if (await db.MatchParticipants.AnyAsync(p => p.OperationKey == operationKey)) return;
+        var present = await db.Accounts.AnyAsync(a => a.Id == account);
         db.MatchParticipants.Add(new MatchParticipant
         {
-            MatchId = table, Seat = seat, AccountId = account, Mode = mode, Place = 4, Total = total, ChipDelta = -stake, LpDelta = lpDelta, Left = true, FinishedAt = calendar.Now,
+            MatchId = table, Seat = seat, AccountId = present ? account : null, Mode = mode, Place = 4, Total = total, ChipDelta = -stake, LpDelta = lpDelta, Left = true, FinishedAt = calendar.Now,
+            OperationKey = operationKey,
         });
         await db.SaveChangesAsync();
+        if (!present) { await tx.CommitAsync(); return; }
         // Lock order as everywhere: daily state, stats, wallet.
         await daily.AddProgressAsync(account, counters, default);
         var stats = (await db.Stats.FromSql($"SELECT * FROM stats WHERE account_id = {account} FOR UPDATE").ToListAsync()).Single();
@@ -256,7 +290,7 @@ public sealed class Store(IServiceScopeFactory scopes, GameCalendar calendar)
     /// Pays out, updates stats, leaderboards, LP and quests, records the participants and closes the match: all or nothing,
     /// and once — a retry after a failure that hid a commit finds the match completed and changes nothing (false).
     /// </summary>
-    public async Task<bool> SettleAsync(Guid table, string mode, Guid[] seats, int botMask, IReadOnlyList<SeatSettlement> outcome)
+    public async Task<bool> SettleAsync(Guid table, string mode, Guid[] seats, int botMask, IReadOnlyList<SeatSettlement> outcome, SettlementReceipt? receipt = null)
     {
         await using var scope = scopes.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<GameDb>();
@@ -269,6 +303,8 @@ public sealed class Store(IServiceScopeFactory scopes, GameCalendar calendar)
         var seasonBoard = Social.LeaderboardEndpoints.SeasonBoard(season);
         var accounts = outcome.Where(o => o.Account is not null).Select(o => o.Account!.Value).ToList();
         var existing = (await db.Accounts.Where(a => accounts.Contains(a.Id)).Select(a => a.Id).ToListAsync()).ToHashSet();
+        receipt = receipt is null ? new SettlementReceipt([.. outcome], new int[4], new int[4], outcome.Sum(o => o.Payout))
+            : receipt with { Outcome = [.. outcome], Xp = new SettlementXp?[4] };
 
         await using var tx = await db.Database.BeginTransactionAsync();
         // Closing the record first also locks it: a second settlement of the same match waits here and then finds it done.
@@ -290,6 +326,13 @@ public sealed class Store(IServiceScopeFactory scopes, GameCalendar calendar)
             var stats = (await db.Stats.FromSql($"SELECT * FROM stats WHERE account_id = {account} FOR UPDATE").ToListAsync()).Single();
             await Ranked.RollOverAsync(db, ledger, stats, season, default);
             if (o.Payout > 0) await ledger.ApplyAsync(account, o.Payout, 0, "payout", $"v4:{table}:payout", default);
+            if (o.BonusXp > 0)
+            {
+                var beforeLevel = Progression.Level(stats.Xp).Level;
+                stats.Xp += o.BonusXp;
+                var (level, into, next) = Progression.Level(stats.Xp);
+                receipt.Xp[o.Seat] = new SettlementXp(into, next, level, level - beforeLevel);
+            }
             AddHands(stats, o.Counters, o.HandWins, modeIndex);
             if (o.LpDelta is { } lp)
             {
@@ -307,8 +350,20 @@ public sealed class Store(IServiceScopeFactory scopes, GameCalendar calendar)
                     """);
             await db.SaveChangesAsync();
         }
+        await db.SaveChangesAsync();
+        var json = JsonSerializer.Serialize(receipt, Realtime.Connection.Json);
+        await db.Matches.Where(m => m.Id == table).ExecuteUpdateAsync(s => s.SetProperty(m => m.SettlementJson, json));
         await tx.CommitAsync();
         return true;
+    }
+
+    public async Task<SettlementReceipt?> SettlementAsync(Guid table)
+    {
+        await using var scope = scopes.CreateAsyncScope();
+        var json = await scope.ServiceProvider.GetRequiredService<GameDb>().Matches.Where(m => m.Id == table && m.Status == MatchStatus.Completed)
+            .Select(m => m.SettlementJson).SingleOrDefaultAsync();
+        return json is null ? null : JsonSerializer.Deserialize<SettlementReceipt>(json, Realtime.Connection.Json)
+            ?? throw new InvalidOperationException($"The settlement receipt of table {table} is empty.");
     }
 
     /// <summary>The season LP of an account now (ranked LP table and rankChange before/after).</summary>

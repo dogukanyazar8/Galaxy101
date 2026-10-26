@@ -29,6 +29,7 @@ public sealed class GameDb(DbContextOptions<GameDb> options) : DbContext(options
         b.HasPostgresExtension("pg_trgm");
         b.Entity<Account>(e =>
         {
+            e.Property(x => x.SessionVersion).HasDefaultValue(0L);
             e.HasIndex(x => x.FriendCode).IsUnique();
             e.Property(x => x.FriendCode).HasMaxLength(7);
             e.Property(x => x.Name).HasMaxLength(16);
@@ -135,6 +136,7 @@ public sealed class GameDb(DbContextOptions<GameDb> options) : DbContext(options
         });
         b.Entity<MatchRecord>(e =>
         {
+            e.Property(x => x.SettlementJson).HasColumnType("jsonb");
             e.ToTable("matches");
             e.HasIndex(x => x.Status).HasFilter("status = 'Active'");
             e.Property(x => x.Status).HasConversion<string>().HasMaxLength(12);
@@ -154,6 +156,8 @@ public sealed class GameDb(DbContextOptions<GameDb> options) : DbContext(options
         });
         b.Entity<MatchParticipant>(e =>
         {
+            e.Property(x => x.OperationKey).HasMaxLength(160);
+            e.HasIndex(x => x.OperationKey).IsUnique();
             // A seat can have two rows: the player who left it (forfeit) and the one who took it over.
             e.HasKey(x => x.Id);
             e.HasIndex(x => new { x.MatchId, x.Seat });

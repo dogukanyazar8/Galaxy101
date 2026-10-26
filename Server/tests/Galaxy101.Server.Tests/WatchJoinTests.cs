@@ -7,6 +7,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql;
+using Galaxy101.Server.Economy;
+using Galaxy101.Server.Realtime;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Galaxy101.Server.Tests;
 
@@ -179,6 +184,39 @@ public sealed class WatchJoinTests(ServerFixture server)
     }
 
     // ---- helpers ------------------------------------------------------------------------------------------------
+
+    [Fact]
+    public async Task Returning_in_another_seat_uses_the_active_seat_and_preserves_the_forfeit_history()
+    {
+        var (http, tokens) = await server.GuestAsync();
+        using (http)
+        {
+            var record = new MatchRecord
+            {
+                Id = Guid.NewGuid(), Mode = GameModes.Private, Stake = 1000, Status = MatchStatus.Active, Hands = 3,
+                Seats = [tokens.AccountId, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()], BotMask = 0b1110,
+                CreatedAt = server.Clock.GetUtcNow(),
+            };
+            var store = server.Services.GetRequiredService<MatchStore>();
+            Assert.Empty(await store.CreateAsync(record, default));
+            var session = new MatchSession(record, store,
+                new ConnectionRegistry(server.Services.GetRequiredService<IServiceScopeFactory>(), server.Clock, NullLogger<ConnectionRegistry>.Instance),
+                server.Services.GetRequiredService<Catalog>(), server.Services.GetRequiredService<IOptions<GameOptions>>().Value,
+                server.Clock, NullLogger.Instance, _ => { });
+            try
+            {
+                await session.StartAsync();
+                await session.LeaveAsync(tokens.AccountId);
+                Assert.Null(await session.TakeSeatAsync(tokens.AccountId, 2));
+                Assert.Equal(2, session.SeatOf(tokens.AccountId));
+                Assert.Null(await session.ChatAsync(tokens.AccountId, "Returned", null));
+                Assert.Equal(ErrorCodes.Conflict, await session.TakeSeatAsync(tokens.AccountId, 1));
+                Assert.NotEqual(0, record.LeftMask & 1); // the original stake remains a forfeited participation
+                Assert.Equal(8000, (await http.GetFromJsonAsync<WalletResponse>("/v1/wallet"))!.Chips);
+            }
+            finally { await session.StopAsync(); }
+        }
+    }
 
     private static TableOptions Options(long stake) => new() { Name = "İzle Test", Type = "single", Visibility = "public", Hands = 3, Stake = stake, TurnSeconds = 30, Spectators = true };
 

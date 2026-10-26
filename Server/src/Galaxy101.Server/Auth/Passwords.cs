@@ -18,7 +18,7 @@ public sealed class Passwords(GameDb db, AccountService accounts, TimeProvider c
     private const int Iterations = 120_000, SaltBytes = 16, HashBytes = 32;
 
     /// <param name="V4">The v4 protocol error code (register / login).</param>
-    public sealed record Outcome(Guid? Account, string? Error, int Remaining = 0, int RetryAfter = 0, string? V4 = null);
+    public sealed record Outcome(Guid? Account, string? Error, int Remaining = 0, int RetryAfter = 0, string? V4 = null, long? SessionVersion = null);
 
     public static string Normalize(string? email) => (email ?? "").Trim().ToLowerInvariant();
 
@@ -70,8 +70,13 @@ public sealed class Passwords(GameDb db, AccountService accounts, TimeProvider c
     public async Task<Outcome> LoginAsync(PasswordLoginRequest request, CancellationToken ct)
     {
         var email = Normalize(request.Email);
-        var login = await db.PasswordLogins.FirstOrDefaultAsync(x => x.Email == email, ct);
-        if (login is null) return new(null, ErrorCodes.AccountNotFound, V4: V4Errors.E_ACCOUNT_UNKNOWN);
+        // Password and epoch must come from the same snapshot: an old password verified while reset commits must not
+        // obtain the new epoch at token issuance. IssueAsync checks this version under the reset's account lock.
+        var credentials = await db.PasswordLogins.Where(x => x.Email == email)
+            .Join(db.Accounts, login => login.AccountId, account => account.Id,
+                (login, account) => new { Login = login, account.SessionVersion }).SingleOrDefaultAsync(ct);
+        if (credentials is null) return new(null, ErrorCodes.AccountNotFound, V4: V4Errors.E_ACCOUNT_UNKNOWN);
+        var login = credentials.Login;
         var now = clock.GetUtcNow(); var game = options.Value;
         if (login.LockedUntil is { } until && until > now) return new(null, ErrorCodes.AccountLocked, 0, (int)Math.Ceiling((until - now).TotalSeconds), V4Errors.E_ACCOUNT_LOCKED);
         if (!Verify(request.Password ?? "", login.Hash))
@@ -95,6 +100,6 @@ public sealed class Passwords(GameDb db, AccountService accounts, TimeProvider c
         }
         login.FailedAttempts = 0; login.LockedUntil = null;
         await db.SaveChangesAsync(ct);
-        return new(login.AccountId, null);
+        return new(login.AccountId, null, SessionVersion: credentials.SessionVersion);
     }
 }

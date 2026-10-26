@@ -117,7 +117,7 @@ public static class PasswordResetEndpoints
         });
 
         // A new password ends every session of the account (all devices sign in again) and lifts a wrong-password lock.
-        anonymous.MapPost("/password/reset", async (PasswordResetRequest request, GameDb db, PasswordResetCodes codes, SessionCutoffs sessions,
+        anonymous.MapPost("/password/reset", async (PasswordResetRequest request, GameDb db, PasswordResetCodes codes,
             Realtime.ConnectionRegistry live, TimeProvider clock, CancellationToken ct) =>
         {
             var email = Passwords.Normalize(request.Email);
@@ -126,14 +126,17 @@ public static class PasswordResetEndpoints
             var login = await db.PasswordLogins.FirstOrDefaultAsync(x => x.Email == email, ct);
             if (login is null) return Api.Error(ErrorCodes.CodeInvalid, error: V4Errors.E_RESET_CODE);
             await using var tx = await db.Database.BeginTransactionAsync(ct);
+            var account = await TokenService.LockAccountAsync(db, login.AccountId, ct);
+            if (account is null) return Api.Error(ErrorCodes.CodeInvalid, error: V4Errors.E_RESET_CODE);
+            var version = checked(account.SessionVersion + 1);
+            await db.Accounts.Where(x => x.Id == login.AccountId).ExecuteUpdateAsync(s => s.SetProperty(x => x.SessionVersion, version), ct);
             login.Hash = Passwords.Hash(request.Password!); login.FailedAttempts = 0; login.LockedUntil = null;
             await db.SaveChangesAsync(ct);
             var now = clock.GetUtcNow();
             await db.RefreshTokens.Where(x => x.AccountId == login.AccountId && x.RevokedAt == null).ExecuteUpdateAsync(s => s.SetProperty(x => x.RevokedAt, now), ct);
             await tx.CommitAsync(ct);
             // Sessions already open end too: their access tokens stop working and the game socket closes.
-            sessions.Cut(login.AccountId);
-            live.Disconnect(login.AccountId);
+            live.Disconnect(login.AccountId, beforeVersion: version);
             return Results.NoContent();
         });
     }

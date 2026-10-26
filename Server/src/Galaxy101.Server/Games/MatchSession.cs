@@ -106,7 +106,14 @@ public sealed class MatchSession
             if (Bot(s)) players[record.Seats[s]] = new PlayerSummary { Id = record.Seats[s], Name = "Bot · " + BotNames[s], Color = BotColors[s], Level = 1 };
     }
     public IReadOnlyList<Guid> Seats => record.Seats;
-    public int SeatOf(Guid account) => Array.IndexOf(record.Seats, account);
+    public int SeatOf(Guid account)
+    {
+        // A forfeited seat keeps its original account for history and settlement. If that person returns in
+        // another seat, commands and reconnects belong to the current participation, not the earlier forfeit.
+        for (var seat = 0; seat < record.Seats.Length; seat++)
+            if (record.Seats[seat] == account && !Left(seat)) return seat;
+        return Array.IndexOf(record.Seats, account);
+    }
 
     // ---- Public API: every call is queued onto the session loop -------------------------------------------------
 

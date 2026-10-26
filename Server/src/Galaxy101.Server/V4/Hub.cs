@@ -243,7 +243,7 @@ public sealed partial class Hub : IRealtimeReplyHandler, IHostedService
             V4Messages.TableCreate => await TableCreateAsync(p, Body<V4TableCreateRequest>(m)),
             V4Messages.TableJoin => await TableJoinAsync(p, Body<V4TableJoinRequest>(m)),
             V4Messages.TableJoinCode => await TableJoinCodeAsync(p, Body<V4TableJoinCodeRequest>(m)),
-            V4Messages.TableSpectate => TableSpectate(p, Body<V4TableSpectateRequest>(m)),
+            V4Messages.TableSpectate => await TableSpectateAsync(p, Body<V4TableSpectateRequest>(m)),
             V4Messages.TableLeave => await TableLeaveAsync(p),
             V4Messages.SeatAddBot => SeatAddBot(p, Body<V4SeatRequest>(m)),
             V4Messages.SeatKick => await SeatKickAsync(p, Body<V4SeatRequest>(m)),
@@ -316,6 +316,7 @@ public sealed partial class Hub : IRealtimeReplyHandler, IHostedService
         if (!people.TryGetValue(account, out var p)) return true;
         if (p.Queue is { } q) { var f = q.Found; Unqueue(q, "cancel"); q.Found = null; if (f is not null) { Release(f, q); TryMatch(); } }
         if (p.Table is not null) await TableLeaveAsync(p);
+        ForgetIfIdle(p);
         return true;
     });
 

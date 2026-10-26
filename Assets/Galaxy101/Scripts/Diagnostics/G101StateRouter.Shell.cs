@@ -41,6 +41,8 @@ namespace Galaxy101.Diagnostics
                         case "S12": lobby.OpenCode(); break;                                      // set Lobi {dlg: {kind: 'code'}}
                         case "S13": case "S14": case "S15":                                       // call Lobi.enterWait($tbl:mine, true)
                             demo.EnterWait(demo.Pick("mine"), true); yield return Settle(.3f);
+                            // set Lobi deep {wait: {friend, invTab}}: the prototype's panel is wait.inv {tab: 'fr' | 'recent'}, so the
+                            // package frame stays on the room (docs/v4/lobby/EKSIKLER.md EK-801); Unity opens the panel the title names.
                             if (id != "S13") { lobby.OpenInvite(null); yield return Settle(.2f); lobby.Invite.Tab = id == "S14" ? "friends" : "recent"; lobby.Refresh(); }
                             break;
                     }

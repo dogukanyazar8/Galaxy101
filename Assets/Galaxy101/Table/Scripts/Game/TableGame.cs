@@ -137,7 +137,7 @@ namespace Galaxy101.Table
             Launch = Pending ?? new TableLaunch(); Pending = null;
             if (Launch.Session == null && Launch.Flow == null && PendingScenario != null) { Launch.Flow = TableScenarios.Has(PendingScenario) ? TableScenarios.Flow(PendingScenario) : PendingScenario; }
             PendingScenario = null;
-            Session = Launch.Session ?? new LocalTableSession(Launch.Setup ?? DefaultSetup(), Launch.Table ?? DefaultTable(), Launch.Clock ?? (() => GameClock.NowMs));
+            Session = Launch.Session ?? new LocalTableSession(Launch.Setup ?? DefaultSetup(), Launch.Table ?? DefaultTable(), Launch.Clock ?? (() => GameClock.NowMs), 0, Launch.Clock == null ? () => GameClock.Frozen : (Func<bool>)null);
 
             if (hud != null)
             {
@@ -214,6 +214,7 @@ namespace Galaxy101.Table
                 await Seconds(0.05f); if (life.IsCancellationRequested) return;
             }
             await Seconds(TableTimings.SeatedToCountdown / 1000f);
+            if (this == null || life.IsCancellationRequested) return;
             seating = false;
             table.CameraRig.GoTo(hud != null ? hud.PreferredView : TableCameraRig.View.Player, 3f);
             offline.Begin();
@@ -252,7 +253,9 @@ namespace Galaxy101.Table
         private void OnDestroy()
         {
             life?.Cancel(); ceremonyLife?.Cancel();
-            foreach (var t in timers) t.Done.TrySetCanceled(); timers.Clear();
+            // Pending waits end quietly (their async methods check life after each await); cancelling them would log
+            // TaskCanceledException from every async void still waiting when the scene unloads.
+            foreach (var t in timers) t.Done.TrySetResult(false); timers.Clear();
             if (Model != null) Model.Applied -= OnMessage;
             if (hud != null) { hud.Command -= OnHudCommand; hud.GiftSent -= OnGiftSent; if (hud.Settings != null) hud.Settings.Changed -= OnSetting; }
             Board?.Clear();
@@ -332,7 +335,7 @@ namespace Galaxy101.Table
         {
             try { await Ceremony.Run(Model, LocalSeat, () => { if (Rack.Count == 0 && Model.Rack != null) Rack.Deal(TileIds.ToInts(Model.Rack)); return BuildBoard(); }, token); }
             catch (OperationCanceledException) { return; }
-            catch (Exception e) { Debug.LogException(e); }
+            catch (Exception e) { if (life != null && !life.IsCancellationRequested) Debug.LogException(e); return; }   // the scene going away mid-roll is not an error
             finally { Ceremony.Clear(); }
             if (token.IsCancellationRequested) return;
             Settle(false);
@@ -531,7 +534,7 @@ namespace Galaxy101.Table
             momentOn = true; momentAt = Time.realtimeSinceStartup; Notify();
             Debug.Log("GALAXY101_TABLE_HAND_END hand=" + Model.HandNo + " reason=" + reason + " finisher=" + finisher + " scores=" + string.Join(",", score));
             await Seconds(finisher >= 0 ? 3.8f : 2.4f);
-            if (this == null || life.IsCancellationRequested) return;
+            if (this == null || life == null || life.IsCancellationRequested) return;
             if (finisher >= 0 && LocalSeat(finisher) != Me) table.CameraRig.GoTo(table.CameraRig.Current, 1.1f);
             momentOn = false;
             ResultOpen = true; resultAt = Time.realtimeSinceStartup; Notify();
@@ -703,6 +706,7 @@ namespace Galaxy101.Table
                 var impact = table.DeckTop(Board.DeckShown).position;
                 float wait = Fx.Nuclear(bomb.transform, impact, table.CameraRig, () => hud?.NuclearFlash());
                 await Seconds(wait + 0.9f);
+                if (this == null || life.IsCancellationRequested) return;
                 if (bomb != null) bomb.enabled = true;
             }
             await Do(Session.Discard(last));
@@ -953,6 +957,7 @@ namespace Galaxy101.Table
             s.RoomStake = Launch.Stake > 0 ? Launch.Stake : m.Table?.Bet ?? 0;
             if (Launch.Chips.HasValue) s.Chips = (int)Math.Min(int.MaxValue, Launch.Chips.Value);
             else if (Session.Online && Galaxy101.Online.GalaxyOnline.Instance?.Wallet is { } wallet) s.Chips = (int)Math.Min(int.MaxValue, wallet.Chips);
+            else if (hud?.Model != null) s.Chips = (int)Math.Min(int.MaxValue, hud.Model.Chips);
             return s;
         }
 
@@ -1094,6 +1099,7 @@ namespace Galaxy101.Table
             ExitOpen = false;
             Message(TableHud.ToastKind.Success, L("Masadan kalktın · lobiye dönülüyor", "You left the table · returning to the lobby"));
             await Session.Leave();
+            if (this == null) return;
             LeaveAfter(TableTimings.LeaveToLobby / 1000f + 0.4f);
         }
 

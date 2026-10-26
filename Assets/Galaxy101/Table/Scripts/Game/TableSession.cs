@@ -44,12 +44,14 @@ namespace Galaxy101.Table
     public sealed class LocalTableSession : ITableSession
     {
         private readonly Func<double> clock;
+        private readonly Func<bool> paused;
         private double lastClock;
 
         /// <param name="clock">Milliseconds of the shared clock (GameClock.NowMs); only its forward steps count.</param>
-        public LocalTableSession(TableSetup setup, V4Table table, Func<double> clock, int seat = 0)
+        /// <param name="paused">The clock is frozen (D-61): the match stands still and the freeze's jump to the canonical instant is not played.</param>
+        public LocalTableSession(TableSetup setup, V4Table table, Func<double> clock, int seat = 0, Func<bool> paused = null)
         {
-            this.clock = clock;
+            this.clock = clock; this.paused = paused;
             lastClock = clock();
             Host = new LocalTableHost(seat, 1_000_000);
             Setup = setup; Table = table;
@@ -79,7 +81,7 @@ namespace Galaxy101.Table
         {
             double now = clock();
             double delta = now - lastClock; lastClock = now;
-            if (!Started || delta <= 0) return;   // a reset clock never runs time backwards
+            if (!Started || delta <= 0 || paused != null && paused()) return;   // a reset clock never runs time backwards; a frozen one not at all
             Host.Advance(Host.Now + (long)Math.Round(delta));
         }
 

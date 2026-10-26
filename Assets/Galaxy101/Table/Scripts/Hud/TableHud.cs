@@ -861,73 +861,40 @@ namespace Galaxy101.Table
             bar.style.flexDirection = FlexDirection.Row; bar.style.alignItems = Align.Center; Pad(bar, 14, 20, 14, 20); bar.userData = 12f;
             hudLayer.Add(bar);
 
-            bar.Add(Clickable(IconButton("table-exit", 22, L("Masadan çık", "Leave table"), "table-exit"), "exit"));
+            bar.Add(Clickable(IconButton("table-exit", 22, L("Masadan çık", "Leave table"), "table.askExit"), "exit"));
             var logo = Text("GALAXY 101", "Montserrat-800", 19, "var(--a1)"); MenuView.Tracking(logo, 3, 19);
             // CSS paints the logo with linear-gradient(lg1, a1 50%, a2) clipped to the glyphs; UI Toolkit text takes
             // one colour, so the mid stop carries it. drop-shadow(0 2px 0 var(--lS)) is a hard text shadow.
             logo.style.textShadow = new TextShadow { offset = new Vector2(0, 2), blurRadius = 0, color = view.C("var(--lS)") };
             bar.Add(logo);
 
-            var room = Row(8); room.name = "table-room"; Pad(room, 7, 13, 7, 13); view.Decorate(room, "var(--dp)", 15);
-            if (s.RoomName != null)
-            {
-                // A server table (G13): its name and type, then the stake.
-                room.Add(Text(s.RoomName, "Baloo2-800", 12, "var(--ic)"));
-                var dot = new VisualElement { pickingMode = PickingMode.Ignore }; dot.style.width = dot.style.height = 4; view.Decorate(dot, "var(--mt)", 2); room.Add(dot);
-                room.Add(Text(L("Bahis ", "Bet ") + view.N(s.RoomStake), "Baloo2-800", 12, "var(--ic)"));
-            }
-            else
-            {
-                room.Add(Text(TableStrings.Get("botRoom", Lang), "Baloo2-800", 12, "var(--ic)"));
-                var practice = Text(TableStrings.Get("botTag", Lang), "Baloo2-800", 9, "var(--aT)"); MenuView.Tracking(practice, 1.2f, 9); practice.name = "bot-tag";
-                Pad(practice, 2, 7, 2, 7); view.Decorate(practice, "var(--a1)", 6); room.Add(practice);
-                var dot = new VisualElement { pickingMode = PickingMode.Ignore }; dot.style.width = dot.style.height = 4; view.Decorate(dot, "var(--mt)", 2); room.Add(dot);
-                room.Add(Text(TableStrings.Get("botStake", Lang), "Baloo2-800", 12, "var(--ic)"));
-            }
+            // G101-Masa table.roomLabel: "Test masası · Tekli" · "Bahis 5.000" (against bots "Botlara karşı · Tekli" · "Antrenman · bahis yok").
+            var room = Row(8); room.name = "table-room"; Pad(room, 7, 13, 7, 13); view.Decorate(room, "var(--dp)", 999);
+            var roomName = Text(s.RoomName ?? L("Botlara karşı · Tekli", "Vs bots · Singles"), "Baloo2-800", 12, "var(--ic)"); roomName.name = "table.roomLabel"; room.Add(roomName);
+            var dot = new VisualElement { pickingMode = PickingMode.Ignore }; dot.style.width = dot.style.height = 4; view.Decorate(dot, "var(--mt)", 2); room.Add(dot);
+            var bet = Text(s.RoomName != null ? L("Bahis ", "Bet ") + view.N(s.RoomStake) : L("Antrenman · bahis yok", "Practice · no stake"), "Baloo2-800", 12, "var(--ic)"); bet.name = "table.roomLabel"; room.Add(bet);
             bar.Add(room);
-            BuildHandCounter(s);
 
             var spacer = new VisualElement { pickingMode = PickingMode.Ignore }; spacer.style.flexGrow = 1; bar.Add(spacer);
 
-            var deck = Row(8); Pad(deck, 5, 13, 5, 6); view.Decorate(deck, "var(--dp)", 18);
-            var mini = new VisualElement { pickingMode = PickingMode.Ignore }; mini.style.width = 20; mini.style.height = 27; mini.style.overflow = Overflow.Hidden;
+            // Deck pill: height 44, padding 0 16 0 8, gap 9, inset shadow; the mini tile 21×28.
+            var deck = Row(9); deck.style.height = 44; Pad(deck, 0, 16, 0, 8); view.Decorate(deck, "var(--dp)", 999);
+            var mini = new VisualElement { pickingMode = PickingMode.Ignore }; mini.style.width = 21; mini.style.height = 28; mini.style.overflow = Overflow.Hidden;
             view.Decorate(mini, "linear-gradient(var(--tf1),var(--tf2))", 5);
-            var edge = new VisualElement { pickingMode = PickingMode.Ignore }; MenuView.Place(edge, 0, 24, 20, 3); edge.style.backgroundColor = view.C("var(--te)"); mini.Add(edge);
+            var edge = new VisualElement { pickingMode = PickingMode.Ignore }; MenuView.Place(edge, 0, 25, 21, 3); edge.style.backgroundColor = view.C("var(--te)"); mini.Add(edge);
             deck.Add(mini);
-            deck.Add(Text(L("Taş", "Deck"), "Baloo2-800", 12, "var(--mt)"));
-            var count = Text(s.DeckCount.ToString(), "Montserrat-700", 16, "#F4F1E8"); count.name = "table.deckCount"; count.style.minWidth = 22; deck.Add(count);
+            var deckLabel = Text(L("Taş", "Deck"), "Baloo2-800", 12, "var(--mt)"); deckLabel.name = "table.t.deck"; deck.Add(deckLabel);
+            var count = Text(s.DeckCount.ToString(), "Montserrat-700", 17, "#F4F1E8"); count.name = "table.deckCount"; count.style.minWidth = 26; count.style.unityTextAlign = TextAnchor.MiddleRight; deck.Add(count);
             bar.Add(deck);
 
-            // XP pill instead of chips (T28): level disc, 100×7 bar, "6.240 / 9.000 XP".
-            var xp = Row(8); xp.name = "xp-pill"; Pad(xp, 5, 14, 5, 5); view.Decorate(xp, "var(--dp)", 18);
-            var levelDisc = new VisualElement { pickingMode = PickingMode.Ignore }; levelDisc.style.width = levelDisc.style.height = 30; levelDisc.style.alignItems = Align.Center; levelDisc.style.justifyContent = Justify.Center;
-            view.Decorate(levelDisc, "linear-gradient(var(--a1),var(--a2))", 15); levelDisc.Add(Text(s.Level.ToString(), "Montserrat-800", 12, "var(--aT)")); xp.Add(levelDisc);
-            var xpColumn = new VisualElement { pickingMode = PickingMode.Ignore };
-            var track = new VisualElement { pickingMode = PickingMode.Ignore }; track.style.width = 100; track.style.height = 7; track.style.overflow = Overflow.Hidden; view.Decorate(track, "rgba(255,255,255,.14)", 4);
-            var fill = new VisualElement { pickingMode = PickingMode.Ignore }; fill.style.position = Position.Absolute; fill.style.left = 0; fill.style.top = 0; fill.style.bottom = 0;
-            fill.style.width = Length.Percent(Mathf.Clamp01(s.XpNeed > 0 ? (float)s.XpInLevel / s.XpNeed : 0) * 100); view.Decorate(fill, "linear-gradient(90deg,var(--a2),var(--a1))", 4);
-            track.Add(fill); xpColumn.Add(track);
-            var xpText = Text(TableStrings.Get("xpPill", Lang, view.N(s.XpInLevel), view.N(s.XpNeed)), "Baloo2-800", 10, "var(--mt)"); xpText.name = "xp-text"; xpText.style.marginTop = 2; xpColumn.Add(xpText);
-            xp.Add(xpColumn);
-            bar.Add(xp);
+            // Chips pill (table.chipsLabel): the dashed gold coin and the balance, as at every table of the prototype (T28 too).
+            var chips = Row(9); chips.name = "table-chips"; chips.style.height = 44; Pad(chips, 0, 16, 0, 8); view.Decorate(chips, "var(--dp)", 999);
+            var coin = new VisualElement { pickingMode = PickingMode.Ignore }; coin.style.width = coin.style.height = 28;
+            view.Decorate(coin, "radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)", 14); Border(coin, 2, view.C("#FFF3C8")); chips.Add(coin);
+            var balance = Text(view.N(s.Chips), "Montserrat-700", 17, "#F4F1E8"); balance.name = "table.chipsLabel"; balance.style.minWidth = 80; balance.style.unityTextAlign = TextAnchor.MiddleRight; chips.Add(balance);
+            bar.Add(chips);
 
-            var settings = Clickable(IconButton("settings", 24, L("Ayarlar", "Settings"), "table-settings"), "settings"); bar.Add(settings);
-        }
-
-        /// <summary>Hand counter under the room pill (T28): played hands as gold dots, then "2 / 5. el".</summary>
-        private void BuildHandCounter(State s)
-        {
-            var counter = Row(6); counter.name = "hand-counter"; counter.style.position = Position.Absolute; counter.style.left = 232; counter.style.top = 62;
-            Pad(counter, 3, 10, 3, 8); view.Decorate(counter, "var(--dp)", 12);
-            var dots = Row(3);
-            for (int i = 1; i <= s.MatchHands; i++)
-            {
-                var dot = new VisualElement { pickingMode = PickingMode.Ignore }; dot.style.width = dot.style.height = 6;
-                view.Decorate(dot, i <= s.Hand ? "var(--a1)" : "rgba(255,255,255,.22)", 3); dots.Add(dot);
-            }
-            counter.Add(dots);
-            counter.Add(Text(TableStrings.Get("handCounter", Lang, Mathf.Clamp(s.Hand, 1, s.MatchHands), s.MatchHands), "Baloo2-800", 10, "var(--ic)"));
-            hudLayer.Add(counter);
+            var settings = Clickable(IconButton("settings", 24, L("Ayarlar", "Settings"), "table.openSettings"), "settings"); bar.Add(settings);
         }
 
         private VisualElement IconButton(string icon, int size, string tooltip, string name)

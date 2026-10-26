@@ -24,6 +24,8 @@ namespace Galaxy101.Diagnostics
         private TableHud Hud => FindAnyObjectByType<TableHud>();
         private string scenarioId;
         private string tableFlow;
+        /// <summary>The table state being run: timed extras of an earlier state never reach the next state's table.</summary>
+        private int tableRun;
 
         /// <summary>
         /// A table state: its states.json path step by step (g101-state.js step()): acct → [scenario] → table {flow, bots,
@@ -33,7 +35,7 @@ namespace Galaxy101.Diagnostics
         private IEnumerator TableState(string id, string theme, string lang)
         {
             var path = (JArray)Entry(id)["path"];
-            scenarioId = null; tableFlow = null;
+            scenarioId = null; tableFlow = null; tableRun++;
             TableSettings.DesignDefaultsOnly = true;
             foreach (JObject step in path)
             {
@@ -95,10 +97,10 @@ namespace Galaxy101.Diagnostics
 
         private IEnumerator TeaAfterDeal()
         {
-            var game = Game;
-            while (game != null && !(game.Model.HasHand && game.Model.Deal == null && !game.Ceremony.Running && game.Current != TableGame.Phase.Deal)) { if (GameClock.Frozen) yield break; yield return null; }
-            if (game == null) yield break;
-            yield return After(2.6f, () => { var hud = Hud; hud?.BotGift(2, "tea", -1, TableStrings.Get("quick.4", hud.L("tr", "en"))); });
+            var game = Game; var hud = Hud; int run = tableRun;
+            while (game != null && run == tableRun && !(game.Model.HasHand && game.Model.Deal == null && !game.Ceremony.Running && game.Current != TableGame.Phase.Deal)) { if (GameClock.Frozen) yield break; yield return null; }
+            if (game == null || run != tableRun) yield break;
+            yield return After(2.6f, () => { if (run == tableRun && hud != null) hud.BotGift(2, "tea", -1, TableStrings.Get("quick.4", hud.L("tr", "en"))); });
         }
 
         private TableLoadingOverlay Loading;
@@ -124,7 +126,8 @@ namespace Galaxy101.Diagnostics
             game.RunFlow(key);
             if (flow == null || flow == "seat") yield break;
             // Timed extras run alongside the path's next steps (the prototype's this.at).
-            void At(float seconds, Action action) => StartCoroutine(After(seconds, action));
+            int run = tableRun;
+            void At(float seconds, Action action) => StartCoroutine(After(seconds, () => { if (run == tableRun && game != null) action(); }));
             string quick4 = TableStrings.Get("quick.4", hud.L("tr", "en"));
             switch (flow)
             {

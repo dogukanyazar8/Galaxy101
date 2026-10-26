@@ -16,10 +16,19 @@ namespace Galaxy101.Table
         private readonly Dictionary<Material, Material> clones = new Dictionary<Material, Material>();
         private readonly Dictionary<Material, Color> baseEmission = new Dictionary<Material, Color>();
         private TableTheme theme;
+        private string tableSkin = "station";
 
         public TableTheme Theme => theme;
 
-        public void SetTheme(TableTheme value) { theme = value; foreach (var pair in clones) Recolor(pair.Key, pair.Value); }
+        public void SetTheme(TableTheme value) { theme = value; RecolorAll(); }
+
+        /// <summary>v4 materials.json tableSkinApply: Andromeda has fixed holo/halo hues; other skins use planet hues.</summary>
+        public void SetTableSkin(string value) { tableSkin = value; RecolorAll(); }
+
+        private void RecolorAll()
+        {
+            foreach (var pair in clones) Recolor(pair.Key, pair.Value);
+        }
 
         /// <summary>Takes ownership of every material used under <paramref name="root"/> and recolours it.</summary>
         public void Adopt(GameObject root)
@@ -65,8 +74,12 @@ namespace Galaxy101.Table
                 case "masa_cam_kenar":
                     SetEmission(m, theme.A1); break;
                 // Unlit accent lines take the accent as their colour.
-                case "led_cizgi": case "masa_holo_cizgi": case "holo":
+                case "led_cizgi": case "masa_holo_cizgi":
                     SetBase(m, theme.A1, keepAlpha: true); break;
+                case "holo":
+                    SetBase(m, tableSkin == "andromeda" ? new Color32(0xB7, 0x9C, 0xFF, 255) : theme.A1, keepAlpha: true); break;
+                case "hale":
+                    SetBase(m, tableSkin == "andromeda" ? new Color32(0x7F, 0x9C, 0xFF, 255) : theme.A2, keepAlpha: true); break;
                 case "masa_kenar":
                     SetBase(m, theme.Rim); break;
                 case "deri":
@@ -76,8 +89,18 @@ namespace Galaxy101.Table
                 case "tas_classic":
                     SetBase(m, theme.Tile); break;
                 case "cuha":
-                    MatchThreeRoughSpecular(m); break;
+                    MatchThreeRoughSpecular(m); ApplyFeltEmission(m); break;
             }
+        }
+
+        private void ApplyFeltEmission(Material material)
+        {
+            if (!material.HasProperty(Emissive)) return;
+            // table3d.js applyLook(): map-based emission, holo accent × .35 / Andromeda white × .5 / opaque zero.
+            bool hologram = tableSkin == "holo", andromeda = tableSkin == "andromeda";
+            material.SetColor(Emissive, hologram ? theme.A1.linear * .35f : andromeda ? Color.white * .5f : Color.black);
+            material.SetTexture("_EmissionMap", hologram || andromeda ? material.GetTexture("_BaseMap") : null);
+            if (hologram || andromeda) material.EnableKeyword("_EMISSION"); else material.DisableKeyword("_EMISSION");
         }
 
         /// <summary>

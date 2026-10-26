@@ -15,15 +15,15 @@
   },
   "galaxy": {
    "roughness": 0.4,
-   "emission": 0.55
+   "emission": 0.18
   },
   "gold": {
    "roughness": 0.4,
-   "emission": 0.25
+   "emission": 0.1
   },
   "neon": {
    "roughness": 0.4,
-   "emission": 1.6
+   "emission": 0.35
   },
   "marble": {
    "roughness": 0.4,

@@ -268,6 +268,16 @@ namespace Galaxy101.Table
             foreach (var go in deckPool) if (go != null) scene.Tiles.Restyle(go);
         }
 
+        /// <summary>Rack-only source badges; also clears markers on tiles that moved to a pile or meld.</summary>
+        public void SetTags(System.Func<int, string> tagOf)
+        {
+            foreach (var pair in known)
+            {
+                scene.Tiles.SetTag(pair.Value.gameObject, tagOf(pair.Key));
+                pair.Value.RefreshVisibility();
+            }
+        }
+
         public void SetValid(ICollection<int> valid)
         {
             foreach (var pair in known) pair.Value.Valid = valid != null && valid.Contains(pair.Key);

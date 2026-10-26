@@ -17,23 +17,26 @@ namespace Galaxy101.Table
     public sealed class TableFx : MonoBehaviour
     {
         public static readonly Color Gold = Hex("#FFD964"), Spark = Hex("#FFE08A"), Green = Hex("#3CCB6E"), White = Color.white;
+        private static readonly Color StackGold = Hex("#FFC94A");
 
         private TableScene scene;
         private Texture2D glow;
         private GlowPoints bursts, sparks, haze;
         private Mesh ringMesh, discMesh, quadMesh;
-        private Material zoneMaterial, zoneFill, sideMaterial, deckGlowMaterial, holoMaterial;
-        private Transform zone, zoneFillTransform, sideRing, deckGlow, holo, deckRoot;
+        private Material zoneMaterial, zoneFill, sideMaterial, deckGlowMaterial, holoMaterial, tableHaloMaterial, stackMarkerMaterial;
+        private Transform zone, zoneFillTransform, sideRing, deckGlow, holo, deckRoot, tableHalo, stackMarker;
         private readonly List<(Transform T, Material M, Color C, float T0)> waves = new List<(Transform, Material, Color, float)>();
         private readonly List<(Material M, Color Base)> leds = new List<(Material, Color)>();
         private readonly List<(float At, System.Action Run)> scheduled = new List<(float, System.Action)>();
         private Light winSpot;
-        private float winSpotT = -9, deckSpinT = -9, holoBoostUntil, holoBaseAlpha = 0.22f;
-        private bool canDiscard, canDraw, sidePulse;
+        private float winSpotT = -9, deckSpinT = -9, holoBoostUntil, pileK, stackAlpha;
+        private bool canDiscard, canDraw, sidePulse, stackMarked;
         private int deckCount = 106;
 
         public Color Accent { get; private set; } = Gold;
         public Transform DeckRoot => deckRoot;
+        /// <summary>Whether melds have moved the stock to the left (table3d.js fl.pileLeft).</summary>
+        public System.Func<bool> PileLeft;
         /// <summary>Live glow points and ring waves (tests, diagnostics).</summary>
         public int LivePoints => (bursts?.Count ?? 0) + (sparks?.Count ?? 0);
         public int LiveHaze => haze?.Count ?? 0;
@@ -60,6 +63,10 @@ namespace Galaxy101.Table
             zoneFillTransform = Flat("atma_dolgu", discMesh, zoneFill = Additive(Accent, 0), table.DiscardCenter(0) + Vector3.up * 0.0004f, 0.058f);
             sideRing = Flat("yan_halka", ringMesh, sideMaterial = Additive(Accent, 0), table.DiscardCenter(3), 0.066f);
             deckGlow = Flat("deste_parilti", quadMesh = Quad(), deckGlowMaterial = Additive(Accent, 0, glow), new Vector3(0, TY + 0.002f, 0), 0.25f);
+            tableHalo = Flat("masa_hale", quadMesh, tableHaloMaterial = Additive(table.Skins.Theme.A2, 0, glow), new Vector3(0, .004f, 0), 1.8f);
+            // M.halo was cloned before applyLook: this marker retains its original #FFC94A in every theme.
+            stackMarker = Flat("balya_isaret", quadMesh, stackMarkerMaterial = Additive(StackGold, 0, glow), Vector3.zero, 1);
+            stackMarker.localScale = new Vector3(.055f, 1, .08f);
 
             RescanTable();
 
@@ -70,12 +77,17 @@ namespace Galaxy101.Table
         /// <summary>Find the holo ring and LED materials of the current table and rack models (again after a theme change).</summary>
         public void RescanTable()
         {
+            if (scene == null) return;
+            Accent = scene.Skins.Theme.A1;
+            float haloAlpha = scene.TableSkin == "wood" ? .12f : scene.TableSkin == "holo" ? .4f : .25f;
+            SetAlpha(tableHaloMaterial, scene.TableSkin == "andromeda" ? Hex("#7F9CFF") : scene.Skins.Theme.A2, ThreeBlend.Additive(haloAlpha));
             holo = null; holoMaterial = null; leds.Clear();
             foreach (var r in scene.GetComponentsInChildren<Renderer>(true))
             {
+                if (!r.gameObject.activeInHierarchy) continue;
                 if (r.name.StartsWith("holo_halka", System.StringComparison.Ordinal) && holo == null)
                 {
-                    holo = r.transform; holoMaterial = r.sharedMaterial; if (holoMaterial.HasProperty("_BaseColor")) holoBaseAlpha = holoMaterial.GetColor("_BaseColor").a;
+                    holo = r.transform; holoMaterial = r.sharedMaterial;
                     // table3d.js M.holo is AdditiveBlending (the GLB export only keeps "transparent").
                     holoMaterial.SetFloat("_Blend", 2); holoMaterial.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha); holoMaterial.SetFloat("_DstBlend", (float)BlendMode.One);
                     holoMaterial.SetFloat("_SrcBlendAlpha", (float)BlendMode.Zero); holoMaterial.SetFloat("_DstBlendAlpha", (float)BlendMode.One);
@@ -84,6 +96,19 @@ namespace Galaxy101.Table
                     if (m != null && (m.name.StartsWith("led", System.StringComparison.Ordinal) || m.name.Contains("_led")) && m.HasProperty("_EmissionColor") && !leds.Exists(l => l.M == m))
                         leds.Add((m, m.GetColor("_EmissionColor")));
             }
+        }
+
+        /// <summary>Pulse below one of the dealer's 15 stacks; null fades it out (table3d.js markStack).</summary>
+        public void MarkStack(int? seat, int stack = 0)
+        {
+            if (!seat.HasValue) { stackMarked = false; return; }
+            if (seat.Value < 0 || seat.Value > 3) throw new System.ArgumentOutOfRangeException(nameof(seat));
+            if (stack < 0 || stack > 14) throw new System.ArgumentOutOfRangeException(nameof(stack));
+            if (scene == null || stackMarker == null) throw new System.InvalidOperationException("Table effects must be initialized before marking a stack.");
+            var pose = scene.SeatPose(seat.Value, (stack - 7) * .057f, TY + .0016f, .36f, false);
+            // Quad is already horizontal; only the seat's yaw applies, not a lying tile's X rotation.
+            stackMarker.SetPositionAndRotation(pose.position, Quaternion.LookRotation(scene.SeatDirection(seat.Value), Vector3.up));
+            stackMarked = true;
         }
 
         // ---------- primitives ----------
@@ -201,7 +226,7 @@ namespace Galaxy101.Table
             rig?.Shake(1.2f);
             var colors = new[] { Color.white, Hex("#FFD964"), Hex("#FF8A3D") };
             for (int i = 0; i < 3; i++) { Burst(impact + Vector3.up * 0.02f, colors[i], 95, 1.1f + i * 0.35f); Wave(impact, colors[i], i * 0.18f); }
-            var lightGo = new GameObject("nukleer_isik"); lightGo.transform.position = impact + Vector3.up * 0.25f;
+            var lightGo = new GameObject("nukleer_isik"); lightGo.transform.position = impact + Vector3.up * 0.3f;
             var light = lightGo.AddComponent<Light>(); light.type = LightType.Point; light.color = Hex("#FFB25A"); light.range = 4.5f; light.intensity = TableScene.ThreeLocalIntensity(90, 1.4f, 0.3f);
             var lying = new System.Collections.Generic.List<(Transform T, Vector3 P, float D)>();
             foreach (var view in FindObjectsByType<TileView>(FindObjectsSortMode.None))
@@ -277,10 +302,14 @@ namespace Galaxy101.Table
             // LEDs: emissive 2.2 + 0.25·sin(1.2t) relative to their authored 2.4.
             float led = (2.2f + Mathf.Sin(t * 1.2f) * 0.25f) / 2.4f;
             foreach (var (m, c) in leds) if (m != null) m.SetColor("_EmissionColor", c * led);
-            // Holo ring: 0.12 rad/s (faster while boosted), opacity 0.22 ± 0.06.
+            // table3d.js frame: stack-marker pulse and the separate 3/s transition when the stock moves left.
+            stackAlpha += ((stackMarked ? .6f + .3f * Mathf.Sin(now * 6) : 0) - stackAlpha) * Mathf.Min(1, Time.deltaTime * 8);
+            SetAlpha(stackMarkerMaterial, StackGold, ThreeBlend.Additive(stackAlpha));
+            pileK += (((PileLeft?.Invoke() ?? false) ? 1f : 0f) - pileK) * Mathf.Min(1, Time.deltaTime * 3);
+            // Holo ring: .34 ± .05 at .9 rad/s; the left stock reduces it by 55 %, before the boost.
             float boost = Mathf.Max(0, holoBoostUntil - now);
             if (holo != null) holo.Rotate(Vector3.up, (0.12f + boost * 1.6f) * Time.deltaTime * Mathf.Rad2Deg, Space.World);
-            if (holoMaterial != null && holoMaterial.HasProperty("_BaseColor")) { var c = holoMaterial.GetColor("_BaseColor"); c.a = ThreeBlend.Additive(holoBaseAlpha + Mathf.Sin(t * 1.3f) * 0.06f + Mathf.Min(0.5f, boost * 0.25f)); holoMaterial.SetColor("_BaseColor", c); }
+            if (holoMaterial != null && holoMaterial.HasProperty("_BaseColor")) { var c = holoMaterial.GetColor("_BaseColor"); c.a = ThreeBlend.Additive((.34f + Mathf.Sin(t * .9f) * .05f) * (1 - pileK * .55f) + Mathf.Min(.5f, boost * .25f)); holoMaterial.SetColor("_BaseColor", c); }
             // Deck spin 0.9 s: one turn, 5 cm bounce.
             float ds = (now - deckSpinT) / 0.9f;
             if (deckRoot != null) { if (ds >= 0 && ds <= 1) { deckRoot.localRotation = Quaternion.AngleAxis(EaseInOutCubic(ds) * 360, Vector3.up); deckRoot.localPosition = Vector3.up * (Mathf.Sin(Mathf.PI * ds) * 0.05f); } else { deckRoot.localRotation = Quaternion.identity; deckRoot.localPosition = Vector3.zero; } }
@@ -453,12 +482,15 @@ namespace Galaxy101.Table
 
         private void OnDestroy()
         {
+            PileLeft = null;
+            if (tableHalo != null) Destroy(tableHalo.gameObject);
+            if (stackMarker != null) Destroy(stackMarker.gameObject);
             foreach (var w in waves) { if (w.M != null) Destroy(w.M); if (w.T != null) Destroy(w.T.gameObject); }
             if (glow != null) Destroy(glow);
             // Everything else this component made at runtime: meshes and materials.
             foreach (var m in new[] { ringMesh, discMesh, quadMesh }) if (m != null) Destroy(m);
             foreach (var p in new[] { bursts, sparks, haze }) p?.Release();
-            foreach (var m in new[] { zoneFill, sideMaterial, deckGlowMaterial }) if (m != null) Destroy(m);
+            foreach (var m in new[] { zoneFill, sideMaterial, deckGlowMaterial, tableHaloMaterial, stackMarkerMaterial }) if (m != null) Destroy(m);
         }
     }
 }

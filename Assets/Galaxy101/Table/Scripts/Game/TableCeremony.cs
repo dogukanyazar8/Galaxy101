@@ -102,6 +102,7 @@ namespace Galaxy101.Table
         public async Task Run(TableClient model, Func<int, int> local, Func<BoardState> fill, CancellationToken token)
         {
             Running = true; Revealed = false; Fake = false; Dice[0] = Dice[1] = 0; LastDie = -1;
+            fx?.MarkStack(null);
             DealProgress D() => model.Deal;
             bool Past(string step) => D() == null || Rank(D().Step) >= Rank(step);
             async Task Until(Func<bool> done) { while (!done()) { await wait(0.05f); token.ThrowIfCancellationRequested(); } }
@@ -143,6 +144,7 @@ namespace Galaxy101.Table
                 int a = d != null && d.IndicatorStack >= 0 ? d.IndicatorStack : Mathf.Clamp(Dice[0] - 1, 0, 14);
                 int b = Mathf.Clamp(d != null && d.IndicatorLevel >= 0 ? d.IndicatorLevel : Dice[1] - 1, 0, stacks[a].Count - 1);
                 Fake = d != null && d.FakeSkip;
+                fx?.MarkStack(dealer, a);
                 var indicator = stacks[a][b]; stacks[a].RemoveAt(b);
                 var outside = StackPose(dealer, a, b); outside.position += scene.SeatDirection(dealer) * 0.07f;
                 Fly(indicator, outside, 0, 0.3f, 0.01f);
@@ -159,11 +161,13 @@ namespace Galaxy101.Table
                 await Until(() => Past("extra"));
                 Set("extra");
                 int extraStack = D() != null && D().ExtraStack >= 0 ? D().ExtraStack : (a + 1) % 15;
+                fx?.MarkStack(dealer, extraStack);
                 Fly(extraTile, StackPose(dealer, extraStack, stacks[extraStack].Count), 0, 0.65f, 0.05f); stacks[extraStack].Add(extraTile);
                 await wait(0.65f); token.ThrowIfCancellationRequested();
 
                 // 5. Hand out (dealStep distribute's plan): S(1+j) and S(5+j), then S(9+j), to the dealer's right first.
                 await Until(() => Past("distribute"));
+                fx?.MarkStack(null);
                 Set("deal");
                 var delivered = new List<GameObject>[4];
                 for (int k = 0; k < 4; k++) delivered[k] = new List<GameObject>();
@@ -174,6 +178,7 @@ namespace Galaxy101.Table
                     bool planned = plan != null && step < plan.Count;
                     int receiver = local(planned ? plan[step].Seat : (dealerAbs + 1 + j) % 4);
                     var picks = planned ? plan[step].Stacks.ToArray() : round == 0 ? new[] { (a + 1 + j) % 15, (a + 5 + j) % 15 } : new[] { (a + 9 + j) % 15 };
+                    if (round == 0) fx?.MarkStack(dealer, picks[0]);
                     for (int p = 0; p < picks.Length; p++)
                     {
                         int slot = round == 0 ? p : 2; var stack = stacks[picks[p]];
@@ -186,6 +191,7 @@ namespace Galaxy101.Table
 
                 // 6. The last two stacks onto each other, then with the indicator stack to the centre (they become the deck).
                 await Until(() => Past("center"));
+                fx?.MarkStack(null);
                 Set("centre");
                 var centre = D()?.CenterStacks;
                 int right = centre != null && centre.Count == 3 ? centre[1] : Mathf.Max((a + 13) % 15, (a + 14) % 15);
@@ -236,12 +242,13 @@ namespace Galaxy101.Table
                 await wait(last + 0.25f); token.ThrowIfCancellationRequested();
                 Set("start");
             }
-            finally { Running = false; }
+            finally { fx?.MarkStack(null); Running = false; }
         }
 
         /// <summary>Removes the ceremony's own objects (the board has taken over the same poses).</summary>
         public void Clear()
         {
+            fx?.MarkStack(null);
             foreach (var go in pieces) if (go != null) UnityEngine.Object.Destroy(go);
             pieces.Clear(); flights.Clear();
             if (die != null) UnityEngine.Object.Destroy(die); die = null; dieStart = -1;

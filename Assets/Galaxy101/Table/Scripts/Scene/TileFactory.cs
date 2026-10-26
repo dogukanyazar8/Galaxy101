@@ -22,6 +22,8 @@ namespace Galaxy101.Table
         private static readonly Dictionary<int, Mesh> faceMeshes = new Dictionary<int, Mesh>();
         private Material okeyGold;
         private Mesh barMesh;
+        private Material sideTag, islekTag;
+        private Mesh tagMesh;
         /// <summary>Under-tile bars (table3d.js barGeo): green = valid set, yellow = new tile (its alpha blinks, set by TableFx).</summary>
         public static Material ValidBar, NewBar;
         /// <summary>The v2 gold okey frame instead of the blank v3 face (kept for comparison captures).</summary>
@@ -57,8 +59,62 @@ namespace Galaxy101.Table
         /// </summary>
         public void Dispose()
         {
-            foreach (UnityEngine.Object o in new UnityEngine.Object[] { face, flatFace, okeyGold, okeyFrame, okeyDot })
+            foreach (UnityEngine.Object o in new UnityEngine.Object[] { face, flatFace, okeyGold, okeyFrame, okeyDot, sideTag, islekTag, tagMesh })
                 if (o != null) { if (Application.isPlaying) UnityEngine.Object.Destroy(o); else UnityEngine.Object.DestroyImmediate(o); }
+        }
+
+        /// <summary>table3d.js setTag(): one reused rack badge, "side" or "islek"; null hides it without creating one.</summary>
+        public void SetTag(GameObject tile, string tag)
+        {
+            if (tile == null) throw new ArgumentNullException(nameof(tile));
+            var marker = tile.transform.Find("tas_simge");
+            if (string.IsNullOrEmpty(tag))
+            {
+                if (marker != null && marker.gameObject.activeSelf) marker.gameObject.SetActive(false);
+                return;
+            }
+            if (tag != "side" && tag != "islek") throw new ArgumentException("Tile tag must be side, islek or null.", nameof(tag));
+            var material = TagMaterial(tag);
+            if (tagMesh == null)
+            {
+                float half = TableConstants.TW * 0.25f;
+                // The same player-facing X/UV convention as FaceMesh, using the whole 128 px source image.
+                tagMesh = new Mesh
+                {
+                    name = "tas_simge",
+                    vertices = new[] { new Vector3(half, -half), new Vector3(half, half), new Vector3(-half, half), new Vector3(-half, -half) },
+                    uv = new[] { new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1), new Vector2(1, 0) },
+                    normals = new[] { Vector3.forward, Vector3.forward, Vector3.forward, Vector3.forward },
+                    triangles = new[] { 0, 1, 2, 0, 2, 3 },
+                };
+                tagMesh.RecalculateBounds();
+            }
+            if (marker == null)
+            {
+                marker = new GameObject("tas_simge").transform; marker.SetParent(tile.transform, false);
+                marker.localPosition = ThreeSpace.ToUnity(TableConstants.TW * 0.36f, TableConstants.TH / 2 + TableConstants.TW * 0.06f, TableConstants.TD / 2 + 0.0012f);
+                marker.gameObject.AddComponent<MeshFilter>();
+                var renderer = marker.gameObject.AddComponent<MeshRenderer>();
+                renderer.shadowCastingMode = ShadowCastingMode.Off; renderer.receiveShadows = false;
+            }
+            var filter = marker.GetComponent<MeshFilter>(); if (filter.sharedMesh != tagMesh) filter.sharedMesh = tagMesh;
+            var r = marker.GetComponent<MeshRenderer>(); if (r.sharedMaterial != material) r.sharedMaterial = material;
+            if (!marker.gameObject.activeSelf) marker.gameObject.SetActive(true);
+        }
+
+        private Material TagMaterial(string tag)
+        {
+            var cached = tag == "side" ? sideTag : islekTag;
+            if (cached != null) return cached;
+            var texture = Resources.Load<Texture2D>("Galaxy101/Table/TileTags/" + tag) ?? throw new InvalidOperationException("Missing tile tag texture: " + tag);
+            var material = new Material(Shader.Find("Universal Render Pipeline/Unlit")) { name = "simge_" + tag };
+            material.SetTexture("_BaseMap", texture); material.SetColor("_BaseColor", Color.white);
+            material.SetFloat("_Surface", 1); material.SetFloat("_Blend", 0); material.SetFloat("_ZWrite", 0);
+            material.SetInt("_SrcBlend", (int)BlendMode.SrcAlpha); material.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha);
+            material.SetInt("_SrcBlendAlpha", (int)BlendMode.One); material.SetInt("_DstBlendAlpha", (int)BlendMode.OneMinusSrcAlpha);
+            material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT"); material.renderQueue = (int)RenderQueue.Transparent + 3;
+            if (tag == "side") sideTag = material; else islekTag = material;
+            return material;
         }
 
         /// <summary>Lying on the table (melds, piles, indicator, stacks) → unlit face; standing on a rack → lit PBR face.</summary>

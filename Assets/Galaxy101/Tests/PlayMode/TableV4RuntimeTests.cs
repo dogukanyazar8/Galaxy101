@@ -147,8 +147,11 @@ namespace Galaxy101.Tests
             Assert.That(game.Rack.TryFind(k5, out _), Is.True, "T49: refused");
             game.SetSelected(y4);
             Assert.That(game.Targets.Any(t => t.Okey == okey.Id), Is.True, "G16: the green okey target");
+            Assert.That(game.Rack.TryFind(y4, out var replacedSlot), Is.True);
             game.TakeOkey(y4, okey.Id); yield return null;
-            Assert.That(game.Rack.TryFind(okey.Id, out _), Is.True, "G17: the okey is on my rack");
+            Assert.That(game.Rack.TryFind(okey.Id, out var acquiredSlot), Is.True, "G17: the okey is on my rack");
+            Assert.That(acquiredSlot, Is.EqualTo(replacedSlot), "Swapping preserves the player's rack arrangement");
+            Assert.That(hudOwner.GetComponent<TableHud>().ActiveToast, Is.EqualTo(TableStrings.Get("okeyTaken", "tr")));
         }
     }
 }

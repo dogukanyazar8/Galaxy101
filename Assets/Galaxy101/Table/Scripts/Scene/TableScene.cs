@@ -279,10 +279,15 @@ namespace Galaxy101.Table
 
         public void SetTableSkin(string skin)
         {
+            var prefab = TableAssetCatalog.Find(catalog.Tables, skin);
+            // Destroy is deferred in play mode; effect rescans must not pick the retired skin's holo/LED renderers.
+            if (tableInstance != null) tableInstance.SetActive(false);
             Kill(tableInstance);
-            tableInstance = Instantiate(TableAssetCatalog.Find(catalog.Tables, skin), tableRoot, false); tableInstance.name = "Table_" + skin;
+            skins.SetTableSkin(skin);
+            tableInstance = Instantiate(prefab, tableRoot, false); tableInstance.name = "Table_" + skin;
             skins.Adopt(tableInstance); tableSkin = skin;
             ApplyFelt();
+            GetComponent<TableFx>()?.RescanTable();
         }
 
         private static readonly System.Collections.Generic.Dictionary<string, string> PlanetIds = new System.Collections.Generic.Dictionary<string, string>
@@ -313,6 +318,7 @@ namespace Galaxy101.Table
         {
             for (int k = 0; k < 4; k++)
             {
+                if (rackInstances[k] != null) rackInstances[k].SetActive(false);
                 Kill(rackInstances[k]);
                 var rack = Instantiate(TableAssetCatalog.Find(catalog.Racks, skin), seats[k], false); rack.name = "Rack";
                 var prefabRotation = rack.transform.localRotation; // the GLB root already carries TILT
@@ -324,6 +330,7 @@ namespace Galaxy101.Table
                 slots[k] = found;
             }
             rackSkin = skin;
+            GetComponent<TableFx>()?.RescanTable();
         }
 
         private void BuildDiscardZone()

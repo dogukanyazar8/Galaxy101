@@ -129,6 +129,7 @@ namespace Galaxy101.Table
             Board.IsOkey = id => Model != null && Model.IsOkey(TileIds.ToV4(id));
             Board.Classify = ClassifyMeld;
             Fx = table.gameObject.GetComponent<TableFx>() ?? table.gameObject.AddComponent<TableFx>(); Fx.Init(table); Board.Fx = Fx;
+            Fx.PileLeft = () => Board.Layout.Count > 0;
             Gifts = table.gameObject.GetComponent<TableGifts>() ?? table.gameObject.AddComponent<TableGifts>(); Gifts.Init(table, Fx);
             Markers = table.gameObject.GetComponent<TableTargets>() ?? table.gameObject.AddComponent<TableTargets>(); Markers.Init(this);
             Ceremony = new TableCeremony(table, Fx, Seconds); Ceremony.Changed += Notify;
@@ -263,7 +264,8 @@ namespace Galaxy101.Table
             life?.Cancel(); ceremonyLife?.Cancel();
             // Pending waits end quietly (their async methods check life after each await); cancelling them would log
             // TaskCanceledException from every async void still waiting when the scene unloads.
-            foreach (var t in timers) t.Done.TrySetResult(false); timers.Clear();
+            var pendingTimers = timers.ToArray(); timers.Clear();
+            foreach (var t in pendingTimers) t.Done.TrySetResult(false);
             if (Model != null) Model.Applied -= OnMessage;
             if (Session is Galaxy101.Online.V4TableSession net) net.ConnectionChanged -= OnConnectionChanged;
             if (hud != null) { hud.Command -= OnHudCommand; hud.GiftSent -= OnGiftSent; if (hud.Settings != null) hud.Settings.Changed -= OnSetting; }
@@ -273,7 +275,11 @@ namespace Galaxy101.Table
 
         // ---------- time (scene-local waits on the shared clock's frame time) ----------
         private readonly List<(float At, TaskCompletionSource<bool> Done)> timers = new List<(float, TaskCompletionSource<bool>)>();
-        private Task Seconds(float seconds) { var done = new TaskCompletionSource<bool>(); timers.Add((Time.time + seconds, done)); return done.Task; }
+        private Task Seconds(float seconds)
+        {
+            if (life != null && life.IsCancellationRequested) return Task.CompletedTask;
+            var done = new TaskCompletionSource<bool>(); timers.Add((Time.time + seconds, done)); return done.Task;
+        }
 
         private void Update()
         {
@@ -359,6 +365,7 @@ namespace Galaxy101.Table
             if (Rack.Count == 0 && Model.Rack != null) Rack.Deal(TileIds.ToInts(Model.Rack));
             SyncRack();
             Board.Settle(BuildBoard());
+            RefreshRackMarkers();
             settled = true;
             if (instant) { table.CameraRig.GoTo(hud != null ? hud.PreferredView : TableCameraRig.View.Player, 0); OnTurn(); }
         }
@@ -406,7 +413,13 @@ namespace Galaxy101.Table
                     if (me) { Board.ForceDuration(TileIds.ToInt((string)ev["tile"]), 0.3f); LastDrawn = -1; } // T39: back on the pile in 300 ms
                     break;
                 case "okeySwapped":
-                    if (me) Board.ForceDuration(TileIds.ToInt((string)ev["okey"]), 0.45f); // T47: the okey flies to the rack
+                    if (me)
+                    {
+                        int acquired = TileIds.ToInt((string)ev["okey"]);
+                        if (Rack.TryFind(TileIds.ToInt((string)ev["tile"]), out var slot)) Rack.Set(slot, acquired);
+                        Board.ForceDuration(acquired, 0.45f); // T47: the okey flies to the replaced tile's slot
+                        Message(TableHud.ToastKind.Info, T("okeyTaken"));
+                    }
                     break;
                 case "undone":
                     if (me) Message(TableHud.ToastKind.Info, L("Taşlar ıstakana döndü", "Tiles back on your rack"));
@@ -865,8 +878,15 @@ namespace Galaxy101.Table
         {
             if (Board == null || Model == null || !Model.HasHand || !settled) return;
             Board.Sync(BuildBoard(), instant);
-            Board.SetValid(highlightSets && Model.OkeyKnown ? RackEval.Of(Rack, Model).ValidTiles : null);
+            RefreshRackMarkers();
             targetsFor = -2;
+        }
+
+        private void RefreshRackMarkers()
+        {
+            Board.SetValid(highlightSets && Model.OkeyKnown ? RackEval.Of(Rack, Model).ValidTiles : null);
+            Board.SetTags(id => !Rack.TryFind(id, out _) ? null : id == PickedTile ? "side" :
+                !Model.IsOkey(TileIds.ToV4(id)) && Model.IsIslek(TileIds.ToV4(id)) ? "islek" : null);
         }
 
         private BoardState BuildBoard()

@@ -90,7 +90,7 @@ namespace Galaxy101
             var f = Found; bool squad = Mode == "squad";
             var frame = Overlay("rgba(0,0,0,.6)", foundAt, null);
             var card = ModalCard(28, foundAt, .3f); card.style.alignItems = Align.Center; Pad(card, 28, 28, 24, 28); ContentWidth(card, 640); frame.Add(card);
-            var kicker = Text(squad ? L("SQUAD HAZIR", "SQUAD READY") : L("MAÇ BULUNDU", "MATCH FOUND"), 12, "Baloo2-800", "var(--a1)", 0, "ranked.found.kicker"); MenuView.Tracking(kicker, 2, 12); card.Add(kicker);
+            var kicker = Text(squad ? L("SQUAD HAZIR", "SQUAD READY") : L("MAÇ BULUNDU", "MATCH FOUND"), 12, "Baloo2-800", "var(--a1)", 0, "ranked.found.kicker"); Track(kicker, 2, 12); card.Add(kicker);
             var title = Text(squad ? L("Hazır mısınız?", "Ready check") : L("Rakiplerin hazır", "Your opponents are here"), 30, "Montserrat-700", "#F4F1E8", 1.1f, "ranked.found.title"); title.style.marginTop = 16; card.Add(title);
 
             var grid = Row(); grid.style.alignSelf = Align.Stretch; grid.style.alignItems = Align.Stretch; grid.style.marginTop = 16;
@@ -116,7 +116,7 @@ namespace Galaxy101
                 var line = Row(); line.style.marginTop = 6; line.Add(Emblem(at.League.Key, at.Tier, 20));
                 var lt = Text(RankedLadder.Label(p.Idx, Lang), 11, "Baloo2-800", at.League.Text); lt.style.marginLeft = 4; line.Add(lt); cell.Add(line);
                 string teamText = team == 0 ? L("TAKIM A", "TEAM A") : team == 1 ? L("TAKIM B", "TEAM B") : p.Me ? L("SEN", "YOU") : "";
-                var tl = Text(teamText, 10, "Baloo2-800", team == 1 ? "#FF8A94" : team == 0 ? "#8EF0B0" : "var(--a1)", 0, "ranked.p.team[" + i + "]"); MenuView.Tracking(tl, 1, 10); tl.style.marginTop = 6; cell.Add(tl);
+                var tl = Text(teamText, 10, "Baloo2-800", team == 1 ? "#FF8A94" : team == 0 ? "#8EF0B0" : "var(--a1)", 0, "ranked.p.team[" + i + "]"); Track(tl, 1, 10); tl.style.marginTop = 6; cell.Add(tl);
                 grid.Add(cell);
             }
             card.Add(grid);
@@ -153,7 +153,7 @@ namespace Galaxy101
             if (resultStage == "promo") { BuildPromo(frame, r); return; }
             var to = RankedLadder.At(r.ToIdx); var league = to.League;
             var card = ModalCard(28, resultShownAt, .3f); card.style.alignItems = Align.Center; Pad(card, 30, 30, 24, 30); ContentWidth(card, 520); frame.Add(card);
-            var kicker = Text(L("DERECELİ · ", "RANKED · ") + (r.Mode ?? "solo").ToUpperInvariant(), 12, "Baloo2-800", "var(--mt)", 0, "ranked.res.kicker"); MenuView.Tracking(kicker, 2, 12); card.Add(kicker);
+            var kicker = Text(L("DERECELİ · ", "RANKED · ") + (r.Mode ?? "solo").ToUpperInvariant(), 12, "Baloo2-800", "var(--mt)", 0, "ranked.res.kicker"); Track(kicker, 2, 12); card.Add(kicker);
 
             // Place colours (renderVals PC): gold, silver, bronze, then the panel's own.
             var pc = new[] { ("linear-gradient(#FFE58A,#E8A317)", "#A86E08", "#3A2400"), ("linear-gradient(#EEF2F8,#A9B4C6)", "#6C7890", "#1E2633"), ("linear-gradient(#F4C08C,#B8703A)", "#7A4520", "#2A1406"), ("var(--pnH)", "var(--pnS)", "#F4F1E8") }[Mathf.Clamp(r.Place, 1, 4) - 1];
@@ -223,7 +223,7 @@ namespace Galaxy101
             col.Add(rays); Loop(rays, t => rays.style.rotate = new Rotate(Mathf.Repeat(t / 24, 1) * 360));
             int rank = backend.Profile.SeasonRank;
             string kick = r.Event == "tier" ? L("KADEME ATLADIN", "TIER UP") : r.Event == "galaxy" ? L("ZİRVEYE ULAŞTIN", "YOU REACHED THE TOP") : L("LİG ATLADIN", "LEAGUE UP");
-            var pk = Text(kick, 13, "Baloo2-800", league.Text, 0, "ranked.res.pKicker"); MenuView.Tracking(pk, 2.4f, 13); col.Add(pk); Up(pk, began, .1f);
+            var pk = Text(kick, 13, "Baloo2-800", league.Text, 0, "ranked.res.pKicker"); Track(pk, 2.4f, 13); col.Add(pk); Up(pk, began, .1f);
             var pop = Box(); pop.style.marginTop = 8; var emblem = Box(); emblem.style.width = emblem.style.height = 180; emblem.Add(Emblem(league.Key, to.Tier, 180, r.ToIdx >= RankedLadder.Steps ? rank : 0)); pop.Add(emblem); col.Add(pop);
             Enter(pop, began, .7f, Linear, u => Pop(pop, u, .6f, .4f, 1.08f, -12, 2, .2f, 1.3f, .4f, 1)); // rkPop .7s
             Loop(emblem, t => emblem.style.translate = new Translate(0, Time.realtimeSinceStartup - began < .8f ? 0 : FloatY(t, 3, .8f)));

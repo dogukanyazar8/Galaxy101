@@ -98,7 +98,7 @@ namespace Galaxy101
             // background: radial-gradient(ellipse at 50% 22%, me.glow, transparent 55%), var(--pn).
             var glow = Fill(); view.Decorate(glow, "radial-gradient(ellipse at 50% 22%," + league.Glow + "," + Fade(league.Glow, 0) + " 55%)", 24); card.Add(glow);
 
-            var tag = Text(SeasonTag(), 11, "Baloo2-800", "var(--mt)", 0, "ranked.text.seasonTag"); MenuView.Tracking(tag, 1.6f, 11); card.Add(tag);
+            var tag = Text(SeasonTag(), 11, "Baloo2-800", "var(--mt)", 0, "ranked.text.seasonTag"); Track(tag, 1.6f, 11); card.Add(tag);
             var emblem = Box(); emblem.style.width = emblem.style.height = 150; emblem.style.flexShrink = 0; emblem.style.marginTop = 10;
             emblem.Add(Emblem(league.Key, at.Tier, 150, gal ? p.SeasonRank : 0)); card.Add(emblem);
             Loop(emblem, t => emblem.style.translate = new Translate(0, FloatY(t, 4)));
@@ -182,7 +182,7 @@ namespace Galaxy101
             var top = Row();
             for (int d = 0; d < m.Dots; d++) { var person = view.Icon("v4/ranked-m-pick", 22, "#fff"); if (d > 0) person.style.marginLeft = 6; top.Add(person); }
             top.Add(Grow());
-            var tag = Text(m.Tag, 11, "Baloo2-800", "#fff", 0, "ranked.m.tag[" + index + "]"); MenuView.Tracking(tag, 1, 11); Pad(tag, 3, 8, 3, 8); view.Decorate(tag, "rgba(0,0,0,.25)", 7); top.Add(tag);
+            var tag = Text(m.Tag, 11, "Baloo2-800", "#fff", 0, "ranked.m.tag[" + index + "]"); Pad(tag, 3, 8, 3, 8); Track(tag, 1, 11); view.Decorate(tag, "rgba(0,0,0,.25)", 7); top.Add(tag);
             card.Add(top);
             var words = Column();
             words.Add(Text(m.Name, 24, "Montserrat-800", "#fff", 1.05f, "ranked.m.name[" + index + "]"));
@@ -278,7 +278,7 @@ namespace Galaxy101
             var seat = Column(); seat.style.flexGrow = 1; seat.style.flexBasis = 0; seat.style.flexShrink = 1; seat.style.minWidth = 0;
             seat.style.alignItems = Align.Center; seat.style.justifyContent = Justify.Center; Pad(seat, 14, 8, 14, 8); view.Decorate(seat, "var(--sd)", 18);
             if (z.Ring != null) InsetRing(seat, 2, z.Ring, 18);
-            var tag = Text(z.Tag, 10, "Baloo2-800", z.TagColor, 0, "ranked.z.tag[" + i + "]"); MenuView.Tracking(tag, 1, 10);
+            var tag = Text(z.Tag, 10, "Baloo2-800", z.TagColor, 0, "ranked.z.tag[" + i + "]"); Track(tag, 1, 10);
             tag.style.position = Position.Absolute; tag.style.left = 10; tag.style.top = 9; seat.Add(tag);
             if (z.CanKick)
             {
@@ -368,7 +368,7 @@ namespace Galaxy101
             string fg = ready ? "var(--aT)" : "var(--mt)";
             var go = Column("ranked.cta.go"); go.style.width = 300; go.style.height = 64; go.style.marginLeft = 14; go.style.alignItems = Align.Center; go.style.justifyContent = Justify.Center;
             Raise(go, ready ? "linear-gradient(var(--a1),var(--a2))" : "var(--pnH)", 18, 6, ready ? "var(--aS)" : "var(--pnS)");
-            var title = Text(label, 24, "Montserrat-800", fg, 1, "ranked.cta.label"); MenuView.Tracking(title, .5f, 24); go.Add(title);
+            var title = Text(label, 24, "Montserrat-800", fg, 1, "ranked.cta.label"); Track(title, .5f, 24); go.Add(title);
             var line = Text(sub, 12, "Baloo2-800", fg, 0, "ranked.cta.sub"); line.style.marginTop = 3; line.style.opacity = .85f; go.Add(line);
             if (ready) Pulse(go);
             go.tooltip = why; GalaxyFilters.HoverBrightness(go, 1.08f);

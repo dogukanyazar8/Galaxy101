@@ -27,7 +27,7 @@ TEXT_DUMP = """() => { const out=[]; const walker=document.createTreeWalker(docu
   const b=r.getBoundingClientRect(); if(b.width<1||b.height<1||b.right<0||b.bottom<0||b.left>1280||b.top>720) continue; let vis=true;
   for(let e=n.parentElement;e;e=e.parentElement){const cs=getComputedStyle(e); if(cs.visibility==='hidden'||cs.display==='none'||+cs.opacity<0.02){vis=false;break;}}
   if(!vis) continue; const cs=getComputedStyle(n.parentElement); const owner=n.parentElement.closest('[data-g101-id]');
-  out.push([t.slice(0,80), Math.round(b.x), Math.round(b.y), Math.round(b.width), Math.round(b.height), cs.fontSize, cs.fontWeight, cs.fontFamily.split(',')[0], cs.color, owner?owner.getAttribute('data-g101-id'):null]); }
+  out.push([t.slice(0,80), Math.round(b.x), Math.round(b.y), Math.round(b.width), Math.round(b.height), cs.fontSize, cs.fontWeight, cs.fontFamily.split(',')[0], cs.color, owner?owner.getAttribute('data-g101-id'):null, !!n.parentElement.closest('svg')]); }
  return out; }"""
 
 

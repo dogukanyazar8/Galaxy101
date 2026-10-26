@@ -20,11 +20,11 @@ namespace Galaxy101
             var toolbar = root.Q<VisualElement>("toolbar");
             toolbar.style.marginBottom = 14;
             // Reference search: height 48, padding 0 6px 0 16px, gap 10, 18px search icon, 700 15px body input.
-            var input = PanelUi.Input(v, "friend-query", query, v.L("Oyuncu adı veya kod ara", "Search by name or code")); input.AddToClassList("bare");
+            var input = PanelUi.Input(v, "menu.fr.onQ", query, v.L("Oyuncu adı veya kod ara", "Search by name or code")); input.AddToClassList("bare");
             var searchIcon = v.Icon("search", 18, "mt"); searchIcon.style.marginRight = 10;
             var search = v.Row(searchIcon, input);
             PanelUi.Grow(search); search.style.minWidth = 0; search.style.height = 48; search.style.paddingLeft = 16; search.style.paddingRight = 6;
-            var clear = PanelUi.CustomButton(v, "", () => input.value = "", "");
+            var clear = PanelUi.CustomButton(v, "", () => input.value = "", ""); clear.name = "menu.fr.clearQ";
             clear.style.paddingLeft = clear.style.paddingRight = clear.style.paddingTop = clear.style.paddingBottom = 0;
             clear.style.width = 32; clear.style.minWidth = 32; clear.style.height = 32; clear.style.borderTopLeftRadius = clear.style.borderTopRightRadius = clear.style.borderBottomLeftRadius = clear.style.borderBottomRightRadius = 10;
             clear.Add(v.Icon("close", 14, "mt"));
@@ -34,12 +34,12 @@ namespace Galaxy101
             v.Decorate(search, "dp", 14);
             toolbar.Add(search);
             // Reference code pill: height 48, padding 0 16px, sd fill, 1px dashed bd, gap 10, 16px copy glyph.
-            var code = PanelUi.CodeStrip(v, 12, 17, 14); v.Decorate(code, "sd", 14); code.style.height = 48; code.style.paddingLeft = code.style.paddingRight = 16; PanelUi.Gap(code, 10);
-            var copy = PanelUi.CustomButton(v, "", () => v.Copy(v.Model.FriendCode), "");
+            var code = PanelUi.CodeStrip(v, 12, 17, 14); code[0].name = "menu.fr.codeLabel#2"; v.Decorate(code, "sd", 14); code.style.height = 48; code.style.paddingLeft = code.style.paddingRight = 16;
+            var copy = PanelUi.CustomButton(v, "", () => v.Copy(v.Model.FriendCode), ""); copy.name = "menu.af.copy#2";
             copy.style.width = copy.style.height = 16; copy.style.minWidth = 16; copy.style.paddingLeft = copy.style.paddingRight = copy.style.paddingTop = copy.style.paddingBottom = 0;
-            copy.Add(v.Icon("copy", 16)); code.Add(copy);
+            copy.Add(v.Icon("copy", 16)); code.Add(copy); PanelUi.Gap(code, 10); // gap 10 between all three (the copy glyph too)
             toolbar.Add(code);
-            var add = PanelUi.CssButton(v, v.L("Arkadaş ekle", "Add friend"), () => v.OpenDialog("add"), "primary", 0, 20, 16);
+            var add = PanelUi.CssButton(v, v.L("Arkadaş ekle", "Add friend"), () => v.OpenDialog("add"), "primary", 0, 20, 16); add.name = "menu.openAddFriend";
             add.style.flexDirection = FlexDirection.Row;
             var addIcon = v.Icon("add", 18, "aT"); addIcon.style.marginRight = 8; add.Insert(0, addIcon);
             add.style.height = 48; toolbar.Add(add); PanelUi.Gap(toolbar, 12);
@@ -50,11 +50,11 @@ namespace Galaxy101
                 list.Clear();
                 var tab = v.Tab("friends");
                 var rows = tab == 2 ? v.Services.Friends.GetRequests(query) : v.Services.Friends.GetFriends(tab == 0, query);
-                foreach (JObject person in rows) list.Add(BuildRow(v, person, tab == 2));
+                int index = 0; foreach (JObject person in rows) list.Add(BuildRow(v, person, tab == 2, index++));
                 if (rows.Count == 0)
                 {
                     var text = query.Trim().Length > 0 ? v.L("\"" + query.Trim() + "\" ile eşleşen arkadaş yok", "No friends match \"" + query.Trim() + "\"") : tab == 2 ? v.L("Bekleyen istek yok", "No pending requests") : v.L("Burada henüz arkadaş yok", "No friends here yet");
-                    var empty = v.Text(text, 15, false, "mt");
+                    var empty = v.Text(text, 15, false, "mt"); empty.name = "menu.fr.emptyText";
                     empty.style.paddingTop = 40; empty.style.unityTextAlign = UnityEngine.TextAnchor.MiddleCenter; list.Add(empty);
                 }
             }
@@ -63,11 +63,11 @@ namespace Galaxy101
             return root;
         }
 
-        private static VisualElement BuildRow(MenuView v, JObject p, bool request)
+        private static VisualElement BuildRow(MenuView v, JObject p, bool request, int index)
         {
             var row = v.Row(); row.AddToClassList("g-friend-row");
             var avatar = v.Box(); avatar.style.width = avatar.style.height = 48; avatar.style.flexShrink = 0;
-            var face = PanelUi.Person(v, p, 48); face.Q<Label>().style.fontSize = 17; avatar.Add(face);
+            var face = PanelUi.Person(v, p, 48); face.Q<Label>().style.fontSize = 17; face.Q<Label>().name = "menu.r.ini[" + index + "]"; avatar.Add(face);
             var online = (bool?)p["on"] ?? false;
             if (!online && !request) face.style.opacity = .55f;
             var dot = PanelUi.Circle(v, 16, online ? "#3CCB6E" : "#5C6680");
@@ -75,10 +75,11 @@ namespace Galaxy101
             dot.style.borderTopWidth = dot.style.borderBottomWidth = dot.style.borderLeftWidth = dot.style.borderRightWidth = 3;
             dot.style.borderTopColor = dot.style.borderBottomColor = dot.style.borderLeftColor = dot.style.borderRightColor = v.C("sd");
             avatar.Add(dot); avatar.style.marginRight = 14; row.Add(avatar);
-            var name = v.Row(v.Text((string)p["name"], 17, true), PanelUi.LevelChip(v, v.L("SV ", "LV ") + (int)p["lv"]));
+            var who = v.Text((string)p["name"], 17, true); who.name = "menu.r.name[" + index + "]"; var lv = PanelUi.LevelChip(v, v.L("SV ", "LV ") + (int)p["lv"]); lv.Q<Label>().name = "menu.r.lv[" + index + "]";
+            var name = v.Row(who, lv);
             PanelUi.Gap(name, 8);
             var status = p["st"] as JArray;
-            var statusLabel = v.Text(status == null ? "" : v.L((string)status[0], (string)status[1]), 13, false, online ? (string)p["sc"] ?? "mt" : "mt"); statusLabel.style.marginTop = 2;
+            var statusLabel = v.Text(status == null ? "" : v.L((string)status[0], (string)status[1]), 13, false, online ? (string)p["sc"] ?? "mt" : "mt"); statusLabel.name = "menu.r.status[" + index + "]"; statusLabel.style.marginTop = 2;
             var details = v.Column(name, statusLabel);
             PanelUi.Grow(details); row.Add(details);
             var id = (string)p["id"];

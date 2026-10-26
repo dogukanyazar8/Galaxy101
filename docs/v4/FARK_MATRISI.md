@@ -24,4 +24,13 @@ Paket (`Design/Galaxy101_ClaudeCode/prototip/galaxy101_handoff_v4/`) ↔ proje. 
 
 ## Özet sayılar
 
-Hat raporları birleşince doldurulur (Faz 1 sonu).
+Üretildi: `python tools/v4/matrix_summary.py --write`. "var" = proje paketle zaten aynıydı; "farklı"/"eksik" = v4 öncesi durum (her satırın "v4 sonrası" sütunu ne yapıldığını söyler).
+
+| Matris | Satır | var | farklı | eksik | pakette yok | diğer |
+|---|---|---|---|---|---|---|
+| `matris/anim.md` | 104 | 0 | 0 | 22 | 0 | 82 |
+| `matris/hat-a.md` | 88 | 37 | 30 | 2 | 5 | 14 |
+| `matris/hat-b.md` | 270 | 25 | 179 | 61 | 0 | 5 |
+| `matris/hat-c.md` | 285 | 61 | 37 | 91 | 94 | 2 |
+| `matris/hat-d.md` | 686 | 441 | 73 | 165 | 5 | 2 |
+| **toplam** | 1433 | 564 | 319 | 341 | 104 | 105 |

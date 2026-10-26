@@ -18,32 +18,34 @@ namespace Galaxy101
             summary.style.alignItems = Align.Center; PanelUi.Pad(summary, 22, 18);
             summary.style.paddingBottom = 18;
             v.Decorate(summary, "radial-gradient(ellipse at 50% 20%,var(--pnH),var(--sd) 70%)", 22);
-            summary.Add(v.Avatar(124, null, true));
-            var name = v.Text((string)v.Model.Profile["name"], 24, true); name.style.marginTop = 18; name.style.height = 24 * 1.15f; name.style.unityTextAlign = TextAnchor.MiddleCenter; summary.Add(name);
+            var big = v.Avatar(124, null, true); big.Q<Label>("avatar-initials").name = "menu.me.ini#3"; big.Q<Label>(className: "avatar-level").name = "menu.mp.lv"; summary.Add(big);
+            var name = v.Text((string)v.Model.Profile["name"], 24, true); name.name = "menu.me.name#3"; name.style.marginTop = 18; name.style.height = 24 * 1.15f; name.style.unityTextAlign = TextAnchor.MiddleCenter; summary.Add(name);
             var status = (string)v.Model.Profile["status"];
             var statusLabel = PanelUi.Wrap(v, string.IsNullOrEmpty(status) ? v.L("Henüz durum mesajı yok", "No status message yet") : status, 13);
-            statusLabel.style.unityTextAlign = TextAnchor.MiddleCenter; statusLabel.style.marginTop = 10; statusLabel.style.minHeight = 18; MenuView.CssParagraph(statusLabel, 13 * 1.4f, false); summary.Add(statusLabel);
+            statusLabel.name = "menu.mp.status"; statusLabel.style.unityTextAlign = TextAnchor.MiddleCenter; statusLabel.style.marginTop = 10; statusLabel.style.minHeight = 18; MenuView.CssParagraph(statusLabel, 13 * 1.4f, false); summary.Add(statusLabel);
             // font: 800 12px Baloo 2; the value in tabular digits.
             Label Bold12(string text) { var label = v.Text(text, 12, false, "mt"); label.style.unityFont = v.Font("Baloo2-800"); return MenuView.CssLine(label); }
             int nextLevel = ((int?)stats["level"] ?? v.Model.Level) + 1;
-            var xp = v.Row(Bold12(v.L("Seviye " + nextLevel + Dative(nextLevel), "To level " + nextLevel)), PanelUi.Spacer(v), MenuView.TabularDigits(Bold12(v.N((int)stats["xp"]) + " / " + v.N((int)stats["nextXp"]) + " XP"))); xp.style.alignSelf = Align.Stretch; xp.style.marginTop = 14; summary.Add(xp);
+            var xpLabel = Bold12(v.L("Seviye " + nextLevel + Dative(nextLevel), "To level " + nextLevel)); xpLabel.name = "menu.mp.xpLabel";
+            var xpValue = MenuView.TabularDigits(Bold12(v.N((int)stats["xp"]) + " / " + v.N((int)stats["nextXp"]) + " XP")); xpValue.name = "menu.mp.xp";
+            var xp = v.Row(xpLabel, PanelUi.Spacer(v), xpValue); xp.style.alignSelf = Align.Stretch; xp.style.marginTop = 14; summary.Add(xp);
             var progress = v.Progress((float)stats["xp"] / (float)stats["nextXp"]); progress.style.height = 10; progress.style.alignSelf = Align.Stretch; progress.style.marginTop = 6; summary.Add(progress);
             // Reference: dashed strip, padding 10px 12px, radius 14, gap 10; code 700 16px, "Kopyala" 700 13px heading in ic.
-            var code = PanelUi.CodeStrip(v, 12, 16, 14); PanelUi.Pad(code, 10, 12); PanelUi.Gap(code, 10); code.style.alignSelf = Align.Stretch; code.style.marginTop = 14; code.Add(PanelUi.Spacer(v));
+            var code = PanelUi.CodeStrip(v, 12, 16, 14); code[0].name = "menu.fr.codeLabel"; PanelUi.Pad(code, 10, 12); PanelUi.Gap(code, 10); code.style.alignSelf = Align.Stretch; code.style.marginTop = 14; code.Add(PanelUi.Spacer(v));
             Button copy = null;
             copy = PanelUi.CustomButton(v, v.L("Kopyala", "Copy"), () =>
             {
                 v.Copy(v.Model.FriendCode); copy.text = v.L("Kopyalandı", "Copied");
                 copy.schedule.Execute(() => copy.text = v.L("Kopyala", "Copy")).StartingIn(1500);
-            }, "");
+            }, ""); copy.name = "menu.af.copy";
             copy.style.paddingLeft = copy.style.paddingRight = copy.style.paddingTop = copy.style.paddingBottom = 0; copy.style.fontSize = 13; copy.style.color = v.C("ic");
             copy.RegisterCallback<PointerEnterEvent>(_ => copy.style.color = UnityEngine.Color.white); copy.RegisterCallback<PointerLeaveEvent>(_ => copy.style.color = v.C("ic"));
             code.Add(copy); summary.Add(code);
             summary.Add(PanelUi.Spacer(v));
-            var edit = PanelUi.Action(v, v.L("Profili düzenle", "Edit profile"), () => v.OpenDialog("profile")); PanelUi.Grow(edit);
+            var edit = PanelUi.Action(v, v.L("Profili düzenle", "Edit profile"), () => v.OpenDialog("profile")); edit.name = "menu.openProfile#2"; PanelUi.Grow(edit);
             edit.style.flexDirection = FlexDirection.Row; PanelUi.Pad(edit, 12, 0);
             var pencil = v.Icon("edit", 16, "aT"); pencil.style.marginRight = 8; edit.Insert(0, pencil);
-            var share = v.Button("", () => v.OpenDialog("share"), "secondary"); share.name = "share-profile"; share.tooltip = v.L("Profili paylaş", "Share profile"); share.style.width = share.style.height = 46; share.style.minWidth = 46; share.style.paddingLeft = share.style.paddingRight = 0; share.style.marginLeft = 10; share.Add(v.Icon("share", 20));
+            var share = v.Button("", () => v.OpenDialog("share"), "secondary"); share.name = "menu.openShare"; share.tooltip = v.L("Profili paylaş", "Share profile"); share.style.width = share.style.height = 46; share.style.minWidth = 46; share.style.paddingLeft = share.style.paddingRight = 0; share.style.marginLeft = 10; share.Add(v.Icon("share", 20));
             var actions = v.Row(edit, share); actions.style.alignSelf = Align.Stretch; summary.Add(actions);
             var detail = root.Q<ScrollView>("detail");
             detail.mode = ScrollViewMode.Vertical;
@@ -64,32 +66,39 @@ namespace Galaxy101
             var row = v.Row(); row.style.alignItems = Align.Stretch;
             string won = v.N((int?)stats["wins"] ?? 0);
             row.Add(Stat(v, v.L("OYNANAN EL", "HANDS PLAYED"), v.N((int)stats["hands"]), v.L(won + " kazanıldı", won + " won"), "#F4F1E8"));
-            row.Add(Stat(v, v.L("KAZANMA", "WIN RATE"), v.P((int)stats["winRate"]), v.L("tüm modlarda", "across modes"), "#3CCB6E"));
+            // mp.stats: "Bu ay +%3" — the month's change, when the account has one (the sample's +3).
+            int? month = (int?)stats["winRateMonth"];
+            row.Add(Stat(v, v.L("KAZANMA", "WIN RATE"), v.P((int)stats["winRate"]), month.HasValue ? v.L("Bu ay " + (month >= 0 ? "+" : "−") + v.P(System.Math.Abs(month.Value)), (month >= 0 ? "+" : "−") + v.P(System.Math.Abs(month.Value)) + " this month") : v.L("tüm modlarda", "across modes"), "#3CCB6E"));
             row.Add(Stat(v, v.L("EN İYİ AÇILIŞ", "BEST OPENING"), v.N((int)stats["bestOpening"]), v.L("puan", "points"), "a1"));
             row.Add(Stat(v, v.L("OKEY BİTİŞ", "OKEY FINISH"), v.N((int)stats["okeyFinish"]), v.L("katlanan el", "doubled hands"), "#F4F1E8"));
+            for (var i = 0; i < row.childCount; i++) { row[i][0].name = "menu.x.k[" + i + "]"; row[i][1].name = "menu.x.v[" + i + "]"; row[i][2].name = "menu.x.sub[" + i + "]"; }
             PanelUi.Gap(row, 10); parent.Add(row);
             var middle = v.Row(); middle.style.marginTop = 14; middle.style.alignItems = Align.Stretch;
             var rank = v.Box("g-panel-card"); rank.name = "profile-rank"; PanelUi.Pad(rank, 16, 18); rank.style.flexGrow = 1.1f; rank.style.flexBasis = 0; rank.style.marginRight = 10;
-            var diamond = v.Box(); diamond.style.width = diamond.style.height = 60; diamond.style.flexShrink = 0; diamond.style.alignItems = Align.Center; diamond.style.justifyContent = Justify.Center;
-            // The account's league (the design's sample: Altın II, best Altın I, 720 / 1000 LP to Altın I).
+            // rk (renderVals): the account's step and LP, else the prototype's sample (idx 7, 72 LP, peak 7): G101Emblem 60, the
+            // league name in rk.txt, SEZON EN İYİ the peak's label, the bar rk.pct in rk.bar, "72 / 100 LP" and "Altın I'e 28 LP".
             bool sample = stats["league"] == null;
-            string league = (string)stats["league"] ?? "g2", nextLeague = sample ? "g1" : (string)stats["nextLeague"], bestLeague = (string)stats["bestLeague"] ?? (sample ? "g1" : league);
-            var (gemFill, gemGlow, leagueInk) = LeagueTint(league);
-            var gem = v.Box(); gem.style.width = gem.style.height = 52; gem.style.rotate = new Rotate(45); gem.style.alignItems = Align.Center; gem.style.justifyContent = Justify.Center; v.Decorate(gem, gemFill, 12);
-            GalaxyFilters.Shadow(gem, 0, 0, 11, v.C(gemGlow));
-            var numeral = v.Text(Numeral(league), 20, true, "#3A1F00"); numeral.style.rotate = new Rotate(-45); gem.Add(numeral); diamond.Add(gem);
+            int idx = v.CurrentRankIndex(), peak = v.PeakRankIndex(), lp = sample ? MenuView.SampleRankLp : (int)stats["lp"]; bool galaxy = idx >= 15;
+            var emblem = v.Emblem(idx, 60); emblem.style.marginRight = 14;
             int seasonNumber = (int?)stats["season"] ?? 3, place = (int?)stats["seasonRank"] ?? 0;
-            string shown = LeagueName(v, league) + (league == "gx" && place > 0 ? " · #" + place : "");
-            var description = v.Column(PanelUi.Caption(v, v.L("SEZON " + seasonNumber + " · DERECELİ", "SEASON " + seasonNumber + " · RANKED"), 10, 1.2f), MenuView.CssLine(v.Text(shown, 22, true, leagueInk), 22 * 1.15f)); description.style.marginLeft = 14; PanelUi.Grow(description);
-            var best = v.Column(PanelUi.Caption(v, v.L("SEZON EN İYİ", "SEASON BEST"), 10, 1.2f), v.Text(LeagueName(v, bestLeague), 15, true)); best.style.alignItems = Align.FlexEnd;
-            rank.Add(v.Row(diamond, description, best));
-            var lp = v.Progress((float)stats["lp"] / (float)stats["nextLp"], "linear-gradient(90deg,#F5A623,#FFE08A)"); lp.style.marginTop = 12; lp.style.height = 10; rank.Add(lp);
+            string shown = v.RankLabel(idx) + (galaxy && place > 0 ? " · #" + place : "");
+            var seasonLabel = PanelUi.Caption(v, v.L("SEZON " + seasonNumber + " · DERECELİ", "SEASON " + seasonNumber + " · RANKED"), 10, 1.2f); seasonLabel.name = "menu.mp.season";
+            var rankLabel = MenuView.CssLine(v.Text(shown, 22, true, MenuView.RankInk(idx)), 22 * 1.15f); rankLabel.name = "menu.t.rank#2";
+            var description = v.Column(seasonLabel, rankLabel); PanelUi.Grow(description);
+            var bestLabel = PanelUi.Caption(v, v.L("SEZON EN İYİ", "SEASON BEST"), 10, 1.2f); bestLabel.name = "menu.mp.bestLabel";
+            var bestValue = v.Text(v.RankLabel(peak), 15, true); bestValue.name = "menu.rk.best";
+            var best = v.Column(bestLabel, bestValue); best.style.alignItems = Align.FlexEnd;
+            rank.Add(v.Row(emblem, description, best));
+            var lpBar = v.Progress(galaxy ? 1 : lp / 100f, (string)MenuView.RankAt(idx).League["bar"]); lpBar.style.marginTop = 12; lpBar.style.height = 10; rank.Add(lpBar);
             Label Bold12(string text) { var label = v.Text(text, 12, false, "mt"); label.style.unityFont = v.Font("Baloo2-800"); return MenuView.CssLine(label); } // 800 12px Baloo 2
-            int lpNow = (int)stats["lp"], lpNext = (int)stats["nextLp"]; string toGo = v.N(System.Math.Max(0, lpNext - lpNow));
-            string nextLabel = nextLeague == null ? v.L("En üst lig", "Top league")
-                : v.L(LeagueName(v, nextLeague) + (nextLeague.EndsWith("2") ? "'ye " : "'e ") + toGo + " LP", toGo + " LP to " + LeagueName(v, nextLeague));
-            var rankFooter = v.Row(Bold12(v.N(lpNow) + " / " + v.N(lpNext) + " LP"), PanelUi.Spacer(v), Bold12(nextLabel)); rankFooter.style.marginTop = 12; rank.Add(rankFooter); middle.Add(rank);
-            var win = v.Box("g-panel-card"); win.name = "profile-mode-win-rates"; PanelUi.Pad(win, 14, 18); win.style.flexGrow = 1; win.style.flexBasis = 0; win.Add(PanelUi.Caption(v, v.L("MODLARA GÖRE KAZANMA", "WIN RATE BY MODE"), 10, 1.2f));
+            bool en = v.Loc.Language == "en";
+            string next = galaxy ? v.L("İlk 100", "Top 100") : idx == 14 ? v.L("Galaksi'ye " + (100 - lp) + " LP", (100 - lp) + " LP to Galaxy")
+                : en ? (100 - lp) + " LP to " + (string)MenuView.RankAt(idx + 1).League["en"] + (MenuView.RankAt(idx + 1).Tier > 0 ? " " + MenuView.Roman[MenuView.RankAt(idx + 1).Tier] : "")
+                : (string)MenuView.RankAt(idx + 1).League["tr"] + (MenuView.RankAt(idx + 1).Tier > 0 ? " " + MenuView.Roman[MenuView.RankAt(idx + 1).Tier] : "") + "'e " + (100 - lp) + " LP";
+            var lpLabel = Bold12(galaxy ? lp + " LP" : lp + " / 100 LP"); lpLabel.name = "menu.rk.lp";
+            var nextLabel = Bold12(next); nextLabel.name = "menu.rk.next";
+            var rankFooter = v.Row(lpLabel, PanelUi.Spacer(v), nextLabel); rankFooter.style.marginTop = 12; rank.Add(rankFooter); middle.Add(rank);
+            var win = v.Box("g-panel-card"); win.name = "profile-mode-win-rates"; PanelUi.Pad(win, 14, 18); win.style.flexGrow = 1; win.style.flexBasis = 0; var byMode = PanelUi.Caption(v, v.L("MODLARA GÖRE KAZANMA", "WIN RATE BY MODE"), 10, 1.2f); byMode.name = "menu.mp.byMode"; win.Add(byMode);
             var rates = (JArray)stats["modeWinRates"];
             // G101-Menu: rows named after the v3 modes (Klasik, Dereceli, Botlara karşı; the fourth rate has no v3 mode and
             // no name), bars in MC = #3D7BFF, #FF6B6B, #8B5CF6, #16B6A8.
@@ -97,43 +106,43 @@ namespace Galaxy101
             string[] colors = { "#3D7BFF", "#FF6B6B", "#8B5CF6", "#16B6A8" };
             for (var i = 0; i < 4; i++)
             {
-                var name = v.Text(names[i], 13, true); name.style.width = 86; name.style.height = 16; name.style.unityTextAlign = TextAnchor.MiddleLeft; name.style.marginRight = 10;
+                var name = v.Text(names[i], 13, true); name.name = "menu.m.name[" + i + "]"; name.style.width = 86; name.style.height = 16; name.style.unityTextAlign = TextAnchor.MiddleLeft; name.style.marginRight = 10;
                 // The fill is width: {{ m.pct }} — "%44" in Turkish is no CSS length, so the design draws every Turkish bar full.
                 var bar = v.Progress(v.Loc.Language == "en" ? (float)rates[i] / 100 : 1, colors[i]); PanelUi.Grow(bar); bar.style.height = 8; bar.style.marginRight = 10;
-                var value = v.Text(v.P((int)rates[i]), 13, true); value.style.width = 40; value.style.height = 16; value.style.unityTextAlign = TextAnchor.MiddleRight;
+                var value = v.Text(v.P((int)rates[i]), 13, true); value.name = "menu.m.pct[" + i + "]"; value.style.width = 40; value.style.height = 16; value.style.unityTextAlign = TextAnchor.MiddleRight;
                 var line = v.Row(name, bar, value); line.style.marginTop = 9; win.Add(line);
             }
             middle.Add(win); parent.Add(middle);
+            // mp.frames (frameOpts): Klasik + six league frames, grid 7 × minmax(0,1fr), gap 8; a tile: column, gap 5, padding
+            // 9px 4px 8px, radius 14, --pnH + inset 2px --a1 when worn (else --dp), opacity .5 when locked; the 44px chip, the
+            // name 700 12px/1.1 and the state 800 10px (Takılı #8EF0B0 · Sahipsin · Kilitli); title = the longer state.
             var frames = v.Box("g-panel-card"); frames.name = "profile-frames"; PanelUi.Pad(frames, 14, 18); frames.style.marginTop = 14;
-            var framesLabel = v.Text(v.L("ÇERÇEVELER", "FRAMES"), 10, false, "mt"); framesLabel.style.unityFont = v.Font("Baloo2-800"); MenuView.Tracking(framesLabel, 1.2f, 10);
-            frames.Add(v.Row(framesLabel, PanelUi.Spacer(v), v.Text(v.L("Takmak için dokun", "Tap to equip"), 12, false, "mt")));
+            var framesLabel = PanelUi.Caption(v, v.L("ÇERÇEVELER", "FRAMES"), 10, 1.2f); framesLabel.name = "menu.mp.framesLabel";
+            var framesHint = v.Text(v.L("Lig çerçeveleri derecelide açılır", "League frames unlock in ranked"), 12, false, "mt"); framesHint.name = "menu.mp.framesHint"; framesHint.style.whiteSpace = WhiteSpace.NoWrap;
+            frames.Add(v.Row(framesLabel, PanelUi.Spacer(v), framesHint));
             var frameRow = v.Row(); frameRow.style.marginTop = 10; frameRow.style.alignItems = Align.Stretch;
-            for (var i = 0; i < 3; i++)
+            int worn = MenuView.FrameId((int?)v.Model.Profile["frame"] ?? 0);
+            for (var i = 0; i < MenuView.FrameIds.Length; i++)
             {
-                var frame = i; var locked = i == 2; var equipped = (int)v.Model.Profile["frame"] == i;
-                var button = v.Button("", async () =>
+                int id = MenuView.FrameIds[i]; bool locked = MenuView.FrameLocked(id, peak), equipped = worn == id;
+                var league = id >= 10 ? (JObject)MenuView.Leagues[id - 10] : null; string lname = league == null ? v.L("Klasik", "Classic") : (string)league[en ? "en" : "tr"];
+                var button = PanelUi.CustomButton(v, "", async () =>
                 {
-                    if (locked) return;
-                    if (await v.Services.Profile.SaveAsync((string)v.Model.Profile["name"], (string)v.Model.Profile["color"], (string)v.Model.Profile["status"], frame) != null) PanelUi.SaveFailure(v);
-                }, "secondary");
-                button.name = "equip-frame-" + i; button.style.flexGrow = 1; button.style.flexBasis = 0; button.style.flexDirection = FlexDirection.Row; button.style.alignItems = Align.Center; button.style.justifyContent = Justify.FlexStart;
-                button.style.paddingTop = button.style.paddingBottom = 10; button.style.paddingLeft = button.style.paddingRight = 12;
-                v.Decorate(button, equipped ? "pnH" : "dp", 14);
-                if (equipped)
-                {
-                    var ring = v.Box(); ring.pickingMode = PickingMode.Ignore; ring.style.position = Position.Absolute;
-                    ring.style.left = ring.style.right = ring.style.top = ring.style.bottom = 0;
-                    ring.style.borderTopWidth = ring.style.borderRightWidth = ring.style.borderBottomWidth = ring.style.borderLeftWidth = 2;
-                    ring.style.borderTopColor = ring.style.borderRightColor = ring.style.borderBottomColor = ring.style.borderLeftColor = v.C("a1");
-                    ring.style.borderTopLeftRadius = ring.style.borderTopRightRadius = ring.style.borderBottomLeftRadius = ring.style.borderBottomRightRadius = 14; button.Add(ring);
-                }
-                var preview = (JObject)v.Model.Profile.DeepClone(); preview["frame"] = frame;
-                var avatar = v.Avatar(40, preview); foreach (var label in avatar.Query<Label>().ToList()) label.style.display = DisplayStyle.None; avatar.style.marginRight = 12; button.Add(avatar);
-                var frameName = v.Text(v.L(new[] { "Klasik", "Altın", "Galaksi" }[i], new[] { "Classic", "Gold", "Galaxy" }[i]), 15, true); frameName.style.unityTextAlign = TextAnchor.MiddleLeft;
-                var frameState = PanelUi.Wrap(v, locked ? v.L("Seviye 30'da açılır", "Unlocks at level 30") : equipped ? v.L("Takılı", "Equipped") : v.L("Sahipsin", "Owned"), 11, equipped ? "#8EF0B0" : "mt"); frameState.style.unityTextAlign = TextAnchor.MiddleLeft;
-                var frameText = v.Column(frameName, frameState); frameText.style.alignItems = Align.FlexStart; frameText.style.minWidth = 0; button.Add(frameText);
-                if (locked) { button.SetEnabled(false); button.style.opacity = .55f; }
-                if (i < 2) button.style.marginRight = 10; frameRow.Add(button);
+                    if (locked || equipped) return;
+                    // A saved 1 is the Altın league frame; the other league frames cannot be stored yet (EKSIKLER EK-603).
+                    if (await v.Services.Profile.SaveAsync((string)v.Model.Profile["name"], (string)v.Model.Profile["color"], (string)v.Model.Profile["status"], id == 12 ? 1 : id) != null) PanelUi.SaveFailure(v);
+                }, "g-frame-tile");
+                button.name = "menu.f.pick[" + i + "]"; button.style.flexGrow = 1; button.style.flexBasis = 0; button.style.minWidth = 0; button.style.flexDirection = FlexDirection.Column; button.style.alignItems = Align.Center; button.style.justifyContent = Justify.FlexStart;
+                button.style.paddingTop = 9; button.style.paddingBottom = 8; button.style.paddingLeft = button.style.paddingRight = 4; if (i < MenuView.FrameIds.Length - 1) button.style.marginRight = 8;
+                v.Decorate(button, equipped ? "pnH" : "dp", 14); if (equipped) button.Add(PanelUi.Ring(v, 2, "a1", 14));
+                else { button.RegisterCallback<PointerEnterEvent>(_ => v.Decorate(button, "pnH", 14)); button.RegisterCallback<PointerLeaveEvent>(_ => v.Decorate(button, "dp", 14)); }
+                if (locked) { button.SetEnabled(false); button.style.opacity = .5f; }
+                button.tooltip = locked ? (en ? "Unlocks at " + (string)league["en"] : (string)league["tr"] + " liginde açılır") : equipped ? v.L("Takılı", "Equipped") : v.L("Sahipsin", "Owned");
+                var chip = v.Avatar(44, new JObject { ["name"] = v.Model.Profile["name"], ["color"] = v.Model.Profile["color"], ["frame"] = id }); button.Add(chip);
+                var frameName = MenuView.CssLine(v.Text(lname, 12, true), 12 * 1.1f); frameName.name = "menu.f.name[" + i + "]"; frameName.style.marginTop = 5; frameName.style.whiteSpace = WhiteSpace.NoWrap; frameName.style.unityTextAlign = TextAnchor.MiddleCenter;
+                var frameState = v.Text(locked ? v.L("Kilitli", "Locked") : equipped ? v.L("Takılı", "Equipped") : v.L("Sahipsin", "Owned"), 10, false, equipped ? "#8EF0B0" : "mt"); frameState.name = "menu.f.short[" + i + "]";
+                frameState.style.unityFont = v.Font("Baloo2-800"); frameState.style.marginTop = 5; frameState.style.whiteSpace = WhiteSpace.NoWrap; MenuView.CssLine(frameState); frameState.style.unityTextAlign = TextAnchor.MiddleCenter;
+                button.Add(frameName); button.Add(frameState); frameRow.Add(button);
             }
             frames.Add(frameRow); parent.Add(frames);
         }
@@ -222,22 +231,35 @@ namespace Galaxy101
 
         private static void History(MenuView v, VisualElement parent)
         {
-            var header = v.Row(v.Box(), PanelUi.Caption(v, v.L("MOD", "MODE"), 10, 1.2f), PanelUi.Caption(v, v.L("SIRA", "PLACE"), 10, 1.2f), PanelUi.Caption(v, v.L("ÇİP", "CHIPS"), 10, 1.2f), PanelUi.Caption(v, v.L("ZAMAN", "WHEN"), 10, 1.2f)); HistoryColumns(header); header.style.marginBottom = 12; parent.Add(header);
+            // Header: grid 44px 1fr 110px 110px 90px, padding 0 14px 2px, 900 10px body, 1.2px tracking.
+            Label Head(string tr, string en, string id) { var l = PanelUi.Caption(v, v.L(tr, en), 10, 1.2f); l.name = id; return l; }
+            var header = v.Row(v.Box(), Head("MOD", "MODE", "menu.mp.hMode"), Head("SIRA", "PLACE", "menu.mp.hPlace"), Head("ÇİP", "CHIPS", "menu.mp.hChips"), Head("ZAMAN", "WHEN", "menu.mp.hWhen"));
+            HistoryColumns(header); header.style.paddingLeft = header.style.paddingRight = 14; header.style.paddingBottom = 2; parent.Add(header);
+            // mp.history (HS): glyph ['1','2','×2','II'][m] on MC[m]; the name is menu.STR.modes[m] — Klasik, Dereceli, Botlara
+            // karşı, and nothing for m 3 (EKSIKLER EK-606); detail lp || "101 · 5K masa".
+            string[] glyphs = { "1", "2", "×2", "II" }, tints = { "#3D7BFF", "#FF6B6B", "#8B5CF6", "#16B6A8" }, names = { v.L("Klasik", "Classic"), v.L("Dereceli", "Ranked"), v.L("Botlara karşı", "Vs bots") };
+            int index = 0;
             foreach (JObject match in v.Services.Profile.GetHistory())
             {
-                var mode = (JObject)v.Model.Content["modes"][(int)match["mode"]];
-                var art = PanelUi.Badge(v, (string)mode["glyph"], (string)mode["bg"], "#fff", 14); art.style.width = art.style.height = 30; art.style.justifyContent = Justify.Center;
-                PanelUi.Pad(art, 0, 0); var artColumn = v.Box(); artColumn.Add(art);
+                int m = (int)match["mode"]; int i = index++;
+                var mode = (JObject)v.Model.Content["modes"][m];
+                var art = v.Box(); art.style.width = art.style.height = 30; art.style.alignItems = Align.Center; art.style.justifyContent = Justify.Center; v.Decorate(art, m < 4 ? tints[m] : (string)mode["bg"], 9);
+                var glyph = v.Text(m < 4 ? glyphs[m] : (string)mode["glyph"], 13, true, "#fff"); glyph.name = "menu.h.g[" + i + "]"; art.Add(glyph);
+                var artColumn = v.Box(); artColumn.Add(art);
                 long stake = (long?)match["stake"] ?? 5000; string table = stake >= 1000 ? stake / 1000 + "K" : stake.ToString();
-                var details = v.Column(v.Text(v.L((string)mode["tr"], (string)mode["en"]), 15, true), v.Text((string)match["lp"] ?? (stake > 0 ? v.L("101 · " + table + " masa", "101 · " + table + " table") : v.L("101 · bahissiz", "101 · no stake")), 12, false, "mt"));
+                var modeName = MenuView.CssLine(v.Text(m < names.Length ? names[m] : "", 15, true), 18); modeName.name = "menu.h.mode[" + i + "]";
+                var detail = MenuView.CssLine(v.Text((string)match["lp"] ?? (stake > 0 ? v.L("101 · " + table + " masa", "101 · " + table + " table") : v.L("101 · bahissiz", "101 · no stake")), 12, false, "mt")); detail.name = "menu.h.detail[" + i + "]";
+                var details = v.Column(); if (modeName.text.Length > 0) details.Add(modeName); details.Add(detail);
                 var place = (int)match["place"];
-                var rank = v.Box(); rank.Add(PanelUi.Badge(v, v.L(place + ".", "#" + place), place == 1 ? "rgba(255,201,74,.18)" : "dp", place == 1 ? "#FFC94A" : "mt", 11)); rank.style.alignItems = Align.FlexStart;
+                var badge = v.Text(v.L(place + ".", "#" + place), 12, false, place == 1 ? "#FFC94A" : "mt"); badge.name = "menu.h.place[" + i + "]"; badge.style.unityFont = v.Font("Baloo2-800"); MenuView.CssLine(badge);
+                badge.style.paddingTop = badge.style.paddingBottom = 3; badge.style.paddingLeft = badge.style.paddingRight = 9; badge.style.height = StyleKeyword.Auto; v.Decorate(badge, place == 1 ? "rgba(255,201,74,.18)" : "dp", 8);
+                var rank = v.Row(badge); rank.style.alignItems = Align.Center;
                 var delta = (long)match["delta"];
+                var deltaText = MenuView.TabularDigits(v.Text(delta == 0 ? "—" : (delta > 0 ? "+" : "−") + v.N(System.Math.Abs(delta)), 15, true, delta > 0 ? "#8EF0B0" : delta < 0 ? "#FF8A94" : "mt")); deltaText.name = "menu.h.delta[" + i + "]";
                 var minutes = (int)match["minutes"];
-                var ago = minutes < 60 ? v.L(minutes + " dk önce", minutes + " min ago") : minutes < 1440 ? v.L(minutes / 60 + " sa önce", minutes / 60 + " h ago")
-                    : minutes < 2880 ? v.L("Dün", "Yesterday") : v.L(minutes / 1440 + " gün önce", minutes / 1440 + " days ago");
-                var row = v.Row(artColumn, details, rank, v.Text(delta == 0 ? "—" : (delta > 0 ? "+" : "−") + v.N(System.Math.Abs(delta)), 15, true, delta > 0 ? "#8EF0B0" : delta < 0 ? "#FF8A94" : "mt"), v.Text(ago, 12, false, "mt"));
-                row.AddToClassList("g-friend-row"); row.style.paddingTop = row.style.paddingBottom = 10; row.style.minHeight = 58; row.style.borderTopRightRadius = row.style.borderBottomRightRadius = 0; HistoryColumns(row); parent.Add(row);
+                var ago = v.Text(minutes < 60 ? v.L(minutes + " dk önce", minutes + " min ago") : minutes < 1440 ? v.L(minutes / 60 + " sa önce", minutes / 60 + " h ago") : v.L("Dün", "Yesterday"), 12, false, "mt"); ago.name = "menu.h.when[" + i + "]";
+                // padding 9px 14px, radius 14, --sd; the list's gap 14.
+                var row = v.Row(artColumn, details, rank, deltaText, ago); PanelUi.Pad(row, 9, 14); v.Decorate(row, "sd", 14); row.style.marginTop = 14; row.style.flexShrink = 0; HistoryColumns(row); parent.Add(row);
             }
         }
 

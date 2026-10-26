@@ -147,7 +147,9 @@ namespace Galaxy101.Diagnostics
                 for (int i = 0; i < 30 && (Screen.width != 1280 || Screen.height != 720); i++) yield return null;
                 yield return Settle(.3f);
             }
-            GameClock.Freeze(hold);
+            // g101-state.js run(): G101Clock.freeze() without an argument — every reference frame sits at the canonical
+            // 100000 ms (DECISIONS D-61 says 100000 + ft; the code that made the references does not: EKSIKLER EK-005).
+            GameClock.Freeze(0);
             yield return null; yield return new WaitForEndOfFrame();
             yield return Capture(id, record);
             Time.timeScale = 1;

@@ -851,418 +851,1514 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 967102668
-    m_Localized: "De\u011Fi\u015Fiklikler kaydedilemedi. Tekrar dene."
+    m_Localized: "Hesab\u0131n ve verilerin hemen, kal\u0131c\u0131 olarak silinir. Bu i\u015Flem geri al\u0131namaz."
     m_Metadata:
       m_Items: []
   - m_Id: 967102669
-    m_Localized: "\xC7evrimi\xE7i"
+    m_Localized: "Sunucuya ula\u015F\u0131lamad\u0131, hesab\u0131n silinmedi"
     m_Metadata:
       m_Items: []
   - m_Id: 967102670
-    m_Localized: "T\xFCm\xFC"
+    m_Localized: Hesap silinemedi
     m_Metadata:
       m_Items: []
   - m_Id: 967102671
-    m_Localized: "\u0130stekler"
+    m_Localized: "Hesab\u0131n silindi"
     m_Metadata:
       m_Items: []
   - m_Id: 967102672
-    m_Localized: "Masa a\xE7\u0131lamad\u0131. Yeniden deneyin."
+    m_Localized: "Verilerin kald\u0131r\u0131ld\u0131. Diledi\u011Fin zaman yeni bir hesapla d\xF6nebilirsin."
     m_Metadata:
       m_Items: []
   - m_Id: 967102673
-    m_Localized: ' sn'
+    m_Localized: "Sunucuya ula\u015F\u0131lamad\u0131, profil kaydedilmedi"
     m_Metadata:
       m_Items: []
   - m_Id: 967102674
-    m_Localized: "\u0130\u015Flem tamam"
+    m_Localized: "Bu ad ya da durum mesaj\u0131 uygun de\u011Fil"
     m_Metadata:
       m_Items: []
   - m_Id: 967102675
-    m_Localized: Yetersiz elmas
+    m_Localized: "De\u011Fi\u015Fiklikler kaydedilemedi. Tekrar dene."
     m_Metadata:
       m_Items: []
   - m_Id: 967102676
-    m_Localized: Tekli
+    m_Localized: "Gezegenler hizalan\u0131yor\u2026"
     m_Metadata:
       m_Items: []
   - m_Id: 967102677
-    m_Localized: "Tekli \xB7 101 \xB7 5K masa"
+    m_Localized: "Ta\u015Flar diziliyor\u2026"
     m_Metadata:
       m_Items: []
   - m_Id: 967102678
-    m_Localized: "E\u015Fli"
+    m_Localized: "Masalar haz\u0131rlan\u0131yor\u2026"
     m_Metadata:
       m_Items: []
   - m_Id: 967102679
-    m_Localized: "E\u015Fli \xB7 101 \xB7 5K masa"
+    m_Localized: "Neredeyse haz\u0131r\u2026"
     m_Metadata:
       m_Items: []
   - m_Id: 967102680
-    m_Localized: "Katlamal\u0131"
+    m_Localized: "Haz\u0131r"
     m_Metadata:
       m_Items: []
   - m_Id: 967102681
-    m_Localized: "Katlamal\u0131 \xB7 101 \xB7 10K masa"
+    m_Localized: "\u0130pucu: G\xF6stergenin bir \xFCst\xFC okeydir ve her ta\u015F\u0131n yerine ge\xE7er."
     m_Metadata:
       m_Items: []
   - m_Id: 967102682
-    m_Localized: Dereceli
+    m_Localized: "\u0130pucu: Elini a\xE7mak i\xE7in 101 puanl\u0131k per ya da 5 \xE7ift gerekir."
     m_Metadata:
       m_Items: []
   - m_Id: 967102683
-    m_Localized: "Dereceli \xB7 Alt\u0131n II"
+    m_Localized: "\u0130pucu: Bir pere bas\u0131l\u0131 tutarak toplu ta\u015F\u0131yabilirsin."
     m_Metadata:
       m_Items: []
   - m_Id: 967102684
-    m_Localized: "Botlara kar\u015F\u0131"
+    m_Localized: "\u0130pucu: \u0130\u015Flek ta\u015F\u0131 atarsan +101 ceza yaz\u0131l\u0131r."
     m_Metadata:
       m_Items: []
   - m_Id: 967102685
-    m_Localized: "Botlara kar\u015F\u0131 \xB7 antrenman"
+    m_Localized: "Masalar dolu, ta\u015Flar haz\u0131r.\nArkada\u015Flar\u0131nla otur, 101 a\xE7\u0131p eli bitir."
     m_Metadata:
       m_Items: []
   - m_Id: 967102686
-    m_Localized: "\xD6zel oda"
+    m_Localized: "Ho\u015F geldin"
     m_Metadata:
       m_Items: []
   - m_Id: 967102687
-    m_Localized: "\xD6zel oda \xB7 \u015Fifreli"
+    m_Localized: "Nas\u0131l devam etmek istersin?"
     m_Metadata:
       m_Items: []
   - m_Id: 967102688
-    m_Localized: "Ta\u015Flar ve okey"
+    m_Localized: "M\u0130SAF\u0130R OLARAK OYNA"
     m_Metadata:
       m_Items: []
   - m_Id: 967102689
-    m_Localized: "Oyunda 106 ta\u015F var: k\u0131rm\u0131z\u0131, sar\u0131, mavi ve siyah renklerde 1'den 13'e kadar iki\u015Fer ta\u015F ve 2 sahte okey."
+    m_Localized: "Kay\u0131t yok \xB7 hemen ba\u015Fla"
     m_Metadata:
       m_Items: []
   - m_Id: 967102690
-    m_Localized: "Ortadan a\xE7\u0131lan ta\u015F g\xF6stergedir. G\xF6stergenin bir \xFCst\xFC okeydir ve her ta\u015F\u0131n yerine ge\xE7ebilir."
+    m_Localized: "Giri\u015F yap"
     m_Metadata:
       m_Items: []
   - m_Id: 967102691
-    m_Localized: "Sahte okey, okeyin kendisi yerine kullan\u0131l\u0131r; de\u011Feri okeyin de\u011Feridir."
+    m_Localized: "Kay\u0131t ol"
     m_Metadata:
       m_Items: []
   - m_Id: 967102692
-    m_Localized: "G\xF6sterge sar\u0131 7 ise okey sar\u0131 8 olur."
+    m_Localized: ya da
     m_Metadata:
       m_Items: []
   - m_Id: 967102693
-    m_Localized: "Da\u011F\u0131t\u0131m"
+    m_Localized: "Devam ederek Kullan\u0131m Ko\u015Fullar\u0131\u2019n\u0131 ve Gizlilik Politikas\u0131\u2019n\u0131 kabul etmi\u015F olursun. Oyun sanal \xE7iple oynan\u0131r; ger\xE7ek para kazand\u0131rmaz."
     m_Metadata:
       m_Items: []
   - m_Id: 967102694
-    m_Localized: "Ta\u015Flar kar\u0131\u015Ft\u0131r\u0131l\u0131r ve her oyuncuya 21 ta\u015F da\u011F\u0131t\u0131l\u0131r."
+    m_Localized: Google ile devam et
     m_Metadata:
       m_Items: []
   - m_Id: 967102695
-    m_Localized: "Oyunu ba\u015Flatan oyuncu 22 ta\u015F al\u0131r ve ilk hamlede bir ta\u015F atarak ba\u015Flar."
+    m_Localized: "Google ile giri\u015F bu s\xFCr\xFCmde hen\xFCz a\xE7\u0131k de\u011Fil."
     m_Metadata:
       m_Items: []
   - m_Id: 967102696
-    m_Localized: "Kalan ta\u015Flar ortada \xE7ekme destesi olur. S\u0131ra saat y\xF6n\xFCn\xFCn tersine ilerler."
+    m_Localized: Geri
     m_Metadata:
       m_Items: []
   - m_Id: 967102697
-    m_Localized: "Elini a\xE7mak"
+    m_Localized: Gizle
     m_Metadata:
       m_Items: []
   - m_Id: 967102698
-    m_Localized: "Elini a\xE7abilmek i\xE7in perlerinin toplam\u0131 en az 101 olmal\u0131."
+    m_Localized: "G\xF6ster"
     m_Metadata:
       m_Items: []
   - m_Id: 967102699
-    m_Localized: "Seri: ayn\u0131 renkte en az 3 ard\u0131\u015F\u0131k ta\u015F. Grup: ayn\u0131 say\u0131da, farkl\u0131 renklerde 3 veya 4 ta\u015F."
+    m_Localized: "Zay\u0131f"
     m_Metadata:
       m_Items: []
   - m_Id: 967102700
-    m_Localized: "\u0130stersen en az 5 \xE7iftle \xE7iftten de a\xE7abilirsin."
+    m_Localized: "G\xFC\xE7l\xFC"
     m_Metadata:
       m_Items: []
   - m_Id: 967102701
-    m_Localized: "Seri 46 + grup 36 = 82 puan. A\xE7mak i\xE7in 19 puan daha gerekir."
+    m_Localized: "Hesab\u0131nla kald\u0131\u011F\u0131n yerden devam et"
     m_Metadata:
       m_Items: []
   - m_Id: 967102702
-    m_Localized: "Ta\u015F i\u015Flemek"
+    m_Localized: ya da e-postayla
     m_Metadata:
       m_Items: []
   - m_Id: 967102703
-    m_Localized: "Elini a\xE7t\u0131ktan sonra masadaki t\xFCm perlere uygun ta\u015F ekleyebilirsin."
+    m_Localized: E-POSTA
     m_Metadata:
       m_Items: []
   - m_Id: 967102704
-    m_Localized: "Masadaki bir perde okeyin yerini tutan ta\u015F sende varsa, onu koyup okeyi alabilirsin."
+    m_Localized: "\u015E\u0130FRE"
     m_Metadata:
       m_Items: []
   - m_Id: 967102705
-    m_Localized: "K\u0131rm\u0131z\u0131 13'\xFC masadaki k\u0131rm\u0131z\u0131 seriye i\u015Fleyebilirsin."
+    m_Localized: En az 6 karakter
     m_Metadata:
       m_Items: []
   - m_Id: 967102706
-    m_Localized: Bitirmek
+    m_Localized: "Beni hat\u0131rla"
     m_Metadata:
       m_Items: []
   - m_Id: 967102707
-    m_Localized: "Elindeki t\xFCm ta\u015Flar\u0131 perlere yerle\u015Ftirip son ta\u015F\u0131n\u0131 atan oyuncu eli bitirir."
+    m_Localized: "\u015Eifremi unuttum"
     m_Metadata:
       m_Items: []
   - m_Id: 967102708
-    m_Localized: "Son ta\u015F olarak okeyi atarak bitirirsen b\xFCt\xFCn cezalar ikiye katlan\u0131r."
+    m_Localized: "Hesab\u0131n yok mu?"
     m_Metadata:
       m_Items: []
   - m_Id: 967102709
-    m_Localized: "Son ta\u015F olarak okeyi atmak cezalar\u0131 ikiye katlar."
+    m_Localized: "\u015Eifreni s\u0131f\u0131rla"
     m_Metadata:
       m_Items: []
   - m_Id: 967102710
-    m_Localized: Puanlama
+    m_Localized: "E-postana gelen 6 haneli kodu ve yeni \u015Fifreni yaz"
     m_Metadata:
       m_Items: []
   - m_Id: 967102711
-    m_Localized: "Eli bitiren oyuncu -101 puan al\u0131r."
+    m_Localized: "Hesab\u0131n\u0131n e-postas\u0131n\u0131 yaz, s\u0131f\u0131rlama kodu g\xF6nderelim"
     m_Metadata:
       m_Items: []
   - m_Id: 967102712
-    m_Localized: "Elini a\xE7an oyuncular ellerinde kalan ta\u015Flar\u0131n toplam\u0131 kadar ceza al\u0131r."
+    m_Localized: KOD
     m_Metadata:
       m_Items: []
   - m_Id: 967102713
-    m_Localized: "Elini a\xE7amayan oyuncu 202 ceza al\u0131r. \xC7iftten a\xE7anlar\u0131n cezas\u0131 ikiye katlan\u0131r."
+    m_Localized: "YEN\u0130 \u015E\u0130FRE"
     m_Metadata:
       m_Items: []
   - m_Id: 967102714
-    m_Localized: "Oyun sonunda en d\xFC\u015F\xFCk puana sahip oyuncu kazan\u0131r."
+    m_Localized: "YEN\u0130 \u015E\u0130FRE (TEKRAR)"
     m_Metadata:
       m_Items: []
   - m_Id: 967102715
-    m_Localized: "G\xF6sterge"
+    m_Localized: "Ayn\u0131 \u015Fifre"
     m_Metadata:
       m_Items: []
   - m_Id: 967102716
-    m_Localized: Okey
+    m_Localized: "Kodu yeniden g\xF6nder"
     m_Metadata:
       m_Items: []
   - m_Id: 967102717
-    m_Localized: "\u0130\u015Fle"
+    m_Localized: "\u015Eifreyi de\u011Fi\u015Ftir"
     m_Metadata:
       m_Items: []
   - m_Id: 967102718
-    m_Localized: "Son ta\u015F"
+    m_Localized: "Kod g\xF6nder"
     m_Metadata:
       m_Items: []
   - m_Id: 967102719
-    m_Localized: Elmas I
+    m_Localized: "\u015Eifreni hat\u0131rlad\u0131n m\u0131?"
     m_Metadata:
       m_Items: []
   - m_Id: 967102720
-    m_Localized: Elmas II
+    m_Localized: "Hesap a\xE7, 25.000 \xE7ip hediye"
     m_Metadata:
       m_Items: []
   - m_Id: 967102721
-    m_Localized: Lobide
+    m_Localized: KULLANICI ADI
     m_Metadata:
       m_Items: []
   - m_Id: 967102722
-    m_Localized: "Masada \xB7 E\u015Fli"
+    m_Localized: "3\u201316 karakter"
     m_Metadata:
       m_Items: []
   - m_Id: 967102723
-    m_Localized: "Dereceli ma\xE7 ar\u0131yor"
+    m_Localized: "Kullan\u0131labilir"
     m_Metadata:
       m_Items: []
   - m_Id: 967102724
-    m_Localized: "2 saat \xF6nce"
+    m_Localized: "\u015E\u0130FRE TEKRAR"
     m_Metadata:
       m_Items: []
   - m_Id: 967102725
-    m_Localized: "3 g\xFCn \xF6nce"
+    m_Localized: "\u015Eifreni tekrar yaz"
     m_Metadata:
       m_Items: []
   - m_Id: 967102726
-    m_Localized: "Ortak arkada\u015F: Ay\u015Fe Y."
+    m_Localized: "Kullan\u0131m Ko\u015Fullar\u0131\u2019n\u0131 ve Gizlilik Politikas\u0131\u2019n\u0131 okudum, kabul ediyorum."
     m_Metadata:
       m_Items: []
   - m_Id: 967102727
-    m_Localized: "Son ma\xE7ta rakibindi"
+    m_Localized: "Hesab\u0131 olu\u015Ftur"
     m_Metadata:
       m_Items: []
   - m_Id: 967102728
-    m_Localized: 3 el kazan
+    m_Localized: "Zaten hesab\u0131n var m\u0131?"
     m_Metadata:
       m_Items: []
   - m_Id: 967102729
-    m_Localized: "\xC7iftten a\xE7"
+    m_Localized: "Misafir giri\u015Fi"
     m_Metadata:
       m_Items: []
   - m_Id: 967102730
-    m_Localized: 5 el oyna
+    m_Localized: "\u0130lerlemen bu cihazda saklan\u0131r"
     m_Metadata:
       m_Items: []
   - m_Id: 967102731
-    m_Localized: Okey atarak bitir
+    m_Localized: TAKMA AD
     m_Metadata:
       m_Items: []
   - m_Id: 967102732
-    m_Localized: "40 ta\u015F i\u015Fle"
+    m_Localized: "Masada g\xF6r\xFCnecek ad\u0131n"
     m_Metadata:
       m_Items: []
   - m_Id: 967102733
-    m_Localized: "\xC7ip, elmas ve ta\u015F g\xF6r\xFCn\xFCmleri"
+    m_Localized: "Ba\u015Flang\u0131\xE7ta 10.000 \xE7ip hesab\u0131na y\xFCklenir."
     m_Metadata:
       m_Items: []
   - m_Id: 967102734
-    m_Localized: "3 arkada\u015F\u0131n \xE7evrimi\xE7i"
+    m_Localized: "Uygulamay\u0131 silersen ya da cihaz de\u011Fi\u015Ftirirsen ilerlemen kaybolur."
     m_Metadata:
       m_Items: []
   - m_Id: 967102735
-    m_Localized: "Sezon 3 \xB7 biti\u015Fe 12 g\xFCn"
+    m_Localized: "Oynamaya ba\u015Fla"
     m_Metadata:
       m_Items: []
   - m_Id: 967102736
-    m_Localized: "5 g\xFCnl\xFCk seri \xB7 her g\xFCn gir, \xF6d\xFCl b\xFCy\xFCs\xFCn"
+    m_Localized: "Sonra hesaba ba\u011Flayabilirsin."
     m_Metadata:
       m_Items: []
   - m_Id: 967102737
-    m_Localized: "\u0130statistikler, derece ve rozetler"
+    m_Localized: "Bir \u015Feyler ters gitti. Tekrar dene."
     m_Metadata:
       m_Items: []
   - m_Id: 967102738
-    m_Localized: "101 Okey nas\u0131l oynan\u0131r"
+    m_Localized: "Ge\xE7erli bir e-posta yaz"
     m_Metadata:
       m_Items: []
   - m_Id: 967102739
-    m_Localized: "Sat\xFCrn"
+    m_Localized: "3\u201316 harf, rakam ya da _"
     m_Metadata:
       m_Items: []
   - m_Id: 967102740
-    m_Localized: "Alt\u0131n halkalar"
+    m_Localized: "\u015Eifreler ayn\u0131 de\u011Fil"
     m_Metadata:
       m_Items: []
   - m_Id: 967102741
-    m_Localized: Mars
+    m_Localized: "Devam etmek i\xE7in ko\u015Fullar\u0131 kabul et"
     m_Metadata:
       m_Items: []
   - m_Id: 967102742
-    m_Localized: "K\u0131z\u0131l \xE7\xF6l"
+    m_Localized: 6 haneli kod
     m_Metadata:
       m_Items: []
   - m_Id: 967102743
-    m_Localized: "Nept\xFCn"
+    m_Localized: "Sunucu adresi g\xFCvenli de\u011Fil (https gerekli)."
     m_Metadata:
       m_Items: []
   - m_Id: 967102744
-    m_Localized: Buz mavisi
+    m_Localized: "Sunucuya ba\u011Flan\u0131lamad\u0131. \u0130nternetini kontrol edip yeniden dene."
     m_Metadata:
       m_Items: []
   - m_Id: 967102745
-    m_Localized: "J\xFCpiter"
+    m_Localized: "Bu e-postayla kay\u0131tl\u0131 hesap bulunamad\u0131."
     m_Metadata:
       m_Items: []
   - m_Id: 967102746
-    m_Localized: "F\u0131rt\u0131na ku\u015Faklar\u0131"
+    m_Localized: Bu e-postayla zaten hesap var
     m_Metadata:
       m_Items: []
   - m_Id: 967102747
-    m_Localized: "Ven\xFCs"
+    m_Localized: "Bilgileri kontrol et: ad 3\u201316 karakter, \u015Fifre en az 6."
     m_Metadata:
       m_Items: []
   - m_Id: 967102748
-    m_Localized: Pembe sis
+    m_Localized: "\xC7ok h\u0131zl\u0131 denedin; biraz bekle."
     m_Metadata:
       m_Items: []
   - m_Id: 967102749
-    m_Localized: "Galaksi ta\u015F\u0131"
+    m_Localized: "Kod hatal\u0131 ya da s\xFCresi doldu. Yeni kod iste."
     m_Metadata:
       m_Items: []
   - m_Id: 967102750
-    m_Localized: "Alt\u0131n ta\u015F"
+    m_Localized: "\u015Eu an e-posta g\xF6nderilemiyor. Biraz sonra tekrar dene."
     m_Metadata:
       m_Items: []
   - m_Id: 967102751
-    m_Localized: "Neon ta\u015F"
+    m_Localized: "Bu ad uygun de\u011Fil; ba\u015Fka bir ad se\xE7."
     m_Metadata:
       m_Items: []
   - m_Id: 967102752
-    m_Localized: "Mermer ta\u015F"
+    m_Localized: TEST SENARYOSU
     m_Metadata:
       m_Items: []
   - m_Id: 967102753
-    m_Localized: "\u0130lk zafer"
+    m_Localized: "Geli\u015Ftirici men\xFCs\xFC \xB7 F9"
     m_Metadata:
       m_Items: []
   - m_Id: 967102754
-    m_Localized: "\u0130lk elini kazan"
+    m_Localized: "\xC7evrimi\xE7i"
     m_Metadata:
       m_Items: []
   - m_Id: 967102755
-    m_Localized: "Okey ustas\u0131"
+    m_Localized: "T\xFCm\xFC"
     m_Metadata:
       m_Items: []
   - m_Id: 967102756
-    m_Localized: 50 kez okey atarak bitir
+    m_Localized: "\u0130stekler"
     m_Metadata:
       m_Items: []
   - m_Id: 967102757
-    m_Localized: "5 \xE7ift"
+    m_Localized: "\u0130zleme yak\u0131nda"
     m_Metadata:
       m_Items: []
   - m_Id: 967102758
-    m_Localized: "\xC7iftten 5 kez a\xE7"
+    m_Localized: Oyuncu
     m_Metadata:
       m_Items: []
   - m_Id: 967102759
-    m_Localized: 100 el
+    m_Localized: "Masa a\xE7"
     m_Metadata:
       m_Items: []
   - m_Id: 967102760
-    m_Localized: 100 el oyna
+    m_Localized: "Klasik \xB7 101 \xB7 masay\u0131 a\xE7\u0131nca otomatik oturursun"
     m_Metadata:
       m_Items: []
   - m_Id: 967102761
-    m_Localized: "Katlama kral\u0131"
+    m_Localized: Oyun modu
     m_Metadata:
       m_Items: []
   - m_Id: 967102762
-    m_Localized: "Katlamal\u0131da 25 el kazan"
+    m_Localized: "Girdi\u011Fin moda g\xF6re; tip se\xE7ebilirsin"
     m_Metadata:
       m_Items: []
   - m_Id: 967102763
-    m_Localized: Seri galibiyet
+    m_Localized: Tekli
     m_Metadata:
       m_Items: []
   - m_Id: 967102764
-    m_Localized: "\xDCst \xFCste 7 el kazan"
+    m_Localized: "E\u015Fli"
     m_Metadata:
       m_Items: []
   - m_Id: 967102765
-    m_Localized: Elmas lig
+    m_Localized: "Masa ad\u0131"
     m_Metadata:
       m_Items: []
   - m_Id: 967102766
-    m_Localized: "Elmas lige y\xFCksel"
+    m_Localized: "Masa ad\u0131 bo\u015F olamaz"
     m_Metadata:
       m_Items: []
   - m_Id: 967102767
-    m_Localized: Galaksi gezgini
+    m_Localized: "Lobide ve davette g\xF6r\xFCn\xFCr"
     m_Metadata:
       m_Items: []
   - m_Id: 967102768
-    m_Localized: "T\xFCm gezegen temalar\u0131n\u0131 dene"
+    m_Localized: "G\xF6r\xFCn\xFCrl\xFCk"
     m_Metadata:
       m_Items: []
   - m_Id: 967102769
-    m_Localized: Efsane
+    m_Localized: "Lobide g\xF6r\xFCnmez, davet koduyla girilir"
     m_Metadata:
       m_Items: []
   - m_Id: 1802865266688
-    m_Localized: 1.000 el kazan
+    m_Localized: Lobide listelenir, herkes oturabilir
     m_Metadata:
       m_Items: []
   - m_Id: 4283099828224
+    m_Localized: "A\xE7\u0131k"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864760156160
+    m_Localized: "\xD6zel"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985280
+    m_Localized: "\u015Eifre"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985281
+    m_Localized: 4 rakam gir
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985282
+    m_Localized: "Girenler bu \u015Fifreyi yazacak"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985283
+    m_Localized: "\u0130ste\u011Fe ba\u011Fl\u0131 \xB7 4 haneli"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985284
+    m_Localized: "El say\u0131s\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985285
+    m_Localized: "Ma\xE7 bu kadar el s\xFCrer, en d\xFC\u015F\xFCk toplam kazan\u0131r"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985286
+    m_Localized: Bahis
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985287
+    m_Localized: Yetersiz
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985288
+    m_Localized: Bakiyen yetersiz
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985289
+    m_Localized: "\xC7ip al"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985290
+    m_Localized: "\xD6d\xFCl"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985291
+    m_Localized: "Kazanan tak\u0131m al\u0131r \xB7 ki\u015Fi ba\u015F\u0131 yar\u0131s\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985292
+    m_Localized: "Kazanan al\u0131r \xB7 masadaki t\xFCm bahisler"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985293
+    m_Localized: Toplam havuz
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985294
+    m_Localized: "Katlamal\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985295
+    m_Localized: "Okeyle ya da \xE7iftle biti\u015Fte puanlar katlan\u0131r"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985296
+    m_Localized: "Tur s\xFCresi"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985297
+    m_Localized: "S\xFCre dolunca otomatik oynan\u0131r"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985298
+    m_Localized: 45 sn
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985299
+    m_Localized: "Kural \xF6zelle\u015Ftirme"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985300
+    m_Localized: "Varsay\u0131lan kurallar"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985301
+    m_Localized: "Okey atma cezas\u0131 (+101)"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985302
+    m_Localized: Okeyi yere atan +101 yazar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985303
+    m_Localized: "\u0130\u015Flek ta\u015F atma cezas\u0131 (+101)"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985304
+    m_Localized: "Masadaki pere i\u015Flenebilen ta\u015F\u0131 atan +101 yazar"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985305
+    m_Localized: "\u0130zleyici"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985306
+    m_Localized: "Oyun s\xFCrerken ba\u015Fkalar\u0131 izleyebilsin"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985307
+    m_Localized: "\u0130zin ver"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985308
+    m_Localized: Verme
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985309
+    m_Localized: Sohbet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985310
+    m_Localized: "Masa i\xE7i yaz\u0131\u015Fma"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985311
+    m_Localized: "A\xE7\u0131k"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985312
+    m_Localized: "Yaln\u0131z haz\u0131r c\xFCmleler"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985313
+    m_Localized: "Kapal\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985314
+    m_Localized: "\u0130kram ve hediye"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985315
+    m_Localized: "Oyuncular birbirine ikram g\xF6nderebilsin"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985316
+    m_Localized: "\xD6ZET"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985317
+    m_Localized: "BAH\u0130S"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985318
+    m_Localized: HAVUZ
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985319
+    m_Localized: "TUR S\xDCRES\u0130"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985320
+    m_Localized: Bakiyen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985321
+    m_Localized: Yetersiz bakiye
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985322
+    m_Localized: Eksikleri tamamla
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985323
+    m_Localized: "Zaten bir masadas\u0131n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985324
+    m_Localized: "Masan a\xE7\u0131ld\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985325
+    m_Localized: "Bot koltu\u011Fa oturdu"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985326
+    m_Localized: "Ayr\u0131l"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985327
+    m_Localized: BEKLEME ODASI
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985328
+    m_Localized: Oda sahibi sensin
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985329
+    m_Localized: Kod
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985330
+    m_Localized: Kodu kopyala
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985331
+    m_Localized: "Payla\u015F"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985332
+    m_Localized: "Herkes yerinde, oyunu ba\u015Flat."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985333
+    m_Localized: "D\xF6rt koltuk dolunca ba\u015Flatabilirsin. Bo\u015F koltu\u011Fa bot ekleyebilirsin."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985334
+    m_Localized: "Oda sahibi oyunu ba\u015Flat\u0131nca masa a\xE7\u0131l\u0131r."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985335
+    m_Localized: "Ba\u015Flat"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985336
+    m_Localized: Oda sahibi bekleniyor
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985337
+    m_Localized: "Masa a\xE7\u0131l\u0131yor\u2026"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985338
+    m_Localized: "Masa haz\u0131r"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985339
+    m_Localized: Oda sahibi
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985340
+    m_Localized: "Masadan \xE7\u0131kar"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985341
+    m_Localized: SEN
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985342
+    m_Localized: "Tak\u0131m A"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985343
+    m_Localized: "Tak\u0131m B"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985344
+    m_Localized: "Bo\u015F koltuk"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985345
+    m_Localized: Davet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985346
+    m_Localized: Bot ekle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985347
+    m_Localized: "Bekleme odas\u0131ndan ayr\u0131ld\u0131n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985348
+    m_Localized: "Bot masadan \xE7\u0131kar\u0131ld\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985349
+    m_Localized: "D\xF6rt koltuk dolmadan ba\u015Flat\u0131lamaz"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985350
+    m_Localized: "Arkada\u015Flar\u0131n\u0131 davet et"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985351
+    m_Localized: "Masa dolu \xB7 davet g\xF6nderilemez"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985352
+    m_Localized: "Son oynad\u0131klar\u0131n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985353
+    m_Localized: Oyuncu ara
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985354
+    m_Localized: "Hen\xFCz birlikte oynad\u0131\u011F\u0131n kimse yok"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985355
+    m_Localized: "Hen\xFCz arkada\u015F\u0131n yok"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985356
+    m_Localized: Bu isimde oyuncu yok
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985357
+    m_Localized: KOLTUKLAR
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985358
+    m_Localized: KODLA DAVET
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985359
+    m_Localized: "A\xE7\u0131k masa lobide listelenir; davet edilen arkada\u015F\u0131n do\u011Frudan bo\u015F koltu\u011Fa oturur."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985360
+    m_Localized: "Kabul eden arkada\u015F\u0131n bo\u015F koltu\u011Fa otomatik oturur."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985361
+    m_Localized: Oyunda
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985362
+    m_Localized: Masada
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985363
+    m_Localized: Masa dolu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985364
+    m_Localized: Tekrar davet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985365
+    m_Localized: Reddetti
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985366
+    m_Localized: "\u0130ptal etmek i\xE7in t\u0131kla"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985367
+    m_Localized: "Masaya ba\u011Flan\u0131l\u0131yor\u2026"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985368
+    m_Localized: Masa doldu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985369
+    m_Localized: "Masa kapand\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985370
+    m_Localized: "Son koltuk sen ba\u011Flan\u0131rken doldu."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985371
+    m_Localized: "Oda sahibi masay\u0131 kapatt\u0131."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985372
+    m_Localized: Benzer masa bul
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985373
+    m_Localized: "Sunucuya ba\u011Flan\u0131lamad\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985374
+    m_Localized: "Lobi i\xE7in \xE7evrimi\xE7i olmal\u0131s\u0131n. Ba\u011Flant\u0131n\u0131 kontrol edip yeniden dene."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985375
+    m_Localized: "Ana men\xFC"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985376
+    m_Localized: Tekrar dene
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985377
+    m_Localized: Sonra
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985378
+    m_Localized: "Kat\u0131l"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985379
+    m_Localized: "\u015Eifreli masa"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985380
+    m_Localized: Gir
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985381
+    m_Localized: "Kodla kat\u0131l"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985382
+    m_Localized: "\xD6zel masalar lobide g\xF6r\xFCnmez; arkada\u015F\u0131ndan ald\u0131\u011F\u0131n kodu yaz."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985383
+    m_Localized: "Kod GX- ve 4 karakterden olu\u015Fur"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985384
+    m_Localized: "\xD6zel masan haz\u0131r"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985385
+    m_Localized: "Masa lobide listelenmez. Kodu arkada\u015Flar\u0131na g\xF6nder, kodla kat\u0131ls\u0131nlar."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985386
+    m_Localized: DAVET KODU
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985387
+    m_Localized: "Davet metni kopyaland\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985388
+    m_Localized: "Bekleme odas\u0131na ge\xE7"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985389
+    m_Localized: "Odaya d\xF6n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985390
+    m_Localized: "Oda sahibi seni masadan \xE7\u0131kard\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985391
+    m_Localized: "Bakiyen yetmedi\u011Fi i\xE7in masadan kalkt\u0131n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985392
+    m_Localized: "Masa kapand\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985393
+    m_Localized: "Ba\u011Flant\u0131 koptu, masadan kalkt\u0131n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985394
+    m_Localized: "Tekli ve e\u015Fli masalar \xB7 101 Okey"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985395
+    m_Localized: "Masa a\xE7"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985396
+    m_Localized: "Bo\u015F yer var"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985397
+    m_Localized: Bekliyor
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985398
+    m_Localized: "Dolu \xB7 ba\u015Fl\u0131yor"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985399
+    m_Localized: Otur
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985400
+    m_Localized: Dolu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985401
+    m_Localized: "\u015Eifreli"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985402
+    m_Localized: "\xD72 Katlamal\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985403
+    m_Localized: "\u0130\u015Flek +101"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985404
+    m_Localized: "\u0130zleyici a\xE7\u0131k"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985405
+    m_Localized: "\u0130zleyici yok"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985406
+    m_Localized: "Haz\u0131r sohbet"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985407
+    m_Localized: "Sohbet kapal\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985408
+    m_Localized: "Hediye kapal\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985409
+    m_Localized: Bu filtrelere uygun masa yok
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985410
+    m_Localized: "Filtreleri temizle ya da kendi masan\u0131 a\xE7; a\xE7\u0131k masalar lobide hemen listelenir."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985411
+    m_Localized: Filtreleri temizle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985412
+    m_Localized: Masa ara
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985413
+    m_Localized: "Yanl\u0131\u015F \u015Fifre. Tekrar dene."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985414
+    m_Localized: "Bu masada hen\xFCz oyun ba\u015Flamad\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985415
+    m_Localized: "Bu masa izleyiciye kapal\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985416
+    m_Localized: "Bu koda ait a\xE7\u0131k bir masa bulunamad\u0131."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985417
+    m_Localized: "Bu masada oyun ba\u015Flad\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985418
+    m_Localized: "Bakiyen bu masa i\xE7in yetersiz"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985419
+    m_Localized: "\u015Eu an benzer bo\u015F masa yok"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985420
+    m_Localized: "Dereceli i\xE7in giri\u015F yapmal\u0131s\u0131n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985421
+    m_Localized: "Dereceli \xB7 Sezon "
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985422
+    m_Localized: "Masa a\xE7\u0131lamad\u0131. Yeniden deneyin."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985423
+    m_Localized: Dereceli
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985424
+    m_Localized: "Botlara kar\u015F\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985425
+    m_Localized: YAKINDA
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985426
+    m_Localized: "Dereceli \xB7 Solo / Duo / Squad"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985427
+    m_Localized: "Botlara kar\u015F\u0131 \xB7 antrenman \xB7 bahis yok"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985428
+    m_Localized: "Klasik \xB7 Tekli / E\u015Fli \xB7 masalar"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985429
+    m_Localized: "Botlara kar\u015F\u0131 yak\u0131nda a\xE7\u0131l\u0131yor"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985430
+    m_Localized: "t\xFCm modlarda"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985431
+    m_Localized: "En \xFCst lig"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985432
+    m_Localized: "101 \xB7 bahissiz"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985433
+    m_Localized: "Zaten bir masadas\u0131n ya da s\u0131radas\u0131n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985434
+    m_Localized: "Sunucuya ula\u015F\u0131lamad\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985435
+    m_Localized: "E\u015Fle\u015Fme ba\u015Flat\u0131lamad\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985436
+    m_Localized: "DERECEL\u0130"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985437
+    m_Localized: "Rakip aran\u0131yor"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985438
+    m_Localized: " \xB7 ligine yak\u0131n oyuncular"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985439
+    m_Localized: ' sn'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985440
+    m_Localized: Tam ekran
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985441
+    m_Localized: "\xC7er\xE7evesiz"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985442
+    m_Localized: Pencere
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985443
+    m_Localized: "G\xF6r\xFCnt\xFC modu"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985444
+    m_Localized: "Tam ekran, \xE7er\xE7evesiz pencere veya pencere"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985445
+    m_Localized: "Yerel \xB7 "
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985446
+    m_Localized: "Monit\xF6r en fazla "
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985447
+    m_Localized: "Kare h\u0131z\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985448
+    m_Localized: "\u0130\u015Flem tamam"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985449
+    m_Localized: Yetersiz elmas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985450
+    m_Localized: "3D masa y\xFCkleniyor\u2026"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985451
+    m_Localized: Tekli
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985452
+    m_Localized: "Tekli \xB7 101 \xB7 5K masa"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985453
+    m_Localized: "E\u015Fli \xB7 101 \xB7 5K masa"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985454
+    m_Localized: "Katlamal\u0131 \xB7 101 \xB7 10K masa"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985455
+    m_Localized: "Dereceli \xB7 Alt\u0131n II"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985456
+    m_Localized: "Botlara kar\u015F\u0131 \xB7 antrenman"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985457
+    m_Localized: "\xD6zel oda"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985458
+    m_Localized: "\xD6zel oda \xB7 \u015Fifreli"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985459
+    m_Localized: "Ta\u015Flar ve okey"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985460
+    m_Localized: "Oyunda 106 ta\u015F var: k\u0131rm\u0131z\u0131, sar\u0131, mavi ve siyah renklerde 1'den 13'e kadar iki\u015Fer ta\u015F ve 2 sahte okey."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985461
+    m_Localized: "Ortadan a\xE7\u0131lan ta\u015F g\xF6stergedir. G\xF6stergenin bir \xFCst\xFC okeydir ve her ta\u015F\u0131n yerine ge\xE7ebilir."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985462
+    m_Localized: "Sahte okey, okeyin kendisi yerine kullan\u0131l\u0131r; de\u011Feri okeyin de\u011Feridir."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985463
+    m_Localized: "G\xF6sterge sar\u0131 7 ise okey sar\u0131 8 olur."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985464
+    m_Localized: "Da\u011F\u0131t\u0131m"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985465
+    m_Localized: "Ta\u015Flar kar\u0131\u015Ft\u0131r\u0131l\u0131r ve her oyuncuya 21 ta\u015F da\u011F\u0131t\u0131l\u0131r."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985466
+    m_Localized: "Oyunu ba\u015Flatan oyuncu 22 ta\u015F al\u0131r ve ilk hamlede bir ta\u015F atarak ba\u015Flar."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985467
+    m_Localized: "Kalan ta\u015Flar ortada \xE7ekme destesi olur. S\u0131ra saat y\xF6n\xFCn\xFCn tersine ilerler."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985468
+    m_Localized: "Elini a\xE7mak"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985469
+    m_Localized: "Elini a\xE7abilmek i\xE7in perlerinin toplam\u0131 en az 101 olmal\u0131."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985470
+    m_Localized: "Seri: ayn\u0131 renkte en az 3 ard\u0131\u015F\u0131k ta\u015F. Grup: ayn\u0131 say\u0131da, farkl\u0131 renklerde 3 veya 4 ta\u015F."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985471
+    m_Localized: "\u0130stersen en az 5 \xE7iftle \xE7iftten de a\xE7abilirsin."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985472
+    m_Localized: "Seri 46 + grup 36 = 82 puan. A\xE7mak i\xE7in 19 puan daha gerekir."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985473
+    m_Localized: "Ta\u015F i\u015Flemek"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985474
+    m_Localized: "Elini a\xE7t\u0131ktan sonra masadaki t\xFCm perlere uygun ta\u015F ekleyebilirsin."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985475
+    m_Localized: "Masadaki bir perde okeyin yerini tutan ta\u015F sende varsa, onu koyup okeyi alabilirsin."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985476
+    m_Localized: "K\u0131rm\u0131z\u0131 13'\xFC masadaki k\u0131rm\u0131z\u0131 seriye i\u015Fleyebilirsin."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985477
+    m_Localized: Bitirmek
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985478
+    m_Localized: "Elindeki t\xFCm ta\u015Flar\u0131 perlere yerle\u015Ftirip son ta\u015F\u0131n\u0131 atan oyuncu eli bitirir."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985479
+    m_Localized: "Son ta\u015F olarak okeyi atarak bitirirsen b\xFCt\xFCn cezalar ikiye katlan\u0131r."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985480
+    m_Localized: "Son ta\u015F olarak okeyi atmak cezalar\u0131 ikiye katlar."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985481
+    m_Localized: Puanlama
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985482
+    m_Localized: "Eli bitiren oyuncu -101 puan al\u0131r."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985483
+    m_Localized: "Elini a\xE7an oyuncular ellerinde kalan ta\u015Flar\u0131n toplam\u0131 kadar ceza al\u0131r."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985484
+    m_Localized: "Elini a\xE7amayan oyuncu 202 ceza al\u0131r. \xC7iftten a\xE7anlar\u0131n cezas\u0131 ikiye katlan\u0131r."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985485
+    m_Localized: "Oyun sonunda en d\xFC\u015F\xFCk puana sahip oyuncu kazan\u0131r."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985486
+    m_Localized: "G\xF6sterge"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985487
+    m_Localized: Okey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985488
+    m_Localized: "\u0130\u015Fle"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985489
+    m_Localized: "Son ta\u015F"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985490
+    m_Localized: Bronz III
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985491
+    m_Localized: Bronz II
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985492
+    m_Localized: Bronz I
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985493
+    m_Localized: "G\xFCm\xFC\u015F III"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985494
+    m_Localized: "G\xFCm\xFC\u015F II"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985495
+    m_Localized: "G\xFCm\xFC\u015F I"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985496
+    m_Localized: "Alt\u0131n III"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985497
+    m_Localized: Elmas III
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985498
+    m_Localized: Elmas II
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985499
+    m_Localized: Elmas I
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985500
+    m_Localized: Usta III
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985501
+    m_Localized: Usta II
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985502
+    m_Localized: Usta I
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985503
+    m_Localized: Lobide
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985504
+    m_Localized: "Masada \xB7 E\u015Fli"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985505
+    m_Localized: "Dereceli ma\xE7 ar\u0131yor"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985506
+    m_Localized: "2 saat \xF6nce"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985507
+    m_Localized: "3 g\xFCn \xF6nce"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985508
+    m_Localized: "Ortak arkada\u015F: Ay\u015Fe Y."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985509
+    m_Localized: "Son ma\xE7ta rakibindi"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985510
+    m_Localized: 3 el kazan
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985511
+    m_Localized: "\xC7iftten a\xE7"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985512
+    m_Localized: 5 el oyna
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985513
+    m_Localized: Okey atarak bitir
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985514
+    m_Localized: "40 ta\u015F i\u015Fle"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985515
+    m_Localized: "\xC7ip, elmas ve ta\u015F g\xF6r\xFCn\xFCmleri"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985516
+    m_Localized: "3 arkada\u015F\u0131n \xE7evrimi\xE7i"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985517
+    m_Localized: "Sezon 3 \xB7 biti\u015Fe 12 g\xFCn"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985518
+    m_Localized: "5 g\xFCnl\xFCk seri \xB7 her g\xFCn gir, \xF6d\xFCl b\xFCy\xFCs\xFCn"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985519
+    m_Localized: "\u0130statistikler, derece ve rozetler"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985520
+    m_Localized: "101 Okey nas\u0131l oynan\u0131r"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985521
+    m_Localized: "Sat\xFCrn"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985522
+    m_Localized: "Alt\u0131n halkalar"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985523
+    m_Localized: Mars
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985524
+    m_Localized: "K\u0131z\u0131l \xE7\xF6l"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985525
+    m_Localized: "Nept\xFCn"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985526
+    m_Localized: Buz mavisi
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985527
+    m_Localized: "J\xFCpiter"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985528
+    m_Localized: "F\u0131rt\u0131na ku\u015Faklar\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985529
+    m_Localized: "Ven\xFCs"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985530
+    m_Localized: Pembe sis
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985531
+    m_Localized: "Galaksi ta\u015F\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985532
+    m_Localized: "Alt\u0131n ta\u015F"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985533
+    m_Localized: "Neon ta\u015F"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985534
+    m_Localized: "Mermer ta\u015F"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985535
+    m_Localized: "\u0130lk zafer"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985536
+    m_Localized: "\u0130lk elini kazan"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985537
+    m_Localized: "Okey ustas\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985538
+    m_Localized: 50 kez okey atarak bitir
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985539
+    m_Localized: "5 \xE7ift"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985540
+    m_Localized: "\xC7iftten 5 kez a\xE7"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985541
+    m_Localized: 100 el
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985542
+    m_Localized: 100 el oyna
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985543
+    m_Localized: "Katlama kral\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985544
+    m_Localized: "Katlamal\u0131da 25 el kazan"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985545
+    m_Localized: Seri galibiyet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985546
+    m_Localized: "\xDCst \xFCste 7 el kazan"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985547
+    m_Localized: Elmas lig
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985548
+    m_Localized: "Elmas lige y\xFCksel"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985549
+    m_Localized: Galaksi gezgini
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985550
+    m_Localized: "T\xFCm gezegen temalar\u0131n\u0131 dene"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985551
+    m_Localized: Efsane
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985552
     m_Localized: 1.000 el kazan
     m_Metadata:
       m_Items: []

@@ -42,6 +42,18 @@ Görev: `Design/PROMPT_v4_OTONOM_GELISTIRME.md`. Bağlam sıfırlanırsa buradan
 - Faz 2 kod hatları (K-11, worktree): `v4/menu` (01–97, S06–S08), `v4/ranked` (Dereceli ekranları, S16), `v4/lobby` (S09–S15 + bekleme/davet/izle/katıl), `v4/audio` (28 ses olayı, müzik, 11 imleç). Masa (`v4/table`) B bitince.
 - İlk ölçüm (run3, menü+giriş+lobi 69 durum): metin eşleşmesi menüde ~%85, UI piksel %6–30. Eşikler ölçüldü (DURUMLAR "Eşikler").
 
+- 22:50 run4 (Unity, 69 durum): lobi demo arka ucu artık doğru (S13 bekleme odası referansa yakın). Ölçümler `durumlar.json`'a işlendi; menü hattına iş listesi olarak iletildi.
+- 22:52 `v4/table` (ana kopya + v4/server + v4/data + v4/assets3d) açıldı; masa hattı başladı (istemci modeli → yerel oturum → TableGame v4 → ağ → yönlendirici → HUD).
+
+- 23:05 Faz 1 birleşmeleri tamam: A (`9c42c73`) → B (`4b7e976`, son `d949edc`) → D (`321d118`) → C (`e372d47`). Ana kopyada:
+  - `node tools/v4/run_package_tests.js`: 106/106 vektör, 26/26 akış.
+  - `dotnet test tools/v4/nunit/CoreV4Tests.csproj`: 791/791.
+  - Sunucu xUnit (Docker): 130/130 (99 mevcut + 27 v4 akış + 4 çalışma zamanı).
+  - Unity içe aktarma (`MenuAssetBuilder.PrepareAssets`, batch): yerelleştirme tabloları, Nunito-700, font atlasları (`3daf284`).
+  - Unity EditMode: 946 test, 939 geçti, 0 kırmızı, 7 atlandı (GPU testleri; `-Graphics` koşusu ayrıca).
+
+- 23:09 Unity EditMode `-Graphics`: **946/946**. Docker: `.dockerignore`/`railway.json` paket kaynaklarını içermiyordu (imaj derlenmezdi) → düzeltildi; `docker build -f Server/Dockerfile` tamam, PostgreSQL 17 ile `/health` 200, misafir 10.000 çip / 20 elmas; `/v1/info` artık 0.4.0 / 101-v4 (`451b53d`).
+
 ## Sıradaki
 
 - Referans yakalamanın bitmesi → `capture_report.json` özetinin buraya ve DURUMLAR'a girmesi.

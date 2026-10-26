@@ -147,6 +147,15 @@ namespace Galaxy101
             row.Insert(0, bar);
         }
 
+        /// <summary>CSS "box-shadow: inset 0 0 0 Npx color" as an overlay ring (no layout shift).</summary>
+        internal static VisualElement Ring(MenuView v, float width, string color, float radius)
+        {
+            var ring = v.Box(); ring.name = "inset-ring"; ring.pickingMode = PickingMode.Ignore; ring.style.position = Position.Absolute; ring.style.left = ring.style.right = ring.style.top = ring.style.bottom = 0;
+            ring.style.borderTopWidth = ring.style.borderRightWidth = ring.style.borderBottomWidth = ring.style.borderLeftWidth = width;
+            ring.style.borderTopColor = ring.style.borderRightColor = ring.style.borderBottomColor = ring.style.borderLeftColor = v.C(color);
+            ring.style.borderTopLeftRadius = ring.style.borderTopRightRadius = ring.style.borderBottomLeftRadius = ring.style.borderBottomRightRadius = radius; return ring;
+        }
+
         /// <summary>Rotated rounded square used by the reference for rank/league markers.</summary>
         internal static VisualElement Diamond(MenuView v, float size, string color, int radius = 2)
         {

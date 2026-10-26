@@ -39,7 +39,8 @@ namespace Galaxy101
             }
             return Save(name, color, status, frame) ? null : "local";
         }
-        public JObject GetStats() => (JObject)content["stats"].DeepClone();
+        /// <summary>The sample stats; v4 adds the month's win-rate change of the design's sample (G101-Menu mp.stats: "Bu ay +%3").</summary>
+        public JObject GetStats() { var stats = (JObject)content["stats"].DeepClone(); if (stats["winRateMonth"] == null) stats["winRateMonth"] = 3; return stats; }
         public JArray GetBadges() => (JArray)content["badges"].DeepClone();
         public JArray GetHistory() => (JArray)content["history"].DeepClone();
         // Signed in to the game server, the two account actions are real requests, not local flags: "çıkış" ends the

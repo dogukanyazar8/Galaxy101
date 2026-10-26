@@ -3,6 +3,8 @@
 !Server/src/**
 !Shared/Galaxy101.Contracts/**
 !Packages/com.okey101.core/Runtime/**
+!Packages/com.galaxy101.contracts/Runtime/**
+!Packages/com.galaxy101.table/Runtime/**
 !Assets/Okey101/Bots/BotPlanner.cs
 **/bin
 **/obj

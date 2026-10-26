@@ -94,7 +94,7 @@ public sealed class SocialRankedFlowTests(ServerFixture server)
         Assert.Equal("ranked.loading", c.Last(M.Snapshot)!.Str("screen"));
         await env.AdvanceAsync(1800);
         Assert.Single(c.Of(M.MatchStart));
-        foreach (var p in players.Skip(1)) await p.CloseAsync();
+        foreach (var p in players.Skip(1)) await env.DropAsync(p);
         Assert.True(await env.UntilAsync(() => c.Of(M.RankChange).Count > 0, 20000, 1000), "rankChange gelmedi");
         var rc = c.Last(M.RankChange)!;
         var mr = c.Last(M.MatchResult)!;

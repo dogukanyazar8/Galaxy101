@@ -40,7 +40,7 @@ namespace Galaxy101.Tests
         public IEnumerator InactiveModeCardMatchesTheSourceSaturationAndBrightnessWithoutExtraDimming()
         {
             controller.View.SetFocused(false);var root=controller.View.Root;
-            var card=root.Q<Button>("mode-3");var bounds=card.worldBound;
+            var card=root.Q<Button>("menu.m.pick[1]");var bounds=card.worldBound;
             var target=owner.GetComponent<MenuGammaPresenter>().Output;
             yield return null;yield return null;
             var pixels=ReadFrame(target);
@@ -70,7 +70,7 @@ namespace Galaxy101.Tests
             var bottomRight=RuntimePanelUtils.ScreenToPanel(root.panel,new Vector2(Screen.width,Screen.height));
             Assert.That(Vector2.Distance(topLeft,bounds.min),Is.LessThan(.1f),"Input mapping added an extra offset or Y flip.");
             Assert.That(Vector2.Distance(bottomRight,bounds.max),Is.LessThan(.1f),"Input mapping applied scaling twice.");
-            var play=root.Q<Button>("play-now");var logicalPoint=play.worldBound.center;
+            var play=root.Q<Button>("menu.play");var logicalPoint=play.worldBound.center;
             var physicalPoint=new Vector2(logicalPoint.x/bounds.width*Screen.width,logicalPoint.y/bounds.height*Screen.height);
             var picked=root.panel.Pick(RuntimePanelUtils.ScreenToPanel(root.panel,physicalPoint));
             Assert.That(picked==play||picked!=null&&play.Contains(picked),Is.True,"Displayed pixels and native button picking disagree.");
@@ -166,7 +166,7 @@ namespace Galaxy101.Tests
             Press(button,KeyCode.Escape);yield return null;yield return null;
             Assert.That(view.Modals.Dialog,Is.Null);Assert.That(view.Modals.Panel,Is.EqualTo("settings"));
             Press(view.Root,KeyCode.Escape);yield return null;
-            Assert.That(view.Modals.Panel,Is.Null);Assert.That(view.Root.Q<Button>("play-now").enabledInHierarchy,Is.True);
+            Assert.That(view.Modals.Panel,Is.Null);Assert.That(view.Root.Q<Button>("menu.play").enabledInHierarchy,Is.True);
         }
         [UnityTest]
         public IEnumerator TabAndShiftTabStayWithinTopDialog()
@@ -185,16 +185,16 @@ namespace Galaxy101.Tests
         public IEnumerator MainButtonsEmitSelectedModeAndRefreshWithoutLosingNativeLayout()
         {
             var view=controller.View;int? played=null;controller.PlayRequested+=mode=>played=mode;
-            Assert.That(view.Root.Q<Label>("mode-soon-4"),Is.Null);Assert.That(view.Root.Q<Label>("mode-soon-3"),Is.Null);
-            var play=view.Root.Q<Button>("play-now");Assert.That(play.worldBound.width,Is.GreaterThan(300));
-            var classic=view.Root.Q<Button>("mode-0");using(var evt=NavigationSubmitEvent.GetPooled()){evt.target=classic;classic.SendEvent(evt);}yield return null;yield return null;
-            play=view.Root.Q<Button>("play-now");using(var evt=NavigationSubmitEvent.GetPooled()){evt.target=play;play.SendEvent(evt);}yield return null;
+            Assert.That(view.Root.Q<Label>("menu.t.soon[2]"),Is.Null);Assert.That(view.Root.Q<Label>("menu.t.soon[1]"),Is.Null);
+            var play=view.Root.Q<Button>("menu.play");Assert.That(play.worldBound.width,Is.GreaterThan(300));
+            var classic=view.Root.Q<Button>("menu.m.pick[0]");using(var evt=NavigationSubmitEvent.GetPooled()){evt.target=classic;classic.SendEvent(evt);}yield return null;yield return null;
+            play=view.Root.Q<Button>("menu.play");using(var evt=NavigationSubmitEvent.GetPooled()){evt.target=play;play.SendEvent(evt);}yield return null;
             Assert.That(played,Is.EqualTo(0));
             Assert.That(view.Root.Query<Button>(className:"mode-card").ToList().Count,Is.EqualTo(3));
             // v4 (G101-Menu modes[].soon = false): Botlara karşı is a playable mode with its own subtitle, no YAKINDA mark.
-            var bots=view.Root.Q<Button>("mode-4");using(var evt=NavigationSubmitEvent.GetPooled()){evt.target=bots;bots.SendEvent(evt);}yield return null;yield return null;
+            var bots=view.Root.Q<Button>("menu.m.pick[2]");using(var evt=NavigationSubmitEvent.GetPooled()){evt.target=bots;bots.SendEvent(evt);}yield return null;yield return null;
             Assert.That(controller.Model.SelectedMode,Is.EqualTo(4));
-            Assert.That(view.Root.Q<Label>("play-subtitle").text,Is.EqualTo("Botlara karşı · antrenman · bahis yok"));
+            Assert.That(view.Root.Q<Label>("menu.playSub").text,Is.EqualTo("Botlara karşı · antrenman · bahis yok"));
             Assert.That(controller.View,Is.Not.Null);
         }
     }

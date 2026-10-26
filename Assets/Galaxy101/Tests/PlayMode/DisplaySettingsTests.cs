@@ -86,7 +86,7 @@ namespace Galaxy101.Tests
             Assert.That((int)menu.Model.Settings["fps"], Is.EqualTo(30));
 
             // Varsayılana dön: Tam ekran, native, Otomatik.
-            Click(root, "settings-reset"); yield return null;
+            Click(root, "menu.resetSettings"); yield return null;
             Assert.That((string)menu.Model.Settings["wmode"], Is.EqualTo("fullscreen")); Assert.That((string)menu.Model.Settings["res"], Is.EqualTo(GameDisplay.Native));
             Assert.That((int)menu.Model.Settings["fps"], Is.EqualTo(FramePacing.Auto));
             Assert.That(GameDisplay.LastRequest.Mode, Is.EqualTo(FullScreenMode.ExclusiveFullScreen));

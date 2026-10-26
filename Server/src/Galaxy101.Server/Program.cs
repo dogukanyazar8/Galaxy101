@@ -105,7 +105,7 @@ app.MapGet("/health", async (GameDb db, CancellationToken ct) =>
 app.MapGet("/v1/info", (GameCalendar calendar, IOptions<GameOptions> game) => new ServerInfoResponse
 {
     Version = typeof(Program).Assembly.GetName().Version?.ToString(3),
-    RuleVersion = "101-v1",
+    RuleVersion = Okey101.Core.V4.G101Rules.RuleVersion,   // new matches play the v4 engine (KARARLAR K-02)
     ServerTime = calendar.Now,
     PrivacyPolicyVersion = game.Value.PrivacyPolicyVersion,
     PrivacyPolicyUrl = game.Value.PrivacyPolicyUrl,

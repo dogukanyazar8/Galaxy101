@@ -63,6 +63,8 @@ namespace Galaxy101.Table
             public bool ShowReturn, ShowIsle, CanIsle, ShowLayPair, CanLayPair;
             /// <summary>protocol.json reconnect: "Bağlantı koptu · Deneme n/5" (0 = connected); GaveUp leaves only "Lobiye dön".</summary>
             public int NetAttempt; public bool NetGaveUp;
+            /// <summary>The account opened on another device: the card says so and offers only "Lobiye dön".</summary>
+            public bool NetReplaced;
             /// <summary>G101-Masa tOpened ("Elini açtın · şimdi bir taş at"): my discard after a first turn once I have opened (the prototype never sets _seenOpen).</summary>
             public bool OpenedThisTurn;
         }

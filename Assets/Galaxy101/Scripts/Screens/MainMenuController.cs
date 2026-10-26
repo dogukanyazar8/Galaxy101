@@ -222,6 +222,9 @@ namespace Galaxy101
         {
             Initialize();if(navigating||View.Modals.Panel!=null||View.Modals.Dialog!=null)return;navigating=true;
             bool overlay=scene==GalaxyTableScene;
+            var launch=Galaxy101.Table.TableGame.Pending;
+            // T51 "Lobiye dön" while the scene still loads: it cannot be stopped, so the table it opens goes straight back.
+            void BackToLobby(){Loading.Hide();if(launch!=null)launch.Cancelled=true;}
             try
             {
                 if(overlay){Loading=Loading??new TableLoadingOverlay(View,transform);Loading.Show(Galaxy101.Table.TableGame.Pending?.Table?.Hands??Galaxy101.Table.TableRules.Current.MatchHands,LoadingKick(Galaxy101.Table.TableGame.Pending));}
@@ -239,7 +242,7 @@ namespace Galaxy101
                     {
                         Loading.SetProgress(load.progress/.9f);
                         // T51: a load that has not finished in time offers the lobby or another wait.
-                        if(Time.realtimeSinceStartup>deadline&&!Loading.ErrorVisible)Loading.ShowError(()=>Loading.Hide(),()=>deadline=Time.realtimeSinceStartup+TableLoadTimeout);
+                        if(Time.realtimeSinceStartup>deadline&&!Loading.ErrorVisible&&launch?.Cancelled!=true)Loading.ShowError(BackToLobby,()=>deadline=Time.realtimeSinceStartup+TableLoadTimeout);
                     }
                     await Task.Yield();
                 }

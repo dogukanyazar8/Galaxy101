@@ -36,9 +36,20 @@ namespace Galaxy101.Table
             var dot = new VisualElement { pickingMode = PickingMode.Ignore }; MenuView.Place(dot, 34, 50, 8, 8); view.Decorate(dot, "var(--a1)", 4); icon.Add(dot);
             card.Add(icon);
 
-            var title = Text(TableStrings.Get("netTitle", Lang), "Montserrat-700", 26, "#F4F1E8"); title.name = "table.t.netTitle"; title.style.marginTop = 12; card.Add(title);
-            var body = Text(TableStrings.Get("netBody", Lang), "Baloo2-700", 15, "var(--mt)"); body.name = "table.t.netBody";
+            var title = Text(TableStrings.Get(s.NetReplaced ? "netReplacedTitle" : "netTitle", Lang), "Montserrat-700", 26, "#F4F1E8"); title.name = "table.t.netTitle"; title.style.marginTop = 12; card.Add(title);
+            var body = Text(TableStrings.Get(s.NetReplaced ? "netReplacedBody" : "netBody", Lang), "Baloo2-700", 15, "var(--mt)"); body.name = "table.t.netBody";
             body.style.whiteSpace = WhiteSpace.Normal; body.style.maxWidth = 380; body.style.unityTextAlign = TextAnchor.UpperCenter; body.style.marginTop = 12; card.Add(body);
+
+            if (s.NetReplaced)
+            {
+                // No attempts to count down: only the way back to the lobby.
+                var back = Text(TableStrings.Get("lobby", Lang), "Montserrat-700", 16, "var(--aT)"); back.name = "table.askExitNet"; back.style.alignSelf = Align.Stretch; back.style.marginTop = 20;
+                back.style.unityTextAlign = TextAnchor.MiddleCenter; Pad(back, 14, 14, 14, 14); view.Decorate(back, "linear-gradient(var(--a1),var(--a2))", 16, 5, "var(--aS)");
+                card.Add(Clickable(back, "net-lobby"));
+                layer.Add(card);
+                hudLayer.Add(layer);
+                return;
+            }
 
             var progress = new VisualElement { pickingMode = PickingMode.Ignore }; progress.style.alignSelf = Align.Stretch; progress.style.marginTop = 18;
             var line = Row(6); line.style.justifyContent = Justify.SpaceBetween;

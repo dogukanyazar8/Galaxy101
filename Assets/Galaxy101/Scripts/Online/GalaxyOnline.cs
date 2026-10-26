@@ -26,6 +26,9 @@ namespace Galaxy101.Online
         public bool Guest { get; private set; }
         public bool Remember { get; private set; }
         public bool SignedIn => Api != null && Api.SignedIn;
+        /// <summary>Bumped at every sign-in and sign-out: an answer that started under another number belongs to another
+        /// account (or none) and must not land in this one's screens.</summary>
+        public int Generation { get; private set; }
         /// <summary>Profile or wallet changed (server push or refresh).</summary>
         public event Action Changed;
         /// <summary>The socket came back after a drop: the server forgot waiting rooms and subscriptions, so listeners
@@ -94,6 +97,7 @@ namespace Galaxy101.Online
 
         public async Task SignOutAsync()
         {
+            Generation++;
             Realtime.Dispose();
             await Api.LogoutAsync();
             Profile = null; Wallet = null; Forget();
@@ -116,6 +120,7 @@ namespace Galaxy101.Online
 
         private async Task AfterSignInAsync()
         {
+            Generation++;
             Persist(Api.Tokens);
             await RefreshAsync();
             try { await Realtime.ConnectAsync(); }

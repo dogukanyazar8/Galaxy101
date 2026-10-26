@@ -30,15 +30,21 @@ namespace Galaxy101
         {
             var value = new JObject { ["name"] = name, ["color"] = color, ["status"] = status ?? "", ["frame"] = frame };
             if (!ProfileValidation.IsValid(value)) return "validation";
+            int mine = ++saves;
             var online = Online.GalaxyOnline.Instance;
             if (online != null && online.SignedIn)
             {
+                int generation = online.Generation;
                 try { await online.Api.PutAsync<JObject>("/v1/profile", new Contracts.ProfileUpdateRequest { Name = name.Trim(), Color = color, Status = status ?? "", Frame = frame }); }
                 catch (Online.ApiException e) { return e.Offline ? "offline" : e.Code; }
+                // A later save (or another account) owns the profile now: this older answer must not put its values back.
+                if (mine != saves || online.Generation != generation) return null;
                 try { await online.RefreshAsync(); } catch (Online.ApiException) { } // saved; the next refresh brings the card
+                if (mine != saves || online.Generation != generation) return null;
             }
             return Save(name, color, status, frame) ? null : "local";
         }
+        private int saves;
         /// <summary>The sample stats; v4 adds the month's win-rate change of the design's sample (G101-Menu mp.stats: "Bu ay +%3").</summary>
         public JObject GetStats() { var stats = (JObject)content["stats"].DeepClone(); if (stats["winRateMonth"] == null) stats["winRateMonth"] = 3; return stats; }
         public JArray GetBadges() => (JArray)content["badges"].DeepClone();
@@ -47,11 +53,15 @@ namespace Galaxy101
         // server session and forgets the remembered token; deletion asks the server to delete the account, then signs out.
         public bool Logout()
         {
-            if (LoggedOut) return false; LoggedOut = true;
             var online = Online.GalaxyOnline.Instance;
-            if (online != null && online.SignedIn) _ = SignOutAsync(online);
+            bool signedIn = online != null && online.SignedIn;
+            // Once per sign-in: a later sign-in in the same menu can log out again; a second tap while signing out cannot.
+            if (signedIn ? loggedOutAt == online.Generation : LoggedOut) return false;
+            LoggedOut = true;
+            if (signedIn) { loggedOutAt = online.Generation; _ = SignOutAsync(online); }
             model.NotifyChanged(); return true;
         }
+        private int loggedOutAt = -1;
         /// <summary>The design's demo flow (no server account): only a local flag.</summary>
         public bool RequestDelete()
         {

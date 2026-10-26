@@ -28,6 +28,8 @@ namespace Galaxy101.Table
         /// <summary>Top bar: "Test masası · Tekli" and "Bahis 5.000" (null: from the table).</summary>
         public string Room, BetLabel;
         public long Stake;
+        /// <summary>"Lobiye dön" on a load that took too long (T51): the scene cannot stop loading, so the table goes straight back.</summary>
+        public bool Cancelled;
         /// <summary>The wallet shown on the table (the state run's 10.000 − 5.000 bet); null = the menu's.</summary>
         public long? Chips;
         /// <summary>Seat cards: name, colour, level (null = the table's users).</summary>
@@ -139,6 +141,7 @@ namespace Galaxy101.Table
             if (Launch.Session == null && Launch.Flow == null && PendingScenario != null) { Launch.Flow = TableScenarios.Has(PendingScenario) ? TableScenarios.Flow(PendingScenario) : PendingScenario; }
             PendingScenario = null;
             Session = Launch.Session ?? new LocalTableSession(Launch.Setup ?? DefaultSetup(), Launch.Table ?? DefaultTable(), Launch.Clock ?? (() => GameClock.NowMs), 0, Launch.Clock == null ? () => GameClock.Frozen : (Func<bool>)null);
+            if (Launch.Cancelled) { Leave(Session.Online); return; }   // the player chose the lobby while this scene was loading
 
             if (hud != null)
             {
@@ -997,7 +1000,7 @@ namespace Galaxy101.Table
             s.ShowReturn = CanDiscard && Legal.ReturnSide;
             s.ShowLayPair = IOpened && eval.Pairs.Count > 0; s.CanLayPair = CanDiscard && s.ShowLayPair;
             s.CanIsle = s.ShowIsle = CanDiscard && IOpened && Rack.Count > 1 && Addable() != null;
-            if (Session is Galaxy101.Online.V4TableSession net) { s.NetAttempt = net.Dropped ? Math.Max(1, net.Attempt) : 0; s.NetGaveUp = net.GaveUp; }
+            if (Session is Galaxy101.Online.V4TableSession net) { s.NetAttempt = net.Dropped ? Math.Max(1, net.Attempt) : 0; s.NetGaveUp = net.GaveUp; s.NetReplaced = net.Replaced; }
             if (netDemo > 0) s.NetAttempt = netDemo;
             s.OpenBar = m.OpenNeed(G101Rules.KindRun); s.PairsBar = m.OpenNeed(G101Rules.KindPair);
             s.ShortOpen = CanDiscard && !IOpened && eval.Sum < s.OpenBar;
@@ -1152,13 +1155,24 @@ namespace Galaxy101.Table
         /// <summary>"Kalk" (tableLeave, R-60): a bot plays my seat to the end; the server answers leftTable (1300 ms to the lobby).</summary>
         public async void ConfirmExit()
         {
-            if (leaving) return;
-            ExitOpen = false;
+            if (leaving || exiting) return;
+            ExitOpen = false; exiting = true;
+            string error;
+            try { error = await Session.Leave(); }
+            finally { exiting = false; }
+            if (this == null || leaving) return;
+            // Refused or unanswered (offline, timeout): the server still holds the seat, so the table stays. If the leave did
+            // land after all, its leftTable takes the player to the lobby. E_NOT_SEATED: the seat is already gone.
+            if (error != null && error != V4Errors.E_NOT_SEATED)
+            {
+                Message(TableHud.ToastKind.Error, L("Masadan kalkılamadı · tekrar dene", "Could not leave the table · try again"));
+                Notify();
+                return;
+            }
             Message(TableHud.ToastKind.Success, L("Masadan kalktın · lobiye dönülüyor", "You left the table · returning to the lobby"));
-            await Session.Leave();
-            if (this == null) return;
             LeaveAfter(TableTimings.LeaveToLobby / 1000f + 0.4f);
         }
+        private bool exiting;
 
         private void LeaveAfter(float seconds) { if (!leaving) StartCoroutine(LeaveLater(seconds)); }
 

@@ -134,6 +134,29 @@ namespace Galaxy101.Tests
             GalaxyOnline.Forget(); // the test's guest session must not be resumed by the next real start
             yield return null;
             if (statePath != null && File.Exists(statePath)) File.Delete(statePath);
+            if (filteringLogs)
+            {
+                Application.logMessageReceived -= CollectLog; filteringLogs = false;
+                var logs = unexpectedLogs.ToList(); unexpectedLogs.Clear();
+                Assert.That(logs, Is.Empty, "errors other than UI Toolkit's filter render-tree log (UF-04)");
+            }
+        }
+
+        // UF-04: UI Toolkit 6000.6.6 may log "Attempted to get a texture (index=N) that is not allocated" while a filtered
+        // dialog is rebuilt. Only that line is let through; any other error still fails the test (checked at teardown).
+        private readonly List<string> unexpectedLogs = new List<string>();
+        private bool filteringLogs;
+
+        private void OnlyKnownUiToolkitLogs()
+        {
+            LogAssert.ignoreFailingMessages = true;
+            if (!filteringLogs) { filteringLogs = true; Application.logMessageReceived += CollectLog; }
+        }
+
+        private void CollectLog(string message, string stack, LogType type)
+        {
+            if ((type == LogType.Error || type == LogType.Exception || type == LogType.Assert) && !message.StartsWith("Attempted to get a texture", StringComparison.Ordinal))
+                unexpectedLogs.Add(type + ": " + message);
         }
 
         private MainMenuController Menu()
@@ -320,8 +343,8 @@ namespace Galaxy101.Tests
             // UI Toolkit 6000.6.6 logs "Attempted to get a texture (index=N) that is not allocated" from its filter render
             // tree when the filtered dialog card is rebuilt during this test's shake (also with every backdrop blur
             // switched off); player runs of S11/S12 never log it (docs/v4/UNITY_FARKLARI.md UF-04). The test's own
-            // assertions still decide the result.
-            LogAssert.ignoreFailingMessages = true;
+            // assertions still decide the result, and any other error fails it.
+            OnlyKnownUiToolkitLogs();
             var menu = Menu(); var root = menu.View.Root; yield return null;
             menu.OpenLobby(); menu.Lobby.ConnectSeconds = .05f; yield return null;
             var locked = fake.List.First(t => t.Locked);
@@ -548,7 +571,7 @@ namespace Galaxy101.Tests
         [UnityTest]
         public IEnumerator LiveServer()
         {
-            LogAssert.ignoreFailingMessages = true;   // UI Toolkit filter render-tree log while dialogs rebuild (UNITY_FARKLARI UF-04); the assertions decide
+            OnlyKnownUiToolkitLogs();   // UI Toolkit filter render-tree log while dialogs rebuild (UNITY_FARKLARI UF-04); any other error still fails
             using (var probe = UnityWebRequest.Get(GalaxyApi.ResolveServer() + "/health"))
             {
                 probe.timeout = 3; yield return probe.SendWebRequest();

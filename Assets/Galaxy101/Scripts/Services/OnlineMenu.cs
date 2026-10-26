@@ -23,6 +23,8 @@ namespace Galaxy101
         private readonly JObject sample;
         private readonly Dictionary<string, JObject> boards = new Dictionary<string, JObject>();
         private long settingsRevision = -1;
+        /// <summary>The sign-in (<see cref="GalaxyOnline.Generation"/>) the cached data belongs to.</summary>
+        private int loadedFor = -1;
 
         public OnlineMenu(MenuModel model, JObject sample) { this.model = model; this.sample = sample; }
 
@@ -52,6 +54,7 @@ namespace Galaxy101
         private async Task LoadAsync(string panel)
         {
             var session = Session; if (session == null) return;
+            Adopt(session);
             try
             {
                 switch (panel)
@@ -65,20 +68,36 @@ namespace Galaxy101
                     case "share": await LoadShare(session); break;
                     default: return;
                 }
-                if (Session == session) model.NotifyChanged();
+                if (!Stale(session, loadedFor)) model.NotifyChanged();
             }
             catch (ApiException e) { if (!e.Offline) Debug.LogWarning("Menu data (" + (panel ?? "start") + ") not loaded: " + e.Code); }
             catch (Exception e) { Debug.LogException(e); } // fire-and-forget: nothing else would see it
         }
 
+        /// <summary>Another account signed in since the cache was filled: nothing of the previous one stays on screen.</summary>
+        private void Adopt(GalaxyOnline session)
+        {
+            if (loadedFor == session.Generation) return;
+            loadedFor = session.Generation;
+            Stats = null; Badges = new JArray(); History = new JArray(); Streak = new JArray(); Quests = new JArray(); CanClaimDay = false;
+            Friends = new JArray(); Requests = new JArray(); Catalog = null; ShareUrl = null; boards.Clear(); settingsRevision = -1;
+            model.SentRequests.Clear();
+        }
+
+        /// <summary>An answer that started under <paramref name="generation"/> belongs to another sign-in now (or to none).</summary>
+        private static bool Stale(GalaxyOnline session, int generation) => Session != session || session.Generation != generation;
+
         // ---------- profile ----------
         private async Task LoadProfile(GalaxyOnline session)
         {
+            int generation = session.Generation;
             var stats = session.Api.GetAsync<StatsResponse>("/v1/profile/stats");
             var badges = session.Api.GetAsync<List<BadgeResponse>>("/v1/profile/badges");
             var history = session.Api.GetAsync<List<HistoryEntryResponse>>("/v1/profile/history");
             await session.RefreshAsync(); // the level, XP and LP on the card
-            var s = await stats; var progress = session.Profile?.Progress ?? new ProgressResponse { Level = 1, NextLevelXp = 375, League = "b3", NextLeague = "b2" };
+            var s = await stats; var list = await badges; var past = await history;
+            if (Stale(session, generation)) return;
+            var progress = session.Profile?.Progress ?? new ProgressResponse { Level = 1, NextLevelXp = 375, League = "b3", NextLeague = "b2" };
             var league = progress.League ?? "b3";
             Stats = new JObject
             {
@@ -91,7 +110,7 @@ namespace Galaxy101
                 ["modeWinRates"] = new JArray(s.WinRate, s.ModeWinRates.Count > 3 ? s.ModeWinRates[3] : 0, 0, 0),
             };
             // The server lists the badges in the reference panel's order; the art and names are the panel's.
-            var art = (JArray)sample["badges"]; var list = await badges; var mapped = new JArray();
+            var art = (JArray)sample["badges"]; var mapped = new JArray();
             for (int i = 0; i < art.Count && i < list.Count; i++)
             {
                 var badge = (JObject)art[i].DeepClone(); var b = list[i];
@@ -100,7 +119,7 @@ namespace Galaxy101
             }
             Badges = mapped;
             var now = DateTimeOffset.UtcNow;
-            History = new JArray((await history).Select(h => new JObject
+            History = new JArray(past.Select(h => new JObject
             {
                 ["mode"] = Math.Max(0, Array.IndexOf(Modes, h.Mode)), ["place"] = h.Place, ["delta"] = h.ChipDelta,
                 ["minutes"] = (int)Math.Max(0, (now - h.FinishedAt).TotalMinutes), ["stake"] = h.Stake,
@@ -109,7 +128,12 @@ namespace Galaxy101
         }
 
         // ---------- daily rewards ----------
-        private async Task LoadDaily(GalaxyOnline session) => ApplyDaily(session, await session.Api.GetAsync<DailyResponse>("/v1/daily"));
+        private async Task LoadDaily(GalaxyOnline session)
+        {
+            int generation = session.Generation;
+            var daily = await session.Api.GetAsync<DailyResponse>("/v1/daily");
+            if (!Stale(session, generation)) ApplyDaily(session, daily);
+        }
 
         private void ApplyDaily(GalaxyOnline session, DailyResponse daily)
         {
@@ -141,14 +165,22 @@ namespace Galaxy101
         private async Task<string> Daily(string path, string tr, string en)
         {
             var session = Session; if (session == null) return "offline";
-            try { ApplyDaily(session, await session.Api.PostAsync<DailyResponse>(path, null)); }
+            int generation = session.Generation;
+            try { var daily = await session.Api.PostAsync<DailyResponse>(path, null); if (Stale(session, generation)) return "offline"; ApplyDaily(session, daily); }
             catch (ApiException e) { await Reload(session, LoadDaily); return Fail(e); }
             model.NotifyChanged(); Notice?.Invoke(tr, en, "info");
             return null;
         }
 
         // ---------- shop ----------
-        private async Task LoadShop(GalaxyOnline session) { Catalog = await session.Api.GetAsync<CatalogResponse>("/v1/shop/catalog"); await session.RefreshAsync(); }
+        private async Task LoadShop(GalaxyOnline session)
+        {
+            int generation = session.Generation;
+            var catalog = await session.Api.GetAsync<CatalogResponse>("/v1/shop/catalog");
+            if (Stale(session, generation)) return;
+            Catalog = catalog;
+            await session.RefreshAsync();
+        }
 
         /// <summary>A gem-priced item is bought on the server; real-money packs need the platform store, which is not open yet.</summary>
         public async Task<string> PurchaseAsync(string id)
@@ -169,7 +201,9 @@ namespace Galaxy101
         // ---------- friends ----------
         private async Task LoadFriends(GalaxyOnline session)
         {
+            int generation = session.Generation;
             var list = await session.Api.GetAsync<FriendsResponse>("/v1/friends");
+            if (Stale(session, generation)) return;
             Friends = new JArray(list.Friends.Select(Friend));
             Requests = new JArray(list.Incoming.Select(r => Person(r.Player, new JArray("Sana istek gönderdi", "Sent you a request"))));
             foreach (var sent in list.Outgoing) if (!string.IsNullOrEmpty(sent.Player?.FriendCode)) model.SentRequests.Add(sent.Player.FriendCode);
@@ -193,9 +227,11 @@ namespace Galaxy101
         public async Task<JObject> SearchAsync(string query)
         {
             var session = Session; if (session == null || string.IsNullOrWhiteSpace(query)) return null;
+            int generation = session.Generation;
             List<PlayerSearchResponse> found;
             try { found = await session.Api.GetAsync<List<PlayerSearchResponse>>("/v1/players/search?q=" + Uri.EscapeDataString(query.Trim())); }
             catch (ApiException e) { if (e.Offline) Fail(e); return null; } // a too short name is simply "not found"
+            if (Stale(session, generation)) return null;
             var hit = found?.FirstOrDefault(); if (hit == null) return null;
             var result = Person(hit.Player, null);
             result["isFriend"] = hit.IsFriend; result["sent"] = hit.RequestSent;
@@ -226,7 +262,9 @@ namespace Galaxy101
         // ---------- leaderboard ----------
         private async Task LoadBoard(GalaxyOnline session, string scope)
         {
+            int generation = session.Generation;
             var board = await session.Api.GetAsync<LeaderboardResponse>("/v1/leaderboard/" + scope);
+            if (Stale(session, generation)) return;
             var rows = board.Rows.Select(r => Row(r.Player, r.Points, r.Rank, r.Me)).ToList();
             boards[scope] = new JObject
             {
@@ -248,7 +286,9 @@ namespace Galaxy101
         // ---------- settings ----------
         private async Task LoadSettings(GalaxyOnline session)
         {
+            int generation = session.Generation;
             var saved = await session.Api.GetAsync<SettingsResponse>("/v1/settings");
+            if (Stale(session, generation)) return;
             settingsRevision = saved.Revision;
             if (saved.Revision == 0) { await PushSettings(session); return; } // never saved on the account: this device's choice
             var next = (JObject)model.Settings.DeepClone();
@@ -277,12 +317,18 @@ namespace Galaxy101
 
         private async Task PushSettings(GalaxyOnline session)
         {
+            int generation = session.Generation;
             for (int attempt = 0; attempt < 2; attempt++)
             {
-                if (settingsRevision < 0) settingsRevision = (await session.Api.GetAsync<SettingsResponse>("/v1/settings")).Revision;
+                if (settingsRevision < 0) { var current = (await session.Api.GetAsync<SettingsResponse>("/v1/settings")).Revision; if (Stale(session, generation)) return; settingsRevision = current; }
                 var dto = model.Settings.ToObject<SettingsDto>(Newtonsoft.Json.JsonSerializer.Create(GalaxyApi.Json));
-                try { settingsRevision = (await session.Api.PutAsync<SettingsResponse>("/v1/settings", new SettingsUpdateRequest { Settings = dto, Revision = settingsRevision })).Revision; return; }
-                catch (ApiException e) when (e.Status == 409) { settingsRevision = -1; } // another device saved: this explicit save wins
+                try
+                {
+                    var saved = (await session.Api.PutAsync<SettingsResponse>("/v1/settings", new SettingsUpdateRequest { Settings = dto, Revision = settingsRevision })).Revision;
+                    if (!Stale(session, generation)) settingsRevision = saved;
+                    return;
+                }
+                catch (ApiException e) when (e.Status == 409) { if (Stale(session, generation)) return; settingsRevision = -1; } // another device saved: this explicit save wins
             }
         }
 
@@ -299,7 +345,12 @@ namespace Galaxy101
         }
 
         // ---------- share ----------
-        private async Task LoadShare(GalaxyOnline session) => ShareUrl = (await session.Api.GetAsync<ShareLinkResponse>("/v1/share"))?.Url;
+        private async Task LoadShare(GalaxyOnline session)
+        {
+            int generation = session.Generation;
+            var url = (await session.Api.GetAsync<ShareLinkResponse>("/v1/share"))?.Url;
+            if (!Stale(session, generation)) ShareUrl = url;
+        }
 
         // ---------- helpers ----------
         private static async Task Reload(GalaxyOnline session, Func<GalaxyOnline, Task> load)

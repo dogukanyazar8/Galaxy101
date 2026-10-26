@@ -76,6 +76,8 @@ namespace Galaxy101.Online
         public bool Dropped { get; private set; }
         /// <summary>The fifth attempt failed: only "Lobiye dön" is left.</summary>
         public bool GaveUp { get; private set; }
+        /// <summary>The account signed in on another device and took the socket: no reconnect, only "Lobiye dön".</summary>
+        public bool Replaced { get; private set; }
         public event Action ConnectionChanged;
 
         public void Tick() { }
@@ -156,12 +158,19 @@ namespace Galaxy101.Online
 
         private void OnClosed(string reason)
         {
-            if (Closed || reason == GalaxyRealtime.ReplacedReason) return;
+            if (Closed) return;
+            if (reason == GalaxyRealtime.ReplacedReason)
+            {
+                // Reconnecting would take the account back from the other device; the table says so and offers the lobby.
+                Replaced = true; Dropped = true; GaveUp = true; retryNow = false;
+                ConnectionChanged?.Invoke();
+                return;
+            }
             _ = Reconnect();
         }
 
         /// <summary>"Şimdi dene": the next attempt at once (the count goes on).</summary>
-        public void RetryNow() { if (Dropped && !reconnecting && !GaveUp) _ = Reconnect(); else retryNow = true; }
+        public void RetryNow() { if (Replaced || Closed) return; if (Dropped && !reconnecting && !GaveUp) _ = Reconnect(); else retryNow = true; }
         private bool retryNow;
 
         private async Task Reconnect()
@@ -175,19 +184,28 @@ namespace Galaxy101.Online
                 {
                     Attempt = n; ConnectionChanged?.Invoke();
                     float until = Time.realtimeSinceStartup + TableTimings.ClientRetryMs / 1000f;
-                    while (Time.realtimeSinceStartup < until && !retryNow) await Task.Yield();
+                    while (Time.realtimeSinceStartup < until && !retryNow && !Closed && !Replaced) await Task.Yield();
                     retryNow = false;
+                    // Closed meanwhile ("Lobiye dön", a new match) or taken by another device: no hello for this table.
+                    if (Closed || Replaced) return;
                     try
                     {
                         await online.Realtime.ConnectAsync();
+                        if (Closed || Replaced) return;
                         var ack = await online.Realtime.RequestAsync(V4Messages.Hello, new V4HelloRequest { Token = "" });
+                        if (Closed) return;
                         if (ack.Ok) { Dropped = false; Attempt = 0; ConnectionChanged?.Invoke(); return; }
                     }
                     catch (Exception e) { Debug.LogWarning("GALAXY101_TABLE_RECONNECT attempt=" + n + " " + e.Message); }
                 }
-                if (Dropped) { GaveUp = true; ConnectionChanged?.Invoke(); }
+                if (Dropped && !Closed) { GaveUp = true; ConnectionChanged?.Invoke(); }
             }
-            finally { reconnecting = false; online.SuspendReconnect = false; }
+            finally
+            {
+                reconnecting = false; online.SuspendReconnect = false;
+                // Closed while this loop held the socket: the session's own reconnect takes it back (Dispose could not).
+                if (Closed && !Replaced && online.SignedIn && !online.Realtime.Connected) online.ReconnectNow();
+            }
         }
 
         private void Close()
@@ -203,8 +221,9 @@ namespace Galaxy101.Online
             foreach (var off in subscriptions) off();
             subscriptions.Clear();
             Close();
-            // The table gave up reconnecting (or left while offline): the session's own reconnect takes over.
-            if (!online.Realtime.Connected) online.ReconnectNow();
+            // The table gave up reconnecting (or left while offline): the session's own reconnect takes over — unless another
+            // device has the account (that socket must stay theirs) or this table's loop is still running (it hands over).
+            if (!Replaced && !reconnecting && online.SignedIn && !online.Realtime.Connected) online.ReconnectNow();
         }
     }
 }

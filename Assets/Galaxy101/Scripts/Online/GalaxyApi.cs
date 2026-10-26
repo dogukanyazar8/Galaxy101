@@ -44,8 +44,15 @@ namespace Galaxy101.Online
 
         public GalaxyApi(string baseUrl = null) { BaseUrl = (baseUrl ?? ResolveServer()).TrimEnd('/'); }
 
+        /// <summary>
+        /// Set by the development state router: state runs never reach a real account or server (the prototype's
+        /// G101State.sandbox), so a remembered session cannot skip the sign-in states or replace the state account.
+        /// </summary>
+        public static string Override;
+
         public static string ResolveServer()
         {
+            if (!string.IsNullOrEmpty(Override)) return Override;
             var args = Environment.GetCommandLineArgs();
             int i = Array.IndexOf(args, "-galaxyServer");
             if (i >= 0 && i + 1 < args.Length) return args[i + 1];

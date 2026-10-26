@@ -95,6 +95,8 @@ namespace Galaxy101.Diagnostics
         {
             Current = o;
             MainMenuController.AuthOnStart = false;
+            // Sandbox like g101-state.js (G101State.sandbox): no real server, no remembered session (port 9 = discard, refused).
+            Galaxy101.Online.GalaxyApi.Override = "http://127.0.0.1:9";
             var owner = new GameObject("G101 state router"); DontDestroyOnLoad(owner);
             var router = owner.AddComponent<G101StateRouter>(); router.options = o;
             return router;

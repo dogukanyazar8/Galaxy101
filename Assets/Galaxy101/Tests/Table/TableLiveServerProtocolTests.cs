@@ -1,3 +1,6 @@
+// Outside Unity only (tools/v4/nunit-table): it blocks on async socket work, which the editor's main-thread
+// synchronization context would deadlock; Unity runs the same path as Tests/PlayMode/TableLiveServerTests.
+#if !UNITY_5_3_OR_NEWER
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -264,3 +267,4 @@ namespace Galaxy101.Table.Tests
         }
     }
 }
+#endif

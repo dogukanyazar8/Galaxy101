@@ -80,17 +80,22 @@ namespace Galaxy101.Diagnostics
                     string text = Regex.Replace(label.text ?? "", "<[^>]+>", "");
                     if (string.IsNullOrWhiteSpace(text) || !Visible(label) || label.resolvedStyle.color.a < .02f) continue;
                     var b = label.worldBound; if (b.width < 1 || b.height < 1) continue;
-                    var p = label.resolvedStyle;
-                    float x = b.x + p.paddingLeft + p.borderLeftWidth, y = b.y + p.paddingTop + p.borderTopWidth;
-                    float w = b.width - p.paddingLeft - p.paddingRight - p.borderLeftWidth - p.borderRightWidth, h = b.height - p.paddingTop - p.paddingBottom - p.borderTopWidth - p.borderBottomWidth;
-                    var size = label.MeasureTextSize(label.text, w, VisualElement.MeasureMode.Undefined, h, VisualElement.MeasureMode.Undefined);
-                    float textW = Mathf.Min(w, size.x);
+                    // The glyph block is laid out in the label's own (local) space and then transformed, so a rotated or
+                    // scaled label reports the bounds of its transformed text box — what a DOM text range rect gives.
+                    var p = label.resolvedStyle; var local = label.contentRect;
+                    var size = label.MeasureTextSize(label.text, local.width, VisualElement.MeasureMode.Undefined, local.height, VisualElement.MeasureMode.Undefined);
+                    float textW = Mathf.Min(local.width, size.x), textH = size.y;
                     var a = p.unityTextAlign;
                     bool center = a == TextAnchor.MiddleCenter || a == TextAnchor.UpperCenter || a == TextAnchor.LowerCenter, right = a == TextAnchor.MiddleRight || a == TextAnchor.UpperRight || a == TextAnchor.LowerRight;
-                    bool middle = a == TextAnchor.MiddleLeft || a == TextAnchor.MiddleCenter || a == TextAnchor.MiddleRight;
-                    float textX = center ? x + (w - textW) / 2 : right ? x + w - textW : x, textY = middle ? y + (h - size.y) / 2 : y;
+                    bool middle = a == TextAnchor.MiddleLeft || a == TextAnchor.MiddleCenter || a == TextAnchor.MiddleRight, lower = a == TextAnchor.LowerLeft || a == TextAnchor.LowerCenter || a == TextAnchor.LowerRight;
+                    float lx = local.x + (center ? (local.width - textW) / 2 : right ? local.width - textW : 0), ly = local.y + (middle ? (local.height - textH) / 2 : lower ? local.height - textH : 0);
+                    var c0 = label.LocalToWorld(new Vector2(lx, ly)); var c1 = label.LocalToWorld(new Vector2(lx + textW, ly));
+                    var c2 = label.LocalToWorld(new Vector2(lx, ly + textH)); var c3 = label.LocalToWorld(new Vector2(lx + textW, ly + textH));
+                    float minX = Mathf.Min(Mathf.Min(c0.x, c1.x), Mathf.Min(c2.x, c3.x)), maxX = Mathf.Max(Mathf.Max(c0.x, c1.x), Mathf.Max(c2.x, c3.x));
+                    float minY = Mathf.Min(Mathf.Min(c0.y, c1.y), Mathf.Min(c2.y, c3.y)), maxY = Mathf.Max(Mathf.Max(c0.y, c1.y), Mathf.Max(c2.y, c3.y));
+                    float textX = minX, textY = minY; textW = maxX - minX; float boxH = maxY - minY;
                     output.Add(new JArray(text.Trim().Length > 80 ? text.Trim().Substring(0, 80) : text.Trim(), Mathf.RoundToInt((textX - frame.x) * k), Mathf.RoundToInt((textY - frame.y) * k),
-                        Mathf.RoundToInt(textW * k), Mathf.RoundToInt(size.y * k), (p.fontSize * k).ToString("0.##", CultureInfo.InvariantCulture) + "px",
+                        Mathf.RoundToInt(textW * k), Mathf.RoundToInt(boxH * k), (p.fontSize * k).ToString("0.##", CultureInfo.InvariantCulture) + "px",
                         p.unityFontDefinition.fontAsset != null ? p.unityFontDefinition.fontAsset.name : p.unityFont != null ? p.unityFont.name : "", Hex(p.color), label.name));
                 }
             }

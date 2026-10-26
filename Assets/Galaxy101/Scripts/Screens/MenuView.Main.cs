@@ -349,7 +349,7 @@ namespace Galaxy101
         }
         private Label Badge(VisualElement parent,string text,bool sale=false)
         {
-            var badge=Text(text,sale?10:11,false,"#fff");badge.style.unityFont=Font(sale?"Nunito-700":"Baloo2-800");// %50: 900 10px Nunito — the prototype loads only Nunito 700 (vendor/fonts.css)badge.AddToClassList(sale?"sale-badge":"notification-badge");badge.style.whiteSpace=WhiteSpace.NoWrap;
+            var badge=Text(text,sale?10:11,false,"#fff");badge.style.unityFont=Font(sale?"Nunito-700":"Baloo2-800");badge.AddToClassList(sale?"sale-badge":"notification-badge");badge.style.whiteSpace=WhiteSpace.NoWrap; // %50: 900 10px Nunito — the prototype loads only Nunito 700 (vendor/fonts.css)
             if(sale){badge.style.height=18;badge.style.paddingTop=badge.style.paddingBottom=4;badge.style.paddingLeft=badge.style.paddingRight=6;badge.style.unityTextAlign=TextAnchor.MiddleCenter;}
             Decorate(badge,"#FF5E6C",sale?7:10,sale?2:0,"#C23E4A");parent.Add(badge);return badge;
         }

@@ -43,7 +43,7 @@ namespace Galaxy101
             price.style.marginRight = 18;
             deal.Add(price);
             var buy = PanelUi.Action(v, v.L("Satın al", "Buy"), () => Purchase(v, (string)data["id"]));
-            buy.name = "menu.shop.buy"; buy.style.height = StyleKeyword.Auto; buy.style.minWidth = 0; PanelUi.Pad(buy, 13, 24); // sized by its padding (EN "Buy" too) buy.style.fontSize = 17; buy.style.unityFont = v.Font("Montserrat-700");
+            buy.name = "menu.shop.buy"; buy.style.height = StyleKeyword.Auto; buy.style.minWidth = 0; PanelUi.Pad(buy, 13, 24); buy.style.fontSize = 17; buy.style.unityFont = v.Font("Montserrat-700"); // sized by its padding (EN "Buy" too)
             v.Decorate(buy, "aT", 14, 4, "rgba(0,0,0,.3)"); buy.style.color = v.C("a1");
             deal.Add(buy);
 

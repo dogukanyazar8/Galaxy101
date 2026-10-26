@@ -23,6 +23,8 @@ namespace Galaxy101.Table
 
         public struct CameraView { public Vector3 Position, Target; public CameraView(Vector3 p, Vector3 t) { Position = p; Target = t; } }
         public static readonly CameraView PlayerView = new CameraView(new Vector3(0, 1.55f, 1.62f), new Vector3(0, 0.62f, -0.25f));
+        // v4 anim/tween3d.json camera.views.mid (three space).
+        public static readonly CameraView MidView = new CameraView(new Vector3(0, 2.08f, 1.62f), new Vector3(0, 0.6f, -0.06f));
         public static readonly CameraView TopView = new CameraView(new Vector3(0, 2.60f, 1.42f), new Vector3(0, 0.58f, 0.16f));
         /// <summary>spec/21: the whole felt during the deal ceremony.</summary>
         public static readonly CameraView DealView = new CameraView(new Vector3(0, 2.05f, 1.62f), new Vector3(0, 0.66f, -0.12f));

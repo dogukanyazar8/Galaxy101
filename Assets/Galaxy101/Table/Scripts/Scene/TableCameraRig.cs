@@ -5,7 +5,7 @@ namespace Galaxy101.Table
     /// <summary>Camera views, eased transitions and idle breathing (spec/09 §3).</summary>
     public sealed class TableCameraRig : MonoBehaviour
     {
-        public enum View { Player, Top, Lobby, Deal }
+        public enum View { Player, Top, Lobby, Deal, Mid }
 
         private Camera cam;
         private Vector3 fromPos, fromTarget, toPos, toTarget;
@@ -41,7 +41,7 @@ namespace Galaxy101.Table
             started = Time.time; duration = seconds;
         }
 
-        private static TableConstants.CameraView ViewOf(View v) => v == View.Top ? TableConstants.TopView : v == View.Lobby ? TableConstants.LobbyView : v == View.Deal ? TableConstants.DealView : TableConstants.PlayerView;
+        private static TableConstants.CameraView ViewOf(View v) => v == View.Top ? TableConstants.TopView : v == View.Mid ? TableConstants.MidView : v == View.Lobby ? TableConstants.LobbyView : v == View.Deal ? TableConstants.DealView : TableConstants.PlayerView;
 
         private void Evaluate(float now, out Vector3 pos, out Vector3 target)
         {

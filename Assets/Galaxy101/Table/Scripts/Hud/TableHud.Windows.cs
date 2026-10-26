@@ -87,8 +87,8 @@ namespace Galaxy101.Table
             if ((key == null || key == "tileSkin") && table.TileSkin != Settings.TileSkin) table.SetTileSkin(Settings.TileSkin);
         }
 
-        /// <summary>Where the camera rests during play: "Oyuncu gözü" or "Kuşbakışı".</summary>
-        public TableCameraRig.View PreferredView => Settings != null && Settings.View == "top" ? TableCameraRig.View.Top : TableCameraRig.View.Player;
+        /// <summary>The v4 playing views: Oyuncu gözü, Yarı yüksek and Kuşbakışı.</summary>
+        public TableCameraRig.View PreferredView => Settings?.View == "top" ? TableCameraRig.View.Top : Settings?.View == "mid" ? TableCameraRig.View.Mid : TableCameraRig.View.Player;
 
         private static readonly HashSet<string> InPlaceKeys = new HashSet<string> { "autoSort", "highlight", "dbl", "master", "music", "sfx", "tileSnd", "chatSnd", "bubbles", "giftNotif", "emojiFx", "turnHint" };
 
@@ -143,24 +143,33 @@ namespace Galaxy101.Table
             float began = windowOpenedAt;
             windowMotions.Add(t =>
             {
-                float u = Mathf.Clamp01((t - began) / .28f), k = 1 + 2.70158f * Mathf.Pow(u - 1, 3) + 1.70158f * Mathf.Pow(u - 1, 2); // easeOutBack
+                float u = Mathf.Clamp01((t - began) / .28f), k = MenuView.CssBezier(.2f, 1.2f, .4f, 1, u);
                 card.style.translate = new Translate(0, 18 * (1 - k)); card.style.scale = new Scale(Vector2.one * Mathf.LerpUnclamped(.95f, 1, k));
-                card.style.opacity = Mathf.Clamp01(u * 4);
+                card.style.opacity = Mathf.Clamp01(k);
             });
         }
 
         // ---------- settings (T15–T18) ----------
-        private static readonly string[] SettingsTabs = { "game", "sound", "look", "alerts" };
+        // G101-Masa.dc.html: use the package keys so v4 list indices (not the older HUD table's indices) apply.
+        private string SettingText(string key) => S("table.STR." + key);
+
+        private Label SettingsText(string text, string font, float size, string color, string name = null, float lineHeight = 0, bool wrap = false)
+        {
+            var label = Text(text, font, Mathf.RoundToInt(size), color); label.name = name; label.style.fontSize = size;
+            float height = lineHeight > 0 ? lineHeight : MenuView.CssLineHeight(font, size);
+            return wrap ? MenuView.CssLines(label, height) : MenuView.CssLine(label, height);
+        }
 
         private void BuildSettings(bool keepScroll)
         {
             var layer = Layer("table-settings-layer"); layer.pickingMode = PickingMode.Position; layer.style.alignItems = Align.Center; layer.style.justifyContent = Justify.Center;
-            var dim = Layer("table-settings-dim"); dim.pickingMode = PickingMode.Position; dim.style.backgroundColor = new Color(0, 0, 0, .55f); GalaxyFilters.BackdropBlur(dim, 6);
+            var dim = Layer("table.closeSettings"); dim.pickingMode = PickingMode.Position; dim.style.backgroundColor = new Color(0, 0, 0, .55f); GalaxyFilters.BackdropBlur(dim, 6);
             Tap(dim, CloseWindow); layer.Add(dim);
             windowLayer.Add(layer);
 
             var win = new VisualElement { name = "table-settings", pickingMode = PickingMode.Position };
-            win.style.width = 920; win.style.height = 600; win.style.flexDirection = FlexDirection.Row;
+            // CSS width/height are content-box; UI Toolkit includes the two 1 px borders (G101-Masa:544).
+            win.style.width = 922; win.style.height = 602; win.style.flexDirection = FlexDirection.Row; win.style.overflow = Overflow.Hidden;
             view.Decorate(win, "var(--pn)", 28, 10, "var(--pnS)"); Border(win, 1, new Color(1, 1, 1, .1f)); GalaxyFilters.Shadow(win, 0, 40, 45, new Color(0, 0, 0, .6f));
             win.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
             ModalIn(win); layer.Add(win);
@@ -171,32 +180,32 @@ namespace Galaxy101.Table
             side.style.borderRightWidth = 1; side.style.borderRightColor = new Color(1, 1, 1, .06f);
             var head = Row(10); Pad(head, 0, 10, 16, 10);
             head.Add(view.Icon("settings", 26, "var(--a1)"));
-            var title = Text(S("setTitle"), "Montserrat-700", 22, "#F4F1E8"); title.style.whiteSpace = WhiteSpace.Normal; title.style.flexShrink = 1; head.Add(title);
+            var title = SettingsText(SettingText("setTitle"), "Montserrat-700", 22, "#F4F1E8", "table.t.setTitle", 24.2f, true); title.style.flexShrink = 1; head.Add(title);
             side.Add(head);
             for (int i = 0; i < 4; i++)
             {
                 int index = i; bool on = i == SettingsTab;
-                var tab = Row(12); tab.name = "settings-tab-" + i; Pad(tab, 12, 14, 12, 14);
+                var tab = Row(12); tab.name = "table.st.pick[" + i + "]"; Pad(tab, 12, 14, 12, 14);
                 view.Decorate(tab, on ? "var(--pnH)" : "transparent", 14);
                 if (on) { var bar = Box(); MenuView.Place(bar, 0, 0, 3, 0); bar.style.bottom = 0; bar.style.height = StyleKeyword.Auto; bar.style.backgroundColor = view.C("var(--a1)"); bar.style.borderTopLeftRadius = bar.style.borderBottomLeftRadius = 14; tab.Add(bar); }
                 else GalaxyFilters.HoverBrightness(tab, 1.25f);
                 var dot = Box(); dot.style.width = dot.style.height = 8; dot.style.rotate = new Rotate(45); view.Decorate(dot, on ? "var(--a1)" : "rgba(255,255,255,.2)", 3); tab.Add(dot);
-                tab.Add(Text(S("sTabs." + i + ".0"), "Montserrat-700", 17, on ? "#F4F1E8" : "var(--mt)"));
+                tab.Add(SettingsText(SettingText("sTabs." + i + ".0"), "Montserrat-700", 17, on ? "#F4F1E8" : "var(--mt)", "table.st.name[" + i + "]", 20.4f));
                 Tap(tab, () => OpenSettings(index)); side.Add(tab);
             }
             ColumnGap(side, 6); head.style.marginTop = 0;
             var grow = Box(); grow.style.flexGrow = 1; side.Add(grow);
-            var foot = Text(S("setFoot"), "Baloo2-700", 11, "var(--mt)"); foot.style.opacity = .7f; foot.style.whiteSpace = WhiteSpace.Normal; foot.style.flexShrink = 1; Pad(foot, 0, 12, 0, 12); side.Add(foot);
             win.Add(side);
 
             // Content: heading + close, the scrolling rows, footer with reset and Tamam.
             var content = Box(); content.style.flexGrow = 1; content.style.minWidth = 0; win.Add(content);
             var heading = Row(12); Pad(heading, 22, 28, 14, 28); heading.style.flexShrink = 0;
             var titles = Box(); titles.style.flexGrow = 1; titles.style.flexShrink = 1;
-            titles.Add(Text(S("sTabs." + SettingsTab + ".0"), "Montserrat-700", 24, "#F4F1E8"));
-            var sub = Text(S("sTabs." + SettingsTab + ".1"), "Baloo2-700", 13, "var(--mt)"); sub.style.marginTop = 2; titles.Add(sub);
+            titles.style.minWidth = 0;
+            titles.Add(SettingsText(SettingText("sTabs." + SettingsTab + ".0"), "Montserrat-700", 24, "#F4F1E8", "table.setHead.title", 27.6f));
+            var sub = SettingsText(SettingText("sTabs." + SettingsTab + ".1"), "Baloo2-700", 13, "var(--mt)", "table.setHead.sub"); sub.style.marginTop = 2; titles.Add(sub);
             heading.Add(titles);
-            var close = Box("settings-close"); close.style.width = close.style.height = 42; close.style.flexShrink = 0; close.style.alignItems = Align.Center; close.style.justifyContent = Justify.Center;
+            var close = Box("table.closeSettings#2"); close.style.width = close.style.height = 42; close.style.flexShrink = 0; close.style.alignItems = Align.Center; close.style.justifyContent = Justify.Center;
             view.Decorate(close, "var(--pnH)", 13, 4, "var(--pnS)"); GalaxyFilters.HoverBrightness(close, 1.25f); close.Add(view.Icon("close", 18, "var(--ic)"));
             Tap(close, CloseWindow); heading.Add(close);
             content.Add(heading);
@@ -221,16 +230,18 @@ namespace Galaxy101.Table
                 case 2: BuildLookTab(list); break;
                 case 3: ToggleRow(list, "bubbles"); ToggleRow(list, "giftNotif"); ToggleRow(list, "emojiFx"); ToggleRow(list, "turnHint"); break;
             }
-            ColumnGap(list, 10);
+            // CSS gap is in addition to the look captions' own 2 / 8 px top margins.
+            for (int i = 1; i < list.childCount; i++) list[i].style.marginTop = list[i].style.marginTop.value.value + 10;
             if (keepScroll && settingsScrollY > 0) { float y = settingsScrollY; scroll.schedule.Execute(() => scroll.scrollOffset = new Vector2(0, y)); }
 
             var footer = Row(12); Pad(footer, 14, 28, 20, 28); footer.style.flexShrink = 0; footer.style.borderTopWidth = 1; footer.style.borderTopColor = new Color(1, 1, 1, .06f);
-            var reset = Text(S("reset"), "Montserrat-700", 14, "var(--mt)"); reset.name = "settings-reset"; Pad(reset, 8, 4, 8, 4);
-            reset.style.whiteSpace = WhiteSpace.Normal; reset.style.maxWidth = 112; reset.style.flexShrink = 1;
+            var reset = SettingsText(SettingText("reset"), "Montserrat-700", 14, "var(--mt)", "table.resetSettings"); Pad(reset, 8, 4, 8, 4);
+            reset.style.height = MenuView.CssLineHeight("Montserrat-700", 14) + 16;
             reset.RegisterCallback<PointerEnterEvent>(_ => reset.style.color = view.C("#F4F1E8")); reset.RegisterCallback<PointerLeaveEvent>(_ => reset.style.color = view.C("var(--mt)"));
             Tap(reset, () => Settings.Reset()); footer.Add(reset);
             var spacer = Box(); spacer.style.flexGrow = 1; footer.Add(spacer);
-            var done = Text(S("done"), "Montserrat-700", 16, "var(--aT)"); done.name = "settings-done"; Pad(done, 12, 30, 12, 30);
+            var done = SettingsText(SettingText("done"), "Montserrat-700", 16, "var(--aT)", "table.closeSettings#3"); Pad(done, 12, 30, 12, 30);
+            done.style.height = MenuView.CssLineHeight("Montserrat-700", 16) + 24;
             view.Decorate(done, "linear-gradient(var(--a1),var(--a2))", 15, 5, "var(--aS)"); GalaxyFilters.HoverBrightness(done, 1.08f);
             Tap(done, CloseWindow); footer.Add(done);
             content.Add(footer);
@@ -241,8 +252,9 @@ namespace Galaxy101.Table
         {
             var row = Row(16); row.name = "setting-row-" + key; Pad(row, 13, 16, 13, 16); view.Decorate(row, "var(--dp)", 16);
             var labels = Box(); labels.style.flexGrow = 1; labels.style.flexShrink = 1; labels.style.minWidth = 0;
-            labels.Add(Text(title ?? S("sRows." + key + ".0"), "Montserrat-700", 16, "#F4F1E8"));
-            var desc = Text(description ?? S("sRows." + key + ".1"), "Baloo2-700", 12, "var(--mt)"); desc.style.whiteSpace = WhiteSpace.Normal; desc.style.flexShrink = 1; desc.style.marginTop = 2; labels.Add(desc);
+            int index = list.childCount;
+            labels.Add(SettingsText(title ?? SettingText("sRows." + key + ".0"), "Montserrat-700", 16, "#F4F1E8", key == "fps" ? "setting-fps-title" : "table.row.name[" + index + "]", 19.2f));
+            var desc = SettingsText(description ?? SettingText("sRows." + key + ".1"), "Baloo2-700", 12.5f, "var(--mt)", key == "fps" ? "setting-fps-description" : "table.row.desc[" + index + "]", 16.875f, true); desc.style.marginTop = 2; labels.Add(desc);
             row.Add(labels); row.Add(control); list.Add(row); return row;
         }
 
@@ -250,7 +262,7 @@ namespace Galaxy101.Table
         private void ToggleRow(VisualElement list, string key)
         {
             bool on = Settings.Bool(key);
-            var toggle = Box("setting-" + key); toggle.style.width = 54; toggle.style.height = 30; toggle.style.flexShrink = 0;
+            var toggle = Box("table.row.toggle[" + list.childCount + "]"); toggle.style.width = 54; toggle.style.height = 30; toggle.style.flexShrink = 0;
             var knob = Box(); MenuView.Place(knob, 3, 3, 24, 24); view.Decorate(knob, "#fff", 12); GalaxyFilters.Shadow(knob, 0, 2, 2, new Color(0, 0, 0, .35f)); toggle.Add(knob);
             float shown = on ? 1 : 0, from = shown, began = -1;
             void Paint() { view.Decorate(toggle, on ? "#3CCB6E" : "rgba(255,255,255,.14)", 15); toggle.EnableInClassList("on", on); }
@@ -268,10 +280,11 @@ namespace Galaxy101.Table
         private void SegmentRow(VisualElement list, string key, (string Label, string Value)[] options, string current, Action<string> pick)
         {
             var group = Row(3); group.name = "setting-" + key; Pad(group, 3, 3, 3, 3); view.Decorate(group, "var(--sd)", 12); group.style.flexShrink = 0;
+            int index = 0;
             foreach (var (label, value) in options)
             {
                 bool on = value == current; string v = value;
-                var option = Text(label, "Montserrat-700", 13, on ? "var(--aT)" : "var(--mt)"); option.name = "setting-" + key + "-" + value; Pad(option, 8, 13, 8, 13);
+                var option = SettingsText(label, "Montserrat-700", 13, on ? "var(--aT)" : "var(--mt)", "table.o.pick[" + index++ + "]"); Pad(option, 8, 13, 8, 13); option.style.height = MenuView.CssLineHeight("Montserrat-700", 13) + 16;
                 view.Decorate(option, on ? "linear-gradient(var(--a1),var(--a2))" : "transparent", 9); option.EnableInClassList("selected", on);
                 Tap(option, () => pick(v)); group.Add(option);
             }
@@ -282,8 +295,9 @@ namespace Galaxy101.Table
         {
             int value = Settings.Int(key);
             var box = Row(12); box.style.flexShrink = 0;
-            var slider = new GalaxySlider(0, 100, value, view) { name = "setting-" + key }; slider.style.width = 200;
-            var label = Text(value + "%", "Montserrat-700", 15, "#F4F1E8"); label.style.width = 44; label.style.unityTextAlign = TextAnchor.MiddleRight;
+            int index = list.childCount;
+            var slider = new GalaxySlider(0, 100, value, view) { name = "table.row.input[" + index + "]" }; slider.style.width = 200;
+            var label = SettingsText(value + "%", "Montserrat-700", 15, "#F4F1E8", "table.row.valLabel[" + index + "]"); label.style.width = 44; label.style.unityTextAlign = TextAnchor.MiddleRight;
             slider.ValueChanged += x => { label.text = x + "%"; Settings.Set(key, x); };
             box.Add(slider); box.Add(label);
             SettingRow(list, key, box);
@@ -311,9 +325,9 @@ namespace Galaxy101.Table
         private static readonly Dictionary<string, (string Face, string Edge, string Shade, string C1, string C2, string Joker, string Glow)> TilePreview = new Dictionary<string, (string, string, string, string, string, string, string)>
         {
             ["classic"] = ("linear-gradient(#FFFDF6,#F1E9D6)", "#E3D7BC", "#B9AB8C", "#D7263D", "#1F5FBF", "#127A4A", null),
-            ["galaxy"] = ("linear-gradient(#3B2F7A,#1C1648)", "#120E30", "#0A0820", "#FF7A8E", "#FFD964", "#FFD964", "rgba(140,110,255,.5)"),
-            ["gold"] = ("linear-gradient(#1d1d24,#050507)", "#D9B25A", "#8A6A20", "#FF4D5E", "#FFC83D", "#E9C46A", "rgba(255,201,74,.4)"),
-            ["neon"] = ("linear-gradient(#14202E,#0A1018)", "#06090E", "#000000", "#3DB4FF", "#FF3D7F", "#3DF5E0", "rgba(61,245,224,.5)"),
+            ["galaxy"] = ("linear-gradient(#3B2F7A,#1C1648)", "#120E30", "#0A0820", "#FF3D5A", "#FFC21A", "#FFD964", "rgba(140,110,255,.5)"),
+            ["gold"] = ("linear-gradient(#1d1d24,#050507)", "#D9B25A", "#8A6A20", "#FF3348", "#3D95FF", "#E9C46A", "rgba(255,201,74,.4)"),
+            ["neon"] = ("linear-gradient(#14202E,#0A1018)", "#06090E", "#000000", "#2E9BFF", "#FFD21F", "#3DF5E0", "rgba(61,245,224,.5)"),
             ["marble"] = ("linear-gradient(#FFFFFF,#E4E6EC)", "#C9CCD6", "#9499A8", "#2B3A55", "#C21F36", "#2B3A55", null),
         };
 
@@ -347,25 +361,24 @@ namespace Galaxy101.Table
 
         private void BuildLookTab(VisualElement list)
         {
-            FrameRateRow(list);
-            list.Add(LookCaption(S("lkView")));
-            var views = CardGrid(2);
+            list.Add(LookCaption(SettingText("lkView"), "table.t.lkView"));
+            var views = CardGrid(3);
             for (int i = 0; i < TableSettings.Views.Length; i++)
             {
                 string key = TableSettings.Views[i]; bool on = Settings.View == key;
-                var card = Row(14); card.name = "setting-view-" + key; Pad(card, 12, 12, 12, 12); CardFace(card, on);
+                var card = Row(14); card.name = "table.v.pick[" + i + "]"; Pad(card, 12, 12, 12, 12); CardFace(card, on);
                 var art = Box(); art.style.width = 96; art.style.height = 62; art.style.flexShrink = 0; art.style.overflow = Overflow.Hidden; view.Decorate(art, "var(--sd)", 11);
-                if (key == "seat") SeatViewArt(art); else TopViewArt(art);
+                if (key == "seat") SeatViewArt(art); else if (key == "mid") MidViewArt(art); else TopViewArt(art);
                 card.Add(art);
                 var words = Box(); words.style.flexShrink = 1; words.style.minWidth = 0;
-                words.Add(Text(S("views." + i + ".0"), "Montserrat-700", 16, "#F4F1E8"));
-                var desc = Text(S("views." + i + ".1"), "Baloo2-700", 12, "var(--mt)"); desc.style.whiteSpace = WhiteSpace.Normal; desc.style.flexShrink = 1; words.Add(desc);
+                words.Add(SettingsText(SettingText("views." + i + ".0"), "Montserrat-700", 16, "#F4F1E8", "table.v.name[" + i + "]", 0, true));
+                words.Add(SettingsText(SettingText("views." + i + ".1"), "Baloo2-700", 12, "var(--mt)", "table.v.desc[" + i + "]", 16.2f, true));
                 card.Add(words);
                 Tap(card, () => Settings.Set("view", key)); AddCell(views, card);
             }
             list.Add(views);
 
-            list.Add(LookCaption(S("lkTable")));
+            list.Add(LookCaption(SettingText("lkTable"), "table.t.lkTable", 8));
             var tables = CardGrid(4);
             for (int i = 0; i < TableAssetCatalog.TableSkins.Length; i++)
             {
@@ -379,11 +392,11 @@ namespace Galaxy101.Table
                 if (key == "holo") for (int g = 1; g < 6; g++) { var line = Box(); MenuView.Place(line, g * 15, 0, 1, 52); line.style.backgroundColor = new Color(1, 1, 1, .08f); felt.Add(line); }
                 if (key == "andromeda") { var core = Box(); MenuView.Place(core, 22, 17, 44, 14); view.Decorate(core, "radial-gradient(#FFF6E0,#F5C98A 30%,rgba(143,176,255,.75) 62%,transparent 80%)", 7); felt.Add(core); }
                 rim.Add(felt); art.Add(rim);
-                AddCell(tables, SkinCard("tableSkin", key, art, S("tSkins." + i + ".0"), S("tSkins." + i + ".1"), Settings.TableSkin == key));
+                AddCell(tables, SkinCard("tableSkin", key, i, art, SettingText("tSkins." + i + ".0"), SettingText("tSkins." + i + ".1"), Settings.TableSkin == key));
             }
             list.Add(tables);
 
-            list.Add(LookCaption(S("lkRack")));
+            list.Add(LookCaption(SettingText("lkRack"), "table.t.lkRack", 8));
             var racks = CardGrid(3);
             for (int i = 0; i < TableAssetCatalog.RackSkins.Length; i++)
             {
@@ -403,11 +416,11 @@ namespace Galaxy101.Table
                     back.Add(row);
                 }
                 ColumnGap(back, 3); art.Add(back);
-                AddCell(racks, SkinCard("rackSkin", key, art, S("rSkins." + i + ".0"), S("rSkins." + i + ".1"), Settings.RackSkin == key));
+                AddCell(racks, SkinCard("rackSkin", key, i, art, SettingText("rSkins." + i + ".0"), SettingText("rSkins." + i + ".1"), Settings.RackSkin == key));
             }
             list.Add(racks);
 
-            list.Add(LookCaption(S("lkTile")));
+            list.Add(LookCaption(SettingText("lkTile"), "table.t.lkTile", 8));
             var styles = CardGrid(5);
             for (int i = 0; i < TableAssetCatalog.TileSkins.Length; i++)
             {
@@ -422,14 +435,17 @@ namespace Galaxy101.Table
                     if (glyph != "★") { var dot = Box(); dot.style.width = dot.style.height = 5; dot.style.marginTop = 1; view.Decorate(dot, color, 3); tile.Add(dot); }
                     art.Add(tile);
                 }
-                AddCell(styles, SkinCard("tileSkin", key, art, S("tlSkins." + i + ".0"), S("tlSkins." + i + ".1"), Settings.TileSkin == key));
+                AddCell(styles, SkinCard("tileSkin", key, i, art, SettingText("tlSkins." + i + ".0"), SettingText("tlSkins." + i + ".1"), Settings.TileSkin == key));
             }
             list.Add(styles);
+            // Existing preference, absent from v4: keep the in-table control after the package's look sections, below
+            // the initial G32/T15 viewport. The menu's Görüntü tab also keeps its shared frame-rate control.
+            FrameRateRow(list);
         }
 
-        private VisualElement LookCaption(string text)
+        private VisualElement LookCaption(string text, string name, float top = 2)
         {
-            var label = Text(text, "Baloo2-800", 10, "var(--mt)"); MenuView.Tracking(label, 1.6f, 10); label.style.marginTop = 2; return label;
+            var label = SettingsText(text, "Baloo2-800", 10, "var(--mt)", name); MenuView.Tracking(label, 1.6f, 10); label.style.marginTop = top; return label;
         }
 
         /// <summary>CSS grid repeat(n, minmax(0,1fr)) with a 10 px gap: rows of n equal cells (a short last row keeps the width).</summary>
@@ -464,20 +480,25 @@ namespace Galaxy101.Table
         {
             view.Decorate(card, on ? "var(--pnH)" : "var(--dp)", 16);
             card.EnableInClassList("selected", on);
-            if (on) { Border(card, 2, view.C("var(--a1)")); GalaxyFilters.Shadow(card, 0, 0, 10, view.C("var(--gl)")); }
-            else { Border(card, 2, Color.clear); GalaxyFilters.HoverBrightness(card, 1.12f); }
-        }
-
-        private VisualElement SkinCard(string setting, string key, VisualElement art, string name, string desc, bool on)
-        {
-            var card = Box("setting-" + setting + "-" + key); Pad(card, 10, 10, 10, 10); CardFace(card, on);
-            card.Add(art);
-            var title = Text(name, "Montserrat-700", 15, "#F4F1E8"); title.style.marginTop = 10; title.style.overflow = Overflow.Hidden; title.style.textOverflow = TextOverflow.Ellipsis; title.style.flexShrink = 1; card.Add(title);
-            var line = Text(desc, "Baloo2-700", 12, "var(--mt)"); line.style.whiteSpace = WhiteSpace.Normal; line.style.flexShrink = 1; line.style.marginTop = 2; card.Add(line);
             if (on)
             {
-                var tag = Text(S("inUse"), "Baloo2-800", 9, "var(--aT)"); MenuView.Tracking(tag, 1, 9); tag.name = "setting-in-use";
-                tag.style.position = Position.Absolute; tag.style.right = 16; tag.style.top = 16; Pad(tag, 3, 7, 3, 7); view.Decorate(tag, "var(--a1)", 6); card.Add(tag);
+                // CSS inset shadows occupy no layout space. A border on the card would shrink every preview by 4 px.
+                var ring = Box(); ring.style.position = Position.Absolute; ring.style.left = ring.style.right = ring.style.top = ring.style.bottom = 0;
+                Radius(ring, 16); Border(ring, 2, view.C("var(--a1)")); card.Add(ring); GalaxyFilters.Shadow(card, 0, 0, 10, view.C("var(--gl)"));
+            }
+            else GalaxyFilters.HoverBrightness(card, 1.12f);
+        }
+
+        private VisualElement SkinCard(string setting, string key, int index, VisualElement art, string name, string desc, bool on)
+        {
+            var card = Box("table.c.pick[" + index + "]"); card.style.minWidth = 0; Pad(card, 12, 12, 12, 12); CardFace(card, on);
+            card.Add(art);
+            var title = SettingsText(name, "Montserrat-700", 15, "#F4F1E8", "table.c.name[" + index + "]"); title.style.marginTop = 10; title.style.overflow = Overflow.Hidden; title.style.textOverflow = TextOverflow.Ellipsis; card.Add(title);
+            var line = SettingsText(desc, "Baloo2-700", 12, "var(--mt)", "table.c.desc[" + index + "]", 16.2f, true); line.style.marginTop = 2; card.Add(line);
+            if (on)
+            {
+                var tag = SettingsText(SettingText("inUse"), "Baloo2-800", 9, "var(--aT)", "table.t.inUse[" + index + "]"); MenuView.Tracking(tag, 1, 9);
+                tag.style.position = Position.Absolute; tag.style.right = 18; tag.style.top = 18; tag.style.height = MenuView.CssLineHeight("Baloo2-800", 9) + 6; Pad(tag, 3, 7, 3, 7); view.Decorate(tag, "var(--a1)", 6); card.Add(tag);
             }
             Tap(card, () => Settings.Set(setting, key));
             return card;
@@ -486,12 +507,30 @@ namespace Galaxy101.Table
         /// <summary>"Oyuncu gözü" sketch (96×62 SVG): table trapezoid, rim bar, seven tiles, a gold dot opposite.</summary>
         private void SeatViewArt(VisualElement art)
         {
-            var felt = Box(); MenuView.Place(felt, 22, 16, 52, 30); view.Decorate(felt, "var(--f1)", 3); Border(felt, 1.5f, view.C("var(--a1)"));
-            felt.style.scale = new Scale(new Vector2(1.45f, 1)); felt.style.transformOrigin = new TransformOrigin(Length.Percent(50), Length.Percent(100));
-            art.Add(felt);
+            ViewTrapezoid(art, new Vector2(26, 16), new Vector2(70, 16), new Vector2(86, 46), new Vector2(10, 46));
             var rim = Box(); MenuView.Place(rim, 16, 46, 64, 10); view.Decorate(rim, "var(--rim)", 3); art.Add(rim);
-            for (int i = 0; i < 7; i++) { var t = Box(); MenuView.Place(t, 20 + i * 8, 40, 6, 8); view.Decorate(t, "var(--tf1)", 2); art.Add(t); }
+            for (int i = 0; i < 7; i++) { var t = Box(); MenuView.Place(t, 20 + i * 8, 40, 6, 8); view.Decorate(t, "var(--tf1)", 2); Radius(t, 1.5f); art.Add(t); }
             var dot = Box(); MenuView.Place(dot, 44, 4, 8, 8); view.Decorate(dot, "var(--a1)", 4); art.Add(dot);
+        }
+
+        /// <summary>G101-Masa:604–605, the v4 96×62 "Yarı yüksek" SVG.</summary>
+        private void MidViewArt(VisualElement art)
+        {
+            ViewTrapezoid(art, new Vector2(22, 9), new Vector2(74, 9), new Vector2(86, 47), new Vector2(10, 47));
+            var rim = Box(); MenuView.Place(rim, 16, 47, 64, 9); view.Decorate(rim, "var(--rim)", 3); art.Add(rim);
+            for (int i = 0; i < 7; i++) { var tile = Box(); MenuView.Place(tile, 21 + i * 8, 41, 6, 8); view.Decorate(tile, "var(--tf1)", 2); Radius(tile, 1.5f); art.Add(tile); }
+            var centre = Box(); MenuView.Place(centre, 40, 22, 16, 10); view.Decorate(centre, "var(--rim)", 2); centre.style.opacity = .6f; art.Add(centre);
+        }
+
+        private void ViewTrapezoid(VisualElement art, params Vector2[] points)
+        {
+            var felt = Box(); MenuView.Place(felt, 0, 0, 96, 62);
+            felt.generateVisualContent += context =>
+            {
+                var painter = context.painter2D; painter.fillColor = view.C("var(--f1)"); painter.strokeColor = view.C("var(--a1)"); painter.lineWidth = 1.5f;
+                painter.BeginPath(); painter.MoveTo(points[0]); for (int i = 1; i < points.Length; i++) painter.LineTo(points[i]); painter.ClosePath(); painter.Fill(); painter.Stroke();
+            };
+            art.Add(felt);
         }
 
         /// <summary>"Kuşbakışı" sketch: square table from above with the four racks around it and two tiles.</summary>

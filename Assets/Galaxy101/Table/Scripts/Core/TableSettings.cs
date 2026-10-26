@@ -14,7 +14,7 @@ namespace Galaxy101.Table
     {
         public const string PrefsKey = "galaxy101.table.settings";
         public static readonly int[] WarnChoices = { 3, 5, 10, 0 };
-        public static readonly string[] Views = { "seat", "top" };
+        public static readonly string[] Views = { "seat", "mid", "top" };
 
         private readonly JObject values;
         private readonly MenuModel menu;

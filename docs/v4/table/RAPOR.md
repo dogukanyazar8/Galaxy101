@@ -166,6 +166,30 @@ Yönlendirici yolu: `acct` → menü (Doğukan Y., 10.000 çip); `scenario` R43/
 | "Elini açtın · şimdi bir taş at", test ipuçları, ilk hamle metni | Eksikti | `tOpened`, isle/penIslek/penOpen 600 ms ipucu, "İlk hamle senin" yalnız dağıtılan elde (`8562200`) |
 | Eylem paneli ölçüleri (Seri diz/Çift diz −102…−177 px) | Eski yerleşim | G101-Masa sütunu: üstte iki sıralama düğmesi, 50 px gösterge, 13 px düğmeler (`fe3c59b`) |
 
+## 8 · Ayarlar ve Yarı yüksek görünümü (G32/T15/T16–T18)
+
+Kaynaklar: `G101-Masa.dc.html:541–675` (pencere, denetimler, önizlemeler), `:822` (seat/mid/top), `:2021–2043` (sekme satırları), `galaxy101_handoff_v4/anim/tween3d.json camera.views.mid`; yerleşim kanıtı `artifacts/v4/ref/{G32,T15,T16,T17,T18}.layout.json`. Eski görsel taban `artifacts/v4/unity/run11/compare.json`: G32/T15 %26,88/%26,91, T16/T17/T18 %14,30/%15,20/%13,19 UI piksel farkı. Bu değerler düzeltme öncesidir.
+
+- `TableHud.Windows.cs`: CSS 920×600 içerik + 1 px kenarlık karşılığı 922×602 pencere; 220 px sol sütun; paket satır yüksekliği (16px/1,2 başlık, 12,5px/1,35 açıklama), üst başlıklar, tek satırlık sıfırlama ve alt eylemler. Paket dışı sol sütun dipnotu kaldırıldı. D-62 `table.st.*`, `table.setHead.*`, `table.row.*`, `table.o.pick[]`, `table.v.*`, `table.c.*`, başlık ve kapatma/sıfırlama adları uygulandı.
+- Görünüm üç karttır; metinler eski konumlu HUD tablosu yerine `table.STR.*` paket anahtarlarından okunur. Kartların seçili halkası yerleşim alanı tüketmez; önizleme dolgusu 12 px ve kendi üst boşluğu + 10 px liste aralığı korunur. Kamera çizimleri paket SVG koordinatlarındadır. Yeni `mid` görünümü: konum `(0, 2.08, 1.62)`, hedef `(0, 0.6, -0.06)`, FOV 40; eski enum değerleri değiştirilmeden eklendi. Kalıcı `mid` tercihi artık yüklemede reddedilmez.
+- **Karar / ödün:** pakette olmayan mevcut FPS tercihi ve uygulama/kayıt davranışı korundu. Masa içindeki satır bütün paket görünüm bölümlerinin sonuna taşındı; G32/T15'in başlangıç görünür alanını kaydırmaz. Aşağı kaydırıldığında mevcut FPS satırı hâlâ vardır. Menüdeki Görüntü → Kare hızı da aynı tercihi kullanır. Bu, paket dışı mevcut davranışı koruma kuralının uygulanmasıdır.
+
+Doğrulama (Unity/player açılmadı):
+
+```
+dotnet test %TEMP%/g101-settings-contract/SettingsContract.csproj
+  önce: 0 başarılı / 3 başarısız (mid seçimi, kalıcı mid, kamera Mid tanımı)
+  sonra: 3 başarılı / 0 başarısız
+python tools/v4/unity_compile.py --repo C:/GD/Okey101-v4/table --csproj-from "C:/GD/Okey 101" --scratch %TEMP%/g101-settings-compile --project Galaxy101.PlayMode.Tests
+  Galaxy101.PlayMode.Tests: OK (0 errors)
+python tools/v4/unity_compile.py --repo C:/GD/Okey101-v4/table --csproj-from "C:/GD/Okey 101" --scratch %TEMP%/g101-settings-compile --project Galaxy101.Service.Tests
+  Galaxy101.Service.Tests: OK (0 errors)
+git diff --check
+  çıkış 0
+```
+
+SDK koşusu gerçek `TableSettings`, `TableConstants`, `TableCameraRig` ve `TableSettingsV4Tests` kaynaklarını derler; yalnız Unity Resources/PlayerPrefs/saat/kamera API'leri geçici bellek adaptörüdür. Native PlayerPrefs, sahne ve görüntü doğrulaması değildir. Üç EditMode testi ile iki `TableSettingsV4RuntimeTests` PlayMode testi derlendi; Unity içinde **koşturulmadı**. Yeni G32/T15/T16–T18 TR/EN ve tema kareleri alınmalı; font satır kırılımı, bulanıklık, çizim ve piksel kabulü yeni koşuya kadar açık kalır.
+
 ## 8 · Gerçek v4 sunucusuna karşı testler
 
 - `tools/v4/nunit-table` içinde `TableLiveServerProtocolTests` (Category `LiveServer`, sunucu yoksa Inconclusive): misafir → bilet → soket → `hello` → `vsBotsStart` → D-24 dağıtımı → `gDraw` + `gDiscard` → yanlış hamle reddi → yalnız olaylardan kurulan gölge model her `tableView`'de (bu koşuda 14) ve `snapshot.game`'de sunucuyla aynı → `tableLeave` → `snapshot.screen = menu`; ayrıca soket koparılıp yeni bilet + `hello` → `snapshot{table}`. Bu makinedeki yerel sunucuya (`scripts/Start-LocalServer.ps1`, 5173) karşı **2/2** geçti; tam takım **38/38**.

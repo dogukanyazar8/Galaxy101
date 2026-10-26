@@ -25,7 +25,8 @@ Dal `v4/table` (worktree `C:/GD/Okey101-v4/table`, taban `26f6697` = main `d2ec3
 | `e93b1cc` | Geri bırak / Yere çift aç / İşle, yeniden bağlanma kartı, ses |
 | `50241d6` | Durum yönlendirici G01–G34, T01–T51; yükleme ekranı; `strings_v4` |
 | `d080e5b` | T33/T48 kaldırıldı; D-62 adları |
-| son commit | Dağıtım sonrası bot çayı (DEMO), bu rapor, EKSIKLER, UNITY_FARKLARI |
+| `d0efb7c` | Dağıtım sonrası bot çayı (DEMO, yalnız yönlendirici), bu rapor, EKSIKLER, UNITY_FARKLARI |
+| `c265313` | Çevrimdışı model maç başlamadan var (masa önceden dinler); `tableView`/`snapshot` tahtayı eşitler (el ortasında katılma, törene devam); eksik açılışta taşlar yerlerine döner |
 
 Kaldırılan eski testler (eski motor akışını sınıyorlardı; yerlerine v4 karşılıkları): `TableGameRuntimeTests`, `TableV3Tests`, `DealCeremonyTests`, `OnlineTableTests` → `tools/v4/nunit-table` + `Tests/PlayMode/TableV4RuntimeTests.cs`; `RackGridTests`'in açılış ölçeri testleri `RackMelds`'i prototipin `segVal`'ine karşı sınar. `MatchWire.cs`, eski `NetworkTableSession` ve eski `TableScenarios` silindi.
 

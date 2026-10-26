@@ -26,18 +26,16 @@ namespace Galaxy101
         /// <summary>
         /// CSS letter-spacing laid out as Chrome does: <see cref="MenuView.Tracking"/> sets the spacing, but UI Toolkit's text adds
         /// it after neither a space nor the last glyph, where Chrome adds it after every character (S16 run: "SEZON 3 · DERECELİ"
-        /// at 1.6 px came out 6.4 px = 4 × 1.6 narrower, "4 OYUNCU" at 1 px 2 px narrower). The spaces get it back as rich-text
-        /// space, the last character as right padding. Call after <see cref="Pad"/>.
+        /// at 1.6 px came out 6.4 px = 4 × 1.6 narrower, "4 OYUNCU" at 1 px 2 px narrower). The spaces get it back as
+        /// word-spacing, the last character as right padding. Call after <see cref="Pad"/>.
         /// </summary>
         private static Label Track(Label label, float px, float size)
         {
             MenuView.Tracking(label, px, size);
-            string text = label.text ?? "";
-            if (text.IndexOf(' ') >= 0 && text.IndexOf('<') < 0)
-            {
-                label.enableRichText = true;
-                label.text = text.Replace(" ", " <space=" + (px / size).ToString("0.####", System.Globalization.CultureInfo.InvariantCulture) + "em>");
-            }
+            // word-spacing goes to the native text generator exactly as letter-spacing does (UITKTextHandle: both × 64, the
+            // same hundredths-of-the-font-size unit) and is added after each space. A rich-text <space=…em> did not move it
+            // (run 7–9: still 3 × 1.6 px short).
+            label.style.wordSpacing = px * 100f / size;
             label.style.paddingRight = label.style.paddingRight.value.value + px;
             return label;
         }
@@ -209,14 +207,24 @@ namespace Galaxy101
         private void Enter(VisualElement owner, float began, float seconds, Func<float, float> ease, Action<float> step, float delay = 0)
         {
             float now = Time.realtimeSinceStartup;
-            if (now - began - delay >= seconds) { step(1); return; }
+            if (now - began - delay >= seconds) { step(1); Rest(owner); return; }
             bool done = false;
             Animate(() =>
             {
                 if (done) return;
                 float u = Mathf.Clamp01((Time.realtimeSinceStartup - began - delay) / seconds); done = u >= 1;
                 step(ease(u));
+                if (done) Rest(owner);
             }, owner);
+        }
+
+        /// <summary>
+        /// An entrance's last keyframe is "none" (animation-fill-mode both): the element goes back to its own box exactly — no
+        /// leftover scale from an overshooting curve (rkSeat ends at 1 only up to the bezier's rounding) moves it or its children.
+        /// </summary>
+        private static void Rest(VisualElement e)
+        {
+            e.style.scale = StyleKeyword.Null; e.style.rotate = StyleKeyword.Null; e.style.translate = StyleKeyword.Null; e.style.opacity = StyleKeyword.Null;
         }
 
         private void Tick()

@@ -64,7 +64,7 @@ Masa hattının yapması gerekenler:
 - Maç sonunda `matchResult`'ın ardından gelen `rankChange`'i masa işlemez: `RankedOnlineBackend` yakalar ve `RankedScreen.Pending`'e koyar. Masa kapanırken `MainMenuController.ReturnToLobby = true` vermek yeter; menü `FromRanked` ile Dereceli ekranını açar ve sonuç kartını gösterir.
 - Dereceli masada sohbet yalnız hazır mesaj, hediye ve izleyici kapalı (masa kuralları `Table.Rules`).
 
-Masa hattı bağlayana kadar (EK-713): masa sahnesi yerel motorla açılır, sunucu koltuğu süre aşımlarından sonra otomatik oynar; LP sunucunun sonucudur ve dönüşte sonuç kartında görünür.
+Masa hattı bunu bağladı (main `46aab1c`, EK-713): `OnRankedMatched` açık `V4TableSession.Current`'ı `TableGame.Pending = TableLaunch{Session, Room}` ile masaya verir; demo maçında oturum yok, masa yerel motorla açılır.
 
 ## 5. Testler
 
@@ -81,7 +81,12 @@ Masa hattı bağlayana kadar (EK-713): masa sahnesi yerel motorla açılır, sun
 - Eksikler `docs/v4/ranked/EKSIKLER.md`: EK-701 **çözüldü**; açık olanlar EK-702 (onaylı parti daveti yok), EK-703 (çevrimiçi maç sayısı / geçmiş), EK-706 (yükleme ekranının dereceli başlığı), EK-712 (eşin reddi metni), EK-713 (v4 masa oturumu, §4), EK-714 (aramada rakip sayısı yok), EK-715 (kopunca `snapshot` ile dönüş).
 - Unity farkları `docs/v4/ranked/UNITY_FARKLARI.md` (UF-701…UF-715): amblem / rozet / çerçeve PNG, box-shadow karşılıkları, saturate yaklaşımı, ışınlar, imleç durumları, **UF-715** letter-spacing düzeltmesi; UF-709'un donma farkı çözüldü.
 
-## 7. Commit'ler
+## 7. Unity koşusu düzeltmeleri (main `46aab1c` sonrası)
+
+- `HemenOynaOpensTheDereceliHomeAsS16`: `ranked.z.ini[0]` y 380 (beklenen 381,91 ± 1,5). 1280×720 yakalamada öğe doğru yerde (`artifacts/v4/unity/run9/S16.layout.json`: y 382, ad 453, "DY" 400 = referans). 1,91'lik kayma koltuk sütununun merkezi çevresinde 1,0315 ölçeğe denk geliyor (x 1 px kayar, ±1,5'te kalır): ölçüm anında `rkSeat` girişi (0,45 sn, gerçek zaman; eğri 1,08'den 1'e aşarak iner) bitmemiş ya da artık ölçek bırakmış. Öğe düzeltmesi: her giriş (`rkFade`, `rkSeat`, `rkModal`, `rkPop`, `rkUp`) bitince öğenin ölçek / dönme / kayma / saydamlık değerleri silinir (`RankedScreen.Rest`, CSS `both` son karesi "none"); test ölçümden önce oyun zamanı .6 sn yerine gerçek zaman 1 sn bekler (S16'nın 900 ms tutuşu gibi). Tolerans değişmedi.
+- `ranked.text.seasonTag`: `c372219`'un sağ dolgusu işledi (genişlik 118 → 120), boşluklara verilen zengin metin `<space>` işlemedi; yerine `word-spacing` (UF-715). Beklenen genişlik 124,4, x 145,8.
+
+## 8. Commit'ler
 
 | Commit | İçerik |
 |---|---|
@@ -94,4 +99,6 @@ Masa hattı bağlayana kadar (EK-713): masa sahnesi yerel motorla açılır, sun
 | `315d829` | **v4 protokolü**: `rankedQueue` / `rankedAccept` / `rankedCancel`, `rankedSearch` / `rankedFound` / `rankedAccepted` / `rankedCancelled` / `rankedReady` / `matchStart` / `rankChange`; oturum başına arka uç, `HookRanked`, `PendingRanked`; 2 yeni test |
 | `c62c8c4` | main `6565e6a` birleştirmesi (`v4/menu`, tek `GalaxyCursor`) |
 | `c372219` | letter-spacing Chrome gibi (boşluk ve son karakter): S16 `seasonTag` x 145,78 (UF-715) |
-| (bu commit) | RAPOR, EKSIKLER (EK-701 çözüldü, EK-702 kısmen, EK-703 açık, EK-712…715), UNITY_FARKLARI (UF-709 çözüldü, UF-715) |
+| `dd6b031` | RAPOR, EKSIKLER (EK-701 çözüldü, EK-702 kısmen, EK-703 açık, EK-712…715), UNITY_FARKLARI (UF-709 çözüldü, UF-715) |
+| (birleştirme) | main `46aab1c` (`v4/table`: `OnRankedMatched` `V4TableSession.Current`'ı okur, `PendingRanked` yanında kalır) |
+| (bu commit) | Giriş animasyonları bitince öğe kendi kutusuna döner (`Rest`), aralık `word-spacing` ile, S16 testi gerçek zamanla bekler; §7 |

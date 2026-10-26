@@ -167,7 +167,8 @@ namespace Galaxy101.Tests
             Assert.That(menu.Ranked, Is.Not.Null); Assert.That(menu.Ranked.Visible, Is.True);
             Assert.That(root.Q<VisualElement>("main-layer").resolvedStyle.display, Is.EqualTo(DisplayStyle.None), "the menu hides under the ranked screen");
             Assert.That(fake.QueuedMode, Is.Null, "the queue starts only with MAÇ ARA");
-            yield return new WaitForSeconds(.6f);
+            // The entrances (rkFade .25 s, rkSeat .45 s) run on real time: measure once they are over, as the 900 ms S16 hold does.
+            yield return new WaitForSecondsRealtime(1f);
 
             Assert.That(TextOf(root, "ranked.head.title"), Is.EqualTo("Dereceli"));
             Assert.That(TextOf(root, "ranked.head.sub"), Is.EqualTo("Sezon 3 · 18 gün kaldı · Solo / Duo / Squad"));

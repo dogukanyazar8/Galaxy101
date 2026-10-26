@@ -83,7 +83,7 @@ namespace Galaxy101.Diagnostics
                     // The glyph block is laid out in the label's own (local) space and then transformed, so a rotated or
                     // scaled label reports the bounds of its transformed text box — what a DOM text range rect gives.
                     var p = label.resolvedStyle; var local = label.contentRect;
-                    var size = label.MeasureTextSize(label.text, local.width, VisualElement.MeasureMode.Undefined, local.height, VisualElement.MeasureMode.Undefined);
+                    var size = label.MeasureTextSize(label.text, local.width, p.whiteSpace == WhiteSpace.NoWrap ? VisualElement.MeasureMode.Undefined : VisualElement.MeasureMode.AtMost, local.height, VisualElement.MeasureMode.Undefined);   // wrapped text: as many lines as the box needs
                     float textW = Mathf.Min(local.width, size.x), textH = size.y;
                     var a = p.unityTextAlign;
                     bool center = a == TextAnchor.MiddleCenter || a == TextAnchor.UpperCenter || a == TextAnchor.LowerCenter, right = a == TextAnchor.MiddleRight || a == TextAnchor.UpperRight || a == TextAnchor.LowerRight;

@@ -3,7 +3,7 @@
   "build": {
     "builder": "DOCKERFILE",
     "dockerfilePath": "Server/Dockerfile",
-    "watchPatterns": ["Server/**", "Shared/**", "Packages/com.okey101.core/Runtime/**", "Packages/com.galaxy101.contracts/Runtime/**", "Packages/com.galaxy101.table/Runtime/**", "Assets/Okey101/Bots/BotPlanner.cs"]
+    "watchPatterns": ["Server/**", "Shared/**", "Packages/com.okey101.core/Runtime/**", "Packages/com.galaxy101.contracts/Runtime/**", "Packages/com.galaxy101.table/Runtime/**", "Assets/Okey101/Bots/BotPlanner.cs", ".dockerignore", "railway.json"]
   },
   "deploy": {
     "healthcheckPath": "/health",

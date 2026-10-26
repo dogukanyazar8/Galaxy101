@@ -43,8 +43,8 @@ Migration ekleme: `dotnet tool restore` sonra `dotnet ef migrations add <Ad> -p 
 
 ## Railway
 
-1. Projeye PostgreSQL ekle; servis değişkenlerinde `DATABASE_URL` referansı otomatik gelir.
-2. Bu depoyu servis olarak bağla. `railway.json` Dockerfile'ı (`Server/Dockerfile`, bağlam depo kökü) ve `/health` kontrolünü tanımlar. Replika sayısı **1** kalmalı (maçlar bellekte, kalıcılık veritabanında).
+1. Projeye PostgreSQL ekle; API servisinde `DATABASE_URL=${{Postgres.DATABASE_URL}}` referansını ayrıca tanımla (`Postgres` gerçek servis adı).
+2. Depoyu kök dizinden bağla; Dockerfile `Server/Dockerfile`, `PORT=8080`, domain target8080, healthcheck `/health`, replika **1**. Yeni Railway servisleri eski `railway.json` dosyasını okumaz; ayarlar servise doğrudan uygulanır. Tam adımlar: [docs/RAILWAY.md](../docs/RAILWAY.md).
 3. Ortam değişkenleri:
 
 | Değişken | Zorunlu | Not |

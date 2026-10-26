@@ -49,7 +49,7 @@ namespace Galaxy101
             var bar = Row(); MenuView.Place(bar, 0, 0, 1280, 86); Pad(bar, 0, 28, 0, 28); page.Add(bar);
             var leave = Row(); leave.name = "lobby.w.leave"; leave.style.height = 46; Pad(leave, 0, 16, 0, 12); Raise(leave, "var(--pnH)", 14, 4, "var(--pnS)"); leave.tooltip = S("leaveRoom");
             var li = view.Icon(IconLeave, 20, "var(--ic)"); li.style.marginRight = 8; leave.Add(li); leave.Add(Text(S("leaveRoom"), 15, "Montserrat-700", "#F4F1E8"));
-            GalaxyFilters.HoverBrightness(leave, 1.25f); Tap(leave, () => _ = Leave(host)); bar.Add(leave);
+            GalaxyFilters.HoverBrightness(leave, 1.25f); Tap(leave, () => _ = Leave()); bar.Add(leave);
             var titles = Box(); titles.style.marginLeft = 14; titles.style.flexShrink = 1;
             var tag = Row(); var cap = Text(S("waitRoom"), 11, "Baloo2-800", "var(--a1)", 0, "lobby.text.waitRoom"); MenuView.Tracking(cap, 1.8f, 11); tag.Add(cap);
             if (host) { var own = Text(S("youOwn"), 11, "Baloo2-800", "var(--a1)", 0, "lobby.text.youOwn"); own.style.marginLeft = 10; Pad(own, 2, 8, 2, 8); view.Decorate(own, "rgba(255,201,74,.16)", 7); tag.Add(own); }
@@ -221,15 +221,15 @@ namespace Galaxy101
             layer?.schedule.Execute(() => { copied = false; if (screen == "wait") Render(); }).ExecuteLater(1600);
         }
 
-        /// <summary>leaveWait(): tableLeave (the stake comes back, R-90 / D-11); "Masan kapatıldı" for the owner, "Bekleme odasından ayrıldın" otherwise.</summary>
-        private async System.Threading.Tasks.Task Leave(bool host)
+        /// <summary>leaveWait(): tableLeave refunds this player's stake; K-12 transfers ownership when another human remains.</summary>
+        private async System.Threading.Tasks.Task Leave()
         {
             leaving = true; invite = null; inviteOpen = false;
             string error = await backend.LeaveAsync();
             if (layer == null) return;
             if (error != null && error != ErrorCodes.NotFound && error != "E_NOT_SEATED") { leaving = false; Flash(L("Ayrılamadın (" + error + ")", "Could not leave (" + error + ")"), "bad"); return; }
             if (backend.Room == null || error != null) { screen = "list"; animateCards = true; Render(); }
-            Flash(host ? S("closedMine") : S("leftRoom"), "info");
+            Flash(S("leftRoom"), "info");
         }
 
         private async System.Threading.Tasks.Task AddBot(int seat)

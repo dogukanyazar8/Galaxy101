@@ -51,7 +51,7 @@ public sealed partial class Hub
         public bool KatlamaPartner { get; init; } = true;
         public int TurnSec { get; init; }
         public required V4TableRules Rules { get; init; }
-        public Guid Owner { get; init; }
+        public Guid Owner { get; set; }
         public bool Ranked { get; init; }
         public bool VsBots { get; init; }
         public string Status { get; set; } = "waiting";
@@ -367,8 +367,13 @@ public sealed partial class Hub
         p.Table = null; p.Seat = -1;
         lobby.Exit(p.Id, LobbyPlace.Room);
         Send(p.Id, V4Messages.LeftTable, new V4LeftTable { Reason = reason, ToLobbyIn = 0, At = now });
-        // The owner leaving closes the waiting room (protocol.json reconnect: "Sahibiyse masa kapanır").
-        if (t.Owner == p.Id) { await CloseTableAsync(t, "ownerLeft"); return; }
+        // K-12: transfer ownership to the first remaining human in seat order; bots and spectators cannot own it.
+        if (t.Owner == p.Id)
+        {
+            var successor = t.Seats.FirstOrDefault(o => o is { IsBot: false });
+            if (successor?.Account is not { } owner) { await CloseTableAsync(t, "ownerLeft"); return; }
+            t.Owner = owner;
+        }
         TableState(t);
         LobbyEmit(t);
     }

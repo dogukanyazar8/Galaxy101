@@ -49,16 +49,36 @@ Değişen mevcut testler (gerekçesi commit mesajlarında):
 - **Yeni hub, eski yol yerinde.** v4 mesajları (`tableCreate`, `g*` …) yeni `Hub`'a gider; eski `table.*` / `match.*` / `queue.*` / `room.*` eski istemci ve eski kayıtlar için kalır (pakette yok, silinmedi). Yeni maçlar v4 motorunda; eski kayıtlar okunur.
 - **Orkestratörün "taşıma bağımsız masa çalışma zamanı" isteği** maç akışını yazmadan önce geldi; akış doğrudan `Packages/com.galaxy101.table` olarak kuruldu ve hub onu sarar (yeniden yazım gerekmedi). Paket `Galaxy101.Contracts`'a da başvurur (olay yükleri sözleşme sınıfları).
 - **Mantıksal saat.** Hub zamanlayıcıları kendi vadeleriyle koşar; bu, sanal saatte de gerçek saatte de olay zamanlarını paketle aynı yapar (SRV-02 tablosu birebir).
-- **v4 kararı kullanıcının önceki kararıyla çelişirse v4 kazanır**: bekleme odasında sahip çıkınca masa kapanır (EK-211).
+- **K-12 / EK-211 (26 Ekim 2026 kullanıcı kararı).** Bekleme odası sahibi açıkça ayrıldığında veya bağlantısı koptuğunda sahiplik koltuk sırasındaki ilk kalan insana geçer. Botlar ve izleyiciler sahip olamaz; insan kalmazsa masa kapanır. Ayrılanın bahsi bir kez iade edilir; diğer bahisler kalır, geri sayım iptal edilir, oda/lobi yeni sahibi alır. İstemcinin ayrılma tostu "Bekleme odasından ayrıldın"; masa kapandı iddiası yok. Eski protokol değişmedi.
 - **Demo kısayolları gerçek sunucuya girmedi** (DEMO-01…18): SRV-04 gerçek PIN'li masa, SRV-08 gerçek ikinci hesap, SRV-09/10 gerçek dört hesaplı kuyruk; ilk el sabitleme (DEMO-17) yalnız test kancası `Hub.NextRig`.
 - **Yeniden başlatma**: v4 masaları geri kurulmaz; açılışta tuttukları bahis iade edilir (EK-210). Eski motorun maç geri kurulumu v4 kayıtlarını atlar.
 
 ## Açık konular
 
-- EK-211 (sahip çıkınca masa kapanır) ve EK-205 (ad benzersizliği) kullanıcı onayı bekler.
+- EK-205 (ad benzersizliği) kullanıcı onayı bekler. EK-211, K-12 ile kapandı.
 - EK-201 (`gAdd.side` L/R ↔ pre/post) ve EK-202 (SRV-25 metnindeki 4000) paket sahibine.
 - `skinSet`, `friendRemoved`, `E_REQUEST_PENDING`, Galaksi çerçevesi seviye kuralı sunucuda yok (EK-206…209).
 - Hub tek döngü; çok masalı yükte masa başına aktöre bölünebilir (EK-221).
 - İstemci (Faz 2) henüz eski protokolle konuşuyor; geçiş ISTEMCI_NOTU'nda.
 
 Ayrıntı: `docs/v4/PROTOKOL_ESLEME.md`, `docs/v4/matris/hat-b.md`, `docs/v4/hat-b/EKSIKLER.md`, `docs/v4/hat-b/ISTEMCI_NOTU.md`.
+
+## K-12 doğrulaması · 26 Ekim 2026
+
+`V4/OwnerTransferTests` altı entegrasyon vakası: açık ayrılma/kopma için ilk insanın seçimi (daha önce katılan yüksek koltuğa ve bota karşı), oda/lobi yayını, ayrılanın tek iadesi ve kalan bahisler, yeni sahibin yetkileri; son insanın bot/izleyici bırakıp ayrılması; geri sayım iptali, eski zamanlayıcının maçı başlatmaması ve yeni sahibin tekrar başlatması.
+
+Derleme, etkin sunucunun çıktısını kullanmadan ayrı geçici `OutDir` altında yapıldı; test DLL'i doğrudan çalıştırıldı. Unity ve yerel sunucu başlatılmadı.
+
+```
+dotnet build Server/tests/Galaxy101.Server.Tests/Galaxy101.Server.Tests.csproj -p:OutDir=<temp>/g101-owner-transfer-tests-1792993413331/ --no-restore -v:minimal
+  0 Uyarı, 0 Hata
+dotnet test <out>/Galaxy101.Server.Tests.dll --filter FullyQualifiedName~OwnerTransferTests
+  RED: Başarısız 4, Başarılı 2, Atlanan 0, Toplam 6 (masa silindiği için Assert.NotNull başarısız)
+  GREEN: Başarısız 0, Başarılı 6, Atlanan 0, Toplam 6
+dotnet test <out>/Galaxy101.Server.Tests.dll
+  Başarısız 0, Başarılı 136, Atlanan 0, Toplam 136
+python tools/v4/unity_compile.py --repo C:/GD/Okey101-v4/server --csproj-from "C:/GD/Okey 101" --scratch <temp>/g101-owner-client-compile --project Galaxy101.Runtime
+  Galaxy101.Runtime: OK (0 errors)
+```
+
+İstemci tostu yalnız C# derlemesiyle doğrulandı; Unity PlayMode/görsel doğrulama bu değişiklikte yapılmadı.

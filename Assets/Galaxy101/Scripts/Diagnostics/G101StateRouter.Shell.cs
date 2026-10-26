@@ -48,6 +48,9 @@ namespace Galaxy101.Diagnostics
                     }
                     yield break;
                 }
+                case "S16":                                                    // acct → go ranked → waitFor Dereceli
+                    yield return RankedState(id, theme, lang);
+                    yield break;
                 default:
                     throw new NotSupportedException("no Unity path for this state yet");
             }

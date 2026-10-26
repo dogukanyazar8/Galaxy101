@@ -851,418 +851,1516 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 967102668
-    m_Localized: Could not save changes. Try again.
+    m_Localized: Your account and its data are deleted now, permanently. This cannot be undone.
     m_Metadata:
       m_Items: []
   - m_Id: 967102669
-    m_Localized: Online
+    m_Localized: 'Server unreachable: your account was not deleted'
     m_Metadata:
       m_Items: []
   - m_Id: 967102670
-    m_Localized: All
+    m_Localized: The account could not be deleted
     m_Metadata:
       m_Items: []
   - m_Id: 967102671
-    m_Localized: Requests
+    m_Localized: Account deleted
     m_Metadata:
       m_Items: []
   - m_Id: 967102672
-    m_Localized: Could not open the table. Try again.
+    m_Localized: Your data was removed. You can come back with a new account anytime.
     m_Metadata:
       m_Items: []
   - m_Id: 967102673
-    m_Localized: ' s'
+    m_Localized: 'Server unreachable: the profile was not saved'
     m_Metadata:
       m_Items: []
   - m_Id: 967102674
-    m_Localized: Done
+    m_Localized: This name or status is not allowed
     m_Metadata:
       m_Items: []
   - m_Id: 967102675
-    m_Localized: Not enough gems
+    m_Localized: Could not save changes. Try again.
     m_Metadata:
       m_Items: []
   - m_Id: 967102676
-    m_Localized: Solo
+    m_Localized: "Aligning planets\u2026"
     m_Metadata:
       m_Items: []
   - m_Id: 967102677
-    m_Localized: "Solo \xB7 101 \xB7 5K table"
+    m_Localized: "Racking tiles\u2026"
     m_Metadata:
       m_Items: []
   - m_Id: 967102678
-    m_Localized: Pairs
+    m_Localized: "Setting up tables\u2026"
     m_Metadata:
       m_Items: []
   - m_Id: 967102679
-    m_Localized: "Pairs \xB7 101 \xB7 5K table"
+    m_Localized: "Almost ready\u2026"
     m_Metadata:
       m_Items: []
   - m_Id: 967102680
-    m_Localized: Doubling
+    m_Localized: Ready
     m_Metadata:
       m_Items: []
   - m_Id: 967102681
-    m_Localized: "Doubling \xB7 101 \xB7 10K table"
+    m_Localized: 'Tip: The tile one above the indicator is the okey; it stands for any tile.'
     m_Metadata:
       m_Items: []
   - m_Id: 967102682
-    m_Localized: Ranked
+    m_Localized: 'Tip: Opening needs sets worth 101 or 5 pairs.'
     m_Metadata:
       m_Items: []
   - m_Id: 967102683
-    m_Localized: "Ranked \xB7 Gold II"
+    m_Localized: 'Tip: Hold a set to move it as one.'
     m_Metadata:
       m_Items: []
   - m_Id: 967102684
-    m_Localized: Vs bots
+    m_Localized: 'Tip: Throwing a playable tile costs +101.'
     m_Metadata:
       m_Items: []
   - m_Id: 967102685
-    m_Localized: "Vs bots \xB7 practice"
+    m_Localized: 'Tables are full, tiles are racked.
+
+      Sit with your friends, open 101 and finish.'
     m_Metadata:
       m_Items: []
   - m_Id: 967102686
-    m_Localized: Private room
+    m_Localized: Welcome
     m_Metadata:
       m_Items: []
   - m_Id: 967102687
-    m_Localized: "Private room \xB7 password"
+    m_Localized: How would you like to continue?
     m_Metadata:
       m_Items: []
   - m_Id: 967102688
-    m_Localized: Tiles and the okey
+    m_Localized: PLAY AS GUEST
     m_Metadata:
       m_Items: []
   - m_Id: 967102689
-    m_Localized: 'There are 106 tiles: two of each number from 1 to 13 in red, yellow, blue and black, plus 2 false okeys.'
+    m_Localized: "No sign-up \xB7 start now"
     m_Metadata:
       m_Items: []
   - m_Id: 967102690
-    m_Localized: The tile turned up in the middle is the indicator. The tile one above it is the okey and can stand in for any tile.
+    m_Localized: Log in
     m_Metadata:
       m_Items: []
   - m_Id: 967102691
-    m_Localized: A false okey takes the place of the okey itself and has the okey's value.
+    m_Localized: Sign up
     m_Metadata:
       m_Items: []
   - m_Id: 967102692
-    m_Localized: If the indicator is yellow 7, the okey is yellow 8.
+    m_Localized: or
     m_Metadata:
       m_Items: []
   - m_Id: 967102693
-    m_Localized: Dealing
+    m_Localized: By continuing you accept the Terms of Use and the Privacy Policy. The game is played with virtual chips; it pays no real money.
     m_Metadata:
       m_Items: []
   - m_Id: 967102694
-    m_Localized: The tiles are shuffled and every player gets 21 tiles.
+    m_Localized: Continue with Google
     m_Metadata:
       m_Items: []
   - m_Id: 967102695
-    m_Localized: The starting player gets 22 tiles and begins by discarding one.
+    m_Localized: Google sign-in is not available in this version yet.
     m_Metadata:
       m_Items: []
   - m_Id: 967102696
-    m_Localized: The remaining tiles form the draw pile in the middle. Play goes counter-clockwise.
+    m_Localized: Back
     m_Metadata:
       m_Items: []
   - m_Id: 967102697
-    m_Localized: Opening your hand
+    m_Localized: Hide
     m_Metadata:
       m_Items: []
   - m_Id: 967102698
-    m_Localized: To open your hand, your sets must add up to at least 101.
+    m_Localized: Show
     m_Metadata:
       m_Items: []
   - m_Id: 967102699
-    m_Localized: 'Run: at least 3 consecutive tiles of the same color. Group: 3 or 4 tiles of the same number in different colors.'
+    m_Localized: Weak
     m_Metadata:
       m_Items: []
   - m_Id: 967102700
-    m_Localized: You can also open with at least 5 pairs.
+    m_Localized: Strong
     m_Metadata:
       m_Items: []
   - m_Id: 967102701
-    m_Localized: Run 46 + group 36 = 82 points. You need 19 more to open.
+    m_Localized: Pick up where you left off
     m_Metadata:
       m_Items: []
   - m_Id: 967102702
-    m_Localized: Adding tiles
+    m_Localized: or with e-mail
     m_Metadata:
       m_Items: []
   - m_Id: 967102703
-    m_Localized: Once you have opened, you can add matching tiles to any set on the table.
+    m_Localized: EMAIL
     m_Metadata:
       m_Items: []
   - m_Id: 967102704
-    m_Localized: If you hold the tile the okey stands for in a set on the table, you can swap it in and take the okey.
+    m_Localized: PASSWORD
     m_Metadata:
       m_Items: []
   - m_Id: 967102705
-    m_Localized: You can add red 13 to the red run on the table.
+    m_Localized: At least 6 characters
     m_Metadata:
       m_Items: []
   - m_Id: 967102706
-    m_Localized: Finishing
+    m_Localized: Remember me
     m_Metadata:
       m_Items: []
   - m_Id: 967102707
-    m_Localized: The player who places all their tiles in sets and discards their last tile finishes the hand.
+    m_Localized: Forgot password
     m_Metadata:
       m_Items: []
   - m_Id: 967102708
-    m_Localized: If you finish by discarding the okey, every penalty is doubled.
+    m_Localized: No account yet?
     m_Metadata:
       m_Items: []
   - m_Id: 967102709
-    m_Localized: Discarding the okey as your last tile doubles all penalties.
+    m_Localized: Reset your password
     m_Metadata:
       m_Items: []
   - m_Id: 967102710
-    m_Localized: Scoring
+    m_Localized: Enter the 6-digit code from your e-mail and a new password
     m_Metadata:
       m_Items: []
   - m_Id: 967102711
-    m_Localized: The player who finishes gets -101 points.
+    m_Localized: Enter your account's e-mail and we'll send a reset code
     m_Metadata:
       m_Items: []
   - m_Id: 967102712
-    m_Localized: Players who opened get a penalty equal to the sum of the tiles left in their hand.
+    m_Localized: CODE
     m_Metadata:
       m_Items: []
   - m_Id: 967102713
-    m_Localized: A player who never opened gets 202 penalty points. Players who opened with pairs get double penalties.
+    m_Localized: NEW PASSWORD
     m_Metadata:
       m_Items: []
   - m_Id: 967102714
-    m_Localized: The player with the lowest score at the end wins.
+    m_Localized: NEW PASSWORD (AGAIN)
     m_Metadata:
       m_Items: []
   - m_Id: 967102715
-    m_Localized: Indicator
+    m_Localized: Same password
     m_Metadata:
       m_Items: []
   - m_Id: 967102716
-    m_Localized: Okey
+    m_Localized: Send the code again
     m_Metadata:
       m_Items: []
   - m_Id: 967102717
-    m_Localized: Add
+    m_Localized: Change password
     m_Metadata:
       m_Items: []
   - m_Id: 967102718
-    m_Localized: Last tile
+    m_Localized: Send code
     m_Metadata:
       m_Items: []
   - m_Id: 967102719
-    m_Localized: Diamond I
+    m_Localized: Remembered it?
     m_Metadata:
       m_Items: []
   - m_Id: 967102720
-    m_Localized: Diamond II
+    m_Localized: Create an account, get 25,000 chips
     m_Metadata:
       m_Items: []
   - m_Id: 967102721
-    m_Localized: In lobby
+    m_Localized: USERNAME
     m_Metadata:
       m_Items: []
   - m_Id: 967102722
-    m_Localized: "At a table \xB7 Pairs"
+    m_Localized: "3\u201316 characters"
     m_Metadata:
       m_Items: []
   - m_Id: 967102723
-    m_Localized: Looking for a ranked match
+    m_Localized: Available
     m_Metadata:
       m_Items: []
   - m_Id: 967102724
-    m_Localized: 2 hours ago
+    m_Localized: REPEAT PASSWORD
     m_Metadata:
       m_Items: []
   - m_Id: 967102725
-    m_Localized: 3 days ago
+    m_Localized: Type your password again
     m_Metadata:
       m_Items: []
   - m_Id: 967102726
-    m_Localized: "Mutual friend: Ay\u015Fe Y."
+    m_Localized: I have read and accept the Terms of Use and Privacy Policy.
     m_Metadata:
       m_Items: []
   - m_Id: 967102727
-    m_Localized: Your opponent last match
+    m_Localized: Create account
     m_Metadata:
       m_Items: []
   - m_Id: 967102728
-    m_Localized: Win 3 hands
+    m_Localized: Already have an account?
     m_Metadata:
       m_Items: []
   - m_Id: 967102729
-    m_Localized: Open with pairs
+    m_Localized: Guest login
     m_Metadata:
       m_Items: []
   - m_Id: 967102730
-    m_Localized: Play 5 hands
+    m_Localized: Your progress is saved on this device
     m_Metadata:
       m_Items: []
   - m_Id: 967102731
-    m_Localized: Finish by discarding the okey
+    m_Localized: NICKNAME
     m_Metadata:
       m_Items: []
   - m_Id: 967102732
-    m_Localized: Add 40 tiles to sets
+    m_Localized: Name shown at the table
     m_Metadata:
       m_Items: []
   - m_Id: 967102733
-    m_Localized: Chips, gems and tile skins
+    m_Localized: You start with 10,000 chips.
     m_Metadata:
       m_Items: []
   - m_Id: 967102734
-    m_Localized: 3 friends online
+    m_Localized: If you delete the app or switch devices, your progress is lost.
     m_Metadata:
       m_Items: []
   - m_Id: 967102735
-    m_Localized: "Season 3 \xB7 12 days left"
+    m_Localized: Start playing
     m_Metadata:
       m_Items: []
   - m_Id: 967102736
-    m_Localized: "5-day streak \xB7 log in daily to grow your reward"
+    m_Localized: You can link an account later.
     m_Metadata:
       m_Items: []
   - m_Id: 967102737
-    m_Localized: Stats, rank and badges
+    m_Localized: Something went wrong. Try again.
     m_Metadata:
       m_Items: []
   - m_Id: 967102738
-    m_Localized: How to play 101 Okey
+    m_Localized: Enter a valid email
     m_Metadata:
       m_Items: []
   - m_Id: 967102739
-    m_Localized: Saturn
+    m_Localized: "3\u201316 letters, digits or _"
     m_Metadata:
       m_Items: []
   - m_Id: 967102740
-    m_Localized: Golden rings
+    m_Localized: "Passwords don\u2019t match"
     m_Metadata:
       m_Items: []
   - m_Id: 967102741
-    m_Localized: Mars
+    m_Localized: Accept the terms to continue
     m_Metadata:
       m_Items: []
   - m_Id: 967102742
-    m_Localized: Red desert
+    m_Localized: The 6-digit code
     m_Metadata:
       m_Items: []
   - m_Id: 967102743
-    m_Localized: Neptune
+    m_Localized: The server address is not secure (https required).
     m_Metadata:
       m_Items: []
   - m_Id: 967102744
-    m_Localized: Ice blue
+    m_Localized: Could not reach the server. Check your connection and try again.
     m_Metadata:
       m_Items: []
   - m_Id: 967102745
-    m_Localized: Jupiter
+    m_Localized: No account with this e-mail.
     m_Metadata:
       m_Items: []
   - m_Id: 967102746
-    m_Localized: Storm belts
+    m_Localized: An account with this e-mail already exists
     m_Metadata:
       m_Items: []
   - m_Id: 967102747
-    m_Localized: Venus
+    m_Localized: "Check the details: name 3\u201316 characters, password at least 6."
     m_Metadata:
       m_Items: []
   - m_Id: 967102748
-    m_Localized: Pink haze
+    m_Localized: Too many attempts; wait a moment.
     m_Metadata:
       m_Items: []
   - m_Id: 967102749
-    m_Localized: Galaxy tiles
+    m_Localized: The code is wrong or expired. Ask for a new one.
     m_Metadata:
       m_Items: []
   - m_Id: 967102750
-    m_Localized: Gold tiles
+    m_Localized: E-mail cannot be sent right now. Try again later.
     m_Metadata:
       m_Items: []
   - m_Id: 967102751
-    m_Localized: Neon tiles
+    m_Localized: This name is not allowed; pick another one.
     m_Metadata:
       m_Items: []
   - m_Id: 967102752
-    m_Localized: Marble tiles
+    m_Localized: TEST SCENARIO
     m_Metadata:
       m_Items: []
   - m_Id: 967102753
-    m_Localized: First win
+    m_Localized: "Developer menu \xB7 F9"
     m_Metadata:
       m_Items: []
   - m_Id: 967102754
-    m_Localized: Win your first hand
+    m_Localized: Online
     m_Metadata:
       m_Items: []
   - m_Id: 967102755
-    m_Localized: Okey master
+    m_Localized: All
     m_Metadata:
       m_Items: []
   - m_Id: 967102756
-    m_Localized: Finish 50 hands with the okey
+    m_Localized: Requests
     m_Metadata:
       m_Items: []
   - m_Id: 967102757
-    m_Localized: 5 pairs
+    m_Localized: Watching is coming soon
     m_Metadata:
       m_Items: []
   - m_Id: 967102758
-    m_Localized: Open with pairs 5 times
+    m_Localized: Player
     m_Metadata:
       m_Items: []
   - m_Id: 967102759
-    m_Localized: 100 hands
+    m_Localized: Open a table
     m_Metadata:
       m_Items: []
   - m_Id: 967102760
-    m_Localized: Play 100 hands
+    m_Localized: "Classic \xB7 101 \xB7 you sit down automatically"
     m_Metadata:
       m_Items: []
   - m_Id: 967102761
-    m_Localized: Doubling king
+    m_Localized: Game mode
     m_Metadata:
       m_Items: []
   - m_Id: 967102762
-    m_Localized: Win 25 Doubling hands
+    m_Localized: Set by the mode you entered; pick a type
     m_Metadata:
       m_Items: []
   - m_Id: 967102763
-    m_Localized: Win streak
+    m_Localized: Singles
     m_Metadata:
       m_Items: []
   - m_Id: 967102764
-    m_Localized: Win 7 hands in a row
+    m_Localized: Pairs
     m_Metadata:
       m_Items: []
   - m_Id: 967102765
-    m_Localized: Diamond league
+    m_Localized: Table name
     m_Metadata:
       m_Items: []
   - m_Id: 967102766
-    m_Localized: Reach Diamond league
+    m_Localized: "Table name can\u2019t be empty"
     m_Metadata:
       m_Items: []
   - m_Id: 967102767
-    m_Localized: Galaxy explorer
+    m_Localized: Shown in the lobby and invites
     m_Metadata:
       m_Items: []
   - m_Id: 967102768
-    m_Localized: Try every planet theme
+    m_Localized: Visibility
     m_Metadata:
       m_Items: []
   - m_Id: 967102769
-    m_Localized: Legend
+    m_Localized: Hidden from the lobby, join by invite code
     m_Metadata:
       m_Items: []
   - m_Id: 1802865266688
-    m_Localized: Win 1,000 hands
+    m_Localized: Listed in the lobby, anyone can sit
     m_Metadata:
       m_Items: []
   - m_Id: 4283099828224
+    m_Localized: Open
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864760156160
+    m_Localized: Private
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985280
+    m_Localized: Password
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985281
+    m_Localized: Enter 4 digits
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985282
+    m_Localized: Players must enter this password
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985283
+    m_Localized: "Optional \xB7 4 digits"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985284
+    m_Localized: Hands
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985285
+    m_Localized: The match lasts this many hands; lowest total wins
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985286
+    m_Localized: Bet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985287
+    m_Localized: Too high
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985288
+    m_Localized: Not enough chips
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985289
+    m_Localized: Get chips
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985290
+    m_Localized: Prize
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985291
+    m_Localized: "Winning team takes it \xB7 half each"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985292
+    m_Localized: Winner takes all bets at the table
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985293
+    m_Localized: Total pool
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985294
+    m_Localized: Doubling
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985295
+    m_Localized: Scores double when finishing with okey or pairs
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985296
+    m_Localized: Turn time
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985297
+    m_Localized: Auto-plays when time runs out
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985298
+    m_Localized: 45s
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985299
+    m_Localized: Customize rules
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985300
+    m_Localized: Default rules
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985301
+    m_Localized: Okey discard penalty (+101)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985302
+    m_Localized: Discarding the okey costs +101
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985303
+    m_Localized: Playable tile penalty (+101)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985304
+    m_Localized: Discarding a tile that fits a set on the table costs +101
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985305
+    m_Localized: Spectators
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985306
+    m_Localized: Others can watch while you play
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985307
+    m_Localized: Allow
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985308
+    m_Localized: "Don\u2019t allow"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985309
+    m_Localized: Chat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985310
+    m_Localized: Table messages
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985311
+    m_Localized: On
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985312
+    m_Localized: Quick phrases only
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985313
+    m_Localized: Off
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985314
+    m_Localized: Treats and gifts
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985315
+    m_Localized: Players can send each other treats
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985316
+    m_Localized: SUMMARY
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985317
+    m_Localized: BET
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985318
+    m_Localized: POOL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985319
+    m_Localized: TURN TIME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985320
+    m_Localized: Balance
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985321
+    m_Localized: Not enough chips
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985322
+    m_Localized: Fix the highlighted fields
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985323
+    m_Localized: You are already at a table
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985324
+    m_Localized: Your table is open
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985325
+    m_Localized: A bot took the seat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985326
+    m_Localized: Leave
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985327
+    m_Localized: WAITING ROOM
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985328
+    m_Localized: You are the host
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985329
+    m_Localized: Code
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985330
+    m_Localized: Copy code
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985331
+    m_Localized: Share
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985332
+    m_Localized: Everyone is seated, start the game.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985333
+    m_Localized: You can start once all four seats are taken. Add bots to empty seats.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985334
+    m_Localized: The table opens when the host starts the game.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985335
+    m_Localized: Start
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985336
+    m_Localized: Waiting for the host
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985337
+    m_Localized: "Opening the table\u2026"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985338
+    m_Localized: Table is ready
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985339
+    m_Localized: Host
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985340
+    m_Localized: Remove from table
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985341
+    m_Localized: YOU
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985342
+    m_Localized: Team A
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985343
+    m_Localized: Team B
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985344
+    m_Localized: Empty seat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985345
+    m_Localized: Invite
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985346
+    m_Localized: Add bot
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985347
+    m_Localized: You left the waiting room
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985348
+    m_Localized: The bot was removed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985349
+    m_Localized: All four seats must be taken
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985350
+    m_Localized: Invite friends
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985351
+    m_Localized: "Table is full \xB7 no invites"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985352
+    m_Localized: Recent players
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985353
+    m_Localized: Search players
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985354
+    m_Localized: Nobody played with you yet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985355
+    m_Localized: No friends yet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985356
+    m_Localized: No player with that name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985357
+    m_Localized: SEATS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985358
+    m_Localized: INVITE BY CODE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985359
+    m_Localized: Open tables are listed in the lobby; invited friends sit straight into an empty seat.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985360
+    m_Localized: Friends who accept take an empty seat automatically.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985361
+    m_Localized: In a game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985362
+    m_Localized: Seated
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985363
+    m_Localized: Table full
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985364
+    m_Localized: Invite again
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985365
+    m_Localized: Declined
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985366
+    m_Localized: Click to cancel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985367
+    m_Localized: "Connecting to the table\u2026"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985368
+    m_Localized: Table is full
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985369
+    m_Localized: Table closed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985370
+    m_Localized: The last seat was taken while you were connecting.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985371
+    m_Localized: The host closed the table.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985372
+    m_Localized: Find a similar table
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985373
+    m_Localized: Could not reach the server
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985374
+    m_Localized: The lobby needs you online. Check your connection and try again.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985375
+    m_Localized: Main menu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985376
+    m_Localized: Try again
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985377
+    m_Localized: Later
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985378
+    m_Localized: Join
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985379
+    m_Localized: Password protected
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985380
+    m_Localized: Enter
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985381
+    m_Localized: Join by code
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985382
+    m_Localized: Private tables are hidden from the lobby; type the code a friend sent you.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985383
+    m_Localized: The code is GX- and 4 characters
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985384
+    m_Localized: Your private table is ready
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985385
+    m_Localized: "It isn\u2019t listed in the lobby. Send the code to friends so they can join."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985386
+    m_Localized: INVITE CODE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985387
+    m_Localized: Invite text copied
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985388
+    m_Localized: Go to waiting room
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985389
+    m_Localized: Back to room
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985390
+    m_Localized: The host removed you from the table
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985391
+    m_Localized: 'You left the table: not enough chips'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985392
+    m_Localized: The table closed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985393
+    m_Localized: 'Connection lost: you left the table'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985394
+    m_Localized: "Singles and pairs tables \xB7 101 Okey"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985395
+    m_Localized: Open table
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985396
+    m_Localized: Has free seat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985397
+    m_Localized: Waiting
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985398
+    m_Localized: "Full \xB7 starting"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985399
+    m_Localized: Sit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985400
+    m_Localized: Full
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985401
+    m_Localized: Password
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985402
+    m_Localized: "\xD72 Doubling"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985403
+    m_Localized: Playable +101
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985404
+    m_Localized: Spectators on
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985405
+    m_Localized: No spectators
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985406
+    m_Localized: Quick chat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985407
+    m_Localized: Chat off
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985408
+    m_Localized: Gifts off
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985409
+    m_Localized: No tables match these filters
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985410
+    m_Localized: Clear the filters or open your own table; open tables show up in the lobby right away.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985411
+    m_Localized: Clear filters
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985412
+    m_Localized: Search tables
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985413
+    m_Localized: Wrong password. Try again.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985414
+    m_Localized: The game at this table has not started yet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985415
+    m_Localized: This table is closed to spectators
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985416
+    m_Localized: No open table found for this code.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985417
+    m_Localized: The game at this table has started
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985418
+    m_Localized: Not enough chips for this table
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985419
+    m_Localized: No similar free table right now
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985420
+    m_Localized: Sign in to play ranked
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985421
+    m_Localized: "Ranked \xB7 Season "
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985422
+    m_Localized: Could not open the table. Try again.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985423
+    m_Localized: Ranked
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985424
+    m_Localized: Vs bots
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985425
+    m_Localized: SOON
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985426
+    m_Localized: "Ranked \xB7 Solo / Duo / Squad"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985427
+    m_Localized: "Vs bots \xB7 practice \xB7 no stake"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985428
+    m_Localized: "Classic \xB7 Singles / Pairs \xB7 tables"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985429
+    m_Localized: Vs bots is coming soon
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985430
+    m_Localized: across modes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985431
+    m_Localized: Top league
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985432
+    m_Localized: "101 \xB7 no stake"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985433
+    m_Localized: You are already at a table or in a queue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985434
+    m_Localized: Server unreachable
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985435
+    m_Localized: Could not start matchmaking
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985436
+    m_Localized: RANKED
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985437
+    m_Localized: Finding opponents
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985438
+    m_Localized: " \xB7 players near your league"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985439
+    m_Localized: ' s'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985440
+    m_Localized: Fullscreen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985441
+    m_Localized: Borderless
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985442
+    m_Localized: Windowed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985443
+    m_Localized: Display mode
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985444
+    m_Localized: Fullscreen, borderless window or window
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985445
+    m_Localized: "Native \xB7 "
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985446
+    m_Localized: 'Monitor max '
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985447
+    m_Localized: Frame rate
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985448
+    m_Localized: Done
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985449
+    m_Localized: Not enough gems
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985450
+    m_Localized: "Loading the 3D table\u2026"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985451
+    m_Localized: Solo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985452
+    m_Localized: "Solo \xB7 101 \xB7 5K table"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985453
+    m_Localized: "Pairs \xB7 101 \xB7 5K table"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985454
+    m_Localized: "Doubling \xB7 101 \xB7 10K table"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985455
+    m_Localized: "Ranked \xB7 Gold II"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985456
+    m_Localized: "Vs bots \xB7 practice"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985457
+    m_Localized: Private room
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985458
+    m_Localized: "Private room \xB7 password"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985459
+    m_Localized: Tiles and the okey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985460
+    m_Localized: 'There are 106 tiles: two of each number from 1 to 13 in red, yellow, blue and black, plus 2 false okeys.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985461
+    m_Localized: The tile turned up in the middle is the indicator. The tile one above it is the okey and can stand in for any tile.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985462
+    m_Localized: A false okey takes the place of the okey itself and has the okey's value.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985463
+    m_Localized: If the indicator is yellow 7, the okey is yellow 8.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985464
+    m_Localized: Dealing
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985465
+    m_Localized: The tiles are shuffled and every player gets 21 tiles.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985466
+    m_Localized: The starting player gets 22 tiles and begins by discarding one.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985467
+    m_Localized: The remaining tiles form the draw pile in the middle. Play goes counter-clockwise.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985468
+    m_Localized: Opening your hand
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985469
+    m_Localized: To open your hand, your sets must add up to at least 101.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985470
+    m_Localized: 'Run: at least 3 consecutive tiles of the same color. Group: 3 or 4 tiles of the same number in different colors.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985471
+    m_Localized: You can also open with at least 5 pairs.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985472
+    m_Localized: Run 46 + group 36 = 82 points. You need 19 more to open.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985473
+    m_Localized: Adding tiles
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985474
+    m_Localized: Once you have opened, you can add matching tiles to any set on the table.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985475
+    m_Localized: If you hold the tile the okey stands for in a set on the table, you can swap it in and take the okey.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985476
+    m_Localized: You can add red 13 to the red run on the table.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985477
+    m_Localized: Finishing
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985478
+    m_Localized: The player who places all their tiles in sets and discards their last tile finishes the hand.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985479
+    m_Localized: If you finish by discarding the okey, every penalty is doubled.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985480
+    m_Localized: Discarding the okey as your last tile doubles all penalties.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985481
+    m_Localized: Scoring
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985482
+    m_Localized: The player who finishes gets -101 points.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985483
+    m_Localized: Players who opened get a penalty equal to the sum of the tiles left in their hand.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985484
+    m_Localized: A player who never opened gets 202 penalty points. Players who opened with pairs get double penalties.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985485
+    m_Localized: The player with the lowest score at the end wins.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985486
+    m_Localized: Indicator
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985487
+    m_Localized: Okey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985488
+    m_Localized: Add
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985489
+    m_Localized: Last tile
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985490
+    m_Localized: Bronze III
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985491
+    m_Localized: Bronze II
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985492
+    m_Localized: Bronze I
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985493
+    m_Localized: Silver III
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985494
+    m_Localized: Silver II
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985495
+    m_Localized: Silver I
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985496
+    m_Localized: Gold III
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985497
+    m_Localized: Diamond III
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985498
+    m_Localized: Diamond II
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985499
+    m_Localized: Diamond I
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985500
+    m_Localized: Master III
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985501
+    m_Localized: Master II
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985502
+    m_Localized: Master I
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985503
+    m_Localized: In lobby
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985504
+    m_Localized: "At a table \xB7 Pairs"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985505
+    m_Localized: Looking for a ranked match
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985506
+    m_Localized: 2 hours ago
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985507
+    m_Localized: 3 days ago
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985508
+    m_Localized: "Mutual friend: Ay\u015Fe Y."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985509
+    m_Localized: Your opponent last match
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985510
+    m_Localized: Win 3 hands
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985511
+    m_Localized: Open with pairs
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985512
+    m_Localized: Play 5 hands
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985513
+    m_Localized: Finish by discarding the okey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985514
+    m_Localized: Add 40 tiles to sets
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985515
+    m_Localized: Chips, gems and tile skins
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985516
+    m_Localized: 3 friends online
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985517
+    m_Localized: "Season 3 \xB7 12 days left"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985518
+    m_Localized: "5-day streak \xB7 log in daily to grow your reward"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985519
+    m_Localized: Stats, rank and badges
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985520
+    m_Localized: How to play 101 Okey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985521
+    m_Localized: Saturn
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985522
+    m_Localized: Golden rings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985523
+    m_Localized: Mars
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985524
+    m_Localized: Red desert
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985525
+    m_Localized: Neptune
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985526
+    m_Localized: Ice blue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985527
+    m_Localized: Jupiter
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985528
+    m_Localized: Storm belts
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985529
+    m_Localized: Venus
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985530
+    m_Localized: Pink haze
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985531
+    m_Localized: Galaxy tiles
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985532
+    m_Localized: Gold tiles
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985533
+    m_Localized: Neon tiles
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985534
+    m_Localized: Marble tiles
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985535
+    m_Localized: First win
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985536
+    m_Localized: Win your first hand
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985537
+    m_Localized: Okey master
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985538
+    m_Localized: Finish 50 hands with the okey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985539
+    m_Localized: 5 pairs
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985540
+    m_Localized: Open with pairs 5 times
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985541
+    m_Localized: 100 hands
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985542
+    m_Localized: Play 100 hands
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985543
+    m_Localized: Doubling king
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985544
+    m_Localized: Win 25 Doubling hands
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985545
+    m_Localized: Win streak
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985546
+    m_Localized: Win 7 hands in a row
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985547
+    m_Localized: Diamond league
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985548
+    m_Localized: Reach Diamond league
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985549
+    m_Localized: Galaxy explorer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985550
+    m_Localized: Try every planet theme
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985551
+    m_Localized: Legend
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1595864885985552
     m_Localized: Win 1,000 hands
     m_Metadata:
       m_Items: []

@@ -105,7 +105,9 @@ namespace Galaxy101
             string shade=classes.Contains("danger")?"#C23E4A":classes.Contains("success")?"#22914A":classes.Contains("secondary")?"var(--pnS)":"var(--aS)";
             Decorate(button,bg,14,classes.Contains("plain")?0:4,shade);
             // style-hover: brightness 1.25 on panel-coloured (secondary) controls, 1.12 on green and nav buttons, 1.08 on gold.
-            float brightness=classes.Contains("mode-card")?1:classes.Contains("settings-button")||classes.Contains("secondary")?1.25f:classes.Contains("nav-button")||classes.Contains("success")?1.12f:1.08f;
+            // "bright-NNN": the v4 style-hover filter:brightness(N/100) of that control (G101-Menu, e.g. bright-120).
+            var tuned=Regex.Match(classes,@"(?<![\w-])bright-(\d+)");
+            float brightness=tuned.Success?int.Parse(tuned.Groups[1].Value,CultureInfo.InvariantCulture)/100f:classes.Contains("mode-card")?1:classes.Contains("settings-button")||classes.Contains("secondary")?1.25f:classes.Contains("nav-button")||classes.Contains("success")?1.12f:1.08f;
             if(brightness>1)GalaxyFilters.HoverBrightness(button,brightness);return button;
         }
         public VisualElement Row(params VisualElement[] children){var row=Box("row");foreach(var child in children)if(child!=null)row.Add(child);return row;}
@@ -184,43 +186,47 @@ namespace Galaxy101
             if(!paints.TryGetValue(key,out var texture)){texture=new GalaxySurface(this).CreateGradient(css,Mathf.Max(.0001f,aspect),1);paints.Add(key,texture);}
             element.style.backgroundColor=Color.clear;element.style.backgroundImage=new StyleBackground(texture);
         }
-        public VisualElement Avatar(int size,JObject data=null,bool level=false)
+        /// <summary>
+        /// A framed avatar as G101-Menu draws it (frameOf / frameOpts): Klasik is the conic a1/dp face, a league frame
+        /// (10–15, a saved 1 = Altın) the G101Ring with "box-shadow: 0 0 16px glow". The initials disc sits at the frame's
+        /// inset — insetS 5/9 (62), inset 7/15 (110), insetM 8/14 (104), insetL 9/17 (124), chips inS 5/7 (40, 44) — inside
+        /// a 3px (chips 2px) ring in the gap colour (top bar: gapS). Chips carry no initials and no glow.
+        /// </summary>
+        public VisualElement Avatar(int size,JObject data=null,bool level=false,bool topBar=false)
         {
             data=data??Model.Profile;var root=Box("avatar");root.style.width=root.style.height=size;root.style.flexShrink=0;
-            int frame=(int?)data["frame"]??0;bool small=size<=62;
-            // frameOf(): the gold frame carries box-shadow 0 0 0 2px #5A3A08, 0 0 16px rgba(255,201,74,.55) under its conic face.
-            if(frame==1)
+            int frame=(int?)data["frame"]??0;var look=FrameLook(frame,topBar);bool chip=size<=44,league=look.League!=null;
+            if(league&&!chip)
             {
-                var glow=Box("avatar-frame-glow");glow.pickingMode=PickingMode.Ignore;MenuView.Place(glow,0,0,size,size);Decorate(glow,"#5A3A08",size/2);GalaxyFilters.Shadow(glow,0,0,8,new Color(1,.788f,.29f,.55f));root.Add(glow);
-                var ring=Box("avatar-frame-ring");ring.pickingMode=PickingMode.Ignore;MenuView.Place(ring,-2,-2,size+4,size+4);Decorate(ring,"#5A3A08",size/2+2);root.Add(ring);
+                // A transparent face casts its CSS box-shadow outside the circle only: an opaque band under the ring art
+                // (which covers it) casts the glow instead.
+                var glow=Box("avatar-frame-glow");glow.pickingMode=PickingMode.Ignore;Place(glow,0,0,size,size);
+                glow.style.borderTopLeftRadius=glow.style.borderTopRightRadius=glow.style.borderBottomLeftRadius=glow.style.borderBottomRightRadius=size/2f;
+                glow.style.borderLeftWidth=glow.style.borderRightWidth=glow.style.borderTopWidth=glow.style.borderBottomWidth=Mathf.Min(12,size/4f);
+                glow.style.borderLeftColor=glow.style.borderRightColor=glow.style.borderTopColor=glow.style.borderBottomColor=C(look.Gap);
+                GalaxyFilters.Shadow(glow,0,0,8,look.Glow);root.Add(glow);
             }
-            var face=Box("avatar-frame");face.pickingMode=PickingMode.Ignore;MenuView.Place(face,0,0,size,size);root.Add(face);
-            if(frame==2)GalaxyFilters.Shadow(face,0,0,5,new Color(.549f,.431f,1,.5f));
-            Decorate(face,frame==1?"conic-gradient(from 210deg,#8A5A12,#FFE9A8 12%,#E8A317 25%,#FFF6D0 38%,#B8790F 52%,#FFE08A 66%,#C88A1A 80%,#8A5A12)":frame==2?"conic-gradient(#3B2F7A,#8C6EFF,#3DF5E0,#3B2F7A)":"conic-gradient(var(--a1) 0 245deg,var(--dp) 245deg)",size/2);
-            // Reference insets: top bar insetS 5, edit preview 8/7, share card 8, profile summary 9.
-            var inner=Box("avatar-inner");inner.style.position=Position.Absolute;int inset=small?5:size>=124?9:size==104?8:frame==1?8:7;
+            var face=Box("avatar-frame");face.pickingMode=PickingMode.Ignore;Place(face,0,0,size,size);root.Add(face);
+            if(league)root.Add(LeagueRing(look.League,size));else Decorate(face,look.Face,size/2);
+            int inset=chip?(league?7:5):size>=124?(league?17:9):size==104?(league?14:8):size<=62?(league?9:5):(league?15:7);
+            var inner=Box("avatar-inner");inner.pickingMode=PickingMode.Ignore;inner.style.position=Position.Absolute;
             inner.style.left=inner.style.right=inner.style.top=inner.style.bottom=inset;Decorate(inner,(string)data["color"]??"#FF8A5B",size/2);
-            // Frame chips (40px) use a 2px gap ring, everything larger 3px.
-            inner.style.borderLeftWidth=inner.style.borderRightWidth=inner.style.borderTopWidth=inner.style.borderBottomWidth=size<=40?2:3;
-            inner.style.borderLeftColor=inner.style.borderRightColor=inner.style.borderTopColor=inner.style.borderBottomColor=C(frame==1?"#3A2604":small?"var(--pn)":"var(--sd)");
-            var initials=Text(ProfileValidation.Initials((string)data["name"]??""),Mathf.RoundToInt(size*.325f),true,"#fff");inner.Add(initials);root.Add(inner);
-            // Studs: top 9px@-4 (62), 12px@-5 (110), 13px@-6 (124) with glow; 10px side studs at -5 on the large previews.
-            if(frame==1&&size>=62&&size!=104)
+            inner.style.borderLeftWidth=inner.style.borderRightWidth=inner.style.borderTopWidth=inner.style.borderBottomWidth=chip?2:3;
+            inner.style.borderLeftColor=inner.style.borderRightColor=inner.style.borderTopColor=inner.style.borderBottomColor=C(look.Gap);
+            if(!chip){var initials=Text(ProfileValidation.Initials((string)data["name"]??""),Mathf.RoundToInt(size*.325f),true,"#fff");initials.name="avatar-initials";inner.Add(initials);}
+            root.Add(inner);
+            if(level)
             {
-                float top=small?9:size>=124?13:12;
-                Stud(root,size/2f-top/2,small?-4:size>=124?-6:-5,top,small?6:8);
-                if(!small){Stud(root,-5,size/2f-5,10,0);Stud(root,size-5,size/2f-5,10,0);}
+                // SV badge: 900 10px, padding 1px 7px, radius 7, bottom -7 (62); 11px, 2px 9px, 8, -7 (104, 110); 12px, 2px 10px, 8, -8 (124).
+                bool large=size>=124;int font=size<=62?10:large?12:11;
+                // The top bar's badge is literal markup ("SV 24") in G101-Menu, the same in English (EKSIKLER EK-611).
+                var badge=Text(large?L("SEVİYE "+Level24,"LEVEL "+Level24):topBar?"SV "+Level24:L("SV "+Level24,"LV "+Level24),font,false,"var(--aT)");badge.AddToClassList("avatar-level");badge.style.unityFont=Font("Baloo2-800");
+                badge.style.paddingTop=badge.style.paddingBottom=size<=62?1:2;badge.style.paddingLeft=badge.style.paddingRight=size<=62?7:large?10:9;badge.style.bottom=large?-8:-7;
+                Decorate(badge,"var(--a1)",size<=62?7:8);root.Add(badge);
             }
-            if(level){var badge=Text(L(size>62?"SEVİYE "+Model.Level:"SV "+Model.Level,size>62?"LEVEL "+Model.Level:"LV "+Model.Level),size>62?12:10,false,"var(--aT)");badge.AddToClassList("avatar-level");Decorate(badge,"var(--a1)",7);root.Add(badge);}
             return root;
         }
-        /// <summary>Rotated gold stud with its 1.5px #5A3A08 box-shadow outline and optional rgba(255,201,74,.8) glow.</summary>
-        private void Stud(VisualElement parent,float x,float y,float size,float glowBlur)
-        {
-            var outline=Box("avatar-stud-outline");outline.pickingMode=PickingMode.Ignore;MenuView.Place(outline,x-1.5f,y-1.5f,size+3,size+3);outline.style.rotate=new Rotate(45);Decorate(outline,"#5A3A08",4);
-            if(glowBlur>0)GalaxyFilters.Shadow(outline,0,0,glowBlur/2,new Color(1,.788f,.29f,.8f));parent.Add(outline);
-            var stud=Box("avatar-stud");stud.pickingMode=PickingMode.Ignore;MenuView.Place(stud,x,y,size,size);stud.style.rotate=new Rotate(45);Decorate(stud,"linear-gradient(135deg,#FFF6D0,#E8A317)",2);parent.Add(stud);
-        }
+        private int Level24=>Model.Level;
         public VisualElement Icon(string name,int size=24,string color=null)
         {var icon=new GalaxyIcon(name,C(color??"var(--ic)"));icon.style.width=icon.style.height=size;icon.style.flexShrink=0;return icon;}
         public VisualElement Tile(string code,int width=46,int height=62)
@@ -264,7 +270,7 @@ namespace Galaxy101
         public void AnimateElement(Action<float> action)
         {
             float began=buildingMotions==dialogMotions?dialogAnimationOrigin:buildingMotions==panelMotions?panelAnimationOrigin:0;
-            Animate(time=>action(time-began));
+            Animate(time=>action(GameClock.Frozen?time:time-began)); // frozen: each animation's own time is the canonical instant
         }
         private void UpdateBackground(){var values=preview??Model.Settings;BackgroundChanged?.Invoke(Model.Planet,(bool?)values["motion"]??true,(string)values["quality"]??"Yüksek");}
         public void Copy(string value)=>Services.Share.CopyToClipboard(value);
@@ -275,6 +281,7 @@ namespace Galaxy101
         public void Flash(string text,string kind="info")
         {
             if(toastLayer==null)return;
+            Galaxy101.Audio.GalaxyAudio.Toast(kind); // v4 audio: gold → ui.reward, bad → ui.error
             foreach(var old in toastLayer.Query<VisualElement>("shell-flash").ToList())old.RemoveFromHierarchy();
             (string bg,string fg)=kind=="ok"?("#3CCB6E","#062B14"):kind=="bad"?("linear-gradient(#FF7A86,#E8455A)","#fff"):kind=="gold"?("linear-gradient(var(--a1),var(--a2))","var(--aT)"):("rgba(5,8,22,.85)","#F4F1E8");
             var pill=new VisualElement{name="shell-flash",pickingMode=PickingMode.Ignore};pill.style.position=Position.Absolute;pill.style.top=22;pill.style.left=640;
@@ -326,9 +333,26 @@ namespace Galaxy101
             if(Modals.Dialog==null)focusBeforeDialog=FocusIdentity(Root.panel?.focusController?.focusedElement as VisualElement);
             if(key=="profile")edit.OnOpen(this);if(key=="add")addFriend.OnOpen(this);
             if(Modals.Dialog!=key)Services.Online.Load(key);
-            if(key=="logout"||key=="delete"){confirm.Kind=key;confirm.OnOpen();DoneFrom=key;}
+            if(key=="logout"||key=="delete"||key=="quit"){confirm.Kind=key;confirm.OnOpen();DoneFrom=key;}
             if(key=="bye")done.From=DoneFrom;
             Modals.OpenDialog(key);Refresh();
+        }
+        /// <summary>
+        /// Oyundan çık (G101-Menu cf.go, isQuit): the farewell over the main menu (the settings close under it), then the
+        /// game quits 1.1 s later (onQuit).
+        /// </summary>
+        public void QuitGame()
+        {
+            if(Modals.Panel=="settings"){settings.Discard();preview=null;}
+            DoneFrom="quit";Modals.ClosePanel();OpenDialog("bye");
+            Root.schedule.Execute(()=>
+            {
+#if UNITY_EDITOR
+                Debug.Log("Galaxy 101: Oyundan çık (the editor keeps running).");
+#else
+                Application.Quit();
+#endif
+            }).ExecuteLater(1100);
         }
         public void CloseTop()
         {

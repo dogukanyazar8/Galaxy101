@@ -190,6 +190,7 @@ namespace Galaxy101
         /// </summary>
         public static void PressSink(VisualElement element)
         {
+            Galaxy101.Audio.CursorRules.Mark(element,"pointer"); // v4 cursor: a pressable control shows the pointer and plays ui.tap
             StyleTranslate rest=default;bool down=false;
             element.RegisterCallback<PointerDownEvent>(_=>
             {

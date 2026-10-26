@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Galaxy101.Server</RootNamespace>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
     <ServerGarbageCollection>true</ServerGarbageCollection>
   </PropertyGroup>
 

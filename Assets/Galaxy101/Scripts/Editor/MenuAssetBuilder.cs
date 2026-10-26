@@ -35,7 +35,7 @@ namespace Galaxy101.Editor
             panel.forceGammaRendering=true;
             string settingsPath=ResourcesRoot+"/TextSettings.asset";var text=AssetDatabase.LoadAssetAtPath<PanelTextSettings>(settingsPath);
             if(text==null){text=ScriptableObject.CreateInstance<PanelTextSettings>();AssetDatabase.CreateAsset(text,settingsPath);}
-            foreach(string name in new[]{"Montserrat-600","Montserrat-700","Montserrat-800","Montserrat-900","Baloo2-600","Baloo2-700","Baloo2-800","Nunito-900"})
+            foreach(string name in new[]{"Montserrat-600","Montserrat-700","Montserrat-800","Montserrat-900","Baloo2-600","Baloo2-700","Baloo2-800","Nunito-700","Nunito-900"})
             {
                 string fontPath="Assets/Galaxy101/Resources/Galaxy101/Fonts/"+name;var asset=AssetDatabase.LoadAssetAtPath<FontAsset>(fontPath+".asset");
                 if(asset==null)
@@ -43,6 +43,9 @@ namespace Galaxy101.Editor
                     var font=AssetDatabase.LoadAssetAtPath<Font>(fontPath+".ttf");asset=FontAsset.CreateFontAsset(font);asset.name=name;AssetDatabase.CreateAsset(asset,fontPath+".asset");
                     foreach(var atlas in asset.atlasTextures)if(atlas!=null)AssetDatabase.AddObjectToAsset(atlas,asset);if(asset.material!=null)AssetDatabase.AddObjectToAsset(asset.material,asset);
                 }
+                // The TTFs are the v4 package's (docs/v4/hat-d EK-409): glyph indices and outlines changed, so the dynamic
+                // atlas is rebuilt from the current source font instead of extending tables made from the old one.
+                else asset.ClearFontAssetData(true);
                 asset.TryAddCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789çğıİöşüÇĞÖŞÜ₺×·—…",out string missing);
                 if(!string.IsNullOrEmpty(missing))throw new InvalidOperationException("Required font glyphs missing from "+name+": "+missing);
                 if(name=="Baloo2-700")text.defaultFontAsset=asset;EditorUtility.SetDirty(asset);

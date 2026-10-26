@@ -21,18 +21,18 @@ namespace Galaxy101
             var root = PanelUi.Shell(v, "Confirm"); root.style.paddingTop = 30; root.style.paddingLeft = root.style.paddingRight = 30; root.style.paddingBottom = 24;
             root.Q<VisualElement>("header").style.display = DisplayStyle.None;
             var body = root.Q<VisualElement>("content"); body.style.alignItems = Align.Center;
-            var delete = Kind == "delete";
+            var delete = Kind == "delete"; var quit = Kind == "quit"; var red = delete || quit;
             // A server account is deleted at once (DELETE /v1/account): no grace period may be promised for it. The 30-day
             // wording belongs to the design's offline demo flow.
             var serverAccount = Online.GalaxyOnline.Instance is { SignedIn: true };
             var icon = v.Box(); icon.style.width = icon.style.height = 72; icon.style.alignItems = Align.Center; icon.style.justifyContent = Justify.Center;
-            v.Decorate(icon, delete ? "linear-gradient(160deg,#FF7A86,#E23B4C)" : "linear-gradient(160deg,var(--pnH),var(--pn))", 22, 5, delete ? "#A82434" : "pnS");
-            if (delete) GalaxyFilters.Shadow(icon, 0, 0, 15, v.C("rgba(255,94,108,.4)"));
-            icon.Add(v.Icon(delete ? "delete" : "logout", 34, "#fff")); body.Add(icon);
-            var title = v.Text(delete ? v.L("Hesabını silmek istiyor musun?", "Delete your account?") : v.L("Çıkış yapmak istiyor musun?", "Log out?"), 24, true);
-            title.style.unityTextAlign = UnityEngine.TextAnchor.MiddleCenter; title.style.whiteSpace = WhiteSpace.Normal; title.style.marginTop = 18; body.Add(title);
-            var desc = PanelUi.Wrap(v, delete ? (serverAccount ? v.L("Hesabın ve verilerin hemen, kalıcı olarak silinir. Bu işlem geri alınamaz.", "Your account and its data are deleted now, permanently. This cannot be undone.") : v.L("Hesabın 30 gün sonra kalıcı olarak silinir. Bu süre içinde giriş yaparsan silme işlemi iptal olur.", "Your account will be deleted after 30 days. Logging in during that time cancels the deletion.")) : v.L("Çiplerin, ilerlemen ve arkadaşların Google hesabında saklanır. İstediğin zaman tekrar giriş yapabilirsin.", "Your chips, progress and friends are saved to your Google account. You can log back in anytime."), 14);
-            desc.style.marginTop = 12; desc.style.maxWidth = 380; desc.style.unityTextAlign = UnityEngine.TextAnchor.MiddleCenter; body.Add(desc);
+            v.Decorate(icon, red ? "linear-gradient(160deg,#FF7A86,#E23B4C)" : "linear-gradient(160deg,var(--pnH),var(--pn))", 22, 5, red ? "#A82434" : "pnS");
+            if (red) GalaxyFilters.Shadow(icon, 0, 0, 15, v.C("rgba(255,94,108,.4)"));
+            icon.Add(v.Icon(quit ? "v4/menu-ask-quit" : delete ? "delete" : "logout", 34, "#fff")); body.Add(icon);
+            var title = v.Text(quit ? v.L("Oyundan çıkmak istiyor musun?", "Quit the game?") : delete ? v.L("Hesabını silmek istiyor musun?", "Delete your account?") : v.L("Çıkış yapmak istiyor musun?", "Log out?"), 24, true);
+            title.style.unityTextAlign = UnityEngine.TextAnchor.MiddleCenter; title.style.whiteSpace = WhiteSpace.Normal; title.style.marginTop = 18; title.name = "menu.cf.title"; body.Add(title);
+            var desc = PanelUi.Wrap(v, quit ? v.L("Galaxy 101 kapanacak. Çiplerin, ilerlemen ve ayarların kayıtlı kalır.", "Galaxy 101 will close. Your chips, progress and settings are saved.") : delete ? (serverAccount ? v.L("Hesabın ve verilerin hemen, kalıcı olarak silinir. Bu işlem geri alınamaz.", "Your account and its data are deleted now, permanently. This cannot be undone.") : v.L("Hesabın 30 gün sonra kalıcı olarak silinir. Bu süre içinde giriş yaparsan silme işlemi iptal olur.", "Your account will be deleted after 30 days. Logging in during that time cancels the deletion.")) : v.L("Çiplerin, ilerlemen ve arkadaşların Google hesabında saklanır. İstediğin zaman tekrar giriş yapabilirsin.", "Your chips, progress and friends are saved to your Google account. You can log back in anytime."), 14);
+            desc.name = "menu.cf.body"; desc.style.marginTop = 12; desc.style.maxWidth = 380; desc.style.unityTextAlign = UnityEngine.TextAnchor.MiddleCenter; body.Add(desc);
             TextField field = null;
             if (delete)
             {
@@ -49,13 +49,13 @@ namespace Galaxy101
                 }
                 section.Add(losses);
                 var word = v.L("SİL", "DELETE");
-                var label = v.Text(v.L("Onaylamak için " + word + " yaz", "Type " + word + " to confirm"), 12, false, "mt"); label.style.unityFont = v.Font("Baloo2-800"); label.style.marginTop = 12; label.style.marginBottom = 8; section.Add(label);
-                field = PanelUi.Input(v, "delete-confirmation", confirmation, word, -1, 16, true); MenuView.Tracking(field, 2, 16); field.style.height = 46; field.style.flexGrow = 0; field.style.width = Length.Percent(100); section.Add(field);
+                var label = v.Text(v.L("Onaylamak için " + word + " yaz", "Type " + word + " to confirm"), 12, false, "mt"); label.style.unityFont = v.Font("Baloo2-800"); label.name = "menu.cf.typeHint"; label.style.marginTop = 12; label.style.marginBottom = 8; section.Add(label);
+                field = PanelUi.Input(v, "menu.cf.onType", confirmation, word, -1, 16, true); MenuView.Tracking(field, 2, 16); field.style.height = 46; field.style.flexGrow = 0; field.style.width = Length.Percent(100); section.Add(field);
                 body.Add(section);
             }
             // Buttons: equal halves, gap 12, padding 13px 0, 700 16px.
             var footer = root.Q<VisualElement>("footer"); footer.style.borderTopWidth = 0; footer.style.marginTop = 22; footer.style.paddingTop = 0;
-            var cancel = PanelUi.CssButton(v, v.L("Vazgeç", "Cancel"), v.CloseTop, "secondary", 13, 0, 16); cancel.style.flexGrow = 1; cancel.style.flexBasis = 0; cancel.style.flexShrink = 1; footer.Add(cancel);
+            var cancel = PanelUi.CssButton(v, v.L("Vazgeç", "Cancel"), v.CloseTop, "secondary bright-120", 13, 0, 16); cancel.name = "menu.closeDlg#4"; cancel.style.flexGrow = 1; cancel.style.flexBasis = 0; cancel.style.flexShrink = 1; footer.Add(cancel);
             Button confirm = null;
             // The farewell shows only after the server answered: a failed deletion keeps the dialog and says so.
             async void DeleteAccount()
@@ -66,13 +66,14 @@ namespace Galaxy101
                 confirm.SetEnabled(true);
                 v.Flash(error == "offline" ? v.L("Sunucuya ulaşılamadı, hesabın silinmedi", "Server unreachable: your account was not deleted") : v.L("Hesap silinemedi", "The account could not be deleted"), "bad");
             }
-            confirm = PanelUi.CssButton(v, delete ? v.L("Hesabı sil", "Delete account") : v.L("Çıkış yap", "Log out"), () =>
+            confirm = PanelUi.CssButton(v, quit ? v.L("Oyundan çık", "Quit game") : delete ? v.L("Hesabı sil", "Delete account") : v.L("Çıkış yap", "Log out"), () =>
             {
                 if (delete && !CanDelete(field.value, v.Loc.Language)) return;
-                if (delete) DeleteAccount();
+                if (quit) v.QuitGame();
+                else if (delete) DeleteAccount();
                 else if (v.Services.Profile.Logout()) v.OpenDialog("bye");
-            }, "danger", 13, 0, 16);
-            confirm.name = "confirm-account-action"; confirm.style.marginLeft = 12; confirm.style.flexGrow = 1; confirm.style.flexBasis = 0; confirm.style.flexShrink = 1; footer.Add(confirm);
+            }, "danger bright-120", 13, 0, 16);
+            confirm.name = "menu.cf.go"; confirm.style.marginLeft = 12; confirm.style.flexGrow = 1; confirm.style.flexBasis = 0; confirm.style.flexShrink = 1; footer.Add(confirm);
             if (delete)
             {
                 void Validate(string value)

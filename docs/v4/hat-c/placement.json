@@ -1,0 +1,737 @@
+{
+ "tool": "tools/blender/place_v4_models.py",
+ "glb_meta_template": "Assets/Galaxy101/Table/Models/galaxy101_zar.glb.meta",
+ "folder_meta_template": "Assets/Galaxy101/Table/Models.meta",
+ "folders": {
+  "Assets/Galaxy101/Table/Models/v4": "02f47c3dea2443e38f2481dee0e36330",
+  "Assets/Galaxy101/Table/Models/v4/jupiter": "f7189bb5a56f481b8e362d4e599294ef",
+  "Assets/Galaxy101/Table/Models/v4/mars": "82e931b151174a229a962ec35e2d1585",
+  "Assets/Galaxy101/Table/Models/v4/neptun": "53600c3200c9445485e638ba27fd9540",
+  "Assets/Galaxy101/Table/Models/v4/saturn": "71ef99a614304887bd72106df842299c",
+  "Assets/Galaxy101/Table/Models/v4/shared": "53cf1ed1606e4d5fbece7973430c44e7",
+  "Assets/Galaxy101/Table/Models/v4/venus": "6d464d7ebcf343589dbd10cfc4789094"
+ },
+ "files": [
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_isaretler_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_isaretler_jupiter.glb",
+   "guid": "933e36690ce94214b1ecf1f3361c1827",
+   "bytes": 140116,
+   "sha256": "07dc38694eb7966099aabf0bb64e29a11cb4d2552be2a68c6686d85ef4dd7d58"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_istaka_aluminyum_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_istaka_aluminyum_jupiter.glb",
+   "guid": "40709f1dee9d44f7b23cba0373f42659",
+   "bytes": 181128,
+   "sha256": "0397cb791cd27cfeca09cc218bfde9074bf4934e7068520634aeb5ea78f9d3ce"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_istaka_andromeda_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_istaka_andromeda_jupiter.glb",
+   "guid": "7d5fc763704e4eb7af63240327ab81eb",
+   "bytes": 502808,
+   "sha256": "0c1844377247a1038b305aeb928210cb8a2a52f9d54639bd0bec69ce39838a89"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_istaka_ceviz_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_istaka_ceviz_jupiter.glb",
+   "guid": "2f6168ab4f0746f1a7dd928a3c559b96",
+   "bytes": 336508,
+   "sha256": "41bea74d2fec098d6002c0ba8328a738e85c7c7467c624095c5f61384d88f201"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_istaka_karbon_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_istaka_karbon_jupiter.glb",
+   "guid": "c5b79413fa0140fa84c0c62986a1b800",
+   "bytes": 82280,
+   "sha256": "bc1b8e2b51954c3cbd12db8390707b3dfb9816f11b2fca311a3ee6499d232e9f"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_istaka_neon_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_istaka_neon_jupiter.glb",
+   "guid": "1d9209f0ff144027a095fe1b01e1bf6e",
+   "bytes": 168932,
+   "sha256": "15b708fe2a756cececdef2f07d68c80f7161b92aaf2150afd9a715513705ba09"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_istaka_sedef_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_istaka_sedef_jupiter.glb",
+   "guid": "6d88b1dd7a7b4fa2a66cfe577a9e03c2",
+   "bytes": 405120,
+   "sha256": "98756e14a9ecb403ff0a55e5898cc1f6e2e743ee02f05723119e71ced37bc41c"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_masa_andromeda_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_masa_andromeda_jupiter.glb",
+   "guid": "08fe04fbba344fc9a72d204e7f4ebb29",
+   "bytes": 2096652,
+   "sha256": "5d7d2ea43a5a94f371b249cf708f3a4770d9b8538ab99abbc52a2a7165e940d4"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_masa_ceviz_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_masa_ceviz_jupiter.glb",
+   "guid": "70554d189ec349fcbc303f6ddcd3a6f2",
+   "bytes": 2389112,
+   "sha256": "af727b0a5a3d0d941d6c0cbacb5d94608e7f3ab7a117a028ac6e71390f363df7"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_masa_hologram_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_masa_hologram_jupiter.glb",
+   "guid": "a669791beccf4e8fb21dc0e54b9a9b85",
+   "bytes": 1504588,
+   "sha256": "f34dbe21dc67670cc745307861748a2812426828d87ccf0fe71e71f969532a48"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_masa_istasyon_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_masa_istasyon_jupiter.glb",
+   "guid": "dc83ce77dd3a4ffc99514c39d542b45e",
+   "bytes": 2082304,
+   "sha256": "cd7414f96db125c0f16190c6692b8880cd2f6a9b0752413fa8ed59a5ac77c219"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_sahne_tam_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_sahne_tam_jupiter.glb",
+   "guid": "af1a60b1d64f4067b9d975f39c5ddc1e",
+   "bytes": 3972860,
+   "sha256": "a63304d25d8d0e0cfed7e7e44e87bb3a6a9bf792001b3b54a5dbb5f498413659"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_tas_seti_altin_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_tas_seti_altin_jupiter.glb",
+   "guid": "a9c37b363c424731a781cb6f53183269",
+   "bytes": 379232,
+   "sha256": "be3eee1a618e330446c7f2a565e9081adf0f660c8ecccc94ad7640bf93cf8f1a"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_tas_seti_galaksi_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_tas_seti_galaksi_jupiter.glb",
+   "guid": "3ed6a7c6f74c47e4ab3e768d29e1a2cc",
+   "bytes": 665208,
+   "sha256": "da41d1e89d2891be89cea407b0befe2ab22ca6e66af970958d22256c12f8612d"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_tas_seti_klasik_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_tas_seti_klasik_jupiter.glb",
+   "guid": "87e3af2582364d609c7b47060922335c",
+   "bytes": 239776,
+   "sha256": "f7de2df9dcb4719baa63ea18761985d78336f1ade667e539cd5875b05dd1c988"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_tas_seti_mermer_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_tas_seti_mermer_jupiter.glb",
+   "guid": "d660f8bce6234563abe693d8b627ee82",
+   "bytes": 359696,
+   "sha256": "9946e1181047e912a7c11c32c1084fd77ea61144cc1cf230e0f81e3aab4465f0"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_tas_seti_neon_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_tas_seti_neon_jupiter.glb",
+   "guid": "ab9b444b515542e18101321e8743580c",
+   "bytes": 624044,
+   "sha256": "656dc6466e024bfc4173342e3324bce6d511aa0d62c5a5e7dcb8a23ff904b89e"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/jupiter/galaxy101_tas_tek_jupiter.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/jupiter/galaxy101_tas_tek_jupiter.glb",
+   "guid": "fa87aee159b84e19828bd3da9bbc6142",
+   "bytes": 155340,
+   "sha256": "a887547d46724700c115dfe4a27c2e59336dc1ee16a45f4ab8bfb042757e64c5"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_isaretler_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_isaretler_mars.glb",
+   "guid": "db592130e9914057b235184b2999e27c",
+   "bytes": 140124,
+   "sha256": "afdfc8a3b3f0398171c2c9a97301d1df60b00b3968916ce86b20027310c59d03"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_istaka_aluminyum_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_istaka_aluminyum_mars.glb",
+   "guid": "8b67b5779cc0441f9224d54ccf1b4fdc",
+   "bytes": 181132,
+   "sha256": "92afd42bf3c843b0fd2298707fa8850efc325030f822a8ca4060e05e519f7d17"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_istaka_andromeda_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_istaka_andromeda_mars.glb",
+   "guid": "f5dc31b3e73944fa93c4026a62c2722c",
+   "bytes": 502808,
+   "sha256": "0c1844377247a1038b305aeb928210cb8a2a52f9d54639bd0bec69ce39838a89"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_istaka_ceviz_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_istaka_ceviz_mars.glb",
+   "guid": "ee6f14b65c1548b8bad447640d686fb1",
+   "bytes": 336508,
+   "sha256": "41bea74d2fec098d6002c0ba8328a738e85c7c7467c624095c5f61384d88f201"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_istaka_karbon_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_istaka_karbon_mars.glb",
+   "guid": "d7446cac81414d7a9abd14ef5dcc092b",
+   "bytes": 82280,
+   "sha256": "1d2e777d6a68d87702450c41a0f4906fe1fdb360078f3cc2214f5749ad3ca221"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_istaka_neon_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_istaka_neon_mars.glb",
+   "guid": "75c4a81793b741398a7c467debf439c4",
+   "bytes": 168936,
+   "sha256": "97c439533e460a9ea0612735f3d02c260289f3bda8204a8587676cd219f54fbb"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_istaka_sedef_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_istaka_sedef_mars.glb",
+   "guid": "b728310ccc134129b609ffc3edc5aaf5",
+   "bytes": 405120,
+   "sha256": "98756e14a9ecb403ff0a55e5898cc1f6e2e743ee02f05723119e71ced37bc41c"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_masa_andromeda_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_masa_andromeda_mars.glb",
+   "guid": "3289b6c38b1d44618b384d9e497fad45",
+   "bytes": 2096656,
+   "sha256": "c9c50adc22a5f3b75232aafd54f11b4403ee969cc3b595fbfa084a79cf64073a"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_masa_ceviz_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_masa_ceviz_mars.glb",
+   "guid": "f85f5d1fb1e64436a0f9061d84ed3a44",
+   "bytes": 2364176,
+   "sha256": "d7abc8d6008698790d82d65b61a048256732d0f90015bad46b5cf31a3183af1f"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_masa_hologram_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_masa_hologram_mars.glb",
+   "guid": "8392a862439e4f0f9a8626163e381f0d",
+   "bytes": 1545064,
+   "sha256": "7db06bdc5d2b445c9432b9a0b3836cb5fa782bff44840fe3a41b3af398b554ab"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_masa_istasyon_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_masa_istasyon_mars.glb",
+   "guid": "51e90f8e7317483db33e0f32c1f66775",
+   "bytes": 2060772,
+   "sha256": "f10dd7bd2f35dda9f7e9c67ba9cfb3b676ffefd4b2d3c18b1d8d19d26fe5ee7d"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_sahne_tam_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_sahne_tam_mars.glb",
+   "guid": "2db2c185eccd43cd952fa6f504522a27",
+   "bytes": 3972880,
+   "sha256": "24f9204f1227c4cf7ffd35279a1ae1e86f0dd8dea741897a2bf393d5ab8193fc"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_tas_seti_altin_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_tas_seti_altin_mars.glb",
+   "guid": "631aabe26cf34bdfb7a271274f46580c",
+   "bytes": 379232,
+   "sha256": "f6b0c268c6d047fa81b8809171e884533bfa40a3b0a874cb2d19514e212f888c"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_tas_seti_galaksi_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_tas_seti_galaksi_mars.glb",
+   "guid": "6e247186e609403486ef4f669f45a9f1",
+   "bytes": 665208,
+   "sha256": "b8ece4226e4a50e0d0d4ef9e2e2e814cefdf1ec98a65a4f606e5c4bc0b43fb88"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_tas_seti_klasik_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_tas_seti_klasik_mars.glb",
+   "guid": "9fd3c69f281347cd98099a7fc5ac94cb",
+   "bytes": 239776,
+   "sha256": "035cb6ecc35d812b1c23915814e0243dce7ca656ecf9be2c9107df25db237924"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_tas_seti_mermer_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_tas_seti_mermer_mars.glb",
+   "guid": "4ab18912c0a54996a66b85bd91b8fda1",
+   "bytes": 359720,
+   "sha256": "de24199dc137aadcdeaff40d00aed7d3ba013c2665ab5704ec4071ea0a73380a"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_tas_seti_neon_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_tas_seti_neon_mars.glb",
+   "guid": "b3e5170a44a646359c2fa57109d30e67",
+   "bytes": 624044,
+   "sha256": "79538b2b7eae8c6a3de004b02532e70d9e511bef4b377577d7b579c2c3eb81c4"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/mars/galaxy101_tas_tek_mars.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/mars/galaxy101_tas_tek_mars.glb",
+   "guid": "81300f2e073b49a095b4f49bb80dae29",
+   "bytes": 155340,
+   "sha256": "a887547d46724700c115dfe4a27c2e59336dc1ee16a45f4ab8bfb042757e64c5"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_isaretler_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_isaretler_neptun.glb",
+   "guid": "5085e8c14c7f415794050344b52601c1",
+   "bytes": 140120,
+   "sha256": "df64b42aec394d84568311d3692b891fedbd30ecaa31a4594dcafda8a3281896"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_istaka_aluminyum_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_istaka_aluminyum_neptun.glb",
+   "guid": "92846e37af944896b84236e1c4619b2b",
+   "bytes": 181132,
+   "sha256": "728697b9c3d916fe2299ce6c547dd9364164bd6e9c0bcbe9a189462d5578bde0"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_istaka_andromeda_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_istaka_andromeda_neptun.glb",
+   "guid": "eef034ebf89249a99cadf3cf6bf1b5a3",
+   "bytes": 502808,
+   "sha256": "0c1844377247a1038b305aeb928210cb8a2a52f9d54639bd0bec69ce39838a89"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_istaka_ceviz_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_istaka_ceviz_neptun.glb",
+   "guid": "57b2ef6310ac41e8be1d0230d579c0f5",
+   "bytes": 336508,
+   "sha256": "41bea74d2fec098d6002c0ba8328a738e85c7c7467c624095c5f61384d88f201"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_istaka_karbon_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_istaka_karbon_neptun.glb",
+   "guid": "1985160f40d24bfb94795c023a782d80",
+   "bytes": 82280,
+   "sha256": "c8f6b7fc3cfbf5f109778903cf093366fc9b0561fbbefba2eefad57cf8e26edd"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_istaka_neon_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_istaka_neon_neptun.glb",
+   "guid": "5876b5e7e9014360b691f57755b5c4e4",
+   "bytes": 168936,
+   "sha256": "e50da68fd514411df129441ae8f2839536e421d456ef3ac8f2feaa2e4a8f1174"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_istaka_sedef_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_istaka_sedef_neptun.glb",
+   "guid": "eefbbd6e1c02435595311cb7fa03c6f5",
+   "bytes": 405120,
+   "sha256": "98756e14a9ecb403ff0a55e5898cc1f6e2e743ee02f05723119e71ced37bc41c"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_masa_andromeda_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_masa_andromeda_neptun.glb",
+   "guid": "08bd17c5df5c4a489003f150b90bd88e",
+   "bytes": 2096652,
+   "sha256": "902e15c60dd38e6d80d8c7985f87ca9b64d68f757d9d0fb3a291cf7418a5a164"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_masa_ceviz_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_masa_ceviz_neptun.glb",
+   "guid": "2a8720675e104762851c1708d85cc7a0",
+   "bytes": 2427248,
+   "sha256": "b950dfc18b164e68f7f0b137b4672f71fdb203ed1b24674ac8084dbf04657b4c"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_masa_hologram_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_masa_hologram_neptun.glb",
+   "guid": "776d077996154742835a72a38356f269",
+   "bytes": 1621304,
+   "sha256": "80c6da9dfd1bb925e1cae72bbedbdb1c90738afb892549714995b26045a62b6f"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_masa_istasyon_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_masa_istasyon_neptun.glb",
+   "guid": "a69f75abb6fc4e278113584cab25740c",
+   "bytes": 2111172,
+   "sha256": "921415722da8d8dca442314da5fd876e280d975f2f45f8df172d172871cbe16b"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_sahne_tam_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_sahne_tam_neptun.glb",
+   "guid": "c7f717363f024712932f8adde916e187",
+   "bytes": 3972868,
+   "sha256": "b81e213fafb808d6d216c796e5d7a2a232ba3346c8d869080701f61321b317e9"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_tas_seti_altin_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_tas_seti_altin_neptun.glb",
+   "guid": "3afe4168416143d0b83db4536f599a62",
+   "bytes": 379216,
+   "sha256": "ae04c45fdf71eb87eca2b8d232b5535d71780b2708599fd465dec11092874ce5"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_tas_seti_galaksi_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_tas_seti_galaksi_neptun.glb",
+   "guid": "4342199f51f740ba83e006d77ac49c3d",
+   "bytes": 665208,
+   "sha256": "4e3df29008b699f2ec139031688e24a98a2a6692b6b1351f05c592228f88ad0d"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_tas_seti_klasik_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_tas_seti_klasik_neptun.glb",
+   "guid": "35f9583b2caa40f091bee39d3a4234ef",
+   "bytes": 239776,
+   "sha256": "839993f0e1af0f8b7496a953b757357a51837d3ff83ad8b46d662a0ad2d9eba1"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_tas_seti_mermer_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_tas_seti_mermer_neptun.glb",
+   "guid": "ba96e1b13c7341209d2f86fef3ebe897",
+   "bytes": 359720,
+   "sha256": "ba299c4ce6e295101e1028a1986c866c6df91b2633434a226bc540ebc2e965c1"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_tas_seti_neon_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_tas_seti_neon_neptun.glb",
+   "guid": "dff1b032b5f0468197feb77ba009c55b",
+   "bytes": 624044,
+   "sha256": "7a46cad980a2e5f46f66c60a6ae93542de1fea06c37a154b3c330ea8dd472fa4"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/neptun/galaxy101_tas_tek_neptun.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/neptun/galaxy101_tas_tek_neptun.glb",
+   "guid": "06f8bec4db234cd8aecbf4c464ae07f0",
+   "bytes": 155340,
+   "sha256": "a887547d46724700c115dfe4a27c2e59336dc1ee16a45f4ab8bfb042757e64c5"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_isaretler_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_isaretler_saturn.glb",
+   "guid": "f7f5194845474b289fefd6e59a85ddf7",
+   "bytes": 140120,
+   "sha256": "6e37670e26d5be6d332012932fc44fd1d620ae4a635d79b18a0600caa3d59807"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_istaka_aluminyum_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_istaka_aluminyum_saturn.glb",
+   "guid": "c8004a82551a4b3184192e7517ec13f1",
+   "bytes": 181132,
+   "sha256": "fd2512459d3309bbfbe099b0fa64b20f6274d997bcae31ed60a267424f5cdb9e"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_istaka_andromeda_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_istaka_andromeda_saturn.glb",
+   "guid": "a9a58e808ff643a98e2043cd23829988",
+   "bytes": 502808,
+   "sha256": "0c1844377247a1038b305aeb928210cb8a2a52f9d54639bd0bec69ce39838a89"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_istaka_ceviz_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_istaka_ceviz_saturn.glb",
+   "guid": "97a53d21613046f2bd8bed81fb9dd9d7",
+   "bytes": 336508,
+   "sha256": "41bea74d2fec098d6002c0ba8328a738e85c7c7467c624095c5f61384d88f201"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_istaka_karbon_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_istaka_karbon_saturn.glb",
+   "guid": "e2b138cbb0a04f83a3e26b3cb8e691aa",
+   "bytes": 82280,
+   "sha256": "ed579cab47366f8dbaf8076276320324b3ba7c019ca721dfa36cf38455059184"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_istaka_neon_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_istaka_neon_saturn.glb",
+   "guid": "9691ff1866c945e799f8dea1eb816b9a",
+   "bytes": 168932,
+   "sha256": "aa684e324fa9526e10e18afb912c1f0334973c02266510ce43ce842a92ca5fe5"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_istaka_sedef_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_istaka_sedef_saturn.glb",
+   "guid": "f309d426ebf7426bb6c094734c7de305",
+   "bytes": 405120,
+   "sha256": "98756e14a9ecb403ff0a55e5898cc1f6e2e743ee02f05723119e71ced37bc41c"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_masa_andromeda_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_masa_andromeda_saturn.glb",
+   "guid": "9b24de18f69d4fe38a0bdc63a5f2471b",
+   "bytes": 2096656,
+   "sha256": "2270efc940f4f901ed8959bde3775b9029371cecb36ca00da8cefa03d006b3b7"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_masa_ceviz_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_masa_ceviz_saturn.glb",
+   "guid": "f175850ffdd04446bfc2f95cf064ffaf",
+   "bytes": 2397748,
+   "sha256": "067f3e108553f2c479c28b45871ae19f353e7cc8fd18e54418aa41aa0f9ab631"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_masa_hologram_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_masa_hologram_saturn.glb",
+   "guid": "55f55d837bce4a63821f3f3ae2a2699c",
+   "bytes": 1605496,
+   "sha256": "e31ffb2460c15a44080b5ec3cf5b046b08a089f2ce65eae57c67ede3a4d0c9a9"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_masa_istasyon_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_masa_istasyon_saturn.glb",
+   "guid": "de2bbc66fd824792aebf0bce432c8f5c",
+   "bytes": 2081884,
+   "sha256": "459fa375fa6c6dab610cfa352bef09e1a6147e9651d924473d9bb49bd4242ba0"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_sahne_tam_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_sahne_tam_saturn.glb",
+   "guid": "fb3da0d2ffac4c9da2416bcfd6a3fb7b",
+   "bytes": 3972868,
+   "sha256": "7219d9833e52e335c17dc12cece2dde90f5e662b4caa392de16e0826cdced6a6"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_tas_seti_altin_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_tas_seti_altin_saturn.glb",
+   "guid": "c5ce9ed444fb44a684a8c005042fb27c",
+   "bytes": 379232,
+   "sha256": "12a422a686cd8f60255cb6605188ff53c8fef08974c64642ea3f2b67dbfc9117"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_tas_seti_galaksi_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_tas_seti_galaksi_saturn.glb",
+   "guid": "86c2df80dfd74e8f9d0db17c08dda5cc",
+   "bytes": 665200,
+   "sha256": "33feb6f0e87dcabb91aeea3c431c639cf455a36ae7601b1d8f94b4253b82a437"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_tas_seti_klasik_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_tas_seti_klasik_saturn.glb",
+   "guid": "d2e5097706734950a1e39c7c995d2f75",
+   "bytes": 239772,
+   "sha256": "bc5742c9139a7b4d541e227dde6a8bda0c9e9ebe7622584dc032b1478399d22d"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_tas_seti_mermer_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_tas_seti_mermer_saturn.glb",
+   "guid": "3654b252c145457a9c6415f41287f08a",
+   "bytes": 359720,
+   "sha256": "45db4dca1106fc44d8dac4bcd3aa56aa6615bb13c3487c1c8df3f3c4cfd98d54"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_tas_seti_neon_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_tas_seti_neon_saturn.glb",
+   "guid": "4960920b15da49309daf00a038d4ce5c",
+   "bytes": 624044,
+   "sha256": "8583c4807ec6bff76d9037609f71a05c2e8650d70c9b28d30e70410b8e1b81b9"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/saturn/galaxy101_tas_tek_saturn.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/saturn/galaxy101_tas_tek_saturn.glb",
+   "guid": "42ffe2d152c949c69513ff32926e253b",
+   "bytes": 155340,
+   "sha256": "a887547d46724700c115dfe4a27c2e59336dc1ee16a45f4ab8bfb042757e64c5"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/galaxy101_hediye_cake.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/shared/galaxy101_hediye_cake.glb",
+   "guid": "ea598f97edf04eb9bcedd388321d6b2f",
+   "bytes": 254740,
+   "sha256": "209fa2e2979ef766e9ea824c722dd7230b2b1a8e30209fd592761a1c706a927b"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/galaxy101_hediye_flower.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/shared/galaxy101_hediye_flower.glb",
+   "guid": "78af4a0595f04c6fb5840a335bd5339d",
+   "bytes": 175728,
+   "sha256": "2d98eae297e9f2f3612526fe7f2c7f46fb2421ad744e6781f2f55538e0f94cd3"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/galaxy101_hediye_rocket.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/shared/galaxy101_hediye_rocket.glb",
+   "guid": "9d873c16d712425fa1bc8a68b2c0a2a2",
+   "bytes": 161524,
+   "sha256": "b3b2d0a767e08e736916bba4c9e116b78cdb84195c206646836598bb9ce820e6"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/galaxy101_hediye_trophy.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/shared/galaxy101_hediye_trophy.glb",
+   "guid": "5b1d70d18aa540acb5830ea20f95a9c0",
+   "bytes": 108672,
+   "sha256": "9fa4c3f9fbbcff30dd1bd7843301e940e29bc161c29a0f08db916fdd73039683"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/galaxy101_ikram_baklava.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/shared/galaxy101_ikram_baklava.glb",
+   "guid": "f1e68083b20144148ba0fd51bcdfdc29",
+   "bytes": 40884,
+   "sha256": "fa10b4ed812443a8f73a09bbf3bd54ffeccc0dcbf278e501dac4526ad21bffef"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/galaxy101_ikram_coffee.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/shared/galaxy101_ikram_coffee.glb",
+   "guid": "9314042d147548faa9eba020a1a4c445",
+   "bytes": 391096,
+   "sha256": "6f7ae7aa65b9e36faf606ed94d1f2e006bfb09217b6616337ce1c5c6400f54d8"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/galaxy101_ikram_cola.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/shared/galaxy101_ikram_cola.glb",
+   "guid": "8ba7a94e0b99484382b66debe50a4604",
+   "bytes": 152984,
+   "sha256": "8895f4a5964cd9ac4045c4b28a71a48566776340d549580474748172e3a73240"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/galaxy101_ikram_seeds.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/shared/galaxy101_ikram_seeds.glb",
+   "guid": "2a8149b556c6452380ccbeb01772803c",
+   "bytes": 21804,
+   "sha256": "a4827eebc26988eb056d70212c641668b9ff68e24b8ee8da99e971523810f8a2"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/galaxy101_ikram_simit.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/shared/galaxy101_ikram_simit.glb",
+   "guid": "1b1d98dea3da482a8c590493b9dfd0f4",
+   "bytes": 404368,
+   "sha256": "7ee26fc302e24b97acada7248e14a7a4f52c89beb104a32e6517570f890a6404"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/galaxy101_ikram_tea.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/shared/galaxy101_ikram_tea.glb",
+   "guid": "90302e599a364edfa531875b77d83033",
+   "bytes": 332608,
+   "sha256": "987b7fb610f9d432e4276073df2f24893bfdad6306f6ea150c19aff1b072507e"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/galaxy101_koltuk.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/shared/galaxy101_koltuk.glb",
+   "guid": "5e9fe919891c470b9f0a3fa3912cdda6",
+   "bytes": 178068,
+   "sha256": "a44decccd7defc465c19a179cf835d96acad1b0fc56d16c7b99be7c77654ab08"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/galaxy101_oda_istasyon.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/shared/galaxy101_oda_istasyon.glb",
+   "guid": "99a5f9c10e934199be9c381f443a61ee",
+   "bytes": 56624,
+   "sha256": "c2d5d62dc47fea495a2d43776c352638cbc13ccefbc9a1aec57bb3aaab4dba5a"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/galaxy101_zar.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/shared/galaxy101_zar.glb",
+   "guid": "96e90ae03ed749f8b67a654ef437471e",
+   "bytes": 453200,
+   "sha256": "d71e2e6fbe4ac7b330940d06cbc8d4710019b8b81eb7ccd15db112a0c7e813c5"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_isaretler_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_isaretler_venus.glb",
+   "guid": "3152953315584c5f8d3318485eddeecd",
+   "bytes": 140116,
+   "sha256": "ba2df2bf69b4a4cd8516f1ecc808b0cf1be70e823ef993f5992ddd0a4307edce"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_istaka_aluminyum_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_istaka_aluminyum_venus.glb",
+   "guid": "dc44b455dbe34ab48673e958f2f5a828",
+   "bytes": 181128,
+   "sha256": "3e37e05eb7f0d5dbd7833aa94691c493fced58d1f491b5d707be87b5309ca6f7"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_istaka_andromeda_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_istaka_andromeda_venus.glb",
+   "guid": "2e874ed1150d45b681d440d4649bd30c",
+   "bytes": 502808,
+   "sha256": "0c1844377247a1038b305aeb928210cb8a2a52f9d54639bd0bec69ce39838a89"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_istaka_ceviz_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_istaka_ceviz_venus.glb",
+   "guid": "ab35d7f978384e3abc8d216d242c84a3",
+   "bytes": 336508,
+   "sha256": "41bea74d2fec098d6002c0ba8328a738e85c7c7467c624095c5f61384d88f201"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_istaka_karbon_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_istaka_karbon_venus.glb",
+   "guid": "34a4bb8dcd984dac8a86183b75c5b940",
+   "bytes": 82280,
+   "sha256": "d293cbe27ac1493005532edc87b49918d4338a12e0e6059bf942f15fa75d788c"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_istaka_neon_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_istaka_neon_venus.glb",
+   "guid": "aad3b05d4f9647e38650abe18a6c08ba",
+   "bytes": 168932,
+   "sha256": "e2f95f8513033076db7af1c5f59a124fdb0481ca2c3776fc38b3139886cb2b7e"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_istaka_sedef_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_istaka_sedef_venus.glb",
+   "guid": "e57ba695284f41ef9eb0ded130d9e0f4",
+   "bytes": 405120,
+   "sha256": "98756e14a9ecb403ff0a55e5898cc1f6e2e743ee02f05723119e71ced37bc41c"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_masa_andromeda_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_masa_andromeda_venus.glb",
+   "guid": "8e171cfe3c9a4339b89a902459f5669e",
+   "bytes": 2096656,
+   "sha256": "fd33534230bed95a590a9663cc89560deb38aca7eb4c1674cc2a0d001038aab9"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_masa_ceviz_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_masa_ceviz_venus.glb",
+   "guid": "3bb03a907ef24a6faf84da9ae0ab378f",
+   "bytes": 2411756,
+   "sha256": "2a85b768e6e21fe281aad4500dafb8d7c4a07d856500f721d7cb85c7ff31ab51"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_masa_hologram_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_masa_hologram_venus.glb",
+   "guid": "4794330303c6443fbc7504a6e839e96f",
+   "bytes": 1599540,
+   "sha256": "17140c0c15125e6c328c6e55c510c101926de4e4083d651970ecbe9560665583"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_masa_istasyon_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_masa_istasyon_venus.glb",
+   "guid": "aeed7c4188ae415b9604ca01f646c08b",
+   "bytes": 2102308,
+   "sha256": "26838e47ab3ce04c96f3efbf2f750d099f620d11f6c1da8fde1a38f869904d5c"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_sahne_tam_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_sahne_tam_venus.glb",
+   "guid": "92024be542ef4b53b4a75ecb32e60566",
+   "bytes": 3972860,
+   "sha256": "216ae8bf244f6a88965cbd8d46c6a5ff93190ed3b33fd97533fc3b48066822bf"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_tas_seti_altin_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_tas_seti_altin_venus.glb",
+   "guid": "081d11a22478460eaa421ed27d0ad561",
+   "bytes": 379232,
+   "sha256": "45902c83c24e22dbbf28586cf99e087455dbe9e94dfaf68d6ec5f0376457c455"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_tas_seti_galaksi_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_tas_seti_galaksi_venus.glb",
+   "guid": "b9b61324048d455d99582a1265d52d22",
+   "bytes": 665208,
+   "sha256": "9a9e393272ebf7fbb1426c72877e18c89d5752729450e0278b6209018208b0e3"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_tas_seti_klasik_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_tas_seti_klasik_venus.glb",
+   "guid": "b544d3f653854f278cb61833bbe54d58",
+   "bytes": 239776,
+   "sha256": "74c2c9045483643946af1136f0426a72d73d28ada374c946ef777dc14eb16efc"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_tas_seti_mermer_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_tas_seti_mermer_venus.glb",
+   "guid": "9a90407f201049359e2207c4dcfbf9ea",
+   "bytes": 359720,
+   "sha256": "cdbf6cd63e3a77f802261b44bfb17ce31903c6406a38e3d6d9bfc4c43d82fad7"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_tas_seti_neon_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_tas_seti_neon_venus.glb",
+   "guid": "d05edeccfd0e47baafa62c14f70ef971",
+   "bytes": 624044,
+   "sha256": "358c2d5813f913eb0d797b313e27a014fb73fde01277047fa42d42b6e3561189"
+  },
+  {
+   "source": "Design/Galaxy101_ClaudeCode/galaxy101_3d_tum_temalar/venus/galaxy101_tas_tek_venus.glb",
+   "dest": "Assets/Galaxy101/Table/Models/v4/venus/galaxy101_tas_tek_venus.glb",
+   "guid": "26dd1377cadb4d6999561cfe1c9b20c8",
+   "bytes": 155340,
+   "sha256": "a887547d46724700c115dfe4a27c2e59336dc1ee16a45f4ab8bfb042757e64c5"
+  }
+ ]
+}

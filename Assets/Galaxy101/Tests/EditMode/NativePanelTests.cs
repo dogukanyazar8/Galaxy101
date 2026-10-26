@@ -21,7 +21,7 @@ namespace Galaxy101.Tests
         public void SetUp()
         {
             save = Path.Combine(Path.GetTempPath(), "galaxy-panel-" + Guid.NewGuid().ToString("N") + ".json");
-            model = new MenuModel(File.ReadAllText("Design/galaxy101_unity_handoff/spec/data/content.json"), File.ReadAllText("Design/galaxy101_unity_handoff/spec/data/themes.json"), save);
+            model = new MenuModel(File.ReadAllText("Assets/Galaxy101/Resources/Galaxy101/content.json"), File.ReadAllText("Assets/Galaxy101/Resources/Galaxy101/themes.json"), save);
             localization = new LocalizationBridge(model);
             target = new RenderTexture(1280, 720, 0);
             panelSettings = ScriptableObject.CreateInstance<PanelSettings>();
@@ -51,15 +51,19 @@ namespace Galaxy101.Tests
             var controller = new EditProfileController(); controller.OnOpen(view);
             var body = controller.Build(view);
             view.Root.Add(body);
-            var name = body.Q<TextField>("profile-name");
+            var name = body.Q<TextField>("menu.pf.onName");
             name.value = "ab";
-            Assert.That(body.Q<Button>("profile-save").enabledSelf, Is.False);
-            Assert.That(body.Q<Label>("profile-name-hint").text, Does.StartWith("3–16"));
+            Assert.That(body.Q<Button>("menu.pf.save").enabledSelf, Is.False);
+            Assert.That(body.Q<Label>("menu.pf.hint").text, Does.StartWith("3–16"));
             name.value = "İpek_32";
-            Assert.That(body.Q<Button>("profile-save").enabledSelf, Is.True);
+            Assert.That(body.Q<Button>("menu.pf.save").enabledSelf, Is.True);
             Assert.That((string)model.Profile["name"], Is.EqualTo("Doğukan Y."));
-            Assert.That(body.Q<VisualElement>("profile-colors").childCount, Is.EqualTo(8));
-            Assert.That(body.Q<Button>("draft-frame-2").enabledSelf, Is.False);
+            Assert.That(body.Q<VisualElement>("profile-colors").Query<Button>(className: "g-edit-swatch").ToList().Count, Is.EqualTo(8));
+            // v4: seven frames (Klasik + the six leagues); the sample's peak (Altın II) leaves Elmas, Usta and Galaksi locked.
+            Assert.That(body.Q<VisualElement>("profile-frames").childCount, Is.EqualTo(7));
+            Assert.That(body.Q<Button>("menu.o.pick[3]").enabledSelf, Is.True);
+            Assert.That(body.Q<Button>("menu.o.pick[4]").enabledSelf, Is.False);
+            Assert.That(body.Q<Button>("menu.o.pick[6]").enabledSelf, Is.False);
         }
 
         [TestCase("tr", "SİL")]
@@ -69,8 +73,8 @@ namespace Galaxy101.Tests
             view.Services.Settings.SetLanguage(language);
             var body = new ConfirmController { Kind = "delete" }.Build(view);
             view.Root.Add(body);
-            var button = body.Q<Button>("confirm-account-action");
-            var input = body.Q<TextField>("delete-confirmation");
+            var button = body.Q<Button>("menu.cf.go");
+            var input = body.Q<TextField>("menu.cf.onType");
             Assert.That(button.enabledSelf, Is.False);
             input.value = word + "!";
             Assert.That(button.enabledSelf, Is.False);
@@ -83,9 +87,9 @@ namespace Galaxy101.Tests
         {
             var body = new FriendsController().Build(view);
             view.Root.Add(body);
-            var input = body.Q<TextField>("friend-query");
+            var input = body.Q<TextField>("menu.fr.onQ");
             input.value = "#AY-2187";
-            Assert.That(body.Q<TextField>("friend-query"), Is.SameAs(input));
+            Assert.That(body.Q<TextField>("menu.fr.onQ"), Is.SameAs(input));
             var names = body.Q<ScrollView>("friend-list").Query<Label>().ToList().Select(label => label.text).ToArray();
             Assert.That(names, Does.Contain("Ayşe Y."));
             Assert.That(names, Does.Not.Contain("Burak C."));

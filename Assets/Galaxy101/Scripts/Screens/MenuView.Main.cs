@@ -24,7 +24,11 @@ namespace Galaxy101
             // display. The main layer's own sections rest while it is hidden (lobby, a scene on top).
             animationJob=Root.schedule.Execute(()=>
             {
-                float now=Time.realtimeSinceStartup;float delta=Mathf.Clamp(now-last,0,.05f);last=now;if(!focused)return;animationTime+=delta;
+                float now=Time.realtimeSinceStartup;float delta=Mathf.Clamp(now-last,0,.05f);last=now;if(!focused)return;
+                // Frozen (state router): every CSS animation's currentTime is the canonical instant. g101-state.js freezes with
+                // G101Clock.freeze() — no ms — so the reference frames sit at 100000 ms, not 100000 + ft (the bob, float and
+                // pulse phases of artifacts/v4/ref agree), whatever GameClock.Freeze was given.
+                if(GameClock.Frozen)animationTime=(float)(GameClock.CanonMs/1000);else animationTime+=delta;
                 foreach(var motion in motions)motion(animationTime);
                 if(mainLayer!=null&&mainLayer.resolvedStyle.display!=DisplayStyle.None)foreach(var section in sections.Values)foreach(var motion in section.Motions)motion(animationTime);
                 foreach(var motion in panelMotions)motion(animationTime);
@@ -63,7 +67,7 @@ namespace Galaxy101
                 // Each part of the menu is rebuilt only when what it shows changed: picking a mode must not recreate the
                 // top bar, logo or footer (their filtered shadows would blink for a frame).
                 string common=Model.Planet+"|"+Loc.Language;
-                Section("top",common+"|"+Model.Chips+"|"+Model.Gems+"|"+Model.Profile.ToString(Newtonsoft.Json.Formatting.None),BuildTopBar);
+                Section("top",common+"|"+Model.Chips+"|"+Model.Gems+"|"+Model.Level+"|"+CurrentRankIndex()+"|"+Model.Profile.ToString(Newtonsoft.Json.Formatting.None),BuildTopBar);
                 Section("logo",common,()=>BuildLogo(planetIndex));
                 Section("play",common,BuildPlay);
                 Section("modes",common,BuildModes);
@@ -106,11 +110,16 @@ namespace Galaxy101
         private void BuildTopBar()
         {
             var top=Box("top-bar");AddMain(top);
-            var avatar=Avatar(62,level:true);GalaxyFilters.HoverBrightness(avatar,1.1f);avatar.name="profile-open";avatar.AddToClassList("avatar-button");avatar.focusable=true;avatar.RegisterCallback<ClickEvent>(_=>OpenPanel("me"));avatar.RegisterCallback<NavigationSubmitEvent>(evt=>{OpenPanel("me");evt.StopImmediatePropagation();});top.Add(avatar);
-            var name=Column(Text((string)Model.Profile["name"],18,true),Row(RankDiamond(18),Text(L("Altın II","Gold II"),14,true,"#FFC94A")));name.AddToClassList("top-name");top.Add(name);
+            var avatar=Avatar(62,level:true,topBar:true);GalaxyFilters.HoverBrightness(avatar,1.1f);avatar.name="menu.openMe";avatar.tooltip=L("Profilim","My profile");avatar.AddToClassList("avatar-button");avatar.focusable=true;avatar.RegisterCallback<ClickEvent>(_=>OpenPanel("me"));avatar.RegisterCallback<NavigationSubmitEvent>(evt=>{OpenPanel("me");evt.StopImmediatePropagation();});top.Add(avatar);
+            avatar.Q<Label>("avatar-initials").name="menu.me.ini";
+            // Name over the league row (gap 5): 24 px G101Emblem, gap 8, rank name 700 14px in the league's colour (rk.txt).
+            int rank=CurrentRankIndex();var emblem=Emblem(rank,24);emblem.style.marginRight=8;
+            var rankName=Text(RankLabel(rank),14,true,RankInk(rank));rankName.name="menu.t.rank";rankName.style.whiteSpace=WhiteSpace.NoWrap;
+            var me=Text((string)Model.Profile["name"],18,true);me.name="menu.me.name";me.style.whiteSpace=WhiteSpace.NoWrap;
+            var name=Column(me,Row(emblem,rankName));name.AddToClassList("top-name");top.Add(name);
             var spacer=Box();spacer.style.flexGrow=1;top.Add(spacer);
             top.Add(Currency(false));top.Add(Currency(true));
-            var settingsButton=Button("",()=>OpenPanel("settings"),"secondary settings-button");settingsButton.name="settings-open";settingsButton.tooltip=L("Ayarlar","Settings");settingsButton.Add(Icon("settings",24));top.Add(settingsButton);
+            var settingsButton=Button("",()=>OpenPanel("settings"),"secondary settings-button");settingsButton.name="menu.openSettings";settingsButton.tooltip=L("Ayarlar","Settings");settingsButton.Add(Icon("settings",24));top.Add(settingsButton);
         }
         private VisualElement Currency(bool gems)
         {
@@ -125,13 +134,8 @@ namespace Galaxy101
                 Shine(shineWindow,3.2f,0,true,9,4);icon.Add(shineWindow);icon.Add(new CssDashedCircle(28,2,C("#FFF3C8")));
             }
             pill.Add(icon);
-            var amount=Text(N(gems?Model.Gems:Model.Chips),17,true);amount.name=gems?"gems-balance":"chips-balance";amount.style.minWidth=gems?44:84;pill.Add(amount);
-            var plus=Button("+",()=>OpenPanel("shop",gems?1:0),"success currency-plus");plus.name=gems?"gems-buy":"chips-buy";plus.tooltip=L(gems?"Elmas satın al":"Çip satın al",gems?"Buy gems":"Buy chips");plus.style.fontSize=20;plus.style.unityTextAlign=TextAnchor.MiddleCenter;Decorate(plus,"#3CCB6E",14,3,"#22914A");pill.Add(plus);return pill;
-        }
-        public VisualElement RankDiamond(int size)
-        {
-            var diamond=Box("rank-diamond");diamond.style.width=diamond.style.height=size;diamond.style.rotate=new Rotate(45);Decorate(diamond,"linear-gradient(135deg,#FFE08A,#F5A623)",Mathf.Max(3,size/5));
-            GalaxyFilters.Shadow(diamond,0,0,5,new Color(1,.788f,.29f,.5f));var numeral=Text("II",Mathf.RoundToInt(size*.5f),true,"#3A1F00");numeral.style.rotate=new Rotate(-45);diamond.Add(numeral);return diamond;
+            var amount=Text(N(gems?Model.Gems:Model.Chips),17,true);amount.name=gems?"menu.gemsLabel":"menu.chipsLabel";amount.style.minWidth=gems?44:84;pill.Add(amount);
+            var plus=Button("+",()=>OpenPanel("shop",gems?1:0),"success currency-plus");plus.name=gems?"menu.buyGems":"menu.buyChips";plus.tooltip=L(gems?"Elmas satın al":"Çip satın al",gems?"Buy gems":"Buy chips");plus.style.fontSize=20;plus.style.unityTextAlign=TextAnchor.MiddleCenter;Decorate(plus,"#3CCB6E",14,3,"#22914A");pill.Add(plus);return pill;
         }
         private void BuildLogo(int planet)
         {
@@ -145,8 +149,16 @@ namespace Galaxy101
                 Decorate(tile,"linear-gradient(var(--tf1),var(--tf2))",i==1?13:12,i==1?6:5,"var(--te2)");tile.style.borderBottomWidth=i==1?8:7;tile.style.borderBottomColor=C("var(--te)");
                 var number=Text(i==1?"0":"1",i==1?74:64,true,"var(--"+tint[i]+")");number.style.height=i==1?74:64;number.style.unityTextAlign=TextAnchor.MiddleCenter;tile.Add(number);
                 var dot=Box();dot.style.width=dot.style.height=i==1?16:14;dot.style.marginTop=3;Decorate(dot,"var(--"+tint[i]+")",99);tile.Add(dot);AddMain(tile);
-                // floatA 3.2s ease-in-out, staggered .4s: 0 → -14px → 0.
-                Animate(t=>{float f=Mathf.Repeat(t-index*.4f,3.2f)/3.2f;tile.style.translate=new Translate(0,-14*(f<.5f?CssBezier(.42f,0,.58f,1,f*2):1-CssBezier(.42f,0,.58f,1,f*2-1)));});
+                // g101TileIn 1.1s cubic-bezier(.16,1,.3,1) both, delays .15/.29/.43 s: opacity 0 → 1 by 55 %, translateY(46px)
+                // scale(.82) → none (its rotateX(-70deg) has no 2D equivalent, UNITY_FARKLARI UF-601); then g101Float 6 s
+                // cubic-bezier(.45,0,.55,1) infinite, delays 0/-2/-4 s: translate 0 → -7px (50 %) → 0.
+                float delay=.15f+.14f*i;
+                Animate(t=>
+                {
+                    float f=Mathf.Clamp01((t-delay)/1.1f),k=CssBezier(.16f,1,.3f,1,f);tile.style.opacity=f>=.55f?1:CssBezier(.16f,1,.3f,1,f/.55f);
+                    float p=Mathf.Repeat(t+2*index,6)/6,y=-7*(p<.5f?CssBezier(.45f,0,.55f,1,p*2):1-CssBezier(.45f,0,.55f,1,p*2-1));
+                    tile.style.translate=new Translate(0,y+46*(1-k));tile.style.scale=new Scale(Vector2.one*(.82f+.18f*k));
+                });
             }
         }
         private void BuildPlay()
@@ -163,12 +175,12 @@ namespace Galaxy101
                 Place(pulse,-spread,-spread,360+spread*2,86+spread*2);pulse.style.borderTopLeftRadius=pulse.style.borderTopRightRadius=pulse.style.borderBottomLeftRadius=pulse.style.borderBottomRightRadius=24+spread;pulse.style.opacity=1-spread/16;
             });
             var depth=Box("play-depth");depth.pickingMode=PickingMode.Ignore;Place(depth,0,7,360,86);Decorate(depth,"var(--aS)",24);host.Add(depth);
-            var play=Button("",Play,"primary play-button");play.name="play-now";Place(play,0,0,360,86);Decorate(play,"linear-gradient(var(--a1),var(--a2))",24);play.style.overflow=Overflow.Hidden;
+            var play=Button("",Play,"primary play-button");play.name="menu.play";Place(play,0,0,360,86);Decorate(play,"linear-gradient(var(--a1),var(--a2))",24);play.style.overflow=Overflow.Hidden;
             play.RegisterCallback<PointerDownEvent>(_=>host.AddToClassList("pressed"),TrickleDown.TrickleDown);
             play.RegisterCallback<PointerUpEvent>(_=>host.RemoveFromClassList("pressed"),TrickleDown.TrickleDown);
             play.RegisterCallback<PointerCaptureOutEvent>(_=>host.RemoveFromClassList("pressed"));
-            Shine(play,2.8f,0,false);var title=Text(L("HEMEN OYNA","PLAY NOW"),34,true,"var(--aT)");Tracking(title,1,34);title.style.whiteSpace=WhiteSpace.NoWrap;title.style.height=36;play.Add(title);
-            var subtitle=Text(PlaySubtitle(),13,false,"var(--aT)");playSubtitle=subtitle;subtitle.name="play-subtitle";subtitle.style.unityFont=Font("Baloo2-800");subtitle.style.marginTop=4;subtitle.style.opacity=.8f;play.Add(subtitle);host.Add(play);
+            Shine(play,2.8f,0,false);var title=Text(L("HEMEN OYNA","PLAY NOW"),34,true,"var(--aT)");Tracking(title,1,34);title.name="menu.t.play";title.style.whiteSpace=WhiteSpace.NoWrap;title.style.height=36;play.Add(title);
+            var subtitle=Text(PlaySubtitle(),13,false,"var(--aT)");playSubtitle=subtitle;subtitle.name="menu.playSub";subtitle.style.unityFont=Font("Baloo2-800");subtitle.style.marginTop=4;subtitle.style.opacity=.8f;play.Add(subtitle);host.Add(play);
         }
         /// <summary>
         /// v4 modes (G101-Menu modes, menu.STR.modes): Klasik (Tekli / Eşli tables in the lobby), Dereceli, Botlara karşı — all open (soon: false).
@@ -181,14 +193,15 @@ namespace Galaxy101
         {
             var strip=Box("mode-strip");Place(strip,0,474,1280,90);strip.style.flexDirection=FlexDirection.Row;strip.style.justifyContent=Justify.Center;AddMain(strip);
             string[] names={L("Klasik","Classic"),L("Dereceli","Ranked"),L("Botlara karşı","Vs bots")},glyphs={"101","II","•"},colors={"#3D7BFF","#16B6A8","#3CCB6E"},shades={"#2148B0","#0C7F75","#22914A"};
-            string[] online={N(14233),N(5630),L("Çevrimdışı","Offline")};
+            // renderVals M[].online: the counts are literal strings ("14.233", "5.630"), unlocalised in English too (EK-611).
+            string[] online={"14.233","5.630",L("Çevrimdışı","Offline")};
             modeCards.Clear();
             for(int i=0;i<3;i++)
             {
                 int index=V3Modes[i];string color=colors[i],shade=shades[i];
                 var slot=Box("mode-slot");slot.style.width=208;slot.style.height=78;slot.style.marginRight=i==2?0:12;
                 var card=Button("",()=>PickMode(index),"mode-card");
-                card.name="mode-"+index;Place(card,0,0,208,78);Decorate(card,color,18,5,shade);
+                card.name="menu.m.pick["+i+"]";Place(card,0,0,208,78);Decorate(card,color,18,5,shade);
                 card.style.flexDirection=FlexDirection.Column;card.style.justifyContent=Justify.Center;card.style.alignItems=Align.FlexStart;card.style.paddingLeft=card.style.paddingRight=14;
                 // overflow: hidden on an inner layer, so the card's 5 px ledge below it is not clipped with the glyph.
                 var clip=Box("mode-clip");clip.pickingMode=PickingMode.Ignore;clip.style.position=Position.Absolute;clip.style.left=clip.style.top=clip.style.right=clip.style.bottom=0;clip.style.overflow=Overflow.Hidden;
@@ -196,13 +209,13 @@ namespace Galaxy101
                 // The design's white selection/hover ring (box-shadow 0 2.5px 0 5px #fff) is left out on purpose: the cards
                 // only lift, light up and glow.
                 // Mode glyph: 700 58px/1, rgba(255,255,255,.16), right -4 bottom -14, clipped by the card.
-                var glyph=Text(glyphs[i],58,true,"rgba(255,255,255,.16)");glyph.name="mode-glyph-"+index;glyph.style.height=58;glyph.style.unityTextAlign=TextAnchor.MiddleRight;glyph.pickingMode=PickingMode.Ignore;
+                var glyph=Text(glyphs[i],58,true,"rgba(255,255,255,.16)");glyph.name="menu.m.glyph["+i+"]";glyph.style.height=58;glyph.style.unityTextAlign=TextAnchor.MiddleRight;glyph.pickingMode=PickingMode.Ignore;
                 glyph.style.position=Position.Absolute;glyph.style.right=-4;glyph.style.bottom=-14;clip.Add(glyph);
                 var gloss=Box();Place(gloss,0,0,208,39);gloss.pickingMode=PickingMode.Ignore;Decorate(gloss,"linear-gradient(rgba(255,255,255,.18),transparent)",18);clip.Add(gloss);
-                var title=Text(names[i],18,true,"#fff");title.pickingMode=PickingMode.Ignore;card.Add(title);
+                var title=Text(names[i],18,true,"#fff");title.name="menu.m.name["+i+"]";title.pickingMode=PickingMode.Ignore;card.Add(title);
                 var line=Row();line.pickingMode=PickingMode.Ignore;line.style.marginTop=4;var dot=Box();dot.style.width=dot.style.height=6;dot.style.marginRight=5;Decorate(dot,"#8EF0B0",3);GalaxyFilters.Shadow(dot,0,0,3,C("#8EF0B0"));line.Add(dot);
                 var count=Text(online[i],11,false,"rgba(255,255,255,.9)");count.style.unityFont=Font("Baloo2-800");line.Add(count);card.Add(line);
-                if(IsSoon(index)){var soon=Text(L("YAKINDA","SOON"),9,false,"#fff");soon.name="mode-soon-"+index;soon.style.unityFont=Font("Baloo2-800");Tracking(soon,1.2f,9);soon.style.position=Position.Absolute;soon.style.right=10;soon.style.bottom=9;soon.style.paddingTop=soon.style.paddingBottom=3;soon.style.paddingLeft=soon.style.paddingRight=7;Decorate(soon,"rgba(0,0,0,.32)",6);clip.Add(soon);}
+                if(IsSoon(index)){var soon=Text(L("YAKINDA","SOON"),9,false,"#fff");soon.name="menu.t.soon["+i+"]";soon.style.unityFont=Font("Baloo2-800");Tracking(soon,1.2f,9);soon.style.position=Position.Absolute;soon.style.right=10;soon.style.bottom=9;soon.style.paddingTop=soon.style.paddingBottom=3;soon.style.paddingLeft=soon.style.paddingRight=7;Decorate(soon,"rgba(0,0,0,.32)",6);clip.Add(soon);}
                 var tick=Box("mode-tick");tick.pickingMode=PickingMode.Ignore;tick.style.position=Position.Absolute;tick.style.right=8;tick.style.top=8;tick.style.width=tick.style.height=22;tick.style.alignItems=Align.Center;tick.style.justifyContent=Justify.Center;Decorate(tick,"#fff",99);tick.Add(Icon("tick",13,"#1B2440"));clip.Add(tick);
                 Color glow=C(color);glow.a=.6f;
                 var state=new ModeCard{Index=index,Card=card,Tick=tick,Glow=glow};modeCards.Add(state);
@@ -272,19 +285,20 @@ namespace Galaxy101
         private void BuildFooter()
         {
             var shade=Box();Place(shade,0,610,1280,110);shade.pickingMode=PickingMode.Ignore;Decorate(shade,"linear-gradient(transparent,rgba(0,0,0,.55))");AddMain(shade);
-            string[] keys={"shop","friends","leader","daily","rules"},tr={"Mağaza","Arkadaşlar","Liderlik","Günlük ödül","Kurallar"},en={"Shop","Friends","Leaderboard","Daily reward","Rules"};
+            string[] keys={"shop","friends","leader","daily","rules"},openIds={"Shop","Friends","Leader","Daily","Rules"},tr={"Mağaza","Arkadaşlar","Liderlik","Günlük ödül","Kurallar"},en={"Shop","Friends","Leaderboard","Daily reward","Rules"};
             string[] backgrounds={"linear-gradient(160deg,var(--a1),var(--a2))","linear-gradient(160deg,#7AA6FF,#3D6BF0)","linear-gradient(160deg,#C2A4FF,#7C4DEB)","linear-gradient(160deg,#4FDB80,#25A857)","linear-gradient(160deg,#5BE6D6,#14A596)"};
             string[] shadows={"var(--aS)","#2448B8","#5530B0","#18793F","#0C746A"},labels={"var(--a1)","#A9C4FF","#D4C2FF","#8EF0B0","#9AF2E8"};
             string[] glows={"var(--gl)","rgba(80,130,255,.4)","rgba(150,110,255,.4)","rgba(60,203,110,.4)","rgba(40,210,190,.4)"};
             var nav=Box("footer-navigation");Place(nav,440,622,400,84);AddMain(nav);
             for(int i=0;i<keys.Length;i++)
             {
-                string key=keys[i];var item=Button("",()=>OpenPanel(key),"plain nav-button");item.name="nav-"+key;if(i==keys.Length-1)item.style.marginRight=0;
+                string key=keys[i];var item=Button("",()=>OpenPanel(key),"plain nav-button");item.name="menu.open"+openIds[i];if(i==keys.Length-1)item.style.marginRight=0;
                 var square=Box("nav-square");Decorate(square,backgrounds[i],18,4,shadows[i]);GalaxyFilters.Shadow(square,0,0,i==0?11:10,C(glows[i]));
                 var highlight=Box();highlight.pickingMode=PickingMode.Ignore;Place(highlight,0,0,56,56);highlight.style.borderTopLeftRadius=highlight.style.borderTopRightRadius=18;highlight.style.borderTopWidth=1;highlight.style.borderTopColor=new Color(1,1,1,i==0?.5f:i==3?.35f:.4f);square.Add(highlight);
                 square.Add(Icon(key,i==0?30:28,i==0?"var(--aT)":"#fff"));item.Add(square);
-                var label=Text(L(tr[i],en[i]),12,false,labels[i]);label.style.unityFont=Font("Baloo2-800");label.style.whiteSpace=WhiteSpace.NoWrap;label.style.marginTop=6;item.Add(label);
-                if(i==0)Badge(item,"%50",true);if(i==1)Badge(item,Services.Friends.GetFriends(true).Count.ToString());if(i==3&&!Model.DayClaimed){var badge=Badge(square,"1");badge.style.top=-7;badge.style.right=-8;}
+                var label=Text(L(tr[i],en[i]),12,false,labels[i]);label.name="menu.t."+keys[i];label.style.unityFont=Font("Baloo2-800");label.style.whiteSpace=WhiteSpace.NoWrap;label.style.marginTop=6;item.Add(label);
+                if(i==0)Badge(item,"%50",true);if(i==1)Badge(item,Services.Friends.GetFriends(true).Count.ToString());// The prototype's Günlük ödül badge is static markup ("1", also after Topla — EKSIKLER EK-609).
+                if(i==3){var badge=Badge(square,"1");badge.style.top=-7;badge.style.right=-8;}
                 // bob 1.6s, default ease: 0 → -4px → 0.
                 if(i==3)Animate(t=>{float f=Mathf.Repeat(t,1.6f)/1.6f;item.style.translate=new Translate(0,-4*(f<.5f?CssBezier(.25f,.1f,.25f,1,f*2):1-CssBezier(.25f,.1f,.25f,1,f*2-1)));});nav.Add(item);
             }
@@ -300,7 +314,7 @@ namespace Galaxy101
         }
         private void BuildPlanetPicker()
         {
-            var picker=Box("planet-picker");var label=Text(L("GEZEGEN TEMASI","PLANET THEME"),10,false,"var(--mt)");label.style.unityFont=Font("Baloo2-800");Tracking(label,1.5f,10);label.style.marginLeft=4;label.style.marginBottom=8;picker.Add(label);
+            var picker=Box("planet-picker");var label=Text(L("GEZEGEN TEMASI","PLANET THEME"),10,false,"var(--mt)");label.name="menu.t.planetTheme";label.style.unityFont=Font("Baloo2-800");Tracking(label,1.5f,10);label.style.marginLeft=4;label.style.marginBottom=8;picker.Add(label);
             var pill=Row();pill.name="planet-theme-pill";pill.AddToClassList("planet-pill");pill.style.height=48;pill.style.alignSelf=Align.FlexStart;Decorate(pill,"rgba(0,0,0,.35)",24);GalaxyFilters.BackdropBlur(pill,8);
             var orbs=Row();orbs.name="planet-theme-orbs";orbs.style.marginRight=10;pill.Add(orbs);
             for(int i=0;i<PlanetNames.Length;i++)
@@ -333,23 +347,9 @@ namespace Galaxy101
             var ramp=(JArray)data["pickerOrb"];var face=Box();face.pickingMode=PickingMode.Ignore;Place(face,0,0,size,size);Decorate(face,$"radial-gradient(circle at 35% 30%,{ramp[0]},{ramp[1]} 55%,{ramp[2]})",size/2);orb.Add(face);
             return orb;
         }
-        /// <summary>Settings account avatar: color disc, 3px border in the frame accent (classic a1, gold #FFD964) and the frame's box-shadow.</summary>
-        public VisualElement AccountAvatar(int size)
-        {
-            int frame=(int?)Model.Profile["frame"]??0;var root=Box("account-avatar");root.style.width=root.style.height=size;root.style.flexShrink=0;
-            if(frame==1)
-            {
-                var glow=Box();glow.pickingMode=PickingMode.Ignore;Place(glow,0,0,size,size);Decorate(glow,"#5A3A08",size/2);GalaxyFilters.Shadow(glow,0,0,8,new Color(1,.788f,.29f,.55f));root.Add(glow);
-                var ring=Box();ring.pickingMode=PickingMode.Ignore;Place(ring,-2,-2,size+4,size+4);Decorate(ring,"#5A3A08",size/2+2);root.Add(ring);
-            }
-            var disc=Box();disc.pickingMode=PickingMode.Ignore;Place(disc,0,0,size,size);Decorate(disc,(string)Model.Profile["color"]??"#FF8A5B",size/2);disc.style.alignItems=Align.Center;disc.style.justifyContent=Justify.Center;
-            disc.style.borderLeftWidth=disc.style.borderRightWidth=disc.style.borderTopWidth=disc.style.borderBottomWidth=3;
-            disc.style.borderLeftColor=disc.style.borderRightColor=disc.style.borderTopColor=disc.style.borderBottomColor=C(frame==1?"#FFD964":"var(--a1)");
-            disc.Add(Text(ProfileValidation.Initials((string)Model.Profile["name"]??""),20,true,"#fff"));root.Add(disc);return root;
-        }
         private Label Badge(VisualElement parent,string text,bool sale=false)
         {
-            var badge=Text(text,sale?10:11,false,"#fff");badge.style.unityFont=Font(sale?"Nunito-900":"Baloo2-800");badge.AddToClassList(sale?"sale-badge":"notification-badge");badge.style.whiteSpace=WhiteSpace.NoWrap;
+            var badge=Text(text,sale?10:11,false,"#fff");badge.style.unityFont=Font(sale?"Nunito-700":"Baloo2-800");// %50: 900 10px Nunito — the prototype loads only Nunito 700 (vendor/fonts.css)badge.AddToClassList(sale?"sale-badge":"notification-badge");badge.style.whiteSpace=WhiteSpace.NoWrap;
             if(sale){badge.style.height=18;badge.style.paddingTop=badge.style.paddingBottom=4;badge.style.paddingLeft=badge.style.paddingRight=6;badge.style.unityTextAlign=TextAnchor.MiddleCenter;}
             Decorate(badge,"#FF5E6C",sale?7:10,sale?2:0,"#C23E4A");parent.Add(badge);return badge;
         }

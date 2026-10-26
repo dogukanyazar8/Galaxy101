@@ -6,6 +6,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "com.galaxy101.table": {
+      "version": "file:com.galaxy101.table",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.okey101.core": {
       "version": "file:com.okey101.core",
       "depth": 0,

@@ -1,0 +1,1602 @@
+{
+ "tool": "tools/blender/unity_contract_check.py",
+ "summary": {
+  "checks": 193,
+  "uyar": 165,
+  "uymaz": 28,
+  "skin_service_missing": [],
+  "by_check": {
+   "hediye düğümü alev": {
+    "uyar": 2,
+    "uymaz": 0
+   },
+   "hediye düğümü demet": {
+    "uyar": 1,
+    "uymaz": 0
+   },
+   "glTFast 6.20 desteklemediği uzantılar": {
+    "uyar": 0,
+    "uymaz": 26
+   },
+   "hediye düğümü kupa_govde": {
+    "uyar": 1,
+    "uymaz": 0
+   },
+   "hediye düğümü kabarcik": {
+    "uyar": 1,
+    "uymaz": 0
+   },
+   "zar yüzleri (Unity uzayı)": {
+    "uyar": 0,
+    "uymaz": 1
+   },
+   "zar pivotu merkezde": {
+    "uyar": 0,
+    "uymaz": 1
+   },
+   "kök dönüşü TILT": {
+    "uyar": 30,
+    "uymaz": 0
+   },
+   "holo_halka düğümü": {
+    "uyar": 25,
+    "uymaz": 0
+   },
+   "cuha malzemesi": {
+    "uyar": 25,
+    "uymaz": 0
+   },
+   "LED malzemeleri": {
+    "uyar": 25,
+    "uymaz": 0
+   },
+   "tas_R1/tas_govde + tas_yuz": {
+    "uyar": 25,
+    "uymaz": 0
+   },
+   "53 taş (52 + sahte okey) + arka": {
+    "uyar": 25,
+    "uymaz": 0
+   },
+   "tek taş kökü": {
+    "uyar": 5,
+    "uymaz": 0
+   }
+  }
+ },
+ "skin_service": [
+  {
+   "material": "led",
+   "found_in": [
+    "chair",
+    "room",
+    "scene",
+    "table"
+   ],
+   "status": "uyar"
+  },
+  {
+   "material": "istaka_led",
+   "found_in": [
+    "rack"
+   ],
+   "status": "uyar"
+  },
+  {
+   "material": "istaka_karbon_dikis",
+   "found_in": [
+    "rack"
+   ],
+   "status": "uyar"
+  },
+  {
+   "material": "istaka_neon_tup1",
+   "found_in": [
+    "rack"
+   ],
+   "status": "uyar"
+  },
+  {
+   "material": "masa_holo_led",
+   "found_in": [
+    "table"
+   ],
+   "status": "uyar"
+  },
+  {
+   "material": "istaka_neon_tup2",
+   "found_in": [
+    "rack"
+   ],
+   "status": "uyar"
+  },
+  {
+   "material": "duvar",
+   "found_in": [
+    "room",
+    "scene"
+   ],
+   "status": "uyar"
+  },
+  {
+   "material": "masa_cam_kenar",
+   "found_in": [
+    "table"
+   ],
+   "status": "uyar"
+  },
+  {
+   "material": "led_cizgi",
+   "found_in": [
+    "table"
+   ],
+   "status": "uyar"
+  },
+  {
+   "material": "masa_holo_cizgi",
+   "found_in": [
+    "table"
+   ],
+   "status": "uyar"
+  },
+  {
+   "material": "holo",
+   "found_in": [
+    "scene",
+    "table"
+   ],
+   "status": "uyar"
+  },
+  {
+   "material": "masa_kenar",
+   "found_in": [
+    "chair",
+    "scene",
+    "table"
+   ],
+   "status": "uyar"
+  },
+  {
+   "material": "deri",
+   "found_in": [
+    "chair",
+    "scene"
+   ],
+   "status": "uyar"
+  },
+  {
+   "material": "istaka_eloksal",
+   "found_in": [
+    "rack"
+   ],
+   "status": "uyar"
+  },
+  {
+   "material": "tas_classic",
+   "found_in": [
+    "tile_set"
+   ],
+   "status": "uyar"
+  },
+  {
+   "material": "cuha",
+   "found_in": [
+    "scene",
+    "table"
+   ],
+   "status": "uyar"
+  }
+ ],
+ "results": [
+  {
+   "file": "galaxy101_hediye_cake.glb",
+   "check": "hediye düğümü alev",
+   "status": "uyar",
+   "detail": "alev, alev_dis, alev_ic",
+   "source": "TableGifts.cs:77-81"
+  },
+  {
+   "file": "galaxy101_hediye_flower.glb",
+   "check": "hediye düğümü demet",
+   "status": "uyar",
+   "detail": "demet",
+   "source": "TableGifts.cs:77-81"
+  },
+  {
+   "file": "galaxy101_hediye_flower.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_sheen",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "galaxy101_hediye_rocket.glb",
+   "check": "hediye düğümü alev",
+   "status": "uyar",
+   "detail": "alev, alev_ic",
+   "source": "TableGifts.cs:77-81"
+  },
+  {
+   "file": "galaxy101_hediye_trophy.glb",
+   "check": "hediye düğümü kupa_govde",
+   "status": "uyar",
+   "detail": "kupa_govde",
+   "source": "TableGifts.cs:77-81"
+  },
+  {
+   "file": "galaxy101_ikram_cola.glb",
+   "check": "hediye düğümü kabarcik",
+   "status": "uyar",
+   "detail": "kabarcik0, kabarcik1, kabarcik2, kabarcik3, kabarcik4, kabarcik5 …",
+   "source": "TableGifts.cs:77-81"
+  },
+  {
+   "file": "galaxy101_zar.glb",
+   "check": "zar yüzleri (Unity uzayı)",
+   "status": "uymaz",
+   "detail": {
+    "yanlış": {
+     "2": {
+      "unity": [
+       -1,
+       0,
+       0
+      ],
+      "beklenen": [
+       1,
+       0,
+       0
+      ]
+     },
+     "5": {
+      "unity": [
+       1,
+       0,
+       0
+      ],
+      "beklenen": [
+       -1,
+       0,
+       0
+      ]
+     }
+    },
+    "gltf": {
+     "2": [
+      1,
+      0,
+      0
+     ],
+     "5": [
+      -1,
+      0,
+      0
+     ],
+     "1": [
+      0,
+      1,
+      0
+     ],
+     "6": [
+      0,
+      -1,
+      0
+     ],
+     "3": [
+      0,
+      0,
+      1
+     ],
+     "4": [
+      0,
+      0,
+      -1
+     ]
+    }
+   },
+   "source": "TableCeremony.cs:225"
+  },
+  {
+   "file": "galaxy101_zar.glb",
+   "check": "zar pivotu merkezde",
+   "status": "uymaz",
+   "detail": "sınır merkezi [0.0, 0.015, 0.0] (proje zarı merkezde)",
+   "source": "TableCeremony.cs:229-231, tools/blender/make_die.py"
+  },
+  {
+   "file": "jupiter/galaxy101_istaka_aluminyum_jupiter.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_chrome rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "jupiter/galaxy101_istaka_andromeda_jupiter.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_andromeda rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "jupiter/galaxy101_istaka_andromeda_jupiter.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "jupiter/galaxy101_istaka_ceviz_jupiter.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_walnut rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "jupiter/galaxy101_istaka_karbon_jupiter.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_carbon rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "jupiter/galaxy101_istaka_neon_jupiter.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_neon rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "jupiter/galaxy101_istaka_sedef_jupiter.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_sedef rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "jupiter/galaxy101_istaka_sedef_jupiter.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "jupiter/galaxy101_masa_andromeda_jupiter.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "jupiter/galaxy101_masa_andromeda_jupiter.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "jupiter/galaxy101_masa_andromeda_jupiter.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led, masa_andromeda_led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "jupiter/galaxy101_masa_andromeda_jupiter.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "jupiter/galaxy101_masa_ceviz_jupiter.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "jupiter/galaxy101_masa_ceviz_jupiter.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "jupiter/galaxy101_masa_ceviz_jupiter.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "jupiter/galaxy101_masa_hologram_jupiter.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "jupiter/galaxy101_masa_hologram_jupiter.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "jupiter/galaxy101_masa_hologram_jupiter.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led, masa_holo_led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "jupiter/galaxy101_masa_istasyon_jupiter.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "jupiter/galaxy101_masa_istasyon_jupiter.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "jupiter/galaxy101_masa_istasyon_jupiter.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led, led_cizgi",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "jupiter/galaxy101_sahne_tam_jupiter.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "jupiter/galaxy101_sahne_tam_jupiter.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "jupiter/galaxy101_sahne_tam_jupiter.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "istaka_andromeda_led, led, masa_andromeda_led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "jupiter/galaxy101_sahne_tam_jupiter.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "jupiter/galaxy101_tas_seti_altin_jupiter.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "jupiter/galaxy101_tas_seti_altin_jupiter.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "jupiter/galaxy101_tas_seti_galaksi_jupiter.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "jupiter/galaxy101_tas_seti_galaksi_jupiter.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "jupiter/galaxy101_tas_seti_galaksi_jupiter.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "jupiter/galaxy101_tas_seti_klasik_jupiter.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "jupiter/galaxy101_tas_seti_klasik_jupiter.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "jupiter/galaxy101_tas_seti_mermer_jupiter.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "jupiter/galaxy101_tas_seti_mermer_jupiter.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "jupiter/galaxy101_tas_seti_neon_jupiter.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "jupiter/galaxy101_tas_seti_neon_jupiter.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "jupiter/galaxy101_tas_tek_jupiter.glb",
+   "check": "tek taş kökü",
+   "status": "uyar",
+   "detail": "kök tas_R7 (TableAssetBuilder tas_tek kullanmaz)",
+   "source": "TableAssetBuilder.cs:25-42"
+  },
+  {
+   "file": "mars/galaxy101_istaka_aluminyum_mars.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_chrome rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "mars/galaxy101_istaka_andromeda_mars.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_andromeda rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "mars/galaxy101_istaka_andromeda_mars.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "mars/galaxy101_istaka_ceviz_mars.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_walnut rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "mars/galaxy101_istaka_karbon_mars.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_carbon rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "mars/galaxy101_istaka_neon_mars.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_neon rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "mars/galaxy101_istaka_sedef_mars.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_sedef rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "mars/galaxy101_istaka_sedef_mars.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "mars/galaxy101_masa_andromeda_mars.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "mars/galaxy101_masa_andromeda_mars.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "mars/galaxy101_masa_andromeda_mars.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led, masa_andromeda_led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "mars/galaxy101_masa_andromeda_mars.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "mars/galaxy101_masa_ceviz_mars.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "mars/galaxy101_masa_ceviz_mars.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "mars/galaxy101_masa_ceviz_mars.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "mars/galaxy101_masa_hologram_mars.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "mars/galaxy101_masa_hologram_mars.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "mars/galaxy101_masa_hologram_mars.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led, masa_holo_led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "mars/galaxy101_masa_istasyon_mars.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "mars/galaxy101_masa_istasyon_mars.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "mars/galaxy101_masa_istasyon_mars.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led, led_cizgi",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "mars/galaxy101_sahne_tam_mars.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "mars/galaxy101_sahne_tam_mars.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "mars/galaxy101_sahne_tam_mars.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "istaka_andromeda_led, led, masa_andromeda_led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "mars/galaxy101_sahne_tam_mars.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "mars/galaxy101_tas_seti_altin_mars.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "mars/galaxy101_tas_seti_altin_mars.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "mars/galaxy101_tas_seti_galaksi_mars.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "mars/galaxy101_tas_seti_galaksi_mars.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "mars/galaxy101_tas_seti_galaksi_mars.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "mars/galaxy101_tas_seti_klasik_mars.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "mars/galaxy101_tas_seti_klasik_mars.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "mars/galaxy101_tas_seti_mermer_mars.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "mars/galaxy101_tas_seti_mermer_mars.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "mars/galaxy101_tas_seti_neon_mars.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "mars/galaxy101_tas_seti_neon_mars.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "mars/galaxy101_tas_tek_mars.glb",
+   "check": "tek taş kökü",
+   "status": "uyar",
+   "detail": "kök tas_R7 (TableAssetBuilder tas_tek kullanmaz)",
+   "source": "TableAssetBuilder.cs:25-42"
+  },
+  {
+   "file": "neptun/galaxy101_istaka_aluminyum_neptun.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_chrome rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "neptun/galaxy101_istaka_andromeda_neptun.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_andromeda rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "neptun/galaxy101_istaka_andromeda_neptun.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "neptun/galaxy101_istaka_ceviz_neptun.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_walnut rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "neptun/galaxy101_istaka_karbon_neptun.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_carbon rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "neptun/galaxy101_istaka_neon_neptun.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_neon rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "neptun/galaxy101_istaka_sedef_neptun.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_sedef rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "neptun/galaxy101_istaka_sedef_neptun.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "neptun/galaxy101_masa_andromeda_neptun.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "neptun/galaxy101_masa_andromeda_neptun.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "neptun/galaxy101_masa_andromeda_neptun.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led, masa_andromeda_led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "neptun/galaxy101_masa_andromeda_neptun.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "neptun/galaxy101_masa_ceviz_neptun.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "neptun/galaxy101_masa_ceviz_neptun.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "neptun/galaxy101_masa_ceviz_neptun.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "neptun/galaxy101_masa_hologram_neptun.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "neptun/galaxy101_masa_hologram_neptun.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "neptun/galaxy101_masa_hologram_neptun.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led, masa_holo_led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "neptun/galaxy101_masa_istasyon_neptun.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "neptun/galaxy101_masa_istasyon_neptun.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "neptun/galaxy101_masa_istasyon_neptun.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led, led_cizgi",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "neptun/galaxy101_sahne_tam_neptun.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "neptun/galaxy101_sahne_tam_neptun.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "neptun/galaxy101_sahne_tam_neptun.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "istaka_andromeda_led, led, masa_andromeda_led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "neptun/galaxy101_sahne_tam_neptun.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "neptun/galaxy101_tas_seti_altin_neptun.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "neptun/galaxy101_tas_seti_altin_neptun.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "neptun/galaxy101_tas_seti_galaksi_neptun.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "neptun/galaxy101_tas_seti_galaksi_neptun.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "neptun/galaxy101_tas_seti_galaksi_neptun.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "neptun/galaxy101_tas_seti_klasik_neptun.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "neptun/galaxy101_tas_seti_klasik_neptun.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "neptun/galaxy101_tas_seti_mermer_neptun.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "neptun/galaxy101_tas_seti_mermer_neptun.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "neptun/galaxy101_tas_seti_neon_neptun.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "neptun/galaxy101_tas_seti_neon_neptun.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "neptun/galaxy101_tas_tek_neptun.glb",
+   "check": "tek taş kökü",
+   "status": "uyar",
+   "detail": "kök tas_R7 (TableAssetBuilder tas_tek kullanmaz)",
+   "source": "TableAssetBuilder.cs:25-42"
+  },
+  {
+   "file": "saturn/galaxy101_istaka_aluminyum_saturn.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_chrome rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "saturn/galaxy101_istaka_andromeda_saturn.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_andromeda rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "saturn/galaxy101_istaka_andromeda_saturn.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "saturn/galaxy101_istaka_ceviz_saturn.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_walnut rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "saturn/galaxy101_istaka_karbon_saturn.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_carbon rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "saturn/galaxy101_istaka_neon_saturn.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_neon rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "saturn/galaxy101_istaka_sedef_saturn.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_sedef rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "saturn/galaxy101_istaka_sedef_saturn.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "saturn/galaxy101_masa_andromeda_saturn.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "saturn/galaxy101_masa_andromeda_saturn.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "saturn/galaxy101_masa_andromeda_saturn.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led, masa_andromeda_led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "saturn/galaxy101_masa_andromeda_saturn.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "saturn/galaxy101_masa_ceviz_saturn.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "saturn/galaxy101_masa_ceviz_saturn.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "saturn/galaxy101_masa_ceviz_saturn.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "saturn/galaxy101_masa_hologram_saturn.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "saturn/galaxy101_masa_hologram_saturn.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "saturn/galaxy101_masa_hologram_saturn.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led, masa_holo_led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "saturn/galaxy101_masa_istasyon_saturn.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "saturn/galaxy101_masa_istasyon_saturn.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "saturn/galaxy101_masa_istasyon_saturn.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led, led_cizgi",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "saturn/galaxy101_sahne_tam_saturn.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "saturn/galaxy101_sahne_tam_saturn.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "saturn/galaxy101_sahne_tam_saturn.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "istaka_andromeda_led, led, masa_andromeda_led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "saturn/galaxy101_sahne_tam_saturn.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "saturn/galaxy101_tas_seti_altin_saturn.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "saturn/galaxy101_tas_seti_altin_saturn.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "saturn/galaxy101_tas_seti_galaksi_saturn.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "saturn/galaxy101_tas_seti_galaksi_saturn.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "saturn/galaxy101_tas_seti_galaksi_saturn.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "saturn/galaxy101_tas_seti_klasik_saturn.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "saturn/galaxy101_tas_seti_klasik_saturn.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "saturn/galaxy101_tas_seti_mermer_saturn.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "saturn/galaxy101_tas_seti_mermer_saturn.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "saturn/galaxy101_tas_seti_neon_saturn.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "saturn/galaxy101_tas_seti_neon_saturn.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "saturn/galaxy101_tas_tek_saturn.glb",
+   "check": "tek taş kökü",
+   "status": "uyar",
+   "detail": "kök tas_R7 (TableAssetBuilder tas_tek kullanmaz)",
+   "source": "TableAssetBuilder.cs:25-42"
+  },
+  {
+   "file": "venus/galaxy101_istaka_aluminyum_venus.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_chrome rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "venus/galaxy101_istaka_andromeda_venus.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_andromeda rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "venus/galaxy101_istaka_andromeda_venus.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "venus/galaxy101_istaka_ceviz_venus.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_walnut rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "venus/galaxy101_istaka_karbon_venus.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_carbon rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "venus/galaxy101_istaka_neon_venus.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_neon rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "venus/galaxy101_istaka_sedef_venus.glb",
+   "check": "kök dönüşü TILT",
+   "status": "uyar",
+   "detail": "kök istaka_sedef rot [-0.36, 0.0, 0.0] konum [0.0, 0.0, 0.0]",
+   "source": "TableScene.cs:317"
+  },
+  {
+   "file": "venus/galaxy101_istaka_sedef_venus.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "venus/galaxy101_masa_andromeda_venus.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "venus/galaxy101_masa_andromeda_venus.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "venus/galaxy101_masa_andromeda_venus.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led, masa_andromeda_led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "venus/galaxy101_masa_andromeda_venus.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "venus/galaxy101_masa_ceviz_venus.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "venus/galaxy101_masa_ceviz_venus.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "venus/galaxy101_masa_ceviz_venus.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "venus/galaxy101_masa_hologram_venus.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "venus/galaxy101_masa_hologram_venus.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "venus/galaxy101_masa_hologram_venus.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led, masa_holo_led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "venus/galaxy101_masa_istasyon_venus.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "venus/galaxy101_masa_istasyon_venus.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "venus/galaxy101_masa_istasyon_venus.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "led, led_cizgi",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "venus/galaxy101_sahne_tam_venus.glb",
+   "check": "holo_halka düğümü",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableFx.cs:76"
+  },
+  {
+   "file": "venus/galaxy101_sahne_tam_venus.glb",
+   "check": "cuha malzemesi",
+   "status": "uyar",
+   "detail": "",
+   "source": "TableScene.cs:305"
+  },
+  {
+   "file": "venus/galaxy101_sahne_tam_venus.glb",
+   "check": "LED malzemeleri",
+   "status": "uyar",
+   "detail": "istaka_andromeda_led, led, masa_andromeda_led",
+   "source": "TableFx.cs:84"
+  },
+  {
+   "file": "venus/galaxy101_sahne_tam_venus.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "venus/galaxy101_tas_seti_altin_venus.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "venus/galaxy101_tas_seti_altin_venus.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "venus/galaxy101_tas_seti_galaksi_venus.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "venus/galaxy101_tas_seti_galaksi_venus.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "venus/galaxy101_tas_seti_galaksi_venus.glb",
+   "check": "glTFast 6.20 desteklemediği uzantılar",
+   "status": "uymaz",
+   "detail": "KHR_materials_iridescence",
+   "source": "glTFast GltfImport.cs; mevcut .meta reportItems code 20"
+  },
+  {
+   "file": "venus/galaxy101_tas_seti_klasik_venus.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "venus/galaxy101_tas_seti_klasik_venus.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "venus/galaxy101_tas_seti_mermer_venus.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "venus/galaxy101_tas_seti_mermer_venus.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "venus/galaxy101_tas_seti_neon_venus.glb",
+   "check": "tas_R1/tas_govde + tas_yuz",
+   "status": "uyar",
+   "detail": "tas_R1 var, çocuklar ['tas_govde', 'tas_yuz']",
+   "source": "TableScene.cs:268, TileFactory.cs:33-34,67"
+  },
+  {
+   "file": "venus/galaxy101_tas_seti_neon_venus.glb",
+   "check": "53 taş (52 + sahte okey) + arka",
+   "status": "uyar",
+   "detail": "54 tas_* grubu",
+   "source": "table3d.js:1039-1043 exportAsset('tiles')"
+  },
+  {
+   "file": "venus/galaxy101_tas_tek_venus.glb",
+   "check": "tek taş kökü",
+   "status": "uyar",
+   "detail": "kök tas_R7 (TableAssetBuilder tas_tek kullanmaz)",
+   "source": "TableAssetBuilder.cs:25-42"
+  }
+ ]
+}

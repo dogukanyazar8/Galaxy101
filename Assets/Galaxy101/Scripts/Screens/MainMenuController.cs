@@ -51,7 +51,7 @@ namespace Galaxy101
             {
                 // Back from a table with the session still open: no splash or sign-in again.
                 var signed=Galaxy101.Online.GalaxyOnline.Instance;
-                if(signed!=null&&signed.SignedIn){ApplyOnline(signed);HookOnline(signed);if(ReturnToLobby){ReturnToLobby=false;if(FromRanked){FromRanked=false;OpenRanked();}else OpenLobby();}}
+                if(signed!=null&&signed.SignedIn){ApplyOnline(signed);HookOnline(signed);if(ReturnToLobby){ReturnToLobby=false;if(FromRanked){FromRanked=false;OpenRanked();}else OpenLobby();}if(PendingToast!=null){View.Toast(PendingToast);PendingToast=null;}}
                 else ShowAuth();
             }
         }
@@ -117,9 +117,9 @@ namespace Galaxy101
         private void OnRankedMatched(RankedStart start)
         {
             if(this==null||start==null||!OpenMatchTable)return;
-            var online=Galaxy101.Online.GalaxyOnline.Instance;
-            if(start.Match is Galaxy101.Contracts.MatchStartMessage match&&online!=null)Galaxy101.Table.TableGame.PendingOnline=new Galaxy101.Table.NetworkTableSession(online,match.MatchId);
-            Galaxy101.Table.TableGame.PendingRoom=View.L("Dereceli · ","Ranked · ")+(start.Mode=="duo"?"Duo":start.Mode=="squad"?"Squad":"Solo");
+            // The server's match (v4 matchStart) plays online; the demo season's match is a local table (R-94: 5 hands, 30 s, no stake).
+            var session=Galaxy101.Online.V4TableSession.Current;
+            Galaxy101.Table.TableGame.Pending=new Galaxy101.Table.TableLaunch{Session=session!=null&&!session.Closed?session:null,Room=View.L("Dereceli · ","Ranked · ")+(start.Mode=="duo"?"Duo":start.Mode=="squad"?"Squad":"Solo")};
             FromRanked=true;
             _=StartLocalAsync(GalaxyTableScene);
         }
@@ -154,22 +154,29 @@ namespace Galaxy101
             Lobby.Show();
         }
         /// <summary>
-        /// A lobby table became a match. Until the networked table lands (V7) the 3D table opens with the same options
-        /// against the local engine, so the flow from lobby to table is complete.
+        /// A lobby table became a match (the earlier protocol's lobby). The table plays the v4 protocol: the match's
+        /// matchStart has opened it already (<see cref="OnMatchStarted(Galaxy101.Online.V4TableSession)"/>); an earlier
+        /// protocol's match has no table to play on.
         /// </summary>
         private void OnMatchStarted(Galaxy101.Contracts.TableStateMessage state)
         {
             Debug.Log("GALAXY101_MATCH_STARTED match="+state.MatchId+" seat="+state.YourSeat);
-            if(!OpenMatchTable)return;
+            var session=Galaxy101.Online.V4TableSession.Current;
+            if(session!=null&&!session.Closed)OnMatchStarted(session);
+        }
+        /// <summary>A v4 matchStart (waiting room, invite, ranked, vsBotsStart): the table opens on the server's match.</summary>
+        public void OnMatchStarted(Galaxy101.Online.V4TableSession session)
+        {
+            if(session==null||!OpenMatchTable||this==null||navigating)return;
             Lobby?.Hide();
-            var online=Galaxy101.Online.GalaxyOnline.Instance;
-            if(online!=null&&state.MatchId.HasValue)
-            {
-                Galaxy101.Table.TableGame.PendingOnline=new Galaxy101.Table.NetworkTableSession(online,state.MatchId.Value);
-                Galaxy101.Table.TableGame.PendingRoom=state.Table==null?null:state.Table.Name+" · "+(state.Table.Type=="pairs"?View.L("Eşli","Pairs"):View.L("Tekli","Singles"));
-            }
+            var table=session.Client.Table;
+            string room=table==null?null:table.Ranked?View.L("Dereceli","Ranked"):table.VsBots?null:table.Name+" · "+(table.Mode=="pairs"?View.L("Eşli","Pairs"):View.L("Tekli","Singles"));
+            Galaxy101.Table.TableGame.Pending=new Galaxy101.Table.TableLaunch{Session=session,Room=room,Stake=table?.Bet??0};
+            FromRanked=table!=null&&table.Ranked;
             _=StartLocalAsync(GalaxyTableScene);
         }
+        /// <summary>Set by the table when a match ends (REMOVED.md T45/T46: no match-end screen): the lobby shows it as a toast.</summary>
+        public static string PendingToast;
         private void OnPlay(int mode)=>OnPlay(mode,GalaxyTableScene);
         private async void OnPlay(int mode,string scene)
         {
@@ -177,6 +184,8 @@ namespace Galaxy101
             if(mode==0){OpenLobby();return;}
             if(mode==3){StartRanked();return;}
             if(mode!=4||navigating)return;
+            // Botlara karşı (K-10, R-94): the server's match code offline with three bots; no chips, XP (D-42).
+            if(scene==GalaxyTableScene)Galaxy101.Table.TableGame.Pending=new Galaxy101.Table.TableLaunch{VsBots=true};
             try{await StartLocalAsync(scene);}
             catch(Exception exception){Debug.LogException(exception);if(this!=null)View.Toast(View.L("Masa açılamadı. Yeniden deneyin.","Could not open the table. Try again."));}
         }

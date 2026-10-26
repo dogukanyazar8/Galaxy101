@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Galaxy101.Table;
 using NUnit.Framework;
-using Okey101.Core.Model;
+using Okey101.Core.V4;
 
 namespace Galaxy101.Tests
 {
@@ -117,58 +117,76 @@ namespace Galaxy101.Tests
         }
 
         // Engine ids: 2 × (13 × colour + number − 1) + copy, colours Red, Yellow, Blue, Black.
-        private static int Id(TileColor color, int number, int copy = 0) => 2 * (13 * (int)color + number - 1) + copy;
+        private static readonly string[] Letters = { "R", "Y", "B", "K" };
+        private static int Id(int color, int number, int copy = 0) => 2 * (13 * color + number - 1) + copy;
+        private const int Red = 0, Yellow = 1, Blue = 2, Black = 3;
+
+        private static RackMelds Eval(RackGrid rack, string indicator)
+        {
+            var segments = rack.Segments().Select(s => (IList<string>)TileIds.ToV4s(s.Ids)).ToList();
+            return RackMelds.Of(segments, G101Rules.OkeyFromIndicator(indicator));
+        }
 
         [Test]
         public void OpeningMeterCountsGapFreeRunsSetsAndPairs()
         {
-            var indicator = new TileFace(TileColor.Black, 13); // okey = black 1
+            const string indicator = "K13a"; // okey = black 1
             var rack = new RackGrid();
-            int[] run = { Id(TileColor.Red, 10), Id(TileColor.Red, 11), Id(TileColor.Red, 12), Id(TileColor.Red, 13) };
-            int[] set = { Id(TileColor.Red, 9), Id(TileColor.Yellow, 9), Id(TileColor.Blue, 9) };
-            int[] pair = { Id(TileColor.Blue, 4), Id(TileColor.Blue, 4, 1) };
+            int[] run = { Id(Red, 10), Id(Red, 11), Id(Red, 12), Id(Red, 13) };
+            int[] set = { Id(Red, 9), Id(Yellow, 9), Id(Blue, 9) };
+            int[] pair = { Id(Blue, 4), Id(Blue, 4, 1) };
             for (int i = 0; i < run.Length; i++) rack.Set(new RackSlot(0, i), run[i]);
             for (int i = 0; i < set.Length; i++) rack.Set(new RackSlot(0, 6 + i), set[i]);
             for (int i = 0; i < pair.Length; i++) rack.Set(new RackSlot(1, i), pair[i]);
-            rack.Set(new RackSlot(1, 5), Id(TileColor.Yellow, 2)); rack.Set(new RackSlot(1, 6), Id(TileColor.Blue, 7)); rack.Set(new RackSlot(1, 7), Id(TileColor.Red, 3));
-            var eval = HandEvaluation.Of(rack, indicator);
+            rack.Set(new RackSlot(1, 5), Id(Yellow, 2)); rack.Set(new RackSlot(1, 6), Id(Blue, 7)); rack.Set(new RackSlot(1, 7), Id(Red, 3));
+            var eval = Eval(rack, indicator);
             Assert.That(eval.Sum, Is.EqualTo(46 + 27));
             Assert.That(eval.Groups.Count, Is.EqualTo(2));
+            Assert.That(eval.Groups.Select(g => g.Kind), Is.EqualTo(new[] { "run", "group" }));
             Assert.That(eval.Pairs.Count, Is.EqualTo(1));
-            Assert.That(eval.ValidTiles.SetEquals(run.Concat(set)), Is.True, "only valid segments light up");
+            Assert.That(new HashSet<int>(TileIds.ToInts(eval.Valid)).SetEquals(run.Concat(set)), Is.True, "only valid segments light up");
 
-            // The okey (black 1) completes a run as a wild tile.
+            // The okey (black 1) completes a run where it lies (R-13).
             var wild = new RackGrid();
-            wild.Set(new RackSlot(0, 0), Id(TileColor.Blue, 11)); wild.Set(new RackSlot(0, 1), Id(TileColor.Black, 1)); wild.Set(new RackSlot(0, 2), Id(TileColor.Blue, 13));
-            Assert.That(HandEvaluation.Of(wild, indicator).Sum, Is.EqualTo(36));
+            wild.Set(new RackSlot(0, 0), Id(Blue, 11)); wild.Set(new RackSlot(0, 1), Id(Black, 1)); wild.Set(new RackSlot(0, 2), Id(Blue, 13));
+            Assert.That(Eval(wild, indicator).Sum, Is.EqualTo(36));
+        }
+
+        /// <summary>The prototype's segVal (G101-Masa.dc.html): a run from its first real tile's position, a group of distinct colours.</summary>
+        private static int SegVal(IList<string> seg, ColorNum okey)
+        {
+            if (seg.Count < 3) return 0;
+            var re = new List<(string C, int N, int X)>();
+            for (int x = 0; x < seg.Count; x++) if (!G101Rules.IsOkey(okey, seg[x])) { var r = G101Rules.RealOf(okey, seg[x]); re.Add((r.C, r.N, x)); }
+            if (re.Count == 0) return 0;
+            int best = 0, l = seg.Count;
+            if (re.All(t => t.C == re[0].C)) { int st = re[0].N - re[0].X; if (st >= 1 && st + l - 1 <= 13 && re.All(t => t.N == st + t.X)) best = l * st + l * (l - 1) / 2; }
+            if (l <= 4 && re.All(t => t.N == re[0].N) && re.Select(t => t.C).Distinct().Count() == re.Count) best = System.Math.Max(best, re[0].N * l);
+            return best;
         }
 
         [Test]
-        public void OpeningMeterPicksWhatTheEngineCandidateOrderPicks()
+        public void OpeningMeterIsThePrototypesSegmentValue()
         {
-            // The meter builds a segment's group directly; it must equal the best whole-segment candidate of the engine's
-            // generator (same start, same okey bindings) on runs, sets, okeys, fake okeys and strays.
+            // RackMelds asks the v4 engine (AnalyzeMeld); the prototype's segVal is an independent oracle on runs, groups,
+            // okeys, fake okeys and strays.
             var random = new System.Random(7);
             for (int round = 0; round < 3000; round++)
             {
-                var indicator = new TileFace((TileColor)random.Next(4), 1 + random.Next(13));
+                string indicator = Letters[random.Next(4)] + (1 + random.Next(13)) + "a";
+                var okey = G101Rules.OkeyFromIndicator(indicator);
                 var tiles = new List<int>(); int length = 3 + random.Next(random.Next(2) == 0 ? 2 : 11);
-                if (random.Next(2) == 0) { int c = random.Next(4), start = 1 + random.Next(13); for (int k = 0; k < length && start + k <= 13; k++) tiles.Add(Id((TileColor)c, start + k, random.Next(2))); }
-                else { int n = 1 + random.Next(13); foreach (var c in Enumerable.Range(0, 4).OrderBy(_ => random.Next()).Take(System.Math.Min(length, 4))) tiles.Add(Id((TileColor)c, n, random.Next(2))); }
-                var joker = Okey101.Core.Model.TileCatalog.JokerFace(indicator);
-                for (int j = random.Next(3); j > 0 && tiles.Count > 0; j--) { int wild = new[] { Id(joker.Color, joker.Number), Id(joker.Color, joker.Number, 1), 104, 105 }[random.Next(4)]; if (!tiles.Contains(wild)) tiles[random.Next(tiles.Count)] = wild; }
-                tiles = tiles.Distinct().OrderBy(_ => random.Next()).ToList(); if (tiles.Count < 3) continue;
+                if (random.Next(2) == 0) { int c = random.Next(4), start = 1 + random.Next(13); for (int k = 0; k < length && start + k <= 13; k++) tiles.Add(Id(c, start + k, random.Next(2))); }
+                else { int n = 1 + random.Next(13); foreach (var c in Enumerable.Range(0, 4).OrderBy(_ => random.Next()).Take(System.Math.Min(length, 4))) tiles.Add(Id(c, n, random.Next(2))); }
+                var okeyIds = new[] { TileIds.ToInt(okey.C + okey.N + "a"), TileIds.ToInt(okey.C + okey.N + "b"), 104, 105 };
+                for (int j = random.Next(3); j > 0 && tiles.Count > 0; j--) { int wild = okeyIds[random.Next(4)]; if (!tiles.Contains(wild)) tiles[random.Next(tiles.Count)] = wild; }
+                if (random.Next(3) == 0) tiles = tiles.Distinct().OrderBy(_ => random.Next()).ToList(); else tiles = tiles.Distinct().ToList();
+                if (tiles.Count < 3) continue;
                 var rack = new RackGrid(); for (int i = 0; i < tiles.Count; i++) rack.Set(new RackSlot(0, i), tiles[i]);
-
-                var ids = tiles.Select(t => new TileId(t)).ToArray(); MeldProposal best = null; int bestValue = -1;
-                foreach (var kind in new[] { MeldKind.Run, MeldKind.Set })
-                    if (kind == MeldKind.Run || ids.Length <= 4)
-                        foreach (var proposal in Okey101.Core.Rules.MeldCandidateGenerator.Generate(ids, indicator, kind))
-                            if (proposal.Tiles.Count == ids.Length && Okey101.Core.Rules.MeldValidator.Validate(proposal, indicator) is var v && v.Success && v.Value > bestValue) { best = proposal; bestValue = v.Value; }
-                string Key(MeldProposal g) => g == null ? "none" : g.Kind + ":" + string.Join(",", g.Tiles.Select(t => t.Id.Value + "/" + t.RepresentedFace));
-                var eval = HandEvaluation.Of(rack, indicator);
-                Assert.That(Key(eval.Groups.FirstOrDefault()), Is.EqualTo(Key(best)), string.Join(",", tiles) + " indicator " + indicator);
-                Assert.That(eval.Sum, Is.EqualTo(best == null ? 0 : bestValue));
+                var ids = TileIds.ToV4s(tiles);
+                var eval = Eval(rack, indicator);
+                Assert.That(eval.Sum, Is.EqualTo(SegVal(ids, okey)), string.Join(",", ids) + " indicator " + indicator);
+                Assert.That(eval.Groups.Count, Is.EqualTo(SegVal(ids, okey) > 0 ? 1 : 0));
             }
         }
     }

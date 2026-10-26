@@ -4,7 +4,8 @@
   "references": [
     "Galaxy101.Runtime",
     "Okey101.Core",
-    "Galaxy101.Editor"
+    "Galaxy101.Editor",
+    "Galaxy101.Table.Client"
   ],
   "includePlatforms": [
     "Editor"

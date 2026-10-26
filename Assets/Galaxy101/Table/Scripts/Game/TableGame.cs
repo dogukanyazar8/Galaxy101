@@ -106,6 +106,7 @@ namespace Galaxy101.Table
         private (string Text, string Sub, int Amount)? shortPenalty;
         private float shortUntil;
         private List<MeldSpec> lastOpen;
+        private Dictionary<int, RackSlot> shortPlacement;
 
         // ---------- seats: absolute (the server's) ↔ the table's (0 = me) ----------
         private int Base => Model != null && Model.Seat >= 0 ? Model.Seat : 0;
@@ -231,7 +232,21 @@ namespace Galaxy101.Table
             // The socket: the reconnect card follows the session; a snapshot of another screen (the match is gone) leaves.
             if (Session is Galaxy101.Online.V4TableSession net) net.ConnectionChanged += () => { if (this == null) return; Notify(); if (net.Closed && !leaving) LeaveAfter(0.5f); };
             // A session the menu opened may already hold the start of the match (and its snapshot).
-            if (Model.Table != null) { ApplySeats(); if (Model.HasHand) { if (Model.Rack != null) Rack.Deal(TileIds.ToInts(Model.Rack)); Settle(true); } else if (Model.Status == G101Rules.StatusLobby) Current = Phase.Seating; }
+            if (Model.Table != null) { ApplySeats(); if (Model.HasHand) Resync(); else if (Model.Status == G101Rules.StatusLobby) Current = Phase.Seating; }
+        }
+
+        /// <summary>
+        /// A view of the whole state (tableView, snapshot, or a session opened before the table): the board follows it; a
+        /// hand joined mid-way is laid out without animation, a deal in progress resumes its ceremony (protocol.json
+        /// reconnect.screens.table).
+        /// </summary>
+        private void Resync()
+        {
+            if (!Model.HasHand) return;
+            if (Model.Deal != null) { if (!Ceremony.Running) BeginDeal(); return; }
+            if (Ceremony.Running) return;
+            if (!settled) { if (Model.Rack != null && Rack.Count == 0) Rack.Deal(TileIds.ToInts(Model.Rack)); Settle(true); return; }
+            SyncRack(); SyncBoard();
         }
 
         private void OnDestroy()
@@ -293,7 +308,7 @@ namespace Galaxy101.Table
                 case V4Messages.Gift: OnGift((V4Gift)m.Payload); break;
                 case V4Messages.Xp: { var x = (V4Xp)m.Payload; XpEarned += x.Gained; if (x.Reason == "hand") LastXp = (int)x.Gained; if (hud?.Model != null) { hud.Model.Level = x.Level; hud.Model.Xp = x.Xp; } break; }
                 case V4Messages.SeatConnection: ApplySeats(); break;
-                case V4Messages.TableView: case V4Messages.Snapshot: if (Model.HasHand && Model.Deal == null && !Ceremony.Running) { SyncRack(); SyncBoard(); } break;
+                case V4Messages.TableView: case V4Messages.Snapshot: Resync(); break;
                 case V4Messages.LeftTable: { var l = (V4LeftTable)m.Payload; LeaveAfter(Math.Max(0, l.ToLobbyIn) / 1000f); break; }
                 case V4Messages.TableClosed: Message(TableHud.ToastKind.Info, L("Masa kapandı", "The table was closed")); LeaveAfter(1.3f); break;
             }
@@ -410,6 +425,7 @@ namespace Galaxy101.Table
         {
             shortMode = (string)ev["mode"]; shortValue = TableClient.I(ev["value"]);
             shortMelds = (lastOpen ?? new List<MeldSpec> { new MeldSpec(shortMode, TableClient.Strings(ev["tiles"])) }).Select(g => TileIds.ToInts(g.Tiles).ToArray()).ToList();
+            shortPlacement = Rack.Placement();
             foreach (var g in shortMelds) foreach (var id in g) Rack.Remove(id);
             shortUntil = Time.time + 1.5f;
             SyncBoard();
@@ -417,7 +433,15 @@ namespace Galaxy101.Table
 
         private void EndShortOpening()
         {
-            shortMelds = null; SyncRack(); SyncBoard();
+            shortMelds = null;
+            // The sets return to the slots they left (the prototype's undoTurn), then the rack follows the model.
+            if (shortPlacement != null)
+            {
+                var back = shortPlacement.Where(p => !Rack.TryFind(p.Key, out _) && Rack[p.Value] == RackGrid.Empty).ToDictionary(p => p.Key, p => p.Value);
+                if (back.Count > 0) Rack.Apply(back);
+                shortPlacement = null;
+            }
+            SyncRack(); SyncBoard();
             turnStartedReal = Time.realtimeSinceStartup;
             if (shortPenalty is var (text, sub, amount)) { hud?.Post(TableHud.ToastKind.Penalty, text, sub, amount); shortPenalty = null; }
             Notify();

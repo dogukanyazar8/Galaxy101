@@ -23,13 +23,13 @@ namespace Galaxy101.Table
 
         /// <param name="seat">The person's seat (the others are bots).</param>
         /// <param name="start">Logical time of the table's start (ms).</param>
-        public LocalTableHost(int seat, long start) { Seat = seat; Now = start; }
+        public LocalTableHost(int seat, long start) { Seat = seat; Now = start; Client = new TableClient(seat); }
 
         public int Seat { get; }
         public long Now { get; private set; }
         public TableRuntime Runtime { get; private set; }
-        /// <summary>The model of the person's seat; every message for the seat is applied to it.</summary>
-        public TableClient Client { get; private set; }
+        /// <summary>The model of the person's seat (there from the start, so the table can listen before the match starts).</summary>
+        public TableClient Client { get; }
         /// <summary>Every message for the person's seat, after the client applied it.</summary>
         public event Action<string, object> Delivered;
         /// <summary>XP the person earned (amount, "hand" | "match"), R-93 / D-42.</summary>
@@ -49,7 +49,6 @@ namespace Galaxy101.Table
         {
             var bots = new bool[4];
             for (int k = 0; k < 4; k++) bots[k] = k != Seat;
-            Client = new TableClient(Seat);
             Runtime = new TableRuntime(this, setup, bots, new RngState(setup.Seed ^ 0x9E3779B9u));
             Runtime.Start(table);
             Flush();

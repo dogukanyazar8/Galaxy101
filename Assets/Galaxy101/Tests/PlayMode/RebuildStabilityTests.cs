@@ -41,13 +41,13 @@ namespace Galaxy101.Tests
             watch = new FrameWatch(document, new RectInt(150, 55, 980, 610));
             var view = menu.View;
 
-            foreach (var (panel, tabs) in new[] { ("settings", 5), ("me", 3), ("leader", 3), ("rules", 0), ("shop", 3), ("friends", 3) })
+            foreach (var (panel, tabs) in new[] { ("settings", 6), ("me", 3), ("leader", 3), ("rules", 0), ("shop", 3), ("friends", 3) })
             {
                 view.OpenPanel(panel, 0); yield return new WaitForSecondsRealtime(1f);
                 for (int tab = 1; tab < tabs; tab++)
                 {
                     int next = tab; var root = view.Root;
-                    if (panel == "settings") yield return watch.Stable(() => FrameWatch.Click(root, "settings-tab-" + next), "settings tab " + next);
+                    if (panel == "settings") yield return watch.Stable(() => FrameWatch.Click(root, "menu.t.pick[" + next + "]"), "settings tab " + next);
                     else yield return watch.Stable(() => view.SetTab(panel, next), panel + " tab " + next);
                 }
                 yield return watch.Stable(() => view.Refresh(), panel + " refresh");

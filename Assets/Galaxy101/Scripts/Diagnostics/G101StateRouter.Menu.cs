@@ -57,21 +57,19 @@ namespace Galaxy101.Diagnostics
             yield return Settle();
             switch (id)
             {
-                case "16": yield return Click("draft-frame-1"); break;                                      // click menu.o.pick[3] (Altın çerçeve)
-                case "17": Field("profile-name").value = "A"; break;                                        // type menu.pf.onName "A"
-                case "18": yield return Click("draft-frame-1"); yield return Click("profile-save"); break;  // pick[3] + menu.pf.save
-                case "20": yield return Click("confirm-account-action"); break;                             // dlg bye, byeFrom logout
-                case "22": Field("delete-confirmation").value = "SİL"; break;                               // delTyped "SİL"
-                case "42": Field("friend-query").value = "ay"; break;                                       // q "ay"
+                case "16": yield return Click("menu.o.pick[3]"); break;                                     // click menu.o.pick[3] (Altın çerçeve)
+                case "17": Field("menu.pf.onName").value = "A"; break;                                      // type menu.pf.onName "A"
+                case "18": yield return Click("menu.o.pick[3]"); yield return Click("menu.pf.save"); break; // pick[3] + menu.pf.save
+                case "20": yield return Click("menu.cf.go"); break;                                         // dlg bye, byeFrom logout
+                case "22": Field("menu.cf.onType").value = "SİL"; break;                                    // delTyped "SİL"
+                case "42": Field("menu.fr.onQ").value = "ay"; break;                                       // q "ay"
                 case "45": case "46": case "47":
-                    Field("add-friend-query").value = id == "47" ? "ZZ-0000" : "MK-3321"; yield return Click("search-add-friend");
-                    if (id == "46") { yield return Settle(); yield return Click("send-friend-request"); }
+                    Field("menu.af.onQ").value = id == "47" ? "ZZ-0000" : "MK-3321"; yield return Click("menu.af.find");
+                    if (id == "46") { yield return Settle(); yield return Click("menu.af.send"); }
                     break;
-                case "61": view.Services.Rewards.ClaimDay(); break;                                         // dayClaimed: true
-                case "84":                                                                                   // copied: true
-                    var button = Button("copy-profile-link");
-                    button.text = "✓ " + view.L("Kopyalandı", "Copied"); view.Decorate(button, "#3CCB6E", 14, 4, "#22914A"); button.style.color = Color.white;
-                    break;
+                case "61": model.DayClaimed = true; model.NotifyChanged(); break;                         // set dayClaimed: true (no onReward: chips stay)
+                case "84":                                                                                   // copied: true — af.copyLabel, the
+                    Button("menu.af.copy").text = view.L("Kopyalandı", "Copied"); break;                      // Profilim strip behind (not sh.copied)
             }
             yield return Settle();
         }

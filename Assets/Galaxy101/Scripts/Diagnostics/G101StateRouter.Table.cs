@@ -127,6 +127,13 @@ namespace Galaxy101.Diagnostics
             if (flow == "deal") { yield return Settle(.25f); game.RunFlow("deal"); yield break; }
             game.RunFlow(key);
             if (flow == null || flow == "seat") yield break;
+            // G101-Masa setupPlay/setupIsleTest/setupPenOpenTest all use the same seedChat history.
+            hud.SetDiagnosticChat(new[]
+            {
+                new TableHud.ChatLine { Seat = 2, Text = TableStrings.Get("bot.0", hud.L("tr", "en")) },
+                new TableHud.ChatLine { Seat = 1, Text = TableStrings.Get("bot.1", hud.L("tr", "en")) },
+                new TableHud.ChatLine { Seat = 3, Text = TableStrings.Get("bot.5", hud.L("tr", "en")) },
+            });
             // Timed extras run alongside the path's next steps (the prototype's this.at).
             int run = tableRun;
             void At(float seconds, Action action) => StartCoroutine(After(seconds, () => { if (run == tableRun && game != null) action(); }));

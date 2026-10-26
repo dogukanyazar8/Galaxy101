@@ -516,7 +516,12 @@ namespace Galaxy101.Table
             var header = Row(18); Pad(header, 26, 30, 18, 30);
             view.Decorate(header, "linear-gradient(180deg,rgba(255,255,255,.06),transparent)", 0);
             var left = new VisualElement { pickingMode = PickingMode.Ignore }; left.style.flexGrow = 1;
-            var caption = Text(r.Title + " · " + r.Sub, "Baloo2-800", 11, "var(--mt)"); caption.name = "table.res.title"; caption.style.height = 18; MenuView.Tracking(caption, 2, 11); left.Add(caption);
+            var caption = Row(0); caption.name = "table.res.title"; caption.style.height = 18;
+            foreach (string part in new[] { r.Title, "\u00a0·\u00a0", r.Sub })
+            {
+                var partText = Text(part, "Baloo2-800", 11, "var(--mt)"); partText.style.height = 18; MenuView.Tracking(partText, 2, 11); caption.Add(partText);
+            }
+            left.Add(caption);
             var head = Text(r.Head, "Montserrat-800", 40, "var(--a1)"); head.name = "table.res.head"; head.style.height = 44; head.style.marginTop = 4;
             head.style.textShadow = new TextShadow { offset = new Vector2(0, 3), blurRadius = 0, color = view.C("var(--lS)") }; left.Add(head); header.Add(left);
             var right = new VisualElement { pickingMode = PickingMode.Ignore }; right.style.alignItems = Align.FlexEnd;
@@ -1143,7 +1148,7 @@ namespace Galaxy101.Table
                 // G101-Masa table.doUndo: 800 13px, padding 8px 11px 8px 9px, radius 12, the panel colour.
                 var undo = Row(7); undo.name = "table.doUndo"; undo.focusable = true; Pad(undo, 8, 11, 8, 9); undo.tooltip = TableStrings.Get("undoTip", Lang);
                 view.Decorate(undo, "var(--pnH)", 12, 3, "var(--pnS)"); GalaxyFilters.HoverBrightness(undo, 1.2f);
-                undo.Add(Text("↓", "Montserrat-800", 13, "#F4F1E8")); undo.Add(Text(L("Geri topla", "Take back"), "Montserrat-800", 13, "#F4F1E8"));
+                undo.Add(view.Icon("v4/table-do-undo", 15, "var(--a1)")); undo.Add(Text(L("Geri topla", "Take back"), "Montserrat-800", 13, "#F4F1E8"));
                 buttons.Add(Clickable(undo, "undo"));
             }
             if (s.ShowReturn)
@@ -1186,21 +1191,39 @@ namespace Galaxy101.Table
                 buttons.Add(open);
             }
             if (s.ShowLayPair) buttons.Add(ActionButton("table.doLayPair", TableStrings.Get("layPair", Lang), s.CanLayPair, false, 13, "pairs"));
+            // CSS gap 6 / max-width 232. Trailing margins live in a 6 px overflow gutter, so they do not
+            // consume the next row's first gap or force a button to wrap earlier than CSS would.
+            buttons.userData = null; buttons.style.flexWrap = Wrap.Wrap; buttons.style.maxWidth = 238;
+            buttons.style.marginRight = buttons.style.marginBottom = -6;
+            foreach (var button in buttons.Children())
+            {
+                button.style.flexShrink = 0; button.style.marginRight = 6; button.style.marginBottom = 6;
+            }
+            column.style.minWidth = 0;
             column.Add(buttons);
+            float isleWidth = 0, appliedWidth = -1;
+            void FitActions()
+            {
+                float preferred = -6;
+                foreach (var button in buttons.Children())
+                {
+                    float width = button.layout.width;
+                    if (float.IsNaN(width) || float.IsInfinity(width) || width <= 0) return;
+                    preferred += width + 6;
+                }
+                // CSS determines the max-content width before wrapping; Yoga shrinks it to its widest wrapped line.
+                float target = Mathf.Min(232, preferred + isleWidth);
+                if (Mathf.Abs(appliedWidth - target) <= .5f) return;
+                appliedWidth = target; column.style.width = target; buttons.style.width = target + 6;
+            }
+            buttons.RegisterCallback<GeometryChangedEvent>(_ => FitActions());
+            foreach (var button in buttons.Children()) button.RegisterCallback<GeometryChangedEvent>(_ => FitActions());
             if (s.ShowIsle)
             {
                 // table.doIsle: a full-width row under the buttons (flex 1 1 100%).
                 var isle = ActionButton("table.doIsle", TableStrings.Get("isle", Lang), s.CanIsle, true, 14, "isle");
                 isle.style.marginTop = 6; isle.style.unityTextAlign = TextAnchor.MiddleCenter; column.Add(isle);
-                // The wrapping row (max-width 232) is as wide as its max-content: every button on one line, İşle included;
-                // İşle (flex-basis 100 %) then wraps under them at that width.
-                string label = TableStrings.Get("isle", Lang);
-                buttons.RegisterCallback<GeometryChangedEvent>(_ =>
-                {
-                    float own = ((TextElement)isle).MeasureTextSize(label, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).x + 28;
-                    float row = buttons.childCount > 0 ? buttons.layout.width + 6 : 0, width = Mathf.Min(232, row + own);
-                    if (Mathf.Abs(column.resolvedStyle.minWidth.value - width) > .5f) column.style.minWidth = width;
-                });
+                isleWidth = ((TextElement)isle).MeasureTextSize(TableStrings.Get("isle", Lang), 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).x + 28 + 6;
             }
             meter.Add(column);
             actions.Add(meter);

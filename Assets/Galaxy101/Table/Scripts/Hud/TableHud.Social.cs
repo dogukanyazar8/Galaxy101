@@ -97,21 +97,40 @@ namespace Galaxy101.Table
         /// <summary>System line (gifts): the gift picture and a --a1 sentence.</summary>
         public void SystemLine(string text, string gift = null) => AddLine(new ChatLine { Seat = -1, Text = text, Gift = gift });
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        /// <summary>The prototype's seedChat fixture, without live-message balloons or unread increments.</summary>
+        public void SetDiagnosticChat(IEnumerable<ChatLine> history)
+        {
+            chat.Clear(); Unread = 0;
+            foreach (var line in history) AddLine(line);
+            if (view != null) Render(Current);
+        }
+#endif
+
         private void AddLine(ChatLine line)
         {
             chat.Add(line); if (chat.Count > 40) chat.RemoveAt(0);
             if (chatLog != null)
             {
-                if (chatLog.childCount >= 40) chatLog.RemoveAt(0);
+                if (chatLog.childCount >= 40)
+                {
+                    chatLog.RemoveAt(0);
+                    for (int i = 0; i < chatLog.childCount; i++)
+                        foreach (string part in new[] { "ini", "name", "text" })
+                        {
+                            var field = chatLog[i].Q<VisualElement>(className: "chat-" + part);
+                            if (field != null) field.name = "table.m." + part + "[" + i + "]";
+                        }
+                }
                 chatLog.Add(ChatRow(line)); ScrollChatToEnd();
             }
         }
 
-        /// <summary>Send my message (80 characters at most); a bot answers 60 % of the time after 1.4 s.</summary>
+        /// <summary>Send my message within the D-32 server limit; a bot answers 60 % of the time after 1.4 s.</summary>
         public void SendChat(string text)
         {
             text = (text ?? "").Trim(); if (text.Length == 0) return;
-            if (text.Length > 80) text = text.Substring(0, 80);
+            if (text.Length > TableEconomy.ChatMax) text = text.Substring(0, TableEconomy.ChatMax);
             // A server table shows the line when the server passes it back (to every seat): nothing is said locally.
             if (OnlineTable) { _ = SendChatAsync(text, null); return; }
             Say(0, text);
@@ -151,9 +170,9 @@ namespace Galaxy101.Table
         private void BuildChat()
         {
             var layer = Layer("table-chat-layer"); layer.pickingMode = PickingMode.Ignore; windowLayer.Add(layer);
-            var dim = Layer("table-chat-dim"); dim.pickingMode = PickingMode.Position; dim.style.backgroundColor = new Color(0, 0, 0, .2f); Tap(dim, CloseWindow); layer.Add(dim);
+            var dim = Layer("table.closeChat"); dim.pickingMode = PickingMode.Position; dim.style.backgroundColor = new Color(0, 0, 0, .2f); Tap(dim, CloseWindow); layer.Add(dim);
             var panel = new VisualElement { name = "table-chat", pickingMode = PickingMode.Position };
-            panel.style.position = Position.Absolute; panel.style.left = 16; panel.style.top = 74; panel.style.bottom = 118; panel.style.width = 360;
+            panel.style.position = Position.Absolute; panel.style.left = 16; panel.style.top = 74; panel.style.bottom = 118; panel.style.width = 360 + 2; panel.style.overflow = Overflow.Hidden;
             view.Decorate(panel, "var(--pn)", 26, 8, "var(--pnS)"); Border(panel, 1, new Color(1, 1, 1, .1f)); GalaxyFilters.Shadow(panel, 0, 30, 40, new Color(0, 0, 0, .6f));
             panel.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
             DrawerIn(panel, -1); layer.Add(panel);
@@ -161,8 +180,8 @@ namespace Galaxy101.Table
             var head = Row(12); Pad(head, 16, 16, 10, 16); head.style.flexShrink = 0;
             var badge = Box(); badge.style.width = badge.style.height = 38; badge.style.alignItems = Align.Center; badge.style.justifyContent = Justify.Center;
             view.Decorate(badge, "linear-gradient(160deg,#7AA6FF,#3D6BF0)", 12, 3, "#2448B8"); badge.Add(view.Icon("table-chat", 20, "#fff")); head.Add(badge);
-            var title = Text(S("chatTitle"), "Montserrat-700", 20, "#F4F1E8"); title.style.flexGrow = 1; title.style.flexShrink = 1; head.Add(title);
-            var close = Box("chat-close"); close.style.width = close.style.height = 36; close.style.alignItems = Align.Center; close.style.justifyContent = Justify.Center;
+            var title = Text(S("chatTitle"), "Montserrat-700", 20, "#F4F1E8"); title.name = "table.t.chatTitle"; title.style.height = 20 * 1.1f; title.style.unityTextAlign = TextAnchor.MiddleLeft; title.style.flexGrow = 1; title.style.flexShrink = 1; head.Add(title);
+            var close = Box("table.closeChat#2"); close.style.width = close.style.height = 36; close.style.alignItems = Align.Center; close.style.justifyContent = Justify.Center;
             view.Decorate(close, "var(--pnH)", 12, 3, "var(--pnS)"); GalaxyFilters.HoverBrightness(close, 1.25f); close.Add(view.Icon("close", 15, "var(--ic)"));
             Tap(close, CloseWindow); head.Add(close);
             panel.Add(head);
@@ -177,14 +196,14 @@ namespace Galaxy101.Table
             for (int i = 0; i < 6; i++)
             {
                 string phrase = S("quick." + i);
-                var chip = Text(phrase, "Baloo2-800", 12, "var(--ic)"); chip.name = "chat-quick-" + i; Pad(chip, 6, 11, 6, 11); chip.style.marginRight = 6; chip.style.marginBottom = 6;
+                var chip = Text(phrase, "Baloo2-800", 12, "var(--ic)"); chip.name = "table.q.say[" + i + "]"; Pad(chip, 6, 11, 6, 11); chip.style.height = MenuView.CssLineHeight("Baloo2-800", 12) + 12; chip.style.unityTextAlign = TextAnchor.MiddleCenter; chip.style.marginRight = 6; chip.style.marginBottom = 6;
                 view.Decorate(chip, "var(--dp)", 14); GalaxyFilters.HoverBrightness(chip, 1.3f);
                 int index = i; Tap(chip, () => SendQuick(index, phrase)); quick.Add(chip);
             }
             panel.Add(quick);
 
             var inputRow = Row(8); Pad(inputRow, 0, 16, 16, 16); inputRow.style.flexShrink = 0;
-            var input = new TextField { name = "chat-input", maxLength = 80, value = chatDraft };
+            var input = new TextField { name = "table.onDraft", maxLength = TableEconomy.ChatMax, value = chatDraft };
             input.style.flexGrow = 1; input.style.flexShrink = 1; input.style.minWidth = 0; input.style.height = 44; input.style.marginLeft = input.style.marginRight = input.style.marginTop = input.style.marginBottom = 0;
             input.textEdition.placeholder = S("chatPh"); input.textEdition.hidePlaceholderOnFocus = false;
             var field = input.Q(className: TextField.inputUssClassName);
@@ -202,7 +221,7 @@ namespace Galaxy101.Table
                 evt.StopPropagation(); SubmitDraft();
             }, TrickleDown.TrickleDown);
             inputRow.Add(input); chatInput = input;
-            var send = Box("chat-send"); send.style.width = send.style.height = 44; send.style.flexShrink = 0; send.style.alignItems = Align.Center; send.style.justifyContent = Justify.Center;
+            var send = Box("table.sendDraft"); send.style.width = send.style.height = 44; send.style.flexShrink = 0; send.style.alignItems = Align.Center; send.style.justifyContent = Justify.Center;
             view.Decorate(send, "linear-gradient(var(--a1),var(--a2))", 14, 4, "var(--aS)"); send.Add(new SendArrow(view.C("var(--aT)")));
             Tap(send, SubmitDraft); inputRow.Add(send);
             panel.Add(inputRow);
@@ -219,23 +238,25 @@ namespace Galaxy101.Table
         /// <summary>Opponent rows on the left (coloured avatar, name, dark bubble), mine mirrored with the theme gradient, system lines in --a1.</summary>
         private VisualElement ChatRow(ChatLine line)
         {
+            int index = chat.IndexOf(line);
             var row = Box(); row.style.flexDirection = FlexDirection.Row; row.style.alignItems = Align.FlexStart; row.style.marginBottom = 10;
             if (line.Seat < 0)
             {
                 var sys = Row(8); sys.style.flexGrow = 1; Pad(sys, 7, 10, 7, 10); view.Decorate(sys, "var(--dp)", 11); sys.name = "chat-system";
                 if (line.Gift != null && GiftThumb(line.Gift) is Texture2D thumb) { var img = Box(); img.style.width = img.style.height = 30; img.style.flexShrink = 0; img.style.backgroundImage = thumb; sys.Add(img); }
-                var words = Text(line.Text, "Baloo2-800", 12, "var(--a1)"); words.style.whiteSpace = WhiteSpace.Normal; words.style.flexShrink = 1; sys.Add(words);
+                var words = Text(line.Text, "Baloo2-800", 12, "var(--a1)"); words.name = "table.m.text[" + index + "]"; words.AddToClassList("chat-text"); words.style.whiteSpace = WhiteSpace.Normal; words.style.flexShrink = 1; MenuView.CssLines(words, 12 * 1.35f); sys.Add(words);
                 row.Add(sys); ApplyGaps(row); return row;
             }
             bool mine = line.Seat == 0; var seat = Seat(line.Seat);
             row.style.flexDirection = mine ? FlexDirection.RowReverse : FlexDirection.Row;
-            var avatar = Box(); avatar.style.width = avatar.style.height = 30; avatar.style.flexShrink = 0; avatar.style.alignItems = Align.Center; avatar.style.justifyContent = Justify.Center;
+            var avatar = Box("table.m.ini[" + index + "]"); avatar.AddToClassList("chat-ini"); avatar.style.width = avatar.style.height = 30; avatar.style.flexShrink = 0; avatar.style.alignItems = Align.Center; avatar.style.justifyContent = Justify.Center;
             view.Decorate(avatar, (string)seat["color"], 15); avatar.Add(Text((string)seat["ini"], "Montserrat-700", 11, "#fff"));
             avatar.style.marginLeft = mine ? 9 : 0; avatar.style.marginRight = mine ? 0 : 9; row.Add(avatar);
             var column = Box(); column.style.maxWidth = 240; column.style.flexShrink = 1; column.style.alignItems = mine ? Align.FlexEnd : Align.FlexStart;
-            column.Add(Text(mine ? S("you") : (string)seat["name"], "Baloo2-800", 11, (string)seat["color"]));
-            var bubble = Text(line.Text, "Baloo2-700", 14, mine ? "var(--aT)" : "#F4F1E8"); bubble.name = "chat-bubble"; bubble.style.whiteSpace = WhiteSpace.Normal; bubble.style.flexShrink = 1; bubble.style.marginTop = 2;
+            var author = Text(mine ? S("you") : (string)seat["name"], "Baloo2-800", 11, (string)seat["color"]); author.name = "table.m.name[" + index + "]"; author.AddToClassList("chat-name"); author.style.height = MenuView.CssLineHeight("Baloo2-800", 11); author.style.unityTextAlign = TextAnchor.MiddleLeft; column.Add(author);
+            var bubble = Box("table.m.text[" + index + "]"); bubble.AddToClassList("chat-text"); bubble.style.flexShrink = 1; bubble.style.marginTop = 2;
             Pad(bubble, 7, 11, 7, 11); view.Decorate(bubble, mine ? "linear-gradient(var(--a1),var(--a2))" : "var(--dp)", 13);
+            var text = Text(line.Text, "Baloo2-700", 14, mine ? "var(--aT)" : "#F4F1E8"); text.style.whiteSpace = WhiteSpace.Normal; MenuView.CssLines(text, 14 * 1.35f); bubble.Add(text);
             column.Add(bubble); row.Add(column);
             return row;
         }
@@ -249,41 +270,46 @@ namespace Galaxy101.Table
             if (anchors.TryGetValue("a" + k, out var avatarAnchor)) { cardAnchor.style.left = avatarAnchor.style.left; cardAnchor.style.top = avatarAnchor.style.top; }
             windowLayer.Add(cardAnchor);
             var card = new VisualElement { name = "player-card-" + k, pickingMode = PickingMode.Position };
-            card.style.position = Position.Absolute; card.style.width = 290; Pad(card, 16, 16, 16, 16);
+            const int cardWidth = 290 + 32 + 2; // CSS content width + padding + borders (G101-Masa player card).
+            card.style.position = Position.Absolute; card.style.width = cardWidth; Pad(card, 16, 16, 16, 16);
             view.Decorate(card, "var(--pn)", 22, 7, "var(--pnS)"); Border(card, 1, new Color(1, 1, 1, .1f)); GalaxyFilters.Shadow(card, 0, 26, 30, new Color(0, 0, 0, .55f));
-            card.style.translate = k == 1 ? new Translate(new Length(-290 - 50), Length.Percent(-50)) : k == 3 ? new Translate(50, Length.Percent(-50)) : new Translate(-145, 58);
+            card.style.translate = k == 1 ? new Translate(new Length(-cardWidth - 50), Length.Percent(-50)) : k == 3 ? new Translate(50, Length.Percent(-50)) : new Translate(-cardWidth / 2, 58);
             CardIn(card, k);
             cardAnchor.Add(card);
 
             var head = Row(12);
-            var avatar = Avatar(seat, 58, false, 0, false); avatar.pickingMode = PickingMode.Ignore; head.Add(avatar);
+            var avatar = Avatar(seat, 58, false, 0, false); avatar.pickingMode = PickingMode.Ignore;
+            var initials = avatar.Q<Label>(); if (initials != null) { initials.name = "table.p.ini[" + (k - 1) + "]"; initials.style.fontSize = 18; }
+            head.Add(avatar);
             var names = Box(); names.style.flexGrow = 1; names.style.flexShrink = 1; names.style.minWidth = 0;
-            names.Add(Text((string)seat["name"], "Montserrat-700", 18, "#F4F1E8"));
-            names.Add(Text((string)seat["rank"] + " · " + L("SV ", "LV ") + (int)seat["lv"], "Baloo2-800", 12, "var(--mt)"));
+            var playerName = Text((string)seat["name"], "Montserrat-700", 18, "#F4F1E8"); playerName.name = "table.p.name[" + (k - 1) + "]"; names.Add(playerName);
+            var rank = Text((string)seat["rank"] + " · " + L("SV ", "LV ") + (int)seat["lv"], "Baloo2-800", 12, "var(--mt)"); rank.name = "table.p.rankLine[" + (k - 1) + "]"; names.Add(rank);
             head.Add(names);
-            var close = Box("card-close"); close.style.width = close.style.height = 34; close.style.flexShrink = 0; close.style.alignItems = Align.Center; close.style.justifyContent = Justify.Center;
+            var close = Box("table.closeCard[" + (k - 1) + "]"); close.style.width = close.style.height = 34; close.style.flexShrink = 0; close.style.alignItems = Align.Center; close.style.justifyContent = Justify.Center;
             view.Decorate(close, "var(--pnH)", 11, 3, "var(--pnS)"); GalaxyFilters.HoverBrightness(close, 1.25f); close.Add(view.Icon("close", 14, "var(--ic)"));
             Tap(close, CloseWindow); head.Add(close);
             card.Add(head);
 
             var stats = Row(8); stats.style.marginTop = 14; stats.style.alignItems = Align.Stretch;
+            int statIndex = 0;
             foreach (var (value, key) in new[] { (((int)seat["lv"]).ToString(), "stLv"), (L("%" + (int)seat["win"], (int)seat["win"] + "%"), "stWin"), (view.N((int)seat["hands"]), "stHands") })
             {
                 var cell = Box(); cell.style.flexGrow = 1; cell.style.flexBasis = 0; cell.style.alignItems = Align.Center; Pad(cell, 8, 6, 8, 6); view.Decorate(cell, "var(--dp)", 12);
-                cell.Add(Text(value, "Montserrat-700", 16, "#F4F1E8"));
-                var label = Text(S(key), "Baloo2-800", 10, "var(--mt)"); MenuView.Tracking(label, .5f, 10); cell.Add(label);
+                var number = Text(value, "Montserrat-700", 16, "#F4F1E8"); number.name = "table.st.v[" + statIndex + "]"; number.style.height = MenuView.CssLineHeight("Montserrat-700", 16); number.style.unityTextAlign = TextAnchor.MiddleCenter; cell.Add(number);
+                var label = Text(S(key), "Baloo2-800", 10, "var(--mt)"); label.name = "table.st.k[" + statIndex++ + "]"; MenuView.Tracking(label, .5f, 10); cell.Add(label);
                 stats.Add(cell);
             }
             card.Add(stats);
 
-            var caption = Text(S("quickGift"), "Baloo2-800", 10, "var(--mt)"); MenuView.Tracking(caption, 1.4f, 10); caption.style.marginTop = 14; card.Add(caption);
+            var caption = Text(S("quickGift"), "Baloo2-800", 10, "var(--mt)"); caption.name = "table.t.quickGift[" + (k - 1) + "]"; MenuView.Tracking(caption, 1.4f, 10); caption.style.marginTop = 14; card.Add(caption);
             var quick = Row(6); quick.style.marginTop = 8; quick.style.alignItems = Align.Stretch;
+            int quickIndex = 0;
             foreach (var kind in QuickGifts)
             {
                 string gift = kind;
-                var cell = Box("card-gift-" + gift); cell.style.flexGrow = 1; cell.style.flexBasis = 0; cell.style.alignItems = Align.Center; Pad(cell, 4, 2, 6, 2); view.Decorate(cell, "var(--dp)", 12);
+                var cell = Box("table.q.send[" + quickIndex++ + "]"); cell.style.flexGrow = 1; cell.style.flexBasis = 0; cell.style.alignItems = Align.Center; Pad(cell, 4, 2, 6, 2); view.Decorate(cell, "var(--dp)", 12);
                 var img = Box(); img.style.width = img.style.height = 46; if (GiftThumb(gift) is Texture2D thumb) img.style.backgroundImage = thumb; cell.Add(img);
-                cell.Add(PriceTag(gift, 11));
+                cell.Add(PriceTag(gift, 11, 10, 3));
                 GalaxyFilters.HoverBrightness(cell, 1.2f);
                 Tap(cell, () => { CloseWindow(); Treat(gift, k.ToString()); });
                 quick.Add(cell);
@@ -291,11 +317,11 @@ namespace Galaxy101.Table
             card.Add(quick);
 
             var buttons = Row(8); buttons.style.marginTop = 14; buttons.style.alignItems = Align.Stretch;
-            var all = Text(S("allGifts"), "Montserrat-700", 13, "var(--aT)"); all.name = "card-all-gifts"; all.style.flexGrow = 1; all.style.flexBasis = 0; all.style.unityTextAlign = TextAnchor.MiddleCenter;
+            var all = Text(S("allGifts"), "Montserrat-700", 13, "var(--aT)"); all.name = "table.p.allGifts[" + (k - 1) + "]"; all.style.flexGrow = 1; all.style.flexBasis = 0; all.style.unityTextAlign = TextAnchor.MiddleCenter;
             Pad(all, 10, 6, 10, 6); view.Decorate(all, "linear-gradient(var(--a1),var(--a2))", 13, 4, "var(--aS)");
             Tap(all, () => OpenGifts(k.ToString())); buttons.Add(all);
             bool sent = friendSent.Contains(k);
-            var friend = Text(S(sent ? "friendSent" : "addFriend"), "Montserrat-700", 13, sent ? "#8EF0B0" : "#F4F1E8"); friend.name = "card-add-friend"; friend.style.flexGrow = 1; friend.style.flexBasis = 0; friend.style.unityTextAlign = TextAnchor.MiddleCenter;
+            var friend = Text(S(sent ? "friendSent" : "addFriend"), "Montserrat-700", 13, sent ? "#8EF0B0" : "#F4F1E8"); friend.name = "table.p.friend[" + (k - 1) + "]"; friend.style.flexGrow = 1; friend.style.flexBasis = 0; friend.style.unityTextAlign = TextAnchor.MiddleCenter;
             Pad(friend, 10, 6, 10, 6); view.Decorate(friend, "var(--pnH)", 13, 4, "var(--pnS)");
             Tap(friend, () => { if (friendSent.Contains(k)) return; if (SendFriendOnline != null) _ = RequestFriendAsync(k); else { friendSent.Add(k); RenderWindows(false); } }); buttons.Add(friend);
             card.Add(buttons);
@@ -356,12 +382,12 @@ namespace Galaxy101.Table
         }
 
         /// <summary>Gift price, or "Ücretsiz" on bot tables: 10 px coin + 800 11 px #FFD964.</summary>
-        private VisualElement PriceTag(string gift, int size)
+        private VisualElement PriceTag(string gift, int size, int coinSize, int gap)
         {
-            var row = Row(3); row.style.marginTop = 2;
-            if (FreeGifts) { row.Add(Text(S("free"), "Baloo2-800", size, "#8EF0B0")); return row; }
-            var coin = Box(); coin.style.width = coin.style.height = size - 1; view.Decorate(coin, "radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)", size); row.Add(coin);
-            row.Add(Text(view.N(GiftPrice(gift)), "Baloo2-800", size, "#FFD964"));
+            var row = Row(gap); row.style.marginTop = 2;
+            if (!FreeGifts) { var coin = Box(); coin.style.width = coin.style.height = coinSize; view.Decorate(coin, "radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)", size); row.Add(coin); }
+            var amount = Text(FreeGifts ? S("free") : view.N(GiftPrice(gift)), "Baloo2-800", size, FreeGifts ? "#8EF0B0" : "#FFD964");
+            amount.style.height = MenuView.CssLineHeight("Baloo2-800", size); amount.style.unityTextAlign = TextAnchor.MiddleCenter; row.Add(amount);
             return row;
         }
 

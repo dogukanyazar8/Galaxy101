@@ -18,14 +18,16 @@ namespace Galaxy101
                 var today = (bool)day["today"];
                 var claimed = (bool)day["claimed"];
                 var card = v.Box("g-day"); card.name = "streak-day-" + index;
-                // grid repeat(6, minmax(0,1fr)) 1.5fr: every card from a zero basis (the USS basis alone let the content widen
-                // days 1–6 to 117–118 px and narrow day 7 to 168; the design gives 116.27 and 174.4).
+                // CSS grid fractions apply to the whole card. A padded Yoga item retains its 16 px padding at basis 0;
+                // put the fractions on an unpadded slot so the seventh card receives 1.5 outer widths too.
+                var slot = v.Box(); slot.style.flexDirection = FlexDirection.Row;
+                slot.style.flexBasis = 0; slot.style.flexGrow = index == 7 ? 1.5f : 1; slot.style.minWidth = 0;
                 card.style.flexBasis = 0; card.style.flexGrow = 1; card.style.minWidth = 0;
-                if (index < 7) card.style.marginRight = 10;
+                if (index < 7) slot.style.marginRight = 10;
                 else
                 {
                     // big: inset 0 0 0 2px var(--a1), 0 0 20px var(--gl) — an overlay ring, no layout (a border moved the label and amount 2 px).
-                    card.style.flexGrow = 1.5f; v.Decorate(card, "linear-gradient(160deg,var(--pnH),var(--sd))", 18);
+                    v.Decorate(card, "linear-gradient(160deg,var(--pnH),var(--sd))", 18);
                     card.Add(PanelUi.Ring(v, 2, "a1", 18)); GalaxyFilters.Shadow(card, 0, 0, 10, v.C("gl"));
                 }
                 if (index == 6) card.style.opacity = .6f;
@@ -52,7 +54,7 @@ namespace Galaxy101
                     v.Decorate(cover, "rgba(0,0,0,.38)", 18);
                     var check = PanelUi.Circle(v, 36, "#3CCB6E"); check.Add(v.Icon("tick", 18, "#fff")); cover.Add(check); card.Add(cover);
                 }
-                days.Add(card);
+                slot.Add(card); days.Add(slot);
             }
             var quests = v.Services.Rewards.GetQuests();
             var heading = root.Q<VisualElement>("quests-heading"); heading.style.marginTop = 2; heading.style.marginBottom = 14;

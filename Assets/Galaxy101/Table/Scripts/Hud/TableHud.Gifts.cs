@@ -297,9 +297,10 @@ namespace Galaxy101.Table
         private void BuildGifts()
         {
             var layer = Layer("table-gift-layer"); windowLayer.Add(layer);
-            var dim = Layer("table-gift-dim"); dim.pickingMode = PickingMode.Position; dim.style.backgroundColor = new Color(0, 0, 0, .28f); Tap(dim, CloseWindow); layer.Add(dim);
+            var dim = Layer("table.closeGift"); dim.pickingMode = PickingMode.Position; dim.style.backgroundColor = new Color(0, 0, 0, .28f); Tap(dim, CloseWindow); layer.Add(dim);
             var panel = new VisualElement { name = "table-gifts", pickingMode = PickingMode.Position };
-            panel.style.position = Position.Absolute; panel.style.right = 16; panel.style.top = 74; panel.style.bottom = 16; panel.style.width = 396; panel.style.overflow = Overflow.Hidden;
+            // G101-Masa: width 396 is CSS content-box; Unity includes the two 1 px borders in its width.
+            panel.style.position = Position.Absolute; panel.style.right = 16; panel.style.top = 74; panel.style.bottom = 16; panel.style.width = 396 + 2; panel.style.overflow = Overflow.Hidden;
             view.Decorate(panel, "var(--pn)", 26, 8, "var(--pnS)"); Border(panel, 1, new Color(1, 1, 1, .1f)); GalaxyFilters.Shadow(panel, 0, 30, 40, new Color(0, 0, 0, .6f));
             panel.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
             DrawerIn(panel, 1); layer.Add(panel);
@@ -307,25 +308,26 @@ namespace Galaxy101.Table
             var head = Row(12); Pad(head, 18, 18, 12, 18); head.style.flexShrink = 0;
             var badge = Box(); badge.style.width = badge.style.height = 40; badge.style.alignItems = Align.Center; badge.style.justifyContent = Justify.Center;
             view.Decorate(badge, "linear-gradient(160deg,var(--a1),var(--a2))", 13, 3, "var(--aS)"); badge.Add(view.Icon("table-gift", 22, "var(--aT)")); head.Add(badge);
-            var title = Text(S("giftTitle"), "Montserrat-700", 22, "#F4F1E8"); title.style.flexGrow = 1; title.style.flexShrink = 1; head.Add(title);
-            var close = Box("gift-close"); close.style.width = close.style.height = 38; close.style.alignItems = Align.Center; close.style.justifyContent = Justify.Center;
+            var title = Text(S("giftTitle"), "Montserrat-700", 22, "#F4F1E8"); title.name = "table.t.giftTitle"; title.style.height = 22 * 1.1f; title.style.unityTextAlign = TextAnchor.MiddleLeft; title.style.flexGrow = 1; title.style.flexShrink = 1; head.Add(title);
+            var close = Box("table.closeGift#2"); close.style.width = close.style.height = 38; close.style.alignItems = Align.Center; close.style.justifyContent = Justify.Center;
             view.Decorate(close, "var(--pnH)", 12, 3, "var(--pnS)"); GalaxyFilters.HoverBrightness(close, 1.25f); close.Add(view.Icon("close", 16, "var(--ic)"));
             Tap(close, CloseWindow); head.Add(close);
             panel.Add(head);
 
             // KİME: three opponents and "Herkes ×3".
             var to = Box(); Pad(to, 0, 18, 0, 18); to.style.flexShrink = 0;
-            var toCaption = Text(S("to"), "Baloo2-800", 10, "var(--mt)"); MenuView.Tracking(toCaption, 1.6f, 10); to.Add(toCaption);
+            var toCaption = Text(S("to"), "Baloo2-800", 10, "var(--mt)"); toCaption.name = "table.t.to"; MenuView.Tracking(toCaption, 1.6f, 10); to.Add(toCaption);
             var recipients = Row(6); recipients.style.marginTop = 8; recipients.style.alignItems = Align.Stretch;
             foreach (var key in new[] { "1", "2", "3", "all" })
             {
                 bool on = GiftTarget == key, all = key == "all"; string pick = key;
-                var cell = Box("gift-to-" + key); cell.style.flexGrow = 1; cell.style.flexBasis = 0; cell.style.minWidth = 0; cell.style.alignItems = Align.Center; Pad(cell, 8, 4, 8, 4);
-                view.Decorate(cell, on ? "var(--pnH)" : "var(--dp)", 14); Border(cell, 2, on ? view.C("var(--a1)") : Color.clear); cell.EnableInClassList("selected", on);
-                var disc = Box(); disc.style.width = disc.style.height = 36; disc.style.alignItems = Align.Center; disc.style.justifyContent = Justify.Center;
+                int recipientIndex = Array.IndexOf(new[] { "1", "2", "3", "all" }, key);
+                var cell = Box("table.r.pick[" + recipientIndex + "]"); cell.style.flexGrow = 1; cell.style.flexBasis = 0; cell.style.minWidth = 0; cell.style.alignItems = Align.Center; Pad(cell, 8, 4, 8, 4);
+                view.Decorate(cell, on ? "var(--pnH)" : "var(--dp)", 14); if (on) view.InsetRing(cell, 14)("focus"); cell.EnableInClassList("selected", on);
+                var disc = Box("table.r.ini[" + recipientIndex + "]"); disc.style.width = disc.style.height = 36 + 4; disc.style.alignItems = Align.Center; disc.style.justifyContent = Justify.Center;
                 view.Decorate(disc, all ? "linear-gradient(160deg,var(--a1),var(--a2))" : (string)Seat(int.Parse(key))["color"], 18); Border(disc, 2, new Color(1, 1, 1, .25f));
                 disc.Add(Text(all ? "★" : (string)Seat(int.Parse(key))["ini"], "Montserrat-700", 13, "#fff")); cell.Add(disc);
-                var name = Text(all ? S("all") + " ×3" : SeatFirstName(int.Parse(key)), "Baloo2-800", 11, on ? "#F4F1E8" : "var(--mt)"); name.style.marginTop = 5; cell.Add(name);
+                var name = Text(all ? S("all") + " ×3" : SeatFirstName(int.Parse(key)), "Baloo2-800", 11, on ? "#F4F1E8" : "var(--mt)"); name.name = "table.r.name[" + recipientIndex + "]"; name.style.height = MenuView.CssLineHeight("Baloo2-800", 11); name.style.unityTextAlign = TextAnchor.MiddleCenter; name.style.marginTop = 5; cell.Add(name);
                 if (!on) GalaxyFilters.HoverBrightness(cell, 1.15f);
                 Tap(cell, () => { GiftTarget = pick; RenderWindows(true); }); recipients.Add(cell);
             }
@@ -336,7 +338,7 @@ namespace Galaxy101.Table
             for (int i = 0; i < 3; i++)
             {
                 bool on = GiftTab == i; int index = i;
-                var tab = Text(S("tabs." + i), "Montserrat-700", 14, on ? "var(--aT)" : "var(--mt)"); tab.name = "gift-tab-" + i; tab.style.flexGrow = 1; tab.style.flexBasis = 0; tab.style.unityTextAlign = TextAnchor.MiddleCenter; Pad(tab, 9, 6, 9, 6);
+                var tab = Text(S("tabs." + i), "Montserrat-700", 14, on ? "var(--aT)" : "var(--mt)"); tab.name = "table.gt.pick[" + i + "]"; tab.style.flexGrow = 1; tab.style.flexBasis = 0; tab.style.unityTextAlign = TextAnchor.MiddleCenter; Pad(tab, 9, 6, 9, 6);
                 view.Decorate(tab, on ? "linear-gradient(var(--a1),var(--a2))" : "transparent", 11, on ? 3 : 0, on ? "var(--aS)" : null);
                 Tap(tab, () => { GiftTab = index; GiftSelection = null; RenderWindows(false); }); tabs.Add(tab);
             }
@@ -347,19 +349,21 @@ namespace Galaxy101.Table
             panel.Add(scroll);
             var grid = CardGrid(3);
             var items = GiftTab < 2 ? Gifts.Where(g => g.Tab == GiftTab).Select(g => g.Key) : Emojis.Select(e => "e:" + e);
+            int itemIndex = 0;
             foreach (var item in items)
             {
                 bool on = GiftSelection == item, emoji = item.StartsWith("e:", StringComparison.Ordinal); string pick = item;
-                var cell = Box("gift-item-" + (emoji ? "emoji-" + Array.IndexOf(emojis, item.Substring(2)) : item)); cell.style.alignItems = Align.Center; Pad(cell, 8, 6, 10, 6);
-                view.Decorate(cell, on ? "var(--pnH)" : "var(--dp)", 16); Border(cell, 2, on ? view.C("var(--a1)") : Color.clear); cell.EnableInClassList("selected", on);
+                int index = itemIndex++;
+                var cell = Box("table.it.pick[" + index + "]"); cell.style.alignItems = Align.Center; Pad(cell, 8, 6, 10, 6);
+                view.Decorate(cell, on ? "var(--pnH)" : "var(--dp)", 16); if (on) view.InsetRing(cell, 16)("focus"); cell.EnableInClassList("selected", on);
                 if (on) GalaxyFilters.Shadow(cell, 0, 0, 9, view.C("var(--gl)")); else GalaxyFilters.HoverBrightness(cell, 1.15f);
                 var art = Box(); art.style.width = 82; art.style.height = 72; art.style.alignItems = Align.Center; art.style.justifyContent = Justify.Center;
-                if (emoji) art.Add(EmojiLabel(item.Substring(2), 44));
+                if (emoji) { var glyph = EmojiLabel(item.Substring(2), 44); glyph.name = "table.it.ch[" + index + "]"; glyph.style.height = 44; art.Add(glyph); }
                 else { var img = Box(); img.style.width = img.style.height = 80; img.style.marginTop = -6; if (GiftThumb(item) is Texture2D thumb) img.style.backgroundImage = thumb; art.Add(img); }
                 cell.Add(art);
-                if (!emoji) { var name = Text(GiftName(item, false), "Montserrat-700", 13, "#F4F1E8"); name.style.marginTop = 4; cell.Add(name); }
-                var price = emoji ? Row(4) : PriceTag(item, 12); price.style.marginTop = 4;
-                if (emoji) price.Add(Text(S("free"), "Baloo2-800", 12, "#8EF0B0"));
+                var name = Text(emoji ? "" : GiftName(item, false), "Montserrat-700", 13, "#F4F1E8"); name.name = "table.it.name[" + index + "]"; name.style.height = emoji ? 0 : MenuView.CssLineHeight("Montserrat-700", 13); name.style.unityTextAlign = TextAnchor.MiddleCenter; name.style.marginTop = 4; cell.Add(name);
+                var price = emoji ? Row(4) : PriceTag(item, 12, 12, 4); price.style.marginTop = 4;
+                if (emoji) { var free = Text(S("free"), "Baloo2-800", 12, "#8EF0B0"); free.style.height = MenuView.CssLineHeight("Baloo2-800", 12); free.style.unityTextAlign = TextAnchor.MiddleCenter; price.Add(free); }
                 cell.Add(price);
                 Tap(cell, () => { GiftSelection = pick; RenderWindows(true); });
                 AddCell(grid, cell);
@@ -374,14 +378,14 @@ namespace Galaxy101.Table
             var left = Box(); left.style.flexGrow = 1; left.style.flexShrink = 1; left.style.minWidth = 0;
             if (!FreeGifts)
             {
-                var cap = Text(S("balance"), "Baloo2-800", 10, "var(--mt)"); MenuView.Tracking(cap, 1.4f, 10); left.Add(cap);
+                var cap = Text(S("balance"), "Baloo2-800", 10, "var(--mt)"); cap.name = "table.t.balance"; MenuView.Tracking(cap, 1.4f, 10); left.Add(cap);
                 var chips = Row(6); var coin = Box(); coin.style.width = coin.style.height = 16; view.Decorate(coin, "radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)", 8); chips.Add(coin);
                 chips.Add(Text(view.N(Current.Chips), "Montserrat-700", 17, "#F4F1E8")); left.Add(chips);
             }
             footer.Add(left);
             bool ok = CanSend;
             string label = GiftSelection == null ? S("pick") : !ok ? S("notEnough") : SelectionCost > 0 ? S("send") + " · " + view.N(SelectionCost) : S("send");
-            var send = Text(label, "Montserrat-800", 16, ok ? "#05301A" : "var(--mt)"); send.name = "gift-send"; Pad(send, 14, 20, 14, 20);
+            var send = Text(label, "Montserrat-800", 16, ok ? "#05301A" : "var(--mt)"); send.name = "table.sendGift"; Pad(send, 14, 20, 14, 20); send.style.height = MenuView.CssLineHeight("Montserrat-800", 16) + 28; send.style.unityTextAlign = TextAnchor.MiddleCenter;
             view.Decorate(send, ok ? "linear-gradient(#5BE38A,#2BB45F)" : "var(--pnH)", 16, 5, ok ? "#18793F" : "var(--pnS)");
             if (ok) Tap(send, SendSelection);
             footer.Add(send);

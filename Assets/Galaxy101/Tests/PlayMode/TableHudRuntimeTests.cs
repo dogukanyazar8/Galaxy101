@@ -32,6 +32,52 @@ namespace Galaxy101.Tests
         }
 
         [UnityTest]
+        public IEnumerator ActionPanelUsesContentWidthAndKeepsTheCssWrappingLimit()
+        {
+            statePath = Path.Combine(Path.GetTempPath(), "galaxy-actions-" + Guid.NewGuid().ToString("N") + ".json");
+            sceneOwner = new GameObject("GalaxyTable"); sceneOwner.AddComponent<TableScene>();
+            hudOwner = new GameObject("TableHud"); hudOwner.SetActive(false);
+            hudOwner.AddComponent<UIDocument>().panelSettings = Resources.Load<PanelSettings>("Galaxy101/UI/PanelSettings");
+            var hud = hudOwner.AddComponent<TableHud>(); hudOwner.SetActive(true); hud.Initialize(statePath);
+            hud.Settings.Set("lang", "tr");
+            hud.Render(new TableHud.State { Phase = "draw" });
+            for (int i = 0; i < 10; i++) yield return null;
+            var open = hud.Canvas.Q<VisualElement>("table.doOpen");
+            Assert.That(hud.Canvas.Q<VisualElement>("table-open-meter").layout.width, Is.EqualTo(open.layout.width + 76).Within(3), "T13: one button's natural width, 50px gauge, 8px gap and 18px padding/border (DURUMLAR ±3px)");
+            var state = new TableHud.State { Phase = "discard", CanUndo = true, ShowLayPair = true, ShowIsle = true };
+            state.Opened[0] = 118;
+            hud.Render(state);
+            for (int i = 0; i < 10; i++) yield return null;
+            Assert.That(hud.Canvas.Q<VisualElement>("table-open-meter").layout.width, Is.EqualTo(308).Within(3), "G17: the action column retains the CSS 232px wrapping limit (DURUMLAR ±3px)");
+            Assert.That(hud.Canvas.Q<VisualElement>("table.doLayPair").layout.y, Is.GreaterThan(hud.Canvas.Q<VisualElement>("table.doOpen").layout.y));
+        }
+
+        [UnityTest]
+        public IEnumerator ChatUsesTheServerLimitAndWrapsLongMessages()
+        {
+            statePath = Path.Combine(Path.GetTempPath(), "galaxy-chat-" + Guid.NewGuid().ToString("N") + ".json");
+            sceneOwner = new GameObject("GalaxyTable"); sceneOwner.AddComponent<TableScene>();
+            hudOwner = new GameObject("TableHud"); hudOwner.SetActive(false);
+            hudOwner.AddComponent<UIDocument>().panelSettings = Resources.Load<PanelSettings>("Galaxy101/UI/PanelSettings");
+            var hud = hudOwner.AddComponent<TableHud>(); hudOwner.SetActive(true); hud.Initialize(statePath);
+            string sent = null;
+            hud.SendGiftOnline = (gift, seat) => System.Threading.Tasks.Task.FromResult<string>(null);
+            hud.SendChatOnline = (text, quick) => { sent = text; return System.Threading.Tasks.Task.FromResult<string>(null); };
+            string message = new string('x', 120);
+            hud.SendChat(message + "!");
+            Assert.That(sent, Is.EqualTo(message), "D-32: preserve all 120 permitted characters and truncate excess");
+            hud.OpenChat(); yield return null;
+            var input = hud.Canvas.Q<TextField>();
+            input.value = message;
+            Assert.That(input.value, Is.EqualTo(message), "The input accepts the same limit as the server");
+            hud.ChatFrom(1, message, null);
+            for (int i = 0; i < 10; i++) yield return null;
+            var bubble = hud.Canvas.Q<VisualElement>("table.m.text[0]");
+            Assert.That(bubble.worldBound.width, Is.LessThanOrEqualTo(240));
+            Assert.That(bubble.worldBound.height, Is.GreaterThan(14 * 1.35f + 14), "Long messages wrap inside the bubble");
+        }
+
+        [UnityTest]
         public IEnumerator HandResultIncludesPenaltiesAndKeepsHandXpSeparateFromTheMatchTotal()
         {
             statePath = Path.Combine(Path.GetTempPath(), "galaxy-result-" + Guid.NewGuid().ToString("N") + ".json");

@@ -6,11 +6,11 @@ Durum kataloğu: 151 kimlik, 144 etkin, 7 kaldırılmış.
 
 | Durum | Sayı |
 |---|---|
-| eşleşti | 59 |
+| eşleşti | 63 |
 | bilinçli fark | 7 |
 | eksik | 0 |
 | kaldırıldı | 7 |
-| bekliyor | 78 |
+| bekliyor | 74 |
 
 ## Eşikler ve yöntem
 
@@ -59,8 +59,8 @@ Ref: `artifacts/v4/ref/<ID>.png` + `.layout.json` (✓ çekildi; `tekrar Δ` = a
 | 50 | menu | Liderlik → Haftalık | ✓ · tekrar Δ107px | Scripts/Screens/LeaderboardController.cs | eşleşti | [run12] metin 97/98 (kayık 0, eksik 0, fazla 0) · ad 76/93 · UI piksel %4.97 |
 | 51 | menu | Liderlik → Sezon | ✓ · tekrar Δ83px | Scripts/Screens/LeaderboardController.cs | eşleşti | [run12] metin 97/98 (kayık 0, eksik 0, fazla 0) · ad 76/93 · UI piksel %5.14 |
 | 52 | menu | Liderlik → Arkadaşlar | ✓ · tekrar Δ13326px | Scripts/Screens/LeaderboardController.cs | eşleşti | [run12] metin 77/78 (kayık 0, eksik 0, fazla 0) · ad 60/77 · UI piksel %4.08 |
-| 60 | menu | Günlük ödül | ✓ · tekrar Δ14384px | Scripts/Screens (DailyReward panel, MenuView) | bekliyor | [run12] metin 72/80 (kayık 7, eksik 0, fazla 0) · ad 32/80 · UI piksel %6.74 |
-| 61 | menu | Gün toplandı | ✓ · tekrar Δ13893px | Scripts/Screens (DailyReward panel, MenuView) | bekliyor | [run12] metin 72/80 (kayık 7, eksik 0, fazla 0) · ad 32/80 · UI piksel %6.68 |
+| 60 | menu | Günlük ödül | ✓ · tekrar Δ14384px | Scripts/Screens (DailyReward panel, MenuView) | eşleşti | [safe15-menu-final] metin 79/80 (kayık 0, eksik 0, fazla 0) · ad 32/80 · UI piksel %5.89 |
+| 61 | menu | Gün toplandı | ✓ · tekrar Δ13893px | Scripts/Screens (DailyReward panel, MenuView) | eşleşti | [safe15-menu-final] metin 79/80 (kayık 0, eksik 0, fazla 0) · ad 32/80 · UI piksel %5.91 |
 | 70 | menu | Kurallar 1 | ✓ · tekrar Δ989px | Scripts/Screens (Rules panel, MenuView) | eşleşti | [run12] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 53/74 · UI piksel %4.7 |
 | 71 | menu | Kurallar 2 | ✓ · tekrar Δ93px | Scripts/Screens (Rules panel, MenuView) | eşleşti | [run12] metin 54/55 (kayık 0, eksik 0, fazla 0) · ad 51/68 · UI piksel %4.81 |
 | 72 | menu | Kurallar 3 | ✓ · tekrar Δ97px | Scripts/Screens (Rules panel, MenuView) | eşleşti | [run12] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 53/77 · UI piksel %4.86 |
@@ -68,7 +68,7 @@ Ref: `artifacts/v4/ref/<ID>.png` + `.layout.json` (✓ çekildi; `tekrar Δ` = a
 | 74 | menu | Kurallar 5 | ✓ · tekrar Δ162px | Scripts/Screens (Rules panel, MenuView) | eşleşti | [run12] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 53/74 · UI piksel %3.92 |
 | 75 | menu | Kurallar 6 | ✓ · tekrar Δ117px | Scripts/Screens (Rules panel, MenuView) | eşleşti | [run12] metin 55/56 (kayık 0, eksik 0, fazla 0) · ad 51/69 · UI piksel %5.52 |
 | 80 | menu | Profilim → Genel | ✓ · tekrar Δ39px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | eşleşti | [run12] metin 93/94 (kayık 0, eksik 0, fazla 0) · ad 88/105 · UI piksel %8.77 |
-| 81 | menu | Profilim → Rozetler | ✓ · tekrar Δ707px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | bekliyor | [run12] metin 65/83 (kayık 17, eksik 0, fazla 0) · ad 73/90 · UI piksel %10.03 |
+| 81 | menu | Profilim → Rozetler | ✓ · tekrar Δ707px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | eşleşti | [safe15-menu-final] metin 82/83 (kayık 0, eksik 0, fazla 0) · ad 73/90 · UI piksel %7.22 |
 | 82 | menu | Profilim → Maç geçmişi | ✓ · tekrar Δ1007px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | eşleşti | [run12] metin 96/97 (kayık 0, eksik 0, fazla 0) · ad 87/104 · UI piksel %5.57 |
 | 83 | menu | Profili paylaş | ✓ · tekrar Δ6738px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | eşleşti | [run12] metin 124/127 (kayık 2, eksik 0, fazla 0) · ad 121/139 · UI piksel %6.13 |
 | 84 | menu | Bağlantı kopyalandı | ✓ · tekrar Δ6881px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | eşleşti | [run12] metin 124/127 (kayık 2, eksik 0, fazla 0) · ad 121/139 · UI piksel %6.13 |
@@ -77,7 +77,7 @@ Ref: `artifacts/v4/ref/<ID>.png` + `.layout.json` (✓ çekildi; `tekrar Δ` = a
 | 92 | menu | EN — Ana menü, Satürn, Tekli seçili | ✓ · tekrar Δ3164px | Scripts/Core/MenuView.cs, Scripts/Screens/MenuView.Main.cs | eşleşti | [run12] metin 36/37 (kayık 0, eksik 0, fazla 0) · ad 32/42 · UI piksel %8.71 |
 | 93 | menu | EN — Mağaza → Çip | ✓ · tekrar Δ966px | Scripts/Screens/ShopController.cs | eşleşti | [run12] metin 63/64 (kayık 0, eksik 0, fazla 0) · ad 33/70 · UI piksel %5.98 |
 | 94 | menu | EN — Arkadaşlar → Çevrimiçi | ✓ · tekrar Δ161px | Scripts/Screens/FriendsController.cs | eşleşti | [run12] metin 58/60 (kayık 1, eksik 0, fazla 0) · ad 48/66 · UI piksel %3.28 |
-| 95 | menu | EN — Günlük ödül | ✓ · tekrar Δ14235px | Scripts/Screens (DailyReward panel, MenuView) | bekliyor | [run12] metin 72/80 (kayık 7, eksik 0, fazla 0) · ad 32/80 · UI piksel %7.32 |
+| 95 | menu | EN — Günlük ödül | ✓ · tekrar Δ14235px | Scripts/Screens (DailyReward panel, MenuView) | eşleşti | [safe15-menu-final] metin 79/80 (kayık 0, eksik 0, fazla 0) · ad 32/80 · UI piksel %6.39 |
 | 96 | menu | EN — Kurallar 1 | ✓ · tekrar Δ364px | Scripts/Screens (Rules panel, MenuView) | eşleşti | [run12] metin 60/61 (kayık 0, eksik 0, fazla 0) · ad 53/74 · UI piksel %4.98 |
 | 97 | menu | EN — Profilim → Genel | ✓ · tekrar Δ28px | Scripts/Screens/ProfileController.cs (+ ShareProfile) | eşleşti | [run12] metin 93/94 (kayık 0, eksik 0, fazla 0) · ad 88/105 · UI piksel %8.5 |
 | S01 | acilis | Açılış / yükleme (GALAXY + 1 0 1, ilerleme) | ✓ · tekrar Δ3357px | Scripts/Screens/AuthFlow.cs | bilinçli fark | UNITY_FARKLARI UF-02 / EKSIKLER EK-004: ilerleme yüzdesi, mesajı ve ipucu yükleme olaylarına ve çağrı sırasına bağlı [run12] metin 3/10 (kayık 3, eksik 3, fazla 36) · ad 0/14 · UI piksel %46.72 |

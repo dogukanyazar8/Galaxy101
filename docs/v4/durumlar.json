@@ -168,13 +168,13 @@
   },
   "60": {
    "unity": "Scripts/Screens (DailyReward panel, MenuView)",
-   "not": "[run12] metin 72/80 (kayık 7, eksik 0, fazla 0) · ad 32/80 · UI piksel %6.74",
-   "durum": "bekliyor"
+   "not": "[safe15-menu-final] metin 79/80 (kayık 0, eksik 0, fazla 0) · ad 32/80 · UI piksel %5.89",
+   "durum": "eşleşti"
   },
   "61": {
    "unity": "Scripts/Screens (DailyReward panel, MenuView)",
-   "not": "[run12] metin 72/80 (kayık 7, eksik 0, fazla 0) · ad 32/80 · UI piksel %6.68",
-   "durum": "bekliyor"
+   "not": "[safe15-menu-final] metin 79/80 (kayık 0, eksik 0, fazla 0) · ad 32/80 · UI piksel %5.91",
+   "durum": "eşleşti"
   },
   "70": {
    "unity": "Scripts/Screens (Rules panel, MenuView)",
@@ -213,8 +213,8 @@
   },
   "81": {
    "unity": "Scripts/Screens/ProfileController.cs (+ ShareProfile)",
-   "not": "[run12] metin 65/83 (kayık 17, eksik 0, fazla 0) · ad 73/90 · UI piksel %10.03",
-   "durum": "bekliyor"
+   "not": "[safe15-menu-final] metin 82/83 (kayık 0, eksik 0, fazla 0) · ad 73/90 · UI piksel %7.22",
+   "durum": "eşleşti"
   },
   "82": {
    "unity": "Scripts/Screens/ProfileController.cs (+ ShareProfile)",
@@ -258,8 +258,8 @@
   },
   "95": {
    "unity": "Scripts/Screens (DailyReward panel, MenuView)",
-   "not": "[run12] metin 72/80 (kayık 7, eksik 0, fazla 0) · ad 32/80 · UI piksel %7.32",
-   "durum": "bekliyor"
+   "not": "[safe15-menu-final] metin 79/80 (kayık 0, eksik 0, fazla 0) · ad 32/80 · UI piksel %6.39",
+   "durum": "eşleşti"
   },
   "96": {
    "unity": "Scripts/Screens (Rules panel, MenuView)",

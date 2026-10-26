@@ -371,7 +371,9 @@ namespace Galaxy101.Table
                 if (key == "seat") SeatViewArt(art); else if (key == "mid") MidViewArt(art); else TopViewArt(art);
                 card.Add(art);
                 var words = Box(); words.style.flexShrink = 1; words.style.minWidth = 0;
-                words.Add(SettingsText(SettingText("views." + i + ".0"), "Montserrat-700", 16, "#F4F1E8", "table.v.name[" + i + "]", 0, true));
+                string title = SettingText("views." + i + ".0");
+                // CSS wraps at spaces; UI Toolkit would also split an overflowing single word (Kuşbakışı).
+                words.Add(SettingsText(title, "Montserrat-700", 16, "#F4F1E8", "table.v.name[" + i + "]", 0, title.Contains(" ")));
                 words.Add(SettingsText(SettingText("views." + i + ".1"), "Baloo2-700", 12, "var(--mt)", "table.v.desc[" + i + "]", 16.2f, true));
                 card.Add(words);
                 Tap(card, () => Settings.Set("view", key)); AddCell(views, card);

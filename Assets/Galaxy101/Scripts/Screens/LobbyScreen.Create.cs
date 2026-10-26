@@ -53,16 +53,14 @@ namespace Galaxy101
         private void BuildCreate()
         {
             var c = create; long chips = backend.Chips;
-            // createOpen: z 20, lbFade .2s; backdrop lobby.closeCreate rgba(0,0,0,.55) + blur(6px).
-            var shade = Fill("lobby.closeCreate"); shade.pickingMode = PickingMode.Position; view.Decorate(shade, "rgba(0,0,0,.55)"); GalaxyFilters.BackdropBlur(shade, 6); Tap(shade, CloseCreate); body.Add(shade);
-            FadeIn(shade, createShownAt, .2f);
+            // createOpen: z 20; the backdrop lobby.closeCreate (rgba(0,0,0,.55) + blur(6px), lbFade .2s) is the persistent veil (Veil()).
             // 1060 × 650 inside a 1 px border, grid minmax(0,1fr) 330px, radius 28, 0 10px 0 --pnS, 0 40px 90px rgba(0,0,0,.6).
             var modal = Row(); modal.name = "lobby-create"; modal.pickingMode = PickingMode.Position; modal.style.alignItems = Align.Stretch;
             MenuView.Place(modal, 109, 34, 1062, 652); modal.style.overflow = Overflow.Hidden;
             Border(modal, 1, new Color(1, 1, 1, .1f)); Raise(modal, "var(--pn)", 28, 10, "var(--pnS)"); GalaxyFilters.Shadow(modal, 0, 40, 45, new Color(0, 0, 0, .6f));
             modal.RegisterCallback<ClickEvent>(e => e.StopPropagation());
             Pop(modal, createShownAt, .3f, true);
-            body.Add(modal);
+            modalLayer.Add(modal);
 
             // Left: header (padding 22 28 10, gap 14) and the scrolling rows (padding 0 22 18 28).
             var left = Box(); left.style.flexGrow = 1; left.style.flexBasis = 0; modal.Add(left);

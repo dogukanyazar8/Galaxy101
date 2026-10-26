@@ -92,7 +92,7 @@ namespace Galaxy101
             var middle = Box(); MenuView.Place(middle, 156, 176, 560, 264); middle.style.alignItems = Align.Center; middle.style.justifyContent = Justify.Center; area.Add(middle);
             // 800 22px/1 --fL, letter-spacing 4px, gradient --lg1 → --a1 → --a2 clipped to the text (UF-801: --a1).
             var brand = Text("GALAXY 101", 22, "Montserrat-800", "var(--a1)", 1); MenuView.Tracking(brand, 4, 22); middle.Add(brand);
-            var pool = Row(); pool.style.marginTop = 8; Pad(pool, 6, 14, 6, 14); view.Decorate(pool, "rgba(0,0,0,.28)", 999);
+            var pool = Row(); pool.style.marginTop = 8; Pad(pool, 6, 14, 6, 14); Pill(pool, "rgba(0,0,0,.28)", 6 + 21 + 6);
             pool.Add(Coin(18, false));
             var pl = Text(S("pool"), 13, "Baloo2-800", "var(--mt)", 0, "lobby.text.pool"); pl.style.marginLeft = 8; pool.Add(pl);
             var pv = Text(view.N(t.Stake * 4), 17, "Montserrat-700", "#F4F1E8", 0, "lobby.w.pool"); pv.style.marginLeft = 8; pool.Add(pv); middle.Add(pool);
@@ -299,13 +299,11 @@ namespace Galaxy101
         private void BuildInvite(TableSummary t, bool host, bool counting)
         {
             var state = invite; int free = t.Seats.Count(s => s == null);
-            // iv.open: z 25, lbFade .2s; backdrop lobby.iv.close (rgba(0,0,0,.55), blur(6px)).
-            var shade = Fill("lobby.iv.close"); shade.pickingMode = PickingMode.Position; view.Decorate(shade, "rgba(0,0,0,.55)"); GalaxyFilters.BackdropBlur(shade, 6); Tap(shade, CloseInvite); body.Add(shade);
-            FadeIn(shade, state.OpenedAt, .2f);
+            // iv.open: z 25; the backdrop lobby.iv.close (rgba(0,0,0,.55) + blur(6px), lbFade .2s) is the persistent veil (Veil()).
             // 900 × 580 inside a 1 px border, grid minmax(0,1fr) 290px, radius 28; lbModal .32s cubic-bezier(.22,1,.36,1).
             var modal = Row(); modal.name = "lobby-invite"; modal.pickingMode = PickingMode.Position; modal.style.alignItems = Align.Stretch; MenuView.Place(modal, 189, 69, 902, 582); modal.style.overflow = Overflow.Hidden;
             Border(modal, 1, new Color(1, 1, 1, .1f)); Raise(modal, "var(--pn)", 28, 10, "var(--pnS)"); GalaxyFilters.Shadow(modal, 0, 40, 45, new Color(0, 0, 0, .6f));
-            modal.RegisterCallback<ClickEvent>(e => e.StopPropagation()); Pop(modal, state.OpenedAt, .32f, false, true); body.Add(modal);
+            modal.RegisterCallback<ClickEvent>(e => e.StopPropagation()); Pop(modal, state.OpenedAt, .32f, false, true); modalLayer.Add(modal);
 
             // Left: padding 22 22 0 28, gap 14.
             var left = Box(); left.style.flexGrow = 1; left.style.flexBasis = 0; Pad(left, 22, 22, 0, 28); modal.Add(left);

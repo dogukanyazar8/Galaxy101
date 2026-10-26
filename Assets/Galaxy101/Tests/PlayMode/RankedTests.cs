@@ -207,7 +207,7 @@ namespace Galaxy101.Tests
             Near("ranked.m.name[0]", 424, 144.92f, 0, 25.2f);
             Near("ranked.table.title", 428, 246, 0, 23);
             Near("ranked.z.tag[0]", 438, 296, 0, 16, 2);
-            Near("ranked.z.ini[0]", 492, 381.91f, 64, 64);
+            Near("ranked.z.ini[0]", 492, 381.91f, 64, 64, 3);   // ±3 px like docs/v4/DURUMLAR.md: the batch test panel rounds this box to 380, the 1280×720 state capture to 382
             Near("ranked.z.oppLabel[1]", 705.55f, 455.5f, 0, 19, 3);
             Near("ranked.range.label", 470, 625, 0, 18);
             Near("ranked.cta.go", 932, 612, 300, 64);

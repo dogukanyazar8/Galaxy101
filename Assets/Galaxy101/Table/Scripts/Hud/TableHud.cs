@@ -63,7 +63,7 @@ namespace Galaxy101.Table
             public bool ShowReturn, ShowIsle, CanIsle, ShowLayPair, CanLayPair;
             /// <summary>protocol.json reconnect: "Bağlantı koptu · Deneme n/5" (0 = connected); GaveUp leaves only "Lobiye dön".</summary>
             public int NetAttempt; public bool NetGaveUp;
-            /// <summary>G101-Masa tOpened: I opened this turn and have not discarded yet ("Elini açtın · şimdi bir taş at").</summary>
+            /// <summary>G101-Masa tOpened ("Elini açtın · şimdi bir taş at"): my discard after a first turn once I have opened (the prototype never sets _seenOpen).</summary>
             public bool OpenedThisTurn;
         }
 
@@ -818,7 +818,7 @@ namespace Galaxy101.Table
             var row = new VisualElement { pickingMode = PickingMode.Ignore }; row.style.position = Position.Absolute; row.style.left = 0; row.style.right = 0; row.style.top = top; row.style.alignItems = Align.Center;
             row.RegisterCallback<GeometryChangedEvent>(_ =>
             {
-                var room = hudLayer?.Q<VisualElement>("table-room"); if (room == null || row.childCount == 0) return;
+                var room = hudLayer?.Q<VisualElement>("table.roomLabel"); if (room == null || row.childCount == 0) return;
                 var toast = row[0]; float scale = row.layout.width > 0 ? row.worldBound.width / row.layout.width : 1;
                 // Centred position (without this row's own shift) against the header's right edge + 12 px.
                 float left = row.worldBound.center.x - row.resolvedStyle.translate.x * scale - toast.layout.width * scale / 2, clear = room.worldBound.xMax + 12 * scale;
@@ -838,9 +838,12 @@ namespace Galaxy101.Table
         {
             var label = Text(L("BURAYA AT", "DISCARD HERE"), "Baloo2-800", 10, "var(--aT)"); label.name = "table.t.discHere"; MenuView.Tracking(label, 1.4f, 10);
             Pad(label, 4, 9, 4, 9); view.Decorate(label, "var(--a1)", 8, 3, "var(--aS)");
-            var holder = Anchor("disc"); var box = Centered(holder, -62, false); box.Add(label);
-            // floatA 1.4s ease-in-out: 0 → −8px → 0 (support.js keyframes).
-            motions.Add(t => { float f = Mathf.Repeat(t, 1.4f) / 1.4f; box.style.translate = new Translate(Length.Percent(-50), -62 - 8 * Mathf.Sin(f * Mathf.PI)); });
+            // G101-Masa sets transform: translate(-50%,-62px) and animation: floatA on the same element; the running
+            // animation's transform (translateY 0 → −6px → 0, ease-in-out) replaces it, so the browser draws the label's
+            // top-left corner at the anchor. That is the reference picture, so the label sits there too.
+            var box = new VisualElement { pickingMode = PickingMode.Ignore }; box.style.position = Position.Absolute; box.style.left = 0; box.style.top = 0;
+            Anchor("disc").Add(box); box.Add(label);
+            motions.Add(t => { float f = Mathf.Repeat(t, 1.4f) / 1.4f; box.style.translate = new Translate(0, -6 * (0.5f - 0.5f * Mathf.Cos(f * 2 * Mathf.PI))); });
         }
 
         private void BuildIndicatorLabel()
@@ -871,13 +874,13 @@ namespace Galaxy101.Table
             // CSS paints the logo with linear-gradient(lg1, a1 50%, a2) clipped to the glyphs; UI Toolkit text takes
             // one colour, so the mid stop carries it. drop-shadow(0 2px 0 var(--lS)) is a hard text shadow.
             logo.style.textShadow = new TextShadow { offset = new Vector2(0, 2), blurRadius = 0, color = view.C("var(--lS)") };
-            bar.Add(logo);
+            logo.style.minWidth = 146; bar.Add(logo);   // the browser's 19 px Montserrat with 3 px tracking is 146 px wide
 
             // G101-Masa table.roomLabel: "Test masası · Tekli" · "Bahis 5.000" (against bots "Botlara karşı · Tekli" · "Antrenman · bahis yok").
-            var room = Row(8); room.name = "table-room"; Pad(room, 7, 13, 7, 13); view.Decorate(room, "var(--dp)", 999);
-            var roomName = Text(s.RoomName ?? L("Botlara karşı · Tekli", "Vs bots · Singles"), "Baloo2-800", 12, "var(--ic)"); roomName.name = "table.roomLabel"; room.Add(roomName);
+            var room = Row(8); room.name = "table.roomLabel"; Pad(room, 7, 13, 7, 13); view.Decorate(room, "var(--dp)", 999);
+            var roomName = Text(s.RoomName ?? L("Botlara karşı · Tekli", "Vs bots · Singles"), "Baloo2-800", 12, "var(--ic)"); room.Add(roomName);
             var dot = new VisualElement { pickingMode = PickingMode.Ignore }; dot.style.width = dot.style.height = 4; view.Decorate(dot, "var(--mt)", 2); room.Add(dot);
-            var bet = Text(s.RoomName != null ? L("Bahis ", "Bet ") + view.N(s.RoomStake) : L("Antrenman · bahis yok", "Practice · no stake"), "Baloo2-800", 12, "var(--ic)"); bet.name = "table.roomLabel"; room.Add(bet);
+            var bet = Text(s.RoomName != null ? L("Bahis ", "Bet ") + view.N(s.RoomStake) : L("Antrenman · bahis yok", "Practice · no stake"), "Baloo2-800", 12, "var(--ic)"); room.Add(bet);
             bar.Add(room);
 
             var spacer = new VisualElement { pickingMode = PickingMode.Ignore }; spacer.style.flexGrow = 1; bar.Add(spacer);
@@ -889,14 +892,14 @@ namespace Galaxy101.Table
             var edge = new VisualElement { pickingMode = PickingMode.Ignore }; MenuView.Place(edge, 0, 25, 21, 3); edge.style.backgroundColor = view.C("var(--te)"); mini.Add(edge);
             deck.Add(mini);
             var deckLabel = Text(L("Taş", "Deck"), "Baloo2-800", 12, "var(--mt)"); deckLabel.name = "table.t.deck"; deck.Add(deckLabel);
-            var count = Text(s.DeckCount.ToString(), "Montserrat-700", 17, "#F4F1E8"); count.name = "table.deckCount"; count.style.minWidth = 26; count.style.unityTextAlign = TextAnchor.MiddleRight; deck.Add(count);
+            var count = Text(s.DeckCount.ToString(), "Montserrat-700", 17, "#F4F1E8"); count.name = "table.deckCount"; count.style.minWidth = 35; count.style.unityTextAlign = TextAnchor.MiddleRight; deck.Add(count);
             bar.Add(deck);
 
             // Chips pill (table.chipsLabel): the dashed gold coin and the balance, as at every table of the prototype (T28 too).
             var chips = Row(9); chips.name = "table-chips"; chips.style.height = 44; Pad(chips, 0, 16, 0, 8); view.Decorate(chips, "var(--dp)", 999);
             var coin = new VisualElement { pickingMode = PickingMode.Ignore }; coin.style.width = coin.style.height = 28;
             view.Decorate(coin, "radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)", 14); Border(coin, 2, view.C("#FFF3C8")); chips.Add(coin);
-            var balance = Text(view.N(s.Chips), "Montserrat-700", 17, "#F4F1E8"); balance.name = "table.chipsLabel"; balance.style.minWidth = 80; balance.style.unityTextAlign = TextAnchor.MiddleRight; chips.Add(balance);
+            var balance = Text(view.N(s.Chips), "Montserrat-700", 17, "#F4F1E8"); balance.name = "table.chipsLabel"; balance.style.minWidth = 92; balance.style.unityTextAlign = TextAnchor.MiddleRight; chips.Add(balance);
             bar.Add(chips);
 
             var settings = Clickable(IconButton("settings", 24, L("Ayarlar", "Settings"), "table.openSettings"), "settings"); bar.Add(settings);
@@ -1168,8 +1171,8 @@ namespace Galaxy101.Table
             {
                 var info = Row(6);
                 var led = new VisualElement { pickingMode = PickingMode.Ignore }; led.style.width = led.style.height = 7; view.Decorate(led, "#3CCB6E", 4); GalaxyFilters.Shadow(led, 0, 0, 4, view.C("#3CCB6E")); info.Add(led);
-                var line = Text(s.OpenedPairs[0] ? L("AÇILDI · " + s.Opened[0] + " ÇİFT", "OPENED · " + s.Opened[0] + " PAIRS") : L("AÇILDI · SERİ " + s.Opened[0], "OPENED · RUNS " + s.Opened[0]), "Baloo2-800", 10, "#8EF0B0");
-                MenuView.Tracking(line, 1.2f, 10); info.Add(line); info.style.marginBottom = 6; column.Add(info);
+                var line = Text(s.OpenedPairs[0] ? L("AÇILDI · " + s.Opened[0] + " ÇİFT", "OPENED · " + s.Opened[0] + " PAIRS") : L("AÇILDI · SERİ " + s.Opened[0], "OPENED · RUNS " + s.Opened[0]), "Baloo2-800", 9, "#8EF0B0");
+                MenuView.Tracking(line, 1, 9); info.Add(line); info.style.marginBottom = 6; column.Add(info);
             }
             var buttons = Row(6);
             if (s.CanUndo)
@@ -1226,6 +1229,15 @@ namespace Galaxy101.Table
                 // table.doIsle: a full-width row under the buttons (flex 1 1 100%).
                 var isle = ActionButton("table.doIsle", TableStrings.Get("isle", Lang), s.CanIsle, true, 14, "isle");
                 isle.style.marginTop = 6; isle.style.unityTextAlign = TextAnchor.MiddleCenter; column.Add(isle);
+                // The wrapping row (max-width 232) is as wide as its max-content: every button on one line, İşle included;
+                // İşle (flex-basis 100 %) then wraps under them at that width.
+                string label = TableStrings.Get("isle", Lang);
+                buttons.RegisterCallback<GeometryChangedEvent>(_ =>
+                {
+                    float own = ((TextElement)isle).MeasureTextSize(label, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).x + 28;
+                    float row = buttons.childCount > 0 ? buttons.layout.width + 6 : 0, width = Mathf.Min(232, row + own);
+                    if (Mathf.Abs(column.resolvedStyle.minWidth.value - width) > .5f) column.style.minWidth = width;
+                });
             }
             meter.Add(column);
             actions.Add(meter);

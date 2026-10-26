@@ -933,7 +933,7 @@ namespace Galaxy101.Table
                 Warn = HumanTurn && warned, TurnHint = turnHint, ShowIndicator = !dealing && Current != Phase.Seating,
                 // tDiscardFirst only on a dealt hand's first move (a prepared flow's hand is past it: the prototype's _turns ≥ 1).
                 FirstTurn = m.TurnN == 1 && m.TurnPhase == G101Rules.PhasePlay && !preparedHand,
-                OpenedThisTurn = HumanTurn && IOpened && m.OpenedTurn[m.Seat] == m.TurnN,
+                OpenedThisTurn = HumanTurn && IOpened,
                 Pairs = eval.Pairs.Count, PickedTile = PickedTile, DeckOnly = HumanTurn && m.TurnPhase == G101Rules.PhaseDraw && m.SideReturned, ShowPutBack = PickedTile >= 0 && CanDiscard && Legal.ReturnSide,
                 Countdown = m.Status == G101Rules.StatusLobby ? countdown : 0, CountdownAt = countdownAt, ExitOpen = ExitOpen,
                 Hand = Math.Max(1, m.HandNo), MatchHands = m.Hands,

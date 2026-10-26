@@ -224,7 +224,8 @@ namespace Galaxy101.Table
                 case "a2": return (top ? seatFrames[2].Pose(0.56f, 0.86f, 0.98f) : seatFrames[2].Pose(0, 1.16f, 1.14f)).UnityPosition;
                 case "a3": return (top ? seatFrames[3].Pose(0, 0.8f, 1.22f) : seatFrames[3].Pose(0, 0.86f, 0.98f)).UnityPosition;
                 case "disc": return seatFrames[0].Pose(0.6f, TY + 0.02f, 0.6f).UnityPosition;
-                case "ind": return seatFrames[0].Pose(DeckShift, TY, 0.11f).UnityPosition;
+                // table3d.js overrides anchorWorld0.ind with the indicator pile itself: (PX0 + deck x, TY + 0.002, 0.07).
+                case "ind": return ThreeSpace.ToUnity(DeckShift + PileX0, TY + 0.002f, 0.07f);
                 case "deck": return ThreeSpace.ToUnity(0, TY + 0.13f, 0);
                 case "putback": return seatFrames[3].Pose(DiscardLocal.x, TY + 0.002f, DiscardLocal.z).UnityPosition;
                 default: throw new System.ArgumentException("Unknown table anchor: " + key, nameof(key));

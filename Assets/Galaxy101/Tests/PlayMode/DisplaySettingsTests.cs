@@ -46,6 +46,38 @@ namespace Galaxy101.Tests
             using (var evt = NavigationSubmitEvent.GetPooled()) { evt.target = e; e.SendEvent(evt); }
         }
 
+        [TestCase(1280, 720)]
+        [TestCase(1920, 1080)]
+        public void CaptureKeepsThePhysicalWindowWhenEachSceneReappliesItsSavedDisplayMode(int width, int height)
+        {
+            var previousMode = GameDisplay.CurrentMode;
+            string previousResolution = GameDisplay.Resolution, previousServer = Online.GalaxyApi.Override;
+            bool? previousAuth = MainMenuController.AuthOnStart;
+            Diagnostics.G101StateRouter router = null;
+            try
+            {
+                router = Diagnostics.G101StateRouter.Run(new Diagnostics.G101StateRouter.Options { Width = width, Height = height });
+                Assert.That(GameDisplay.LastRequest, Is.EqualTo((width, height, FullScreenMode.Windowed, 0d)), "the guard must apply before the first scene starts");
+                foreach (string mode in new[] { "fullscreen", "borderless", "windowed", "fullscreen" })
+                {
+                    GameDisplay.Apply(mode, GameDisplay.Native);
+                    Assert.That(GameDisplay.LastRequest, Is.EqualTo((width, height, FullScreenMode.Windowed, 0d)), "scene startup: " + mode);
+                    Assert.That(GameDisplay.CurrentMode, Is.EqualTo(GameDisplay.ParseMode(mode)), "capture must not replace the saved preference");
+                }
+                UnityEngine.Object.DestroyImmediate(router.gameObject); router = null;
+                Assert.That(Diagnostics.G101StateRouter.Current, Is.Null, "destroying the capture owner releases its guard");
+                GameDisplay.Apply("fullscreen", GameDisplay.Native);
+                Assert.That(GameDisplay.LastRequest.Mode, Is.EqualTo(FullScreenMode.ExclusiveFullScreen), "normal display behavior remains available after capture");
+            }
+            finally
+            {
+                if (router != null) UnityEngine.Object.DestroyImmediate(router.gameObject);
+                // A failing old implementation has no owner cleanup; keep that RED run isolated from other tests.
+                if (Diagnostics.G101StateRouter.Current != null) typeof(Diagnostics.G101StateRouter).GetProperty("Current").SetValue(null, null);
+                Online.GalaxyApi.Override = previousServer; MainMenuController.AuthOnStart = previousAuth;
+                GameDisplay.Apply(GameDisplay.Key(previousMode), previousResolution);
+            }
+        }
         [UnityTest]
         public IEnumerator DisplayTabHasModeResolutionAndFrameRateAndAppliesThem()
         {

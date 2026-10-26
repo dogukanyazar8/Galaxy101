@@ -23,6 +23,8 @@ namespace Galaxy101.Diagnostics
     /// </summary>
     public sealed partial class G101StateRouter : MonoBehaviour
     {
+        public const int CaptureWindowGuardVersion = 1;
+
         public sealed class Options
         {
             public List<string> States = new List<string>();
@@ -71,7 +73,7 @@ namespace Galaxy101.Diagnostics
             if (size != null)
             {
                 var wh = size.Split('x', 'X', '×');
-                if (wh.Length != 2 || !int.TryParse(wh[0], out o.Width) || !int.TryParse(wh[1], out o.Height) || o.Width < 640 || o.Height < 360) throw new ArgumentException("-g101Size must be WxH, e.g. 1920x1080.");
+                if (wh.Length != 2 || !int.TryParse(wh[0], out o.Width) || !int.TryParse(wh[1], out o.Height) || !GameDisplay.IsValidResolution(o.Width + "x" + o.Height)) throw new ArgumentException("-g101Size must be WxH, e.g. 1920x1080.");
             }
             if (float.TryParse(Value("g101Fps"), NumberStyles.Float, CultureInfo.InvariantCulture, out float fps)) o.FpsSeconds = fps;
             o.States.AddRange(state.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()));
@@ -93,13 +95,24 @@ namespace Galaxy101.Diagnostics
         /// <summary>Start a router run (command line or a PlayMode test).</summary>
         public static G101StateRouter Run(Options o)
         {
+            if (o == null) throw new ArgumentNullException(nameof(o));
+            if (!GameDisplay.IsValidResolution(o.Width + "x" + o.Height)) throw new ArgumentOutOfRangeException(nameof(o), "Capture dimensions must be a supported WxH resolution.");
+            if (Current != null) throw new InvalidOperationException("A state capture is already running.");
             Current = o;
+            GameDisplay.Refresh();
             MainMenuController.AuthOnStart = false;
             // Sandbox like g101-state.js (G101State.sandbox): no real server, no remembered session (port 9 = discard, refused).
             Galaxy101.Online.GalaxyApi.Override = "http://127.0.0.1:9";
             var owner = new GameObject("G101 state router"); DontDestroyOnLoad(owner);
             var router = owner.AddComponent<G101StateRouter>(); router.options = o;
             return router;
+        }
+
+        private void OnDestroy()
+        {
+            if (Current != options) return;
+            Current = null;
+            ActiveState = null;
         }
 
         public bool Finished { get; private set; }

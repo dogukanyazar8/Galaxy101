@@ -109,6 +109,15 @@ namespace Galaxy101
         /// <summary>Re-apply after the window moved to another monitor (FramePacing's watcher).</summary>
         internal static void Refresh()
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            // Capture is established before scene startup. Saved preferences and monitor refreshes must never
+            // switch the physical display away from the diagnostic window, even for a single frame.
+            if (Diagnostics.G101StateRouter.Current is { } capture)
+            {
+                Request(new Vector2Int(capture.Width, capture.Height), FullScreenMode.Windowed, 0);
+                return;
+            }
+#endif
             var native = ReadNative();
             var size = Resolve(Resolution, native);
             var mode = UnityMode(CurrentMode);
@@ -131,6 +140,11 @@ namespace Galaxy101
                 foreach (var r in Screen.resolutions)
                     if (r.width == size.x && r.height == size.y && r.refreshRateRatio.value > hz) hz = r.refreshRateRatio.value;
             }
+            Request(size, mode, hz);
+        }
+
+        private static void Request(Vector2Int size, FullScreenMode mode, double hz)
+        {
             LastRequest = (size.x, size.y, mode, hz);
             if (!CanResize) return;
             bool sameHz = hz <= 0 || Math.Abs(Screen.currentResolution.refreshRateRatio.value - hz) < 0.5;
@@ -141,7 +155,8 @@ namespace Galaxy101
                 Screen.SetResolution(size.x, size.y, mode, ratio);
             }
             else Screen.SetResolution(size.x, size.y, mode);
-            Debug.Log("GALAXY101_DISPLAY mode=" + Key(CurrentMode) + " size=" + size.x + "x" + size.y + (hz > 0 ? " hz=" + hz.ToString("0.##") : ""));
+            string modeKey = mode == FullScreenMode.Windowed ? "windowed" : mode == FullScreenMode.ExclusiveFullScreen ? "fullscreen" : "borderless";
+            Debug.Log("GALAXY101_DISPLAY mode=" + modeKey + " size=" + size.x + "x" + size.y + (hz > 0 ? " hz=" + hz.ToString("0.##") : ""));
         }
 
         /// <summary>

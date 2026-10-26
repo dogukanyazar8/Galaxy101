@@ -15,7 +15,7 @@ namespace Okey101.Editor
         private sealed class BuildEvidence
         {
             public string result, executable, unityVersion, backend, graphicsAPI, completedUtc, configuration, productVersion, ruleVersion, productName;
-            public int errors, warnings;
+            public int errors, warnings, captureWindowGuardVersion;
             public long bytes;
             public string[] scenes;
         }
@@ -77,6 +77,7 @@ namespace Okey101.Editor
                 result = summary.result.ToString(), executable = output, unityVersion = UnityEngine.Application.unityVersion,
                 backend = "Mono", graphicsAPI = "Direct3D11", completedUtc = DateTime.UtcNow.ToString("O"),
                 configuration = development ? "Development" : acceptance ? "Acceptance" : "Release",
+                captureWindowGuardVersion = development ? Galaxy101.Diagnostics.G101StateRouter.CaptureWindowGuardVersion : 0,
                 productVersion = PlayerSettings.bundleVersion, ruleVersion = Okey101.Application.ReplayRecord.RuleVersion,productName=PlayerSettings.productName,
                 errors = (int)summary.totalErrors, warnings = (int)summary.totalWarnings, bytes = checked((long)summary.totalSize),scenes=scenes
             };

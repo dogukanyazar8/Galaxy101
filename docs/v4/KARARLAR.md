@@ -18,6 +18,7 @@ Kaynak görev: `Design/PROMPT_v4_OTONOM_GELISTIRME.md` §0.5. Paket: `Design/Gal
 | K-12 | Bekleme odasında sahip çıkınca sahiplik ilk kalan insana geçer; insan kalmazsa masa kapanır | kullanıcı kararı · 26 Ekim 2026 · EK-211 |
 | K-13 | Mevcut cilalı modeller korunur; v4 renk ve yerleşimleri uygulanır | kullanıcı kararı · 26 Ekim 2026 · EK-305 |
 | K-14 | Desteklenen taş olayları mevcut gerçek CC0 kaydından üretilen örneklere bağlanır; olay/kanal/zaman sözleşmesi korunur | kullanıcı kararı · 26 Ekim 2026 · EK-413 |
+| K-15 | Tanılama yakalaması ilk sahneden itibaren sabit pencerede; en fazla dört durum, yeni çıktı klasörü, tek Unity süreci; ağır doğrulamalar sıralı | kullanıcı isteği · 26 Ekim 2026 · sistem donması sonrası |
 
 ## K-01 · Kural motoru: `rules.js` → C# adım motoru
 
@@ -83,3 +84,9 @@ Kullanıcı EK-305 için "Mevcut cilalı modeller; v4 renk/yerleşimi" seçti. `
 ## K-14 · Gerçek taş sesleri
 
 Kullanıcı EK-413 için "Gerçek taş kayıtları" seçti. Kaynak kaydın ve örneklerin gerçekliği doğrulanır; mevcut sentez dosyaları yalnız adları yüzünden gerçek kayıt diye kabul edilmez. Mevcut hazırlama betiğinin tanımladığı çekme/koyma/atma temasları kullanılır; karşılığı bulunmayan sesler uydurulmaz. v4 olay tetikleme, kanal, kazanç, öncelik ve eşzamanlılık kuralları korunur; değişen ses kaynağı bilinçli fark olarak kaydedilir.
+
+## K-15 · Yakalama güvenliği ve küçük gruplar
+
+Kullanıcı 26 Ekim 2026 yeniden başlatması sonrası önce tam ekran çakışmasının düzeltilmesini, kalan işlerin sıralı küçük test gruplarıyla sürmesini istedi. `GameDisplay.Refresh` etkin `G101StateRouter` varken fiziksel isteği `Windowed`, seçilen `-g101Size`, yenileme hızı isteği 0 olarak sabitler. Koruma `BeforeSceneLoad` başlangıcında etkinleşir; menü ayarları ve monitör tazelemesi bunu ezemez. Kayıtlı tercih değiştirilmez. Yönlendirici yok edilince koruma kaldırılır; yok etme sırasında fiziksel ekranı yeniden değiştiren çağrı yapılmaz.
+
+Development raporundaki `captureWindowGuardVersion: 1` bu korumayı içeren yeni derlemeyi tanımlar; eski derlemeler yakalama betiğinde başlatılmaz. `Capture-G101States.ps1` yalnız en fazla dört açık kimliği kabul eder (`all` reddedilir), dolu çıktı klasörünü ve açık Unity/oyuncu sürecini reddeder; manifest ve her dosya doğrulanır. Oyuncunun çalışma kümesi/özel bayt tepe değerleri `process.json`'a yazılır. İlk donma sonrası deneme iki durum; ardından en fazla dört durumluk ayrı oyuncular. Bu bir çalışma güvenliği sınırıdır, oyun tasarımındaki sayı değildir. Test, derleme ve yakalama paralel çalıştırılmaz.

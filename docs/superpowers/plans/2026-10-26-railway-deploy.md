@@ -28,10 +28,10 @@
 - [x] Verify the isolated diff and keep unrelated Unity assets/settings unchanged. Independent read-only deployment review found no blocking issue.
 
 ### Task 2: Publish GitHub and provision Railway
-- [ ] Commit the deployment files and upload the repository with Git LFS to the provided private repo, preserving its initial README commit.
-- [ ] Create Galaxy101 project, PostgreSQL and API service in the authenticated workspace; configure required references/secrets/port and direct service settings.
-- [ ] Connect GitHub main, generate HTTPS domain and deploy; inspect build/runtime logs.
+- [x] Commit the deployment files and upload the repository with Git LFS to the provided private repo, preserving its initial README commit.
+- [x] Create Galaxy101 project, PostgreSQL and API service in the authenticated workspace; configure required references/secrets/port and direct service settings. CLI dot-path no-op worked around with stdin JSON; deployment manifest verified.
+- [x] Connect GitHub main, generate HTTPS domain and deploy; inspect build/runtime logs. API deployment `9457d23f-2022-45da-928f-259a9ea9aa3e` succeeded.
 
 ### Task 3: Verify the live service and deliver instructions
-- [ ] Check `/health`, `/v1/info`, guest API and authenticated WSS; record observed results.
-- [ ] Update the deployment URL/status and Windows launch instructions; commit documentation and preserve main's original WIP.
+- [x] Check `/health`, `/v1/info`, guest API and authenticated WSS; record observed results. LiveServer tests:2 passed,0 failed,0 skipped,36s; no Unity process used.
+- [x] Update the deployment URL/status and Windows launch instructions; commit documentation and preserve main's original WIP. Independent final documentation review found no blocker. Git fast-forward integration and before/after WIP hashes verify preservation.

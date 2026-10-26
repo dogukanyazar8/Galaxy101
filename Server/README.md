@@ -18,7 +18,7 @@ Klasörler özellik bazlı: `Auth`, `Profile`, `Economy`, `Social`, `Realtime`, 
 
 - **Sunucu otoritedir.** İstemci bakiye, ödül, skor, sıra yazmaz; yalnız istek gönderir.
 - **Bakiye tek yerden değişir:** `Ledger` — negatife düşmeyen koşullu `UPDATE` + değişmez işlem defteri satırı. `(hesap, idempotency anahtarı)` benzersiz; tekrar eden istek bir kez uygulanır.
-- **Maç = tek iş parçacıklı aktör** (`MatchSession`). Kilit yok, hamleler tek sırayla. Hamle önce veritabanına yazılır, sonra geçerli olur. Yeniden başlatmada tohumlanmış dağıtım + hamle günlüğü yeniden oynatılır; aynı masa döner.
+- **Legacy maç = tek iş parçacıklı aktör** (`MatchSession`). Hamleler tek sırayla, veritabanına yazılarak işlenir; bu runtime kayıt günlüğünden yeniden kurulabilir. Güncel **v4** runtime farklıdır: restart sonrası açık maçları iptal eder, net bahisleri iade eder; masayı sürdürmez.
 - **Gizli el:** her koltuğa yalnız kendi `PlayerViewProjector` görünümü gider.
 - **Zaman aşımı / ayrılan / kopan koltuk:** çevrimdışı masadaki aynı `BotPlanner` oynar; plan geçersizse garantili yasal yedek hamle.
 - Dış servis (Google Play, App Store, Google/Apple kimliği) yapılandırılmamışsa ilgili uç nokta `503 store_unavailable` / `401 invalid_token` döner; sessiz başarı yok.

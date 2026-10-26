@@ -132,6 +132,27 @@ public sealed class DeletedAccounts(TimeProvider clock, Microsoft.Extensions.Opt
 }
 
 /// <summary>
+/// Accounts whose sessions were ended at a moment (a password reset): access tokens issued before it are refused for as
+/// long as they could still be valid. In memory like <see cref="DeletedAccounts"/> (single instance).
+/// </summary>
+public sealed class SessionCutoffs(TimeProvider clock, Microsoft.Extensions.Options.IOptions<AuthOptions> auth)
+{
+    private readonly ConcurrentDictionary<Guid, (DateTime At, DateTimeOffset Until)> cutoffs = new();
+
+    public void Cut(Guid account)
+    {
+        var now = clock.GetUtcNow();
+        foreach (var (id, entry) in cutoffs) if (entry.Until <= now) cutoffs.TryRemove(id, out _);
+        // Whole seconds, as a token's "iat": a token signed in the same second after the cut stays valid.
+        var at = new DateTime(now.UtcDateTime.Ticks - now.UtcDateTime.Ticks % TimeSpan.TicksPerSecond, DateTimeKind.Utc);
+        cutoffs[account] = (at, now.AddMinutes(auth.Value.AccessTokenMinutes + 1));
+    }
+
+    public bool Refuses(Guid account, DateTime issuedUtc) =>
+        cutoffs.TryGetValue(account, out var entry) && entry.Until > clock.GetUtcNow() && issuedUtc < entry.At;
+}
+
+/// <summary>
 /// One-time, 30-second tickets for opening the WebSocket, so access tokens never travel in URLs (and logs).
 /// In memory: the game runs as a single instance (see README).
 /// </summary>

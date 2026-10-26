@@ -28,13 +28,27 @@ public sealed class ModerationTests(ServerFixture server)
 
         var wrong = await anonymous.PostAsJsonAsync("/v1/auth/password/reset", new PasswordResetRequest { Email = email, Code = code == "000000" ? "111111" : "000000", Password = "yenisifre" });
         Assert.Equal(ErrorCodes.CodeInvalid, (await wrong.Content.ReadFromJsonAsync<ErrorResponse>())!.Code);
-        Assert.Equal(HttpStatusCode.NoContent, (await anonymous.PostAsJsonAsync("/v1/auth/password/reset", new PasswordResetRequest { Email = email, Code = code, Password = "yenisifre" })).StatusCode);
+        var old = server.CreateClient();
+        old.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokens.AccessToken);
+        Assert.Equal(HttpStatusCode.OK, (await old.GetAsync("/v1/profile")).StatusCode);
+        server.Clock.Advance(TimeSpan.FromSeconds(2)); // the old token was signed a while before the reset
+        // The same code sent twice at once: exactly one reset goes through.
+        var both = await Task.WhenAll(
+            anonymous.PostAsJsonAsync("/v1/auth/password/reset", new PasswordResetRequest { Email = email, Code = code, Password = "yenisifre" }),
+            anonymous.PostAsJsonAsync("/v1/auth/password/reset", new PasswordResetRequest { Email = email, Code = code, Password = "yenisifre" }));
+        Assert.Equal(1, both.Count(r => r.StatusCode == HttpStatusCode.NoContent));
         // One use only.
         Assert.Equal(HttpStatusCode.BadRequest, (await anonymous.PostAsJsonAsync("/v1/auth/password/reset", new PasswordResetRequest { Email = email, Code = code, Password = "baskasifre" })).StatusCode);
 
         Assert.Equal(HttpStatusCode.Unauthorized, (await anonymous.PostAsJsonAsync("/v1/auth/login", new PasswordLoginRequest { Email = email, Password = "eskisifre" })).StatusCode);
-        Assert.Equal(HttpStatusCode.OK, (await anonymous.PostAsJsonAsync("/v1/auth/login", new PasswordLoginRequest { Email = email, Password = "yenisifre" })).StatusCode);
+        var login = await anonymous.PostAsJsonAsync("/v1/auth/login", new PasswordLoginRequest { Email = email, Password = "yenisifre" });
+        Assert.Equal(HttpStatusCode.OK, login.StatusCode);
         Assert.Equal(HttpStatusCode.Unauthorized, (await anonymous.PostAsJsonAsync("/v1/auth/refresh", new RefreshRequest { RefreshToken = tokens.RefreshToken })).StatusCode);
+        // The access token from before the reset stops working too; the new sign-in's works.
+        Assert.Equal(HttpStatusCode.Unauthorized, (await old.GetAsync("/v1/profile")).StatusCode);
+        var fresh = server.CreateClient();
+        fresh.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", (await login.Content.ReadFromJsonAsync<TokenResponse>())!.AccessToken);
+        Assert.Equal(HttpStatusCode.OK, (await fresh.GetAsync("/v1/profile")).StatusCode);
     }
 
     [Fact]

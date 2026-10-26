@@ -42,14 +42,19 @@ services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme).Co
             return (notBefore is null || notBefore <= now.AddSeconds(30)) && expires is not null && expires > now.AddSeconds(-30);
         },
     };
-    // A deleted account's still-unexpired access tokens are refused.
+    // A deleted account's still-unexpired access tokens are refused, and so are those issued before a password reset.
     jwt.Events = new JwtBearerEvents
     {
         OnTokenValidated = context =>
         {
-            if (Guid.TryParse(context.Principal?.FindFirst(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub)?.Value, out var account) &&
-                context.HttpContext.RequestServices.GetRequiredService<DeletedAccounts>().Contains(account))
-                context.Fail("Account deleted.");
+            if (Guid.TryParse(context.Principal?.FindFirst(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub)?.Value, out var account))
+            {
+                var services = context.HttpContext.RequestServices;
+                if (services.GetRequiredService<DeletedAccounts>().Contains(account)) context.Fail("Account deleted.");
+                else if (context.SecurityToken is Microsoft.IdentityModel.JsonWebTokens.JsonWebToken token &&
+                         services.GetRequiredService<SessionCutoffs>().Refuses(account, token.IssuedAt))
+                    context.Fail("Session ended.");
+            }
             return Task.CompletedTask;
         },
     };
@@ -69,6 +74,7 @@ services.AddSingleton(TimeProvider.System);
 services.AddSingleton<GameCalendar>();
 services.AddSingleton<RealtimeTickets>();
 services.AddSingleton<DeletedAccounts>();
+services.AddSingleton<SessionCutoffs>();
 services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.Section));
 services.AddSingleton<IEmailSender, SmtpEmailSender>();
 services.AddSingleton<PasswordResetCodes>();

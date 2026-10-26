@@ -76,6 +76,8 @@ public sealed class PasswordResetCodes(TimeProvider clock)
         if (!codes.TryGetValue(email, out var entry)) return false;
         lock (entry)
         {
+            // Two requests with the same code: the first one takes it out, the second finds it gone (one use only).
+            if (!codes.TryGetValue(email, out var current) || !ReferenceEquals(current, entry)) return false;
             if (entry.Expires <= clock.GetUtcNow() || entry.Tries >= MaxTries) { codes.TryRemove(email, out _); return false; }
             var ok = code is { Length: 6 } && CryptographicOperations.FixedTimeEquals(SHA256.HashData(Encoding.UTF8.GetBytes(code)), entry.Hash);
             if (ok || ++entry.Tries >= MaxTries) codes.TryRemove(email, out _);
@@ -115,7 +117,8 @@ public static class PasswordResetEndpoints
         });
 
         // A new password ends every session of the account (all devices sign in again) and lifts a wrong-password lock.
-        anonymous.MapPost("/password/reset", async (PasswordResetRequest request, GameDb db, PasswordResetCodes codes, TimeProvider clock, CancellationToken ct) =>
+        anonymous.MapPost("/password/reset", async (PasswordResetRequest request, GameDb db, PasswordResetCodes codes, SessionCutoffs sessions,
+            Realtime.ConnectionRegistry live, TimeProvider clock, CancellationToken ct) =>
         {
             var email = Passwords.Normalize(request.Email);
             if (!Passwords.ValidPassword(request.Password)) return Api.Error(ErrorCodes.Validation, error: V4Errors.E_PASS_SHORT);
@@ -128,6 +131,9 @@ public static class PasswordResetEndpoints
             var now = clock.GetUtcNow();
             await db.RefreshTokens.Where(x => x.AccountId == login.AccountId && x.RevokedAt == null).ExecuteUpdateAsync(s => s.SetProperty(x => x.RevokedAt, now), ct);
             await tx.CommitAsync(ct);
+            // Sessions already open end too: their access tokens stop working and the game socket closes.
+            sessions.Cut(login.AccountId);
+            live.Disconnect(login.AccountId);
             return Results.NoContent();
         });
     }

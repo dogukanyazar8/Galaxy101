@@ -62,10 +62,10 @@ namespace Galaxy101
             view.Decorate(layer, "linear-gradient(180deg,rgba(5,8,22,.15),rgba(5,8,22,.5))");
             body = Fill("lobby-body"); body.pickingMode = PickingMode.Ignore; layer.Add(body);
             AppVersionLabel.Attach(layer);
-            cardsSeen.Clear();
+            cardsSeen.Clear(); probes.Clear();
             dialogLayer = Fill("lobby-dialogs"); dialogLayer.pickingMode = PickingMode.Ignore; layer.Add(dialogLayer);
             toastLayer = Fill("lobby-toasts"); toastLayer.pickingMode = PickingMode.Ignore; layer.Add(toastLayer);
-            backend.TablesChanged += OnTables; backend.RoomChanged += OnRoom; backend.ChipsChanged += OnChips; backend.InviteAnswered += OnInviteAnswered;
+            backend.TablesChanged += OnTables; backend.RoomChanged += OnRoom; backend.ChipsChanged += OnChips; backend.InviteAnswered += OnInviteAnswered; backend.InviteReceived += OnInviteReceived;
             shownAt = Time.realtimeSinceStartup;
             screen = backend.Room != null ? "wait" : "list"; animateCards = true; Render();
             if (!backend.Online && !(await Connect())) return;
@@ -87,7 +87,7 @@ namespace Galaxy101
         public void Hide()
         {
             if (layer == null) return;
-            backend.TablesChanged -= OnTables; backend.RoomChanged -= OnRoom; backend.ChipsChanged -= OnChips; backend.InviteAnswered -= OnInviteAnswered;
+            backend.TablesChanged -= OnTables; backend.RoomChanged -= OnRoom; backend.ChipsChanged -= OnChips; backend.InviteAnswered -= OnInviteAnswered; backend.InviteReceived -= OnInviteReceived;
             backend.Unsubscribe();
             ticker?.Pause(); ticker = null; motions.Clear(); toastStep = null;
             var canvas = layer.parent; layer.RemoveFromHierarchy(); layer = null;
@@ -193,10 +193,10 @@ namespace Galaxy101
             bar.Add(Grow());
             bar.Add(Balance(chips, true));
             var code = Row(); code.name = "lobby.openCode"; code.style.height = 46; code.style.marginLeft = 14; Pad(code, 0, 18, 0, 18); Raise(code, "var(--pnH)", 14, 4, "var(--pnS)");
-            var key = view.Icon(IconKey, 18, "var(--ic)"); key.style.marginRight = 8; code.Add(key); code.Add(Text(S("joinCode"), 15, "Montserrat-700", "#F4F1E8"));
+            var key = view.Icon(IconKey, 18, "var(--ic)"); key.style.marginRight = 8; code.Add(key); code.Add(Exact(Text(S("joinCode"), 15, "Montserrat-700", "#F4F1E8")));
             GalaxyFilters.HoverBrightness(code, 1.2f); Tap(code, OpenCode); bar.Add(code);
             var open = Row(); open.name = "lobby.openCreate"; open.style.height = 46; open.style.marginLeft = 14; Pad(open, 0, 20, 0, 20); Raise(open, "linear-gradient(var(--a1),var(--a2))", 14, 5, "var(--aS)");
-            var plus = view.Icon(IconPlus, 18, "var(--aT)"); plus.style.marginRight = 8; open.Add(plus); open.Add(Text(S("create"), 16, "Montserrat-800", "var(--aT)"));
+            var plus = view.Icon(IconPlus, 18, "var(--aT)"); plus.style.marginRight = 8; open.Add(plus); open.Add(Exact(Text(S("create"), 16, "Montserrat-800", "var(--aT)")));
             GalaxyFilters.HoverBrightness(open, 1.07f); Tap(open, OpenCreate); bar.Add(open);
             Pulse(open, 2.4f);
 
@@ -479,13 +479,13 @@ namespace Galaxy101
         /// PIN / balance answer. The prototype checks a PIN or a code before connecting; here the server does, so the PIN
         /// or code dialog stays up (and shakes) until it answers, and only what it accepts goes on to "bağlanılıyor".
         /// </summary>
-        private async Task JoinAsync(TableJoinMessage join, TableSummary table, bool watch = false)
+        private async Task JoinAsync(TableJoinMessage join, TableSummary table, bool watch = false, Func<Task<string>> request = null)
         {
             var origin = dialog?.Kind == "pin" || dialog?.Kind == "code" ? dialog : null;
             if (origin == null) OpenDialog(new Dialog { Kind = "connect", Table = table });
             joining = true;
             string error;
-            try { error = watch ? await backend.WatchAsync(join) : await backend.JoinAsync(join); }
+            try { error = request != null ? await request() : watch ? await backend.WatchAsync(join) : await backend.JoinAsync(join); }
             finally { joining = false; }
             if (layer == null) return;
             if (watch && error == ErrorCodes.Validation) error = "E_SPECTATE_OFF";
@@ -609,7 +609,7 @@ namespace Galaxy101
         {
             var option = Row(); option.name = name; Pad(option, padY, padX, padY, padX); if (gap > 0) option.style.marginRight = gap;
             Raise(option, on ? "linear-gradient(var(--a1),var(--a2))" : "transparent", radius, on ? 3 : 0, "var(--aS)");
-            option.Add(Text(text, size, font, on ? "var(--aT)" : "var(--mt)"));
+            option.Add(Exact(Text(text, size, font, on ? "var(--aT)" : "var(--mt)")));
             option.EnableInClassList("selected", on); Tap(option, pick); return option;
         }
 
@@ -619,8 +619,63 @@ namespace Galaxy101
             float ring = on ? 2 : 0;
             var chip = Row(); chip.name = name; chip.style.marginLeft = 10; Pad(chip, 9 - ring, 14 - ring, 9 - ring, 14 - ring); view.Decorate(chip, on ? "var(--pnH)" : "var(--dp)", 12);
             if (on) Border(chip, 2, view.C("var(--a1)"));
-            mark.style.marginRight = 7; chip.Add(mark); chip.Add(Text(text, 14, "Montserrat-700", on ? "#F4F1E8" : "var(--mt)"));
+            if (mark is Label markText) Exact(markText);
+            mark.style.marginRight = 7; chip.Add(mark); chip.Add(Exact(Text(text, 14, "Montserrat-700", on ? "#F4F1E8" : "var(--mt)")));
             chip.EnableInClassList("selected", on); Tap(chip, toggle); return chip;
+        }
+
+        // ---------- CSS text widths ----------
+        // A browser lays a text box out at its fractional advance width; UI Toolkit rounds every measured text box up to the
+        // whole pixel, so a row of short labels drifts right by about half a pixel per label (run8 S09: the stake tabs ended
+        // 7 px right of the reference). Labels in such rows get their own width, measured once by a hidden probe of the same
+        // font at ten times the size (the rounding shrinks tenfold) and kept per font, size and text.
+        private static readonly Dictionary<string, float> exactWidths = new Dictionary<string, float>();
+        private readonly Dictionary<string, Label> probes = new Dictionary<string, Label>();
+        private readonly List<(Label Label, string Key, string Probe, string Text, float Pad)> pendingExact = new List<(Label, string, string, string, float)>();
+        private bool exactScheduled;
+
+        private Label Exact(Label label)
+        {
+            var font = label.style.unityFont.value; float size = label.style.fontSize.value.value;
+            if (font == null || size <= 0 || layer == null || label.style.letterSpacing.keyword == StyleKeyword.Undefined && label.style.letterSpacing.value.value != 0) return label;
+            string probeKey = font.name + "|" + size.ToString("R", System.Globalization.CultureInfo.InvariantCulture) + "|" + (label.enableRichText ? "rich" : "plain");
+            string key = probeKey + "|" + label.text;
+            float pad = label.style.paddingLeft.value.value + label.style.paddingRight.value.value;
+            if (exactWidths.TryGetValue(key, out float width)) { label.style.width = width + pad; return label; }
+            if (!probes.ContainsKey(probeKey))
+            {
+                var probe = new Label { pickingMode = PickingMode.Ignore, enableRichText = label.enableRichText };
+                probe.style.position = Position.Absolute; probe.style.visibility = Visibility.Hidden; probe.style.whiteSpace = WhiteSpace.NoWrap;
+                probe.style.paddingLeft = probe.style.paddingRight = probe.style.paddingTop = probe.style.paddingBottom = 0;
+                probe.style.marginLeft = probe.style.marginRight = probe.style.marginTop = probe.style.marginBottom = 0;
+                probe.style.unityFont = font; probe.style.fontSize = size * 10;
+                layer.Add(probe); probes[probeKey] = probe;
+            }
+            pendingExact.Add((label, key, probeKey, label.text, pad));
+            if (!exactScheduled) { exactScheduled = true; layer.schedule.Execute(MeasureExact); }
+            return label;
+        }
+
+        /// <summary>Measures the waiting texts once their probes carry the resolved font size (the next panel update).</summary>
+        private void MeasureExact()
+        {
+            exactScheduled = false; if (layer == null) { pendingExact.Clear(); return; }
+            var waiting = new List<(Label Label, string Key, string Probe, string Text, float Pad)>();
+            foreach (var item in pendingExact)
+            {
+                if (!probes.TryGetValue(item.Probe, out var probe) || probe.panel == null) continue;
+                if (!exactWidths.TryGetValue(item.Key, out float width))
+                {
+                    float expected = probe.style.fontSize.value.value;
+                    if (Mathf.Abs(probe.resolvedStyle.fontSize - expected) > .01f) { waiting.Add(item); continue; }
+                    width = probe.MeasureTextSize(item.Text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).x / 10;
+                    if (width <= 0) continue;
+                    exactWidths[item.Key] = width;
+                }
+                if (item.Label.panel != null && item.Label.text == item.Text) item.Label.style.width = width + item.Pad;
+            }
+            pendingExact.Clear(); pendingExact.AddRange(waiting);
+            if (waiting.Count > 0) { exactScheduled = true; layer.schedule.Execute(MeasureExact); }
         }
 
         /// <summary>A round dot; <paramref name="glow"/> is the CSS box-shadow blur (0 0 Npx colour).</summary>

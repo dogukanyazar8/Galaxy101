@@ -73,6 +73,8 @@ namespace Galaxy101.Diagnostics
         public event Action<TableStateMessage> RoomChanged;
         public event Action ChipsChanged;
         public event Action<Guid, string> InviteAnswered;
+        public event Action<IncomingInvite> InviteReceived;
+        public Task<string> RespondInviteAsync(IncomingInvite invite, bool accept) => Task.FromResult<string>(null);
 
         /// <summary>resolveArg('$tbl:pass' | '$tbl:open' | '$tbl:mine' | '$tbl:full') of g101-state.js.</summary>
         public TableSummary Pick(string kind)
@@ -107,7 +109,7 @@ namespace Galaxy101.Diagnostics
         private static FriendResponse Friend((string Name, string Color, int Level, string Presence, bool Friend, double SeenHours, int AgoDays) f) =>
             new FriendResponse { Player = new PlayerSummary { Id = Id("f" + f.Name), Name = f.Name, Color = f.Color, Level = f.Level }, Presence = f.Presence,
                 LastSeen = f.Presence == "offline" ? DateTimeOffset.UtcNow.AddHours(-f.SeenHours) : (DateTimeOffset?)null };
-        private void Unused() { ChipsChanged?.Invoke(); InviteAnswered?.Invoke(Guid.Empty, null); }
+        private void Unused() { ChipsChanged?.Invoke(); InviteAnswered?.Invoke(Guid.Empty, null); InviteReceived?.Invoke(null); }
     }
 }
 #endif

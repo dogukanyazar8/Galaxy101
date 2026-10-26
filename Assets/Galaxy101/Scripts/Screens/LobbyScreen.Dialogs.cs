@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Galaxy101.Contracts;
+using Galaxy101.Online;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -16,6 +17,8 @@ namespace Galaxy101
             public string Kind, Pin = "", Code = "", CodeError;
             public TableSummary Table;
             public InviteMessage Invite;
+            /// <summary>A v4 invite (inviteIn): answered with inviteRespond.</summary>
+            public IncomingInvite Incoming;
             public float Shake, OpenedAt;
             /// <summary>d.err of the PIN dialog: the PIN was wrong.</summary>
             public bool Error;
@@ -44,6 +47,13 @@ namespace Galaxy101
 
         /// <summary>A friend's invite (realtime <c>invite</c>, v4 inviteIn): who, the stake; Katıl joins by the table code.</summary>
         public void ShowInvite(InviteMessage message) => OpenDialog(new Dialog { Kind = "invited", Invite = message });
+
+        /// <summary>inviteIn while the lobby is open (outside a waiting room and the form): the same invite dialog.</summary>
+        private void OnInviteReceived(IncomingInvite invite)
+        {
+            if (layer == null || invite == null || backend.Room != null) return;
+            OpenDialog(new Dialog { Kind = "invited", Incoming = invite });
+        }
 
         private void RenderDialog()
         {
@@ -244,6 +254,7 @@ namespace Galaxy101
         /// <summary>An incoming invite (inviteIn) in the error dialog's shape: who, the stake and code; Sonra / Katıl (EK-806).</summary>
         private void BuildInvited(VisualElement card, Dialog d)
         {
+            if (d.Incoming != null) { BuildIncoming(card, d.Incoming); return; }
             var m = d.Invite; Pad(card, 30, 30, 24, 30); ContentWidth(card, 450);
             var face = Box(); Square(face, 68); view.Decorate(face, m.From?.Color ?? "#3D7BFF", 34); Border(face, 3, new Color(1, 1, 1, .85f)); face.Add(Text(Initials(m.From?.Name), 24, "Montserrat-700", "#fff")); card.Add(face);
             AddErrorTexts(card, L((m.From?.Name ?? "Bir arkadaşın") + " seni masaya çağırıyor", (m.From?.Name ?? "A friend") + " invites you to a table"),
@@ -252,6 +263,21 @@ namespace Galaxy101
             {
                 if (m.Stake > backend.Chips) { CloseDialog(); Low(m.Stake, backend.Chips); return; }
                 var code = m.RoomCode; CloseDialog(); _ = JoinAsync(new TableJoinMessage { Code = code }, null);
+            }, "lobby.closeDlg#4", "lobby.d.alt", true, 10 + 10));
+        }
+
+        /// <summary>A v4 invite: who, the table (passBody: name · bet); Sonra declines, Katıl accepts (inviteRespond) and the room follows.</summary>
+        private void BuildIncoming(VisualElement card, IncomingInvite m)
+        {
+            Pad(card, 30, 30, 24, 30); ContentWidth(card, 450);
+            var face = Box(); Square(face, 68); view.Decorate(face, m.From?.Color ?? "#3D7BFF", 34); Border(face, 3, new Color(1, 1, 1, .85f)); face.Add(Text(Initials(m.From?.Name), 24, "Montserrat-700", "#fff")); card.Add(face);
+            AddErrorTexts(card, L((m.From?.Name ?? "Bir arkadaşın") + " seni masaya çağırıyor", (m.From?.Name ?? "A friend") + " invites you to a table"),
+                S("passBody", m.Table?.Name ?? "", view.N(m.Table?.Stake ?? 0)));
+            card.Add(Pair(L("Sonra", "Later"), () => { CloseDialog(); _ = backend.RespondInviteAsync(m, false); }, S("join"), () =>
+            {
+                long stake = m.Table?.Stake ?? 0;
+                if (stake > backend.Chips) { CloseDialog(); Low(stake, backend.Chips); return; }
+                CloseDialog(); _ = JoinAsync(null, m.Table, false, () => backend.RespondInviteAsync(m, true));
             }, "lobby.closeDlg#4", "lobby.d.alt", true, 10 + 10));
         }
 

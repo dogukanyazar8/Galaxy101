@@ -23,7 +23,18 @@ Yeni dosyalar: `LobbyScreen.Strings.cs` (v4 metin anahtarları, hata kodu eşlem
 | `008d395` | `main` birleştirmesi (6565e6a) |
 | `dd24b37` | `LobbyClient` v4 protokolü; canlı sunucu testi `tableJoinCode` ve Başlat ile |
 | `f451720` | Bu belgeler ve referans kareleri (main'deki kırmızı Hemen oyna testinin gerekçesi commit mesajında) |
-| (son) | Commit tablosu |
+| `3e0ceb4` | Commit tablosu |
+| (main fd64806 birleştirmesi) | run8 sonrası `main` |
+| `71deb03` | S09 süzgeç satırı kayması (tam metin genişlikleri); gelen davet (`inviteIn` / `inviteRespond`) |
+| (son) | Bu rapor: run8 sonucu |
+
+## 2a. run8 sonucu ve sonrası
+
+Orkestratörün Unity koşusu run8 (`artifacts/v4/unity/run8`, main fd64806): S10, S11, S12, S13 eşleşti; S14 / S15 bilinçli fark olarak kaydedildi (ana liste EK-007 = EK-801). S09: 148/155 metin, 7 metin 3 px'ten fazla kaymış (Katlamalı +4, Tümü +4, 1K +5, 5K +5, 10K +6, 50K +6, 100K +7), UI pikseli %12,74 (sınır %12).
+
+- **Neden:** UI Toolkit ölçülen her metin kutusunu tam piksele yukarı yuvarlıyor (tarayıcı kesirli genişliği tutuyor); süzgeç satırındaki 13 kısa etiket satır boyunca yarım piksel kadar birikiyor (sekme kutuları 103,41 → 104, 95,33 → 96 …).
+- **Düzeltme (71deb03):** segment seçenekleri (tip ve bahis sekmeleri; formdaki, kurallardaki ve davet panelindeki segmentler de), süzgeç çipleri (101↑ işaretiyle) ve üst çubuktaki Kodla katıl / Masa aç etiketleri genişliklerini aynı fontla on kat büyük ölçen gizli bir yoklama etiketinden alıyor (yuvarlama hatası onda bire iner; font + boyut + metin başına önbellekte). Ölçüm lobi açıldıktan sonraki ilk panel güncellemesinde, giriş solmasının (.3 s) içinde; sonraki yeniden çizimler önbellekten aynı karede.
+- **Beklenen:** süzgeç satırı ±1 px; UI pikselindeki kalan payın bir kısmı arka plandaki gezegen (Unity'de daha büyük / parlak; menü-arka plan hattı) ve yazı kenar yumuşatması — bu hattın dosyalarında değil. Unity'de yeniden çekimle doğrulanmalı.
 
 ## 3. Durum ve görünüm başına değişiklikler
 
@@ -107,7 +118,9 @@ Yeni dosyalar: `LobbyScreen.Strings.cs` (v4 metin anahtarları, hata kodu eşlem
 
 Hata kodları: ekran v4 kodlarını (`E_PIN_WRONG`, `E_TABLE_FULL`, `E_TABLE_CLOSED`, `E_CODE_FORMAT`, `E_CODE_UNKNOWN`, `E_NO_CHIPS`, `E_ALREADY_SEATED`, `E_TABLE_PLAYING`, `E_SPECTATE_OFF`, `E_SEAT_TAKEN`, sessizler `E_NOT_OWNER`, `E_TABLE_NOT_FULL`, `E_STATUS`, …) `strings_v4.json` `errors`'taki türe göre gösterir (pencere / satır içi / sallama / tost / sessiz); sahte arka uç ve eski sunucu kodları `LobbyScreen.V4Code` ile aynı yere düşer.
 
-Bu hattın dosyaları dışında kalan işler: `AckMessage`'ın dönüş alanları (EK-812), menünün `inviteIn` / `inviteRespond` bağlantısı (EK-813), `tableSpectate`'e PIN (EK-807), son oyuncularda zaman alanı (EK-804, sunucu).
+Gelen davet (71deb03): `inviteIn` → `ILobbyBackend.InviteReceived` → lobi açıkken davet penceresi ("X seni masaya çağırıyor", `passBody` masa · bahis); Katıl → `inviteRespond{accept: true}` "Masaya bağlanılıyor…" üzerinden bekleme odasına, Sonra → `inviteRespond{accept: false}`; süresi geçmişse `E_INVITE_EXPIRED` tostu.
+
+Bu hattın dosyaları dışında kalan işler: `AckMessage`'ın dönüş alanları (EK-812), lobi kapalıyken menünün gelen daveti açması (EK-813), `tableSpectate`'e PIN (EK-807), son oyuncularda zaman alanı (EK-804, sunucu).
 
 ## 5. Testler
 
@@ -119,6 +132,7 @@ Bu hattın dosyaları dışında kalan işler: `AckMessage`'ın dönüş alanlar
 - Davet: sekme sayısı "1/3", davet açılan koltuğa (`(mert, 1)`), `inviteResult` declined → "no", oturunca beklemeden düşer.
 - Canlı sunucu testi (`LiveServer`, sunucu yoksa Inconclusive): ikinci misafir `tableJoinCode` ile (yanlış PIN `E_PIN_WRONG`), kurucu Başlat'a basar.
 - main'de kırmızı olan `HemenOynaOpensTheListWithFiltersSearchAndBalanceRules` §3 S09'daki kuralla geçer (beklenti değişmedi).
+- Yeni `IncomingInviteJoinsThroughInviteRespond`: `inviteIn` davet penceresini açar, Katıl `inviteRespond(accept)` gönderir ve bekleme odası gelir.
 
 ## 6. Referans kareleri
 

@@ -15,6 +15,9 @@ Kaynak görev: `Design/PROMPT_v4_OTONOM_GELISTIRME.md` §0.5. Paket: `Design/Gal
 | K-09 | Maç akışı taşımadan bağımsız saf C# paket (`com.galaxy101.table`): sunucu ve Unity çevrimdışı aynı kodu koşar | karar · Hat B → Faz 2 |
 | K-10 | "Botlara karşı" v4'teki gibi açık (YAKINDA kalkar) | karar · Faz 2 |
 | K-11 | Faz 2 kod yazımı ekran gruplarına bölünebilir (worktree'de, Unity'siz derleme); Unity'de doğrulama yalnız ana kopyada ve sırayla | karar · Faz 2 |
+| K-12 | Bekleme odasında sahip çıkınca sahiplik ilk kalan insana geçer; insan kalmazsa masa kapanır | kullanıcı kararı · 26 Ekim 2026 · EK-211 |
+| K-13 | Mevcut cilalı modeller korunur; v4 renk ve yerleşimleri uygulanır | kullanıcı kararı · 26 Ekim 2026 · EK-305 |
+| K-14 | Desteklenen taş olayları mevcut gerçek CC0 kaydından üretilen örneklere bağlanır; olay/kanal/zaman sözleşmesi korunur | kullanıcı kararı · 26 Ekim 2026 · EK-413 |
 
 ## K-01 · Kural motoru: `rules.js` → C# adım motoru
 
@@ -68,3 +71,15 @@ Hafızadaki eski ürün kararı (24 Ekim 2026: "Botlara karşı YAKINDA kalır")
 ## K-11 · Faz 2'nin bölünmesi
 
 Unity aynı anda tek süreç çalıştırabilir; bu kısıt Unity'nin *çalıştırılmasına* aittir. Ekran kodunun yazımı Unity gerektirmez (`tools/v4/unity_compile.py --repo <worktree> --csproj-from <ana kopya>` ile derlenir). Bu yüzden birbirinden bağımsız ekran grupları (ör. Dereceli ekranı, ses sistemi) ayrı worktree'lerde yazılabilir; ana kopyaya birleşince durum yönlendiricisiyle Unity'de sırayla doğrulanır.
+
+## K-12 · Bekleme odasında sahiplik devri
+
+26 Ekim 2026 devam oturumunda kullanıcı EK-211 için "Sahiplik ilk insana geçsin" dedi. Bu açık karar, paketin sahip ayrılınca masayı kapatma davranışını geçersiz kılar. Ayrılan kişinin bahsi iade edilir; sahiplik koltuk sırasındaki ilk kalan insana geçer. Kalan insan yoksa masa kapatılır. Yeni sahip bilgisi bütün üyelere ve lobi listesine yayınlanır. K-10 ayrıca "Açık kalsın" cevabıyla doğrulandı: "Botlara karşı" etkin kalır.
+
+## K-13 · Cilalı masa modelleri
+
+Kullanıcı EK-305 için "Mevcut cilalı modeller; v4 renk/yerleşimi" seçti. `TableAssetBuilder` mevcut `Models/*.glb` kaynaklarını, bevel/LOD/dokuları ve zar geometrisini korur. `Models/v4` ve paketin `materials/lighting/tween3d` verileri renk, ışık ve yerleşim referansıdır; ham v4 modelleri mevcut prefabların yerine geçirilmez.
+
+## K-14 · Gerçek taş sesleri
+
+Kullanıcı EK-413 için "Gerçek taş kayıtları" seçti. Kaynak kaydın ve örneklerin gerçekliği doğrulanır; mevcut sentez dosyaları yalnız adları yüzünden gerçek kayıt diye kabul edilmez. Mevcut hazırlama betiğinin tanımladığı çekme/koyma/atma temasları kullanılır; karşılığı bulunmayan sesler uydurulmaz. v4 olay tetikleme, kanal, kazanç, öncelik ve eşzamanlılık kuralları korunur; değişen ses kaynağı bilinçli fark olarak kaydedilir.

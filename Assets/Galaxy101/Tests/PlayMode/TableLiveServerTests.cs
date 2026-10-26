@@ -208,12 +208,13 @@ namespace Galaxy101.Tests
             Assert.That(errors, Is.Empty, string.Join("\n", errors));
 
             // Masadan kalk: the server lets the seat go (R-60) and the session's screen is the menu again.
-            foreach (var go in new[] { hudOwner, gameOwner, sceneOwner }) if (go != null) UnityEngine.Object.Destroy(go);   // no scene change in a test
-            gameOwner = sceneOwner = hudOwner = null; yield return null;
             bool left = false; offs.Add(online.Realtime.On(V4Messages.LeftTable, _ => left = true));
             var leave = session.Leave(); yield return Until(() => leave.IsCompleted, 10, "tableLeave");
             Assert.That(leave.Result, Is.Null, "tableLeave: " + leave.Result);
             yield return Until(() => left, 10, "leftTable");
+            // TableGame owns the session: leave before destroying it, then remove the scene before the lobby timer.
+            foreach (var go in new[] { hudOwner, gameOwner, sceneOwner }) if (go != null) UnityEngine.Object.Destroy(go);
+            gameOwner = sceneOwner = hudOwner = null; yield return null;
             snapshot = null; yield return Request(online, V4Messages.Resync, null, a => resync = a);
             yield return Until(() => snapshot != null, 10, "snapshot after leaving");
             Assert.That((string)snapshot["screen"], Is.EqualTo("menu"), "the lobby is given back");

@@ -129,7 +129,7 @@ namespace Galaxy101.Online
                     inbox.Enqueue((type, data));
                 }
             }
-            catch (OperationCanceledException) { return; } // replaced by a new socket or disposed: its requests are not ours to fail
+            catch (OperationCanceledException) when (ct.IsCancellationRequested) { return; } // replaced by a new socket or disposed: its requests are not ours to fail
             catch (Exception e) { if (reason != ReplacedReason) reason = e.Message; }
             FailPending();
             if (!ct.IsCancellationRequested) inbox.Enqueue(("__closed", reason));

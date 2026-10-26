@@ -233,7 +233,7 @@ namespace Galaxy101.Table
         {
             Model.Applied += OnMessage;
             // The socket: the reconnect card follows the session; a snapshot of another screen (the match is gone) leaves.
-            if (Session is Galaxy101.Online.V4TableSession net) net.ConnectionChanged += () => { if (this == null) return; Notify(); if (net.Closed && !leaving) LeaveAfter(0.5f); };
+            if (Session is Galaxy101.Online.V4TableSession net) net.ConnectionChanged += OnConnectionChanged;
             // A session the menu opened may already hold the start of the match (and its snapshot).
             if (Model.Table != null) { ApplySeats(); if (Model.HasHand) Resync(); else if (Model.Status == G101Rules.StatusLobby) Current = Phase.Seating; }
         }
@@ -252,6 +252,12 @@ namespace Galaxy101.Table
             SyncRack(); SyncBoard();
         }
 
+        private void OnConnectionChanged()
+        {
+            Notify();
+            if (Session is Galaxy101.Online.V4TableSession net && net.Closed && !leaving) LeaveAfter(0.5f);
+        }
+
         private void OnDestroy()
         {
             life?.Cancel(); ceremonyLife?.Cancel();
@@ -259,6 +265,7 @@ namespace Galaxy101.Table
             // TaskCanceledException from every async void still waiting when the scene unloads.
             foreach (var t in timers) t.Done.TrySetResult(false); timers.Clear();
             if (Model != null) Model.Applied -= OnMessage;
+            if (Session is Galaxy101.Online.V4TableSession net) net.ConnectionChanged -= OnConnectionChanged;
             if (hud != null) { hud.Command -= OnHudCommand; hud.GiftSent -= OnGiftSent; if (hud.Settings != null) hud.Settings.Changed -= OnSetting; }
             Board?.Clear();
             Session?.Dispose();

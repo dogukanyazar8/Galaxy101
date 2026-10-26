@@ -61,6 +61,13 @@ Görev: `Design/PROMPT_v4_OTONOM_GELISTIRME.md`. Bağlam sıfırlanırsa buradan
 
 ## Sıradaki
 
-- Referans yakalamanın bitmesi → `capture_report.json` özetinin buraya ve DURUMLAR'a girmesi.
-- Faz 1 hatlarının başlatılması (worktree + dal).
-- FARK_MATRISI.
+- Masa son birleşmesinin Unity EditMode / PlayMode doğrulaması (sunucu açık).
+- Masa görsel eşitliği: G32/T15, sonuç kartı, T16–T18; ardından kalan G/T durumları.
+- Menü 60/61/95/81; EN ve tema koşusu; Faz 3 istemci uçtan uca boşlukları; son koşu ve rapor.
+
+### 2026-10-26 · Devam oturumu
+
+- Başlangıç ana kopya `ed7f035`, temiz; `v4/table` `b6c4733` ve üç değişmiş dosya. Değişiklikler diff ve paket kaynağıyla incelendi: üst çubuk ölçüleri (G13 referans `deckCount` 34,63 px, `chipsLabel` 92,34 px), tek `table.roomLabel`, atma etiketi CSS animasyonu, gösterge ankrajı, açılmış el bildirimi ve eylem yerleşimi. Korundu; yerel commit `81727ff`, `main` ile birleştirme `5cbc5e1`, ana kopyaya alındı.
+- Worktree'nin dört test projesi Unity'siz derlendi: `Galaxy101.PlayMode.Tests`, `Galaxy101.Service.Tests`, `Galaxy101.Editor.Tests`, `Okey101.PlayMode.Tests`: hepsi **0 hata**. Gerçek Unity doğrulaması ayrı, henüz tamamlanmadı.
+- Docker Desktop ve yerel sunucu yeniden açıldı; `/health` **200**. `dotnet test tools/v4/nunit-table/TableClientTests.csproj` (worktree, canlı testler dahil): **38/38**, atlanan yok. `dotnet test tools/v4/nunit/CoreV4Tests.csproj`: **791/791**, atlanan yok; mevcut üç CS0649 uyarısı. Günlükler `artifacts/v4/resume-20261026/`.
+- Kullanıcı EK-211'i sahiplik ilk insana devredilecek diye cevapladı (K-12); K-10 "Botlara karşı" açık kalacak diye doğrulandı. Sahiplik uygulaması ve regresyon testi sırada.

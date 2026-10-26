@@ -854,7 +854,8 @@ namespace Galaxy101.Table
                 if (Launch.Seats != null && abs < Launch.Seats.Length && Launch.Seats[abs].Name != null)
                 {
                     var (name, color, level) = Launch.Seats[abs];
-                    hud.SetSeat(k, name, color, level, Model.SeatBot[abs], Rank(level), 38 + level * 7 % 20, level * 52);
+                    // The Test masası's seats are people to the eye (g101-state.js SEATS), whoever plays them.
+                    hud.SetSeat(k, name, color, level, false, Rank(level), 38 + level * 7 % 20, level * 52);
                     continue;
                 }
                 var user = abs < seats.Count ? seats[abs]?.User : null;
@@ -863,7 +864,7 @@ namespace Galaxy101.Table
         }
 
         /// <summary>The prototype's seat rank by level (Gerçek Ana Oyun startGame: &gt;40 Usta I, &gt;28 Elmas III, &gt;18 Altın II, else Gümüş I).</summary>
-        private static string Rank(int level) => level > 40 ? "usta1" : level > 28 ? "elmas3" : level > 18 ? "altin2" : "gumus1";
+        private static string Rank(int level) => level > 40 ? "Usta I" : level > 28 ? "Elmas III" : level > 18 ? "Altın II" : "Gümüş I";
 
         // ---------- HUD ----------
         private void Notify()

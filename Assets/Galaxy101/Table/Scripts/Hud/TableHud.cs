@@ -50,10 +50,9 @@ namespace Galaxy101.Table
             /// <summary>T33/T47–T49: every okey on the table with what it stands for, drag targets and refusals; the
             /// tooltip under one okey; the band text while dragging a tile that can take an okey.</summary>
             public readonly List<OkeyMark> Okeys = new List<OkeyMark>();
-            public int OkeyTipId = -1;
             /// <summary>T34: the tile that fed an opening, glowing for 1.2 s.</summary>
             public int GlowTile = -1;
-            public string OkeyTip, DragBanner;
+            public string DragBanner;
             /// <summary>spec/21: the deal ceremony card and the "Zar at" button while dealing.</summary>
             public DealInfoCard Deal;
             /// <summary>spec/22: Geri topla, Elden bit, and Aç below 101 (orange: a wrong opening costs +101).</summary>
@@ -394,12 +393,13 @@ namespace Galaxy101.Table
             if (balloons.TryGetValue(k, out var balloon)) column.Add(BalloonElement(k, balloon));
             var plate = new VisualElement { pickingMode = PickingMode.Ignore }; plate.style.marginTop = 6; plate.style.alignItems = Align.Center;
             Pad(plate, 4, 12, 5, 12); view.Decorate(plate, "rgba(5,8,22,.66)", 12); Border(plate, 1, new Color(1, 1, 1, .08f)); GalaxyFilters.BackdropBlur(plate, 6);
-            var nameRow = Row(5); nameRow.Add(Text((string)Seat(k)["name"], "Montserrat-700", 14, "#F4F1E8"));
+            // D-62: the prototype's table.p.*[i], i = 0 right, 1 across, 2 left.
+            var nameRow = Row(5); var seatName = Text((string)Seat(k)["name"], "Montserrat-700", 14, "#F4F1E8"); seatName.name = "table.p.name[" + (k - 1) + "]"; nameRow.Add(seatName);
             var bot = Text(TableStrings.Get("botBadge", Lang), "Baloo2-800", 8, "var(--ic)"); MenuView.Tracking(bot, 1, 8); bot.name = "bot-badge-" + k;
             if (Seat(k)["bot"] != null && !(bool)Seat(k)["bot"]) bot.style.display = DisplayStyle.None;
             Pad(bot, 1, 5, 1, 5); view.Decorate(bot, "rgba(255,255,255,.14)", 5); nameRow.Add(bot);
             plate.Add(nameRow);
-            var status = Text(Status(k, s, false), "Baloo2-800", 11, s.Opened[k] > 0 ? "#8EF0B0" : "var(--mt)"); status.style.marginTop = 1; plate.Add(status);
+            var status = Text(Status(k, s, false), "Baloo2-800", 11, s.Opened[k] > 0 ? "#8EF0B0" : "var(--mt)"); status.name = "table.p.status[" + (k - 1) + "]"; status.style.marginTop = 1; plate.Add(status);
             column.Add(plate);
         }
 
@@ -414,7 +414,7 @@ namespace Galaxy101.Table
             // dots 1.2s: the dot breathes in and out.
             motions.Add(t => dot.style.opacity = 0.3f + 0.7f * Mathf.Abs(Mathf.Sin(t * Mathf.PI / 1.2f)));
             column.Add(ring);
-            var invite = Text(L("Davet et", "Invite"), "Baloo2-800", 12, "#F4F1E8"); invite.name = "invite-" + k; invite.style.marginTop = 6;
+            var invite = Text(L("Davet et", "Invite"), "Baloo2-800", 12, "#F4F1E8"); invite.name = "table.p.invite[" + (k - 1) + "]"; invite.style.marginTop = 6;
             Pad(invite, 6, 14, 6, 14); view.Decorate(invite, "var(--pnH)", 15, 3, "var(--pnS)"); GalaxyFilters.HoverBrightness(invite, 1.25f);
             column.Add(Clickable(invite, "invite:" + k));
         }
@@ -426,9 +426,9 @@ namespace Galaxy101.Table
             var row = FullRow(470);
             var card = new VisualElement { name = "table-waiting", pickingMode = PickingMode.Ignore }; card.style.alignItems = Align.Center;
             Pad(card, 18, 28, 18, 28); view.Decorate(card, "rgba(5,8,22,.62)", 24); Border(card, 1, new Color(1, 1, 1, .1f)); GalaxyFilters.BackdropBlur(card, 8);
-            var title = Text(L("MASA HAZIRLANIYOR", "SETTING UP THE TABLE"), "Baloo2-800", 11, "var(--a1)"); MenuView.Tracking(title, 2, 11); card.Add(title);
+            var title = Text(L("MASA HAZIRLANIYOR", "SETTING UP THE TABLE"), "Baloo2-800", 11, "var(--a1)"); title.name = "table.t.waitTitle"; MenuView.Tracking(title, 2, 11); card.Add(title);
             var sub = Text(seated == 4 ? L("Masa doldu · oyun başlıyor", "Table full · starting") : L("Oyuncular bekleniyor · " + seated + "/4", "Waiting for players · " + seated + "/4"), "Montserrat-700", 22, "#F4F1E8");
-            sub.style.marginTop = 10; card.Add(sub);
+            sub.name = "table.waitSub"; sub.style.marginTop = 10; card.Add(sub);
             var track = new VisualElement { pickingMode = PickingMode.Ignore }; track.style.width = 200; track.style.height = 8; track.style.marginTop = 10; track.style.overflow = Overflow.Hidden;
             view.Decorate(track, "rgba(255,255,255,.14)", 4);
             var fill = new VisualElement { pickingMode = PickingMode.Ignore }; fill.style.position = Position.Absolute; fill.style.left = 0; fill.style.top = 0; fill.style.bottom = 0;
@@ -513,13 +513,13 @@ namespace Galaxy101.Table
             var left = new VisualElement { pickingMode = PickingMode.Ignore }; left.style.flexGrow = 1;
             var caption = Text(r.Title + " · " + r.Sub, "Baloo2-800", 11, "var(--mt)"); MenuView.Tracking(caption, 2, 11); left.Add(caption);
             var headRow = Row(12); headRow.style.marginTop = 4;
-            var head = Text(r.Head, "Montserrat-800", 36, "var(--a1)"); head.name = "table-result-head";
+            var head = Text(r.Head, "Montserrat-800", 36, "var(--a1)"); head.name = "table.res.head";
             head.style.textShadow = new TextShadow { offset = new Vector2(0, 3), blurRadius = 0, color = view.C("var(--lS)") }; headRow.Add(head);
             if (r.Multiplier > 1) { var mul = Text("×" + r.Multiplier, "Montserrat-800", 15, "var(--aT)"); mul.name = "result-multiplier"; Pad(mul, 3, 10, 3, 10); view.Decorate(mul, "linear-gradient(var(--a1),var(--a2))", 10, 3, "var(--aS)"); headRow.Add(mul); }
             left.Add(headRow); header.Add(left);
             var right = new VisualElement { pickingMode = PickingMode.Ignore }; right.style.alignItems = Align.FlexEnd;
             var xpCap = Text("XP", "Baloo2-800", 10, "var(--mt)"); MenuView.Tracking(xpCap, 1.4f, 10); right.Add(xpCap);
-            var xp = Text("+" + view.N(r.Xp) + " XP", "Montserrat-800", 28, "#6BE8B0"); xp.name = "table-result-xp"; xp.style.marginTop = 2; right.Add(xp);
+            var xp = Text("+" + view.N(r.Xp) + " XP", "Montserrat-800", 28, "#6BE8B0"); xp.name = "table.res.xp"; xp.style.marginTop = 2; right.Add(xp);
             header.Add(right); card.Add(header);
 
             var body = new VisualElement { pickingMode = PickingMode.Ignore }; Pad(body, 0, 30, 0, 30);
@@ -610,7 +610,7 @@ namespace Galaxy101.Table
             var bar = new VisualElement { pickingMode = PickingMode.Ignore }; bar.style.position = Position.Absolute; bar.style.left = 0; bar.style.top = 0; bar.style.bottom = 0; bar.style.backgroundColor = new Color(1, 1, 1, .32f);
             next.Add(bar);
             bool last = r.LastHand;
-            var label = Text((last ? L("Maç sonucu · ", "Match result · ") : L("Sonraki el · ", "Next hand · ")) + r.Seconds, "Montserrat-800", 18, "var(--aT)"); label.name = "result-next-label"; next.Add(label);
+            var label = Text((last ? L("Maç sonucu · ", "Match result · ") : L("Sonraki el · ", "Next hand · ")) + r.Seconds, "Montserrat-800", 18, "var(--aT)"); label.name = "table.nextLabel"; next.Add(label);
             float start = r.StartedAt; int total = r.Seconds;
             // barFill 15s + the countdown in the label ("Sonraki el · 11"); the last hand leads to the match end.
             motions.Add(t =>
@@ -895,7 +895,7 @@ namespace Galaxy101.Table
             var edge = new VisualElement { pickingMode = PickingMode.Ignore }; MenuView.Place(edge, 0, 24, 20, 3); edge.style.backgroundColor = view.C("var(--te)"); mini.Add(edge);
             deck.Add(mini);
             deck.Add(Text(L("Taş", "Deck"), "Baloo2-800", 12, "var(--mt)"));
-            var count = Text(s.DeckCount.ToString(), "Montserrat-700", 16, "#F4F1E8"); count.name = "deck-count"; count.style.minWidth = 22; deck.Add(count);
+            var count = Text(s.DeckCount.ToString(), "Montserrat-700", 16, "#F4F1E8"); count.name = "table.deckCount"; count.style.minWidth = 22; deck.Add(count);
             bar.Add(deck);
 
             // XP pill instead of chips (T28): level disc, 100×7 bar, "6.240 / 9.000 XP".
@@ -1078,16 +1078,7 @@ namespace Galaxy101.Table
                         motions.Add(t => GalaxyFilters.Shadow(frame, 0, 0, 6 + 5 * (0.5f + 0.5f * Mathf.Sin(t * Mathf.PI * 2 / 1.1f)), view.C("var(--gl)")));
                     anchor.Add(frame);
                 }
-                var pill = Text(okey.Number, "Montserrat-800", 11, okey.Color); pill.name = "okey-badge-" + id;
-                pill.style.position = Position.Absolute; pill.style.left = 6; pill.style.top = -26; pill.style.minWidth = 17; pill.style.height = 17;
-                pill.style.unityTextAlign = TextAnchor.MiddleCenter; Pad(pill, 0, 3, 0, 3); view.Decorate(pill, "#FFFFFF", 9); Border(pill, 2, view.C("#E8B730"));
-                anchor.Add(pill);
-                if (s.OkeyTipId == id && s.OkeyTip != null)
-                {
-                    var tip = Text(s.OkeyTip, "Baloo2-800", 12, "#F4F1E8"); tip.name = "okey-tip";
-                    Pad(tip, 6, 11, 6, 11); view.Decorate(tip, "rgba(5,8,22,.88)", 10); GalaxyFilters.Shadow(tip, 0, 6, 9, new Color(0, 0, 0, .35f));
-                    Centered(anchor, -64, false).Add(tip);
-                }
+                // REMOVED.md T33 / T48: no okey badge and no long-press tip — the okey's value is its place in the meld (R-13).
             }
         }
 
@@ -1112,8 +1103,8 @@ namespace Galaxy101.Table
             if (balloons.TryGetValue(0, out var mine)) me.Add(BalloonElement(0, mine));
             PenaltyBadge(me, 0, s, true);
             var column = new VisualElement { pickingMode = PickingMode.Ignore };
-            column.Add(Text((string)Seat(0)["name"], "Montserrat-700", 16, "#F4F1E8"));
-            var status = Text(Status(0, s, true), "Baloo2-800", 12, s.Opened[0] > 0 ? "#8EF0B0" : "var(--mt)"); status.style.marginTop = 1; column.Add(status);
+            var myName = Text((string)Seat(0)["name"], "Montserrat-700", 16, "#F4F1E8"); myName.name = "table.me.name"; column.Add(myName);
+            var status = Text(Status(0, s, true), "Baloo2-800", 12, s.Opened[0] > 0 ? "#8EF0B0" : "var(--mt)"); status.name = "table.me.status"; status.style.marginTop = 1; column.Add(status);
             var buttons = Row(8); buttons.style.marginTop = 6; buttons.pickingMode = PickingMode.Position;
             var chat = Square("table-chat-open", "linear-gradient(160deg,#7AA6FF,#3D6BF0)", "#2448B8", L("Sohbet", "Chat"));
             chat.Add(view.Icon("table-chat", 22, "#fff"));

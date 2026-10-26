@@ -85,6 +85,17 @@ Kalan farkların kaynağı: `EKSIKLER.md` (EK-601…614), `UNITY_FARKLARI.md` (U
 - **Eski yakalama planı (EK-614):** `GalaxyCaptureDriver` eski adları kullanıyor.
 - **İmleç:** menü açılışında `GalaxyCursor.Apply()` paketin okunu donanım imleci yapar (prototipte varsayılan "Normal").
 
+## 6. Run8 sonrası düzeltmeler (main fd64806 üzerine)
+
+Run8: 50 durum eşleşti, 7 bilinçli fark; kuralı geçemeyen 12 durum için (`artifacts/v4/unity/run8/compare.json`; döküm artık döndürülmüş ve satır kırılmış metni doğru ölçüyor):
+
+| Durum | Run8 farkı | Neden | Düzeltme | Kaynak |
+|---|---|---|---|---|
+| 60, 61, 95 | Görev satırları dx +4, dy −1; "15.000" dy −4 | Liste kaydırıcısının 4 px sağ dolgusu yoktu; "tamamlandı" rozeti 26 px (27,2 olmalı); 7. gün kartında 2 px kenarlık (inset halka değil) ve 15px/1 yerine doğal satır | Liste içeriğine `padding-right: 4`; rozet 800 12px, dolgu 4px 10px, 19,2 px satır, köşe 8; başlık 20px/1.2; 7. gün halkası katmansız (`inset 0 0 0 2px a1` + `0 0 20px gl`); tutarlar 15 px satır; bugün kartına `0 0 26px rgba(60,203,110,.55)` ışıması | G101-Menu 667–716 |
+| 70, 72, 74, 96 | Örnek kutusu içeriği dy +4; EN "Opening your hand" tek satır, altındaki başlıklar −10 px | Örnek açıklamasında `margin-top: 6` yoktu ve satırı 22,4 px (14px/1.5 = 21 olmalı); bölüm başlıkları 19,2 px sabit yükseklikteydi, kırılamıyordu | Açıklama 6 px üstte, 21 px satır; "ÖRNEK" doğal satır; bölüm başlığı 16px/1.2 ile kırılır, düğme en az 50 px | G101-Menu 722–752 |
+| 81 | Rozet ızgarası dy −5/−6/−13, +4/+5 | Kartlar içeriği üstten diziyordu; CSS'te her satırın kartları aynı yükseklikte ve içerik ortada | Kart = satır, `align-items: center`; ad 15px/1.2, açıklama 12 px (19,2 px satır, 2 px üst), ilerleme satırı 6 px üstte | G101-Menu 505–516 |
+| S02–S05 | Yan logo "1" taşları dy +9/+11; slogan h +4; S04 koşullar metni dy +5 | Rakam taşın üstüne hizalıydı (font Npx/1 ortalar); süzülme gerçek zamandan kosinüsle (donukken 100000 ms, `g101Float` eğrisi değil); slogan 20 px doğal satırla (29 olmalı); alan başlıkları 20 px (19,2 olmalı: alan başına +1) | Rakam ortada; `g101Float` cubic-bezier(.45,0,.55,1), gecikme 0/−2/−4 sn, donukken 100000 ms; `g101TileIn` saydamlığı eğriyle; slogan 20px/1.45 (29 px); alan başlık satırı 19,2 px | Gerçek Ana Oyun 34, 89–100, 158, 210 |
+
 ## 5. Commit'ler
 
 | Commit | İçerik |
@@ -95,4 +106,6 @@ Kalan farkların kaynağı: `EKSIKLER.md` (EK-601…614), `UNITY_FARKLARI.md` (U
 | `752adc2` | Yönlendirici ve testler D-62 adlarıyla |
 | `e1d6708` | Donuk saat 100000 ms, içerik kutulu kartlar, arkadaşlar kod şeridi ve ekle penceresi, günlük ödül durumu, alt menü adları |
 | `119d6c9` | Mağaza taş görünümleri, "Buy" düğmesi, İngilizce sabitler |
-| (bu rapor) | `docs/v4/menu/RAPOR.md`, `EKSIKLER.md`, `UNITY_FARKLARI.md` |
+| `137ae5f` | `docs/v4/menu/RAPOR.md`, `EKSIKLER.md`, `UNITY_FARKLARI.md` |
+| `fd64806` | (orkestratör) `main`: run8, `G101Dump` dönüşüm ve satır kırılımı ölçümü; `MenuView.Main.cs` rozet ve `ShopController.cs` "Satın al" satırlarında yorumun yuttuğu kod düzeltildi |
+| (bu commit) | Run8 sonrası: günlük ödül, kurallar, rozetler, giriş ekranları (§6) |

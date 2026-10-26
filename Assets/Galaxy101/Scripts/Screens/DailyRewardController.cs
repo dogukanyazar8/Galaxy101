@@ -19,11 +19,16 @@ namespace Galaxy101
                 var claimed = (bool)day["claimed"];
                 var card = v.Box("g-day"); card.name = "streak-day-" + index;
                 if (index < 7) card.style.marginRight = 10;
-                else { card.style.flexGrow = 1.5f; card.AddToClassList("g-panel-selected"); v.Decorate(card, "linear-gradient(160deg,var(--pnH),var(--sd))", 18); }
+                else
+                {
+                    // big: inset 0 0 0 2px var(--a1), 0 0 20px var(--gl) — an overlay ring, no layout (a border moved the label and amount 2 px).
+                    card.style.flexGrow = 1.5f; v.Decorate(card, "linear-gradient(160deg,var(--pnH),var(--sd))", 18);
+                    card.Add(PanelUi.Ring(v, 2, "a1", 18)); GalaxyFilters.Shadow(card, 0, 0, 10, v.C("gl"));
+                }
                 if (index == 6) card.style.opacity = .6f;
                 if (today)
                 {
-                    v.Decorate(card, "linear-gradient(160deg,#4FDB80,#1FA35A)", 18, 5, "#146B3C");
+                    v.Decorate(card, "linear-gradient(160deg,#4FDB80,#1FA35A)", 18, 5, "#146B3C"); GalaxyFilters.Shadow(card, 0, 0, 13, v.C("rgba(60,203,110,.55)")); // 0 5px 0 #146B3C, 0 0 26px
                     PanelUi.Bob(v, card);
                 }
                 card.Add(PanelUi.Caption(v, v.L(index + ". Gün", "Day " + index), 11, .5f, today ? "#fff" : "mt"));
@@ -35,7 +40,7 @@ namespace Galaxy101
                     claim.style.paddingTop = claim.style.paddingBottom = 6; claim.style.paddingLeft = claim.style.paddingRight = 0;
                     v.Decorate(claim, "#fff", 10, 3, "#0E5A31"); claim.style.color = v.C("#146B3C"); card.Add(claim);
                 }
-                else card.Add(v.Text(v.N((int)day["chips"]), 15, true, index == 7 ? "a1" : "#F4F1E8"));
+                else card.Add(MenuView.CssLine(v.Text(v.N((int)day["chips"]), 15, true, index == 7 ? "a1" : "#F4F1E8"), 15)); // 700 15px/1
                 if (claimed)
                 {
                     var cover = v.Box(); cover.style.position = Position.Absolute;
@@ -49,13 +54,16 @@ namespace Galaxy101
             var quests = v.Services.Rewards.GetQuests();
             var heading = root.Q<VisualElement>("quests-heading"); heading.style.marginTop = 2; heading.style.marginBottom = 14;
             var count = quests.OfType<JObject>().Count(q => (int)q["cur"] >= (int)q["max"]);
-            heading.Add(v.Text(v.L("Günlük görevler", "Daily quests"), 20, true));
+            heading.Add(MenuView.CssLine(v.Text(v.L("Günlük görevler", "Daily quests"), 20, true), 24)); // 700 20px/1.2
+            // doneCount: 800 12px Baloo 2, padding 4px 10px, radius 8 — a 27.2 px pill that sets the heading's height.
             var badge = PanelUi.Badge(v, v.L(count + "/" + quests.Count + " tamamlandı", count + "/" + quests.Count + " completed"), "dp", "a1", 12);
+            PanelUi.Pad(badge, 4, 10); v.Decorate(badge, "dp", 8); var badgeText = badge.Q<Label>(); badgeText.style.unityFont = v.Font("Baloo2-800"); MenuView.CssLine(badgeText, 19.2f);
             badge.style.marginLeft = 12; heading.Add(badge); heading.Add(PanelUi.Spacer(v));
             var reset = v.Text("", 13, false, "mt"); var clock = v.Icon("clock", 15, "mt"); clock.style.marginRight = 6; heading.Add(clock); heading.Add(reset);
             Action tick = () => { var left = v.Services.Rewards.ResetTime - DateTime.Now; reset.text = v.L("Yenilenmeye " + Math.Max(0, (int)left.TotalHours) + " sa " + left.Minutes + " dk", "Resets in " + Math.Max(0, (int)left.TotalHours) + "h " + left.Minutes + "m"); };
             tick(); reset.schedule.Execute(tick).Every(1000);
-            var list = v.Scroll(); root.Q<VisualElement>("quests").Add(list);
+            // overflow-y auto with a stable gutter and padding-right 4 between the rows and the bar.
+            var list = v.Scroll(); list.contentContainer.style.paddingRight = 4; root.Q<VisualElement>("quests").Add(list);
             for (var index = 0; index < quests.Count; index++)
             {
                 var q = (JObject)quests[index]; var i = index;

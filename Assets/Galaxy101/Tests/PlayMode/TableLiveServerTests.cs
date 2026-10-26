@@ -65,7 +65,8 @@ namespace Galaxy101.Tests
             }
             MainMenuController.OpenMatchTable = false;   // no menu here: the test opens the table itself
             var online = GalaxyOnline.Ensure();
-            if (!online.SignedIn)
+            // A fresh guest per test: an account left seated by an earlier live test (lobby, auth) answers E_ALREADY_SEATED.
+            if (online.SignedIn) { var signOut = online.SignOutAsync(); yield return Until(() => signOut.IsCompleted, 10, "sign-out"); }
             {
                 var signIn = online.GuestAsync("Masa" + UnityEngine.Random.Range(1000, 9999), "#3D7BFF");
                 yield return Until(() => signIn.IsCompleted, 15, "guest sign-in");

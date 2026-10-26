@@ -548,6 +548,7 @@ namespace Galaxy101.Tests
         [UnityTest]
         public IEnumerator LiveServer()
         {
+            LogAssert.ignoreFailingMessages = true;   // UI Toolkit filter render-tree log while dialogs rebuild (UNITY_FARKLARI UF-04); the assertions decide
             using (var probe = UnityWebRequest.Get(GalaxyApi.ResolveServer() + "/health"))
             {
                 probe.timeout = 3; yield return probe.SendWebRequest();

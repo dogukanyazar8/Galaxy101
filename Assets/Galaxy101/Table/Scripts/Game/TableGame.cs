@@ -141,7 +141,6 @@ namespace Galaxy101.Table
             if (Launch.Session == null && Launch.Flow == null && PendingScenario != null) { Launch.Flow = TableScenarios.Has(PendingScenario) ? TableScenarios.Flow(PendingScenario) : PendingScenario; }
             PendingScenario = null;
             Session = Launch.Session ?? new LocalTableSession(Launch.Setup ?? DefaultSetup(), Launch.Table ?? DefaultTable(), Launch.Clock ?? (() => GameClock.NowMs), 0, Launch.Clock == null ? () => GameClock.Frozen : (Func<bool>)null);
-            if (Launch.Cancelled) { Leave(Session.Online); return; }   // the player chose the lobby while this scene was loading
 
             if (hud != null)
             {
@@ -158,6 +157,9 @@ namespace Galaxy101.Table
             if (Session is LocalTableSession offline) StartOffline(offline);
             else AttachModel();
             Notify();
+            // Loading cannot be cancelled once Unity activates the scene. Release the server seat before going back;
+            // an offline/refused leave keeps the initialized table visible so the player can retry.
+            if (Launch.Cancelled) { if (Session.Online) ConfirmExit(); else Leave(false); }
         }
 
         private static TableSetup DefaultSetup() => new TableSetup { Options = new MatchOptions { Mode = "solo", Hands = 5 }, Seed = (uint)UnityEngine.Random.Range(1, int.MaxValue), TurnMs = TableTimings.DefaultTurnMs };
@@ -197,6 +199,7 @@ namespace Galaxy101.Table
                 Rack.Clear();
                 for (int r = 0; r < 2; r++) for (int i = 0; i < RackGrid.Columns && i < sc.Rows[r].Length; i++) if (sc.Rows[r][i] != null) Rack.Set(new RackSlot(r, i), TileIds.ToInt(sc.Rows[r][i]));
                 Settle(true);
+                Notify();
                 return;
             }
             offline.Begin(Launch.SkipCountdown || flow == "deal");
@@ -425,7 +428,7 @@ namespace Galaxy101.Table
                     }
                     break;
                 case "undone":
-                    if (me) Message(TableHud.ToastKind.Info, L("Taşlar ıstakana döndü", "Tiles back on your rack"));
+                    if (me) Message(TableHud.ToastKind.Info, T("undone"));
                     break;
                 case "opened":
                     if (!me && local >= 0)
@@ -805,7 +808,16 @@ namespace Galaxy101.Table
             _ = Do(Session.Swap(TileIds.ToV4(tileId), okey.Meld, okey.Index));
         }
 
-        public void RollDice() { if (Model?.Deal != null && Model.Deal.Dealer == Model.Seat) _ = Do(Session.RollDice(), false); }
+        private bool rollingRequest;
+        private bool CanRollDice => !rollingRequest && Model?.Deal is { } d && d.Dealer == Model.Seat && d.Step == "dice" && d.Dice.Count < 2
+            && Ceremony?.Running == true && Ceremony.Step == "roll" && Ceremony.LastDie + 1 == d.Dice.Count;
+        public async void RollDice()
+        {
+            if (!CanRollDice) return;
+            rollingRequest = true;
+            try { Notify(); await Do(Session.RollDice(), false); }
+            finally { rollingRequest = false; if (this != null) Notify(); }
+        }
 
         public void SortRack(bool runs) { if (!CanArrange) return; Rack.Sort(runs, TileCodes.FaceFor(Model)); SyncBoard(); Notify(); }
 
@@ -1020,7 +1032,7 @@ namespace Galaxy101.Table
             if (d == null || !Ceremony.Running || Ceremony.Step == null) return null;
             string ind = Ceremony.Revealed && Model.Indicator != null ? TileIds.Code(TileIds.ToInt(Model.Indicator)) : null;
             string okey = Ceremony.Revealed && Model.OkeyKnown ? TileIds.Code(Model.OkeyColor, Model.OkeyNumber) : null;
-            bool myRoll = d.Dealer == Model.Seat && d.Step == "dice" && d.Dice.Count < 2 && Ceremony.Step == "roll";
+            bool myRoll = CanRollDice;
             return new TableHud.DealInfoCard
             {
                 Dealer = LocalSeat(d.Dealer), DieA = Ceremony.Dice[0], DieB = Ceremony.Dice[1], LastDie = Ceremony.LastDie, Roll = myRoll ? d.Dice.Count : -1,
@@ -1159,6 +1171,7 @@ namespace Galaxy101.Table
             ExitOpen = false; exiting = true;
             string error;
             try { error = await Session.Leave(); }
+            catch (Exception e) { Debug.LogWarning("GALAXY101_TABLE_LEAVE_FAILED " + e.Message); error = "offline"; }
             finally { exiting = false; }
             if (this == null || leaving) return;
             // Refused or unanswered (offline, timeout): the server still holds the seat, so the table stays. If the leave did

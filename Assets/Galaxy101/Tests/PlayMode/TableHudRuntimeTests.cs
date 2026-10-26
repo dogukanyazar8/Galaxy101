@@ -50,6 +50,13 @@ namespace Galaxy101.Tests
             for (int i = 0; i < 10; i++) yield return null;
             Assert.That(hud.Canvas.Q<VisualElement>("table-open-meter").layout.width, Is.EqualTo(308).Within(3), "G17: the action column retains the CSS 232px wrapping limit (DURUMLAR ±3px)");
             Assert.That(hud.Canvas.Q<VisualElement>("table.doLayPair").layout.y, Is.GreaterThan(hud.Canvas.Q<VisualElement>("table.doOpen").layout.y));
+            state.CanUndo = false; state.ShowLayPair = false;
+            hud.Render(state);
+            for (int i = 0; i < 10; i++) yield return null;
+            open = hud.Canvas.Q<VisualElement>("table.doOpen");
+            var isle = hud.Canvas.Q<TextElement>("table.doIsle");
+            float isleNaturalWidth = isle.MeasureTextSize(isle.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).x + 28;
+            Assert.That(hud.Canvas.Q<VisualElement>("table-open-meter").layout.width, Is.EqualTo(open.layout.width + 6 + isleNaturalWidth + 76).Within(3), "G14: the full-width action contributes its natural width before wrapping");
         }
 
         [UnityTest]
@@ -154,6 +161,8 @@ namespace Galaxy101.Tests
             Assert.That(canvas.Q<VisualElement>("table-message-row").resolvedStyle.top, Is.EqualTo(132f));
             Assert.That(canvas.Q<VisualElement>("table-toast-row").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
             Assert.That(hud.ActiveToast, Does.StartWith("Eksik açılış · 88 / 101 · +101"));
+            var flash = canvas.Q<VisualElement>("table-message");
+            Assert.That(flash[1].layout.x - flash[0].layout.xMax, Is.EqualTo(10).Within(1), "The independently rebuilt flash keeps the source's 10px icon gap");
 
             var previous = RenderTexture.active; RenderTexture.active = framebuffer;
             var pixels = new Texture2D(1280, 720, TextureFormat.RGBA32, false); pixels.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0); pixels.Apply();

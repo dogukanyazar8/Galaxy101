@@ -27,27 +27,45 @@ namespace Galaxy101.Online
         private static GalaxyOnline watched;
         private static Action unwatch;
 
-        /// <summary>Listen for matchStart on the session's socket (waiting room, invite, ranked, vsBotsStart): each starts a session.</summary>
+        /// <summary>Open a match from matchStart or a recovered table snapshot when the start was missed.</summary>
         public static void Watch(GalaxyOnline online)
         {
             if (online == null || watched == online) return;
             unwatch?.Invoke();
             watched = online;
-            unwatch = online.Realtime.On(V4Messages.MatchStart, data =>
+            void Open(string type, JToken data)
             {
+                Current?.Dispose();
+                var session = new V4TableSession(online);
+                session.Receive(type, data);
+                if (session.Closed) { session.Dispose(); return; }
+                Started?.Invoke(session);
+                if (!session.Closed && session.Owns && !online.Replaced)
+                    UnityEngine.Object.FindAnyObjectByType<MainMenuController>()?.OnMatchStarted(session);
+            }
+            var offStart = online.Realtime.On(V4Messages.MatchStart, data =>
+            {
+                if (!online.Owns(online.Generation) || online.Replaced) return;
                 // A session left open for another table (one nobody opened, e.g. a lobby test that keeps the lobby on
                 // screen) gives way to the new match; the same table's start is already its own.
                 var id = (string)data?["table"]?["id"];
                 if (Current != null && !Current.Closed && Current.Client.Status != G101Rules.StatusMatchOver && Current.Client.Table?.Id == id) return;
-                Current?.Dispose();
-                var session = new V4TableSession(online);
-                session.Receive(V4Messages.MatchStart, data);
-                Started?.Invoke(session);
-                UnityEngine.Object.FindAnyObjectByType<MainMenuController>()?.OnMatchStarted(session);
+                Open(V4Messages.MatchStart, data);
             });
+            var offSnapshot = online.Realtime.On(V4Messages.Snapshot, data =>
+            {
+                if (!online.Owns(online.Generation) || online.Replaced || (string)data?["screen"] != "table" || data?["table"] == null) return;
+                // An open session already receives this snapshot. Creating one while Pump enumerates its handler copy
+                // requires applying this first snapshot explicitly; later snapshots use that session's normal subscriber.
+                if (Current != null && !Current.Closed) return;
+                Open(V4Messages.Snapshot, data);
+            });
+            unwatch = () => { offStart(); offSnapshot(); };
         }
 
         private readonly GalaxyOnline online;
+        private readonly int generation;
+        private bool Owns => online != null && online.Owns(generation);
         private readonly List<Action> subscriptions = new List<Action>();
         private long offset;
         private bool offsetKnown;
@@ -56,13 +74,17 @@ namespace Galaxy101.Online
         public V4TableSession(GalaxyOnline online)
         {
             this.online = online;
+            generation = online.Generation;
             Client = new TableClient(-1);
             me = online.Profile?.Id.ToString();
             Current = this;
+            // Ownership moved to this table. Its Current guard blocks global reconnect; an older table's suspended
+            // reconnect must not leave the replacement session suspended after it closes.
+            online.SuspendReconnect = false;
             // matchStart reaches the session through Watch (it creates the session for it).
             foreach (var type in V4Wire.TableMessages)
                 if (type != V4Messages.MatchStart) { var t = type; subscriptions.Add(online.Realtime.On(t, data => Receive(t, data))); }
-            subscriptions.Add(online.Realtime.On(V4Messages.Session, data => { var s = (V4Session)V4Wire.Payload(V4Messages.Session, data); if (s?.Me?.Id != null) me = s.Me.Id; Clock(s?.ServerTime ?? 0); }));
+            subscriptions.Add(online.Realtime.On(V4Messages.Session, data => { if (!Owns || Closed) return; var s = (V4Session)V4Wire.Payload(V4Messages.Session, data); if (s?.Me?.Id != null) me = s.Me.Id; Clock(s?.ServerTime ?? 0); }));
             online.Realtime.Closed += OnClosed;
             subscriptions.Add(() => online.Realtime.Closed -= OnClosed);
         }
@@ -85,13 +107,14 @@ namespace Galaxy101.Online
         /// <summary>One table message as the socket delivered it (main thread).</summary>
         public void Receive(string type, JToken data)
         {
-            if (Closed) return;
+            if (Closed || !Owns) return;
             if (data is JObject o && o["at"] != null) Clock((long)o["at"]);
             var payload = V4Wire.Payload(type, data);
             if (payload is V4MatchStart start) SeatFrom(start.Table, false);
             if (payload is V4Snapshot snap)
             {
                 if (snap.Screen != "table") { Close(); return; }
+                if (snap.Me?.Id != null) me = snap.Me.Id;
                 SeatFrom(snap.Table, snap.Spectator == true);
             }
             Client.Apply(type, payload);
@@ -119,8 +142,10 @@ namespace Galaxy101.Online
 
         private async Task<string> Request(string type, object data = null)
         {
-            if (Closed) return V4Errors.E_NOT_SEATED;
+            if (Closed || !Owns) return V4Errors.E_NOT_SEATED;
+            if (Replaced || online.Replaced) return "offline";
             var ack = await online.Realtime.RequestAsync(type, data ?? new object());
+            if (!Owns) return "offline";
             return ack.Ok ? null : ack.Code ?? "error";
         }
 
@@ -158,7 +183,7 @@ namespace Galaxy101.Online
 
         private void OnClosed(string reason)
         {
-            if (Closed) return;
+            if (Closed || !Owns) return;
             if (reason == GalaxyRealtime.ReplacedReason)
             {
                 // Reconnecting would take the account back from the other device; the table says so and offers the lobby.
@@ -175,36 +200,37 @@ namespace Galaxy101.Online
 
         private async Task Reconnect()
         {
-            if (reconnecting) return;
+            if (reconnecting || Closed || !Owns || Replaced || online.Replaced) return;
             reconnecting = true; Dropped = true; GaveUp = false;
             online.SuspendReconnect = true;
             try
             {
-                for (int n = Math.Max(1, Attempt + 1); n <= TableTimings.ClientRetries && !Closed; n++)
+                for (int n = Math.Max(1, Attempt + 1); n <= TableTimings.ClientRetries && !Closed && Owns; n++)
                 {
                     Attempt = n; ConnectionChanged?.Invoke();
                     float until = Time.realtimeSinceStartup + TableTimings.ClientRetryMs / 1000f;
-                    while (Time.realtimeSinceStartup < until && !retryNow && !Closed && !Replaced) await Task.Yield();
+                    while (Time.realtimeSinceStartup < until && !retryNow && !Closed && Owns && !Replaced && !online.Replaced) await Task.Yield();
                     retryNow = false;
                     // Closed meanwhile ("Lobiye dön", a new match) or taken by another device: no hello for this table.
-                    if (Closed || Replaced) return;
+                    if (Closed || !Owns || Replaced || online.Replaced) return;
                     try
                     {
                         await online.Realtime.ConnectAsync();
-                        if (Closed || Replaced) return;
+                        if (Closed || !Owns || Replaced || online.Replaced) return;
                         var ack = await online.Realtime.RequestAsync(V4Messages.Hello, new V4HelloRequest { Token = "" });
-                        if (Closed) return;
+                        if (Closed || !Owns || Replaced || online.Replaced) return;
                         if (ack.Ok) { Dropped = false; Attempt = 0; ConnectionChanged?.Invoke(); return; }
                     }
                     catch (Exception e) { Debug.LogWarning("GALAXY101_TABLE_RECONNECT attempt=" + n + " " + e.Message); }
                 }
-                if (Dropped && !Closed) { GaveUp = true; ConnectionChanged?.Invoke(); }
+                if (Dropped && !Closed && Owns && !Replaced && !online.Replaced) { GaveUp = true; ConnectionChanged?.Invoke(); }
             }
             finally
             {
-                reconnecting = false; online.SuspendReconnect = false;
+                reconnecting = false;
+                if (Owns && (Current == null || Current == this)) online.SuspendReconnect = false;
                 // Closed while this loop held the socket: the session's own reconnect takes it back (Dispose could not).
-                if (Closed && !Replaced && online.SignedIn && !online.Realtime.Connected) online.ReconnectNow();
+                if (Closed && Owns && !Replaced && !online.Replaced && !online.Realtime.Connected) online.ReconnectNow();
             }
         }
 
@@ -223,7 +249,7 @@ namespace Galaxy101.Online
             Close();
             // The table gave up reconnecting (or left while offline): the session's own reconnect takes over — unless another
             // device has the account (that socket must stay theirs) or this table's loop is still running (it hands over).
-            if (!Replaced && !reconnecting && online.SignedIn && !online.Realtime.Connected) online.ReconnectNow();
+            if (!Replaced && !reconnecting && Owns && !online.Replaced && !online.Realtime.Connected) online.ReconnectNow();
         }
     }
 }

@@ -51,7 +51,7 @@ namespace Galaxy101
             {
                 // Back from a table with the session still open: no splash or sign-in again.
                 var signed=Galaxy101.Online.GalaxyOnline.Instance;
-                if(signed!=null&&signed.SignedIn){ApplyOnline(signed);HookOnline(signed);if(ReturnToLobby){ReturnToLobby=false;if(FromRanked){FromRanked=false;OpenRanked();}else OpenLobby();}if(PendingToast!=null){View.Toast(PendingToast);PendingToast=null;}}
+                if(signed!=null&&signed.SignedIn&&!signed.Replaced){ApplyOnline(signed);HookOnline(signed);if(ReturnToLobby){ReturnToLobby=false;if(FromRanked){FromRanked=false;OpenRanked();}else OpenLobby();}if(PendingToast!=null){View.Toast(PendingToast);PendingToast=null;}}
                 else ShowAuth();
             }
         }
@@ -68,7 +68,7 @@ namespace Galaxy101
         /// <summary>The menu shows the server's profile card and balance once signed in; signed out, the sign-in comes back.</summary>
         private void ApplyOnline(Galaxy101.Online.GalaxyOnline online)
         {
-            if(!online.SignedIn){if(Auth==null||!Auth.Visible)ShowAuth();return;}
+            if(!online.SignedIn||online.Replaced){Lobby?.Hide();lobbyClient?.Dispose();lobbyClient=null;Lobby=null;Ranked?.Hide();Ranked=null;if(Auth==null||!Auth.Visible)ShowAuth();return;}
             if(online.Profile!=null){Model.Profile["name"]=online.Profile.Name;Model.Profile["color"]=online.Profile.Color;Model.Profile["status"]=online.Profile.Status??"";Model.Profile["frame"]=online.Profile.Frame;if(online.Profile.Progress!=null){Model.Level=online.Profile.Progress.Level;Model.Xp=online.Profile.Progress.LevelXp;}}
             if(online.Profile!=null&&!string.IsNullOrEmpty(online.Profile.FriendCode))Model.FriendCode=online.Profile.FriendCode;
             if(online.Wallet!=null){Model.Chips=online.Wallet.Chips;Model.Gems=online.Wallet.Gems;Model.OwnedSkins.Clear();foreach(var item in online.Wallet.OwnedItems??new System.Collections.Generic.List<string>())Model.OwnedSkins.Add(item);}

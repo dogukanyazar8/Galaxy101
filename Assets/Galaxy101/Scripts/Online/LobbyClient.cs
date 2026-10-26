@@ -81,6 +81,9 @@ namespace Galaxy101.Online
     public sealed class LobbyClient : ILobbyBackend, IDisposable
     {
         private readonly GalaxyOnline online;
+        private readonly int generation;
+        private bool disposed;
+        private bool Owns => !disposed && online != null && online.Owns(generation) && !online.Replaced;
         private readonly List<Action> subscriptions = new List<Action>();
         private readonly List<TableSummary> tables = new List<TableSummary>();
         /// <summary>Invites still waiting for inviteResult.</summary>
@@ -91,23 +94,24 @@ namespace Galaxy101.Online
         public LobbyClient(GalaxyOnline online)
         {
             this.online = online;
+            generation = online.Generation;
             var rt = online.Realtime;
             // lobby{tables}, then lobbyTable{table} (added or changed) and lobbyTableRemoved{id}.
-            subscriptions.Add(rt.On<V4LobbyEvent>(V4Messages.Lobby, m => { tables.Clear(); if (m?.Tables != null) tables.AddRange(m.Tables.Select(Summary)); TablesChanged?.Invoke(); }));
-            subscriptions.Add(rt.On<V4TableEvent>(V4Messages.LobbyTable, OnLobbyTable));
-            subscriptions.Add(rt.On<V4IdEvent>(V4Messages.LobbyTableRemoved, m => { if (tables.RemoveAll(x => x.Id == Id(m?.Id)) > 0) TablesChanged?.Invoke(); }));
+            subscriptions.Add(On<V4LobbyEvent>(V4Messages.Lobby, m => { tables.Clear(); if (m?.Tables != null) tables.AddRange(m.Tables.Select(Summary)); TablesChanged?.Invoke(); }));
+            subscriptions.Add(On<V4TableEvent>(V4Messages.LobbyTable, OnLobbyTable));
+            subscriptions.Add(On<V4IdEvent>(V4Messages.LobbyTableRemoved, m => { if (tables.RemoveAll(x => x.Id == Id(m?.Id)) > 0) TablesChanged?.Invoke(); }));
             // The waiting room: tableState{table} and countdown{n, cancelled}; leftTable / kicked / tableClosed end it, matchStart hands it over.
-            subscriptions.Add(rt.On<V4TableEvent>(V4Messages.TableState, m => { if (m?.Table != null && Seat(m.Table) >= 0 && m.Table.Status != "playing") SetRoom(m.Table); }));
-            subscriptions.Add(rt.On<V4Countdown>(V4Messages.Countdown, OnCountdown));
-            subscriptions.Add(rt.On<V4LeftTable>(V4Messages.LeftTable, m => { if (room != null) CloseRoom(m?.Reason == "disconnect" ? "disconnect" : "left"); }));
-            subscriptions.Add(rt.On<V4Kicked>(V4Messages.Kicked, m => { if (room != null) CloseRoom("kicked"); }));
-            subscriptions.Add(rt.On<V4TableClosed>(V4Messages.TableClosed, m => { if (room != null) CloseRoom(m?.Reason ?? "ownerLeft"); }));
-            subscriptions.Add(rt.On<V4MatchStart>(V4Messages.MatchStart, m => { if (m?.Table != null && Seat(m.Table) >= 0) Handover(m.Table, "started"); }));
+            subscriptions.Add(On<V4TableEvent>(V4Messages.TableState, m => { if (m?.Table != null && Seat(m.Table) >= 0 && m.Table.Status != "playing") SetRoom(m.Table); }));
+            subscriptions.Add(On<V4Countdown>(V4Messages.Countdown, OnCountdown));
+            subscriptions.Add(On<V4LeftTable>(V4Messages.LeftTable, m => { if (room != null) CloseRoom(m?.Reason == "disconnect" ? "disconnect" : "left"); }));
+            subscriptions.Add(On<V4Kicked>(V4Messages.Kicked, m => { if (room != null) CloseRoom("kicked"); }));
+            subscriptions.Add(On<V4TableClosed>(V4Messages.TableClosed, m => { if (room != null) CloseRoom(m?.Reason ?? "ownerLeft"); }));
+            subscriptions.Add(On<V4MatchStart>(V4Messages.MatchStart, m => { if (m?.Table != null && Seat(m.Table) >= 0) Handover(m.Table, "started"); }));
             // tableSpectate, Oyuna katıl (R-65) and a return after hello: snapshot{screen} says where the player is.
-            subscriptions.Add(rt.On<V4Snapshot>(V4Messages.Snapshot, OnSnapshot));
+            subscriptions.Add(On<V4Snapshot>(V4Messages.Snapshot, OnSnapshot));
             // balance{chips} (bet on sitting R-90, betRefund on leaving the waiting room D-11): the session's wallet follows.
-            subscriptions.Add(rt.On<V4Balance>(V4Messages.Balance, m => { if (m != null) online.Apply(new WalletResponse { Chips = m.Chips, Gems = m.Gems, OwnedItems = online.Wallet?.OwnedItems ?? new List<string>() }); }));
-            subscriptions.Add(rt.On<V4InviteIn>(V4Messages.InviteIn, m =>
+            subscriptions.Add(On<V4Balance>(V4Messages.Balance, m => { if (m != null) online.Apply(new WalletResponse { Chips = m.Chips, Gems = m.Gems, OwnedItems = online.Wallet?.OwnedItems ?? new List<string>() }); }));
+            subscriptions.Add(On<V4InviteIn>(V4Messages.InviteIn, m =>
             {
                 if (m?.InviteId == null || m.Table == null) return;
                 var t = Summary(m.Table);
@@ -117,11 +121,13 @@ namespace Galaxy101.Online
                     From = m.From == null ? null : new PlayerSummary { Id = Id(m.From.Id), Name = m.From.Name, Color = m.From.Color, Level = m.From.Level, Frame = m.From.Frame },
                 });
             }));
-            subscriptions.Add(rt.On<V4InviteResult>(V4Messages.InviteResult, m => { if (m?.UserId == null) return; var who = Id(m.UserId); invites.Remove(who); InviteAnswered?.Invoke(who, m.Result); }));
+            subscriptions.Add(On<V4InviteResult>(V4Messages.InviteResult, m => { if (m?.UserId == null) return; var who = Id(m.UserId); invites.Remove(who); InviteAnswered?.Invoke(who, m.Result); }));
             online.Changed += OnChanged;
             rt.Closed += OnClosed;
             online.Reconnected += OnReconnected;
         }
+
+        private Action On<T>(string type, Action<T> action) => online.Realtime.On<T>(type, message => { if (Owns) action(message); });
 
         private void OnLobbyTable(V4TableEvent m)
         {
@@ -150,9 +156,9 @@ namespace Galaxy101.Online
         /// <summary>The server drops a disconnected player from their waiting room (R-66, stake back): so does the client.</summary>
         private void OnClosed(string reason) { if (room != null) CloseRoom("offline"); }
 
-        private void OnReconnected() { if (subscribed) _ = Request(V4Messages.LobbySubscribe, null); }
+        private void OnReconnected() { if (Owns && subscribed) _ = Request(V4Messages.LobbySubscribe, null); }
 
-        public bool Online => online != null && online.SignedIn && online.Realtime.Connected;
+        public bool Online => Owns && online.Realtime.Connected;
         public Guid Me => online.Profile?.Id ?? Guid.Empty;
         public long Chips => online.Wallet?.Chips ?? 0;
         public IReadOnlyList<TableSummary> Tables => tables;
@@ -163,7 +169,7 @@ namespace Galaxy101.Online
         public event Action<Guid, string> InviteAnswered;
         public event Action<IncomingInvite> InviteReceived;
 
-        private void OnChanged() => ChipsChanged?.Invoke();
+        private void OnChanged() { if (!Owns) { tables.Clear(); if (room != null) CloseRoom("disconnect"); } ChipsChanged?.Invoke(); }
 
         private void SetRoom(V4Table t)
         {
@@ -187,16 +193,18 @@ namespace Galaxy101.Online
 
         public async Task<string> SubscribeAsync()
         {
+            if (!Owns) return "offline";
             subscribed = true;
             if (!online.Realtime.Connected)
             {
                 try { await online.Realtime.ConnectAsync(); }
                 catch (Exception) { return "offline"; }
+                if (!Owns) return "offline";
             }
             return await Request(V4Messages.LobbySubscribe, null);
         }
 
-        public void Unsubscribe() { subscribed = false; if (online.Realtime.Connected) _ = Request(V4Messages.LobbyUnsubscribe, null); }
+        public void Unsubscribe() { subscribed = false; if (Owns && online.Realtime.Connected) _ = Request(V4Messages.LobbyUnsubscribe, null); }
 
         /// <summary>
         /// tableCreate. The form's two penalty switches (Okey atma, İşlek taş atma) meet one protocol flag (EK-811):
@@ -253,7 +261,8 @@ namespace Galaxy101.Online
 
         private async Task<string> Request(string type, object data)
         {
-            try { var ack = await online.Realtime.RequestAsync(type, data); return ack.Ok ? null : ack.Code ?? "error"; }
+            if (!Owns) return "offline";
+            try { var ack = await online.Realtime.RequestAsync(type, data); return !Owns ? "offline" : ack.Ok ? null : ack.Code ?? "error"; }
             catch (ApiException) { return "offline"; }
             catch (Exception) { return "offline"; }
         }
@@ -302,6 +311,7 @@ namespace Galaxy101.Online
 
         public void Dispose()
         {
+            disposed = true;
             foreach (var off in subscriptions) off();
             subscriptions.Clear();
             if (online != null) { online.Changed -= OnChanged; online.Reconnected -= OnReconnected; online.Realtime.Closed -= OnClosed; }

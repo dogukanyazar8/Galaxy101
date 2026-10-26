@@ -35,12 +35,18 @@ namespace Galaxy101
             if (online != null && online.SignedIn)
             {
                 int generation = online.Generation;
-                try { await online.Api.PutAsync<JObject>("/v1/profile", new Contracts.ProfileUpdateRequest { Name = name.Trim(), Color = color, Status = status ?? "", Frame = frame }); }
-                catch (Online.ApiException e) { return e.Offline ? "offline" : e.Code; }
-                // A later save (or another account) owns the profile now: this older answer must not put its values back.
-                if (mine != saves || online.Generation != generation) return null;
-                try { await online.RefreshAsync(); } catch (Online.ApiException) { } // saved; the next refresh brings the card
-                if (mine != saves || online.Generation != generation) return null;
+                // Keep the server's PUT order as well as the local revision order. An older PUT cannot finish after the newer one.
+                await online.ProfileSaving.WaitAsync();
+                try
+                {
+                    if (mine != saves || !online.Owns(generation)) return null;
+                    try { await online.Api.PutAsync<JObject>("/v1/profile", new Contracts.ProfileUpdateRequest { Name = name.Trim(), Color = color, Status = status ?? "", Frame = frame }); }
+                    catch (Online.ApiException e) { return e.Offline ? "offline" : e.Code; }
+                    if (mine != saves || !online.Owns(generation)) return null;
+                    try { await online.RefreshAsync(); } catch (Online.ApiException) { } // saved; the next refresh brings the card
+                    if (mine != saves || !online.Owns(generation)) return null;
+                }
+                finally { online.ProfileSaving.Release(); }
             }
             return Save(name, color, status, frame) ? null : "local";
         }
@@ -73,8 +79,10 @@ namespace Galaxy101
         {
             var online = Online.GalaxyOnline.Instance;
             if (online == null || !online.SignedIn) return RequestDelete() ? null : "duplicate";
+            int generation = online.Generation;
             try { await online.Api.SendAsync<JObject>("DELETE", "/v1/account"); }
             catch (Online.ApiException e) { UnityEngine.Debug.LogWarning("Account deletion failed: " + e.Code); return e.Code; }
+            if (!online.Owns(generation)) return "offline";
             DeletionRequested = true;
             await SignOutAsync(online);
             model.NotifyChanged(); return null;

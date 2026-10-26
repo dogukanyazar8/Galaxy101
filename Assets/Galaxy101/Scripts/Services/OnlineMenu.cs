@@ -28,7 +28,7 @@ namespace Galaxy101
 
         public OnlineMenu(MenuModel model, JObject sample) { this.model = model; this.sample = sample; }
 
-        public static GalaxyOnline Session => GalaxyOnline.Instance != null && GalaxyOnline.Instance.SignedIn ? GalaxyOnline.Instance : null;
+        public static GalaxyOnline Session => GalaxyOnline.Instance != null && GalaxyOnline.Instance.SignedIn && !GalaxyOnline.Instance.Replaced ? GalaxyOnline.Instance : null;
         public bool Active => Session != null;
         /// <summary>The outcome of an action, for the menu to show: Turkish, English and the flash kind ("info" / "bad").</summary>
         public event Action<string, string, string> Notice;
@@ -55,6 +55,7 @@ namespace Galaxy101
         {
             var session = Session; if (session == null) return;
             Adopt(session);
+            int generation = session.Generation;
             try
             {
                 switch (panel)
@@ -68,7 +69,7 @@ namespace Galaxy101
                     case "share": await LoadShare(session); break;
                     default: return;
                 }
-                if (!Stale(session, loadedFor)) model.NotifyChanged();
+                if (!Stale(session, generation)) model.NotifyChanged();
             }
             catch (ApiException e) { if (!e.Offline) Debug.LogWarning("Menu data (" + (panel ?? "start") + ") not loaded: " + e.Code); }
             catch (Exception e) { Debug.LogException(e); } // fire-and-forget: nothing else would see it
@@ -167,7 +168,7 @@ namespace Galaxy101
             var session = Session; if (session == null) return "offline";
             int generation = session.Generation;
             try { var daily = await session.Api.PostAsync<DailyResponse>(path, null); if (Stale(session, generation)) return "offline"; ApplyDaily(session, daily); }
-            catch (ApiException e) { await Reload(session, LoadDaily); return Fail(e); }
+            catch (ApiException e) { if (Stale(session, generation)) return "offline"; await Reload(session, LoadDaily); if (Stale(session, generation)) return "offline"; return Fail(e); }
             model.NotifyChanged(); Notice?.Invoke(tr, en, "info");
             return null;
         }
@@ -187,13 +188,16 @@ namespace Galaxy101
         {
             var session = Session; if (session == null) return "offline";
             if (id == null || !id.StartsWith("skin-", StringComparison.Ordinal)) return ErrorCodes.StoreUnavailable;
+            int generation = session.Generation;
             try
             {
                 var bought = await session.Api.PostAsync<PurchaseResponse>("/v1/shop/purchase", new GemPurchaseRequest { OfferId = id });
+                if (Stale(session, generation)) return "offline";
                 if (bought?.Wallet != null) session.Apply(bought.Wallet);
             }
             catch (ApiException e) { return e.Offline ? "offline" : e.Code; }
             try { await LoadShop(session); } catch (ApiException) { } // bought; the catalog catches up on the next opening
+            if (Stale(session, generation)) return "offline";
             model.NotifyChanged();
             return null;
         }
@@ -241,8 +245,9 @@ namespace Galaxy101
 
         public Task<string> SendRequestAsync(string code) => Friendly(async s =>
         {
+            int generation = s.Generation;
             await s.Api.PostAsync<JObject>("/v1/friends/requests", new FriendCodeRequest { Code = code });
-            model.SentRequests.Add(code);
+            if (!Stale(s, generation)) model.SentRequests.Add(code);
         }, "İstek gönderildi", "Request sent");
 
         public Task<string> AcceptAsync(string id) => Friendly(s => s.Api.PostAsync<JObject>("/v1/friends/requests/" + id + "/accept", null), "Artık arkadaşsınız", "You are now friends");
@@ -251,9 +256,12 @@ namespace Galaxy101
         private async Task<string> Friendly(Func<GalaxyOnline, Task> action, string tr, string en)
         {
             var session = Session; if (session == null) return "offline";
+            int generation = session.Generation;
             try { await action(session); }
-            catch (ApiException e) { await Reload(session, LoadFriends); return Fail(e); }
+            catch (ApiException e) { if (Stale(session, generation)) return "offline"; await Reload(session, LoadFriends); if (Stale(session, generation)) return "offline"; return Fail(e); }
+            if (Stale(session, generation)) return "offline";
             await Reload(session, LoadFriends);
+            if (Stale(session, generation)) return "offline";
             model.NotifyChanged();
             if (tr != null) Notice?.Invoke(tr, en, "info");
             return null;

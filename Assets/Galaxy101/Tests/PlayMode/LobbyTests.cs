@@ -134,29 +134,6 @@ namespace Galaxy101.Tests
             GalaxyOnline.Forget(); // the test's guest session must not be resumed by the next real start
             yield return null;
             if (statePath != null && File.Exists(statePath)) File.Delete(statePath);
-            if (filteringLogs)
-            {
-                Application.logMessageReceived -= CollectLog; filteringLogs = false;
-                var logs = unexpectedLogs.ToList(); unexpectedLogs.Clear();
-                Assert.That(logs, Is.Empty, "errors other than UI Toolkit's filter render-tree log (UF-04)");
-            }
-        }
-
-        // UF-04: UI Toolkit 6000.6.6 may log "Attempted to get a texture (index=N) that is not allocated" while a filtered
-        // dialog is rebuilt. Only that line is let through; any other error still fails the test (checked at teardown).
-        private readonly List<string> unexpectedLogs = new List<string>();
-        private bool filteringLogs;
-
-        private void OnlyKnownUiToolkitLogs()
-        {
-            LogAssert.ignoreFailingMessages = true;
-            if (!filteringLogs) { filteringLogs = true; Application.logMessageReceived += CollectLog; }
-        }
-
-        private void CollectLog(string message, string stack, LogType type)
-        {
-            if ((type == LogType.Error || type == LogType.Exception || type == LogType.Assert) && !message.StartsWith("Attempted to get a texture", StringComparison.Ordinal))
-                unexpectedLogs.Add(type + ": " + message);
         }
 
         private MainMenuController Menu()
@@ -223,6 +200,23 @@ namespace Galaxy101.Tests
             Seed("Gece Yarısı", "esli", 50000, 5, 30, false, new[] { 16, 12, 1, 5 }, "playing", 4, locked: true),
             Seed("Sabah Sporu", "tekli", 5000, 7, 20, false, new[] { 2, 9, 11, 13 }, "waiting", 0, okey: false),
         };
+
+        [UnityTest]
+        public IEnumerator HiddenMenuBalanceRefreshAndLobbyReturnKeepFilterTexturesValid()
+        {
+            var menu = Menu(); var root = menu.View.Root;
+            yield return new WaitForSeconds(.3f);
+            var play = root.Q<Button>("menu.play");
+            using (var evt = NavigationSubmitEvent.GetPooled()) { evt.target = play; play.SendEvent(evt); }
+            yield return new WaitForSeconds(.3f);
+            Assert.That(menu.Lobby.Visible, Is.True);
+            // Real stake/wallet notifications rebuild the menu while the lobby owns the visible canvas.
+            menu.Model.Chips -= 1000; menu.Model.NotifyChanged();
+            yield return new WaitForSeconds(.3f);
+            menu.Lobby.Hide();
+            yield return new WaitForSeconds(.3f);
+            Assert.That(root.Q<VisualElement>("main-layer").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+        }
 
         /// <summary>The list with the design's own tables, dumped for tools/compare_ui.py (only with GALAXY_UI_DUMP_DIR).</summary>
         [UnityTest]
@@ -340,11 +334,7 @@ namespace Galaxy101.Tests
         [UnityTest]
         public IEnumerator PinAndCodeDialogsShakeOnWrongInputAndJoin()
         {
-            // UI Toolkit 6000.6.6 logs "Attempted to get a texture (index=N) that is not allocated" from its filter render
-            // tree when the filtered dialog card is rebuilt during this test's shake (also with every backdrop blur
-            // switched off); player runs of S11/S12 never log it (docs/v4/UNITY_FARKLARI.md UF-04). The test's own
-            // assertions still decide the result, and any other error fails it.
-            OnlyKnownUiToolkitLogs();
+            // Keep renderer errors fatal while the filtered dialog is rebuilt.
             var menu = Menu(); var root = menu.View.Root; yield return null;
             menu.OpenLobby(); menu.Lobby.ConnectSeconds = .05f; yield return null;
             var locked = fake.List.First(t => t.Locked);
@@ -571,7 +561,6 @@ namespace Galaxy101.Tests
         [UnityTest]
         public IEnumerator LiveServer()
         {
-            OnlyKnownUiToolkitLogs();   // UI Toolkit filter render-tree log while dialogs rebuild (UNITY_FARKLARI UF-04); any other error still fails
             using (var probe = UnityWebRequest.Get(GalaxyApi.ResolveServer() + "/health"))
             {
                 probe.timeout = 3; yield return probe.SendWebRequest();

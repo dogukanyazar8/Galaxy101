@@ -57,6 +57,19 @@ namespace Galaxy101.Tests
         };
 
         [UnityTest]
+        public IEnumerator PreparedRackRefreshesTheHudAfterItsAuthoredGapsAreApplied()
+        {
+            var launch = Offline(); launch.Manual = true;
+            var game = Build(launch);
+            yield return Until(() => game.Session != null, 10, "the router's manually started table");
+            game.RunFlow("play");
+            yield return Until(() => game.HumanTurn && game.CanDraw, 10, "the prepared play turn");
+            Assert.That(RackEval.Of(game.Rack, game.Model).Sum, Is.EqualTo(88), "HAND_DEAL's real gap-free melds");
+            Assert.That(game.HudState().OpenSum, Is.EqualTo(88), "The game evaluates the arranged rack");
+            Assert.That(hudOwner.GetComponent<TableHud>().Current.OpenSum, Is.EqualTo(88), "The rendered HUD must follow the final arrangement, not the initial dealt order");
+        }
+
+        [UnityTest]
         public IEnumerator ALocalReferenceTableKeepsGiftPricesWhenItIsNotAVsBotsTable()
         {
             var launch = Offline("play"); launch.Table.VsBots = false;

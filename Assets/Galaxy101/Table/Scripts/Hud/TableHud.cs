@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
@@ -759,21 +760,24 @@ namespace Galaxy101.Table
             cell.Add(content); return cell;
         }
 
-        /// <summary>Leave card (T25). The bot table is offline and XP-only, so the stake sentence becomes the XP one.</summary>
+        /// <summary>Leave card (T25): the source's actual-stake warning or its no-stake practice warning.</summary>
         private void BuildExit()
         {
             var layer = Backdrop("table-exit-card", "exit-stay");
-            var card = Card(460, 28, "exit"); card.name = "table-exit-confirm"; card.style.alignItems = Align.Center; Pad(card, 28, 28, 28, 28);
+            var card = Card(460 + 56 + 2, 28, "exit"); card.name = "table-exit-confirm"; card.style.alignItems = Align.Center; Pad(card, 28, 28, 28, 28);
             var icon = new VisualElement { pickingMode = PickingMode.Ignore }; icon.style.width = icon.style.height = 64; icon.style.alignItems = Align.Center; icon.style.justifyContent = Justify.Center;
             view.Decorate(icon, "rgba(255,94,108,.16)", 20); icon.Add(view.Icon("table-exit", 32, "#FF8A94")); card.Add(icon);
-            var title = Text(L("Masadan kalkmak istiyor musun?", "Leave the table?"), "Montserrat-700", 24, "#F4F1E8"); title.style.marginTop = 12;
-            title.style.whiteSpace = WhiteSpace.Normal; title.style.unityTextAlign = TextAnchor.UpperCenter; title.style.maxWidth = 404; title.style.flexShrink = 1; card.Add(title);
-            var body = Text(TableStrings.Get("exitBodyBot", Lang), "Baloo2-700", 15, "var(--mt)");
-            body.style.whiteSpace = WhiteSpace.Normal; body.style.maxWidth = 360; body.style.unityTextAlign = TextAnchor.UpperCenter; body.style.marginTop = 12; card.Add(body);
+            var title = Text(TableStrings.Get("exitTitle", Lang), "Montserrat-700", 24, "#F4F1E8"); title.name = "table.t.exitTitle"; title.style.marginTop = 12;
+            title.style.whiteSpace = WhiteSpace.Normal; title.style.unityTextAlign = TextAnchor.UpperCenter; title.style.maxWidth = 460; title.style.flexShrink = 1; MenuView.CssLines(title, 24 * 1.2f); card.Add(title);
+            long stake = FreeGifts ? 0 : Current.RoomStake;
+            string warning = stake > 0 ? TableStrings.Get("exitBody", Lang).Replace(L("5.000", "5,000"), stake.ToString("N0", new CultureInfo(L("tr-TR", "en-US")))) :
+                L("Maç bitmeden kalkarsan yerine bot oynar. Antrenman masasında bahis yoktur.", "If you leave before the match ends, a bot takes your seat. Practice tables have no stake.");
+            var body = Text(warning, "Baloo2-700", 15, "var(--mt)"); body.name = "table.t.exitBody";
+            body.style.whiteSpace = WhiteSpace.Normal; body.style.maxWidth = 360; body.style.unityTextAlign = TextAnchor.UpperCenter; body.style.marginTop = 12; MenuView.CssLines(body, 15 * 1.5f); card.Add(body);
             var buttons = Row(10); buttons.style.alignSelf = Align.Stretch; buttons.style.marginTop = 20;
-            var stay = Text(L("Masada kal", "Stay"), "Montserrat-700", 17, "var(--aT)"); stay.name = "exit-stay"; stay.style.flexGrow = 1; stay.style.flexBasis = 0; stay.style.unityTextAlign = TextAnchor.MiddleCenter;
+            var stay = Text(L("Masada kal", "Stay"), "Montserrat-700", 17, "var(--aT)"); stay.name = "table.stay#2"; stay.style.flexGrow = 1; stay.style.flexBasis = 0; stay.style.unityTextAlign = TextAnchor.MiddleCenter;
             Pad(stay, 14, 14, 14, 14); view.Decorate(stay, "linear-gradient(var(--a1),var(--a2))", 16, 5, "var(--aS)"); buttons.Add(Clickable(stay, "exit-stay"));
-            var leave = Text(L("Kalk", "Leave"), "Montserrat-700", 17, "#fff"); leave.name = "exit-leave"; leave.style.flexGrow = 1; leave.style.flexBasis = 0; leave.style.unityTextAlign = TextAnchor.MiddleCenter;
+            var leave = Text(L("Kalk", "Leave"), "Montserrat-700", 17, "#fff"); leave.name = "table.leave"; leave.style.flexGrow = 1; leave.style.flexBasis = 0; leave.style.unityTextAlign = TextAnchor.MiddleCenter;
             Pad(leave, 14, 14, 14, 14); view.Decorate(leave, "linear-gradient(#FF7A86,#E8455A)", 16, 5, "#A3283A"); buttons.Add(Clickable(leave, "exit-leave"));
             card.Add(buttons); layer.Add(card);
         }
@@ -940,7 +944,7 @@ namespace Galaxy101.Table
             float began = flash.ShownAt;
             // toastIn .3s ease.
             toastMotions.Add(now => { float k = MenuView.CssBezier(.25f, .1f, .25f, 1, Mathf.Clamp01((now - began) / .3f)); toast.style.opacity = k; toast.style.translate = new Translate(0, -14 * (1 - k)); });
-            row.Add(toast); toastLayer.Add(row);
+            row.Add(toast); ApplyGaps(row); toastLayer.Add(row);
         }
 
         /// <summary>Penalty pill (tehlike degradesi, Montserrat 800, hard #9E1F33 shadow).</summary>
@@ -1199,22 +1203,33 @@ namespace Galaxy101.Table
             buttons.style.marginRight = buttons.style.marginBottom = -6;
             foreach (var button in buttons.Children())
             {
+                if (button.style.position.value == Position.Absolute) continue;
                 button.style.flexShrink = 0; button.style.marginRight = 6; button.style.marginBottom = 6;
             }
             column.style.minWidth = 0;
             column.Add(buttons);
-            float isleWidth = 0, appliedWidth = -1;
+            TextElement fullWidthAction = null;
+            float appliedWidth = -1;
             void FitActions()
             {
                 float preferred = -6;
                 foreach (var button in buttons.Children())
                 {
+                    // Decorate inserts an absolute "ledge" shadow beside each button; it is outside flex flow.
+                    if (button.style.position.value == Position.Absolute) continue;
                     float width = button.layout.width;
                     if (float.IsNaN(width) || float.IsInfinity(width) || width <= 0) return;
                     preferred += width + 6;
                 }
+                float extra = 0;
+                if (fullWidthAction != null)
+                {
+                    float textWidth = fullWidthAction.MeasureTextSize(fullWidthAction.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).x;
+                    if (float.IsNaN(textWidth) || float.IsInfinity(textWidth) || textWidth <= 0) return;
+                    extra = textWidth + 28 + 6;
+                }
                 // CSS determines the max-content width before wrapping; Yoga shrinks it to its widest wrapped line.
-                float target = Mathf.Min(232, preferred + isleWidth);
+                float target = Mathf.Min(232, preferred + extra);
                 if (Mathf.Abs(appliedWidth - target) <= .5f) return;
                 appliedWidth = target; column.style.width = target; buttons.style.width = target + 6;
             }
@@ -1225,7 +1240,8 @@ namespace Galaxy101.Table
                 // table.doIsle: a full-width row under the buttons (flex 1 1 100%).
                 var isle = ActionButton("table.doIsle", TableStrings.Get("isle", Lang), s.CanIsle, true, 14, "isle");
                 isle.style.marginTop = 6; isle.style.unityTextAlign = TextAnchor.MiddleCenter; column.Add(isle);
-                isleWidth = ((TextElement)isle).MeasureTextSize(TableStrings.Get("isle", Lang), 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).x + 28 + 6;
+                fullWidthAction = (TextElement)isle;
+                isle.RegisterCallback<GeometryChangedEvent>(_ => FitActions());
             }
             meter.Add(column);
             actions.Add(meter);

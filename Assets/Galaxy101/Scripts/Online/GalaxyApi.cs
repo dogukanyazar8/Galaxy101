@@ -37,6 +37,8 @@ namespace Galaxy101.Online
 
         public string BaseUrl { get; }
         public TokenResponse Tokens { get; private set; }
+        /// <summary>The owning sign-in. Token rotation preserves it; a new sign-in or sign-out invalidates it.</summary>
+        public int Generation { get; private set; }
         public bool SignedIn => Tokens != null;
         public int TimeoutSeconds = 10;
         /// <summary>The refresh token rotated (persist it if the player chose "Beni hatırla").</summary>
@@ -62,26 +64,39 @@ namespace Galaxy101.Online
             return DefaultServer;
         }
 
-        public void Use(TokenResponse tokens) { Tokens = tokens; TokensChanged?.Invoke(tokens); }
-        public void SignOut() { Tokens = null; TokensChanged?.Invoke(null); }
+        public void Use(TokenResponse tokens) { Generation++; refreshing = null; SetTokens(tokens); }
+        public void SignOut() => Use(null);
+        private void SetTokens(TokenResponse tokens) { Tokens = tokens; TokensChanged?.Invoke(tokens); }
+
+        private async Task<TokenResponse> AuthenticateAsync(string path, object body)
+        {
+            SignOut();
+            int generation = Generation;
+            var tokens = await SendAsync<TokenResponse>("POST", path, body, false);
+            if (generation != Generation) throw new ApiException("session_changed", 0);
+            SetTokens(tokens);
+            return tokens;
+        }
 
         // ---------- auth (spec/18) ----------
         public async Task<TokenResponse> GuestAsync(string name, string color)
-        { var t = await SendAsync<TokenResponse>("POST", "/v1/auth/guest", new GuestLoginRequest { Name = name, Color = color, Platform = Application.platform.ToString() }, false); Use(t); return t; }
+        { return await AuthenticateAsync("/v1/auth/guest", new GuestLoginRequest { Name = name, Color = color, Platform = Application.platform.ToString() }); }
         public async Task<TokenResponse> RegisterAsync(RegisterRequest request)
-        { request.Platform = Application.platform.ToString(); var t = await SendAsync<TokenResponse>("POST", "/v1/auth/register", request, false); Use(t); return t; }
+        { request.Platform = Application.platform.ToString(); return await AuthenticateAsync("/v1/auth/register", request); }
         public async Task<TokenResponse> LoginAsync(string email, string password)
-        { var t = await SendAsync<TokenResponse>("POST", "/v1/auth/login", new PasswordLoginRequest { Email = email, Password = password }, false); Use(t); return t; }
+        { return await AuthenticateAsync("/v1/auth/login", new PasswordLoginRequest { Email = email, Password = password }); }
         public async Task<bool> ResumeAsync(string refreshToken)
         {
-            try { Use(await SendAsync<TokenResponse>("POST", "/v1/auth/refresh", new RefreshRequest { RefreshToken = refreshToken }, false)); return true; }
+            try { await AuthenticateAsync("/v1/auth/refresh", new RefreshRequest { RefreshToken = refreshToken }); return true; }
             // A ban is not a dead session: the token stays remembered for after it, and the caller shows why.
             catch (ApiException e) when (!e.Offline && e.Code != ErrorCodes.Banned) { return false; }
         }
         public async Task LogoutAsync()
         {
-            if (Tokens != null) try { await SendAsync<JObject>("POST", "/v1/auth/logout", new RefreshRequest { RefreshToken = Tokens.RefreshToken }); } catch (ApiException) { }
+            // Start with the old bearer before clearing it. No completion may sign out a newer account.
+            var request = Tokens == null ? null : SendAsync<JObject>("POST", "/v1/auth/logout", new RefreshRequest { RefreshToken = Tokens.RefreshToken });
             SignOut();
+            if (request != null) try { await request; } catch (ApiException) { }
         }
 
         // ---------- menu data ----------
@@ -96,6 +111,7 @@ namespace Galaxy101.Online
 
         public async Task<T> SendAsync<T>(string method, string path, object body = null, bool auth = true)
         {
+            int generation = Generation;
             if (!ServerAddress.IsAllowed(BaseUrl, out var refused))
             {
                 Debug.LogError("Galaxy 101 server address refused (" + BaseUrl + "): " + refused);
@@ -123,6 +139,7 @@ namespace Galaxy101.Online
                     }
                     long status = request.responseCode;
                     string text = request.downloadHandler.text;
+                    if (auth && generation != Generation) throw new ApiException("session_changed", 0);
                     if (request.result == UnityWebRequest.Result.ConnectionError || status == 0) throw new ApiException("offline", 0);
                     if (status == 401 && sent != null && attempt == 0 && await RefreshAfter(sent)) continue;
                     if (status >= 200 && status < 300)
@@ -142,13 +159,24 @@ namespace Galaxy101.Online
         private Task<bool> refreshing;
         private Task<bool> RefreshAfter(TokenResponse sent)
         {
-            if (Tokens != sent) return Task.FromResult(Tokens != null);
-            return refreshing ?? (refreshing = RefreshAsync(sent.RefreshToken));
+            if (Tokens != sent) return Task.FromResult(Tokens != null && Tokens.AccountId == sent.AccountId);
+            return refreshing ?? (refreshing = RefreshAsync(sent, Generation));
         }
-        private async Task<bool> RefreshAsync(string refreshToken)
+        private async Task<bool> RefreshAsync(TokenResponse sent, int generation)
         {
-            try { return await ResumeAsync(refreshToken); }
-            finally { refreshing = null; }
+            try
+            {
+                var tokens = await SendAsync<TokenResponse>("POST", "/v1/auth/refresh", new RefreshRequest { RefreshToken = sent.RefreshToken }, false);
+                if (generation != Generation || Tokens != sent || tokens?.AccountId != sent.AccountId) return false;
+                SetTokens(tokens);
+                return true;
+            }
+            catch (ApiException e) when (!e.Offline && e.Code != ErrorCodes.Banned)
+            {
+                if (generation == Generation && Tokens == sent) SignOut();
+                return false;
+            }
+            finally { if (generation == Generation) refreshing = null; }
         }
 
         private static Task Await(UnityWebRequestAsyncOperation operation)

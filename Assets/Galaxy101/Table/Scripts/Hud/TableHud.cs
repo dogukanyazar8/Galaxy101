@@ -63,6 +63,8 @@ namespace Galaxy101.Table
             public bool ShowReturn, ShowIsle, CanIsle, ShowLayPair, CanLayPair;
             /// <summary>protocol.json reconnect: "Bağlantı koptu · Deneme n/5" (0 = connected); GaveUp leaves only "Lobiye dön".</summary>
             public int NetAttempt; public bool NetGaveUp;
+            /// <summary>G101-Masa tOpened: I opened this turn and have not discarded yet ("Elini açtın · şimdi bir taş at").</summary>
+            public bool OpenedThisTurn;
         }
 
         public sealed class OkeyMark { public int Id; public string Number, Color; public bool Target, Invalid; }
@@ -194,6 +196,8 @@ namespace Galaxy101.Table
         /// <summary>The menu profile (level, XP) the table writes to.</summary>
         public MenuModel Model => model;
         public VisualElement Canvas => canvas;
+        /// <summary>The HUD's view (themes, fonts, texts): the table scene's own screens (the loading screen of G01/T50/T51) draw with it.</summary>
+        public MenuView View => view;
         public TableScene Table => table;
 
         private void Start() { if (view == null) Initialize(); }
@@ -343,7 +347,8 @@ namespace Galaxy101.Table
             BuildTopBar(state);
             BuildToast(state);
             BuildMe(state);
-            BuildActions(state);
+            // G101-Masa showActions: playing (not the waiting room) and not dealing.
+            if (state.Phase != "seat" && state.Phase != "deal") BuildActions(state);
             if (state.Phase == "seat") BuildWaiting(state);
             if (state.Phase == "deal" && state.Deal != null) BuildDeal(state.Deal);
             if (state.Countdown > 0) BuildCountdown(state);
@@ -912,11 +917,12 @@ namespace Galaxy101.Table
             if (s.DragBanner != null) { text = s.DragBanner; bg = "linear-gradient(var(--a1),var(--a2))"; fg = "var(--aT)"; }
             else if (s.Phase == "draw" && s.Active == 0 && s.DeckOnly) { text = TableStrings.Get("drawDeckOnly", Lang); bg = "linear-gradient(var(--a1),var(--a2))"; fg = "var(--aT)"; }
             else if (s.Phase == "discard" && s.Active == 0 && s.ShowPutBack) { text = TableStrings.Get("putBackHint", Lang); bg = "rgba(5,8,22,.75)"; fg = "var(--ic)"; }
-            else if (s.Phase == "deal") { text = L("Taşlar dağıtılıyor…", "Dealing tiles…"); bg = "rgba(5,8,22,.75)"; fg = "var(--ic)"; }
+            else if (s.Phase == "deal" && s.Deal == null) { text = L("Taşlar dağıtılıyor…", "Dealing tiles…"); bg = "rgba(5,8,22,.75)"; fg = "var(--ic)"; }
             else if (s.Phase == "draw" && s.Active == 0) { string n = FirstName(3); text = L("Sıra sende · desteden ya da " + n + "'ın taşından çek", "Your turn · draw from the deck or " + n + "'s tile"); bg = "linear-gradient(var(--a1),var(--a2))"; fg = "var(--aT)"; }
             else if (s.Phase == "discard" && s.Active == 0)
             {
-                text = s.FirstTurn ? L("İlk hamle senin · ıstakadan bir taş at", "You start · discard a tile from your rack") : L("Atacağın taşı halkaya sürükle ya da çift tıkla", "Drag a tile onto the ring or double-click it");
+                text = s.FirstTurn ? L("İlk hamle senin · ıstakadan bir taş at", "You start · discard a tile from your rack")
+                    : s.OpenedThisTurn ? TableStrings.Get("tOpened", Lang) : L("Atacağın taşı halkaya sürükle ya da çift tıkla", "Drag a tile onto the ring or double-click it");
                 bg = "#3CCB6E"; fg = "#062B14";
             }
             else if (s.Active > 0) { string n = FirstName(s.Active); text = L(n + " oynuyor…", n + " is playing…"); bg = "rgba(5,8,22,.75)"; fg = "var(--ic)"; }

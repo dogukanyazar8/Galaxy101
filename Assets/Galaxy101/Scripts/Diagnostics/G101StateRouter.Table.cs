@@ -77,18 +77,20 @@ namespace Galaxy101.Diagnostics
                 launch.Table = table; launch.Room = L("Test masası · Tekli", "Test table · Singles"); launch.Stake = TestBet; launch.Chips = AccountChips - TestBet; launch.Seats = TestSeats;
             }
             TableGame.Pending = launch;
+            _ = Menu.StartLocalAsync(MainMenuController.GalaxyTableScene);
+            float until = Time.realtimeSinceStartup + 30;
+            while (Game == null || Game.Model == null || Hud == null || Hud.View == null) { if (Time.realtimeSinceStartup > until) throw new TimeoutException("table did not open"); yield return null; }
             if (noWait)
             {
-                // T50 / G01 / T51: the loading screen over the menu (the table scene is not loaded: UF-506).
-                var loading = new TableLoadingOverlay(Menu.View, Menu.transform);
+                // T50 / G01 / T51: the loading screen over the table, which waits full ("Masa doldu · oyun başlıyor"), as the
+                // prototype's loading layer lies over G101-Masa.
+                Game.ShowTableFull();
+                var loading = new TableLoadingOverlay(Hud.View, Hud.transform);
                 loading.Show(5, bots ? null : L("KLASİK · TEKLİ · 101 · 5 EL", "CLASSIC · SINGLES · 101 · 5 HANDS"));
                 Loading = loading;
                 StartCoroutine(LoadingProgress(loading));
                 yield break;
             }
-            _ = Menu.StartLocalAsync(MainMenuController.GalaxyTableScene);
-            float until = Time.realtimeSinceStartup + 30;
-            while (Game == null || Game.Model == null || Hud == null) { if (Time.realtimeSinceStartup > until) throw new TimeoutException("table did not open"); yield return null; }
             yield return Settle(.4f);
             yield return Go(tableFlow);
             // DEMO (G101-Masa dealFinish): 2.6 s after a real deal ends, seat 2 treats the table to tea.
@@ -137,6 +139,9 @@ namespace Galaxy101.Diagnostics
                 case "exit": At(.4f, () => game.RequestExit()); break;
                 case "net": At(.5f, () => game.ShowConnectionLost()); break;
                 case "settings": At(.3f, () => hud.OpenSettings(2)); break;
+                case "isle": At(.6f, () => hud.Post(TableHud.ToastKind.Info, TableStrings.Get("isleTestHint", hud.L("tr", "en")))); break;
+                case "penIslek": At(.6f, () => hud.Post(TableHud.ToastKind.Info, TableStrings.Get("penIslekTest", hud.L("tr", "en")))); break;
+                case "penOpen": At(.6f, () => hud.Post(TableHud.ToastKind.Info, TableStrings.Get("penOpenTest", hud.L("tr", "en")))); break;
             }
             // DEMO (DEMO_LIST.md "Bot ikramı"): the prototype's tea from seat 2 on the play and gift flows.
             if (flow == "play") At(1.6f, () => hud.BotGift(2, "tea", -1, quick4));

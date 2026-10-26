@@ -172,6 +172,7 @@ namespace Galaxy101.Table
         {
             offline.Host.Xp += (gained, reason) => { AddXp(gained); if (reason == "hand") LastXp = (int)gained; };
             AttachModel();
+            ApplySeats();   // the seats are known before matchStart (the waiting room, the loading screen)
             if (!Launch.Manual) RunFlow(Launch.Flow);
         }
 
@@ -185,6 +186,7 @@ namespace Galaxy101.Table
             if (flow == "seat") { _ = SeatThenStart(offline); return; }
             if (flow != null && TableScenarios.Has(flow))
             {
+                preparedHand = true;
                 var sc = TableScenarios.Create(flow);
                 offline.Resume(sc.State());
                 // The prototype's rack layout of the flow, slot for slot.
@@ -320,6 +322,7 @@ namespace Galaxy101.Table
 
         private void BeginDeal()
         {
+            preparedHand = false;
             Current = Phase.Deal; Active = -1; settled = false; ResultOpen = false; momentOn = false;
             Gifts.Clear(); hud?.NewHand();
             foreach (var list in penaltyWhy) list.Clear();
@@ -575,6 +578,20 @@ namespace Galaxy101.Table
 
         /// <summary>The state router's "net" flow (T26, prototype dropNet): the reconnect card without a socket to lose.</summary>
         private int netDemo;
+        /// <summary>The hand was prepared by a test flow (TableScenarios), not dealt.</summary>
+        private bool preparedHand;
+
+        /// <summary>
+        /// The state router's loading states (G01, T50, T51): the Test masası full and about to start ("Masa doldu · oyun
+        /// başlıyor", 106 tiles) under the loading screen, as the prototype draws the table behind it.
+        /// </summary>
+        public void ShowTableFull()
+        {
+            seating = true; for (int k = 0; k < 4; k++) seated[k] = true;
+            Current = Phase.Seating; Board.Clear(); Board.LayoutDeck(106);
+            table.CameraRig.GoTo(TableCameraRig.View.Lobby, 0);
+            ApplySeats(); Notify();
+        }
         public void ShowConnectionLost() { netDemo = 1; Notify(); }
 
         /// <summary>
@@ -874,8 +891,9 @@ namespace Galaxy101.Table
 
         private void ApplySeats()
         {
-            if (hud == null || Model?.Table == null) return;
-            var seats = Model.Table.Seats;
+            var tableInfo = Model?.Table ?? (Session is LocalTableSession offline ? offline.Table : null);
+            if (hud == null || tableInfo == null) return;
+            var seats = tableInfo.Seats;
             for (int k = 1; k < 4; k++)
             {
                 int abs = Abs(k);
@@ -887,7 +905,8 @@ namespace Galaxy101.Table
                     continue;
                 }
                 var user = abs < seats.Count ? seats[abs]?.User : null;
-                if (user != null && !string.IsNullOrEmpty(user.Name)) hud.SetSeat(k, user.Name, user.Color, user.Level, Model.SeatBot[abs] || Model.Autoplay[abs]);
+                bool bot = Model.Table != null ? Model.SeatBot[abs] || Model.Autoplay[abs] : seats[abs]?.Bot ?? true;
+                if (user != null && !string.IsNullOrEmpty(user.Name)) hud.SetSeat(k, user.Name, user.Color, user.Level, bot);
             }
         }
 
@@ -910,7 +929,10 @@ namespace Galaxy101.Table
             {
                 Phase = Current == Phase.Seating ? "seat" : dealing ? "deal" : Current == Phase.Draw ? "draw" : Current == Phase.Discard ? "discard" : Current == Phase.Finished ? "fin" : "opp",
                 Active = Active, DeckCount = Current == Phase.Seating ? 106 : dealing ? 0 : m.Deck, TurnSeconds = Mathf.RoundToInt(m.TurnMs / 1000f), TurnStartedAt = turnStartedReal,
-                Warn = HumanTurn && warned, TurnHint = turnHint, ShowIndicator = !dealing && Current != Phase.Seating, FirstTurn = m.TurnN == 1 && m.TurnPhase == G101Rules.PhasePlay,
+                Warn = HumanTurn && warned, TurnHint = turnHint, ShowIndicator = !dealing && Current != Phase.Seating,
+                // tDiscardFirst only on a dealt hand's first move (a prepared flow's hand is past it: the prototype's _turns ≥ 1).
+                FirstTurn = m.TurnN == 1 && m.TurnPhase == G101Rules.PhasePlay && !preparedHand,
+                OpenedThisTurn = HumanTurn && IOpened && m.OpenedTurn[m.Seat] == m.TurnN,
                 Pairs = eval.Pairs.Count, PickedTile = PickedTile, DeckOnly = HumanTurn && m.TurnPhase == G101Rules.PhaseDraw && m.SideReturned, ShowPutBack = PickedTile >= 0 && CanDiscard && Legal.ReturnSide,
                 Countdown = m.Status == G101Rules.StatusLobby ? countdown : 0, CountdownAt = countdownAt, ExitOpen = ExitOpen,
                 Hand = Math.Max(1, m.HandNo), MatchHands = m.Hands,

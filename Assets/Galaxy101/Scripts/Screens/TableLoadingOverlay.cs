@@ -30,7 +30,7 @@ namespace Galaxy101
         public void Show(int hands, string kick = null)
         {
             Hide();
-            var canvas = view.Root.Q<VisualElement>("galaxy-canvas") ?? view.Root;
+            var canvas = view.Root.Q<VisualElement>("galaxy-canvas") ?? view.Root.Q<VisualElement>("table-canvas") ?? view.Root;
             layer = Fill("table-loading"); layer.pickingMode = PickingMode.Position; canvas.Add(layer);
             var backdrop = Fill("table-loading-background"); backdrop.pickingMode = PickingMode.Ignore; layer.Add(backdrop);
             background = new GameObject("Table loading background").AddComponent<GalaxyBackground>(); background.transform.SetParent(owner, false);

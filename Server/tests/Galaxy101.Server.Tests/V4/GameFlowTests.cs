@@ -61,7 +61,7 @@ public sealed class GameFlowTests(ServerFixture server)
     }
 
     [Fact]
-    public async Task SRV_02_Deal_ceremony_with_a_bot_dealer_takes_21686_ms()
+    public async Task SRV_02_Deal_ceremony_with_a_bot_dealer_takes_20358_ms()
     {
         await using var env = new V4Env(server);
         var seed = BotDealerSeed(42);
@@ -72,19 +72,42 @@ public sealed class GameFlowTests(ServerFixture server)
         Assert.True(await env.UntilAsync(() => c.Of(M.Turn).Count > 0));
         var deal = c.Last(M.DealStart)!;
         Assert.False(deal["humanDealer"].GetBoolean());
-        Assert.Equal(21686, c.Of(M.Turn)[0].At - deal.At);
+        Assert.Equal(20358, c.Of(M.Turn)[0].At - deal.At);
         Assert.Equal(["dice", "indicator", "extra", "distribute", "center"], c.Of(M.DealStep).Select(s => s.Str("step")));
-        // The step table of protocol/timings.md, from dealStart.
+        // Current prototip/galaxy101_handoff_v4/logic/mockServer.js, from dealStart; older timing docs differ.
         long T(string type, Func<Frame, bool>? f = null) => c.Of(type).First(x => f is null || f(x)).At - deal.At;
-        Assert.Equal(2940, T(M.DealStep, s => s.Str("step") == "dice"));
-        Assert.Equal(3640, T(M.DealDie, d => d.Int("index") == 0));
-        Assert.Equal(5860, T(M.DealDie, d => d.Int("index") == 1));
-        Assert.Equal(8850, T(M.DealStep, s => s.Str("step") == "indicator"));
-        Assert.Equal(11150, T(M.DealStep, s => s.Str("step") == "extra"));
-        Assert.Equal(12450, T(M.DealStep, s => s.Str("step") == "distribute"));
-        Assert.Equal(17550, T(M.DealStep, s => s.Str("step") == "center"));
-        Assert.Equal(19550, T(M.HandDealt));
+        Assert.Equal(2572, T(M.DealStep, s => s.Str("step") == "dice"));
+        Assert.Equal(3272, T(M.DealDie, d => d.Int("index") == 0));
+        Assert.Equal(5492, T(M.DealDie, d => d.Int("index") == 1));
+        Assert.Equal(8482, T(M.DealStep, s => s.Str("step") == "indicator"));
+        Assert.Equal(10782, T(M.DealStep, s => s.Str("step") == "extra"));
+        Assert.Equal(12082, T(M.DealStep, s => s.Str("step") == "distribute"));
+        Assert.Equal(16222, T(M.DealStep, s => s.Str("step") == "center"));
+        Assert.Equal(18222, T(M.HandDealt));
         await c.SendAsync(M.TableLeave);
+    }
+
+    [Fact]
+    public async Task SRV_02c_Skip_deal_is_authorized_by_the_server_and_keeps_the_fast_fill_gate()
+    {
+        await using var env = new V4Env(server);
+        env.Hub.SeedSource = () => 7;
+        env.Hub.NextRig = G101Rules.RigFromHands(new ScenarioDeal { Dealer = 3, Dice = [4, 3], Indicator = "Y4a" });
+        var client = await env.GuestAsync(); await client.SendAsync(M.Hello);
+        Assert.Equal(V4Errors.E_NOT_SEATED, (await client.SendAsync(M.GSkipDeal)).Code);
+        Assert.True((await client.SendAsync(M.VsBotsStart, new { mode = "solo", hands = 1 })).Ok);
+        Assert.True(await env.UntilAsync(() => client.Of(M.DealStart).Count > 0));
+        Assert.True((await client.SendAsync(M.GSkipDeal)).Ok);
+        await env.SettleAsync();
+        var skip = Assert.Single(client.Of(M.DealSkip));
+        Assert.Equal(new[] { 4, 3 }, skip["dice"].EnumerateArray().Select(value => value.GetInt32()));
+        Assert.Equal("Y4a", skip.Str("indicator")); Assert.False(skip.Has("rack"));
+        Assert.Single(client.Of(M.HandDealt)); Assert.Empty(client.Of(M.Turn));
+        await env.AdvanceAsync(1099); Assert.Empty(client.Of(M.Turn));
+        await env.AdvanceAsync(1);
+        Assert.Equal(1100, Assert.Single(client.Of(M.Turn)).At - skip.At);
+        Assert.Equal(V4Errors.E_PHASE, (await client.SendAsync(M.GSkipDeal)).Code);
+        await client.SendAsync(M.TableLeave);
     }
 
     [Fact]

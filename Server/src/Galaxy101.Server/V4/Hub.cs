@@ -29,7 +29,7 @@ public sealed partial class Hub : IRealtimeReplyHandler, IHostedService
         V4Messages.Hello, V4Messages.Resync, V4Messages.LobbySubscribe, V4Messages.LobbyUnsubscribe, V4Messages.TableCreate, V4Messages.TableJoin,
         V4Messages.TableJoinCode, V4Messages.TableSpectate, V4Messages.TableLeave, V4Messages.SeatAddBot, V4Messages.SeatKick, V4Messages.TableStart,
         V4Messages.InviteSend, V4Messages.InviteRespond, V4Messages.InviteCancel, V4Messages.VsBotsStart, V4Messages.RankedQueue,
-        V4Messages.RankedAccept, V4Messages.RankedCancel, V4Messages.GRollDice, V4Messages.GDraw, V4Messages.GReturnSide, V4Messages.GOpen,
+        V4Messages.RankedAccept, V4Messages.RankedCancel, V4Messages.GRollDice, V4Messages.GSkipDeal, V4Messages.GDraw, V4Messages.GReturnSide, V4Messages.GOpen,
         V4Messages.GLay, V4Messages.GAdd, V4Messages.GSwap, V4Messages.GUndo, V4Messages.GDiscard, V4Messages.GReady, V4Messages.GRackOrder,
         V4Messages.ChatSend, V4Messages.GiftSend,
     ];
@@ -342,6 +342,8 @@ public sealed partial class Hub : IRealtimeReplyHandler, IHostedService
         {
             case V4Messages.GRollDice:
                 return run.RollDice(p.Seat) is { } rollError ? Reply.Fail(rollError) : Reply.Ok;
+            case V4Messages.GSkipDeal:
+                return run.SkipDeal(p.Seat) is { } skipError ? Reply.Fail(skipError) : Reply.Ok;
             case V4Messages.GReady:
                 return run.ReadyUp(p.Seat) is { } readyError ? Reply.Fail(readyError) : Reply.Ok;
             case V4Messages.GRackOrder:

@@ -592,7 +592,7 @@ public sealed partial class Hub
     {
         if (Busy(p)) return Reply.Fail(V4Errors.E_ALREADY_SEATED);
         var hands = m.Hands ?? 5;
-        if (m.Mode is not ("solo" or "pairs") || hands is < 1 or > 7) return Reply.Fail(V4Errors.E_TABLE_OPTIONS);
+        if (m.Mode is not ("solo" or "pairs") || hands is < 1 or > 11) return Reply.Fail(V4Errors.E_TABLE_OPTIONS);
         var t = NewTable(p.Id, new V4TableCreateRequest
         {
             Name = "Botlara karşı", Mode = m.Mode, Bet = 0, Rules = new V4TableRules { Spectate = false, Chat = "open", Gifts = false },

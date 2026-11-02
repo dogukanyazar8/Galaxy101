@@ -303,7 +303,7 @@ namespace Galaxy101
             // iv.open: z 25; the backdrop lobby.iv.close (rgba(0,0,0,.55) + blur(6px), lbFade .2s) is the persistent veil (Veil()).
             // 900 × 580 inside a 1 px border, grid minmax(0,1fr) 290px, radius 28; lbModal .32s cubic-bezier(.22,1,.36,1).
             var modal = Row(); modal.name = "lobby-invite"; modal.pickingMode = PickingMode.Position; modal.style.alignItems = Align.Stretch; MenuView.Place(modal, 189, 69, 902, 582); modal.style.overflow = Overflow.Hidden;
-            Border(modal, 1, new Color(1, 1, 1, .1f)); Raise(modal, "var(--pn)", 28, 10, "var(--pnS)"); GalaxyFilters.Shadow(modal, 0, 40, 45, new Color(0, 0, 0, .6f));
+            Border(modal, 1, new Color(1, 1, 1, .1f)); Raise(modal, "var(--pn)", 28, 10, "var(--pnS)"); GalaxyFilters.BoxShadow(modal, 0, 40, 45, new Color(0, 0, 0, .6f));
             modal.RegisterCallback<ClickEvent>(e => e.StopPropagation()); Pop(modal, state.OpenedAt, .32f, false, true); modalLayer.Add(modal);
 
             // Left: padding 22 22 0 28, gap 14.

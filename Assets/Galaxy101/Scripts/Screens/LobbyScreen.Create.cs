@@ -57,7 +57,7 @@ namespace Galaxy101
             // 1060 × 650 inside a 1 px border, grid minmax(0,1fr) 330px, radius 28, 0 10px 0 --pnS, 0 40px 90px rgba(0,0,0,.6).
             var modal = Row(); modal.name = "lobby-create"; modal.pickingMode = PickingMode.Position; modal.style.alignItems = Align.Stretch;
             MenuView.Place(modal, 109, 34, 1062, 652); modal.style.overflow = Overflow.Hidden;
-            Border(modal, 1, new Color(1, 1, 1, .1f)); Raise(modal, "var(--pn)", 28, 10, "var(--pnS)"); GalaxyFilters.Shadow(modal, 0, 40, 45, new Color(0, 0, 0, .6f));
+            Border(modal, 1, new Color(1, 1, 1, .1f)); Raise(modal, "var(--pn)", 28, 10, "var(--pnS)"); GalaxyFilters.BoxShadow(modal, 0, 40, 45, new Color(0, 0, 0, .6f));
             modal.RegisterCallback<ClickEvent>(e => e.StopPropagation());
             Pop(modal, createShownAt, .3f, true);
             modalLayer.Add(modal);

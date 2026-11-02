@@ -75,7 +75,7 @@ namespace Galaxy101
             var frame = Fill("lobby-dialog-frame"); frame.style.alignItems = Align.Center; frame.style.justifyContent = Justify.Center; dialogLayer.Add(frame);
             // Card: --pn, 1px rgba(255,255,255,.1), radius 26, 0 10px 0 --pnS, 0 40px 90px rgba(0,0,0,.6).
             var card = Box("lobby-dialog-" + d.Kind); card.pickingMode = PickingMode.Position; card.style.alignItems = Align.Center;
-            Border(card, 1, new Color(1, 1, 1, .1f)); Raise(card, "var(--pn)", 26, 10, "var(--pnS)"); GalaxyFilters.Shadow(card, 0, 40, 45, new Color(0, 0, 0, .6f));
+            Border(card, 1, new Color(1, 1, 1, .1f)); Raise(card, "var(--pn)", 26, 10, "var(--pnS)"); GalaxyFilters.BoxShadow(card, 0, 40, 45, new Color(0, 0, 0, .6f));
             card.RegisterCallback<ClickEvent>(e => e.StopPropagation()); frame.Add(card);
             // lbModal .25s (share .3s cubic-bezier(.2,1.2,.4,1)).
             if (d.Kind == "share") Pop(card, d.OpenedAt, .3f, true); else Pop(card, d.OpenedAt, .25f, false);

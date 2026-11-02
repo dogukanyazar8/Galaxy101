@@ -300,7 +300,7 @@ namespace Galaxy101
             var panel = Box("auth-panel"); panel.pickingMode = PickingMode.Position;
             panel.style.position = Position.Absolute; panel.style.right = 70; panel.style.top = top; panel.style.bottom = bottom; panel.style.width = 470;
             Pad(panel, padY, padX, padY, padX);
-            view.Decorate(panel, "var(--pn)", 28, 10, "var(--pnS)"); Border(panel, 1, new Color(1, 1, 1, .1f)); GalaxyFilters.Shadow(panel, 0, 40, 45, new Color(0, 0, 0, .5f));
+            view.Decorate(panel, "var(--pn)", 28, 10, "var(--pnS)"); Border(panel, 1, new Color(1, 1, 1, .1f)); GalaxyFilters.BoxShadow(panel, 0, 40, 45, new Color(0, 0, 0, .5f));
             float began = screenAt;
             if (Time.realtimeSinceStartup - began < .45f)
                 Animate(() => { float u = Mathf.Clamp01((Time.realtimeSinceStartup - began) / .45f), k = 1 - Mathf.Pow(1 - u, 3); panel.style.translate = new Translate(30 * (1 - k), 0); panel.style.opacity = u; });

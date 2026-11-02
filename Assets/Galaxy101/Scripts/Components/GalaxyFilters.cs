@@ -149,6 +149,74 @@ namespace Galaxy101
             }
         }
         /// <summary>
+        /// The panels' CSS "box-shadow: x y 2σ color" under a box whose outline is its opaque rounded border box (a
+        /// <see cref="HardShadow"/> ledge included) — the pixels <see cref="Shadow"/> gives such a box, at a fraction of the
+        /// cost. A drop-shadow filter renders the box's whole subtree offscreen at display resolution and blurs it there: a
+        /// 90 px panel shadow takes ~5 ms of GPU a frame at 3840×2160. Here a plain rounded rectangle in the shadow colour,
+        /// shrunk so its blur runs at <see cref="SoftShadow.TargetSigma"/> pixels, is blurred and scaled back up (UI Toolkit
+        /// filters an element at its own size × pixels per point, before its transform). Drawn by a sibling just under the
+        /// element that follows its layout, transform, opacity and display.
+        /// </summary>
+        public static void BoxShadow(VisualElement element,float x,float y,float sigma,Color color)
+        {
+            if(!boxShadows.TryGetValue(element,out var shadow)){shadow=new SoftShadow(element);boxShadows.Add(element,shadow);}
+            shadow.Set(new Vector2(x,y),Mathf.Max(0,sigma),color);
+        }
+        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<VisualElement,SoftShadow> boxShadows=new System.Runtime.CompilerServices.ConditionalWeakTable<VisualElement,SoftShadow>();
+        private sealed class SoftShadow:VisualElement
+        {
+            // Blur radius (σ) in render-target pixels: the scaled-up Gaussian then stays within one 8-bit level of a full-size one.
+            public const float TargetSigma=8;
+            private readonly VisualElement owner,shape=new VisualElement{name="box-shadow-shape",pickingMode=PickingMode.Ignore};
+            private IVisualElementScheduledItem follow;
+            private Vector2 offset;private float sigma;private Color color;
+            private Vector4 fitted=new Vector4(float.NaN,0,0,0);
+            public SoftShadow(VisualElement owner)
+            {
+                this.owner=owner;name="box-shadow";pickingMode=PickingMode.Ignore;style.position=Position.Absolute;
+                shape.style.position=Position.Absolute;shape.style.transformOrigin=new TransformOrigin(0,0);Add(shape);
+                // Re-added where it was, the owner gets no new geometry.
+                owner.RegisterCallback<GeometryChangedEvent>(_=>Fit());owner.RegisterCallback<AttachToPanelEvent>(_=>Fit());
+            }
+            public void Set(Vector2 offset,float sigma,Color color)
+            {
+                if(offset==this.offset&&Mathf.Approximately(sigma,this.sigma)&&color==this.color)return;
+                this.offset=offset;this.sigma=sigma;this.color=color;fitted.x=float.NaN;Fit();
+            }
+            private void Fit()
+            {
+                var host=owner.parent;float w=owner.layout.width,h=owner.layout.height;if(host==null||float.IsNaN(w))return;
+                // Under the owner and under a ledge drawn beside it (CSS paints the first of "0 10px 0 pnS, 0 40px 90px …" on top).
+                int at=host.IndexOf(owner);while(at>0&&(host[at-1].name=="ledge"||host[at-1]==this))at--;
+                if(parent!=host||host.IndexOf(this)!=at){RemoveFromHierarchy();at=host.IndexOf(owner);while(at>0&&host[at-1].name=="ledge")at--;host.Insert(at,this);}
+                style.left=owner.layout.x-host.resolvedStyle.borderLeftWidth;style.top=owner.layout.y-host.resolvedStyle.borderTopWidth;
+                style.width=w;style.height=h;
+                if(follow==null)follow=schedule.Execute(Follow).Every(0);else follow.Resume();
+                Follow();
+            }
+            // The owner's transform, opacity and display every frame; the shape again when its size, ledge or the display's
+            // pixels per point change (a resolution switch rescales the canvas without a new layout).
+            private void Follow()
+            {
+                if(owner.parent!=parent){follow?.Pause();RemoveFromHierarchy();return;}
+                var s=owner.resolvedStyle;
+                style.translate=new Translate(s.translate.x,s.translate.y);style.scale=s.scale;style.rotate=s.rotate;
+                style.transformOrigin=new TransformOrigin(s.transformOrigin.x,s.transformOrigin.y,s.transformOrigin.z);
+                style.opacity=s.opacity;style.visibility=s.visibility;
+                style.display=sigma>0&&color.a>0&&s.display==DisplayStyle.Flex?DisplayStyle.Flex:DisplayStyle.None;
+                float w=owner.layout.width,h=owner.layout.height+LedgeDepth(owner),ppp=owner.scaledPixelsPerPoint;
+                var key=new Vector4(w,h,ppp,0);if(key==fitted||float.IsNaN(w))return;fitted=key;
+                float k=Mathf.Max(1,sigma*ppp/TargetSigma),face=owner.layout.height;
+                // CSS shrinks radii larger than half a side; a ledge only lengthens the outline's straight sides.
+                float Radius(float r)=>Mathf.Min(r,w/2,face/2)/k;
+                shape.style.left=offset.x;shape.style.top=offset.y;shape.style.width=w/k;shape.style.height=h/k;
+                shape.style.borderTopLeftRadius=Radius(s.borderTopLeftRadius);shape.style.borderTopRightRadius=Radius(s.borderTopRightRadius);
+                shape.style.borderBottomRightRadius=Radius(s.borderBottomRightRadius);shape.style.borderBottomLeftRadius=Radius(s.borderBottomLeftRadius);
+                shape.style.backgroundColor=color;shape.style.scale=new Scale(new Vector2(k,k));
+                GalaxyFilters.Blur(shape,sigma/k);
+            }
+        }
+        /// <summary>
         /// CSS "box-shadow: 0 0 0 spread color" — a solid band around the element's rounded outline (pulse rings, focus
         /// halos), drawn like <see cref="HardShadow"/> by a child reaching <paramref name="reach"/> px around the box.
         /// Returns the setter (spread px up to the reach, colour).

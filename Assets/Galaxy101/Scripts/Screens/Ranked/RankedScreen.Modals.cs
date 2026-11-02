@@ -25,7 +25,7 @@ namespace Galaxy101
         private VisualElement ModalCard(int radius, float began, float seconds)
         {
             var card = Column(); card.pickingMode = PickingMode.Position;
-            Border(card, 1, new Color(1, 1, 1, .1f)); Raise(card, "var(--pn)", radius, 10, "var(--pnS)"); GalaxyFilters.Shadow(card, 0, 40, 45, new Color(0, 0, 0, .6f));
+            Border(card, 1, new Color(1, 1, 1, .1f)); Raise(card, "var(--pn)", radius, 10, "var(--pnS)"); GalaxyFilters.BoxShadow(card, 0, 40, 45, new Color(0, 0, 0, .6f));
             card.RegisterCallback<ClickEvent>(e => e.StopPropagation());
             Enter(card, began, seconds, u => Bezier(.2f, 1.2f, .4f, 1, u), k =>
             {

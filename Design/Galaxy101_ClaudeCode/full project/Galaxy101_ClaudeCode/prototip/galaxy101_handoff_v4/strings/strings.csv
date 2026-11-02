@@ -1,0 +1,1044 @@
+﻿key,tr,en,params,source
+app.STR.tag,"Masalar dolu, taşlar hazır.
+Arkadaşlarınla otur, 101 açıp eli bitir.","Tables are full and the tiles are ready.
+Sit with friends, open 101 and finish the hand.",,table
+app.STR.welcome,Hoş geldin,Welcome,,table
+app.STR.howCont,Nasıl devam etmek istersin?,How do you want to continue?,,table
+app.STR.guest,MİSAFİR OLARAK OYNA,PLAY AS GUEST,,table
+app.STR.guestSub,Kayıt yok · hemen başla,No sign-up · start now,,table
+app.STR.login,Giriş yap,Log in,,table
+app.STR.register,Kayıt ol,Sign up,,table
+app.STR.regGift,+25.000,"+25,000",,table
+app.STR.or,ya da,or,,table
+app.STR.orEmail,ya da e-postayla,or with email,,table
+app.STR.google,Google ile devam et,Continue with Google,,table
+app.STR.googleBusy,Google’a bağlanılıyor…,Connecting to Google…,,table
+app.STR.terms,Devam ederek Kullanım Koşulları’nı ve Gizlilik Politikası’nı kabul etmiş olursun. Oyun sanal çiple oynanır; gerçek para kazandırmaz.,By continuing you accept the Terms of Use and Privacy Policy. The game uses virtual chips and pays out no real money.,,table
+app.STR.back,Geri,Back,,table
+app.STR.remember,Beni hatırla,Remember me,,table
+app.STR.forgot,Şifremi unuttum,Forgot password,,table
+app.STR.avatarColor,AVATAR RENGİ,AVATAR COLOR,,table
+app.STR.agree,"Kullanım Koşulları’nı ve Gizlilik Politikası’nı okudum, kabul ediyorum.",I have read and accept the Terms of Use and Privacy Policy.,,table
+app.STR.loginT,Giriş yap,Log in,,table
+app.STR.loginS,Hesabınla kaldığın yerden devam et,Pick up where you left off,,table
+app.STR.loginCta,Giriş yap,Log in,,table
+app.STR.noAcc,Hesabın yok mu?,No account yet?,,table
+app.STR.toReg,Kayıt ol,Sign up,,table
+app.STR.regT,Kayıt ol,Sign up,,table
+app.STR.regS,"Hesap aç, 25.000 çip hediye","Create an account, get 25,000 chips",,table
+app.STR.regCta,Hesabı oluştur,Create account,,table
+app.STR.hasAcc,Zaten hesabın var mı?,Already have an account?,,table
+app.STR.toLogin,Giriş yap,Log in,,table
+app.STR.guestChips,Başlangıçta 10.000 çip hesabına yüklenir.,"You start with 10,000 chips.",,table
+app.STR.guestDevice,Uygulamayı silersen ya da cihaz değiştirirsen ilerlemen kaybolur.,"If you delete the app or switch devices, your progress is lost.",,table
+app.STR.guestT,Misafir girişi,Guest login,,table
+app.STR.guestS,İlerlemen bu cihazda saklanır,Your progress is saved on this device,,table
+app.STR.guestCta,Oynamaya başla,Start playing,,table
+app.STR.later,Sonra hesaba bağlayabilirsin.,You can link an account later.,,table
+app.STR.toAuth,Seçeneklere dön,Back to options,,table
+app.STR.fEmail,E-POSTA,EMAIL,,table
+app.STR.fPass,ŞİFRE,PASSWORD,,table
+app.STR.fName,KULLANICI ADI,USERNAME,,table
+app.STR.fPass2,ŞİFRE TEKRAR,REPEAT PASSWORD,,table
+app.STR.fNick,TAKMA AD,NICKNAME,,table
+app.STR.phEmail,ornek@mail.com,you@mail.com,,table
+app.STR.phPass,En az 6 karakter,At least 6 characters,,table
+app.STR.phName,3–16 karakter,3–16 characters,,table
+app.STR.phPass2,Şifreni tekrar yaz,Type your password again,,table
+app.STR.phNick,Masada görünecek adın,Name shown at the table,,table
+app.STR.eEmail,Geçerli bir e-posta yaz,Enter a valid email,,table
+app.STR.ePass,En az 6 karakter,At least 6 characters,,table
+app.STR.eName,"3–16 harf, rakam ya da _","3–16 letters, digits or _",,table
+app.STR.eTaken,Bu ad alınmış,This name is taken,,table
+app.STR.eMatch,Şifreler aynı değil,Passwords don’t match,,table
+app.STR.eTerms,Devam etmek için koşulları kabul et,Accept the terms to continue,,table
+app.STR.eExists,Bu e-postayla zaten hesap var,An account with this email exists,,table
+app.STR.okName,Kullanılabilir,Available,,table
+app.STR.show,Göster,Show,,table
+app.STR.hide,Gizle,Hide,,table
+app.STR.noAcct,Bu e-postayla kayıtlı hesap bulunamadı.,No account found for this email.,,table
+app.STR.badPass,Şifre hatalı. {0} deneme hakkın kaldı.,Wrong password. {0} attempts left.,n,table
+app.STR.locked,Çok fazla deneme. Şifreni sıfırla.,Too many attempts. Reset your password.,,table
+app.STR.forgotNeed,Sıfırlama için önce e-postanı yaz.,Type your email first to reset.,,table
+app.STR.forgotSent,Sıfırlama bağlantısı {0} adresine gönderildi.,A reset link was sent to {0}.,e,table
+app.STR.weak,Zayıf,Weak,,table
+app.STR.mid,Orta,Medium,,table
+app.STR.strong,Güçlü,Strong,,table
+app.STR.splash.0,Gezegenler hizalanıyor…,Aligning planets…,,table
+app.STR.splash.1,Taşlar diziliyor…,Racking tiles…,,table
+app.STR.splash.2,Masalar hazırlanıyor…,Setting up tables…,,table
+app.STR.splash.3,Neredeyse hazır…,Almost ready…,,table
+app.STR.splash.4,Hazır,Ready,,table
+app.STR.tips.0,İpucu: Göstergenin bir üstü okeydir ve her taşın yerine geçer.,Tip: The tile above the indicator is the okey and stands in for any tile.,,table
+app.STR.tips.1,İpucu: Elini açmak için 101 puanlık per ya da 5 çift gerekir.,Tip: You need 101 points in sets or 5 pairs to open.,,table
+app.STR.tips.2,İpucu: Bir pere basılı tutarak toplu taşıyabilirsin.,Tip: Press and hold a set to move it as a group.,,table
+app.STR.tips.3,İpucu: İşlek taşı atarsan +101 ceza yazılır.,Tip: Discarding a playable tile costs +101.,,table
+app.STR.ldMsg.0,Masaya bağlanılıyor…,Connecting to the table…,,table
+app.STR.ldMsg.1,3D masa yükleniyor…,Loading 3D table…,,table
+app.STR.ldMsg.2,Taşlar karılıyor…,Shuffling tiles…,,table
+app.STR.ldMsg.3,Hazır,Ready,,table
+app.STR.failTitle,Masa açılamadı,Couldn’t open the table,,table
+app.STR.failBody,Bağlantı kurulamadı. İnternetini kontrol edip yeniden dene.,We couldn’t connect. Check your connection and try again.,,table
+app.STR.toLobby,Lobiye dön,Back to lobby,,table
+app.STR.retry,Yeniden dene,Try again,,table
+app.STR.hello,"Hoş geldin, {0}!","Welcome, {0}!",n,table
+app.STR.helloGift,"Hoş geldin, {0}! {1} çip hesabına eklendi","Welcome, {0}! {1} chips added",n|c,table
+app.STR.bye,Çıkış yapıldı,Logged out,,table
+app.STR.quitDone,Oyun kapatıldı,Game closed,,table
+app.STR.quitBack,Oyunu yeniden aç,Open the game again,,table
+app.STR.leftT,Masadan kalktın · bahis kaybedildi,You left the table · bet lost,,table
+app.STR.netT,Bağlantı koptu · lobiye dönüldü,Connection lost · back in the lobby,,table
+app.STR.specEnd,İzlediğin maç bitti,The match you watched is over,,table
+app.STR.won,Maçı kazandın! +{0} çip,You won the match! +{0} chips,c,table
+app.STR.rankT,Maç bitti · {0}. sıradasın,Match over · you placed {0},r,table
+app.STR.refund,Bahsin iade edildi,Your bet was refunded,,table
+app.STR.single,TEKLİ,SINGLES,,table
+app.STR.pairs,EŞLİ,PAIRS,,table
+app.STR.hands,EL,HANDS,,table
+app.STR.classic,KLASİK,CLASSIC,,table
+app.STR.watching,İZLEYİCİ,SPECTATOR,,table
+menu.STR.play,HEMEN OYNA,PLAY NOW,,table
+menu.STR.planetTheme,GEZEGEN TEMASI,PLANET THEME,,table
+menu.STR.rank,Altın II,Gold II,,table
+menu.STR.shop,Mağaza,Shop,,table
+menu.STR.friends,Arkadaşlar,Friends,,table
+menu.STR.leader,Liderlik,Leaderboard,,table
+menu.STR.daily,Günlük ödül,Daily reward,,table
+menu.STR.rules,Kurallar,Rules,,table
+menu.STR.settings,Ayarlar,Settings,,table
+menu.STR.close,Kapat,Close,,table
+menu.STR.reset,Varsayılana dön,Reset to default,,table
+menu.STR.cancel,Vazgeç,Cancel,,table
+menu.STR.save,Kaydet,Save,,table
+menu.STR.ptRow,Gezegen teması,Planet theme,,table
+menu.STR.ptDesc,"Renkler, logo ve arka plan seçtiğin gezegene göre değişir","Colors, logo and background follow the planet you pick",,table
+menu.STR.editProfile,Profili düzenle,Edit profile,,table
+menu.STR.myProfile,Profilim,My profile,,table
+menu.STR.buyChips,Çip satın al,Buy chips,,table
+menu.STR.buyGems,Elmas satın al,Buy gems,,table
+menu.STR.playerId,Oyuncu ID · 4821 9930,Player ID · 4821 9930,,table
+menu.STR.linked,Bağlı,Linked,,table
+menu.STR.logout,Çıkış yap,Log out,,table
+menu.STR.del,Hesabı sil,Delete account,,table
+menu.STR.offline,Çevrimdışı,Offline,,table
+menu.STR.modes.0,Klasik,Classic,,table
+menu.STR.modes.1,Dereceli,Ranked,,table
+menu.STR.modes.2,Botlara karşı,Vs bots,,table
+menu.STR.soon,YAKINDA,SOON,,table
+menu.STR.subs.0,Klasik · Tekli / Eşli · masalar,Classic · Singles / Pairs · tables,,table
+menu.STR.subs.1,Dereceli · Solo / Duo / Squad,Ranked · Solo / Duo / Squad,,table
+menu.STR.subs.2,Botlara karşı · antrenman · bahis yok,Vs bots · practice · no stake,,table
+menu.STR.pn.Satürn,Satürn,Saturn,,table
+menu.STR.pn.Mars,Mars,Mars,,table
+menu.STR.pn.Neptün,Neptün,Neptune,,table
+menu.STR.pn.Jüpiter,Jüpiter,Jupiter,,table
+menu.STR.pn.Venüs,Venüs,Venus,,table
+menu.STR.pd.Satürn,Altın halkalar,Golden rings,,table
+menu.STR.pd.Mars,Kızıl çöl,Red desert,,table
+menu.STR.pd.Neptün,Buz mavisi,Ice blue,,table
+menu.STR.pd.Jüpiter,Fırtına kuşakları,Storm belts,,table
+menu.STR.pd.Venüs,Pembe sis,Pink haze,,table
+menu.TAGS.g,Gösterge,Indicator,,table
+menu.TAGS.o,Okey,Okey,,table
+menu.TAGS.a,İşle,Add,,table
+menu.TAGS.l,Son taş,Last tile,,table
+menu.LG.d1,Elmas I,Diamond I,,table
+menu.LG.d2,Elmas II,Diamond II,,table
+menu.LG.g1,Altın I,Gold I,,table
+menu.LG.g2,Altın II,Gold II,,table
+menu.RULES.0.0,Taşlar ve okey,Tiles and the okey,,table
+menu.RULES.0.1.0,"Oyunda 106 taş var: kırmızı, sarı, mavi ve siyah renklerde 1'den 13'e kadar ikişer taş ve 2 sahte okey.","There are 106 tiles: two of each number from 1 to 13 in red, yellow, blue and black, plus 2 false okeys.",,table
+menu.RULES.0.1.1,Ortadan açılan taş göstergedir. Göstergenin bir üstü okeydir ve her taşın yerine geçebilir.,The tile turned up in the middle is the indicator. The tile one above it is the okey and can stand in for any tile.,,table
+menu.RULES.0.1.2,"Sahte okey, okeyin kendisi yerine kullanılır; değeri okeyin değeridir.",A false okey takes the place of the okey itself and has the okey's value.,,table
+menu.RULES.0.2,Gösterge sarı 7 ise okey sarı 8 olur.,"If the indicator is yellow 7, the okey is yellow 8.",,table
+menu.RULES.1.0,Dağıtım,Dealing,,table
+menu.RULES.1.1.0,Taşlar karıştırılır ve her oyuncuya 21 taş dağıtılır.,The tiles are shuffled and every player gets 21 tiles.,,table
+menu.RULES.1.1.1,Oyunu başlatan oyuncu 22 taş alır ve ilk hamlede bir taş atarak başlar.,The starting player gets 22 tiles and begins by discarding one.,,table
+menu.RULES.1.1.2,Kalan taşlar ortada çekme destesi olur. Sıra saat yönünün tersine ilerler.,The remaining tiles form the draw pile in the middle. Play goes counter-clockwise.,,table
+menu.RULES.1.2,,,,table
+menu.RULES.2.0,Elini açmak,Opening your hand,,table
+menu.RULES.2.1.0,Elini açabilmek için perlerinin toplamı en az 101 olmalı.,"To open your hand, your sets must add up to at least 101.",,table
+menu.RULES.2.1.1,"Seri: aynı renkte en az 3 ardışık taş. Grup: aynı sayıda, farklı renklerde 3 veya 4 taş.",Run: at least 3 consecutive tiles of the same color. Group: 3 or 4 tiles of the same number in different colors.,,table
+menu.RULES.2.1.2,İstersen en az 5 çiftle çiftten de açabilirsin.,You can also open with at least 5 pairs.,,table
+menu.RULES.2.2,Seri 46 + grup 36 = 82 puan. Açmak için 19 puan daha gerekir.,Run 46 + group 36 = 82 points. You need 19 more to open.,,table
+menu.RULES.3.0,Taş işlemek,Adding tiles,,table
+menu.RULES.3.1.0,Elini açtıktan sonra masadaki tüm perlere uygun taş ekleyebilirsin.,"Once you have opened, you can add matching tiles to any set on the table.",,table
+menu.RULES.3.1.1,"Masadaki bir perde okeyin yerini tutan taş sende varsa, onu koyup okeyi alabilirsin.","If you hold the tile the okey stands for in a set on the table, you can swap it in and take the okey.",,table
+menu.RULES.3.2,Kırmızı 13'ü masadaki kırmızı seriye işleyebilirsin.,You can add red 13 to the red run on the table.,,table
+menu.RULES.4.0,Bitirmek,Finishing,,table
+menu.RULES.4.1.0,Elindeki tüm taşları perlere yerleştirip son taşını atan oyuncu eli bitirir.,The player who places all their tiles in sets and discards their last tile finishes the hand.,,table
+menu.RULES.4.1.1,Son taş olarak okeyi atarak bitirirsen bütün cezalar ikiye katlanır.,"If you finish by discarding the okey, every penalty is doubled.",,table
+menu.RULES.4.2,Son taş olarak okeyi atmak cezaları ikiye katlar.,Discarding the okey as your last tile doubles all penalties.,,table
+menu.RULES.5.0,Puanlama,Scoring,,table
+menu.RULES.5.1.0,Eli bitiren oyuncu -101 puan alır.,The player who finishes gets -101 points.,,table
+menu.RULES.5.1.1,Elini açan oyuncular ellerinde kalan taşların toplamı kadar ceza alır.,Players who opened get a penalty equal to the sum of the tiles left in their hand.,,table
+menu.RULES.5.1.2,Elini açamayan oyuncu 202 ceza alır. Çiftten açanların cezası ikiye katlanır.,A player who never opened gets 202 penalty points. Players who opened with pairs get double penalties.,,table
+menu.RULES.5.1.3,Oyun sonunda en düşük puana sahip oyuncu kazanır.,The player with the lowest score at the end wins.,,table
+menu.RULES.5.2,,,,table
+menu.TASKS.0,3 el kazan,Win 3 hands,,table
+menu.TASKS.1,Çiftten aç,Open with pairs,,table
+menu.TASKS.2,5 el oyna,Play 5 hands,,table
+menu.TASKS.3,Okey atarak bitir,Finish by discarding the okey,,table
+menu.TASKS.4,40 taş işle,Add 40 tiles to sets,,table
+menu.SET_EN.Oyun,Oyun,Game,,table
+menu.SET_EN.Ses,Ses,Sound,,table
+menu.SET_EN.Görüntü,Görüntü,Display,,table
+menu.SET_EN.Dil,Dil,Language,,table
+menu.SET_EN.Hesap,Hesap,Account,,table
+menu.SET_EN.Taş_hareketleri_ve_masa_davranışı,Taş hareketleri ve masa davranışı,Tile movement and table behavior,,table
+menu.SET_EN.Müzik_efektler_ve_bildirim_sesleri,"Müzik, efektler ve bildirim sesleri","Music, effects and notification sounds",,table
+menu.SET_EN.Tema_çözünürlük_ve_görsel_efektler,"Tema, çözünürlük ve görsel efektler","Theme, resolution and visual effects",,table
+menu.SET_EN.Uygulamanın_dili,Uygulamanın dili,App language,,table
+menu.SET_EN.Profil_bağlı_hesaplar_ve_bildirimler,"Profil, bağlı hesaplar ve bildirimler","Profile, linked accounts and notifications",,table
+menu.SET_EN.Otomatik_sırala,Otomatik sırala,Auto-sort,,table
+menu.SET_EN.Yeni_çekilen_taş_ıstakada_uygun_yere_yer,Yeni çekilen taş ıstakada uygun yere yerleşsin,Drawn tiles go to the right spot on your rack,,table
+menu.SET_EN.Perleri_vurgula,Perleri vurgula,Highlight sets,,table
+menu.SET_EN.Geçerli_perlerin_çevresi_yeşil_yansın,Geçerli perlerin çevresi yeşil yansın,Valid sets glow green,,table
+menu.SET_EN.Çift_tıkla_taş_at,Çift tıkla taş at,Double-click to discard,,table
+menu.SET_EN.Sürüklemeden_hızlı_atış,Sürüklemeden hızlı atış,Discard quickly without dragging,,table
+menu.SET_EN.Masa_sohbeti,Masa sohbeti,Table chat,,table
+menu.SET_EN.Masa_içi_mesaj_ve_emojiler_görünsün,Masa içi mesaj ve emojiler görünsün,Show messages and emojis at the table,,table
+menu.SET_EN.Tur_süresi_uyarısı,Tur süresi uyarısı,Turn timer warning,,table
+menu.SET_EN.Süre_bitmeden_kaç_saniye_önce_uyarılsın,Süre bitmeden kaç saniye önce uyarılsın,How many seconds before your time runs out,,table
+menu.SET_EN.Taş_boyutu,Taş boyutu,Tile size,,table
+menu.SET_EN.Istakadaki_taşların_büyüklüğü,Istakadaki taşların büyüklüğü,Size of the tiles on your rack,,table
+menu.SET_EN.Küçük,Küçük,Small,,table
+menu.SET_EN.Orta,Orta,Medium,,table
+menu.SET_EN.Büyük,Büyük,Large,,table
+menu.SET_EN.Ana_ses,Ana ses,Master volume,,table
+menu.SET_EN.Tüm_seslerin_genel_seviyesi,Tüm seslerin genel seviyesi,Overall level of all sounds,,table
+menu.SET_EN.Müzik,Müzik,Music,,table
+menu.SET_EN.Menü_ve_masa_müziği,Menü ve masa müziği,Menu and table music,,table
+menu.SET_EN.Efektler,Efektler,Effects,,table
+menu.SET_EN.Taş_zar_ve_buton_sesleri,"Taş, zar ve buton sesleri","Tile, dice and button sounds",,table
+menu.SET_EN.Taş_sesleri,Taş sesleri,Tile sounds,,table
+menu.SET_EN.Taş_çekme_ve_atma_sesi,Taş çekme ve atma sesi,Sound when drawing and discarding,,table
+menu.SET_EN.Bildirim_sesi,Bildirim sesi,Notification sound,,table
+menu.SET_EN.Sıra_sende_ve_davet_uyarıları,Sıra sende ve davet uyarıları,Your-turn and invite alerts,,table
+menu.SET_EN.Arka_plan_hareketi,Arka plan hareketi,Background motion,,table
+menu.SET_EN.Dönen_gezegen_ve_kayan_yıldızlar,Dönen gezegen ve kayan yıldızlar,Spinning planet and shooting stars,,table
+menu.SET_EN.Çözünürlük,Çözünürlük,Resolution,,table
+menu.SET_EN.Görüntü_modu,Görüntü modu,Display mode,,table
+menu.SET_EN.Tam_ekran_çerçevesiz_pencere_veya_pencer,"Tam ekran, çerçevesiz pencere veya pencere","Fullscreen, borderless or windowed",,table
+menu.SET_EN.Tam_ekran,Tam ekran,Fullscreen,,table
+menu.SET_EN.Çerçevesiz,Çerçevesiz,Borderless,,table
+menu.SET_EN.Pencere,Pencere,Windowed,,table
+menu.SET_EN.Ekran_boyutu,Ekran boyutu,Screen size,,table
+menu.SET_EN.Efekt_kalitesi,Efekt kalitesi,Effect quality,,table
+menu.SET_EN.Düşük_ayar_eski_bilgisayarlarda_akıcılığ,Düşük ayar eski bilgisayarlarda akıcılığı artırır,Lower settings run smoother on older computers,,table
+menu.SET_EN.Düşük,Düşük,Low,,table
+menu.SET_EN.Yüksek,Yüksek,High,,table
+menu.SET_EN.Arkadaşlık_istekleri,Arkadaşlık istekleri,Friend requests,,table
+menu.SET_EN.Yeni_istekler_için_bildirim_al,Yeni istekler için bildirim al,Get notified about new requests,,table
+menu.SET_EN.Masa_davetleri,Masa davetleri,Table invites,,table
+menu.SET_EN.Arkadaşların_seni_masaya_çağırabilsin,Arkadaşların seni masaya çağırabilsin,Let friends invite you to their table,,table
+menu.SET_EN.Türkiye,Türkiye,Turkey,,table
+menu.SET_EN.Uluslararası,Uluslararası,International,,table
+lobby.STR.back,Ana menü,Main menu,,table
+lobby.STR.classic,Klasik,Classic,,table
+lobby.STR.classicSub,Tekli ve eşli masalar · 101 Okey,Singles and pairs tables · 101 Okey,,table
+lobby.STR.buy,Çip satın al,Buy chips,,table
+lobby.STR.joinCode,Kodla katıl,Join by code,,table
+lobby.STR.create,Masa aç,Open table,,table
+lobby.STR.all,Tümü,All,,table
+lobby.STR.tekli,Tekli,Singles,,table
+lobby.STR.esli,Eşli,Pairs,,table
+lobby.STR.fFree,Boş yer var,Has free seat,,table
+lobby.STR.fKat,Katlamalı,Doubling,,table
+lobby.STR.allBets,Tümü,All,,table
+lobby.STR.search,Masa ara,Search tables,,table
+lobby.STR.locked,Şifreli masa,Password protected,,table
+lobby.STR.sWait,Bekliyor,Waiting,,table
+lobby.STR.sFull,Dolu · başlıyor,Full · starting,,table
+lobby.STR.sPlay,Oyunda · El {0}/{1},Playing · Hand {0}/{1},h|n,table
+lobby.STR.meta,· {0} el · {1} sn,· {0} hands · {1}s,h|t,table
+lobby.STR.sit,Otur,Sit,,table
+lobby.STR.joinRun,Katıl,Join,,table
+lobby.STR.watch,İzle,Watch,,table
+lobby.STR.full,Dolu,Full,,table
+lobby.STR.bot,BOT,BOT,,table
+lobby.STR.emptyT,Bu filtrelere uygun masa yok,No tables match these filters,,table
+lobby.STR.emptyB,Filtreleri temizle ya da kendi masanı aç; açık masalar lobide hemen listelenir.,Clear the filters or open your own table; open tables show up in the lobby right away.,,table
+lobby.STR.clearF,Filtreleri temizle,Clear filters,,table
+lobby.STR.bKat,Katlamalı,Doubling,,table
+lobby.STR.bKatP,Ortak eşiği yükseltir,Partner raises the bar,,table
+lobby.STR.bKatNP,Yalnız rakip yükseltir,Only opponents raise,,table
+lobby.STR.bHands,{0} el,{0} hands,n,table
+lobby.STR.bTurn,{0} sn,{0}s,n,table
+lobby.STR.bOkey,Okey +101,Okey +101,,table
+lobby.STR.bIsle,İşlek +101,Playable +101,,table
+lobby.STR.bNoSpec,İzleyici yok,No spectators,,table
+lobby.STR.bSpec,İzleyici açık,Spectators on,,table
+lobby.STR.bQuick,Hazır sohbet,Quick chat,,table
+lobby.STR.bChatOff,Sohbet kapalı,Chat off,,table
+lobby.STR.bNoGift,Hediye kapalı,Gifts off,,table
+lobby.STR.bPriv,Özel,Private,,table
+lobby.STR.bPass,Şifreli,Password,,table
+lobby.STR.createT,Masa aç,Open a table,,table
+lobby.STR.createS,Klasik · 101 · masayı açınca otomatik oturursun,Classic · 101 · you sit down automatically,,table
+lobby.STR.rMode,Oyun modu,Game mode,,table
+lobby.STR.rModeD,Girdiğin moda göre; tip seçebilirsin,Set by the mode you entered; pick a type,,table
+lobby.STR.rName,Masa adı,Table name,,table
+lobby.STR.rNameD,Lobide ve davette görünür,Shown in the lobby and invites,,table
+lobby.STR.rNameErr,Masa adı boş olamaz,Table name can’t be empty,,table
+lobby.STR.rVis,Görünürlük,Visibility,,table
+lobby.STR.visOpen,Açık,Open,,table
+lobby.STR.visPriv,Özel,Private,,table
+lobby.STR.visOpenD,"Lobide listelenir, herkes oturabilir","Listed in the lobby, anyone can sit",,table
+lobby.STR.visPrivD,"Lobide görünmez, davet koduyla girilir","Hidden from the lobby, join by invite code",,table
+lobby.STR.rPass,Şifre,Password,,table
+lobby.STR.passOffD,İsteğe bağlı · 4 haneli,Optional · 4 digits,,table
+lobby.STR.passOnD,Girenler bu şifreyi yazacak,Players must enter this password,,table
+lobby.STR.passErr,4 rakam gir,Enter 4 digits,,table
+lobby.STR.rHands,El sayısı,Hands,,table
+lobby.STR.rHandsD,"Maç bu kadar el sürer, en düşük toplam kazanır",The match lasts this many hands; lowest total wins,,table
+lobby.STR.rBet,Bahis,Bet,,table
+lobby.STR.bal,Bakiyen {0},Balance {0},b,table
+lobby.STR.lowT,Bakiyen yetersiz,Not enough chips,,table
+lobby.STR.lowB,{0} bahis için {1} çip daha gerekiyor.,You need {1} more chips for a {0} bet.,t|n,table
+lobby.STR.lowAll,En düşük bahis için {0} çip daha gerekiyor.,You need {0} more chips for the lowest bet.,n,table
+lobby.STR.buyChips,Çip al,Get chips,,table
+lobby.STR.tierLocked,Yetersiz,Too high,,table
+lobby.STR.tierOk,Uygun,Available,,table
+lobby.STR.rPrize,Ödül,Prize,,table
+lobby.STR.prizeT,Kazanan alır · masadaki tüm bahisler,Winner takes all bets at the table,,table
+lobby.STR.prizeE,Kazanan takım alır · kişi başı yarısı,Winning team takes it · half each,,table
+lobby.STR.pool,Toplam havuz,Total pool,,table
+lobby.STR.rKat,Katlamalı,Doubling,,table
+lobby.STR.rKatD,"Sonradan açan önceki açılışı geçmeli: 101 → 102 → 103, 5 → 6 → 7 çift","Each later opening must beat the previous one: 101 → 102 → 103, 5 → 6 → 7 pairs",,table
+lobby.STR.rKatP,Ortağın açılışı eşiği yükseltsin mi?,Should your partner’s opening raise the bar?,,table
+lobby.STR.rKatPD,Kapalıysa eşiği yalnız rakip takımın açılışları yükseltir,"If off, only the opposing team’s openings raise it",,table
+lobby.STR.rTurn,Tur süresi,Turn time,,table
+lobby.STR.rTurnD,Süre dolunca otomatik oynanır,Auto-plays when time runs out,,table
+lobby.STR.rRules,Kural özelleştirme,Customize rules,,table
+lobby.STR.rulesDef,Varsayılan kurallar,Default rules,,table
+lobby.STR.rulesCh,{0} kural değişti,{0} rules changed,n,table
+lobby.STR.resetRules,Varsayılana dön,Reset to default,,table
+lobby.STR.rOkey,Okey atma cezası (+101),Okey discard penalty (+101),,table
+lobby.STR.rOkeyD,Okeyi yere atan +101 yazar,Discarding the okey costs +101,,table
+lobby.STR.rIsle,İşlek taş atma cezası (+101),Playable tile penalty (+101),,table
+lobby.STR.rIsleD,Masadaki pere işlenebilen taşı atan +101 yazar,Discarding a tile that fits a set on the table costs +101,,table
+lobby.STR.rSpec,İzleyici,Spectators,,table
+lobby.STR.rSpecD,Oyun sürerken başkaları izleyebilsin,Others can watch while you play,,table
+lobby.STR.allow,İzin ver,Allow,,table
+lobby.STR.deny,Verme,Don’t allow,,table
+lobby.STR.rChat,Sohbet,Chat,,table
+lobby.STR.rChatD,Masa içi yazışma,Table messages,,table
+lobby.STR.chOn,Açık,On,,table
+lobby.STR.chQuick,Yalnız hazır cümleler,Quick phrases only,,table
+lobby.STR.chOff,Kapalı,Off,,table
+lobby.STR.rGift,İkram ve hediye,Treats and gifts,,table
+lobby.STR.rGiftD,Oyuncular birbirine ikram gönderebilsin,Players can send each other treats,,table
+lobby.STR.on,Açık,On,,table
+lobby.STR.off,Kapalı,Off,,table
+lobby.STR.summary,ÖZET,SUMMARY,,table
+lobby.STR.kRules,MASA KURALLARI,TABLE RULES,,table
+lobby.STR.sKatOn,101 → 102 → 103,101 → 102 → 103,,table
+lobby.STR.sKatP,Ortağın açılışı eşiği yükseltir,Partner’s opening raises the bar,,table
+lobby.STR.sYes,Evet,Yes,,table
+lobby.STR.sNo,Hayır,No,,table
+lobby.STR.sOkey,Okey atma cezası,Okey discard penalty,,table
+lobby.STR.sIsle,İşlek taş atma cezası,Playable tile penalty,,table
+lobby.STR.sQuick,Hazır cümleler,Quick phrases,,table
+lobby.STR.kBet,BAHİS,BET,,table
+lobby.STR.kHands,EL,HANDS,,table
+lobby.STR.kTurn,TUR SÜRESİ,TURN TIME,,table
+lobby.STR.kPool,HAVUZ,POOL,,table
+lobby.STR.balance,Bakiyen,Balance,,table
+lobby.STR.ctaCreate,Masayı oluştur · {0},Create table · {0},b,table
+lobby.STR.ctaLow,Yetersiz bakiye,Not enough chips,,table
+lobby.STR.ctaFix,Eksikleri tamamla,Fix the highlighted fields,,table
+lobby.STR.cancel,Vazgeç,Cancel,,table
+lobby.STR.close,Kapat,Close,,table
+lobby.STR.modeLine,Klasik · {0} · {1},Classic · {0} · {1},t|v,table
+lobby.STR.open,Açık,Open,,table
+lobby.STR.priv,Özel,Private,,table
+lobby.STR.passT,Şifreli masa,Password protected,,table
+lobby.STR.enter,Gir,Enter,,table
+lobby.STR.wrongPass,Yanlış şifre. Tekrar dene.,Wrong password. Try again.,,table
+lobby.STR.passBody,{0} · {1} bahis,{0} · {1} bet,n|b,table
+lobby.STR.codeT,Kodla katıl,Join by code,,table
+lobby.STR.codeS,Özel masalar lobide görünmez; arkadaşından aldığın kodu yaz.,Private tables are hidden from the lobby; type the code a friend sent you.,,table
+lobby.STR.codeErr,Bu koda ait açık bir masa bulunamadı.,No open table found for this code.,,table
+lobby.STR.codeShort,Kod 6 karakter olmalı,The code has 6 characters,,table
+lobby.STR.join,Katıl,Join,,table
+lobby.STR.connT,Masaya bağlanılıyor…,Connecting to the table…,,table
+lobby.STR.fullT,Masa doldu,Table is full,,table
+lobby.STR.fullB,Son koltuk sen bağlanırken doldu.,The last seat was taken while you were connecting.,,table
+lobby.STR.closedT,Masa kapandı,Table closed,,table
+lobby.STR.closedB,Oda sahibi masayı kapattı.,The host closed the table.,,table
+lobby.STR.similar,Benzer masa bul,Find a similar table,,table
+lobby.STR.watchIt,İzle,Watch,,table
+lobby.STR.noSimilar,Şu an benzer boş masa yok,No similar free table right now,,table
+lobby.STR.ok,Tamam,OK,,table
+lobby.STR.shareT,Özel masan hazır,Your private table is ready,,table
+lobby.STR.shareS,"Masa lobide listelenmez. Kodu arkadaşlarına gönder, kodla katılsınlar.",It isn’t listed in the lobby. Send the code to friends so they can join.,,table
+lobby.STR.inviteCode,DAVET KODU,INVITE CODE,,table
+lobby.STR.passLbl,Şifre,Password,,table
+lobby.STR.copy,Kodu kopyala,Copy code,,table
+lobby.STR.copied,Kopyalandı,Copied,,table
+lobby.STR.share,Paylaş,Share,,table
+lobby.STR.shared,Davet metni kopyalandı,Invite text copied,,table
+lobby.STR.toRoom,Bekleme odasına geç,Go to waiting room,,table
+lobby.STR.back2,Odaya dön,Back to room,,table
+lobby.STR.shareText,"Galaxy 101'de ""{0}"" masasına gel! Kod: {1} · Şifre: {2}","Join my ""{0}"" table on Galaxy 101! Code: {1} · Password: {2}",n|c|p,table
+lobby.STR.waitRoom,BEKLEME ODASI,WAITING ROOM,,table
+lobby.STR.youOwn,Oda sahibi sensin,You are the host,,table
+lobby.STR.leaveRoom,Ayrıl,Leave,,table
+lobby.STR.code,Kod,Code,,table
+lobby.STR.kick,Masadan çıkar,Remove from table,,table
+lobby.STR.addBot,Bot ekle,Add bot,,table
+lobby.STR.emptySeat,Boş koltuk,Empty seat,,table
+lobby.STR.ownerT,Oda sahibi,Host,,table
+lobby.STR.teamA,Takım A,Team A,,table
+lobby.STR.teamB,Takım B,Team B,,table
+lobby.STR.you,SEN,YOU,,table
+lobby.STR.waitN,Oyuncular bekleniyor · {0}/4,Waiting for players · {0}/4,n,table
+lobby.STR.ready,Masa hazır,Table is ready,,table
+lobby.STR.start,Başlat,Start,,table
+lobby.STR.startN,Başlat · {0}/4,Start · {0}/4,n,table
+lobby.STR.hintOwner,Dört koltuk dolunca başlatabilirsin. Boş koltuğa bot ekleyebilirsin.,You can start once all four seats are taken. Add bots to empty seats.,,table
+lobby.STR.hintReady,"Herkes yerinde, oyunu başlat.","Everyone is seated, start the game.",,table
+lobby.STR.hintGuest,Oda sahibi oyunu başlatınca masa açılır.,The table opens when the host starts the game.,,table
+lobby.STR.guestWait,Oda sahibi bekleniyor,Waiting for the host,,table
+lobby.STR.starting,Oyun başlıyor · {0},Starting · {0},n,table
+lobby.STR.joined,{0} masaya oturdu,{0} sat down,n,table
+lobby.STR.kicked,{0} masadan çıkarıldı,{0} was removed,n,table
+lobby.STR.botAdded,Bot koltuğa oturdu,A bot took the seat,,table
+lobby.STR.closedMine,Masan kapatıldı,Your table was closed,,table
+lobby.STR.leftRoom,Bekleme odasından ayrıldın,You left the waiting room,,table
+lobby.STR.invite,Davet et,Invite,,table
+lobby.STR.inviteS,Davet,Invite,,table
+lobby.STR.invT,Arkadaşlarını davet et,Invite friends,,table
+lobby.STR.invSub,{0} boş koltuk · davet 30 sn geçerli,{0} empty seat · invites last 30 s,n,table
+lobby.STR.tabFr,Arkadaşlar,Friends,,table
+lobby.STR.tabRe,Son oynadıkların,Recent players,,table
+lobby.STR.invSearch,Oyuncu ara,Search players,,table
+lobby.STR.invNone,Bu isimde oyuncu yok,No player with that name,,table
+lobby.STR.invSeats,KOLTUKLAR,SEATS,,table
+lobby.STR.invSeatLine,NaN/4 dolu · {1} davet bekliyor,NaN/4 taken · {1} pending,n|p,table
+lobby.STR.invByCode,KODLA DAVET,INVITE BY CODE,,table
+lobby.STR.invOpen,Açık masa lobide listelenir; davet edilen arkadaşın doğrudan boş koltuğa oturur.,Open tables are listed in the lobby; invited friends sit straight into an empty seat.,,table
+lobby.STR.invNote,Kabul eden arkadaşın boş koltuğa otomatik oturur.,Friends who accept take an empty seat automatically.,,table
+lobby.STR.stOn,Çevrimiçi,Online,,table
+lobby.STR.stGame,Oyunda,In a game,,table
+lobby.STR.stOff,Son görülme {0},Last seen {0},h,table
+lobby.STR.stRecent,Birlikte oynadınız · {0},Played together · {0},h,table
+lobby.STR.bInv,Davet et,Invite,,table
+lobby.STR.bPend,Bekleniyor {0},Waiting {0},n,table
+lobby.STR.bCancel,İptal etmek için tıkla,Click to cancel,,table
+lobby.STR.bIn,Masada,Seated,,table
+lobby.STR.bNo,Reddetti,Declined,,table
+lobby.STR.bExp,Tekrar davet,Invite again,,table
+lobby.STR.bGame,Oyunda,In a game,,table
+lobby.STR.bOff,Çevrimdışı,Offline,,table
+lobby.STR.bFull,Masa dolu,Table full,,table
+lobby.STR.invSent,{0} davet edildi,{0} invited,n,table
+lobby.STR.invNo,{0} daveti reddetti,{0} declined,n,table
+lobby.STR.invExp,{0} yanıt vermedi,{0} didn’t respond,n,table
+lobby.STR.prizeSum,Kazanan {0} çipin tamamını alır.,The winner takes all {0} chips.,p,table
+lobby.STR.prizeSumE,Kazanan takım {0} çipi alır; kişi başı {1}.,The winning team takes {0} chips; {1} each.,p|h,table
+ranked.STR.back,Geri,Back,,table
+ranked.STR.title,Dereceli,Ranked,,table
+ranked.STR.seasonTag,SEZON 3 · DERECELİ,SEASON 3 · RANKED,,table
+ranked.STR.days,18 gün kaldı,18 days left,,table
+ranked.STR.home,Maç ara,Find match,,table
+ranked.STR.progress,İlerleme,Progress,,table
+ranked.STR.seeProgress,Dereceli ilerlemem,My ranked progress,,table
+ranked.STR.invite,Davet et,Invite,,table
+ranked.STR.friendSlot,Arkadaş yeri,Friend slot,,table
+ranked.STR.pending,Davet bekleniyor,Waiting for reply,,table
+ranked.STR.remove,Takımdan çıkar,Remove from party,,table
+ranked.STR.searching,Rakip aranıyor,Finding opponents,,table
+ranked.STR.cancel,İptal,Cancel,,table
+ranked.STR.decline,Reddet,Decline,,table
+ranked.STR.cont,Devam,Continue,,table
+ranked.STR.road,Lig yolu,League road,,table
+ranked.STR.roadSub,16 basamak · her kademe 100 LP,16 steps · 100 LP per tier,,table
+ranked.STR.youHere,BURADASIN,YOU ARE HERE,,table
+ranked.STR.rewards,Sezon ödülleri,Season rewards,,table
+ranked.STR.rewardsSub,"Sezonda ulaştığın en yüksek lige göre · çip, avatar çerçevesi ve profil rozeti","Based on the highest league you reach · chips, avatar frame and profile badge",,table
+ranked.STR.recent,Son maçlar,Recent matches,,table
+ranked.STR.noHist,Henüz dereceli maç oynamadın. İlk maçını bitirince sonuçların burada görünür.,No ranked matches yet. Your results show up here after your first match.,,table
+ranked.STR.you,SEN,YOU,,table
+ranked.STR.team,TAKIM,TEAM,,table
+ranked.STR.rival,RAKİP,RIVAL,,table
+ranked.STR.friend,ARKADAŞ,FRIEND,,table
+ranked.STR.opp,Rakip,Opponent,,table
+table.STR.room,Tekli · 101,Solo · 101,,table
+table.STR.bet,Bahis 5.000,"Stake 5,000",,table
+table.STR.deck,Taş,Deck,,table
+table.STR.loading,3D masa yükleniyor…,Loading 3D table…,,table
+table.STR.tDiscardFirst,İlk hamle senin · ıstakadan bir taş at,You start · discard a tile from your rack,,table
+table.STR.tDraw,Sıra sende · desteden ya da {0}'ın taşından çek,Your turn · draw from the deck or {0}'s tile,n,table
+table.STR.tDiscard,Atacağın taşı halkaya sürükle ya da çift tıkla,Drag a tile onto the ring or double-click it,,table
+table.STR.tWait,{0} oynuyor…,{0} is playing…,n,table
+table.STR.tDeal,Taşlar dağıtılıyor…,Dealing tiles…,,table
+table.STR.dealYou,Taşları sen dağıtıyorsun,You are dealing,,table
+table.STR.dealBy,Taşları {0} dağıtıyor,{0} is dealing,n,table
+table.STR.dsBuild,106 taş 7’li balyalara diziliyor,Stacking 106 tiles into piles of 7,,table
+table.STR.dsRoll,{0} zar atıyor,{0} is rolling,n,table
+table.STR.dsYourRoll,Zarı iki kez at,Roll the die twice,,table
+table.STR.dsRolling,Zar yuvarlanıyor…,Rolling…,,table
+table.STR.dsInd,{0}. balya · alttan {1}. taş gösterge,Pile {0} · tile {1} from the bottom is the indicator,a|b,table
+table.STR.dsFake,Sahte okey çıktı · üstündeki taş gösterge oldu,Fake okey turned up · the tile above is the indicator,,table
+table.STR.dsExtra,Fazla taş yandaki balyanın üstüne,Extra tile onto the next pile,,table
+table.STR.dsDist,Balyalar dağıtılıyor,Handing out the piles,,table
+table.STR.dsCenter,Kalan balyalar ortaya,Remaining piles to the centre,,table
+table.STR.dsStart,22 taşla sen başlıyorsun,You start with 22 tiles,n|me,table
+table.STR.roll,Zar at,Roll,,table
+table.STR.rollAgain,Tekrar at,Roll again,,table
+table.STR.diceCap,ZAR,DIE,,table
+table.STR.okeyCap,OKEY,OKEY,,table
+table.STR.dealerCap,DAĞITAN,DEALER,,table
+table.STR.tOpened,Elini açtın · şimdi bir taş at,Hand opened · now discard a tile,,table
+table.STR.sortRun,Seri diz,Sort runs,,table
+table.STR.sortPair,Çift diz,Sort pairs,,table
+table.STR.open,Aç,Open,,table
+table.STR.opened,Açıldı ✓,Opened ✓,,table
+table.STR.notOpened,Açmadı · {0} taş,Not opened · {0} tiles,n,table
+table.STR.openedS,Açtı · {0},Opened · {0},v,table
+table.STR.tilesS,{0} taş,{0} tiles,n,table
+table.STR.discHere,BURAYA AT,DISCARD HERE,,table
+table.STR.indicator,GÖSTERGE,INDICATOR,,table
+table.STR.invite,Davet et,Invite,,table
+table.STR.waitTitle,MASA HAZIRLANIYOR,SETTING UP THE TABLE,,table
+table.STR.waitSub,Oyuncular bekleniyor · {0}/4,Waiting for players · {0}/4,n,table
+table.STR.waitFull,Masa doldu · oyun başlıyor,Table full · starting,,table
+table.STR.giftTitle,İkram ve hediye,Treats & gifts,,table
+table.STR.to,KİME,TO,,table
+table.STR.all,Herkes,Everyone,,table
+table.STR.tabs.0,İkram,Treats,,table
+table.STR.tabs.1,Hediye,Gifts,,table
+table.STR.tabs.2,Emoji,Emoji,,table
+table.STR.free,Ücretsiz,Free,,table
+table.STR.send,Gönder,Send,,table
+table.STR.notEnough,Yetersiz çip,Not enough chips,,table
+table.STR.balance,BAKİYE,BALANCE,,table
+table.STR.pick,Bir şey seç,Pick something,,table
+table.STR.chatTitle,Masa sohbeti,Table chat,,table
+table.STR.chatPh,Mesaj yaz…,Type a message…,,table
+table.STR.quick.0,Kolay gelsin,Good luck,,table
+table.STR.quick.1,Hadi bakalım,Let's go,,table
+table.STR.quick.2,Güzel hamle!,Nice move!,,table
+table.STR.quick.3,Şanslısın,Lucky you,,table
+table.STR.quick.4,Çaylar benden!,Tea's on me!,,table
+table.STR.quick.5,Bir el daha?,One more?,,table
+table.STR.recvTitle,SANA İKRAM VAR,A TREAT FOR YOU,,table
+table.STR.thanks,Teşekkür et,Say thanks,,table
+table.STR.thanksMsg,"Eyvallah, eline sağlık!","Thank you, that's kind!",,table
+table.STR.quickGift,HIZLI İKRAM,QUICK TREAT,,table
+table.STR.allGifts,Tüm hediyeler,All gifts,,table
+table.STR.addFriend,Arkadaş ekle,Add friend,,table
+table.STR.friendSent,İstek gönderildi,Request sent,,table
+table.STR.stLv,SEVİYE,LEVEL,,table
+table.STR.stWin,KAZANMA,WIN RATE,,table
+table.STR.stHands,EL,HANDS,,table
+table.STR.resTitle,{0}. EL BİTTİ,HAND {0} OVER,n,table
+table.STR.resSub,TAŞ BİTTİ,DECK EMPTY,,table
+table.STR.youWin,Kazandın!,You won!,,table
+table.STR.winner,{0} kazandı,{0} won,n,table
+table.STR.chipsCap,ÇİP,CHIPS,,table
+table.STR.colPlayer,OYUNCU,PLAYER,,table
+table.STR.colHand,EL PUANI,HAND,,table
+table.STR.colTotal,TOPLAM,TOTAL,,table
+table.STR.noteOpen,açtı,opened,,table
+table.STR.noteClosed,açmadı,not opened,,table
+table.STR.giftsGot,ALDIĞIN İKRAMLAR,TREATS RECEIVED,,table
+table.STR.noGifts,Bu elde ikram gelmedi,No treats this hand,,table
+table.STR.next,Sonraki el,Next hand,,table
+table.STR.leave,Masadan kalk,Leave table,,table
+table.STR.exitTitle,Masadan kalkmak istiyor musun?,Leave the table?,,table
+table.STR.exitBody,El bitmeden kalkarsan 5.000 bahsin kaybedilir ve yerine bot oynar.,"If you leave before the hand ends you lose your 5,000 stake and a bot takes your seat.",,table
+table.STR.stay,Masada kal,Stay,,table
+table.STR.leaveBtn,Kalk,Leave,,table
+table.STR.bye,Masadan kalktın · lobiye dönülüyor,You left the table · back to lobby,,table
+table.STR.netTitle,Bağlantı koptu,Connection lost,,table
+table.STR.netBody,"Yeniden bağlanıyoruz. Bu sırada botun senin yerine oynuyor, elin korunuyor.",Reconnecting. A bot is playing for you meanwhile and your hand is kept.,,table
+table.STR.netAttempt,Deneme {0}/5,Attempt {0}/5,n,table
+table.STR.netWait,Bağlanıyor,Connecting,,table
+table.STR.retry,Şimdi dene,Retry now,,table
+table.STR.lobby,Lobiye dön,Back to lobby,,table
+table.STR.netBack,Bağlantı yeniden kuruldu,Connection restored,,table
+table.STR.flows.0,Bekleme,Waiting,,table
+table.STR.flows.1,Dağıtım,Deal,,table
+table.STR.flows.2,Oyun,Play,,table
+table.STR.flows.3,El açma,Open hand,,table
+table.STR.flows.4,Elden bitiş,Bomb finish,,table
+table.STR.flows.5,Hediye,Gifts,,table
+table.STR.flows.6,Sohbet,Chat,,table
+table.STR.flows.7,El sonu,Hand over,,table
+table.STR.flows.8,Çıkış,Leave,,table
+table.STR.flows.9,Bağlantı koptu,Disconnected,,table
+table.STR.flows.10,Ayarlar,Settings,,table
+table.STR.setTitle,Masa ayarları,Table settings,,table
+table.STR.setFoot,Değişiklikler anında uygulanır,Changes apply instantly,,table
+table.STR.reset,Varsayılana dön,Reset to default,,table
+table.STR.done,Tamam,Done,,table
+table.STR.inUse,SEÇİLİ,IN USE,,table
+table.STR.warnToast,Süren bitiyor!,Time is running out!,,table
+table.STR.lkView,GÖRÜŞ AÇISI,CAMERA VIEW,,table
+table.STR.lkTable,MASA TEMASI,TABLE THEME,,table
+table.STR.lkRack,ISTAKA TEMASI,RACK THEME,,table
+table.STR.lkTile,TAŞ GÖRÜNÜMÜ,TILE STYLE,,table
+table.STR.tlSkins.0.0,Klasik,Classic,,table
+table.STR.tlSkins.0.1,"Fildişi, klasik renkler","Ivory, classic colours",,table
+table.STR.tlSkins.1.0,Galaksi,Galaxy,,table
+table.STR.tlSkins.1.1,"Nebula doku, parlayan rakam","Nebula texture, glowing numbers",,table
+table.STR.tlSkins.2.0,Altın,Gold,,table
+table.STR.tlSkins.2.1,"Siyah oniks, altın çerçeve","Black onyx, gold frame",,table
+table.STR.tlSkins.3.0,Neon,Neon,,table
+table.STR.tlSkins.3.1,"Füme gövde, ışıklı kenar","Smoked body, glowing edge",,table
+table.STR.tlSkins.4.0,Mermer,Marble,,table
+table.STR.tlSkins.4.1,"Beyaz mermer, altın damar","White marble, gold veins",,table
+table.STR.sTabs.0.0,Oyun,Game,,table
+table.STR.sTabs.0.1,Taş hareketleri ve masa davranışı,Tile movement and table behavior,,table
+table.STR.sTabs.1.0,Ses,Sound,,table
+table.STR.sTabs.1.1,"Müzik, efektler ve bildirim sesleri","Music, effects and notification sounds",,table
+table.STR.sTabs.2.0,Görünüm,Look,,table
+table.STR.sTabs.2.1,"Görüş açısı, masa ve ıstaka temaları","Camera view, table and rack themes",,table
+table.STR.sTabs.3.0,Bildirimler,Alerts,,table
+table.STR.sTabs.3.1,Masada gördüğün uyarılar ve efektler,Hints and effects shown at the table,,table
+table.STR.sRows.autoSort.0,Otomatik yerleştir,Auto-place,,table
+table.STR.sRows.autoSort.1,Çektiğin taş ıstakada uyduğu taşın yanına gelsin,Drawn tiles go next to a matching tile,,table
+table.STR.sRows.highlight.0,Perleri vurgula,Highlight sets,,table
+table.STR.sRows.highlight.1,Geçerli perlerin altında yeşil çizgi görünsün,Valid sets get a green line underneath,,table
+table.STR.sRows.dbl.0,Çift tıkla at,Double-click to discard,,table
+table.STR.sRows.dbl.1,Taşa çift tıklayınca doğrudan atılsın,Double-clicking a tile discards it,,table
+table.STR.sRows.warn.0,Tur süresi uyarısı,Turn timer warning,,table
+table.STR.sRows.warn.1,Süre bitmeden kaç saniye önce uyarılsın,How many seconds before your time runs out,,table
+table.STR.sRows.lang.0,Dil,Language,,table
+table.STR.sRows.lang.1,Masadaki tüm yazıların dili,Language of all text at the table,,table
+table.STR.sRows.master.0,Ana ses,Master volume,,table
+table.STR.sRows.master.1,Tüm seslerin genel seviyesi,Overall level of all sounds,,table
+table.STR.sRows.music.0,Masa müziği,Table music,,table
+table.STR.sRows.music.1,Arka planda çalan müzik,Background music,,table
+table.STR.sRows.sfx.0,Efektler,Effects,,table
+table.STR.sRows.sfx.1,"Taş, zar ve hediye sesleri","Tile, dice and gift sounds",,table
+table.STR.sRows.tileSnd.0,Taş sesleri,Tile sounds,,table
+table.STR.sRows.tileSnd.1,"Taş çekme, dizme ve atma sesleri","Drawing, arranging and discarding",,table
+table.STR.sRows.chatSnd.0,Mesaj sesi,Message sound,,table
+table.STR.sRows.chatSnd.1,Yeni sohbet mesajında kısa bir ses çalsın,Short sound for new chat messages,,table
+table.STR.sRows.bubbles.0,Sohbet balonları,Chat bubbles,,table
+table.STR.sRows.bubbles.1,Mesajlar oyuncuların yanında balon olarak görünsün,Messages appear as bubbles next to players,,table
+table.STR.sRows.giftNotif.0,İkram bildirimleri,Treat alerts,,table
+table.STR.sRows.giftNotif.1,Sana ikram geldiğinde sağ üstte bildirim çıksın,Show a card when someone sends you a treat,,table
+table.STR.sRows.emojiFx.0,Emoji efektleri,Emoji effects,,table
+table.STR.sRows.emojiFx.1,Gönderilen emojiler masada uçarak görünsün,Sent emojis fly across the table,,table
+table.STR.sRows.turnHint.0,Sıra ipuçları,Turn hints,,table
+table.STR.sRows.turnHint.1,"Üstteki sıra bilgisi ve ""Buraya at"" etiketi","Top turn banner and ""Discard here"" label",,table
+table.STR.views.0.0,Oyuncu gözü,Player view,,table
+table.STR.views.0.1,"Alçak açı, ıstaka önde","Low angle, rack up front",,table
+table.STR.views.1.0,Yarı yüksek,Mid view,,table
+table.STR.views.1.1,"Orta açı, ıstaka ve masa dengeli","Medium angle, rack and table balanced",,table
+table.STR.views.2.0,Kuşbakışı,Top view,,table
+table.STR.views.2.1,"Yüksek açı, tüm masa görünür","High angle, whole table visible",,table
+table.STR.tSkins.0.0,İstasyon,Station,,table
+table.STR.tSkins.0.1,"Metal kenar, ışık şeridi","Metal rim, light strip",,table
+table.STR.tSkins.1.0,Ceviz salon,Walnut lounge,,table
+table.STR.tSkins.1.1,"Cilalı ceviz, pirinç detay","Polished walnut, brass trim",,table
+table.STR.tSkins.2.0,Hologram,Hologram,,table
+table.STR.tSkins.2.1,"Cam kenar, ışıklı ızgara","Glass rim, glowing grid",,table
+table.STR.tSkins.3.0,Andromeda,Andromeda,,table
+table.STR.tSkins.3.1,"Sarmal galaksi, yanardöner kenar","Spiral galaxy, iridescent rim",,table
+table.STR.rSkins.0.0,Klasik ceviz,Classic walnut,,table
+table.STR.rSkins.0.1,"Masif ceviz, akçaağaç kakma","Solid walnut, maple inlay",,table
+table.STR.rSkins.1.0,Sedef kakma,Mother-of-pearl,,table
+table.STR.rSkins.1.1,"Gül ağacı, sedef desen","Rosewood, pearl inlay",,table
+table.STR.rSkins.2.0,Alüminyum,Aluminium,,table
+table.STR.rSkins.2.1,"Eloksal metal, füme cam","Anodised metal, smoked glass",,table
+table.STR.rSkins.3.0,Karbon,Carbon,,table
+table.STR.rSkins.3.1,"Karbon fiber, ışıklı dikiş","Carbon fibre, glowing seams",,table
+table.STR.rSkins.4.0,Neon cam,Neon glass,,table
+table.STR.rSkins.4.1,"Füme cam, neon tüpler","Smoked glass, neon tubes",,table
+table.STR.rSkins.5.0,Andromeda,Andromeda,,table
+table.STR.rSkins.5.1,"Galaksi panel, yanardöner","Galaxy panel, iridescent",,table
+table.STR.engErr.E_SIDE_DISCARD,Soldan aldığın taşı aynı turda atamazsın,You can't discard the tile you took from the left this turn,,table
+table.STR.engErr.E_SIDE_MUST_OPEN,Soldan aldığın taşla açman gerekiyor,You must open with the tile you took from the left,,table
+table.STR.engErr.E_NOT_OPENED,Açmadan bitemezsin,You can't finish without opening,,table
+table.STR.engErr.E_MELD_INVALID,Bu per geçersiz,That set is not valid,,table
+table.STR.engErr.E_LAST_TILE,Son taşı işleyemezsin,You can't add your last tile,,table
+table.STR.engErr.E_SWAP_INVALID,Bu taş okeyin yerine geçmiyor,That tile doesn't replace the okey,,table
+table.STR.engErrAny,Bu hamle kurallara uymuyor,That move breaks the rules,,table
+table.STR.okeyTaken,Okeyi aldın!,You took the okey!,,table
+table.STR.undoBtn,Geri topla,Take back,,table
+table.STR.undoTip,Bu turda açtığın ve işlediğin taşları ıstakana geri al,Return the tiles you opened or added this turn to your rack,,table
+table.STR.undone,Taşlar ıstakana geri toplandı,Tiles returned to your rack,,table
+table.STR.shortTip,Sayı yetmiyor · açarsan hatalı açma cezası alırsın,Not enough points · opening now is a wrong-open penalty,,table
+table.STR.penOpenRun,hatalı el açma · {0}/101,wrong open · {0}/101,n,table
+table.STR.penOpenPair,hatalı çift açma · {0}/5 çift,wrong pair open · {0}/5 pairs,n,table
+table.STR.penIslek,işlek taş attı,discarded a playable tile,,table
+table.STR.penCode.P_OKEY_DISCARD,okey attı,discarded the okey,,table
+table.STR.penCode.P_OPENED_WITH,açtıran taşı attı,fed the opening tile,,table
+table.STR.penCode.P_OKEY_TAKEN,okeyi aldırdı,lost the okey,,table
+table.STR.penCode.P_OPEN_SHORT,eksik açılış,short opening,,table
+table.STR.penFlash,{0} +{1} ceza · {2},{0} +{1} penalty · {2},w|a|why,table
+table.STR.penS,Ceza +{0},Penalty +{0},n,table
+table.STR.penOpenTest,Test · per toplamı 101’e yetmiyor · Aç’a basarsan hatalı açma cezası,Test · your sets total under 101 · pressing Open costs a wrong-open penalty,,table
+table.STR.penIslekTest,Test · işlenebilir bir taşı atarsan işlek ceza · botlar da işlek atabilir,Test · discarding a playable tile is a penalty · bots may do it too,,table
+table.STR.isleTestHint,"Test masası · herkes elini açtı, ellerde az taş kaldı · taşları perlere işle, okeyleri al, elini bitir","Test table · everyone has opened, few tiles left · add to the sets, take the okeys, finish your hand",,table
+table.STR.returnBtn,Geri bırak,Put back,,table
+table.STR.returnTip,Soldan aldığın taşı geri koy · ya da taşı soldaki halkaya sürükle,Return the tile you took from the left · or drag it onto the left ring,,table
+table.STR.bombBtn,Elden bit,Bomb out,,table
+table.STR.bombTip,Elini açmadan son taşı masaya çak,Slam your last tile without opening,,table
+table.STR.bombTitle,ELDEN BİTTİN!,BOMBED OUT!,,table
+table.STR.bombSub,El açmadan bitirdin · rakiplere ×2 ceza,Finished without opening · ×2 penalty to rivals,,table
+table.STR.finTitle,{0} BİTİRDİ!,{0} FINISHED!,n,table
+table.STR.finYou,BİTİRDİN!,YOU FINISHED!,,table
+table.STR.finSub,Son taşını desteye kapattı · −101 puan,Closed the last tile on the deck · −101 points,,table
+table.STR.deckOutTitle,TAŞ BİTTİ,DECK EMPTY,,table
+table.STR.deckOutSub,En düşük puanlı oyuncu eli alır,Lowest score takes the hand,,table
+table.STR.resFin,{0} BİTİRDİ,{0} FINISHED,n,table
+table.STR.noteFin,bitirdi,finished,,table
+table.STR.groupToast,Per taşınıyor · ıstakada istediğin yere bırak,Moving set · drop it anywhere on your rack,,table
+table.STR.openedRun,AÇILDI · SERİ {0},OPENED · RUNS {0},v,table
+table.STR.openedPairs,AÇILDI · {0} ÇİFT,OPENED · {0} PAIRS,n,table
+table.STR.layMore,Yere aç,Lay down,,table
+table.STR.isle,İşle,Add on,,table
+table.STR.pairOpen,Çift aç · {0}/5,Open pairs · {0}/5,n,table
+table.STR.gaugeOpen,AÇIK,OPEN,,table
+table.STR.layPair,Yere çift aç,Lay pairs,,table
+table.STR.cantIsleClosed,İşlemek için önce elini açmalısın,Open your hand before adding to the table,,table
+table.STR.layPairNo,Çiftle açtın · yalnızca çift açabilirsin,You opened with pairs · you can only lay pairs,,table
+table.STR.isleDrawFirst,"Önce desteden ya da soldan taş çek, sonra işle","Draw a tile first, then add it to the table",,table
+table.STR.gaugePair,/ {0} ÇİFT,/ {0} PAIRS,n,table
+table.STR.tagSide,YERDEN,FROM LEFT,,table
+table.STR.tagIslek,İŞLEK,PLAYABLE,,table
+table.STR.cantIsle,Bu taş o pere işlenemez,That tile does not fit this set,,table
+table.STR.nextIn,Sonraki el · {0},Next hand · {0},n,table
+table.STR.gave,"{0}, {1} için {2} gönderdin",{0} sent {1} {2},a|b|it|tab|me,table
+table.STR.gaveAll,{0} herkese {1} gönderdin,{0} sent everyone {1},a|it|tab|me,table
+table.STR.toYou,{0} sana {1} gönderdi,{0} sent you {1},a|it|tab,table
+table.STR.you,Sen,You,,table
+table.STR.bot.0,Selam!,Hi!,,table
+table.STR.bot.1,Kolay gelsin,Good luck,,table
+table.STR.bot.2,Hadi bakalım,Let's go,,table
+table.STR.bot.3,Haha,Haha,,table
+table.STR.bot.4,Bakalım bakalım,We'll see,,table
+table.STR.bot.5,Bu el benim,This hand is mine,,table
+table.STR.bot.6,Güzel taş,Nice tile,,table
+table.STR.botThanks.0,Eyvallah!,Thanks!,,table
+table.STR.botThanks.1,Sağ ol!,Cheers!,,table
+table.STR.botThanks.2,Çok naziksin,So kind,,table
+table.GIFTS.tea,Çay,Tea,,table
+table.GIFTS.tea.short,çay,tea,,table
+table.GIFTS.coffee,Türk kahvesi,Turkish coffee,,table
+table.GIFTS.coffee.short,Türk kahvesi,Turkish coffee,,table
+table.GIFTS.cola,Soğuk içecek,Cold drink,,table
+table.GIFTS.cola.short,soğuk içecek,a cold drink,,table
+table.GIFTS.simit,Simit,Simit,,table
+table.GIFTS.simit.short,simit,simit,,table
+table.GIFTS.baklava,Baklava,Baklava,,table
+table.GIFTS.baklava.short,baklava,baklava,,table
+table.GIFTS.seeds,Çekirdek,Seeds,,table
+table.GIFTS.seeds.short,çekirdek,sunflower seeds,,table
+table.GIFTS.flower,Çiçek,Flowers,,table
+table.GIFTS.flower.short,çiçek,flowers,,table
+table.GIFTS.cake,Pasta,Cake,,table
+table.GIFTS.cake.short,pasta,a cake,,table
+table.GIFTS.trophy,Kupa,Trophy,,table
+table.GIFTS.trophy.short,kupa,a trophy,,table
+table.GIFTS.rocket,Roket,Rocket,,table
+table.GIFTS.rocket.short,roket,a rocket,,table
+shared.rank.bronze,Bronz,Bronze,,table
+shared.rank.bronze.motif,Bronz · Kehribar,Bronze · Amber,,table
+shared.rank.silver,Gümüş,Silver,,table
+shared.rank.silver.motif,Gümüş · Safir,Silver · Sapphire,,table
+shared.rank.gold,Altın,Gold,,table
+shared.rank.gold.motif,Altın · Zümrüt,Gold · Emerald,,table
+shared.rank.diamond,Elmas,Diamond,,table
+shared.rank.diamond.motif,Platin · Elmas,Platinum · Diamond,,table
+shared.rank.master,Usta,Master,,table
+shared.rank.master.motif,Gül altın · Yakut,Rose gold · Ruby,,table
+shared.rank.galaxy,Galaksi,Galaxy,,table
+shared.rank.galaxy.motif,Titanyum · Opal,Titanium · Opal,,table
+app.inline.setTimeout@419,Test: +10.000.000 çip eklendi,"Test: +10,000,000 chips added",,inline
+app.inline.name@524,Botlara karşı,Vs bots,,inline
+app.inline.room@538,Dereceli,Ranked,,inline
+app.inline.type@538, · Katlamalı, · Doubling,,inline
+app.inline.type@538, (yalnız rakip), (opponents only),,inline
+app.inline.betLabel@538,Antrenman · bahis yok,Practice · no stake,,inline
+app.inline.lang@538,Dereceli · LP,Ranked · LP,,inline
+app.inline.lang@538,Bahis ,Bet ,,inline
+app.inline.kick@539,BOTLARA KARŞI · ANTRENMAN,VS BOTS · PRACTICE,,inline
+app.inline.x@539,DERECELİ,RANKED,,inline
+app.inline.gameLang@618,Türkçe,English,,inline
+app.inline.nick@625,Misafir,Guest,,inline
+app.inline.endGame@651,Dereceli maçtan ayrıldın · 4. sayıldı,You left a ranked match · counted as 4th,,inline
+app.inline.amt@661, çip, chips,,inline
+app.inline.fmt@661, elmas, gems,,inline
+app.inline.flash@661,{r.day}. gün ödülü alındı · {amt},Day {r.day} reward collected · {amt},,inline
+app.inline.x@661,Görev ödülü · {r.name} · {amt},Quest reward · {r.name} · {amt},,inline
+menu.inline.sub@1132,çip,chips,,inline
+menu.inline.bonus@1132,+%{b},+{b}%,,inline
+menu.inline.sub@1133,elmas,gems,,inline
+menu.inline.sub@1139,Taş görünümü,Tile skin,,inline
+menu.inline.popLabel@1140,EN POPÜLER,MOST POPULAR,,inline
+menu.inline.dealTag@1141,HAFTA SONU FIRSATI · %50,WEEKEND DEAL · 50% OFF,,inline
+menu.inline.dealTitle@1141,1.000.000 çip + 50 elmas,"1,000,000 chips + 50 gems",,inline
+menu.inline.buy@1141,Satın al,Buy,,inline
+menu.inline.invite@1143,Davet et,Invite,,inline
+menu.inline.sent@1143,Gönderildi,Sent,,inline
+menu.inline.watch@1143,İzle,Watch,,inline
+menu.inline.msg@1143,Mesaj,Message,,inline
+menu.inline.accept@1143,Kabul et,Accept,,inline
+menu.inline.decline@1143,Reddet,Decline,,inline
+menu.inline.lv@1149,SV ,LV ,,inline
+menu.inline.search@1158,Oyuncu adı veya kod ara,Search by name or code,,inline
+menu.inline.codeLabel@1158,Kodun,Your code,,inline
+menu.inline.add@1158,Arkadaş ekle,Add friend,,inline
+menu.inline.emptyText@1159,"""{s.q.trim()}"" ile eşleşen arkadaş yok","No friends match ""{s.q.trim()}""",,inline
+menu.inline.trim@1159,Bekleyen istek yok,No pending requests,,inline
+menu.inline.tab@1159,Burada henüz arkadaş yok,No friends here yet,,inline
+menu.inline.h0@1172,SIRA,RANK,,inline
+menu.inline.h1@1172,OYUNCU,PLAYER,,inline
+menu.inline.h2@1172,LİG,LEAGUE,,inline
+menu.inline.h3@1172,PUAN,POINTS,,inline
+menu.inline.label@1177,{d}. Gün,Day {d},,inline
+menu.inline.claim@1191,Topla,Collect,,inline
+menu.inline.tasksTitle@1191,Günlük görevler,Daily quests,,inline
+menu.inline.doneCount@1191,{doneN}/{TASKS.length} tamamlandı,{doneN}/{TASKS.length} completed,,inline
+menu.inline.refresh@1191,Yenilenmeye {hh} sa {mm} dk,Resets in {hh}h {mm}m,,inline
+menu.inline.take@1191,Al,Claim,,inline
+menu.inline.taken@1191,Alındı,Claimed,,inline
+menu.inline.going@1191,Devam ediyor,In progress,,inline
+menu.inline.exLabel@1200,ÖRNEK,EXAMPLE,,inline
+menu.inline.fmtAgo@1216,{m} dk önce,{m} min ago,,inline
+menu.inline.fmtAgo@1216,{Math.floor(m / 60)} sa önce,{Math.floor(m / 60)} h ago,,inline
+menu.inline.floor@1216,Dün,Yesterday,,inline
+menu.inline.lv@1218,SEVİYE 24,LEVEL 24,,inline
+menu.inline.status@1218,Henüz durum mesajı yok,No status message yet,,inline
+menu.inline.xpLabel@1219,Seviye 25'e,To level 25,,inline
+menu.inline.xp@1219,6.240 / 9.000 XP,"6,240 / 9,000 XP",,inline
+menu.inline.share@1219,Profili paylaş,Share profile,,inline
+menu.inline.stats@1221,OYNANAN EL,HANDS PLAYED,,inline
+menu.inline.x@1221,527 kazanıldı,527 won,,inline
+menu.inline.x@1221,KAZANMA,WIN RATE,,inline
+menu.inline.x@1221,%41,41%,,inline
+menu.inline.x@1221,Bu ay +%3,+3% this month,,inline
+menu.inline.x@1221,EN İYİ AÇILIŞ,BEST OPENING,,inline
+menu.inline.x@1221,puan,points,,inline
+menu.inline.x@1221,OKEY BİTİŞ,OKEY FINISH,,inline
+menu.inline.x@1221,katlanan el,doubled hands,,inline
+menu.inline.season@1222,SEZON 3 · DERECELİ,SEASON 3 · RANKED,,inline
+menu.inline.bestLabel@1222,SEZON EN İYİ,SEASON BEST,,inline
+menu.inline.best@1222,Altın I,Gold I,,inline
+menu.inline.toNext@1222,Altın I'e 28 LP,28 LP to Gold I,,inline
+menu.inline.byMode@1223,MODLARA GÖRE KAZANMA,WIN RATE BY MODE,,inline
+menu.inline.pct@1223,%{p},{p}%,,inline
+menu.inline.framesLabel@1224,ÇERÇEVELER,FRAMES,,inline
+menu.inline.framesHint@1224,Lig çerçeveleri derecelide açılır,League frames unlock in ranked,,inline
+menu.inline.hMode@1228,MOD,MODE,,inline
+menu.inline.hPlace@1228,SIRA,PLACE,,inline
+menu.inline.hChips@1228,ÇİP,CHIPS,,inline
+menu.inline.hWhen@1228,ZAMAN,WHEN,,inline
+menu.inline.detail@1229,101 · 5K masa,101 · 5K table,,inline
+menu.inline.place@1230,{pl}.,#{pl},,inline
+menu.inline.name@1249,Klasik,Classic,,inline
+menu.inline.tip@1250,Derecelide {l.tr} ligine ulaşınca açılır,Reach {l.en} in ranked to unlock,,inline
+menu.inline.state@1251,{l.tr} liginde açılır,Unlocks at {l.en},,inline
+menu.inline.state@1251,Takılı,Equipped,,inline
+menu.inline.x@1251,Sahipsin,Owned,,inline
+menu.inline.short@1252,Kilitli,Locked,,inline
+menu.inline.title@1263,Profili düzenle,Edit profile,,inline
+menu.inline.lv@1263,SV 24,LV 24,,inline
+menu.inline.colorLabel@1264,AVATAR RENGİ,AVATAR COLOR,,inline
+menu.inline.nameLabel@1264,Oyuncu adı,Player name,,inline
+menu.inline.hint@1266,Masadaki diğer oyuncular bu adı görür.,Other players see this name at the table.,,inline
+menu.inline.x@1266,"3–16 karakter: harf, rakam, boşluk, nokta veya alt çizgi.","3–16 characters: letters, numbers, space, dot or underscore.",,inline
+menu.inline.statusLabel@1267,Durum mesajı,Status message,,inline
+menu.inline.statusPh@1267,Örn. Hızlı bir el için hep hazırım,e.g. Always up for a quick game,,inline
+menu.inline.frameLabel@1268,Avatar çerçevesi,Avatar frame,,inline
+menu.inline.note@1271,Adını 30 günde bir değiştirebilirsin.,You can change your name once every 30 days.,,inline
+menu.inline.word@1275,SİL,DELETE,,inline
+menu.inline.title@1279,Oyundan çıkmak istiyor musun?,Quit the game?,,inline
+menu.inline.x@1279,Hesabını silmek istiyor musun?,Delete your account?,,inline
+menu.inline.x@1279,Çıkış yapmak istiyor musun?,Log out?,,inline
+menu.inline.body@1280,"Galaxy 101 kapanacak. Çiplerin, ilerlemen ve ayarların kayıtlı kalır.","Galaxy 101 will close. Your chips, progress and settings are saved.",,inline
+menu.inline.x@1280,Hesabın 30 gün sonra kalıcı olarak silinir. Bu süre içinde giriş yaparsan silme işlemi iptal olur.,Your account will be deleted after 30 days. Logging in during that time cancels the deletion.,,inline
+menu.inline.x@1280,"Çiplerin, ilerlemen ve arkadaşların Google hesabında saklanır. İstediğin zaman tekrar giriş yapabilirsin.","Your chips, progress and friends are saved to your Google account. You can log back in anytime.",,inline
+menu.inline.typeHint@1282,Onaylamak için {word} yaz,Type {word} to confirm,,inline
+menu.inline.btn@1284,Oyundan çık,Quit game,,inline
+menu.inline.btn@1284,Hesabı sil,Delete account,,inline
+menu.inline.x@1284,Çıkış yap,Log out,,inline
+menu.inline.doneTitle@1287,Görüşmek üzere,See you soon,,inline
+menu.inline.st@1287,Silme talebin alındı,Deletion scheduled,,inline
+menu.inline.last@1287,Çıkış yapıldı,Logged out,,inline
+menu.inline.doneBody@1288,Galaxy 101 kapatılıyor…,Closing Galaxy 101…,,inline
+menu.inline.last@1288,30 gün içinde giriş yaparak iptal edebilirsin.,Log in within 30 days to cancel.,,inline
+menu.inline.x@1288,Masada görüşmek üzere.,See you at the table soon.,,inline
+menu.inline.doneBtn@1289,Tamam,OK,,inline
+menu.inline.sub@1300,Arkadaş kodu veya oyuncu adıyla ara,Search with a friend code or player name,,inline
+menu.inline.ph@1300,Örn. MK-3321,e.g. MK-3321,,inline
+menu.inline.findLabel@1301,Ara,Search,,inline
+menu.inline.idleText@1304,Kod ya da ad girip Ara'ya bas.,Enter a code or name and press Search.,,inline
+menu.inline.noneText@1305,Bu oyuncuyla zaten arkadaşsınız.,You are already friends with this player.,,inline
+menu.inline.x@1305,Oyuncu bulunamadı. Kodu kontrol edip tekrar dene.,No player found. Check the code and try again.,,inline
+menu.inline.btn@1307,İstek gönderildi,Request sent,,inline
+menu.inline.btn@1307,İstek gönder,Send request,,inline
+menu.inline.copyLabel@1311,Kopyalandı,Copied,,inline
+menu.inline.copyLabel@1311,Kopyala,Copy,,inline
+menu.inline.x@1315,Diğer,More,,inline
+menu.inline.sub@1316,Profil kartını arkadaşlarına gönder,Send your profile card to friends,,inline
+menu.inline.season@1316,Sezon 3,Season 3,,inline
+menu.inline.chips@1317,EL,HANDS,,inline
+menu.inline.x@1317,KAZANMA,WIN,,inline
+menu.inline.x@1317,EN İYİ,BEST,,inline
+menu.inline.linkLabel@1318,Profil bağlantısı,Profile link,,inline
+menu.inline.viaLabel@1318,Şununla paylaş,Share via,,inline
+menu.inline.copyLabel@1319,Bağlantıyı kopyala,Copy link,,inline
+menu.inline.go@1322,{name} açılıyor…,Opening {name}…,,inline
+menu.inline.inviteTitle@1323,"Arkadaşını davet et, çip kazan","Invite a friend, earn chips",,inline
+menu.inline.inviteSub@1323,Bağlantınla gelen arkadaşın ilk elini oynayınca ikiniz de 2.000 çip kazanırsınız.,"You both get 2,000 chips when they play their first hand with your link.",,inline
+menu.inline.quitTip@1329,Galaxy 101’i kapat,Close Galaxy 101,,inline
+menu.inline.x@1348,Görüş açısı,Camera view,,inline
+menu.inline.x@1348,Masayı hangi açıdan göreceğin,How you see the table,,inline
+menu.inline.x@1348,Masa teması,Table theme,,inline
+menu.inline.x@1348,Çuha ve kenar stili,Felt and rim style,,inline
+menu.inline.x@1348,Istaka teması,Rack theme,,inline
+menu.inline.x@1348,Istakanın malzemesi,Material of your rack,,inline
+menu.inline.x@1348,Taş görünümü,Tile style,,inline
+menu.inline.x@1348,Taş yüzü ve rakam renkleri,Face and number colours,,inline
+menu.inline.x@1348,Masa bildirimleri,Table notifications,,inline
+menu.inline.x@1348,"Balonlar, ikramlar, emojiler ve ipuçları","Bubbles, treats, emojis and hints",,inline
+menu.inline.cur@1349,{lk.notifs.filter((t) => t.x === '27px').length}/5 açık,{lk.notifs.filter((t) => t.x === '27px').length}/5 on,,inline
+menu.inline.name@1433,Çözünürlük,Resolution,,inline
+menu.inline.desc@1434,Yerel · Monitör en fazla {nat},Native · Monitor max {nat},,inline
+menu.inline.x@1434,Monitör en fazla {nat},Monitor max {nat},,inline
+menu.inline.max@1463,Monitör {hzL},Monitor {hzL},,inline
+menu.inline.name@1464,Kare hızı,Frame rate,,inline
+menu.inline.desc@1465,Ekranla eşitlenir (VSync) · {max},Matches refresh rate (VSync) · {max},,inline
+menu.inline.rate@1465,Sabit {cur} FPS · {max},Locked to {cur} FPS · {max},,inline
+menu.inline.label@1466,Otomatik · {hzL},Auto · {hzL},,inline
+menu.inline.next@1550,İlk 100,Top 100,,inline
+menu.inline.next@1550,Galaksi'ye {100 - rv.lp} LP,{100 - rv.lp} LP to Galaxy,,inline
+menu.inline.g@1550,"{RR.label(rv.idx + 1, 'tr')}'e {100 - rv.lp} LP","{100 - rv.lp} LP to {RR.label(rv.idx + 1, 'en')}",,inline
+lobby.inline.name@851,{genTR(first)} masası,{first}'s table,,inline
+ranked.inline.flash@420,{f.name} takıma katıldı,{f.name} joined your party,,inline
+ranked.inline.flash@445,Arama iptal edildi,Search cancelled,,inline
+ranked.inline.flash@459,Maç zamanında kabul edilmedi,Match not accepted in time,,inline
+ranked.inline.flash@464,Maçı reddettin,You declined the match,,inline
+ranked.inline.next@486,Galaksi'ye {100 - rk.lp} LP,{100 - rk.lp} LP to Galaxy,,inline
+ranked.inline.x@486,"{R.label(rk.idx + 1, lang)}'e {100 - rk.lp} LP","{100 - rk.lp} LP to {R.label(rk.idx + 1, lang)}",,inline
+ranked.inline.prot@487,Düşme koruması · {rk.prot} maç,Demotion shield · {rk.prot} matches,,inline
+ranked.inline.tag@491,4 OYUNCU,4 PLAYERS,,inline
+ranked.inline.desc@491,Tek başına · seviyende 3 rakip,Alone · 3 opponents at your level,,inline
+ranked.inline.tag@492,EŞLİ,PAIRS,,inline
+ranked.inline.desc@492,Sen + 1 arkadaş · karşıda bir çift,You + 1 friend vs a pair,,inline
+ranked.inline.tag@493,4 ARKADAŞ,4 FRIENDS,,inline
+ranked.inline.desc@493,4 arkadaş aynı dereceli masada,4 friends on one ranked table,,inline
+ranked.inline.label@513,Takım aralığı · ±1 lig,Party range · ±1 league,,inline
+ranked.inline.hint@513,{LG[lo].tr} – {LG[hi].tr} arası arkadaşlar katılabilir · herkes kendi sırasına göre LP kazanır,Friends from {LG[lo].en} to {LG[hi].en} can join · everyone earns LP for their own place,,inline
+ranked.inline.label@514,Eşleşme aralığı · ,Match range · ,,inline
+ranked.inline.hint@515,30 sn geçti · arama ±2 lige genişledi,Search widened to ±2 leagues after 30 s,,inline
+ranked.inline.x@515,Seviyene uygun rakipler · 30 sn sonra ±2 lige genişler,Opponents at your level · widens to ±2 leagues after 30 s,,inline
+ranked.inline.why@517,Duo için 1 arkadaş davet et,Invite 1 friend for Duo,,inline
+ranked.inline.x@517,Squad için {need - joined} arkadaş daha davet et,Invite {need - joined} more friend{need - joined > 1 ? 's' : ''} for Squad,,inline
+ranked.inline.label@518,MASAYI KUR,START TABLE,,inline
+ranked.inline.label@518,MAÇ ARA,FIND MATCH,,inline
+ranked.inline.sub@518,4 arkadaş · dereceli,4 friends · ranked,,inline
+ranked.inline.mode@518,Dereceli · 101 · 5 el,Ranked · 101 · 5 hands,,inline
+ranked.inline.length@522,bulundu,found,,inline
+ranked.inline.title@523,Dereceliye davet et,Invite to ranked,,inline
+ranked.inline.sub@523,Duo · 1 arkadaş seç,Duo · pick 1 friend,,inline
+ranked.inline.sub@523,Squad · {s.party.length}/3 davet edildi,Squad · {s.party.length}/3 invited,,inline
+ranked.inline.btn@525,Takımda,In party,,inline
+ranked.inline.x@525,Çevrimdışı,Offline,,inline
+ranked.inline.x@525,Aralık dışı,Out of range,,inline
+ranked.inline.note@527,· yalnızca ±1 lig,· ±1 league only,,inline
+ranked.inline.why@528,Dereceli takımlar ±1 lig içinde olmalı,Ranked parties must be within ±1 league,,inline
+ranked.inline.kicker@530,SQUAD HAZIR,SQUAD READY,,inline
+ranked.inline.kicker@530,MAÇ BULUNDU,MATCH FOUND,,inline
+ranked.inline.title@530,Hazır mısınız?,Ready check,,inline
+ranked.inline.title@530,Rakiplerin hazır,Your opponents are here,,inline
+ranked.inline.acceptLabel@531,Kabul et · ,Accept · ,,inline
+ranked.inline.status@532,Masa hazırlanıyor…,Setting up the table…,,inline
+ranked.inline.x@532,Oyuncular bekleniyor…,Waiting for players…,,inline
+ranked.inline.team@534,TAKIM A,TEAM A,,inline
+ranked.inline.team@534,TAKIM B,TEAM B,,inline
+ranked.inline.downTier@539,"{R.label(r.to.idx, lang)} kademesine düştün","Dropped to {R.label(r.to.idx, lang)}",,inline
+ranked.inline.downLeague@539,"{ta.league.tr} ligine düştün · {R.label(r.to.idx, lang)}","Dropped to {R.label(r.to.idx, lang)}",,inline
+ranked.inline.protected@539,Düşme koruması seni bu ligde tuttu,Demotion shield kept you in this league,,inline
+ranked.inline.note@540,Maçtan ayrıldın · 4. sayıldın,You left the match · counted as 4th,,inline
+ranked.inline.kicker@541,DERECELİ · ,RANKED · ,,inline
+ranked.inline.title@542,Galibiyet!,Victory!,,inline
+ranked.inline.title@542,{r.place}. oldun,"{r.place}{['st', 'nd', 'rd', 'th'][r.place - 1]} place",,inline
+ranked.inline.closeLabel@546,Tamam,Done,,inline
+ranked.inline.againLabel@546,Tekrar ara,Play again,,inline
+ranked.inline.pKicker@547,KADEME ATLADIN,TIER UP,,inline
+ranked.inline.r@547,ZİRVEYE ULAŞTIN,YOU REACHED THE TOP,,inline
+ranked.inline.ev@547,LİG ATLADIN,LEAGUE UP,,inline
+ranked.inline.pTitle@548,{ta.league.tr} ligi,{ta.league.en} league,,inline
+ranked.inline.ev@548,Galaksi · #87,Galaxy · #87,,inline
+ranked.inline.pSub@549,"{R.label(r.to.idx, lang)} kademesinden başlıyorsun. 3 maç boyunca bu ligden düşmezsin.","You start at {R.label(r.to.idx, lang)}. You can't drop out of this league for 3 matches.",,inline
+ranked.inline.ev@549,Usta I'in üstündeki ilk 100 oyuncunun arasındasın.,You are among the top 100 players above Master I.,,inline
+ranked.inline.st@557,Ulaşıldı,Reached,,inline
+ranked.inline.st@557,Kazanacağın,You get this,,inline
+ranked.inline.mode@559,Dereceli · ,Ranked · ,,inline
+ranked.inline.sub@565,Sezon 3 · 18 gün kaldı · Solo / Duo / Squad,Season 3 · 18 days left · Solo / Duo / Squad,,inline
+ranked.inline.table@566,Squad masan,Your squad,,inline
+ranked.inline.mode@566,Duo masan,Your duo,,inline
+ranked.inline.mode@566,Masan,Your table,,inline
+ranked.inline.sub@566,Eş,Partner,,inline
+ranked.inline.rules@566,101 · 5 el · 30 sn · katlamasız,101 · 5 hands · 30 s · no doubling,,inline
+ranked.inline.k@567,MAÇ,MATCHES,,inline
+ranked.inline.k@567,1.LİK,1ST PLACES,,inline
+ranked.inline.k@567,1.LİK ORANI,TOP RATE,,inline
+ranked.inline.v@567,%{Math.round(top / games * 100)},{Math.round(top / games * 100)}%,,inline
+table.inline.sec@1991, sn,s,,inline
+table.inline.x@1993,Kapalı,Off,,inline
+table.inline.rankLine@2029,SV,LV,,inline
+table.inline.toLocaleString@2071,Maç bitmeden kalkarsan yerine bot oynar. Antrenman masasında bahis yoktur.,"If you leave before the match ends, a bot takes your seat. Practice tables have no stake.",,inline
+table.inline.chipsCap@2071,EL,HAND,,inline
+table.inline.specTitle@2073,İZLİYORSUN,SPECTATING,,inline
+table.inline.specLeave@2073,Ayrıl,Leave,,inline
+table.inline.nextLabel@2098,Maçı bitir,Finish match,,inline
+err.E_AUTH_REQUIRED,Devam etmek için giriş yap,Sign in to continue,,error:new
+err.E_SESSION_EXPIRED,Oturumun sona erdi · tekrar giriş yap,Your session expired · sign in again,,error:new
+err.E_EMAIL_INVALID,Geçerli bir e-posta yaz,Enter a valid email,,error:app.STR.eEmail
+err.E_PASS_SHORT,En az 6 karakter,At least 6 characters,,error:app.STR.ePass
+err.E_NAME_INVALID,"3–16 harf, rakam ya da _","3–16 letters, digits or _",,error:app.STR.eName
+err.E_EMAIL_EXISTS,Bu e-postayla zaten hesap var,An account with this email exists,,error:app.STR.eExists
+err.E_NAME_TAKEN,Bu ad alınmış,This name is taken,,error:app.STR.eTaken
+err.E_ACCOUNT_UNKNOWN,Bu e-postayla kayıtlı hesap bulunamadı.,No account found for this email.,,error:app.STR.noAcct
+err.E_PASS_WRONG,Şifre hatalı. {0} deneme hakkın kaldı.,Wrong password. {0} attempts left.,,error:app.STR.badPass
+err.E_ACCOUNT_LOCKED,Çok fazla hatalı deneme · {0} dakika sonra tekrar dene,Too many wrong attempts · try again in {0} minutes,detail,error:new
+err.E_CONFIRM_MISMATCH,Onaylamak için SİL yaz,Type DELETE to confirm,,error:new
+err.E_IN_GAME,Masadayken bu işlem yapılamaz,You can’t do this while at a table,,error:new
+err.E_STATUS_LONG,Durum mesajı en çok 40 karakter olabilir,Status can be at most 40 characters,,error:new
+err.E_FRAME_LOCKED,Bu çerçeve henüz açılmadı,This frame is still locked,,error:new
+err.E_SKU_UNKNOWN,Bu paket artık satışta değil,This pack is no longer available,,error:new
+err.E_ALREADY_OWNED,Bu görünüme zaten sahipsin,You already own this item,,error:new
+err.E_NO_GEMS,Yetersiz elmas · {0} elmas eksik,Not enough gems · {0} short,detail,error:new
+err.E_NOT_OWNED,Önce bu görünümü satın al,Buy this item first,,error:new
+err.E_USER_UNKNOWN,Oyuncu bulunamadı. Kodu kontrol edip tekrar dene.,No player found. Check the code and try again.,,error:menu.inline.x@1305
+err.E_ALREADY_FRIENDS,Bu oyuncuyla zaten arkadaşsınız.,You are already friends with this player.,,error:menu.inline.noneText@1305
+err.E_REQUEST_PENDING,Bu oyuncuya zaten istek gönderdin,You already sent this player a request,,error:new
+err.E_ALREADY_SEATED,Zaten bir masada oturuyorsun,You are already seated at a table,,error:new
+err.E_TABLE_NAME,Masa adı boş olamaz,Table name can’t be empty,,error:lobby.STR.rNameErr
+err.E_PIN_FORMAT,Şifre 4 haneli olmalı,The PIN must be 4 digits,,error:new
+err.E_NO_CHIPS,Yetersiz çip,Not enough chips,,error:table.STR.notEnough
+err.E_TABLE_CLOSED,Masa kapandı,Table closed,,error:lobby.STR.closedT
+err.E_PIN_WRONG,Yanlış şifre. Tekrar dene.,Wrong password. Try again.,,error:lobby.STR.wrongPass
+err.E_TABLE_FULL,Masa doldu,The table is full,,error:new
+err.E_TABLE_PLAYING,Bu masada oyun başladı,A game is already under way at this table,,error:new
+err.E_CODE_FORMAT,Kod 6 karakter olmalı,The code has 6 characters,,error:lobby.STR.codeShort
+err.E_CODE_UNKNOWN,Bu koda ait açık bir masa bulunamadı.,No open table found for this code.,,error:lobby.STR.codeErr
+err.E_SPECTATE_OFF,Bu masa izleyiciye kapalı,Spectating is off at this table,,error:new
+err.E_SEAT_TAKEN,Son koltuk sen bağlanırken doldu.,The last seat was taken while you were connecting.,,error:lobby.STR.fullB
+err.E_INVITE_EXPIRED,Davetin süresi doldu,The invite has expired,,error:new
+err.E_PARTY_RANGE,Aralık dışı,Out of range,,error:ranked.inline.x@525
+err.E_MATCH_EXPIRED,Eşleşme süresi doldu · aramaya dönülüyor,Match expired · back to search,,error:new
+err.E_CHAT_LENGTH,Mesaj 1–120 karakter olmalı,Messages must be 1–120 characters,,error:new
+err.E_SIDE_RETURNED,Geri bıraktığın taşı bu turda tekrar alamazsın,You can’t take back a tile you returned this turn,,error:table.STR.engErr.E_SIDE_RETURNED
+err.E_SIDE_DISCARD,Soldan aldığın taşı aynı turda atamazsın,You can't discard the tile you took from the left this turn,,error:table.STR.engErr.E_SIDE_DISCARD
+err.E_SIDE_MUST_OPEN,Soldan aldığın taşla açman gerekiyor,You must open with the tile you took from the left,,error:table.STR.engErr.E_SIDE_MUST_OPEN
+err.E_MELD_INVALID,Bu per geçersiz,That set is not valid,,error:table.STR.engErr.E_MELD_INVALID
+err.E_MELD_MIX,Bir açılışta seri ve çift karışmaz,You can’t mix runs and pairs in one opening,,error:table.STR.engErr.E_MELD_MIX
+err.E_NOT_OPENED,Açmadan bitemezsin,You can't finish without opening,,error:table.STR.engErr.E_NOT_OPENED
+err.E_OPEN_MODE,Çiftle açtın · yalnızca çift açabilirsin,You opened with pairs · you can only lay pairs,,error:table.STR.layPairNo
+err.E_LAST_TILE,Son taşı işleyemezsin,You can't add your last tile,,error:table.STR.engErr.E_LAST_TILE
+err.E_ISLE_DISABLED,Bu masada işleme kapalı,Adding on is off at this table,,error:table.STR.engErr.E_ISLE_DISABLED
+err.E_SWAP_INVALID,Bu taş okeyin yerine geçmiyor,That tile doesn't replace the okey,,error:table.STR.engErr.E_SWAP_INVALID
+err.E_RESET_CODE,Kod yanlış ya da süresi doldu,The code is wrong or has expired,,error:new
+err.E_OAUTH_FAILED,Google ile giriş yapılamadı · tekrar dene,Google sign-in failed · try again,,error:new

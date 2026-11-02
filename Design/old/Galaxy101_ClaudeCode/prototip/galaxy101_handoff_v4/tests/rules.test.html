@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Galaxy 101 · Kural testleri v0.4.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #0A0C28; color: #F4F1E8; font: 14px/1.45 Nunito, sans-serif; }
+  a { color: #FFD964; } a:hover { color: #F5A623; }
+</style>
+<script src="../logic/rules.js"></script>
+<script src="../logic/bots.js"></script>
+<script src="../logic/mockServer.js"></script>
+<script src="runner.js"></script>
+<script src="server.tests.js"></script>
+</head>
+<body>
+<div style="max-width:980px;margin:0 auto;padding:32px 24px 64px">
+  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap">
+    <div style="font:800 26px/1.1 Montserrat,sans-serif">Kural testleri <span style="opacity:.55;font-weight:600">v0.4.0</span></div>
+    <div id="sum" style="font:800 15px Montserrat,sans-serif;padding:8px 14px;border-radius:12px;background:#232A66">Koşuluyor…</div>
+  </div>
+  <div style="opacity:.7;margin:8px 0 24px">Kaynak: <code>tests/rules/*.json</code> · motor <code>logic/rules.js</code> · botlar <code>logic/bots.js</code>. Aynı vektörler C# NUnit ve sunucu testlerinde koşulur. Sunucu akışları: <code>tests/server.tests.js</code> (sanal saat).</div>
+  <div id="out" style="display:flex;flex-direction:column;gap:18px"></div>
+</div>
+<script>
+(async function () {
+  var R = self.G101Rules, B = self.G101Bots, TR = self.G101TestRunner, out = document.getElementById('out'), pass = 0, fail = 0;
+  var idx = await (await fetch('rules/index.json')).json();
+  for (var f of idx.files) {
+    var suite = await (await fetch('rules/' + f)).json();
+    var box = document.createElement('div');
+    box.style.cssText = 'background:#161A45;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px';
+    var h = document.createElement('div'); h.style.cssText = 'font:800 14px Montserrat,sans-serif;letter-spacing:.5px;text-transform:uppercase;opacity:.8;margin-bottom:4px'; h.textContent = suite.suite + ' · ' + suite.tests.length;
+    box.appendChild(h);
+    suite.tests.forEach(function (t) {
+      var fails = TR.run(R, B, t), ok = !fails.length; ok ? pass++ : fail++;
+      var row = document.createElement('div'); row.style.cssText = 'display:grid;grid-template-columns:18px 92px minmax(0,1fr) auto;gap:10px;align-items:start';
+      row.innerHTML = '<div style="width:12px;height:12px;border-radius:6px;margin-top:4px;background:' + (ok ? '#6BE8B0' : '#FF5E6C') + '"></div>' +
+        '<div style="font:800 12px/1.6 Montserrat,sans-serif;opacity:.85">' + t.id + '</div>' +
+        '<div>' + t.title + (ok ? '' : '<div style="color:#FF8A95;font-size:12px;margin-top:4px;white-space:pre-wrap">' + fails.join('\n') + '</div>') + '</div>' +
+        '<div style="font-size:12px;opacity:.55">' + (t.rules || []).join(' ') + '</div>';
+      box.appendChild(row);
+    });
+    out.appendChild(box);
+  }
+  var SV = self.G101ServerTests.run(), sbox = document.createElement('div');
+  sbox.style.cssText = 'background:#161A45;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px';
+  var sh = document.createElement('div'); sh.style.cssText = 'font:800 14px Montserrat,sans-serif;letter-spacing:.5px;text-transform:uppercase;opacity:.8;margin-bottom:4px'; sh.textContent = 'sunucu akışları (mockServer) · ' + SV.length; sbox.appendChild(sh);
+  SV.forEach(function (t) {
+    var ok = !t.fails.length; ok ? pass++ : fail++;
+    var row = document.createElement('div'); row.style.cssText = 'display:grid;grid-template-columns:18px 92px minmax(0,1fr);gap:10px;align-items:start';
+    row.innerHTML = '<div style="width:12px;height:12px;border-radius:6px;margin-top:4px;background:' + (ok ? '#6BE8B0' : '#FF5E6C') + '"></div><div style="font:800 12px/1.6 Montserrat,sans-serif;opacity:.85">' + t.id + '</div><div>' + t.title + (ok ? '' : '<div style="color:#FF8A95;font-size:12px;margin-top:4px;white-space:pre-wrap">' + t.fails.join('\n') + '</div>') + '</div>';
+    sbox.appendChild(row);
+  });
+  out.appendChild(sbox);
+  var s = document.getElementById('sum');
+  s.textContent = fail ? (fail + ' kırmızı · ' + pass + ' yeşil') : ('Tamamı yeşil · ' + pass + ' / ' + pass);
+  s.style.background = fail ? '#E8455A' : '#2FBF7E';
+  window.__g101TestResult = { pass: pass, fail: fail };
+})();
+</script>
+</body>
+</html>

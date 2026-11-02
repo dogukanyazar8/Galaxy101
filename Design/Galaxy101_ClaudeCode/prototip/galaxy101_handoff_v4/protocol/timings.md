@@ -1,4 +1,4 @@
-# timings.md · Galaxy 101 zamanlama sözleşmesi · v0.4.0
+# timings.md · Galaxy 101 zamanlama sözleşmesi · v0.5.0
 
 Bütün sunucu süreleri `logic/mockServer.js` → `TIMINGS` (T) ile birebir aynı. Bot süreleri `logic/bots.js` → `TIMING`. İstemci animasyon süreleri prototipten (`G101-Masa.dc.html`, `table3d.js`) ölçüldü. Sunucu animasyonu beklemez; olayları kendi saatine göre gönderir. İstemci, sunucu takvimine sığacak şekilde canlandırır.
 

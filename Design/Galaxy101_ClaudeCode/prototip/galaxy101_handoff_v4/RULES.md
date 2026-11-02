@@ -1,4 +1,4 @@
-# RULES.md · Galaxy 101 kural karar tablosu · v0.4.0
+# RULES.md · Galaxy 101 kural karar tablosu · v0.5.0
 
 Tek kaynak budur. Kodda karşılığı `logic/rules.js` (kural kimlikleri yorumlarda), testleri `tests/rules/*.json`. Eski spec/17 ve spec/22 bu tabloyla çelişirse bu tablo geçerlidir. Kaldırılanlar `REMOVED.md`'de.
 
@@ -59,9 +59,9 @@ Hepsi el puanına sabit eklenir, çarpanla çarpılmaz (R-58). Masa seçeneği "
 | Kimlik | Ceza | Tutar | Kime / ne zaman | Test |
 |---|---|---|---|---|
 | R-40 | Eksik açılış (R-23) | +101 | açana, anında | OPEN-02, OPEN-04 |
-| R-41 | İşlek taş atma: atılan taş masadaki bir seri/gruba eklenebiliyor ya da bir okeyin yerine geçebiliyor | +101 | atana, atışta | PEN-01, PEN-02 |
-| R-42 | Okey atma (bitiş atışı hariç). Okey atışında ayrıca işlek cezası yazılmaz. Sahte okey okey değildir. | +101 | atana, atışta | PEN-03, PEN-04, FIN-02 |
-| R-43 | Açtıran taş: açmamış oyuncu soldan aldığı taşla açarsa, taşı atan oyuncuya taşın perdeki değeri × 10 | 9 → +90, 13 → +130 | atana, açanın turu bitince | SIDE-01 |
+| R-41 | İşlek taş atma: atılan taş masadaki bir seri/gruba eklenebiliyor ya da bir okeyin yerine geçebiliyor | +101 | atana, atışta · masa seçeneği "İşlek taş atma cezası" kapalıysa yazılmaz | PEN-01, PEN-02, PEN-07 |
+| R-42 | Okey atma (bitiş atışı hariç). Okey atışında ayrıca işlek cezası yazılmaz. Sahte okey okey değildir. | +101 | atana, atışta · masa seçeneği "Okey atma cezası" kapalıysa yazılmaz | PEN-03, PEN-04, FIN-02, PEN-08 |
+| R-43 | Açtıran taş: açmamış oyuncu soldan aldığı taşla açarsa, taşı atan oyuncuya taşın perdeki değeri × 10 | 9 → +90, 13 → +130 | atana, açanın turu bitince · masa seçeneği "Açtıran taş cezası" (varsayılan açık) kapalıysa yazılmaz | SIDE-01, PEN-09 |
 | R-44 | Masadaki okeyi alınan: okeyi masaya koyan oyuncuya (alan kendisi değilse) | +101 | koyana, alanın turu bitince | OKEY-01, OKEY-03 |
 
 ## 6 · El sonu puanı

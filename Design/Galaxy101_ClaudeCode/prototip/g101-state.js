@@ -1,4 +1,4 @@
-/* Galaxy 101 · g101-state.js · v0.4.0
+/* Galaxy 101 · g101-state.js · v0.5.0
  * Durum yönlendirici: ?state=ID ile states.json'daki durumu açar, ?ft ile dondurur, ?dump=1 ile yerleşim dökümü verir.
  *   Galaxy 101 - Gerçek Ana Oyun.dc.html?state=G15&theme=saturn&lang=tr&seed=42&ft=1200
  * Bileşenler componentDidMount'ta window.__g101.<Ad> = this kaydeder (App, Menu, Lobi, Dereceli, Masa); yönlendirici yalnız bunları sürer.
@@ -91,7 +91,7 @@
       P.forEach(function (p) { st[p] = cs[p]; });
       return { id: el.getAttribute('data-g101-id'), box: { x: +((r.left - o.left) / k).toFixed(2), y: +((r.top - o.top) / k).toFixed(2), w: +(r.width / k).toFixed(2), h: +(r.height / k).toFixed(2) }, visible: r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && +cs.opacity > 0, text: el.children.length ? null : (el.textContent || '').trim().slice(0, 200), style: st };
     });
-    var out = { version: '0.4.0', state: id, error: window.G101State && window.G101State.error || null, seed: window.G101Clock && G101Clock.seed, t: window.G101Clock && G101Clock.now(), unit: '1280x720 tasarım birimi', scale: k, count: items.length, items: items };
+    var out = { version: '0.5.0', state: id, error: window.G101State && window.G101State.error || null, seed: window.G101Clock && G101Clock.seed, t: window.G101Clock && G101Clock.now(), unit: '1280x720 tasarım birimi', scale: k, count: items.length, items: items };
     window.G101Dump = out;
     try { if (window.parent !== window) window.parent.postMessage({ g101dump: out }, '*'); } catch (e) {}
     if (!NODL) { var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 1)], { type: 'application/json' })); a.download = id + '.layout.json'; document.body.appendChild(a); a.click(); a.remove(); }

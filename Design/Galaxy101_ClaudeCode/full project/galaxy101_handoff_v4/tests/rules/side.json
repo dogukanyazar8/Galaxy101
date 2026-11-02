@@ -1,0 +1,593 @@
+{
+ "suite": "side",
+ "version": "0.5.0",
+ "note": "Aksi belirtilmedikçe gösterge B6a → okey B7 (B7a, B7b), sahte okey Ja/Jb = B7.",
+ "tests": [
+  {
+   "id": "SIDE-01",
+   "title": "Açmamış oyuncu soldan alırsa o taşla açmak zorunda; açtıran taş: soldakine 9 × 10 = +90",
+   "rules": [
+    "R-31",
+    "R-32",
+    "R-43"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "K10a",
+       "K11a",
+       "K12a",
+       "K13a",
+       "Y11a",
+       "R11a",
+       "B11a",
+       "Y5a",
+       "Y6a",
+       "Y7a",
+       "R2a",
+       "R6b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      [
+       "Y2a",
+       "K9a"
+      ]
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "draw",
+      "n": 9
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "draw",
+      "seat": 0,
+      "src": "side"
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "drew",
+        "src": "side",
+        "tile": "K9a",
+        "from": 3,
+        "mustOpen": true
+       }
+      ]
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R2a"
+     },
+     "expect": {
+      "error": "E_SIDE_MUST_OPEN"
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "K9a"
+     },
+     "expect": {
+      "error": "E_SIDE_DISCARD"
+     }
+    },
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "K10a",
+         "K11a",
+         "K12a",
+         "K13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "Y11a",
+         "R11a",
+         "B11a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "Y5a",
+         "Y6a",
+         "Y7a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "error": "E_SIDE_MUST_OPEN"
+     }
+    },
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "K9a",
+         "K10a",
+         "K11a",
+         "K12a",
+         "K13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "Y11a",
+         "R11a",
+         "B11a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "Y5a",
+         "Y6a",
+         "Y7a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.opened.0": 106,
+       "hand.pen.3": 0
+      }
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R2a"
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "penalty",
+        "seat": 3,
+        "code": "P_OPENED_WITH",
+        "amount": 90,
+        "by": 0,
+        "tile": "K9a"
+       }
+      ],
+      "state": {
+       "hand.pen": [
+        0,
+        0,
+        0,
+        90
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "SIDE-02",
+   "title": "Geri bırak: taş yığına döner, aynı tur yalnız desteden çekilir",
+   "rules": [
+    "R-32",
+    "R-33"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "K10a",
+       "K11a",
+       "K12a",
+       "K13a",
+       "Y11a",
+       "R11a",
+       "B11a",
+       "Y5a",
+       "Y6a",
+       "Y7a",
+       "R2a",
+       "R6b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      [
+       "Y2a",
+       "K9a"
+      ]
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "draw",
+      "n": 9
+     },
+     "deck": [
+      "R1a",
+      "R1b"
+     ]
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "draw",
+      "seat": 0,
+      "src": "side"
+     },
+     "expect": {
+      "ok": true
+     }
+    },
+    {
+     "do": {
+      "t": "returnSide",
+      "seat": 0
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.discards.3": [
+        "Y2a",
+        "K9a"
+       ],
+       "hand.turn.phase": "draw",
+       "hand.racks.0#len": 12
+      }
+     }
+    },
+    {
+     "do": {
+      "t": "draw",
+      "seat": 0,
+      "src": "side"
+     },
+     "expect": {
+      "error": "E_SIDE_RETURNED"
+     }
+    },
+    {
+     "do": {
+      "t": "draw",
+      "seat": 0,
+      "src": "deck"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.racks.0#len": 13
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "SIDE-03",
+   "title": "Açmış oyuncu soldan alabilir, kullanmak zorunda değil, ama o taşı atamaz; açtıran cezası yok",
+   "rules": [
+    "R-31",
+    "R-32"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R2a",
+       "R6b",
+       "Y13b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      [
+       "Y2a",
+       "K9a"
+      ]
+     ],
+     "melds": [],
+     "opened": [
+      110,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "draw",
+      "n": 9
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "draw",
+      "seat": 0,
+      "src": "side"
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "drew",
+        "mustOpen": false
+       }
+      ]
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "K9a"
+     },
+     "expect": {
+      "error": "E_SIDE_DISCARD"
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R2a"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.pen": [
+        0,
+        0,
+        0,
+        0
+       ],
+       "hand.racks.0#set": [
+        "K9a",
+        "R6b",
+        "Y13b"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "SIDE-04",
+   "title": "Soldan alınan taşla açılış geri toplanırsa açma zorunluluğu geri gelir",
+   "rules": [
+    "R-31",
+    "R-34"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "K10a",
+       "K11a",
+       "K12a",
+       "K13a",
+       "Y11a",
+       "R11a",
+       "B11a",
+       "Y5a",
+       "Y6a",
+       "Y7a",
+       "R2a",
+       "R6b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      [
+       "Y2a",
+       "K9a"
+      ]
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "draw",
+      "n": 9
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "draw",
+      "seat": 0,
+      "src": "side"
+     },
+     "expect": {
+      "ok": true
+     }
+    },
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "K9a",
+         "K10a",
+         "K11a",
+         "K12a",
+         "K13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "Y11a",
+         "R11a",
+         "B11a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "Y5a",
+         "Y6a",
+         "Y7a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true
+     }
+    },
+    {
+     "do": {
+      "t": "undo",
+      "seat": 0
+     },
+     "expect": {
+      "ok": true
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R2a"
+     },
+     "expect": {
+      "error": "E_SIDE_MUST_OPEN"
+     }
+    }
+   ]
+  },
+  {
+   "id": "SIDE-05",
+   "title": "Soldaki yığın boşsa alınamaz",
+   "rules": [
+    "R-30"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "K10a",
+       "K11a",
+       "K12a",
+       "K13a",
+       "Y11a",
+       "R11a",
+       "B11a",
+       "Y5a",
+       "Y6a",
+       "Y7a",
+       "R2a",
+       "R6b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "draw",
+      "n": 9
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "draw",
+      "seat": 0,
+      "src": "side"
+     },
+     "expect": {
+      "error": "E_SIDE_EMPTY"
+     }
+    }
+   ]
+  }
+ ]
+}

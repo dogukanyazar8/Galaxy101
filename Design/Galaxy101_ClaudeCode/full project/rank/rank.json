@@ -1,0 +1,166 @@
+{
+  "leagues": [
+    {
+      "key": "bronze",
+      "tr": "Bronz",
+      "en": "Bronze",
+      "colors": [
+        "#FFD9B3",
+        "#E39A5C",
+        "#A2582A",
+        "#3E1C0A"
+      ],
+      "text": "#F2B886",
+      "bar": "linear-gradient(90deg,#A2582A,#E39A5C 60%,#FFD9B3)",
+      "glow": "rgba(227,154,92,.55)",
+      "distribution": "~%25",
+      "seasonRewardChips": 5000,
+      "frame": {
+        "bg": "conic-gradient(from 210deg,#3E1C0A,#FFD9B3 12%,#E39A5C 26%,#FFD9B3 38%,#A2582A 54%,#E39A5C 68%,#A2582A 84%,#3E1C0A)",
+        "sh": "0 0 0 2px #3E1C0A,0 0 14px rgba(227,154,92,.55)",
+        "gap": "#3E1C0A"
+      }
+    },
+    {
+      "key": "silver",
+      "tr": "Gümüş",
+      "en": "Silver",
+      "colors": [
+        "#FFFFFF",
+        "#CBD6E4",
+        "#7F8DA4",
+        "#2C3444"
+      ],
+      "text": "#D9E2EE",
+      "bar": "linear-gradient(90deg,#7F8DA4,#CBD6E4 60%,#FFFFFF)",
+      "glow": "rgba(203,214,228,.5)",
+      "distribution": "~%30",
+      "seasonRewardChips": 15000,
+      "frame": {
+        "bg": "conic-gradient(from 210deg,#2C3444,#FFFFFF 12%,#CBD6E4 26%,#FFFFFF 38%,#7F8DA4 54%,#CBD6E4 68%,#7F8DA4 84%,#2C3444)",
+        "sh": "0 0 0 2px #2C3444,0 0 14px rgba(203,214,228,.5)",
+        "gap": "#2C3444"
+      }
+    },
+    {
+      "key": "gold",
+      "tr": "Altın",
+      "en": "Gold",
+      "colors": [
+        "#FFF3C2",
+        "#FFC93A",
+        "#C27F0C",
+        "#462A02"
+      ],
+      "text": "#FFD45C",
+      "bar": "linear-gradient(90deg,#C27F0C,#FFC93A 60%,#FFF3C2)",
+      "glow": "rgba(255,201,58,.55)",
+      "distribution": "~%25",
+      "seasonRewardChips": 40000,
+      "frame": {
+        "bg": "conic-gradient(from 210deg,#462A02,#FFF3C2 12%,#FFC93A 26%,#FFF3C2 38%,#C27F0C 54%,#FFC93A 68%,#C27F0C 84%,#462A02)",
+        "sh": "0 0 0 2px #462A02,0 0 14px rgba(255,201,58,.55)",
+        "gap": "#462A02"
+      }
+    },
+    {
+      "key": "diamond",
+      "tr": "Elmas",
+      "en": "Diamond",
+      "colors": [
+        "#E6FDFF",
+        "#6FE3FF",
+        "#2A86D6",
+        "#0A2A58"
+      ],
+      "text": "#7FE6FF",
+      "bar": "linear-gradient(90deg,#2A86D6,#6FE3FF 60%,#E6FDFF)",
+      "glow": "rgba(111,227,255,.55)",
+      "distribution": "~%13",
+      "seasonRewardChips": 100000,
+      "frame": {
+        "bg": "conic-gradient(from 210deg,#0A2A58,#E6FDFF 12%,#6FE3FF 26%,#E6FDFF 38%,#2A86D6 54%,#6FE3FF 68%,#2A86D6 84%,#0A2A58)",
+        "sh": "0 0 0 2px #0A2A58,0 0 14px rgba(111,227,255,.55)",
+        "gap": "#0A2A58"
+      }
+    },
+    {
+      "key": "master",
+      "tr": "Usta",
+      "en": "Master",
+      "colors": [
+        "#FFE3F4",
+        "#FF6FC4",
+        "#B3238A",
+        "#420836"
+      ],
+      "text": "#FF8FD2",
+      "bar": "linear-gradient(90deg,#B3238A,#FF6FC4 60%,#FFE3F4)",
+      "glow": "rgba(255,111,196,.55)",
+      "distribution": "~%6",
+      "seasonRewardChips": 250000,
+      "frame": {
+        "bg": "conic-gradient(from 210deg,#420836,#FFE3F4 12%,#FF6FC4 26%,#FFE3F4 38%,#B3238A 54%,#FF6FC4 68%,#B3238A 84%,#420836)",
+        "sh": "0 0 0 2px #420836,0 0 14px rgba(255,111,196,.55)",
+        "gap": "#420836"
+      }
+    },
+    {
+      "key": "galaxy",
+      "tr": "Galaksi",
+      "en": "Galaxy",
+      "colors": [
+        "#DFFFFB",
+        "#3DF5E0",
+        "#8C6EFF",
+        "#1B1250"
+      ],
+      "text": "#B9A6FF",
+      "bar": "linear-gradient(90deg,#8C6EFF,#5FB4F0 55%,#3DF5E0)",
+      "glow": "rgba(140,110,255,.6)",
+      "distribution": "İlk 100",
+      "seasonRewardChips": 1000000,
+      "frame": {
+        "bg": "conic-gradient(from 200deg,#1B1250,#8C6EFF 18%,#3DF5E0 34%,#DFFFFB 42%,#3DF5E0 50%,#8C6EFF 68%,#4B2FC0 84%,#1B1250)",
+        "sh": "0 0 0 2px #1B1250,0 0 18px rgba(140,110,255,.6)",
+        "gap": "#1B1250"
+      }
+    }
+  ],
+  "tierMark": "III=1 nokta, II=2, I=3 (elmas). Galaksi: #sıra",
+  "lp": {
+    "tierSize": 100,
+    "low": [
+      30,
+      10,
+      -10,
+      -20
+    ],
+    "high": [
+      25,
+      5,
+      -12,
+      -22
+    ],
+    "lowLeagues": [
+      "bronze",
+      "silver",
+      "gold"
+    ],
+    "highLeagues": [
+      "diamond",
+      "master",
+      "galaxy"
+    ]
+  },
+  "protectionMatches": 3,
+  "matchmaking": {
+    "range": 1,
+    "after30s": 2
+  },
+  "season": {
+    "weeks": 8,
+    "resetTiers": 4,
+    "floor": "Gümüş III (altındaysa yerinde kalır)"
+  }
+}

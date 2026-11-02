@@ -1,4 +1,4 @@
-# anim/ · animasyon kataloğu · v0.4.0
+# anim/ · animasyon kataloğu · v0.5.0
 
 | Dosya | İçerik |
 |---|---|

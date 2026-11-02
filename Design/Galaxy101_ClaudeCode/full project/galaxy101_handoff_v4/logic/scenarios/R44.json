@@ -1,0 +1,109 @@
+{
+ "id": "R44",
+ "title": "Okey alma cezası: sağındaki bot (koltuk 1) masadaki okeyini aldı (+101)",
+ "rules": [
+  "R-44",
+  "R-26"
+ ],
+ "states": [
+  "T36"
+ ],
+ "note": "Sen R10-R11-okey(Y5)-R13, 13 grubu ve K10-K12 ile 118 açar, R6 atarsın. Koltuk 1 botu 105 açar, R12 ile okeyini alır. Turu bitince sana +101 yazılır.",
+ "opts": {
+  "mode": "solo",
+  "hands": 5
+ },
+ "seed": 7,
+ "deal": {
+  "dealer": 3,
+  "dice": [
+   4,
+   3
+  ],
+  "indicator": "Y4a",
+  "racks": [
+   [
+    "R10a",
+    "R11a",
+    "Y5a",
+    "R13a",
+    "K13a",
+    "B13a",
+    "Y13a",
+    "K10a",
+    "K11a",
+    "K12a",
+    "R6a",
+    "R1a",
+    "R3a",
+    "B2a",
+    "B5b",
+    "B9b",
+    "K2a",
+    "K7b",
+    "Y1a",
+    "Y3b",
+    "Y10b",
+    "B4b"
+   ],
+   [
+    "R7a",
+    "B7a",
+    "K7a",
+    "Y7a",
+    "R8a",
+    "B8a",
+    "K8a",
+    "Y8a",
+    "B10a",
+    "B11a",
+    "B12a",
+    "K3a",
+    "K4a",
+    "K5a",
+    "R12a",
+    "R2a",
+    "R4a",
+    "B3a",
+    "Y2a",
+    "Y9a",
+    "B6a"
+   ]
+  ]
+ },
+ "me": [
+  {
+   "do": "open",
+   "melds": [
+    [
+     "R10a",
+     "R11a",
+     "Y5a",
+     "R13a"
+    ],
+    [
+     "K13a",
+     "B13a",
+     "Y13a"
+    ],
+    [
+     "K10a",
+     "K11a",
+     "K12a"
+    ]
+   ]
+  },
+  {
+   "do": "discard",
+   "tile": "R6a"
+  }
+ ],
+ "expect": {
+  "penalty": {
+   "seat": 0,
+   "code": "P_OKEY_TAKEN",
+   "amount": 101,
+   "by": 1
+  }
+ }
+}

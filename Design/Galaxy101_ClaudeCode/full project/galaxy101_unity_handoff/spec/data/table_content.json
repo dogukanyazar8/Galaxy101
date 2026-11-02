@@ -1,0 +1,468 @@
+{
+  "planets_table": {
+    "Satürn": {
+      "bg1": "#2A2F6E",
+      "bg2": "#161A45",
+      "bg3": "#0A0C28",
+      "pn": "#232A66",
+      "pnH": "#2D3680",
+      "pnS": "#0B0D2B",
+      "dp": "#0B0E2E",
+      "sd": "#10133A",
+      "bd": "#2E3680",
+      "a1": "#FFD964",
+      "a2": "#F5A623",
+      "aS": "#B86E0F",
+      "aT": "#3A1F00",
+      "lS": "#8A4E06",
+      "gl": "rgba(255,201,74,.45)",
+      "mt": "#A9AEDD",
+      "ic": "#D3D6FF",
+      "pg": "rgba(255,214,140,.30)",
+      "st": "#FFE7A3",
+      "lg1": "#FFF4C8",
+      "tf1": "#FFFDF6",
+      "tf2": "#EEE2C6",
+      "te": "#D9C9A2",
+      "f1": "#2C3790",
+      "f2": "#11153F",
+      "rim": "#4a5080"
+    },
+    "Mars": {
+      "bg1": "#5A1F17",
+      "bg2": "#2C0E0B",
+      "bg3": "#140605",
+      "pn": "#4A1E19",
+      "pnH": "#5C2620",
+      "pnS": "#1C0907",
+      "dp": "#1E0A08",
+      "sd": "#2A0F0C",
+      "bd": "#6A2A22",
+      "a1": "#FFA26B",
+      "a2": "#E8552E",
+      "aS": "#8E2A12",
+      "aT": "#2A0800",
+      "lS": "#7A1E0C",
+      "gl": "rgba(255,120,70,.45)",
+      "mt": "#E3B2A4",
+      "ic": "#FFD8CC",
+      "pg": "rgba(255,110,60,.30)",
+      "st": "#FFC9B0",
+      "lg1": "#FFE2CC",
+      "tf1": "#FFF7F0",
+      "tf2": "#F0D8C6",
+      "te": "#DDB8A0",
+      "f1": "#74291E",
+      "f2": "#2A0D09",
+      "rim": "#6e3e36"
+    },
+    "Neptün": {
+      "bg1": "#0F3C80",
+      "bg2": "#081F52",
+      "bg3": "#03102E",
+      "pn": "#12407F",
+      "pnH": "#185099",
+      "pnS": "#04163A",
+      "dp": "#061A40",
+      "sd": "#071C46",
+      "bd": "#1F5AA8",
+      "a1": "#8CEBFF",
+      "a2": "#2FB4E8",
+      "aS": "#11699A",
+      "aT": "#021C2E",
+      "lS": "#0A4F75",
+      "gl": "rgba(100,220,255,.45)",
+      "mt": "#A6CDF0",
+      "ic": "#D2EEFF",
+      "pg": "rgba(80,170,255,.34)",
+      "st": "#CDEBFF",
+      "lg1": "#E6FBFF",
+      "tf1": "#F8FCFF",
+      "tf2": "#DCE8F4",
+      "te": "#B8CADC",
+      "f1": "#164FA4",
+      "f2": "#061A40",
+      "rim": "#3e5e8e"
+    },
+    "Jüpiter": {
+      "bg1": "#4E3522",
+      "bg2": "#26180E",
+      "bg3": "#120A05",
+      "pn": "#47321F",
+      "pnH": "#5A3F28",
+      "pnS": "#1A1008",
+      "dp": "#1E140A",
+      "sd": "#2A1B0F",
+      "bd": "#6E4E30",
+      "a1": "#FFC88A",
+      "a2": "#E58B45",
+      "aS": "#8F4C18",
+      "aT": "#2E1405",
+      "lS": "#7A3C10",
+      "gl": "rgba(255,170,100,.45)",
+      "mt": "#DCC2A6",
+      "ic": "#F7E3CC",
+      "pg": "rgba(255,190,130,.26)",
+      "st": "#FFE2C2",
+      "lg1": "#FFF0DC",
+      "tf1": "#FFFAF2",
+      "tf2": "#F0E0CA",
+      "te": "#DCC4A4",
+      "f1": "#66462A",
+      "f2": "#22150A",
+      "rim": "#6c5538"
+    },
+    "Venüs": {
+      "bg1": "#5A2A4E",
+      "bg2": "#2C1428",
+      "bg3": "#140812",
+      "pn": "#4C2444",
+      "pnH": "#5E2E54",
+      "pnS": "#1C0A19",
+      "dp": "#1F0C1C",
+      "sd": "#2B1127",
+      "bd": "#7A3A6A",
+      "a1": "#FFD3A8",
+      "a2": "#F28AA0",
+      "aS": "#A33F5E",
+      "aT": "#3A0A18",
+      "lS": "#8A2E48",
+      "gl": "rgba(255,170,190,.45)",
+      "mt": "#E2B9D2",
+      "ic": "#FFE0EE",
+      "pg": "rgba(255,200,170,.30)",
+      "st": "#FFE0C8",
+      "lg1": "#FFF3E6",
+      "tf1": "#FFFBF6",
+      "tf2": "#F4E4D8",
+      "te": "#E0C6B8",
+      "f1": "#713464",
+      "f2": "#260E23",
+      "rim": "#704668"
+    }
+  },
+  "seats": [
+    {
+      "name": "Doğukan Y.",
+      "ini": "DY",
+      "color": "#FF8A5B",
+      "frame": 1,
+      "lv": 24,
+      "rank": "Altın II",
+      "win": 44,
+      "hands": 1260
+    },
+    {
+      "name": "Zeynep E.",
+      "ini": "ZE",
+      "color": "#16B6A8",
+      "frame": 0,
+      "lv": 31,
+      "rank": "Elmas III",
+      "win": 51,
+      "hands": 2104
+    },
+    {
+      "name": "Ayşe Y.",
+      "ini": "AY",
+      "color": "#3D7BFF",
+      "frame": 1,
+      "lv": 42,
+      "rank": "Usta I",
+      "win": 57,
+      "hands": 4380
+    },
+    {
+      "name": "Burak C.",
+      "ini": "BC",
+      "color": "#8B5CF6",
+      "frame": 0,
+      "lv": 18,
+      "rank": "Gümüş I",
+      "win": 39,
+      "hands": 612
+    }
+  ],
+  "gifts": [
+    {
+      "k": "tea",
+      "tab": 0,
+      "tr": "Çay",
+      "en": "Tea",
+      "trS": "çay",
+      "enS": "tea",
+      "price": 100
+    },
+    {
+      "k": "coffee",
+      "tab": 0,
+      "tr": "Türk kahvesi",
+      "en": "Turkish coffee",
+      "trS": "Türk kahvesi",
+      "enS": "Turkish coffee",
+      "price": 150
+    },
+    {
+      "k": "cola",
+      "tab": 0,
+      "tr": "Soğuk içecek",
+      "en": "Cold drink",
+      "trS": "soğuk içecek",
+      "enS": "a cold drink",
+      "price": 120
+    },
+    {
+      "k": "simit",
+      "tab": 0,
+      "tr": "Simit",
+      "en": "Simit",
+      "trS": "simit",
+      "enS": "simit",
+      "price": 200
+    },
+    {
+      "k": "baklava",
+      "tab": 0,
+      "tr": "Baklava",
+      "en": "Baklava",
+      "trS": "baklava",
+      "enS": "baklava",
+      "price": 500
+    },
+    {
+      "k": "seeds",
+      "tab": 0,
+      "tr": "Çekirdek",
+      "en": "Seeds",
+      "trS": "çekirdek",
+      "enS": "sunflower seeds",
+      "price": 80
+    },
+    {
+      "k": "flower",
+      "tab": 1,
+      "tr": "Çiçek",
+      "en": "Flowers",
+      "trS": "çiçek",
+      "enS": "flowers",
+      "price": 1000
+    },
+    {
+      "k": "cake",
+      "tab": 1,
+      "tr": "Pasta",
+      "en": "Cake",
+      "trS": "pasta",
+      "enS": "a cake",
+      "price": 2500
+    },
+    {
+      "k": "trophy",
+      "tab": 1,
+      "tr": "Kupa",
+      "en": "Trophy",
+      "trS": "kupa",
+      "enS": "a trophy",
+      "price": 5000
+    },
+    {
+      "k": "rocket",
+      "tab": 1,
+      "tr": "Roket",
+      "en": "Rocket",
+      "trS": "roket",
+      "enS": "a rocket",
+      "price": 10000
+    }
+  ],
+  "emoji": [
+    "😂",
+    "😍",
+    "😎",
+    "😡",
+    "👏",
+    "🔥",
+    "🤔",
+    "🙏",
+    "😱"
+  ],
+  "quickGifts": [
+    "tea",
+    "coffee",
+    "simit",
+    "flower"
+  ],
+  "demoHands": {
+    "deal": [
+      [
+        "R10",
+        "R11",
+        "R12",
+        "R13",
+        null,
+        "B9",
+        "Y9",
+        "K9",
+        null,
+        "Y4",
+        "Y5",
+        "Y6",
+        null,
+        "K12",
+        "K5"
+      ],
+      [
+        "B2",
+        "K7",
+        null,
+        "R3",
+        "Y7",
+        "B11",
+        null,
+        "Y12",
+        null,
+        "B5",
+        "R7",
+        null,
+        "B12",
+        "K11",
+        null
+      ]
+    ],
+    "openPreset": [
+      [
+        "R10",
+        "R11",
+        "R12",
+        "R13",
+        null,
+        "B9",
+        "Y9",
+        "K9",
+        null,
+        "Y4",
+        "Y5",
+        "Y6",
+        "Y7",
+        null,
+        null
+      ],
+      [
+        "B12",
+        "Y12",
+        "K12",
+        null,
+        "B2",
+        "K7",
+        "R3",
+        null,
+        "B11",
+        "B5",
+        "R7",
+        "K11",
+        "K5",
+        null,
+        null
+      ]
+    ],
+    "ayseMelds": [
+      [
+        "K5",
+        "K6",
+        "K7",
+        "K8"
+      ],
+      [
+        "R12",
+        "B12",
+        "Y12"
+      ],
+      [
+        "B9",
+        "B10",
+        "B11",
+        "B12",
+        "B13"
+      ]
+    ],
+    "prevTotals": [
+      48,
+      12,
+      -101,
+      202
+    ]
+  },
+  "settingsDefaults": {
+    "autoSort": true,
+    "highlight": true,
+    "dbl": true,
+    "warn": 5,
+    "lang": null,
+    "master": 80,
+    "music": 55,
+    "sfx": 90,
+    "tileSnd": true,
+    "chatSnd": true,
+    "bubbles": true,
+    "giftNotif": true,
+    "emojiFx": true,
+    "turnHint": true,
+    "view": null,
+    "tableSkin": null,
+    "rackSkin": null
+  },
+  "cameraViews": {
+    "Oyuncu gözü": "seat",
+    "Kuşbakışı": "top"
+  },
+  "tableSkins": {
+    "İstasyon": "station",
+    "Ceviz salon": "wood",
+    "Hologram": "holo",
+    "Andromeda": "andromeda"
+  },
+  "rackSkins": {
+    "Klasik ceviz": "walnut",
+    "Sedef kakma": "sedef",
+    "Alüminyum": "chrome",
+    "Karbon": "carbon",
+    "Neon cam": "neon",
+    "Andromeda": "andromeda"
+  },
+  "skinPreviewCss": {
+    "table": {
+      "station": {
+        "rim": "linear-gradient(160deg,#6a7396,#2c3352)",
+        "line": "inset 0 0 0 2px var(--a1)",
+        "glow": "0 0 0 2px var(--a1),0 0 18px var(--gl)"
+      },
+      "wood": {
+        "rim": "linear-gradient(160deg,#7A4528,#3A2014)",
+        "line": "inset 0 0 0 2px #D9B15A",
+        "glow": "0 3px 0 #22120a"
+      },
+      "holo": {
+        "rim": "linear-gradient(160deg,rgba(120,160,255,.35),rgba(20,30,60,.6))",
+        "line": "inset 0 0 0 1px var(--a1),inset 0 0 20px var(--gl)",
+        "glow": "0 0 0 1px var(--a1),0 0 24px var(--gl)"
+      }
+    },
+    "rack": {
+      "chrome": {
+        "back": "linear-gradient(#2a2f45,#151a2c)",
+        "ledge": "#8a93b0",
+        "glow": "inset 0 2px 0 var(--a1)"
+      },
+      "walnut": {
+        "back": "linear-gradient(#6A3B22,#3e2314)",
+        "ledge": "#D9A94A",
+        "glow": "inset 0 2px 0 #E0B04E"
+      },
+      "neon": {
+        "back": "linear-gradient(#0b0c14,#05060c)",
+        "ledge": "var(--a1)",
+        "glow": "0 0 14px var(--gl),inset 0 2px 0 #fff"
+      }
+    }
+  }
+}

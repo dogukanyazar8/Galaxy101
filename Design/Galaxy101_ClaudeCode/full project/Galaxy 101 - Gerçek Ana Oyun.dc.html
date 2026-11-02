@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<script src="./g101-clock.js"></script>
+<script src="./g101-state.js"></script>
+<script src="./g101-cursor.js"></script>
+<script src="./g101-rank.js"></script>
+<script src="./g101-sound.js"></script>
+<script src="./g101-settings.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+<script src="./planet-renderer.js"></script>
+<script src="./starfield.js"></script>
+<style>
+html,body{margin:0;height:100%;background:#05060F;overflow:hidden;font-family:'Baloo 2',sans-serif;color:#F4F1E8}
+a{color:#FFC94A}a:hover{color:#FFE08A}
+input::placeholder{color:rgba(169,174,221,.5)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes panelIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+@keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes dealIn{from{opacity:0;transform:translateY(-220px) rotate(-25deg) scale(.6)}to{opacity:1;transform:none}}
+@keyframes floatA{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-12px) rotate(var(--r,0deg))}}
+@keyframes popScale{0%{opacity:0;transform:scale(.4)}70%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+@keyframes pulseG{0%,100%{box-shadow:0 6px 0 var(--aS),0 0 0 0 var(--gl)}50%{box-shadow:0 6px 0 var(--aS),0 0 0 14px transparent}}
+@keyframes shine{0%{transform:translateX(-160%) skewX(-20deg)}60%,100%{transform:translateX(520%) skewX(-20deg)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,-14px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes g101Float{0%,100%{translate:0 0}50%{translate:0 -7px}}
+@keyframes g101Glint{0%,62%{transform:translateX(-200%) skewX(-18deg);opacity:0}66%{opacity:1}86%,100%{transform:translateX(330%) skewX(-18deg);opacity:0}}
+@keyframes g101TileIn{0%{opacity:0;transform:translateY(46px) rotateX(-70deg) scale(.82)}55%{opacity:1}100%{opacity:1;transform:none}}
+@keyframes tileIn{0%{opacity:0;transform:translateY(80px) rotateX(-80deg) scale(.78)}45%{opacity:1}100%{opacity:1;transform:none}}
+@keyframes tileFloat{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-6px) rotate(calc(var(--r,0deg) * .6))}}
+@keyframes tileShine{0%{transform:translateX(-180%) skewX(-18deg)}35%,100%{transform:translateX(320%) skewX(-18deg)}}
+@keyframes logoIn{from{opacity:0;transform:translateY(14px) scale(.94);letter-spacing:22px}to{opacity:1;transform:none;letter-spacing:8px}}
+@keyframes splashOut{0%{opacity:1;transform:none;filter:blur(0)}100%{opacity:0;transform:scale(.96);filter:blur(10px)}}
+@keyframes tilesOut{0%{transform:none}100%{transform:translateY(-36px) scale(1.14)}}
+@keyframes menuIn{0%{opacity:0;transform:scale(1.05);filter:blur(12px)}60%{filter:blur(0)}100%{opacity:1;transform:none;filter:none}}
+@keyframes planetFloat{0%,100%{transform:translate(-50%,-50%) rotate(-16deg)}50%{transform:translate(-50%,-52%) rotate(-14deg)}}
+</style>
+</helmet>
+
+<div style="position:fixed;inset:0;display:grid;place-items:center;background:#05060F">
+  <div data-g101-id="app.stage" style="position:relative;width:{{ stageW }};height:{{ stageH }};overflow:hidden;--bg1:#2A2F6E;--bg2:#161A45;--bg3:#0A0C28;--pn:#232A66;--pnH:#2D3680;--pnS:#0B0D2B;--dp:#0B0E2E;--sd:#10133A;--bd:#2E3680;--a1:#FFD964;--a2:#F5A623;--aS:#B86E0F;--aT:#3A1F00;--lS:#8A4E06;--gl:rgba(255,201,74,.45);--mt:#A9AEDD;--ic:#D3D6FF;--p1:#F3E1B5;--p2:#D9B77A;--p4:#B98F55;--rg:#E8CF98;--pg:rgba(255,214,140,.35);--st:#FFE7A3;--lg1:#FFF4C8;--tf1:#FFFDF6;--tf2:#EEE2C6;--te:#D9C9A2;--te2:#A8925F;--t1:#C8462E;--t2:#2B5DA8;--t3:#D9951A;--atm:rgba(255,226,175,.55);--fL:'Montserrat',sans-serif;--fH:'Montserrat',sans-serif;--fB:'Baloo 2',sans-serif">
+    <div data-cursor-lock="{{ busyCur }}" style="{{ themeStyle }}">
+
+      <div style="position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:0 0;transform:{{ scaleT }};overflow:hidden;background:radial-gradient(ellipse 80% 70% at 50% 35%,var(--bg1) 0%,var(--bg2) 55%,var(--bg3) 100%);font-family:var(--fB)">
+        <div style="position:absolute;inset:0;pointer-events:none">{{ starsEl }}</div>
+        <div style="position:absolute;left:{{ pl.x }};top:{{ pl.y }};width:0;height:0;opacity:{{ pl.o }};transform:scale({{ pl.s }});transition:left 1s cubic-bezier(.6,0,.2,1),top 1s cubic-bezier(.6,0,.2,1),transform 1s cubic-bezier(.6,0,.2,1),opacity .8s;pointer-events:none">
+          <div style="position:absolute;left:0;top:0;width:0;height:0;animation:planetFloat 14s ease-in-out infinite;transform:translate(-50%,-50%) rotate(-16deg)">
+            <div style="position:absolute;left:-330px;top:-330px;width:660px;height:660px;border-radius:50%;background:radial-gradient(closest-side,var(--pg),transparent 70%)"></div>
+            <div style="position:absolute;left:-148px;top:calc(-148px / var(--pf,1));width:296px;height:calc(296px / var(--pf,1));border-radius:50%;box-shadow:-3px -3px 14px -6px var(--atm),0 0 80px var(--pg)"></div>
+            <div style="position:absolute;left:-150px;top:-150px;width:300px;height:300px">{{ planetEl }}</div>
+          </div>
+        </div>
+        <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 70% 60% at 50% 50%,transparent 55%,rgba(0,0,0,.35))"></div>
+
+        <sc-if value="{{ isSplash }}" hint-placeholder-val="{{ true }}">
+          <div data-g101-id="app.splash" onClick="{{ skipSplash }}" style="position:absolute;inset:0;cursor:default;transform-origin:50% 45%;animation:{{ spAnim }}">
+            <div style="position:absolute;left:0;right:0;top:118px;display:flex;flex-direction:column;align-items:center">
+              <div data-g101-id="app.splash.logo" style="font:700 66px/1.15 var(--fL);letter-spacing:8px;background:linear-gradient(180deg,var(--lg1) 0%,var(--a1) 45%,var(--a2) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 5px 0 var(--lS)) drop-shadow(0 10px 18px rgba(0,0,0,.5)) drop-shadow(0 0 26px var(--gl));animation:logoIn 1.1s .85s cubic-bezier(.16,1,.3,1) both">GALAXY</div>
+              <div data-g101-id="app.splash.tiles" style="display:flex;gap:12px;align-items:flex-end;height:136px;margin-top:10px;perspective:900px;animation:{{ tilesAnim }}"><sc-if value="{{ fitted }}" hint-placeholder-val="{{ false }}">
+                <div data-g101-id="app.splash.tile[0]" style="transform-origin:50% 100%;animation:tileIn 1.15s .1s cubic-bezier(.16,1,.3,1) both"><div style="rotate:-10deg;animation:g101Float 6s 0s cubic-bezier(.45,0,.55,1) infinite;position:relative;overflow:hidden;width:78px;height:108px;border-radius:12px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -7px 0 var(--te),0 5px 0 var(--te2),0 16px 26px rgba(0,0,0,.45),0 0 22px var(--gl);display:flex;flex-direction:column;align-items:center;padding-top:8px;box-sizing:border-box;font:700 64px/1 var(--fH);color:var(--t1)">1<div style="width:14px;height:14px;border-radius:50%;background:var(--t1);margin-top:3px"></div><div style="position:absolute;top:0;bottom:0;left:0;width:38%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);pointer-events:none;animation:g101Glint 7s 2.18s ease-in-out infinite;transform:translateX(-200%) skewX(-18deg);opacity:0"></div></div></div>
+                <div data-g101-id="app.splash.tile[1]" style="transform-origin:50% 100%;animation:tileIn 1.15s .3s cubic-bezier(.16,1,.3,1) both"><div style="rotate:2deg;animation:g101Float 6s -2s cubic-bezier(.45,0,.55,1) infinite;position:relative;overflow:hidden;width:88px;height:122px;border-radius:13px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -8px 0 var(--te),0 6px 0 var(--te2),0 18px 30px rgba(0,0,0,.45),0 0 26px var(--gl);display:flex;flex-direction:column;align-items:center;padding-top:8px;box-sizing:border-box;font:700 74px/1 var(--fH);color:var(--t2)">0<div style="width:16px;height:16px;border-radius:50%;background:var(--t2);margin-top:3px"></div><div style="position:absolute;top:0;bottom:0;left:0;width:38%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);pointer-events:none;animation:g101Glint 7s 2.36s ease-in-out infinite;transform:translateX(-200%) skewX(-18deg);opacity:0"></div></div></div>
+                <div data-g101-id="app.splash.tile[2]" style="transform-origin:50% 100%;animation:tileIn 1.15s .5s cubic-bezier(.16,1,.3,1) both"><div style="rotate:10deg;animation:g101Float 6s -4s cubic-bezier(.45,0,.55,1) infinite;position:relative;overflow:hidden;width:78px;height:108px;border-radius:12px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -7px 0 var(--te),0 5px 0 var(--te2),0 16px 26px rgba(0,0,0,.45),0 0 22px var(--gl);display:flex;flex-direction:column;align-items:center;padding-top:8px;box-sizing:border-box;font:700 64px/1 var(--fH);color:var(--t3)">1<div style="width:14px;height:14px;border-radius:50%;background:var(--t3);margin-top:3px"></div><div style="position:absolute;top:0;bottom:0;left:0;width:38%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);pointer-events:none;animation:g101Glint 7s 2.54s ease-in-out infinite;transform:translateX(-200%) skewX(-18deg);opacity:0"></div></div></div></sc-if>
+              </div>
+            </div>
+            <div data-g101-id="app.splash.progress" style="position:absolute;left:50%;top:478px;width:440px;margin-left:-220px;display:flex;flex-direction:column;gap:9px;animation:fadeIn .5s 1.1s both">
+              <div style="display:flex;justify-content:space-between;font:800 14px var(--fB)"><div data-g101-id="app.splash.msg" style="color:var(--ic)">{{ sp.msg }}</div><div data-g101-id="app.splash.pct" style="color:var(--a1);font-variant-numeric:tabular-nums">{{ sp.label }}</div></div>
+              <div style="height:14px;border-radius:7px;background:var(--dp);overflow:hidden;box-shadow:inset 0 2px 0 rgba(0,0,0,.4)"><div data-g101-id="app.splash.bar" style="width:{{ sp.w }};height:100%;border-radius:7px;background:linear-gradient(90deg,var(--a2),var(--a1));box-shadow:0 0 14px var(--gl);transition:width .12s linear"></div></div>
+            </div>
+            <div data-g101-id="app.splash.tipBox" style="position:absolute;left:50%;bottom:40px;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:11px 18px 11px 11px;border-radius:18px;background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(6px);animation:fadeIn .5s 1.4s both">
+              <div style="width:30px;height:30px;border-radius:10px;background:linear-gradient(160deg,var(--a1),var(--a2));display:grid;place-items:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--aT)"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.6 1 2.5h6c0-.9.2-1.7 1-2.5A6 6 0 0 0 12 3z"></path></svg></div>
+              <div data-g101-id="app.splash.tip" style="font:700 14px var(--fB);color:var(--ic);white-space:nowrap">{{ sp.tip }}</div>
+            </div>
+            <div data-g101-id="app.splash.brand" style="position:absolute;right:20px;bottom:14px;display:flex;align-items:center;gap:8px;font:700 11px var(--fB);color:var(--mt)">
+              <div style="display:flex;align-items:center;gap:5px;opacity:.85"><div style="width:9px;height:9px;transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,var(--a1),var(--a2))"></div><span style="font:800 12px var(--fH);letter-spacing:1px;color:#F4F1E8">CDX</span><span style="letter-spacing:1.5px">GAMES</span></div>
+              <div style="width:1px;height:10px;background:var(--mt);opacity:.4"></div>
+              <div style="opacity:.6">v0.5.0</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isAuthSide }}" hint-placeholder-val="{{ false }}">
+          <div data-g101-id="auth.side" style="position:absolute;left:0;top:0;width:620px;height:720px;animation:fadeIn .6s both;pointer-events:none">
+            <div style="position:absolute;left:0;right:0;top:150px;display:flex;flex-direction:column;align-items:center">
+              <div data-g101-id="auth.side.logo" style="font:700 60px/1.15 var(--fL);letter-spacing:7px;background:linear-gradient(180deg,var(--lg1) 0%,var(--a1) 45%,var(--a2) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 5px 0 var(--lS)) drop-shadow(0 10px 18px rgba(0,0,0,.5)) drop-shadow(0 0 26px var(--gl))">GALAXY</div>
+              <div style="display:flex;gap:11px;align-items:flex-end;height:120px;margin-top:8px">
+                <div style="rotate:-10deg;animation:g101TileIn 1.1s 0.12s cubic-bezier(.16,1,.3,1) both,g101Float 6s 0s cubic-bezier(.45,0,.55,1) infinite;width:70px;height:96px;border-radius:11px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -6px 0 var(--te),0 5px 0 var(--te2),0 16px 26px rgba(0,0,0,.45),0 0 22px var(--gl);display:flex;flex-direction:column;align-items:center;padding-top:7px;box-sizing:border-box;font:700 56px/1 var(--fH);color:var(--t1)">1<div style="width:12px;height:12px;border-radius:50%;background:var(--t1);margin-top:3px"></div></div>
+                <div style="rotate:2deg;animation:g101TileIn 1.1s 0.26s cubic-bezier(.16,1,.3,1) both,g101Float 6s -2s cubic-bezier(.45,0,.55,1) infinite;width:79px;height:108px;border-radius:12px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -7px 0 var(--te),0 6px 0 var(--te2),0 18px 30px rgba(0,0,0,.45),0 0 26px var(--gl);display:flex;flex-direction:column;align-items:center;padding-top:7px;box-sizing:border-box;font:700 66px/1 var(--fH);color:var(--t2)">0<div style="width:14px;height:14px;border-radius:50%;background:var(--t2);margin-top:3px"></div></div>
+                <div style="rotate:10deg;animation:g101TileIn 1.1s 0.4s cubic-bezier(.16,1,.3,1) both,g101Float 6s -4s cubic-bezier(.45,0,.55,1) infinite;width:70px;height:96px;border-radius:11px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -6px 0 var(--te),0 5px 0 var(--te2),0 16px 26px rgba(0,0,0,.45),0 0 22px var(--gl);display:flex;flex-direction:column;align-items:center;padding-top:7px;box-sizing:border-box;font:700 56px/1 var(--fH);color:var(--t3)">1<div style="width:12px;height:12px;border-radius:50%;background:var(--t3);margin-top:3px"></div></div>
+              </div>
+              <div data-g101-id="auth.side.tag" style="font:700 20px/1.45 var(--fB);color:var(--ic);text-align:center;max-width:440px;margin-top:150px;white-space:pre-line">{{ L.tag }}</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isAuth }}" hint-placeholder-val="{{ false }}">
+          <div data-g101-id="auth.panel" style="position:absolute;right:70px;top:60px;bottom:60px;width:470px;display:flex;flex-direction:column;gap:12px;padding:28px 32px;box-sizing:border-box;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:28px;box-shadow:0 10px 0 var(--pnS),0 40px 90px rgba(0,0,0,.5);animation:panelIn .45s cubic-bezier(.2,1,.4,1) both">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div data-g101-id="auth.brand" style="font:900 11px var(--fB);letter-spacing:2px;color:var(--a1)">GALAXY 101</div>
+              <div style="display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--dp)">
+                <sc-for list="{{ langs }}" as="l" hint-placeholder-count="2">
+                  <div data-g101-id="auth.lang[{{ $index }}]" onClick="{{ l.pick }}" style="padding:6px 13px;border-radius:9px;font:800 13px var(--fH);background:{{ l.bg }};color:{{ l.fg }};cursor:pointer">{{ l.code }}</div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;margin:6px 0 8px">
+              <div data-g101-id="auth.welcome" style="font:700 32px/1.15 var(--fH)">{{ L.welcome }}</div>
+              <div data-g101-id="auth.howCont" style="font:700 15px var(--fB);color:var(--mt)">{{ L.howCont }}</div>
+            </div>
+            <div data-g101-id="auth.guest" onClick="{{ goGuest }}" style="position:relative;overflow:hidden;flex:none;height:76px;border-radius:20px;background:linear-gradient(var(--a1),var(--a2));animation:pulseG 2.2s infinite;display:flex;align-items:center;gap:14px;padding:0 20px;cursor:pointer;color:var(--aT);transition:transform .12s" style-hover="transform:translateY(-2px)" style-active="transform:translateY(4px)">
+              <div style="position:absolute;top:0;bottom:0;width:56px;background:rgba(255,255,255,.4);animation:shine 3s infinite"></div>
+              <div style="position:relative;width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.35);display:grid;place-items:center;flex:none"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--aT)"><path d="M6 11h4M8 9v4"></path><path d="M15 12h.01M18 10h.01"></path><path d="M17.3 5H6.7a4 4 0 0 0-4 3.6L2 15a3 3 0 0 0 5.2 2l1.6-2h6.4l1.6 2A3 3 0 0 0 22 15l-.7-6.4A4 4 0 0 0 17.3 5z"></path></svg></div>
+              <div style="position:relative;flex:1;min-width:0"><div style="font:800 21px/1.1 var(--fH)">{{ L.guest }}</div><div style="font:800 13px var(--fB);opacity:.8;margin-top:3px">{{ L.guestSub }}</div></div>
+            </div>
+            <div data-g101-id="auth.login" onClick="{{ goLogin }}" style="flex:none;height:60px;border-radius:18px;background:var(--pnH);box-shadow:0 5px 0 var(--pnS);display:flex;align-items:center;gap:14px;padding:0 20px;cursor:pointer;transition:filter .15s,transform .12s" style-hover="filter:brightness(1.2)" style-active="transform:translateY(4px);box-shadow:0 1px 0 var(--pnS)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--ic)"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"></path><path d="M10 17l5-5-5-5"></path><path d="M15 12H4"></path></svg>
+              <div style="font:700 18px var(--fH)">{{ L.login }}</div>
+            </div>
+            <div data-g101-id="auth.register" onClick="{{ goRegister }}" style="flex:none;height:60px;border-radius:18px;background:#3D7BFF;box-shadow:0 5px 0 #2148B0;display:flex;align-items:center;gap:14px;padding:0 14px 0 20px;cursor:pointer;transition:filter .15s,transform .12s" style-hover="filter:brightness(1.1)" style-active="transform:translateY(4px);box-shadow:0 1px 0 #2148B0">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="3.5"></circle><path d="M3.5 20a6.5 6.5 0 0 1 13 0"></path><path d="M19 8v6M16 11h6"></path></svg>
+              <div style="flex:1;font:700 18px var(--fH);color:#fff">{{ L.register }}</div>
+              <div style="display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:10px;background:rgba(0,0,0,.22);font:800 12px var(--fB);color:#FFE08A" data-g101-id="auth.regGift"><div style="width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)"></div>{{ L.regGift }}</div>
+            </div>
+            <div data-g101-id="auth.or" style="display:flex;align-items:center;gap:12px;margin:4px 0;font:800 12px var(--fB);color:var(--mt)"><div style="flex:1;height:1px;background:rgba(255,255,255,.1)"></div>{{ L.or }}<div style="flex:1;height:1px;background:rgba(255,255,255,.1)"></div></div>
+            <div data-g101-id="auth.google" onClick="{{ google }}" style="flex:none;height:56px;border-radius:18px;background:#fff;box-shadow:0 5px 0 #A9B4D0;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;transition:transform .12s" style-active="transform:translateY(4px);box-shadow:0 1px 0 #A9B4D0">
+              <sc-if value="{{ googleBusy }}" hint-placeholder-val="{{ false }}"><div style="width:20px;height:20px;border-radius:50%;border:3px solid #3D7BFF;border-top-color:transparent;animation:spin .8s linear infinite;box-sizing:border-box"></div></sc-if>
+              <sc-if value="{{ googleIdle }}" hint-placeholder-val="{{ true }}"><div style="width:22px;height:22px;border-radius:50%;border:4px solid #3D7BFF;border-right-color:#3CCB6E;border-bottom-color:#FFC94A;border-left-color:#FF5E6C;box-sizing:border-box"></div></sc-if>
+              <div style="font:700 17px var(--fH);color:#1B2340">{{ googleLabel }}</div>
+            </div>
+            <div style="flex:1"></div>
+            <div data-g101-id="auth.terms" style="font:700 12px/1.5 var(--fB);color:var(--mt);opacity:.8;text-wrap:pretty">{{ L.terms }}</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isForm }}" hint-placeholder-val="{{ false }}">
+          <div data-g101-id="form.panel" onKeyDown="{{ formKey }}" style="position:absolute;right:70px;top:46px;bottom:46px;width:470px;display:flex;flex-direction:column;gap:12px;padding:24px 30px;box-sizing:border-box;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:28px;box-shadow:0 10px 0 var(--pnS),0 40px 90px rgba(0,0,0,.5);animation:panelIn .4s cubic-bezier(.2,1,.4,1) both">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+              <div data-g101-id="form.back" onClick="{{ goAuth }}" title="{{ L.back }}" style="flex:none;width:42px;height:42px;border-radius:13px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);display:grid;place-items:center;cursor:pointer" style-hover="filter:brightness(1.25)" style-active="transform:translateY(3px)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--ic)"><path d="M15 5l-7 7 7 7"></path></svg></div>
+              <div style="min-width:0"><div data-g101-id="form.title" style="font:700 26px/1.1 var(--fH)">{{ fm.title }}</div><div data-g101-id="form.sub" style="font:700 13px var(--fB);color:var(--mt);margin-top:2px">{{ fm.sub }}</div></div>
+            </div>
+
+            <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+              <div data-g101-id="form.google" onClick="{{ google }}" style="flex:none;height:50px;border-radius:16px;background:#fff;box-shadow:0 4px 0 #A9B4D0;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer" style-active="transform:translateY(3px);box-shadow:0 1px 0 #A9B4D0">
+                <div style="width:20px;height:20px;border-radius:50%;border:4px solid #3D7BFF;border-right-color:#3CCB6E;border-bottom-color:#FFC94A;border-left-color:#FF5E6C;box-sizing:border-box"></div>
+                <div style="font:700 16px var(--fH);color:#1B2340">{{ googleLabel }}</div>
+              </div>
+              <div data-g101-id="form.orEmail" style="display:flex;align-items:center;gap:12px;font:800 12px var(--fB);color:var(--mt)"><div style="flex:1;height:1px;background:rgba(255,255,255,.1)"></div>{{ L.orEmail }}<div style="flex:1;height:1px;background:rgba(255,255,255,.1)"></div></div>
+            </sc-if>
+
+            <sc-for list="{{ fields }}" as="x" hint-placeholder-count="2">
+              <div data-g101-id="form.field[{{ $index }}]" style="display:flex;flex-direction:column;gap:6px;flex:none">
+                <div style="display:flex;justify-content:space-between;gap:10px;font:800 12px var(--fB);letter-spacing:.6px"><div data-g101-id="form.field[{{ $index }}].label" style="color:var(--mt)">{{ x.label }}</div><div data-g101-id="form.field[{{ $index }}].hint" style="color:{{ x.hc }};letter-spacing:0">{{ x.hint }}</div></div>
+                <div style="display:flex;align-items:center;gap:10px;height:50px;padding:0 8px 0 14px;border-radius:14px;background:var(--dp);box-shadow:{{ x.ring }};box-sizing:border-box;transition:box-shadow .15s">
+                  <input data-g101-id="form.field[{{ $index }}].input" type="{{ x.type }}" value="{{ x.value }}" onChange="{{ x.change }}" onFocus="{{ x.focus }}" onBlur="{{ x.blur }}" placeholder="{{ x.ph }}" maxLength="{{ x.max }}" autoComplete="off" spellCheck="false" style="flex:1;min-width:0;height:100%;background:transparent;border:0;outline:none;font:700 16px var(--fB);color:#F4F1E8;padding:0">
+                  <sc-if value="{{ x.eye }}" hint-placeholder-val="{{ false }}">
+                    <div data-g101-id="form.field[{{ $index }}].eye" onClick="{{ x.toggle }}" title="{{ x.eyeTitle }}" style="flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;cursor:pointer;opacity:{{ x.eyeOp }}" style-hover="background:var(--pnH)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--ic)"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg></div>
+                  </sc-if>
+                  <sc-if value="{{ x.ok }}" hint-placeholder-val="{{ false }}">
+                    <div style="flex:none;width:22px;height:22px;margin-right:6px;border-radius:50%;background:#3CCB6E;display:grid;place-items:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+                  </sc-if>
+                </div>
+                <sc-if value="{{ x.meter }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <sc-for list="{{ x.bars }}" as="b" hint-placeholder-count="3"><div style="flex:1;height:5px;border-radius:3px;background:{{ b.c }};transition:background .2s"></div></sc-for>
+                    <div data-g101-id="form.field[{{ $index }}].meter" style="font:800 11px var(--fB);color:{{ x.mc }};min-width:54px;text-align:right">{{ x.ml }}</div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+
+            <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div data-g101-id="form.remember" onClick="{{ toggleRemember }}" style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                  <div style="width:42px;height:24px;border-radius:12px;background:{{ rem.bg }};position:relative;transition:background .2s;box-shadow:inset 0 2px 0 rgba(0,0,0,.25)"><div style="position:absolute;top:3px;left:{{ rem.x }};width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s cubic-bezier(.3,1.5,.5,1)"></div></div>
+                  <div style="font:700 14px var(--fB);color:var(--ic)">{{ L.remember }}</div>
+                </div>
+                <div style="flex:1"></div>
+                <div data-g101-id="form.forgot" onClick="{{ forgot }}" style="font:800 14px var(--fB);color:var(--a1);cursor:pointer" style-hover="text-decoration:underline">{{ L.forgot }}</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isGuest }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div data-g101-id="form.guest.colorLabel" style="font:800 12px var(--fB);letter-spacing:.6px;color:var(--mt)">{{ L.avatarColor }}</div>
+                <div style="display:flex;align-items:center;gap:16px">
+                  <div data-g101-id="form.guest.avatar" style="flex:none;width:74px;height:74px;border-radius:50%;background:{{ gv.color }};border:3px solid var(--a1);box-shadow:0 0 0 3px var(--pnS),0 0 22px var(--gl);display:grid;place-items:center;font:700 26px var(--fH);color:#fff;transition:background .2s">{{ gv.ini }}</div>
+                  <div style="display:grid;grid-template-columns:repeat(4,30px);gap:10px">
+                    <sc-for list="{{ swatches }}" as="c" hint-placeholder-count="8">
+                      <div data-g101-id="form.guest.swatch[{{ $index }}]" onClick="{{ c.pick }}" style="width:30px;height:30px;border-radius:50%;background:{{ c.c }};box-shadow:{{ c.ring }};cursor:pointer;transition:transform .15s" style-hover="transform:scale(1.12)"></div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;padding:14px 16px;border-radius:16px;background:var(--sd)">
+                  <div style="display:flex;align-items:center;gap:10px"><div style="flex:none;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)"></div><div data-g101-id="form.guest.chips" style="font:700 14px/1.35 var(--fB);color:var(--ic)">{{ L.guestChips }}</div></div>
+                  <div style="display:flex;align-items:center;gap:10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--mt);flex:none"><rect x="6" y="2.5" width="12" height="19" rx="2.5"></rect><path d="M11 18.5h2"></path></svg><div data-g101-id="form.guest.device" style="font:700 14px/1.35 var(--fB);color:var(--ic)">{{ L.guestDevice }}</div></div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isRegister }}" hint-placeholder-val="{{ false }}">
+              <div data-g101-id="form.terms" onClick="{{ toggleTerms }}" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                <div style="flex:none;width:22px;height:22px;border-radius:7px;background:{{ terms.bg }};box-shadow:{{ terms.ring }};display:grid;place-items:center;margin-top:1px;transition:background .15s"><sc-if value="{{ terms.on }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--aT)"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if></div>
+                <div style="font:700 13px/1.45 var(--fB);color:{{ terms.fg }};text-wrap:pretty">{{ L.agree }}</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ hasErr }}" hint-placeholder-val="{{ false }}">
+              <div data-g101-id="form.error" key="{{ errKey }}" style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:14px;background:rgba(255,94,108,.12);box-shadow:inset 0 0 0 1px rgba(255,94,108,.35);animation:shake .4s both">
+                <div style="flex:none;width:22px;height:22px;border-radius:50%;background:#FF5E6C;display:grid;place-items:center;font:900 13px var(--fH);color:#fff">!</div>
+                <div data-g101-id="form.errorText" style="font:700 14px/1.35 var(--fB);color:#FFC2C8">{{ errText }}</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ hasInfo }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:14px;background:rgba(60,203,110,.12);box-shadow:inset 0 0 0 1px rgba(60,203,110,.35);animation:fadeIn .3s both">
+                <div style="flex:none;width:22px;height:22px;border-radius:50%;background:#3CCB6E;display:grid;place-items:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+                <div data-g101-id="form.infoText" style="font:700 14px/1.35 var(--fB);color:#BFF5D2">{{ infoText }}</div>
+              </div>
+            </sc-if>
+
+            <div style="flex:1"></div>
+            <div data-g101-id="form.submit" onClick="{{ submit }}" style="position:relative;overflow:hidden;flex:none;height:58px;border-radius:18px;background:linear-gradient(var(--a1),var(--a2));box-shadow:0 5px 0 var(--aS);display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;color:var(--aT);opacity:{{ fm.op }};transition:transform .12s,filter .15s" style-hover="filter:brightness(1.07)" style-active="transform:translateY(4px);box-shadow:0 1px 0 var(--aS)">
+              <sc-if value="{{ fm.busy }}" hint-placeholder-val="{{ false }}"><div style="width:20px;height:20px;border-radius:50%;border:3px solid var(--aT);border-top-color:transparent;animation:spin .8s linear infinite;box-sizing:border-box"></div></sc-if>
+              <div data-g101-id="form.cta" style="font:800 19px var(--fH)">{{ fm.cta }}</div>
+            </div>
+            <div style="display:flex;justify-content:center;gap:6px;font:700 14px var(--fB);color:var(--mt)">
+              <div data-g101-id="form.alt">{{ fm.alt }}</div>
+              <div data-g101-id="form.altLink" onClick="{{ fm.altGo }}" style="font-weight:800;color:var(--a1);cursor:pointer" style-hover="text-decoration:underline">{{ fm.altLink }}</div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ isLobby }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:0 0;transform:{{ scaleT }}">
+          <dc-import name="G101-Lobi" lang="{{ lang }}" user="{{ user }}" chips="{{ chips }}" on-back="{{ goMenu }}" on-start="{{ startGame }}" on-buy="{{ buyChips }}" hint-size="1280px,720px"></dc-import>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isRanked }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:0 0;transform:{{ scaleT }}">
+          <dc-import name="G101-Dereceli" lang="{{ lang }}" user="{{ user }}" chips="{{ chips }}" ranked="{{ ranked }}" result="{{ rankedRes }}" on-back="{{ goMenu }}" on-start="{{ startGame }}" on-result-seen="{{ clearRankedRes }}" hint-size="1280px,720px"></dc-import>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isMenu }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:0;top:0;width:{{ stageW }};height:{{ stageH }};transform-origin:50% 50%;animation:{{ menuAnim }}">
+          <dc-import name="G101-Menu" scale="{{ k }}" planet="{{ planet }}" lang="{{ lang }}" user="{{ user }}" chips="{{ chips }}" gems="{{ gems }}" open-panel="{{ menuPanel }}" on-play="{{ goLobby }}" on-planet="{{ setPlanet }}" on-lang="{{ setLang }}" on-logout="{{ logout }}" on-quit="{{ quitGame }}" on-reward="{{ reward }}" ranked="{{ ranked }}" hint-size="{{ stageHint }}"></dc-import>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ gameOn }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:0;top:0">
+          <dc-import name="G101-Masa" scale="{{ k }}" planet="{{ planet }}" language="{{ gameLang }}" chips="{{ chips }}" bet="{{ g.bet }}" hands="{{ g.hands }}" turn-seconds="{{ g.turn }}" room-label="{{ g.room }}" bet-label="{{ g.betLabel }}" seats="{{ g.seats }}" table-rules="{{ g.rules }}" test-finish="{{ tFinish }}" test-eject="{{ tEject }}" test-elden="{{ tElden }}" start-hand="{{ g.startHand }}" spectate="{{ g.spectate }}" auto-start="{{ true }}" on-ready="{{ gameReady }}" on-exit="{{ gameExit }}" on-match-end="{{ matchEnd }}" on-open-settings="{{ openGameSet }}" hint-size="{{ stageHint }}"></dc-import>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showVer }}" hint-placeholder-val="{{ false }}">
+        <div data-g101-id="app.version" style="position:absolute;right:8px;bottom:3px;z-index:90;pointer-events:none;font:700 10px Nunito,sans-serif;letter-spacing:.5px;color:#9DA6D8;opacity:.55">Galaxy 101 · {{ appVersion }}</div>
+      </sc-if>
+      <sc-if value="{{ showFps }}" hint-placeholder-val="{{ false }}">
+        <div data-g101-id="app.fps" style="position:absolute;left:8px;top:{{ fpsTop }};z-index:99;pointer-events:none">{{ fpsEl }}</div>
+      </sc-if>
+
+      <sc-if value="{{ gameSet }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:0;top:0;width:{{ stageW }};height:{{ stageH }};z-index:80;pointer-events:none">
+          <dc-import name="G101-Menu" scale="{{ k }}" planet="{{ planet }}" lang="{{ lang }}" user="{{ user }}" chips="{{ chips }}" gems="{{ gems }}" ranked="{{ ranked }}" settings-only="{{ true }}" settings-tab="masa" on-close-settings="{{ closeGameSet }}" on-lang="{{ setLang }}" on-planet="{{ setPlanet }}" on-logout="{{ logout }}" on-quit="{{ quitGame }}" hint-size="{{ stageHint }}"></dc-import>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+        <div data-g101-id="load.screen" data-cursor="progress" style="position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:0 0;transform:{{ scaleT }};overflow:hidden;font-family:var(--fB);opacity:{{ ld.op }};transition:opacity .45s">
+          <div style="position:absolute;inset:0;background:radial-gradient(120% 110% at 75% 30%,var(--bg1),var(--bg2) 50%,var(--bg3))"></div>
+          <div style="position:absolute;inset:0;background-image:radial-gradient(1.5px 1.5px at 12% 18%,rgba(255,255,255,.8),transparent),radial-gradient(1.5px 1.5px at 34% 72%,rgba(255,255,255,.6),transparent),radial-gradient(2px 2px at 58% 12%,rgba(255,255,255,.7),transparent),radial-gradient(1.5px 1.5px at 88% 84%,rgba(255,255,255,.6),transparent),radial-gradient(1.5px 1.5px at 46% 46%,rgba(255,255,255,.5),transparent),radial-gradient(2px 2px at 22% 90%,rgba(255,255,255,.6),transparent),radial-gradient(1.5px 1.5px at 94% 22%,rgba(255,255,255,.7),transparent)"></div>
+          <div style="position:absolute;left:740px;top:110px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle at 36% 30%,var(--p1),var(--p2) 45%,var(--p4) 85%);box-shadow:0 0 120px var(--pg);opacity:{{ ld.po }};transition:opacity .4s"></div>
+          <div style="position:absolute;left:660px;top:280px;width:580px;height:96px;border-radius:50%;border:7px solid var(--rg);transform:rotate(-14deg);opacity:{{ ld.ro }};box-sizing:border-box;transition:opacity .4s"></div>
+          <div style="position:absolute;left:110px;top:190px;width:540px;display:flex;flex-direction:column;gap:16px">
+            <div data-g101-id="load.kick" style="font:900 12px var(--fB);letter-spacing:2px;color:var(--a1)">{{ ld.kick }}</div>
+            <div data-g101-id="load.logo" style="font:800 76px/1 var(--fL);letter-spacing:5px;background:linear-gradient(180deg,var(--lg1),var(--a1) 50%,var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap">GALAXY 101</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:26px">
+              <div style="display:flex;justify-content:space-between;font:800 14px var(--fB)"><div data-g101-id="load.msg" style="color:var(--ic)">{{ ld.msg }}</div><div data-g101-id="load.pct" style="color:var(--a1);font-variant-numeric:tabular-nums">{{ ld.label }}</div></div>
+              <div style="height:12px;border-radius:6px;background:rgba(255,255,255,.14);overflow:hidden"><div data-g101-id="load.bar" style="width:{{ ld.w }};height:100%;border-radius:6px;background:linear-gradient(90deg,var(--a2),var(--a1));box-shadow:0 0 14px var(--gl);transition:width .15s linear"></div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:22px;background:var(--pn);box-shadow:0 7px 0 var(--pnS);margin-top:30px">
+              <div style="width:40px;height:40px;border-radius:13px;background:linear-gradient(160deg,var(--a1),var(--a2));display:grid;place-items:center;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--aT)"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.6 1 2.5h6c0-.9.2-1.7 1-2.5A6 6 0 0 0 12 3z"></path></svg></div>
+              <div data-g101-id="load.tip" style="font:700 16px/1.35 var(--fB);text-wrap:pretty">{{ ld.tip }}</div>
+            </div>
+          </div>
+          <sc-if value="{{ ld.err }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;inset:0;background:rgba(3,5,14,.45);animation:fadeIn .25s both"></div>
+            <div style="position:absolute;left:640px;top:360px;transform:translate(-50%,-50%);width:460px">
+              <div data-g101-id="load.fail" style="background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:22px;box-shadow:0 7px 0 var(--pnS),0 26px 60px rgba(0,0,0,.55);padding:26px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;animation:modalIn .3s both">
+                <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(#FF7A86,#E8455A);box-shadow:0 5px 0 #9E1F33;display:grid;place-items:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8.5a15 15 0 0 1 20 0M5.5 12a10 10 0 0 1 13 0M9 15.5a5 5 0 0 1 6 0M12 19h.01M3 3l18 18"></path></svg></div>
+                <div data-g101-id="load.fail.title" style="font:700 24px/1.2 var(--fH)">{{ L.failTitle }}</div>
+                <div data-g101-id="load.fail.body" style="font:700 15px/1.45 var(--fB);color:var(--mt);text-wrap:pretty">{{ L.failBody }}</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:6px">
+                  <div data-g101-id="load.fail.lobby" onClick="{{ failLobby }}" style="font:800 15px var(--fH);padding:13px;border-radius:15px;background:var(--pnH);box-shadow:0 5px 0 var(--pnS);cursor:pointer" style-hover="filter:brightness(1.2)" style-active="transform:translateY(3px)">{{ L.toLobby }}</div>
+                  <div data-g101-id="load.fail.retry" onClick="{{ failRetry }}" style="font:800 15px var(--fH);padding:13px;border-radius:15px;background:linear-gradient(var(--a1),var(--a2));color:var(--aT);box-shadow:0 5px 0 var(--aS);cursor:pointer" style-hover="filter:brightness(1.07)" style-active="transform:translateY(3px)">{{ L.retry }}</div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:0 0;transform:{{ scaleT }};pointer-events:none;z-index:90">
+          <div data-g101-id="app.toast" key="{{ toast.key }}" style="position:absolute;left:50%;top:22px;display:flex;align-items:center;gap:10px;padding:10px 20px 10px 10px;border-radius:999px;background:{{ toast.bg }};color:{{ toast.fg }};font:800 15px var(--fB);box-shadow:0 10px 30px rgba(0,0,0,.4);white-space:nowrap;animation:toastIn .35s both">
+            <div style="width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.18);display:grid;place-items:center"><div style="width:9px;height:9px;border-radius:2px;transform:rotate(45deg);background:currentColor"></div></div>
+            {{ toast.text }}
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ isQuit }}" hint-placeholder-val="{{ false }}">
+        <div data-g101-id="app.quit" style="position:fixed;inset:0;z-index:95;background:#03040B;display:grid;place-items:center;animation:fadeIn .6s ease-out both">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
+            <div style="font:800 44px/1 var(--fL);letter-spacing:5px;background:linear-gradient(180deg,var(--lg1),var(--a1) 50%,var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent;opacity:.85">GALAXY 101</div>
+            <div data-g101-id="app.quit.text" style="font:700 15px var(--fB);color:#8089A8">{{ L.quitDone }}</div>
+            <div data-g101-id="app.quit.back" onClick="{{ unquit }}" style="margin-top:18px;padding:11px 24px;border-radius:14px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);font:700 15px var(--fH);color:#C9CFE3;cursor:pointer;transition:background .15s" style-hover="background:rgba(255,255,255,.12)" style-active="transform:translateY(2px)">{{ L.quitBack }}</div>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;firstRun&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Akış&quot;},&quot;failFirstLoad&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Akış&quot;},&quot;testFinish&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Kapalı&quot;,&quot;Nükleer&quot;,&quot;Kara delik&quot;,&quot;Süpernova&quot;,&quot;Meteor&quot;],&quot;default&quot;:&quot;Kapalı&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Test (masada)&quot;},&quot;testEject&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Test (masada)&quot;},&quot;testElden&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Test (masada)&quot;},&quot;muted&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Ses&quot;}}">
+const SAVE_KEY = 'galaxy101.save.v1';
+const PV = {
+  'Satürn': { bg1: '#2A2F6E', bg2: '#161A45', bg3: '#0A0C28', pn: '#232A66', pnH: '#2D3680', pnS: '#0B0D2B', dp: '#0B0E2E', sd: '#10133A', bd: '#2E3680', a1: '#FFD964', a2: '#F5A623', aS: '#B86E0F', aT: '#3A1F00', lS: '#8A4E06', gl: 'rgba(255,201,74,.45)', mt: '#A9AEDD', ic: '#D3D6FF', p1: '#F3E1B5', p2: '#D9B77A', p3: '#EBD3A0', p4: '#B98F55', rg: '#E8CF98', pg: 'rgba(255,214,140,.35)', st: '#FFE7A3', lg1: '#FFF4C8', tf1: '#FFFDF6', tf2: '#EEE2C6', te: '#D9C9A2', te2: '#A8925F', t1: '#C8462E', t2: '#2B5DA8', t3: '#D9951A', atm: 'rgba(255,226,175,.55)', pf: 1.1, ro: 0.85 },
+  'Mars': { bg1: '#5A1F17', bg2: '#2C0E0B', bg3: '#140605', pn: '#4A1E19', pnH: '#5C2620', pnS: '#1C0907', dp: '#1E0A08', sd: '#2A0F0C', bd: '#6A2A22', a1: '#FFA26B', a2: '#E8552E', aS: '#8E2A12', aT: '#2A0800', lS: '#7A1E0C', gl: 'rgba(255,120,70,.45)', mt: '#E3B2A4', ic: '#FFD8CC', p1: '#E0754A', p2: '#B8482A', p3: '#D9633C', p4: '#8E3420', rg: 'transparent', pg: 'rgba(255,110,60,.35)', st: '#FFC9B0', lg1: '#FFE2CC', tf1: '#FFF7F0', tf2: '#F0D8C6', te: '#DDB8A0', te2: '#A3705A', t1: '#B3261E', t2: '#E0612E', t3: '#6E1A10', atm: 'rgba(255,150,110,.45)', pf: 1, ro: 0 },
+  'Neptün': { bg1: '#0F3C80', bg2: '#081F52', bg3: '#03102E', pn: '#12407F', pnH: '#185099', pnS: '#04163A', dp: '#061A40', sd: '#071C46', bd: '#1F5AA8', a1: '#8CEBFF', a2: '#2FB4E8', aS: '#11699A', aT: '#021C2E', lS: '#0A4F75', gl: 'rgba(100,220,255,.45)', mt: '#A6CDF0', ic: '#D2EEFF', p1: '#5FA8FF', p2: '#2F6FE0', p3: '#4A8EF5', p4: '#1F4FB8', rg: '#9CC8FF', pg: 'rgba(80,170,255,.4)', st: '#CDEBFF', lg1: '#E6FBFF', tf1: '#F8FCFF', tf2: '#DCE8F4', te: '#B8CADC', te2: '#7C93AE', t1: '#1F5FBF', t2: '#0E9CC4', t3: '#2D3B9A', atm: 'rgba(150,210,255,.8)', pf: 1.02, ro: 0.35 },
+  'Jüpiter': { bg1: '#4E3522', bg2: '#26180E', bg3: '#120A05', pn: '#47321F', pnH: '#5A3F28', pnS: '#1A1008', dp: '#1E140A', sd: '#2A1B0F', bd: '#6E4E30', a1: '#FFC88A', a2: '#E58B45', aS: '#8F4C18', aT: '#2E1405', lS: '#7A3C10', gl: 'rgba(255,170,100,.45)', mt: '#DCC2A6', ic: '#F7E3CC', p1: '#F2DCC0', p2: '#C98A5A', p3: '#E8C49C', p4: '#A8643A', rg: '#D9B48A', pg: 'rgba(255,190,130,.3)', st: '#FFE2C2', lg1: '#FFF0DC', tf1: '#FFFAF2', tf2: '#F0E0CA', te: '#DCC4A4', te2: '#A08060', t1: '#B4532A', t2: '#6E4A2E', t3: '#D08A3A', atm: 'rgba(255,220,180,.5)', pf: 1.07, ro: 0.25 },
+  'Venüs': { bg1: '#5A2A4E', bg2: '#2C1428', bg3: '#140812', pn: '#4C2444', pnH: '#5E2E54', pnS: '#1C0A19', dp: '#1F0C1C', sd: '#2B1127', bd: '#7A3A6A', a1: '#FFD3A8', a2: '#F28AA0', aS: '#A33F5E', aT: '#3A0A18', lS: '#8A2E48', gl: 'rgba(255,170,190,.45)', mt: '#E2B9D2', ic: '#FFE0EE', p1: '#FBE7C2', p2: '#EFC98E', p3: '#F7DAB0', p4: '#DDAE72', rg: 'transparent', pg: 'rgba(255,200,170,.35)', st: '#FFE0C8', lg1: '#FFF3E6', tf1: '#FFFBF6', tf2: '#F4E4D8', te: '#E0C6B8', te2: '#AC8878', t1: '#C2416A', t2: '#D98A2B', t3: '#8E3A7A', atm: 'rgba(255,238,205,.9)', pf: 1, ro: 0 },
+};
+const COLORS = ['#FF8A5B', '#3D7BFF', '#16B6A8', '#8B5CF6', '#FF6B6B', '#3CCB6E', '#E8A317', '#E05FA8'];
+const TAKEN = ['admin', 'galaxy', 'galaxy101', 'okeyci', 'okeyci_34', 'misafir', 'moderator', 'destek'];
+const STR = {
+  tr: {
+    tag: 'Masalar dolu, taşlar hazır.\nArkadaşlarınla otur, 101 açıp eli bitir.',
+    welcome: 'Hoş geldin', howCont: 'Nasıl devam etmek istersin?', guest: 'MİSAFİR OLARAK OYNA', guestSub: 'Kayıt yok · hemen başla', login: 'Giriş yap', register: 'Kayıt ol', regGift: '+25.000', or: 'ya da', orEmail: 'ya da e-postayla',
+    google: 'Google ile devam et', googleBusy: 'Google’a bağlanılıyor…',
+    terms: 'Devam ederek Kullanım Koşulları’nı ve Gizlilik Politikası’nı kabul etmiş olursun. Oyun sanal çiple oynanır; gerçek para kazandırmaz.',
+    back: 'Geri', remember: 'Beni hatırla', forgot: 'Şifremi unuttum', avatarColor: 'AVATAR RENGİ',
+    agree: 'Kullanım Koşulları’nı ve Gizlilik Politikası’nı okudum, kabul ediyorum.',
+    loginT: 'Giriş yap', loginS: 'Hesabınla kaldığın yerden devam et', loginCta: 'Giriş yap', noAcc: 'Hesabın yok mu?', toReg: 'Kayıt ol',
+    regT: 'Kayıt ol', regS: 'Hesap aç, 25.000 çip hediye', regCta: 'Hesabı oluştur', hasAcc: 'Zaten hesabın var mı?', toLogin: 'Giriş yap',
+    guestChips: 'Başlangıçta 10.000 çip hesabına yüklenir.', guestDevice: 'Uygulamayı silersen ya da cihaz değiştirirsen ilerlemen kaybolur.',
+    guestT: 'Misafir girişi', guestS: 'İlerlemen bu cihazda saklanır', guestCta: 'Oynamaya başla', later: 'Sonra hesaba bağlayabilirsin.', toAuth: 'Seçeneklere dön',
+    fEmail: 'E-POSTA', fPass: 'ŞİFRE', fName: 'KULLANICI ADI', fPass2: 'ŞİFRE TEKRAR', fNick: 'TAKMA AD',
+    phEmail: 'ornek@mail.com', phPass: 'En az 6 karakter', phName: '3–16 karakter', phPass2: 'Şifreni tekrar yaz', phNick: 'Masada görünecek adın',
+    eEmail: 'Geçerli bir e-posta yaz', ePass: 'En az 6 karakter', eName: '3–16 harf, rakam ya da _', eTaken: 'Bu ad alınmış', eMatch: 'Şifreler aynı değil', eTerms: 'Devam etmek için koşulları kabul et', eExists: 'Bu e-postayla zaten hesap var',
+    okName: 'Kullanılabilir', show: 'Göster', hide: 'Gizle',
+    noAcct: 'Bu e-postayla kayıtlı hesap bulunamadı.', badPass: (n) => `Şifre hatalı. ${n} deneme hakkın kaldı.`, locked: 'Çok fazla deneme. Şifreni sıfırla.', forgotNeed: 'Sıfırlama için önce e-postanı yaz.', forgotSent: (e) => `Sıfırlama bağlantısı ${e} adresine gönderildi.`,
+    weak: 'Zayıf', mid: 'Orta', strong: 'Güçlü',
+    splash: ['Gezegenler hizalanıyor…', 'Taşlar diziliyor…', 'Masalar hazırlanıyor…', 'Neredeyse hazır…', 'Hazır'],
+    tips: ['İpucu: Göstergenin bir üstü okeydir ve her taşın yerine geçer.', 'İpucu: Elini açmak için 101 puanlık per ya da 5 çift gerekir.', 'İpucu: Bir pere basılı tutarak toplu taşıyabilirsin.', 'İpucu: İşlek taşı atarsan +101 ceza yazılır.'],
+    ldMsg: ['Masaya bağlanılıyor…', '3D masa yükleniyor…', 'Taşlar karılıyor…', 'Hazır'], failTitle: 'Masa açılamadı', failBody: 'Bağlantı kurulamadı. İnternetini kontrol edip yeniden dene.', toLobby: 'Lobiye dön', retry: 'Yeniden dene',
+    hello: (n) => `Hoş geldin, ${n}!`, helloGift: (n, c) => `Hoş geldin, ${n}! ${c} çip hesabına eklendi`, bye: 'Çıkış yapıldı', quitDone: 'Oyun kapatıldı', quitBack: 'Oyunu yeniden aç',
+    leftT: 'Masadan kalktın · bahis kaybedildi', netT: 'Bağlantı koptu · lobiye dönüldü', specEnd: 'İzlediğin maç bitti', won: (c) => `Maçı kazandın! +${c} çip`, rankT: (r) => `Maç bitti · ${r}. sıradasın`, refund: 'Bahsin iade edildi',
+    single: 'TEKLİ', pairs: 'EŞLİ', hands: 'EL', classic: 'KLASİK', watching: 'İZLEYİCİ',
+  },
+  en: {
+    tag: 'Tables are full and the tiles are ready.\nSit with friends, open 101 and finish the hand.',
+    welcome: 'Welcome', howCont: 'How do you want to continue?', guest: 'PLAY AS GUEST', guestSub: 'No sign-up · start now', login: 'Log in', register: 'Sign up', regGift: '+25,000', or: 'or', orEmail: 'or with email',
+    google: 'Continue with Google', googleBusy: 'Connecting to Google…',
+    terms: 'By continuing you accept the Terms of Use and Privacy Policy. The game uses virtual chips and pays out no real money.',
+    back: 'Back', remember: 'Remember me', forgot: 'Forgot password', avatarColor: 'AVATAR COLOR',
+    agree: 'I have read and accept the Terms of Use and Privacy Policy.',
+    loginT: 'Log in', loginS: 'Pick up where you left off', loginCta: 'Log in', noAcc: 'No account yet?', toReg: 'Sign up',
+    regT: 'Sign up', regS: 'Create an account, get 25,000 chips', regCta: 'Create account', hasAcc: 'Already have an account?', toLogin: 'Log in',
+    guestChips: 'You start with 10,000 chips.', guestDevice: 'If you delete the app or switch devices, your progress is lost.',
+    guestT: 'Guest login', guestS: 'Your progress is saved on this device', guestCta: 'Start playing', later: 'You can link an account later.', toAuth: 'Back to options',
+    fEmail: 'EMAIL', fPass: 'PASSWORD', fName: 'USERNAME', fPass2: 'REPEAT PASSWORD', fNick: 'NICKNAME',
+    phEmail: 'you@mail.com', phPass: 'At least 6 characters', phName: '3–16 characters', phPass2: 'Type your password again', phNick: 'Name shown at the table',
+    eEmail: 'Enter a valid email', ePass: 'At least 6 characters', eName: '3–16 letters, digits or _', eTaken: 'This name is taken', eMatch: 'Passwords don’t match', eTerms: 'Accept the terms to continue', eExists: 'An account with this email exists',
+    okName: 'Available', show: 'Show', hide: 'Hide',
+    noAcct: 'No account found for this email.', badPass: (n) => `Wrong password. ${n} attempts left.`, locked: 'Too many attempts. Reset your password.', forgotNeed: 'Type your email first to reset.', forgotSent: (e) => `A reset link was sent to ${e}.`,
+    weak: 'Weak', mid: 'Medium', strong: 'Strong',
+    splash: ['Aligning planets…', 'Racking tiles…', 'Setting up tables…', 'Almost ready…', 'Ready'],
+    tips: ['Tip: The tile above the indicator is the okey and stands in for any tile.', 'Tip: You need 101 points in sets or 5 pairs to open.', 'Tip: Press and hold a set to move it as a group.', 'Tip: Discarding a playable tile costs +101.'],
+    ldMsg: ['Connecting to the table…', 'Loading 3D table…', 'Shuffling tiles…', 'Ready'], failTitle: 'Couldn’t open the table', failBody: 'We couldn’t connect. Check your connection and try again.', toLobby: 'Back to lobby', retry: 'Try again',
+    hello: (n) => `Welcome, ${n}!`, helloGift: (n, c) => `Welcome, ${n}! ${c} chips added`, bye: 'Logged out', quitDone: 'Game closed', quitBack: 'Open the game again',
+    leftT: 'You left the table · bet lost', netT: 'Connection lost · back in the lobby', specEnd: 'The match you watched is over', won: (c) => `You won the match! +${c} chips`, rankT: (r) => `Match over · you placed ${r}`, refund: 'Your bet was refunded',
+    single: 'SINGLES', pairs: 'PAIRS', hands: 'HANDS', classic: 'CLASSIC', watching: 'SPECTATOR',
+  },
+};
+const emailOk = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.trim());
+const nameOk = (n) => /^[A-Za-z0-9_çğıöşüÇĞİÖŞÜ. ]{3,16}$/.test(n.trim());
+const hashP = (p) => { let h = 5381; for (let i = 0; i < p.length; i++) h = ((h << 5) + h + p.charCodeAt(i)) >>> 0; return 'h' + h.toString(36); };
+const initials = (n) => { const w = String(n || '?').replace(/^Bot · /, '').trim().split(/\s+/).filter(Boolean); const s = w.length > 1 ? w[0][0] + w[1][0] : (w[0] || '?').slice(0, 2); return s.toLocaleUpperCase('tr-TR'); };
+const F0 = { email: '', pass: '', name: '', pass2: '', nick: '', color: COLORS[0], showPass: false, remember: true, terms: false, focus: null };
+
+class Component extends DCLogic {
+  state = { screen: 'splash', k: (() => { try { return Math.max(0.3, Math.round(Math.min(window.innerWidth / 1280, window.innerHeight / 720) * 1000) / 1000); } catch (e) { return 1; } })(), save: this.loadSave(), sp: 0, f: { ...F0 }, tried: {}, busy: null, err: null, errKey: 0, info: null, fails: 0, ld: null, game: null, gameOn: false, toast: null, menuPanel: null };
+  loadSave() {
+    let s = {}; try { s = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}') || {}; } catch (e) {}
+    const save = { lang: 'tr', planet: 'Satürn', acct: null, accounts: {}, wallets: {}, ...s };
+    if (this.props && this.props.firstRun) save.acct = null;
+    return save;
+  }
+  persist(patch) {
+    const sandbox = window.G101State && window.G101State.sandbox;   // durum/döküm koşusu: gerçek kayda yazma
+    this.setState((st) => { const save = { ...st.save, ...patch }; if (!sandbox) try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} return { save }; });
+  }
+  get lang() { return this.state.save.lang === 'en' ? 'en' : 'tr'; }
+  get L() { return STR[this.lang]; }
+  get wallet() { const a = this.state.save.acct; return (a && this.state.save.wallets[a.id]) || { chips: 0, gems: 0 }; }
+  setWallet(patch) { const a = this.state.save.acct; if (!a) return; const w = { ...this.wallet, ...patch }; this.persist({ wallets: { ...this.state.save.wallets, [a.id]: w } }); }
+  fmt(n) { return Math.round(n).toLocaleString(this.lang === 'en' ? 'en-US' : 'tr-TR'); }
+
+  grantTest() {
+    if (window.G101State && window.G101State.sandbox) return;   // durum koşularında test çipi verilmez (görüntüler deterministik kalsın)
+    const st = this.state, a = st.save.acct; if (!a) return; const g = st.save.test10m || {}; if (g[a.id]) return;
+    const w = st.save.wallets[a.id] || { chips: 0, gems: 0 };
+    this.persist({ test10m: { ...g, [a.id]: true }, wallets: { ...st.save.wallets, [a.id]: { ...w, chips: w.chips + 10000000 } } });
+    setTimeout(() => this.flash(this.lang === 'en' ? 'Test: +10,000,000 chips added' : 'Test: +10.000.000 çip eklendi', 'gold'), 900);
+  }
+  componentDidMount() {
+    (window.__g101 = window.__g101 || {}).App = this;   // g101-state.js durum yönlendiricisi
+    const fpsHook = () => { const G = window.G101Settings; if (!G) { this._fpsW = setTimeout(fpsHook, 120); return; } this.setState({ showFps: !!G.get().showFps }); this._fpsUn = G.on((p) => { if ('showFps' in p) this.setState({ showFps: !!p.showFps }); }); };
+    fpsHook();
+    this._muteT = setInterval(() => { const S = window.G101Sound; if (S && S.setMuted && S.muted !== !!this.props.muted) S.setMuted(!!this.props.muted); }, 400);   // tweak: sesi kapat
+    if (window.G101Sound) window.G101Sound.setMusic('menu');   // ilk dokunuşta başlar (tarayıcı ses izni)
+    setTimeout(() => this.grantTest(), 0);
+    try { if (new URLSearchParams(location.search).get('to') === 'lobby' && this.state.save.acct) setTimeout(() => this.go('lobby'), 0); } catch (e) {}
+    this._fit = () => { const k = Math.min(window.innerWidth / 1280, window.innerHeight / 720); this.setState({ k: Math.max(0.3, Math.round(k * 1000) / 1000) }); };
+    this._fit();
+    this._rz = () => { clearTimeout(this._rzT); this._rzT = setTimeout(this._fit, 120); };
+    window.addEventListener('resize', this._rz);
+    const fx = () => {
+      if (!window.GalaxyPlanet || !window.GalaxyStars) { this._fxT = setTimeout(fx, 60); return; }
+      if (this._pcv && !this._pr) this._pr = window.GalaxyPlanet.create(this._pcv);
+      if (this._scv && !this._st) this._st = window.GalaxyStars.create(this._scv, 1280, 720);
+      this.syncFx();
+    };
+    fx();
+    this.runSplash();
+  }
+  // FPS göstergesi (Ayarlar › Görüntü › FPS göster): rAF sayacı, yarım saniyede bir güncellenir; React yeniden çizimi yok.
+  startFps() {
+    if (this._fpsRaf) return; let n = 0, t0 = performance.now();
+    const loop = (t) => { this._fpsRaf = requestAnimationFrame(loop); n++; if (t - t0 >= 500) { const f = Math.round((n * 1000) / (t - t0)), ms = ((t - t0) / n).toFixed(1); if (this._fpsEl) { this._fpsEl.textContent = `FPS ${f} · ${ms} ms`; this._fpsEl.style.color = f >= 50 ? '#8EF0B0' : f >= 30 ? '#FFD964' : '#FF8A94'; } n = 0; t0 = t; } };
+    this._fpsRaf = requestAnimationFrame(loop);
+  }
+  stopFps() { cancelAnimationFrame(this._fpsRaf); this._fpsRaf = 0; }
+  componentWillUnmount() { this.stopFps(); clearInterval(this._muteT); clearTimeout(this._fpsW); if (this._fpsUn) this._fpsUn(); window.removeEventListener('resize', this._rz); clearInterval(this._spI); clearInterval(this._ldI); clearTimeout(this._fxT); clearTimeout(this._toT); if (this._pr) this._pr.destroy(); if (this._st) this._st.destroy(); }
+  componentDidUpdate() { const s = this.state, ps = this._ps || {}; this._ps = s; if (s.showFps && !this._fpsRaf) this.startFps(); else if (!s.showFps && this._fpsRaf) this.stopFps(); if (ps.k !== s.k || (ps.save && ps.save.planet) !== s.save.planet || ps.screen !== s.screen) this.syncFx(); }
+  syncFx() {
+    const s = this.state, name = PV[s.save.planet] ? s.save.planet : 'Satürn', hidden = s.screen === 'menu' || s.screen === 'game';
+    if (this._pr) { this._pr.set(name, 40, s.k); this._pr.paused = hidden; }
+    if (this._st) { this._st.set(PV[name].st, s.k); this._st.paused = hidden; }
+  }
+  runSplash() {
+    const t0 = Date.now(); let target = 18;
+    const bump = (v) => { target = Math.max(target, v); };
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => bump(46));
+    import(new URL('./table3d.js', document.baseURI).href).then(() => bump(84), () => bump(84));
+    const w = () => (window.GalaxyPlanet ? bump(62) : setTimeout(w, 100)); w();
+    this._spI = setInterval(() => {
+      const el = Date.now() - t0, cap = (el > 2800 && target >= 84) || el > 7000 ? 100 : Math.min(target, 96);
+      const sp = Math.min(cap, this.state.sp + 0.9 + Math.random() * 1.8);
+      this.setState({ sp });
+      if (sp >= 100) { clearInterval(this._spI); setTimeout(() => this.afterSplash(), 380); }
+    }, 40);
+  }
+  afterSplash() {
+    if (this.state.screen !== 'splash' || this.state.spOut) return;
+    const to = this.state.save.acct ? 'menu' : 'auth';
+    this.setState({ spOut: true });
+    setTimeout(() => { this.go(to, { fromSplash: true, spOut: false }); }, 720);
+  }
+  go(screen, extra) { if (window.G101Sound) { if (screen !== this.state.screen && this.state.screen !== 'splash') window.G101Sound.play('ui.screen'); window.G101Sound.setMusic(screen === 'game' ? 'table' : 'menu'); } this.setState({ screen, err: null, info: null, busy: null, fromSplash: false, ...(extra || {}) }); }
+  flash(text, kind) {
+    if (window.G101Sound && (kind === 'gold' || kind === 'bad')) window.G101Sound.play(kind === 'gold' ? 'ui.reward' : 'ui.error');
+    const C = { ok: ['#3CCB6E', '#062B14'], bad: ['linear-gradient(#FF7A86,#E8455A)', '#fff'], info: ['rgba(5,8,22,.85)', '#F4F1E8'], gold: ['linear-gradient(var(--a1),var(--a2))', 'var(--aT)'] }[kind || 'info'];
+    clearTimeout(this._toT); this.setState((s) => ({ toast: { text, bg: C[0], fg: C[1], key: (s.toast ? s.toast.key : 0) + 1 } }));
+    this._toT = setTimeout(() => this.setState({ toast: null }), 3400);
+  }
+  setF(patch) { this.setState((s) => ({ f: { ...s.f, ...patch }, err: null })); }
+  fail(err) { this.setState((s) => ({ busy: null, err, errKey: s.errKey + 1 })); }
+
+  loginAs(acct, bonus) {
+    const s = this.state.save, w = s.wallets[acct.id], fresh = !w;
+    const wallets = fresh ? { ...s.wallets, [acct.id]: { chips: bonus, gems: 20 } } : s.wallets;
+    this.persist({ acct, wallets });
+    setTimeout(() => this.grantTest(), 0);
+    this.go('menu', { f: { ...F0 }, tried: {}, fails: 0 });
+    if (!(window.G101State && window.G101State.id)) setTimeout(() => this.flash(fresh ? this.L.helloGift(acct.name.split(' ')[0], this.fmt(bonus)) : this.L.hello(acct.name.split(' ')[0]), fresh ? 'gold' : 'ok'), 500);
+  }
+  google() {
+    if (this.state.busy) return;
+    this.setState({ busy: 'google', err: null });
+    setTimeout(() => this.loginAs({ id: 'g:dogukan', name: 'Doğukan Y.', color: '#FF8A5B', method: 'google', email: 'dogukan.y@gmail.com' }, 25000), 1300);
+  }
+  validate(which) {
+    const f = this.state.f, L = this.L, e = {}, save = this.state.save;
+    if (which === 'login') { if (!emailOk(f.email)) e.email = L.eEmail; if (f.pass.length < 6) e.pass = L.ePass; }
+    if (which === 'register') {
+      const n = f.name.trim(), lower = n.toLocaleLowerCase('tr-TR');
+      if (!nameOk(n)) e.name = L.eName; else if (TAKEN.includes(lower) || Object.values(save.accounts).some((a) => a.name.toLocaleLowerCase('tr-TR') === lower)) e.name = L.eTaken;
+      if (!emailOk(f.email)) e.email = L.eEmail; else if (save.accounts[f.email.trim().toLowerCase()]) e.email = L.eExists;
+      if (f.pass.length < 6) e.pass = L.ePass;
+      if (!f.pass2 || f.pass2 !== f.pass) e.pass2 = L.eMatch;
+      if (!f.terms) e.terms = L.eTerms;
+    }
+    if (which === 'guest') { if (!nameOk(f.nick)) e.nick = L.eName; else if (TAKEN.includes(f.nick.trim().toLocaleLowerCase('tr-TR'))) e.nick = L.eTaken; }
+    return e;
+  }
+  submit() {
+    const s = this.state, scr = s.screen, L = this.L, f = s.f;
+    if (s.busy) return;
+    const errs = this.validate(scr);
+    this.setState({ tried: { ...s.tried, [scr]: true }, info: null });
+    if (Object.keys(errs).length) { if (errs.terms && Object.keys(errs).length === 1) this.fail(L.eTerms); return; }
+    this.setState({ busy: scr, err: null });
+    if (scr === 'login') setTimeout(() => {
+      const em = f.email.trim().toLowerCase(), a = this.state.save.accounts[em];
+      if (!a) return this.fail(L.noAcct);
+      if (a.pass !== hashP(f.pass)) { const n = this.state.fails + 1; this.setState({ fails: n }); return this.fail(n >= 3 ? L.locked : L.badPass(3 - n)); }
+      this.loginAs({ id: 'e:' + em, name: a.name, color: a.color, method: 'email', email: em }, 25000);
+    }, 900);
+    if (scr === 'register') setTimeout(() => {
+      const em = f.email.trim().toLowerCase(), color = COLORS[Math.floor(Math.random() * COLORS.length)];
+      this.persist({ accounts: { ...this.state.save.accounts, [em]: { name: f.name.trim(), pass: hashP(f.pass), color } } });
+      this.loginAs({ id: 'e:' + em, name: f.name.trim(), color, method: 'email', email: em }, 25000);
+    }, 1100);
+    if (scr === 'guest') setTimeout(() => this.loginAs({ id: 'guest:' + Date.now().toString(36), name: f.nick.trim(), color: f.color, method: 'guest' }, 10000), 700);
+  }
+
+  // Botlara karşı: üç bot, bahis yok, 5 el, 30 sn. Masa sunucuya vsBotsStart ile bağlanır.
+  startBots() {
+    const en = this.lang === 'en', B = [{ name: 'Bot Ayla', color: '#3CCB6E', lv: 12 }, { name: 'Bot Cem', color: '#4FC3F7', lv: 15 }, { name: 'Bot Defne', color: '#FFB547', lv: 18 }];
+    this.startGame({ bots: true, table: { id: 'bots', name: en ? 'Vs bots' : 'Botlara karşı', type: 'tekli', bet: 0, hands: 5, turn: 30, players: [null, ...B] }, seats: [null, ...B] });
+  }
+  startGame(cfg) {
+    const s = this.state, L = this.L, t = cfg.table;
+    if (!cfg.spectate && !cfg.retry) this.setWallet({ chips: Math.max(0, this.wallet.chips - t.bet) });
+    const me = s.save.acct || { name: 'Oyuncu', color: '#FF8A5B' };
+    const seats = (cfg.seats || []).map((p, i) => {
+      const x = i === 0 && !cfg.spectate ? { name: me.name, color: me.color, lv: 24 } : (p || { name: 'Bot', color: '#5B6390', lv: 10 });
+      const lv = x.lv || 10;
+      const myRank = cfg.ranked && window.G101Rank ? window.G101Rank.label(this.rankedOf().idx, this.lang) : null;
+      return { name: x.name, ini: initials(x.name), color: x.color, lv, frame: i % 2, rank: x.rank || (i === 0 && myRank) || (lv > 40 ? 'Usta I' : lv > 28 ? 'Elmas III' : lv > 18 ? 'Altın II' : 'Gümüş I'), win: 38 + ((lv * 7) % 20), hands: lv * 52 };
+    });
+    const typ = t.type === 'esli' ? L.pairs : L.single;
+    const rk = cfg.ranked, rkMode = rk ? { solo: 'Solo', duo: 'Duo', squad: 'Squad' }[rk.mode] : '';
+    const g = { cfg, bet: t.bet, hands: t.hands, turn: t.turn, room: rk ? `${this.lang === 'en' ? 'Ranked' : 'Dereceli'} · ${rkMode}` : `${t.name} · ${this.lang === 'en' ? (t.type === 'esli' ? 'Pairs' : 'Singles') : (t.type === 'esli' ? 'Eşli' : 'Tekli')}${t.kat ? (this.lang === 'en' ? ' · Doubling' : ' · Katlamalı') + (t.type === 'esli' && t.katP === false ? (this.lang === 'en' ? ' (opponents only)' : ' (yalnız rakip)') : '') : ''}`, betLabel: cfg.bots ? (this.lang === 'en' ? 'Practice · no stake' : 'Antrenman · bahis yok') : rk ? (this.lang === 'en' ? 'Ranked · LP' : 'Dereceli · LP') : (this.lang === 'en' ? 'Bet ' : 'Bahis ') + this.fmt(t.bet), seats, startHand: cfg.startHand || 1, spectate: !!cfg.spectate,
+      kick: cfg.bots ? `${this.lang === 'en' ? 'VS BOTS · PRACTICE' : 'BOTLARA KARŞI · ANTRENMAN'} · 101 · ${t.hands} ${L.hands}` : rk ? `${this.lang === 'en' ? 'RANKED' : 'DERECELİ'} · ${rkMode.toLocaleUpperCase('tr-TR')} · 101 · ${t.hands} ${L.hands}` : `${L.classic} · ${typ} · 101 · ${t.hands} ${L.hands}${cfg.spectate ? ' · ' + L.watching : ''}`, attempt: (cfg.attempt || 1) };
+    clearInterval(this._ldI);
+    this.setState({ screen: 'loading', game: g, gameOn: true, ld: { pct: 0, ready: false, err: false, t0: Date.now(), tip: L.tips[Math.floor(Math.random() * L.tips.length)] } });
+    this._ldI = setInterval(() => this.tickLoad(), 50);
+  }
+  tickLoad() {
+    const s = this.state, ld = s.ld; if (!ld || ld.err) return;
+    const el = Date.now() - ld.t0;
+    if (this.props.failFirstLoad && s.game.attempt === 1 && el > 2200) { clearInterval(this._ldI); this.setState({ ld: { ...ld, err: true }, gameOn: false }); return; }
+    if (!ld.ready && el > 20000) { clearInterval(this._ldI); this.setState({ ld: { ...ld, err: true }, gameOn: false }); return; }
+    const cap = ld.ready ? 100 : 90, pct = Math.min(cap, ld.pct + (ld.ready ? 4 : 0.6 + Math.random() * 1.6));
+    this.setState({ ld: { ...ld, pct } });
+    if (pct >= 100 && el > 1600) { clearInterval(this._ldI); this.setState({ ld: { ...this.state.ld, out: true } }); setTimeout(() => this.state.screen === 'loading' && this.go('game'), 460); }
+  }
+  rankedOf() { const a = this.state.save.acct, all = this.state.save.ranked || {}; return (a && all[a.id]) || { idx: 7, lp: 72, prot: 0, peak: 7, games: 0, top: 0, hist: [] }; }
+  applyRanked(place, mode) {
+    const R = window.G101Rank, a = this.state.save.acct; if (!R) return null;
+    const before = this.rankedOf(); let { idx, lp, prot, peak } = before; const d = R.deltas(Math.min(idx, 14))[place - 1]; lp += d; let ev = null;
+    if (idx === 15) { if (lp < 0) { idx = 14; lp += 100; ev = 'downLeague'; } }
+    else if (lp >= 100) { if (idx === 14) { idx = 15; lp -= 100; prot = 3; ev = 'galaxy'; } else { idx++; lp -= 100; if (idx % 3 === 0) { prot = 3; ev = 'league'; } else ev = 'tier'; } }
+    else if (lp < 0) { if (idx === 0) lp = 0; else if (idx % 3 === 0 && prot > 0) { lp = 0; ev = 'protected'; } else { idx--; lp += 100; ev = (idx + 1) % 3 === 0 ? 'downLeague' : 'downTier'; } }
+    if (prot > 0 && ev !== 'league' && ev !== 'galaxy') prot--;
+    peak = Math.max(peak, idx);
+    const hist = [{ place, d, mode, idx, t: Date.now() }, ...(before.hist || [])].slice(0, 20);
+    const next = { idx, lp, prot, peak, games: (before.games || 0) + 1, top: (before.top || 0) + (place === 1 ? 1 : 0), hist };
+    if (a) this.persist({ ranked: { ...(this.state.save.ranked || {}), [a.id]: next } });
+    return { place, d, mode, ev, from: { idx: before.idx, lp: before.lp }, to: { idx, lp }, prot, key: Date.now() };
+  }
+  endGame(text, kind, to) { clearInterval(this._ldI); this.setState({ gameOn: false, game: null, ld: null, gameSet: false }); this.go(to || 'lobby'); if (text) setTimeout(() => this.flash(text, kind), 300); }
+
+  renderVals() {
+    const s = this.state, L = this.L, h = React.createElement, en = this.lang === 'en', scr = s.screen, f = s.f;
+    if (!this._planetEl) {
+      this._planetEl = h('canvas', { ref: (el) => { this._pcv = el; }, style: { position: 'absolute', left: 0, top: 0, width: '300px', height: '300px', display: 'block' } });
+      this._starsEl = h('canvas', { ref: (el) => { this._scv = el; }, style: { position: 'absolute', left: 0, top: 0, width: '1280px', height: '720px', display: 'block' } });
+    }
+    const pName = PV[s.save.planet] ? s.save.planet : 'Satürn', P = PV[pName];
+    const themeStyle = { position: 'absolute', inset: 0 };
+    Object.entries(P).forEach(([k, v]) => { themeStyle['--' + k] = v; });
+    const isForm = scr === 'login' || scr === 'register' || scr === 'guest';
+    const PL = { splash: { x: 640, y: 330, s: 1, o: 1 }, auth: { x: 310, y: 340, s: 1.05, o: 1 }, lobby: { x: 1210, y: 30, s: 0.7, o: 0.5 } };
+    const pp = s.spOut || (scr === 'menu' && s.fromSplash) ? { x: 640, y: 340, s: 1.5, o: 0 } : (PL[isForm ? 'auth' : scr] || PL.splash);
+    const tried = s.tried[scr], errs = tried ? this.validate(scr) : {};
+    const fld = (key, label, ph, type, max, extra) => {
+      const err = errs[key], focus = f.focus === key;
+      return { label, ph, type: type || 'text', max: max || 64, value: f[key], hint: err || '', hc: '#FF8A94', eye: false, ok: false, meter: false, bars: [], toggle: null, eyeOp: 1, eyeTitle: '',
+        ring: err ? 'inset 0 0 0 2px #FF5E6C' : focus ? 'inset 0 0 0 2px var(--a1),0 0 0 4px rgba(255,201,74,.12)' : 'inset 0 2px 0 rgba(0,0,0,.3)',
+        change: (e) => this.setF({ [key]: e.target.value }), focus: () => this.setF({ focus: key }), blur: () => this.setState((st) => ({ f: { ...st.f, focus: st.f.focus === key ? null : st.f.focus } })), ...(extra || {}) };
+    };
+    const eye = { eye: true, toggle: () => this.setF({ showPass: !f.showPass }), eyeOp: f.showPass ? 1 : 0.55, eyeTitle: f.showPass ? L.hide : L.show };
+    const pType = f.showPass ? 'text' : 'password';
+    let fields = [];
+    if (scr === 'login') fields = [fld('email', L.fEmail, L.phEmail, 'email'), fld('pass', L.fPass, L.phPass, pType, 40, eye)];
+    if (scr === 'register') {
+      const p = f.pass, sc = (p.length >= 8) + /[A-ZÇĞİÖŞÜ]/.test(p) + /[0-9]/.test(p) + /[^A-Za-z0-9]/.test(p), lvl = !p ? 0 : sc <= 1 ? 1 : sc <= 2 ? 2 : 3;
+      const mc = ['var(--mt)', '#FF5E6C', '#FFC94A', '#3CCB6E'][lvl];
+      const n = f.name.trim(), lower = n.toLocaleLowerCase('tr-TR'), avail = nameOk(n) && !TAKEN.includes(lower) && !Object.values(s.save.accounts).some((a) => a.name.toLocaleLowerCase('tr-TR') === lower);
+      const nameF = fld('name', L.fName, L.phName, 'text', 16, { ok: avail });
+      if (avail && !errs.name) { nameF.hint = L.okName; nameF.hc = '#8EF0B0'; }
+      fields = [nameF, fld('email', L.fEmail, L.phEmail, 'email'),
+        fld('pass', L.fPass, L.phPass, pType, 40, { ...eye, meter: !!p, bars: [1, 2, 3].map((i) => ({ c: i <= lvl ? mc : 'rgba(255,255,255,.1)' })), mc, ml: ['', L.weak, L.mid, L.strong][lvl] }),
+        fld('pass2', L.fPass2, L.phPass2, pType, 40, { ok: !!f.pass2 && f.pass2 === f.pass })];
+    }
+    if (scr === 'guest') fields = [fld('nick', L.fNick, L.phNick, 'text', 16)];
+    const FM = {
+      login: { title: L.loginT, sub: L.loginS, cta: L.loginCta, alt: L.noAcc, altLink: L.toReg, altGo: () => this.go('register', { tried: {} }) },
+      register: { title: L.regT, sub: L.regS, cta: L.regCta, alt: L.hasAcc, altLink: L.toLogin, altGo: () => this.go('login', { tried: {} }) },
+      guest: { title: L.guestT, sub: L.guestS, cta: L.guestCta, alt: L.later, altLink: '', altGo: () => {} },
+    }[scr] || { title: '', sub: '', cta: '', alt: '', altLink: '', altGo: () => {} };
+    FM.busy = !!s.busy && s.busy === scr; FM.op = FM.busy ? 0.85 : 1;
+    const sp = s.sp, spMsg = L.splash[sp >= 100 ? 4 : sp > 75 ? 3 : sp > 45 ? 2 : sp > 20 ? 1 : 0];
+    if (!this._tip) this._tip = Math.floor(Math.random() * 4);
+    const ld = s.ld || { pct: 0 }, g = s.game || {};
+    const lp = ld.pct || 0;
+    const acct = s.save.acct, w = this.wallet;
+    const k = s.k;
+    return {
+      stageW: 1280 * k + 'px', stageH: 720 * k + 'px', stageHint: `${1280 * k}px,${720 * k}px`, scaleT: `scale(${k})`, k, themeStyle, fitted: true,
+      starsEl: this._starsEl, planetEl: this._planetEl, pl: { x: pp.x + 'px', y: pp.y + 'px', s: pp.s, o: pp.o },
+      L, lang: this.lang, gameLang: en ? 'English' : 'Türkçe', planet: pName,
+      isSplash: scr === 'splash', spAnim: s.spOut ? 'splashOut .75s cubic-bezier(.7,0,.3,1) both' : 'fadeIn .5s both', tilesAnim: s.spOut ? 'tilesOut .75s cubic-bezier(.7,0,.3,1) both' : 'none', menuAnim: s.fromSplash ? 'menuIn 1.2s cubic-bezier(.16,1,.3,1) both' : 'fadeIn .35s both', isAuthSide: scr === 'auth' || isForm, isAuth: scr === 'auth', isForm, isLogin: scr === 'login', isRegister: scr === 'register', isGuest: scr === 'guest',
+      showVer: scr !== 'splash' && scr !== 'menu', appVersion: 'v0.5.0',
+      isMenu: scr === 'menu', isLobby: scr === 'lobby', isLoading: scr === 'loading', gameOn: s.gameOn,
+      skipSplash: () => { if (s.sp > 60) { clearInterval(this._spI); this.afterSplash(); } },
+      sp: { w: sp + '%', label: Math.floor(sp) + '%', msg: spMsg, tip: L.tips[this._tip] },
+      langs: ['tr', 'en'].map((c) => ({ code: c.toUpperCase(), bg: this.lang === c ? 'linear-gradient(var(--a1),var(--a2))' : 'transparent', fg: this.lang === c ? 'var(--aT)' : 'var(--mt)', pick: () => this.persist({ lang: c }) })),
+      goGuest: () => this.go('guest', { f: { ...F0, nick: (en ? 'Guest' : 'Misafir') + (1000 + Math.floor(Math.random() * 9000)), color: COLORS[Math.floor(Math.random() * COLORS.length)] }, tried: {} }),
+      goLogin: () => this.go('login', { tried: {}, fails: 0 }), goRegister: () => this.go('register', { tried: {} }), goAuth: () => this.go('auth', { tried: {} }),
+      google: () => this.google(), googleBusy: s.busy === 'google', googleIdle: s.busy !== 'google', googleLabel: s.busy === 'google' ? L.googleBusy : L.google,
+      fm: FM, fields, submit: () => this.submit(), formKey: (e) => { if (e.key === 'Enter') this.submit(); },
+      rem: { bg: f.remember ? '#3CCB6E' : 'var(--dp)', x: f.remember ? '21px' : '3px' }, toggleRemember: () => this.setF({ remember: !f.remember }),
+      forgot: () => { if (!emailOk(f.email)) return this.fail(L.forgotNeed); this.setState({ err: null, info: L.forgotSent(f.email.trim()) }); },
+      terms: { on: f.terms, bg: f.terms ? 'linear-gradient(var(--a1),var(--a2))' : 'var(--dp)', ring: f.terms ? 'none' : (s.tried.register && !f.terms ? 'inset 0 0 0 2px #FF5E6C' : 'inset 0 0 0 2px var(--bd)'), fg: f.terms ? 'var(--ic)' : 'var(--mt)' },
+      toggleTerms: () => this.setF({ terms: !f.terms }),
+      gv: { color: f.color, ini: initials(f.nick || '?') },
+      swatches: COLORS.map((c) => ({ c, ring: c === f.color ? '0 0 0 3px var(--pn),0 0 0 5px var(--a1)' : '0 0 0 1px rgba(255,255,255,.15)', pick: () => this.setF({ color: c }) })),
+      hasErr: !!s.err, errText: s.err || '', errKey: s.errKey, hasInfo: !!s.info, infoText: s.info || '',
+      user: acct ? { name: acct.name, color: acct.color, method: acct.method } : { name: 'Oyuncu', color: '#FF8A5B' },
+      chips: w.chips, gems: w.gems, menuPanel: s.menuPanel,
+      goLobby: (m) => (m === 'bots' ? this.startBots() : this.go(m === 'dereceli' ? 'ranked' : 'lobby')),
+      gameSet: !!s.gameSet && s.gameOn, openGameSet: () => this.setState({ gameSet: true }), closeGameSet: () => this.setState({ gameSet: false }),
+      isRanked: scr === 'ranked', ranked: this.rankedOf(), rankedRes: s.rankedRes || null, clearRankedRes: () => this.setState({ rankedRes: null }), goMenu: () => this.go('menu', { menuPanel: null }),
+      buyChips: () => this.go('menu', { menuPanel: 'shop' }),
+      setPlanet: (n) => this.persist({ planet: n }), setLang: (l) => this.persist({ lang: l }),
+      quitGame: () => this.setState({ quit: true }), isQuit: !!s.quit, unquit: () => this.setState({ quit: false, menuPanel: null }),
+      logout: () => { this.persist({ acct: null }); this.go('auth', { menuPanel: null }); this.flash(L.bye); },
+      startGame: (cfg) => this.startGame(cfg),
+      g: { rules: (g.cfg && g.cfg.table && g.cfg.table.rules) || null, bet: g.bet ?? 5000, hands: g.hands || 5, turn: g.turn || 30, room: g.room || '', betLabel: g.betLabel || '', seats: g.seats || null, startHand: g.startHand || 1, spectate: !!g.spectate },
+      ld: { w: lp + '%', label: Math.floor(lp) + '%', msg: L.ldMsg[lp >= 100 ? 3 : lp > 70 ? 2 : lp > 25 ? 1 : 0], kick: g.kick || '', tip: ld.tip || '', err: !!ld.err, op: ld.out ? 0 : 1, po: ld.err ? 0.5 : 0.9, ro: ld.err ? 0.4 : P.ro },
+      gameReady: () => this.setState((st) => (st.ld ? { ld: { ...st.ld, ready: true } } : null)),
+      failLobby: () => { const gg = s.game; if (gg && !gg.spectate) this.setWallet({ chips: this.wallet.chips + gg.bet }); if (gg && gg.cfg && gg.cfg.ranked) return this.endGame(null, null, 'ranked'); this.endGame(gg && !gg.spectate ? L.refund : null, 'ok'); },
+      failRetry: () => { const gg = s.game; this.setState({ gameOn: false }); setTimeout(() => this.startGame({ ...gg.cfg, retry: true, attempt: (gg.attempt || 1) + 1 }), 60); },
+      gameExit: (r) => { const gg = s.game; if (gg && gg.cfg && gg.cfg.ranked && !(r && r.spectate)) { const res = this.applyRanked(4, gg.cfg.ranked.mode); this.setState({ rankedRes: res ? { ...res, left: true } : null }); return this.endGame(en ? 'You left a ranked match · counted as 4th' : 'Dereceli maçtan ayrıldın · 4. sayıldı', 'bad', 'ranked'); } this.endGame(r && r.spectate ? null : r && r.net ? L.netT : L.leftT, 'bad'); },
+      matchEnd: (res) => {
+        const gg = this.state.game; if (!gg) return this.endGame();
+        if (gg.spectate) return this.endGame(L.specEnd);
+        const rank = 1 + res.totals.filter((v) => v < res.totals[0]).length;
+        if (gg.cfg && gg.cfg.ranked) { const rr = this.applyRanked(rank, gg.cfg.ranked.mode); this.setState({ rankedRes: rr }); return this.endGame(null, null, 'ranked'); }
+        if (res.won && gg.bet) { this.setWallet({ chips: this.wallet.chips + gg.bet * 4 }); this.endGame(L.won(this.fmt(gg.bet * 4)), 'gold'); }
+        else this.endGame(L.rankT(rank), 'info');
+      },
+      busyCur: s.busy ? 'wait' : '', tFinish: this.props.testFinish || 'Kapalı', tEject: !!this.props.testEject, tElden: !!this.props.testElden,
+      showFps: !!s.showFps, fpsTop: Math.round(64 * k) + 'px', fpsEl: this._fpsNode || (this._fpsNode = h('div', { ref: (el) => { this._fpsEl = el; }, style: { font: '800 12px/1 Montserrat,sans-serif', letterSpacing: '.5px', color: '#8EF0B0', background: 'rgba(3,5,14,.72)', border: '1px solid rgba(255,255,255,.12)', borderRadius: '8px', padding: '6px 9px', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums', boxShadow: '0 4px 14px rgba(0,0,0,.4)' } }, 'FPS –')),
+      reward: (r) => { const ww = this.wallet; this.setWallet({ chips: ww.chips + (r.chips || 0), gems: ww.gems + (r.gems || 0) }); const amt = '+' + this.fmt(r.chips || 0) + (en ? ' chips' : ' çip') + (r.gems ? ' · +' + r.gems + (en ? ' gems' : ' elmas') : ''); this.flash(r.kind === 'day' ? (en ? `Day ${r.day} reward collected · ${amt}` : `${r.day}. gün ödülü alındı · ${amt}`) : (en ? `Quest reward · ${r.name} · ${amt}` : `Görev ödülü · ${r.name} · ${amt}`), 'gold'); },
+      hasToast: !!s.toast, toast: s.toast || { text: '', bg: '', fg: '', key: 0 },
+    };
+  }
+}
+</script>
+</body>
+</html>

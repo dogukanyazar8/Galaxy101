@@ -1,4 +1,4 @@
-# Galaxy 101 · teslim paketi v4 · sürüm 0.4.0
+# Galaxy 101 · teslim paketi v4 · sürüm 0.5.0
 
 Bu paket oyunu Unity (istemci) ve .NET (sunucu) tarafına tahmin gerektirmeden taşımak için hazırlandı. Kaynak, çalışan prototiptir: `Galaxy 101 - Gerçek Ana Oyun.dc.html`. Paketteki her değer oyunda çalışan koddan çıkarıldı ya da onunla birlikte test edildi.
 
@@ -29,7 +29,7 @@ Bu paket oyunu Unity (istemci) ve .NET (sunucu) tarafına tahmin gerektirmeden t
 1. `logic/rules.js` → C# kural motoru; `tests/rules/*.json` aynen xUnit/NUnit vektörü olur.
 2. `protocol/` + `logic/mockServer.js` → .NET sunucu; `tests/server.tests.js` entegrasyon testine çevrilir.
 3. Unity istemci: `states/` ekran ekran, `export/` yerleşim, `assets/`, `anim/`, `strings/`, `sound/`.
-4. 3D modeller: `Araç - 3D Varlık Dışa Aktarma.html` masa, ıstaka, taş setleri, zar, koltuk, oda, ikram/hediyeler, oyun işaretleri ve tam sahneyi GLB olarak tek zip halinde indirir (5 gezegen teması seçilebilir; malzeme adları `assets/materials.json` ile aynı).
+4. 3D modeller: `Araç - 3D Varlık Dışa Aktarma.html` masa, ıstaka, taş setleri, zar, koltuk, oda, ikram/hediyeler, oyun işaretleri, tam sahne ve 5 uzay gemisini (Kervan, Ok, Halka, 2 avcı) GLB olarak tek zip halinde indirir (5 gezegen teması seçilebilir; malzeme adları `assets/materials.json` ile aynı).
 
 ## Fazlar
 | Faz | Durum |

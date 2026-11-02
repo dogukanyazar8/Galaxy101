@@ -562,7 +562,7 @@ const FRIENDS = [
   { name: 'Tolga F.', color: '#16B6A8', lv: 47, st: 'off', fr: false, seen: ['3 gün', '3 days'], ago: ['3 gün önce', '3 days ago'] }, { name: 'Sena M.', color: '#3D7BFF', lv: 31, st: 'game', fr: false, ago: ['bugün', 'today'] },
 ];
 const BOTS = ['Nova', 'Orion', 'Vega', 'Lyra', 'Atlas', 'Rigel'];
-const R0 = { okey: true, isle: true, spec: true, chat: 'on', gifts: true };
+const R0 = { okey: true, isle: true, opener: true, spec: true, chat: 'on', gifts: true };
 const TIERS = [1000, 5000, 10000, 50000, 100000];
 const TABLE_NAMES = ['Ay Işığı', 'Kuyruklu Yıldız', 'Boğaz Esintisi', 'Pazar Keyfi', 'Okey Dostları', 'Galaksi Turu', 'Meteor', 'Kahve Molası'];
 const mk = (id, name, type, bet, hands, turn, kat, players, status, hand, extra) => ({ id, name, type, bet, hands, turn, kat, pass: null, vis: 'open', code: null, rules: { ...R0 }, players, owner: 0, status, hand, ...(extra || {}) });
@@ -596,7 +596,7 @@ const STR = {
     rPrize: 'Ödül', prizeT: 'Kazanan alır · masadaki tüm bahisler', prizeE: 'Kazanan takım alır · kişi başı yarısı', pool: 'Toplam havuz',
     rKat: 'Katlamalı', rKatD: 'Sonradan açan önceki açılışı geçmeli: 101 → 102 → 103, 5 → 6 → 7 çift', rKatP: 'Ortağın açılışı eşiği yükseltsin mi?', rKatPD: 'Kapalıysa eşiği yalnız rakip takımın açılışları yükseltir', rTurn: 'Tur süresi', rTurnD: 'Süre dolunca otomatik oynanır',
     rRules: 'Kural özelleştirme', rulesDef: 'Varsayılan kurallar', rulesCh: (n) => `${n} kural değişti`, resetRules: 'Varsayılana dön',
-    rOkey: 'Okey atma cezası (+101)', rOkeyD: 'Okeyi yere atan +101 yazar', rIsle: 'İşlek taş atma cezası (+101)', rIsleD: 'Masadaki pere işlenebilen taşı atan +101 yazar',
+    rOkey: 'Okey atma cezası (+101)', rOkeyD: 'Okeyi yere atan +101 yazar', rIsle: 'İşlek taş atma cezası (+101)', rIsleD: 'Masadaki pere işlenebilen taşı atan +101 yazar', rOpen: 'Açtıran taş cezası (değer × 10)', rOpenD: 'Attığın taşı alan oyuncu o taşla elini açarsa taşın değerinin 10 katı sana yazılır', sOpen: 'Açtıran taş cezası', bOpen: 'Açtıran ×10',
     rSpec: 'İzleyici', rSpecD: 'Oyun sürerken başkaları izleyebilsin', allow: 'İzin ver', deny: 'Verme', rChat: 'Sohbet', rChatD: 'Masa içi yazışma', chOn: 'Açık', chQuick: 'Yalnız hazır cümleler', chOff: 'Kapalı',
     rGift: 'İkram ve hediye', rGiftD: 'Oyuncular birbirine ikram gönderebilsin', on: 'Açık', off: 'Kapalı',
     summary: 'ÖZET', kRules: 'MASA KURALLARI', sKatOn: '101 → 102 → 103', sKatP: 'Ortağın açılışı eşiği yükseltir', sYes: 'Evet', sNo: 'Hayır', sOkey: 'Okey atma cezası', sIsle: 'İşlek taş atma cezası', sQuick: 'Hazır cümleler', kBet: 'BAHİS', kHands: 'EL', kTurn: 'TUR SÜRESİ', kPool: 'HAVUZ', balance: 'Bakiyen', ctaCreate: (b) => `Masayı oluştur · ${b}`, ctaLow: 'Yetersiz bakiye', ctaFix: 'Eksikleri tamamla', cancel: 'Vazgeç', close: 'Kapat',
@@ -629,7 +629,7 @@ const STR = {
     rPrize: 'Prize', prizeT: 'Winner takes all bets at the table', prizeE: 'Winning team takes it · half each', pool: 'Total pool',
     rKat: 'Doubling', rKatD: 'Each later opening must beat the previous one: 101 → 102 → 103, 5 → 6 → 7 pairs', rKatP: 'Should your partner’s opening raise the bar?', rKatPD: 'If off, only the opposing team’s openings raise it', rTurn: 'Turn time', rTurnD: 'Auto-plays when time runs out',
     rRules: 'Customize rules', rulesDef: 'Default rules', rulesCh: (n) => `${n} rules changed`, resetRules: 'Reset to default',
-    rOkey: 'Okey discard penalty (+101)', rOkeyD: 'Discarding the okey costs +101', rIsle: 'Playable tile penalty (+101)', rIsleD: 'Discarding a tile that fits a set on the table costs +101',
+    rOkey: 'Okey discard penalty (+101)', rOkeyD: 'Discarding the okey costs +101', rIsle: 'Playable tile penalty (+101)', rIsleD: 'Discarding a tile that fits a set on the table costs +101', rOpen: 'Opening-tile penalty (value × 10)', rOpenD: 'If the next player opens their hand with the tile you discarded, you get its value × 10', sOpen: 'Opening-tile penalty', bOpen: 'Opener ×10',
     rSpec: 'Spectators', rSpecD: 'Others can watch while you play', allow: 'Allow', deny: 'Don’t allow', rChat: 'Chat', rChatD: 'Table messages', chOn: 'On', chQuick: 'Quick phrases only', chOff: 'Off',
     rGift: 'Treats and gifts', rGiftD: 'Players can send each other treats', on: 'On', off: 'Off',
     summary: 'SUMMARY', kRules: 'TABLE RULES', sKatOn: '101 → 102 → 103', sKatP: 'Partner’s opening raises the bar', sYes: 'Yes', sNo: 'No', sOkey: 'Okey discard penalty', sIsle: 'Playable tile penalty', sQuick: 'Quick phrases', kBet: 'BET', kHands: 'HANDS', kTurn: 'TURN TIME', kPool: 'POOL', balance: 'Balance', ctaCreate: (b) => `Create table · ${b}`, ctaLow: 'Not enough chips', ctaFix: 'Fix the highlighted fields', cancel: 'Cancel', close: 'Close',
@@ -878,6 +878,7 @@ class Component extends DCLogic {
     if (full) { out.push({ label: L.bHands(t.hands), bg: nb, fg: nf }); out.push({ label: L.bTurn(t.turn), bg: nb, fg: nf }); }
     if (t.rules.okey) out.push({ label: L.bOkey, bg: 'rgba(255,94,108,.14)', fg: '#FFB3BA' });
     if (t.rules.isle) out.push({ label: L.bIsle, bg: 'rgba(255,94,108,.14)', fg: '#FFB3BA' });
+    if (t.rules.opener !== false) out.push({ label: L.bOpen, bg: 'rgba(255,94,108,.14)', fg: '#FFB3BA' });
     out.push(t.rules.spec ? { label: L.bSpec, bg: nb, fg: nf } : { label: L.bNoSpec, bg: nb, fg: 'var(--mt)' });
     if (t.rules.chat === 'quick') out.push({ label: L.bQuick, bg: nb, fg: nf });
     if (t.rules.chat === 'off') out.push({ label: L.bChatOff, bg: nb, fg: 'var(--mt)' });
@@ -896,7 +897,7 @@ class Component extends DCLogic {
     const row = (k, on, v) => ({ k, v, dot: on ? '#3CCB6E' : 'rgba(255,255,255,.18)', glow: on ? '0 0 7px rgba(60,203,110,.7)' : 'none', kc: on ? '#F4F1E8' : 'var(--mt)', vc: on ? '#8EF0B0' : 'var(--mt)' });
     const out = [row(L.rKat, !!t.kat, t.kat ? L.sKatOn : L.off)];
     if (t.kat && t.type === 'esli') out.push(row(L.sKatP, t.katP !== false, t.katP !== false ? L.sYes : L.sNo));
-    out.push(row(L.sOkey, !!r.okey, r.okey ? '+101' : L.off), row(L.sIsle, !!r.isle, r.isle ? '+101' : L.off),
+    out.push(row(L.sOkey, !!r.okey, r.okey ? '+101' : L.off), row(L.sIsle, !!r.isle, r.isle ? '+101' : L.off), row(L.sOpen, r.opener !== false, r.opener !== false ? '×10' : L.off),
       row(L.rSpec, !!r.spec, r.spec ? L.on : L.off), row(L.rChat, r.chat !== 'off', r.chat === 'quick' ? L.sQuick : r.chat === 'off' ? L.off : L.on), row(L.rGift, !!r.gifts, r.gifts ? L.on : L.off));
     return out;
   }
@@ -936,7 +937,7 @@ class Component extends DCLogic {
       katT: this.tog(c.kat, () => this.setC({ kat: !c.kat })), showKatP: c.type === 'esli' && c.kat, katPT: this.tog(c.katP, () => this.setC({ katP: !c.katP })),
       turnSegs: this.seg([[15, '15'], [20, '20'], [30, '30'], [45, '45 sn']], c.turn, (v) => this.setC({ turn: v })),
       rulesOpen: c.rulesOpen, toggleRules: () => this.setC({ rulesOpen: !c.rulesOpen }), chev: c.rulesOpen ? 'rotate(180deg)' : 'none', rulesSum: changed ? L.rulesCh(changed) : L.rulesDef,
-      ruleToggles: [{ name: L.rOkey, desc: L.rOkeyD, ...this.tog(c.rules.okey, () => setR('okey', !c.rules.okey), true) }, { name: L.rIsle, desc: L.rIsleD, ...this.tog(c.rules.isle, () => setR('isle', !c.rules.isle), true) }],
+      ruleToggles: [{ name: L.rOkey, desc: L.rOkeyD, ...this.tog(c.rules.okey, () => setR('okey', !c.rules.okey), true) }, { name: L.rIsle, desc: L.rIsleD, ...this.tog(c.rules.isle, () => setR('isle', !c.rules.isle), true) }, { name: L.rOpen, desc: L.rOpenD, ...this.tog(c.rules.opener !== false, () => setR('opener', c.rules.opener === false), true) }],
       ruleSegs: [
         { name: L.rSpec, desc: L.rSpecD, opts: this.seg([[true, L.allow], [false, L.deny]], c.rules.spec, (v) => setR('spec', v)) },
         { name: L.rChat, desc: L.rChatD, opts: this.seg([['on', L.chOn], ['quick', L.chQuick], ['off', L.chOff]], c.rules.chat, (v) => setR('chat', v)) },

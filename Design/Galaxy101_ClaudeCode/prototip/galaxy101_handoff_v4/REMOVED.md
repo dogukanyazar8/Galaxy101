@@ -1,4 +1,4 @@
-# REMOVED.md · kaldırılan kurallar ve kısayollar · v0.4.0
+# REMOVED.md · kaldırılan kurallar ve kısayollar · v0.5.0
 
 Anılmamak kaldırılmak değildir; kaldırılan her şey burada.
 

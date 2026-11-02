@@ -1,0 +1,1940 @@
+{
+ "version": "0.5.0",
+ "transport": {
+  "note": "Tek WebSocket. Her mesaj JSON nesnesi, alan \"t\" mesaj adı. C2S mesajlarında \"rid\" (istemci sıra no) zorunlu; sunucu her C2S için tam bir \"ack\" döner. S2C olaylarında \"at\" = sunucu saati (ms). Prova: logic/mockServer.js → createServer({clock,seed}).connect(onMessage).send(msg).",
+  "envelopeC2S": {
+   "t": "string",
+   "rid": "int"
+  },
+  "envelopeS2C": {
+   "t": "string",
+   "at": "int"
+  },
+  "ack": {
+   "rid": "int",
+   "ok": "bool",
+   "error": "string?",
+   "detail": "object?",
+   "...": "mesaja özel dönüş alanları"
+  }
+ },
+ "hiddenInfo": [
+  "Rakip ıstakaları hiçbir mesajda yer almaz; yalnız taş sayıları (counts). İstisna: el sonunda handEnd.racks (açık gösterim).",
+  "Deste sırası (H.deck) asla gönderilmez; yalnız deck = kalan sayı.",
+  "Zar değerleri dealDie olayı ile atış anında gelir; gösterge ve okey dealStep:indicator ile gelir. handStart motor olayı istemciye dice/indicator/okey boşaltılarak iletilir.",
+  "Desteden çekilen taş (game.drew src=deck) yalnız çekene tile ile gider; diğerlerine tile=null. Yerden (soldan) alınan taş herkese açıktır.",
+  "Eksik açılış (game.openShort) taşları yalnız deneyene gider.",
+  "İzleyici (seat=-1) kendi ıstakası olmadan, oyuncuların gördüğü açık bilgiyi alır.",
+  "Her oyuncuya kendi görünümü: snapshot.game = gameView(table, seat)."
+ ],
+ "reconnect": {
+  "flow": [
+   "Maç sırasında kopan oyuncu \"kalktı\" sayılmaz. Sunucu koltuğu tutar, seatConnection{connected:false} yayınlar.",
+   "Sırası gelince normal tur süresi işler; süre dolunca R-70 otomatik oyun. Üst üste 2 zaman aşımından sonra koltuğu sunucu oynar (seatConnection{autoplay:true}); bot mantığı oyuncu adına oynar.",
+   "Oyuncu maç bitene kadar dönebilir: hello{token} → session + snapshot{screen:\"table\"}; sunucunun oynaması o anda biter, sıra ondaysa tur süresi baştan başlar.",
+   "Bekleme odasında (S13) bağlantı koparsa oyuncu odadan hemen çıkarılır, bahsi iade edilir (leftTable{reason:\"disconnect\"}). Sahibiyse masa kapanır.",
+   "İstemci yeniden bağlanma ekranı: \"Bağlantı koptu · Deneme n/5\", denemeler 3 sn arayla; 5. deneme de başarısızsa \"Lobiye dön\" düğmesi.",
+   "Dönünce snapshot.screen istemcinin döneceği ekranı belirler; snapshot.game ile masa animasyonsuz kurulur, sonra canlı olaylar akar."
+  ],
+  "screens": {
+   "menu": "Ana menü (1a)",
+   "waitroom": "Bekleme odası (S13)",
+   "table": "Oyun masası (dağıtım sürüyorsa game.deal.step ve elapsed ile tören kaldığı adımdan sürer)",
+   "ranked.search": "Dereceli arama",
+   "ranked.found": "Maç bulundu (kabul sayacı)",
+   "ranked.loading": "Masa hazırlanıyor"
+  },
+  "open": ""
+ },
+ "c2s": [
+  {
+   "name": "hello",
+   "group": "oturum",
+   "fields": {
+    "token": "string"
+   },
+   "returns": {
+    "token": "string"
+   },
+   "errors": [
+    "E_SESSION_EXPIRED"
+   ],
+   "desc": "Yeniden bağlanma. Başarıda session + snapshot."
+  },
+  {
+   "name": "register",
+   "group": "oturum",
+   "fields": {
+    "email": "string",
+    "pass": "string",
+    "name": "string"
+   },
+   "returns": {
+    "token": "string"
+   },
+   "errors": [
+    "E_EMAIL_INVALID",
+    "E_PASS_SHORT",
+    "E_NAME_INVALID",
+    "E_EMAIL_EXISTS",
+    "E_NAME_TAKEN"
+   ],
+   "desc": "S04 Kayıt ol. 25.000 çip + 20 elmas."
+  },
+  {
+   "name": "login",
+   "group": "oturum",
+   "fields": {
+    "email": "string",
+    "pass": "string"
+   },
+   "returns": {
+    "token": "string"
+   },
+   "errors": [
+    "E_ACCOUNT_UNKNOWN",
+    "E_PASS_WRONG",
+    "E_ACCOUNT_LOCKED"
+   ],
+   "desc": "S03 Giriş yap. E_PASS_WRONG.detail.left = kalan hak; 3. yanlışta 5 dk kilit, E_ACCOUNT_LOCKED.detail.until."
+  },
+  {
+   "name": "guest",
+   "group": "oturum",
+   "fields": {
+    "name": "string?",
+    "color": "string?"
+   },
+   "returns": {
+    "token": "string"
+   },
+   "errors": [
+    "E_NAME_INVALID"
+   ],
+   "desc": "S05 Misafir olarak oyna. 10.000 çip + 20 elmas."
+  },
+  {
+   "name": "passwordResetRequest",
+   "group": "oturum",
+   "fields": {
+    "email": "string"
+   },
+   "returns": {},
+   "errors": [],
+   "desc": "Şifremi unuttum: kod e-postayla gönderilir. Hesabın var olup olmadığı yanıtta belli edilmez."
+  },
+  {
+   "name": "passwordReset",
+   "group": "oturum",
+   "fields": {
+    "email": "string",
+    "code": "string",
+    "pass": "string"
+   },
+   "returns": {},
+   "errors": [
+    "E_RESET_CODE",
+    "E_PASS_SHORT"
+   ],
+   "desc": "Yeni şifre; başarıda giriş kilidi kalkar (Q-14)."
+  },
+  {
+   "name": "oauth",
+   "group": "oturum",
+   "fields": {
+    "provider": "\"google\"",
+    "email": "string",
+    "name": "string?",
+    "idToken": "string"
+   },
+   "returns": {
+    "token": "string"
+   },
+   "errors": [
+    "E_OAUTH_FAILED"
+   ],
+   "desc": "S02 Google ile devam et. Yeni hesap 25.000 çip + 20 elmas."
+  },
+  {
+   "name": "logout",
+   "group": "oturum",
+   "fields": {},
+   "returns": {},
+   "errors": [],
+   "desc": "Çıkış yap."
+  },
+  {
+   "name": "accountDelete",
+   "group": "oturum",
+   "fields": {
+    "confirm": "string"
+   },
+   "returns": {},
+   "errors": [
+    "E_CONFIRM_MISMATCH",
+    "E_IN_GAME"
+   ],
+   "desc": "Hesabı sil (SİL / DELETE)."
+  },
+  {
+   "name": "resync",
+   "group": "oturum",
+   "fields": {},
+   "returns": {},
+   "errors": [],
+   "desc": "Tam durum anlık görüntüsü ister → snapshot."
+  },
+  {
+   "name": "ping",
+   "group": "oturum",
+   "fields": {},
+   "returns": {
+    "serverTime": "int"
+   },
+   "errors": [],
+   "desc": "Saat eşitleme."
+  },
+  {
+   "name": "profileUpdate",
+   "group": "profil",
+   "fields": {
+    "name": "string?",
+    "status": "string?",
+    "color": "string?",
+    "frame": "int?"
+   },
+   "returns": {},
+   "errors": [
+    "E_NAME_INVALID",
+    "E_STATUS_LONG",
+    "E_FRAME_LOCKED"
+   ],
+   "desc": "Profili düzenle."
+  },
+  {
+   "name": "shopBuy",
+   "group": "ekonomi",
+   "fields": {
+    "sku": "string"
+   },
+   "returns": {},
+   "errors": [
+    "E_SKU_UNKNOWN",
+    "E_ALREADY_OWNED",
+    "E_NO_GEMS"
+   ],
+   "desc": "Mağaza satın alma. SKU listesi mockServer ECON.shop."
+  },
+  {
+   "name": "skinSet",
+   "group": "ekonomi",
+   "fields": {
+    "skin": "string"
+   },
+   "returns": {},
+   "errors": [
+    "E_NOT_OWNED"
+   ],
+   "desc": "Taş görünümü seç."
+  },
+  {
+   "name": "dailyGet",
+   "group": "günlük",
+   "fields": {},
+   "returns": {},
+   "errors": [],
+   "desc": "→ daily."
+  },
+  {
+   "name": "dailyClaim",
+   "group": "günlük",
+   "fields": {},
+   "returns": {
+    "amount": "int"
+   },
+   "errors": [
+    "E_DAILY_CLAIMED"
+   ],
+   "desc": "Günlük ödülü al."
+  },
+  {
+   "name": "questClaim",
+   "group": "günlük",
+   "fields": {
+    "questId": "string"
+   },
+   "returns": {},
+   "errors": [
+    "E_QUEST_UNKNOWN",
+    "E_QUEST_INCOMPLETE",
+    "E_QUEST_CLAIMED"
+   ],
+   "desc": "Görev ödülünü al."
+  },
+  {
+   "name": "friendsGet",
+   "group": "arkadaş",
+   "fields": {},
+   "returns": {},
+   "errors": [],
+   "desc": "→ friends."
+  },
+  {
+   "name": "friendFind",
+   "group": "arkadaş",
+   "fields": {
+    "query": "string"
+   },
+   "returns": {
+    "result": "\"friend\"|\"player\"|\"none\"",
+    "user": "User?"
+   },
+   "errors": [],
+   "desc": "Arkadaş ekle araması (kod AB1234 → AB-1234, sonra ad içerir)."
+  },
+  {
+   "name": "friendRequest",
+   "group": "arkadaş",
+   "fields": {
+    "userId": "string"
+   },
+   "returns": {},
+   "errors": [
+    "E_USER_UNKNOWN",
+    "E_ALREADY_FRIENDS",
+    "E_REQUEST_PENDING"
+   ],
+   "desc": "İstek gönder."
+  },
+  {
+   "name": "friendRespond",
+   "group": "arkadaş",
+   "fields": {
+    "userId": "string",
+    "accept": "bool"
+   },
+   "returns": {},
+   "errors": [
+    "E_REQUEST_UNKNOWN"
+   ],
+   "desc": "İsteği kabul/ret."
+  },
+  {
+   "name": "friendRemove",
+   "group": "arkadaş",
+   "fields": {
+    "userId": "string"
+   },
+   "returns": {},
+   "errors": [
+    "E_NOT_FRIENDS"
+   ],
+   "desc": "Arkadaşlıktan çıkar."
+  },
+  {
+   "name": "leaderboardGet",
+   "group": "liderlik",
+   "fields": {
+    "board": "\"weekly\"|\"season\"|\"friends\""
+   },
+   "returns": {},
+   "errors": [],
+   "desc": "→ leaderboard. weekly: 30/15/5/1 puan (özel oda ve botlara karşı hariç), pazartesi 00:00 İstanbul sıfırlanır · season: dereceli LP · friends: arkadaşlar arasında sezon LP."
+  },
+  {
+   "name": "lobbySubscribe",
+   "group": "lobi",
+   "fields": {},
+   "returns": {},
+   "errors": [],
+   "desc": "Masa listesi + canlı güncellemeler (lobbyTable, lobbyTableRemoved)."
+  },
+  {
+   "name": "lobbyUnsubscribe",
+   "group": "lobi",
+   "fields": {},
+   "returns": {},
+   "errors": [],
+   "desc": "Canlı güncellemeyi bırak."
+  },
+  {
+   "name": "tableCreate",
+   "group": "lobi",
+   "fields": {
+    "name": "string",
+    "mode": "\"solo\"|\"pairs\"",
+    "private": "bool",
+    "pin": "string(4)?",
+    "hands": "3|5|7",
+    "bet": "1000|5000|10000|50000|100000",
+    "katlama": "bool",
+    "turnSec": "15|20|30|45",
+    "rules": "{spectate:bool,chat:\"open\"|\"quick\"|\"off\",gifts:bool,isle:bool,penalties:bool,penOkey:bool?,penIslek:bool?,penOpener:bool? (R-41/R-42/R-43, varsayılan true)}",
+    "katlamaPartner": "bool? (yalnız eşli + katlamalı; varsayılan true)"
+   },
+   "returns": {
+    "table": "Table"
+   },
+   "errors": [
+    "E_ALREADY_SEATED",
+    "E_TABLE_NAME",
+    "E_PIN_FORMAT",
+    "E_TABLE_OPTIONS",
+    "E_NO_CHIPS"
+   ],
+   "desc": "S10 Masa aç. Bahis oturunca düşülür (R-90). Katlamalı (R-64): yalnız açılış eşiği yükselir."
+  },
+  {
+   "name": "tableJoin",
+   "group": "lobi",
+   "fields": {
+    "tableId": "string",
+    "pin": "string?",
+    "seat": "int?"
+   },
+   "returns": {
+    "table": "Table",
+    "seat": "int"
+   },
+   "errors": [
+    "E_TABLE_CLOSED",
+    "E_ALREADY_SEATED",
+    "E_PIN_WRONG",
+    "E_TABLE_FULL",
+    "E_NO_CHIPS",
+    "E_TABLE_PLAYING"
+   ],
+   "desc": "Otur. Şifreli masada pin zorunlu (S11). Masa oynanıyorsa \"Oyuna katıl\" (R-65): botun ya da kalkan oyuncunun koltuğu devralınır, bahis o an ödenir, koltuğun toplamıyla devam edilir; ardından snapshot{screen:\"table\"}."
+  },
+  {
+   "name": "tableJoinCode",
+   "group": "lobi",
+   "fields": {
+    "code": "string",
+    "pin": "string?"
+   },
+   "returns": {
+    "table": "Table",
+    "seat": "int"
+   },
+   "errors": [
+    "E_CODE_FORMAT",
+    "E_CODE_UNKNOWN",
+    "E_PIN_WRONG",
+    "E_TABLE_FULL",
+    "E_NO_CHIPS",
+    "E_ALREADY_SEATED"
+   ],
+   "desc": "S12 Kodla katıl (GX-XXXX)."
+  },
+  {
+   "name": "tableSpectate",
+   "group": "lobi",
+   "fields": {
+    "tableId": "string"
+   },
+   "returns": {},
+   "errors": [
+    "E_TABLE_CLOSED",
+    "E_SPECTATE_OFF",
+    "E_ALREADY_SEATED"
+   ],
+   "desc": "İzle → snapshot{spectator:true}."
+  },
+  {
+   "name": "tableLeave",
+   "group": "lobi",
+   "fields": {},
+   "returns": {},
+   "errors": [
+    "E_NOT_SEATED"
+   ],
+   "desc": "Bekleme odasında: bahis iade. Maçta: R-60 (bahis kaybı, son sıra, yerine bot) → leftTable."
+  },
+  {
+   "name": "seatAddBot",
+   "group": "bekleme",
+   "fields": {
+    "seat": "int"
+   },
+   "returns": {},
+   "errors": [
+    "E_NOT_SEATED",
+    "E_NOT_OWNER",
+    "E_STATUS",
+    "E_SEAT_TAKEN"
+   ],
+   "desc": "Sahip: boş koltuğa bot."
+  },
+  {
+   "name": "seatKick",
+   "group": "bekleme",
+   "fields": {
+    "seat": "int"
+   },
+   "returns": {},
+   "errors": [
+    "E_NOT_SEATED",
+    "E_NOT_OWNER",
+    "E_STATUS",
+    "E_SEAT_EMPTY"
+   ],
+   "desc": "Sahip: oyuncuyu/botu çıkar (bahis iade)."
+  },
+  {
+   "name": "tableStart",
+   "group": "bekleme",
+   "fields": {},
+   "returns": {},
+   "errors": [
+    "E_NOT_SEATED",
+    "E_NOT_OWNER",
+    "E_STATUS",
+    "E_TABLE_NOT_FULL"
+   ],
+   "desc": "Sahip: Başlat → countdown 3-2-1."
+  },
+  {
+   "name": "inviteSend",
+   "group": "davet",
+   "fields": {
+    "userId": "string",
+    "seat": "int?",
+    "recent": "bool?"
+   },
+   "returns": {
+    "inviteId": "string",
+    "expiresAt": "int"
+   },
+   "errors": [
+    "E_NOT_SEATED",
+    "E_STATUS",
+    "E_USER_UNKNOWN",
+    "E_NOT_FRIENDS",
+    "E_USER_OFFLINE",
+    "E_USER_BUSY",
+    "E_TABLE_FULL"
+   ],
+   "desc": "S14/S15 Davet. 30 sn geçerli."
+  },
+  {
+   "name": "inviteRespond",
+   "group": "davet",
+   "fields": {
+    "inviteId": "string",
+    "accept": "bool"
+   },
+   "returns": {},
+   "errors": [
+    "E_INVITE_EXPIRED",
+    "E_TABLE_FULL",
+    "E_NO_CHIPS",
+    "E_TABLE_CLOSED"
+   ],
+   "desc": "Gelen daveti yanıtla."
+  },
+  {
+   "name": "inviteCancel",
+   "group": "davet",
+   "fields": {
+    "inviteId": "string"
+   },
+   "returns": {},
+   "errors": [
+    "E_INVITE_EXPIRED"
+   ],
+   "desc": "Gönderilen daveti geri çek."
+  },
+  {
+   "name": "vsBotsStart",
+   "group": "botlar",
+   "fields": {
+    "mode": "\"solo\"|\"pairs\"",
+    "hands": "int?"
+   },
+   "returns": {
+    "table": "Table"
+   },
+   "errors": [
+    "E_ALREADY_SEATED"
+   ],
+   "desc": "Botlara karşı: 3 bot, çip yok, doğrudan matchStart."
+  },
+  {
+   "name": "rankedQueue",
+   "group": "dereceli",
+   "fields": {
+    "mode": "\"solo\"|\"duo\"|\"squad\"",
+    "party": "string[]"
+   },
+   "returns": {},
+   "errors": [
+    "E_ALREADY_SEATED",
+    "E_ALREADY_QUEUED",
+    "E_MODE",
+    "E_PARTY_SIZE",
+    "E_PARTY_RANGE"
+   ],
+   "desc": "Arama başlat. Duo: party 1 kişi, Squad: 3 kişi."
+  },
+  {
+   "name": "rankedAccept",
+   "group": "dereceli",
+   "fields": {
+    "matchId": "string",
+    "accept": "bool"
+   },
+   "returns": {},
+   "errors": [
+    "E_MATCH_EXPIRED"
+   ],
+   "desc": "Maç bulundu: kabul / reddet (10 sn)."
+  },
+  {
+   "name": "rankedCancel",
+   "group": "dereceli",
+   "fields": {},
+   "returns": {},
+   "errors": [
+    "E_NOT_QUEUED"
+   ],
+   "desc": "Aramayı iptal et."
+  },
+  {
+   "name": "gRollDice",
+   "group": "masa",
+   "fields": {},
+   "returns": {},
+   "errors": [
+    "E_NOT_SEATED",
+    "E_SPECTATOR",
+    "E_PHASE",
+    "E_NOT_DEALER"
+   ],
+   "desc": "Dağıtan insan oyuncu zarı atar (her zar ayrı). 15 sn içinde atmazsa sunucu atar."
+  },
+  {
+   "name": "gDraw",
+   "group": "masa",
+   "fields": {
+    "src": "\"deck\"|\"side\""
+   },
+   "returns": {},
+   "errors": [
+    "ENGINE"
+   ],
+   "desc": "Desteden çek / soldan al."
+  },
+  {
+   "name": "gReturnSide",
+   "group": "masa",
+   "fields": {},
+   "returns": {},
+   "errors": [
+    "ENGINE"
+   ],
+   "desc": "Soldan alınan taşı geri bırak (R-32)."
+  },
+  {
+   "name": "gOpen",
+   "group": "masa",
+   "fields": {
+    "melds": "[{kind:\"run\"|\"group\"|\"pair\",tiles:string[]}]"
+   },
+   "returns": {},
+   "errors": [
+    "ENGINE"
+   ],
+   "desc": "Elini aç (101 / 5 çift)."
+  },
+  {
+   "name": "gLay",
+   "group": "masa",
+   "fields": {
+    "melds": "[{kind,tiles}]"
+   },
+   "returns": {},
+   "errors": [
+    "ENGINE"
+   ],
+   "desc": "Açmış oyuncu ek per yere açar."
+  },
+  {
+   "name": "gAdd",
+   "group": "masa",
+   "fields": {
+    "tile": "string",
+    "meld": "string",
+    "side": "\"L\"|\"R\"|null"
+   },
+   "returns": {},
+   "errors": [
+    "ENGINE"
+   ],
+   "desc": "İşle."
+  },
+  {
+   "name": "gSwap",
+   "group": "masa",
+   "fields": {
+    "tile": "string",
+    "meld": "string",
+    "index": "int"
+   },
+   "returns": {},
+   "errors": [
+    "ENGINE"
+   ],
+   "desc": "Masadaki okeyi al (R-26)."
+  },
+  {
+   "name": "gUndo",
+   "group": "masa",
+   "fields": {},
+   "returns": {},
+   "errors": [
+    "ENGINE"
+   ],
+   "desc": "Geri topla (R-34)."
+  },
+  {
+   "name": "gDiscard",
+   "group": "masa",
+   "fields": {
+    "tile": "string"
+   },
+   "returns": {},
+   "errors": [
+    "ENGINE"
+   ],
+   "desc": "Taş at / bitir."
+  },
+  {
+   "name": "gReady",
+   "group": "masa",
+   "fields": {},
+   "returns": {},
+   "errors": [
+    "E_NOT_SEATED",
+    "E_SPECTATOR",
+    "E_PHASE"
+   ],
+   "desc": "\"Sonraki el\" düğmesi; tüm insanlar hazırsa 15 sn beklenmez."
+  },
+  {
+   "name": "gRackOrder",
+   "group": "masa",
+   "fields": {
+    "tiles": "(string|null)[]"
+   },
+   "returns": {},
+   "errors": [
+    "E_RACK_MISMATCH"
+   ],
+   "desc": "Istaka dizilimi (yalnız doğrulama; dizilim istemcidedir)."
+  },
+  {
+   "name": "chatSend",
+   "group": "sohbet",
+   "fields": {
+    "text": "string?",
+    "quick": "string?"
+   },
+   "returns": {},
+   "errors": [
+    "E_NOT_SEATED",
+    "E_CHAT_OFF",
+    "E_CHAT_QUICK_ONLY",
+    "E_CHAT_LENGTH",
+    "E_CHAT_QUICK_UNKNOWN"
+   ],
+   "desc": "Sohbet: serbest yazı (≤120) ya da hazır mesaj/emoji anahtarı."
+  },
+  {
+   "name": "giftSend",
+   "group": "hediye",
+   "fields": {
+    "gift": "string",
+    "to": "int|\"all\""
+   },
+   "returns": {},
+   "errors": [
+    "E_NOT_SEATED",
+    "E_GIFTS_OFF",
+    "E_GIFT_UNKNOWN",
+    "E_GIFT_TARGET",
+    "E_NO_CHIPS"
+   ],
+   "desc": "Hediye ısmarla. \"all\" = fiyat × alıcı sayısı."
+  }
+ ],
+ "s2c": [
+  {
+   "name": "ack",
+   "group": "sistem",
+   "to": "gönderen",
+   "fields": {
+    "rid": "int",
+    "ok": "bool",
+    "error": "string?",
+    "detail": "object?"
+   },
+   "desc": "Her C2S için tam bir kez."
+  },
+  {
+   "name": "session",
+   "group": "oturum",
+   "to": "kullanıcı",
+   "fields": {
+    "me": "Me",
+    "serverVersion": "string",
+    "serverTime": "int"
+   },
+   "desc": "Giriş başarılı."
+  },
+  {
+   "name": "snapshot",
+   "group": "oturum",
+   "to": "kullanıcı",
+   "fields": {
+    "me": "Me",
+    "screen": "\"menu\"|\"waitroom\"|\"table\"|\"ranked.search\"|\"ranked.found\"|\"ranked.loading\"",
+    "table": "Table?",
+    "game": "GameView?",
+    "ranked": "Queue?",
+    "spectator": "bool?"
+   },
+   "desc": "Tam durum. Kopma sonrası dönülecek ekran."
+  },
+  {
+   "name": "profile",
+   "group": "profil",
+   "to": "kullanıcı",
+   "fields": {
+    "me": "Me"
+   },
+   "desc": "Profil değişti."
+  },
+  {
+   "name": "balance",
+   "group": "ekonomi",
+   "to": "kullanıcı",
+   "fields": {
+    "chips": "int",
+    "gems": "int",
+    "dChips": "int",
+    "dGems": "int",
+    "reason": "\"bet\"|\"betRefund\"|\"win\"|\"daily\"|\"quest\"|\"purchase\"|\"shop\"|\"gift\"",
+    "ref": "string?"
+   },
+   "desc": "Her bakiye hareketi. İstemci sayaç animasyonunu bundan oynatır."
+  },
+  {
+   "name": "xp",
+   "group": "ekonomi",
+   "to": "kullanıcı",
+   "fields": {
+    "gained": "int",
+    "xp": "int",
+    "xpNext": "int",
+    "level": "int",
+    "levelUp": "int",
+    "reason": "string"
+   },
+   "desc": "XP kazanımı: her el sonunda (reason:\"hand\") ve maç sonunda sıra bonusu (reason:\"match\")."
+  },
+  {
+   "name": "daily",
+   "group": "günlük",
+   "to": "kullanıcı",
+   "fields": {
+    "daily": "{day:int,claimedToday:bool,amounts:int[7],msToReset:int}",
+    "quests": "[{id,cur,goal,reward,gem,claimed}]"
+   },
+   "desc": "Günlük ödül + görevler. Gün değişimi Europe/Istanbul. Bir gün atlanırsa seri 1. güne döner; 7. günden sonra baştan."
+  },
+  {
+   "name": "presence",
+   "group": "arkadaş",
+   "to": "arkadaşlar",
+   "fields": {
+    "user": "User"
+   },
+   "desc": "Çevrimiçi/oyunda değişimi."
+  },
+  {
+   "name": "friends",
+   "group": "arkadaş",
+   "to": "kullanıcı",
+   "fields": {
+    "friends": "User[]",
+    "requests": "User[]"
+   },
+   "desc": "Liste."
+  },
+  {
+   "name": "friendRequestIn",
+   "group": "arkadaş",
+   "to": "alıcı",
+   "fields": {
+    "from": "User"
+   },
+   "desc": "Yeni istek."
+  },
+  {
+   "name": "friendRequestResult",
+   "group": "arkadaş",
+   "to": "iki taraf",
+   "fields": {
+    "user": "User",
+    "accepted": "bool"
+   },
+   "desc": "İstek sonucu."
+  },
+  {
+   "name": "friendRemoved",
+   "group": "arkadaş",
+   "to": "iki taraf",
+   "fields": {
+    "userId": "string"
+   },
+   "desc": "Arkadaşlık bitti."
+  },
+  {
+   "name": "leaderboard",
+   "group": "liderlik",
+   "to": "kullanıcı",
+   "fields": {
+    "board": "\"weekly\"|\"season\"|\"friends\"",
+    "rows": "[{pos,user,rankIdx,lp,pts}]",
+    "mine": "row?",
+    "resetsAt": "int?"
+   },
+   "desc": "Liderlik."
+  },
+  {
+   "name": "lobby",
+   "group": "lobi",
+   "to": "abone",
+   "fields": {
+    "tables": "Table[]"
+   },
+   "desc": "Tam liste."
+  },
+  {
+   "name": "lobbyTable",
+   "group": "lobi",
+   "to": "abone",
+   "fields": {
+    "table": "Table"
+   },
+   "desc": "Masa eklendi/değişti."
+  },
+  {
+   "name": "lobbyTableRemoved",
+   "group": "lobi",
+   "to": "abone",
+   "fields": {
+    "id": "string"
+   },
+   "desc": "Masa kapandı/başladı listeden düştü."
+  },
+  {
+   "name": "tableState",
+   "group": "masa",
+   "to": "masadakiler",
+   "fields": {
+    "table": "Table"
+   },
+   "desc": "Koltuk/durum değişti. Table.katlama, Table.katlamaPartner (eşli+katlamalı değilse null) lobi kartı ve masa bilgisinde gösterilir."
+  },
+  {
+   "name": "tableClosed",
+   "group": "masa",
+   "to": "masadakiler",
+   "fields": {
+    "id": "string",
+    "reason": "\"ownerLeft\""
+   },
+   "desc": "Masa kapandı → Masa kapandı diyaloğu."
+  },
+  {
+   "name": "kicked",
+   "group": "bekleme",
+   "to": "çıkarılan",
+   "fields": {
+    "tableId": "string"
+   },
+   "desc": "Sahip seni çıkardı."
+  },
+  {
+   "name": "countdown",
+   "group": "bekleme",
+   "to": "masadakiler",
+   "fields": {
+    "n": "int",
+    "startsIn": "int",
+    "cancelled": "bool?"
+   },
+   "desc": "Bekleme odası 3-2-1."
+  },
+  {
+   "name": "seatConnection",
+   "group": "masa",
+   "to": "masadakiler",
+   "fields": {
+    "seat": "int",
+    "connected": "bool",
+    "autoplay": "bool?"
+   },
+   "desc": "Kopma/dönüş. autoplay:true = üst üste 2 zaman aşımından sonra koltuğu sunucu oynuyor (koltukta \"Otomatik\" rozeti)."
+  },
+  {
+   "name": "leftTable",
+   "group": "masa",
+   "to": "kalkan",
+   "fields": {
+    "reason": "\"leave\"|\"disconnect\"",
+    "toLobbyIn": "int"
+   },
+   "desc": "\"Masadan kalktın\" tostu → 1300 ms sonra lobi."
+  },
+  {
+   "name": "inviteIn",
+   "group": "davet",
+   "to": "alıcı",
+   "fields": {
+    "inviteId": "string",
+    "from": "User",
+    "table": "Table",
+    "expiresAt": "int"
+   },
+   "desc": "Gelen davet."
+  },
+  {
+   "name": "inviteExpired",
+   "group": "davet",
+   "to": "alıcı",
+   "fields": {
+    "inviteId": "string"
+   },
+   "desc": "Davet süresi doldu/geri çekildi."
+  },
+  {
+   "name": "inviteResult",
+   "group": "davet",
+   "to": "gönderen",
+   "fields": {
+    "inviteId": "string",
+    "userId": "string",
+    "result": "\"accepted\"|\"declined\"|\"expired\"|\"failed\"",
+    "seat": "int?",
+    "error": "string?"
+   },
+   "desc": "Davet sonucu."
+  },
+  {
+   "name": "rankedSearch",
+   "group": "dereceli",
+   "to": "kullanıcı",
+   "fields": {
+    "mode": "string",
+    "since": "int",
+    "range": "1|2",
+    "filled": "int",
+    "found": "null"
+   },
+   "desc": "Arama durumu (koltuklar tek tek dolar)."
+  },
+  {
+   "name": "rankedFound",
+   "group": "dereceli",
+   "to": "kullanıcı",
+   "fields": {
+    "found": "{matchId,players:[{user,bot}],expiresAt,accepted:bool[4]}"
+   },
+   "desc": "Maç bulundu, 10 sn kabul."
+  },
+  {
+   "name": "rankedAccepted",
+   "group": "dereceli",
+   "to": "kullanıcı",
+   "fields": {
+    "index": "int",
+    "accepted": "bool[4]"
+   },
+   "desc": "Bir oyuncu kabul etti."
+  },
+  {
+   "name": "rankedCancelled",
+   "group": "dereceli",
+   "to": "kullanıcı",
+   "fields": {
+    "reason": "\"timeout\"|\"declined\"|\"cancel\""
+   },
+   "desc": "Arama/kabul bitti."
+  },
+  {
+   "name": "rankedReady",
+   "group": "dereceli",
+   "to": "masadakiler",
+   "fields": {
+    "table": "Table",
+    "loadingMs": "int"
+   },
+   "desc": "\"Masa hazırlanıyor\"."
+  },
+  {
+   "name": "rankChange",
+   "group": "dereceli",
+   "to": "kullanıcı",
+   "fields": {
+    "before": "{idx,lp}",
+    "after": "{idx,lp}",
+    "delta": "int",
+    "place": "int",
+    "tierUp": "bool",
+    "leagueUp": "bool",
+    "down": "bool",
+    "protectedLeft": "int"
+   },
+   "desc": "Maç sonu LP. leagueUp → lig atlama ekranı, tierUp → kademe atlama, down → düşme tostu."
+  },
+  {
+   "name": "matchStart",
+   "group": "masa",
+   "to": "masadakiler",
+   "fields": {
+    "table": "Table",
+    "countdownMs": "int"
+   },
+   "desc": "Maç başlıyor; 3-2-1 sonra dağıtım."
+  },
+  {
+   "name": "dealStart",
+   "group": "dağıtım",
+   "to": "masadakiler",
+   "fields": {
+    "handNo": "int",
+    "dealer": "int",
+    "stacks": "15",
+    "perStack": "7",
+    "buildMs": "int",
+    "humanDealer": "bool"
+   },
+   "desc": "Tören başladı: balyalar diziliyor."
+  },
+  {
+   "name": "dealStep",
+   "group": "dağıtım",
+   "to": "masadakiler",
+   "fields": {
+    "step": "\"dice\"|\"indicator\"|\"extra\"|\"distribute\"|\"center\"",
+    "dealer": "int?",
+    "rollWaitMs": "int?",
+    "stack": "int?",
+    "level": "int?",
+    "rolledLevel": "int?",
+    "fakeSkip": "bool?",
+    "indicator": "string?",
+    "okey": "{c,n}?",
+    "plan": "[{seat,stacks:int[]}]?",
+    "stacks": "int[]?",
+    "deck": "int?"
+   },
+   "desc": "Tören adımı. indicator yalnız indicator adımında açıklanır."
+  },
+  {
+   "name": "dealDie",
+   "group": "dağıtım",
+   "to": "masadakiler",
+   "fields": {
+    "index": "0|1",
+    "value": "1..6",
+    "rollMs": "int"
+   },
+   "desc": "Zar atıldı; değer bu anda açıklanır."
+  },
+  {
+   "name": "handDealt",
+   "group": "dağıtım",
+   "to": "her oyuncuya ayrı",
+   "fields": {
+    "handNo": "int",
+    "rack": "string[]|null",
+    "counts": "int[4]",
+    "deck": "int",
+    "indicator": "string",
+    "okey": "{c,n}",
+    "starter": "int"
+   },
+   "desc": "Taşlar ıstakaya; yalnız kendi ıstakan (izleyiciye null)."
+  },
+  {
+   "name": "turn",
+   "group": "masa",
+   "to": "masadakiler",
+   "fields": {
+    "seat": "int",
+    "phase": "\"draw\"|\"play\"",
+    "n": "int",
+    "turnMs": "int",
+    "deadline": "int"
+   },
+   "desc": "Sıra başladı; tur sayacı deadline'a göre."
+  },
+  {
+   "name": "legal",
+   "group": "masa",
+   "to": "sıradaki oyuncu",
+   "fields": {
+    "legal": "{draw,side,discard,open,undo,returnSide,add}"
+   },
+   "desc": "Düğme etkinlikleri."
+  },
+  {
+   "name": "game",
+   "group": "masa",
+   "to": "masadakiler (görünüm süzgeçli)",
+   "fields": {
+    "ev": "EngineEvent"
+   },
+   "desc": "Kural motoru olayı: drew, sideReturned, openShort, opened, laid, added, okeySwapped, undone, discarded, finished, penalty, auto, draw, seatLeft, handEnd, matchEnd, turn. Alanlar logic/rules.js ev.push satırları."
+  },
+  {
+   "name": "handWait",
+   "group": "masa",
+   "to": "masadakiler",
+   "fields": {
+    "nextHandIn": "int",
+    "nextAt": "int",
+    "handNo": "int",
+    "hands": "int"
+   },
+   "desc": "El sonu: \"Sonraki el · 15\"."
+  },
+  {
+   "name": "readyState",
+   "group": "masa",
+   "to": "masadakiler",
+   "fields": {
+    "ready": "int[]"
+   },
+   "desc": "Hazır olan koltuklar."
+  },
+  {
+   "name": "matchResult",
+   "group": "masa",
+   "to": "masadakiler",
+   "fields": {
+    "ranking": "Unit[]",
+    "totals": "int[4]",
+    "history": "array",
+    "pool": "int (ödenen bahislerin toplamı)",
+    "rake": "0",
+    "payouts": "int[4]",
+    "xpBonus": "int[4]",
+    "lp": "(int|null)[4]",
+    "weekly": "int[4]"
+   },
+   "desc": "Maç sonu sıralama ve ödeme (R-59, R-91)."
+  },
+  {
+   "name": "chat",
+   "group": "sohbet",
+   "to": "masadakiler",
+   "fields": {
+    "seat": "int",
+    "user": "string?",
+    "text": "string?",
+    "quick": "string?",
+    "bot": "bool?",
+    "spectator": "bool?"
+   },
+   "desc": "Sohbet satırı. quick = strings.csv anahtarı."
+  },
+  {
+   "name": "gift",
+   "group": "hediye",
+   "to": "masadakiler",
+   "fields": {
+    "from": "int",
+    "to": "int[]",
+    "gift": "string",
+    "cost": "int"
+   },
+   "desc": "Hediye uçuşu."
+  },
+  {
+   "name": "tableView",
+   "from": "server",
+   "to": "masadaki her insan oyuncu ve izleyici (kendi görünümü)",
+   "when": "her commit sonrası, tur başında, dağıtım bitince (handDealt ile)",
+   "fields": {
+    "view": "GameView (snapshot.game ile aynı biçim): status, handNo, dealer, totals, deck, rack (yalnız kendi), counts, discards, melds, opened, openMode, pen, turn{seat,phase,n,sideTake,sideMust,deadline}, legal, result"
+   },
+   "secret": "rack yalnız alıcının kendi ıstakası; rakipler yalnız counts",
+   "ui": "istemci tahta/ıstaka eşitlemesi (G101-Masa srvMsg)"
+  }
+ ],
+ "errors": [
+  {
+   "code": "E_BAD_MESSAGE",
+   "ui": "silent",
+   "state": null,
+   "key": "err.E_BAD_MESSAGE",
+   "note": "İstemci hatası; kayda yaz"
+  },
+  {
+   "code": "E_UNKNOWN_MESSAGE",
+   "ui": "silent",
+   "state": null,
+   "key": "err.E_UNKNOWN_MESSAGE",
+   "note": "Sürüm uyuşmazlığı; kayda yaz"
+  },
+  {
+   "code": "E_AUTH_REQUIRED",
+   "ui": "screen",
+   "state": "S02",
+   "key": "err.E_AUTH_REQUIRED",
+   "note": "Giriş seçimine dön"
+  },
+  {
+   "code": "E_SESSION_EXPIRED",
+   "ui": "screen",
+   "state": "S02",
+   "key": "err.E_SESSION_EXPIRED",
+   "note": ""
+  },
+  {
+   "code": "E_EMAIL_INVALID",
+   "ui": "inline",
+   "state": "S04",
+   "key": "err.E_EMAIL_INVALID",
+   "note": "alan altı kırmızı"
+  },
+  {
+   "code": "E_PASS_SHORT",
+   "ui": "inline",
+   "state": "S04",
+   "key": "err.E_PASS_SHORT",
+   "note": ""
+  },
+  {
+   "code": "E_NAME_INVALID",
+   "ui": "inline",
+   "state": "S04|S05|ProfilDüzenle",
+   "key": "err.E_NAME_INVALID",
+   "note": ""
+  },
+  {
+   "code": "E_EMAIL_EXISTS",
+   "ui": "inline",
+   "state": "S04",
+   "key": "err.E_EMAIL_EXISTS",
+   "note": ""
+  },
+  {
+   "code": "E_NAME_TAKEN",
+   "ui": "inline",
+   "state": "S04",
+   "key": "err.E_NAME_TAKEN",
+   "note": ""
+  },
+  {
+   "code": "E_ACCOUNT_UNKNOWN",
+   "ui": "inline",
+   "state": "S03",
+   "key": "err.E_ACCOUNT_UNKNOWN",
+   "note": ""
+  },
+  {
+   "code": "E_PASS_WRONG",
+   "ui": "inline",
+   "state": "S03",
+   "key": "err.E_PASS_WRONG",
+   "note": "\"N deneme hakkın kaldı\" (detail.left)"
+  },
+  {
+   "code": "E_ACCOUNT_LOCKED",
+   "ui": "inline",
+   "state": "S03",
+   "key": "err.E_ACCOUNT_LOCKED",
+   "note": "\"5 dakika sonra tekrar dene\" (detail.until), \"Şifremi unuttum\" bağlantısı vurgulu"
+  },
+  {
+   "code": "E_CONFIRM_MISMATCH",
+   "ui": "inline",
+   "state": "Ayarlar.Hesap.Sil",
+   "key": "err.E_CONFIRM_MISMATCH",
+   "note": "Sil düğmesi pasif kalır"
+  },
+  {
+   "code": "E_IN_GAME",
+   "ui": "toast",
+   "state": "Ayarlar.Hesap",
+   "key": "err.E_IN_GAME",
+   "note": ""
+  },
+  {
+   "code": "E_STATUS_LONG",
+   "ui": "inline",
+   "state": "ProfilDüzenle",
+   "key": "err.E_STATUS_LONG",
+   "note": ""
+  },
+  {
+   "code": "E_FRAME_LOCKED",
+   "ui": "toast",
+   "state": "ProfilDüzenle",
+   "key": "err.E_FRAME_LOCKED",
+   "note": "Galaksi çerçevesi seviye 30"
+  },
+  {
+   "code": "E_SKU_UNKNOWN",
+   "ui": "toast",
+   "state": "Mağaza",
+   "key": "err.E_SKU_UNKNOWN",
+   "note": ""
+  },
+  {
+   "code": "E_ALREADY_OWNED",
+   "ui": "toast",
+   "state": "Mağaza.Görünüm",
+   "key": "err.E_ALREADY_OWNED",
+   "note": ""
+  },
+  {
+   "code": "E_NO_GEMS",
+   "ui": "toast",
+   "state": "Mağaza.Görünüm",
+   "key": "err.E_NO_GEMS",
+   "note": "eksik miktar detail.missing"
+  },
+  {
+   "code": "E_NOT_OWNED",
+   "ui": "toast",
+   "state": "Mağaza.Görünüm",
+   "key": "err.E_NOT_OWNED",
+   "note": ""
+  },
+  {
+   "code": "E_DAILY_CLAIMED",
+   "ui": "silent",
+   "state": "GünlükÖdül",
+   "key": "err.E_DAILY_CLAIMED",
+   "note": "düğme zaten pasif"
+  },
+  {
+   "code": "E_QUEST_UNKNOWN",
+   "ui": "silent",
+   "state": "GünlükÖdül",
+   "key": "err.E_QUEST_UNKNOWN",
+   "note": ""
+  },
+  {
+   "code": "E_QUEST_INCOMPLETE",
+   "ui": "silent",
+   "state": "GünlükÖdül",
+   "key": "err.E_QUEST_INCOMPLETE",
+   "note": ""
+  },
+  {
+   "code": "E_QUEST_CLAIMED",
+   "ui": "silent",
+   "state": "GünlükÖdül",
+   "key": "err.E_QUEST_CLAIMED",
+   "note": ""
+  },
+  {
+   "code": "E_USER_UNKNOWN",
+   "ui": "inline",
+   "state": "ArkadaşEkle",
+   "key": "err.E_USER_UNKNOWN",
+   "note": "\"bulunamadı\""
+  },
+  {
+   "code": "E_ALREADY_FRIENDS",
+   "ui": "inline",
+   "state": "ArkadaşEkle",
+   "key": "err.E_ALREADY_FRIENDS",
+   "note": "\"zaten arkadaşsınız\""
+  },
+  {
+   "code": "E_REQUEST_PENDING",
+   "ui": "inline",
+   "state": "ArkadaşEkle",
+   "key": "err.E_REQUEST_PENDING",
+   "note": ""
+  },
+  {
+   "code": "E_REQUEST_UNKNOWN",
+   "ui": "silent",
+   "state": "Arkadaşlar.İstekler",
+   "key": "err.E_REQUEST_UNKNOWN",
+   "note": ""
+  },
+  {
+   "code": "E_NOT_FRIENDS",
+   "ui": "silent",
+   "state": "Arkadaşlar",
+   "key": "err.E_NOT_FRIENDS",
+   "note": ""
+  },
+  {
+   "code": "E_ALREADY_SEATED",
+   "ui": "toast",
+   "state": "S09",
+   "key": "err.E_ALREADY_SEATED",
+   "note": ""
+  },
+  {
+   "code": "E_TABLE_NAME",
+   "ui": "inline",
+   "state": "S10",
+   "key": "err.E_TABLE_NAME",
+   "note": "Oluştur pasif"
+  },
+  {
+   "code": "E_PIN_FORMAT",
+   "ui": "inline",
+   "state": "S10",
+   "key": "err.E_PIN_FORMAT",
+   "note": ""
+  },
+  {
+   "code": "E_TABLE_OPTIONS",
+   "ui": "silent",
+   "state": "S10",
+   "key": "err.E_TABLE_OPTIONS",
+   "note": ""
+  },
+  {
+   "code": "E_NO_CHIPS",
+   "ui": "toast",
+   "state": "S09|S10|Masa.Hediye",
+   "key": "err.E_NO_CHIPS",
+   "note": "\"Yetersiz bakiye · X çip eksik\" (detail.missing)"
+  },
+  {
+   "code": "E_TABLE_CLOSED",
+   "ui": "dialog",
+   "state": "S09.MasaKapandı",
+   "key": "err.E_TABLE_CLOSED",
+   "note": ""
+  },
+  {
+   "code": "E_PIN_WRONG",
+   "ui": "shake",
+   "state": "S11",
+   "key": "err.E_PIN_WRONG",
+   "note": "PIN kutuları sallanır + hata"
+  },
+  {
+   "code": "E_TABLE_FULL",
+   "ui": "dialog",
+   "state": "S09.MasaDoldu",
+   "key": "err.E_TABLE_FULL",
+   "note": ""
+  },
+  {
+   "code": "E_TABLE_PLAYING",
+   "ui": "toast",
+   "state": "S09",
+   "key": "err.E_TABLE_PLAYING",
+   "note": "dereceli / botlara karşı masaya katılım"
+  },
+  {
+   "code": "E_CODE_FORMAT",
+   "ui": "inline",
+   "state": "S12",
+   "key": "err.E_CODE_FORMAT",
+   "note": ""
+  },
+  {
+   "code": "E_CODE_UNKNOWN",
+   "ui": "inline",
+   "state": "S12",
+   "key": "err.E_CODE_UNKNOWN",
+   "note": ""
+  },
+  {
+   "code": "E_SPECTATE_OFF",
+   "ui": "toast",
+   "state": "S09",
+   "key": "err.E_SPECTATE_OFF",
+   "note": ""
+  },
+  {
+   "code": "E_NOT_SEATED",
+   "ui": "silent",
+   "state": null,
+   "key": "err.E_NOT_SEATED",
+   "note": ""
+  },
+  {
+   "code": "E_NOT_OWNER",
+   "ui": "silent",
+   "state": "S13",
+   "key": "err.E_NOT_OWNER",
+   "note": ""
+  },
+  {
+   "code": "E_STATUS",
+   "ui": "silent",
+   "state": null,
+   "key": "err.E_STATUS",
+   "note": ""
+  },
+  {
+   "code": "E_SEAT_TAKEN",
+   "ui": "toast",
+   "state": "S13",
+   "key": "err.E_SEAT_TAKEN",
+   "note": ""
+  },
+  {
+   "code": "E_SEAT_EMPTY",
+   "ui": "silent",
+   "state": "S13",
+   "key": "err.E_SEAT_EMPTY",
+   "note": ""
+  },
+  {
+   "code": "E_TABLE_NOT_FULL",
+   "ui": "silent",
+   "state": "S13",
+   "key": "err.E_TABLE_NOT_FULL",
+   "note": "Başlat pasif"
+  },
+  {
+   "code": "E_USER_OFFLINE",
+   "ui": "silent",
+   "state": "S14",
+   "key": "err.E_USER_OFFLINE",
+   "note": "satır düğmesi pasif"
+  },
+  {
+   "code": "E_USER_BUSY",
+   "ui": "silent",
+   "state": "S14",
+   "key": "err.E_USER_BUSY",
+   "note": ""
+  },
+  {
+   "code": "E_INVITE_EXPIRED",
+   "ui": "toast",
+   "state": "S14|DavetKartı",
+   "key": "err.E_INVITE_EXPIRED",
+   "note": ""
+  },
+  {
+   "code": "E_ALREADY_QUEUED",
+   "ui": "silent",
+   "state": "Dereceli",
+   "key": "err.E_ALREADY_QUEUED",
+   "note": ""
+  },
+  {
+   "code": "E_MODE",
+   "ui": "silent",
+   "state": "Dereceli",
+   "key": "err.E_MODE",
+   "note": ""
+  },
+  {
+   "code": "E_PARTY_SIZE",
+   "ui": "silent",
+   "state": "Dereceli",
+   "key": "err.E_PARTY_SIZE",
+   "note": "HEMEN OYNA pasif"
+  },
+  {
+   "code": "E_PARTY_RANGE",
+   "ui": "toast",
+   "state": "Dereceli.Davet",
+   "key": "err.E_PARTY_RANGE",
+   "note": "±1 lig dışı"
+  },
+  {
+   "code": "E_MATCH_EXPIRED",
+   "ui": "toast",
+   "state": "Dereceli.MaçBulundu",
+   "key": "err.E_MATCH_EXPIRED",
+   "note": ""
+  },
+  {
+   "code": "E_NOT_QUEUED",
+   "ui": "silent",
+   "state": "Dereceli",
+   "key": "err.E_NOT_QUEUED",
+   "note": ""
+  },
+  {
+   "code": "E_SPECTATOR",
+   "ui": "silent",
+   "state": "Masa",
+   "key": "err.E_SPECTATOR",
+   "note": ""
+  },
+  {
+   "code": "E_DEALING",
+   "ui": "silent",
+   "state": "G02–G12",
+   "key": "err.E_DEALING",
+   "note": ""
+  },
+  {
+   "code": "E_NOT_DEALER",
+   "ui": "silent",
+   "state": "G05",
+   "key": "err.E_NOT_DEALER",
+   "note": ""
+  },
+  {
+   "code": "E_RACK_MISMATCH",
+   "ui": "resync",
+   "state": null,
+   "key": "err.E_RACK_MISMATCH",
+   "note": "resync gönder"
+  },
+  {
+   "code": "E_CHAT_OFF",
+   "ui": "silent",
+   "state": "T06",
+   "key": "err.E_CHAT_OFF",
+   "note": "sohbet paneli gizli"
+  },
+  {
+   "code": "E_CHAT_QUICK_ONLY",
+   "ui": "silent",
+   "state": "T06",
+   "key": "err.E_CHAT_QUICK_ONLY",
+   "note": "yazı alanı gizli"
+  },
+  {
+   "code": "E_CHAT_LENGTH",
+   "ui": "inline",
+   "state": "T06",
+   "key": "err.E_CHAT_LENGTH",
+   "note": ""
+  },
+  {
+   "code": "E_CHAT_QUICK_UNKNOWN",
+   "ui": "silent",
+   "state": "T06",
+   "key": "err.E_CHAT_QUICK_UNKNOWN",
+   "note": ""
+  },
+  {
+   "code": "E_GIFTS_OFF",
+   "ui": "silent",
+   "state": "T07",
+   "key": "err.E_GIFTS_OFF",
+   "note": "hediye düğmesi gizli"
+  },
+  {
+   "code": "E_GIFT_UNKNOWN",
+   "ui": "silent",
+   "state": "T07",
+   "key": "err.E_GIFT_UNKNOWN",
+   "note": ""
+  },
+  {
+   "code": "E_GIFT_TARGET",
+   "ui": "silent",
+   "state": "T07",
+   "key": "err.E_GIFT_TARGET",
+   "note": ""
+  },
+  {
+   "code": "E_NOT_YOUR_TURN",
+   "ui": "silent",
+   "state": "Masa",
+   "key": "err.E_NOT_YOUR_TURN",
+   "note": "taş ıstakaya döner"
+  },
+  {
+   "code": "E_PHASE",
+   "ui": "silent",
+   "state": "Masa",
+   "key": "err.E_PHASE",
+   "note": "taş ıstakaya döner"
+  },
+  {
+   "code": "E_HAND_OVER",
+   "ui": "silent",
+   "state": "Masa",
+   "key": "err.E_HAND_OVER",
+   "note": ""
+  },
+  {
+   "code": "E_TILE_NOT_IN_RACK",
+   "ui": "resync",
+   "state": null,
+   "key": "err.E_TILE_NOT_IN_RACK",
+   "note": ""
+  },
+  {
+   "code": "E_SIDE_EMPTY",
+   "ui": "silent",
+   "state": "Masa",
+   "key": "err.E_SIDE_EMPTY",
+   "note": ""
+  },
+  {
+   "code": "E_SIDE_RETURNED",
+   "ui": "toast",
+   "state": "T38",
+   "key": "err.E_SIDE_RETURNED",
+   "note": "geri bırakılan taş tekrar alınamaz"
+  },
+  {
+   "code": "E_SIDE_DISCARD",
+   "ui": "toast",
+   "state": "T38",
+   "key": "err.E_SIDE_DISCARD",
+   "note": "soldan alınan taş atılamaz"
+  },
+  {
+   "code": "E_SIDE_MUST_OPEN",
+   "ui": "toast",
+   "state": "T39",
+   "key": "err.E_SIDE_MUST_OPEN",
+   "note": "önce aç ya da geri bırak"
+  },
+  {
+   "code": "E_RETURN_INVALID",
+   "ui": "silent",
+   "state": "T39",
+   "key": "err.E_RETURN_INVALID",
+   "note": ""
+  },
+  {
+   "code": "E_DECK_EMPTY",
+   "ui": "silent",
+   "state": "Masa",
+   "key": "err.E_DECK_EMPTY",
+   "note": ""
+  },
+  {
+   "code": "E_MELD_INVALID",
+   "ui": "toast",
+   "state": "T40",
+   "key": "err.E_MELD_INVALID",
+   "note": "geçersiz per kırmızı çerçeve"
+  },
+  {
+   "code": "E_MELD_MIX",
+   "ui": "toast",
+   "state": "T40",
+   "key": "err.E_MELD_MIX",
+   "note": "seri/grup ile çift karışamaz"
+  },
+  {
+   "code": "E_MELD_NOT_FOUND",
+   "ui": "resync",
+   "state": null,
+   "key": "err.E_MELD_NOT_FOUND",
+   "note": ""
+  },
+  {
+   "code": "E_ALREADY_OPENED",
+   "ui": "silent",
+   "state": "Masa",
+   "key": "err.E_ALREADY_OPENED",
+   "note": ""
+  },
+  {
+   "code": "E_NOT_OPENED",
+   "ui": "toast",
+   "state": "T41",
+   "key": "err.E_NOT_OPENED",
+   "note": "önce elini açmalısın"
+  },
+  {
+   "code": "E_OPEN_MODE",
+   "ui": "toast",
+   "state": "T41",
+   "key": "err.E_OPEN_MODE",
+   "note": "çift açan seri/grup açamaz (seri açan çift açabilir)"
+  },
+  {
+   "code": "E_LAST_TILE",
+   "ui": "toast",
+   "state": "T40",
+   "key": "err.E_LAST_TILE",
+   "note": "ıstakada atılacak taş kalmalı"
+  },
+  {
+   "code": "E_ISLE_INVALID",
+   "ui": "silent",
+   "state": "Masa",
+   "key": "err.E_ISLE_INVALID",
+   "note": "taş ıstakaya döner"
+  },
+  {
+   "code": "E_ISLE_DISABLED",
+   "ui": "toast",
+   "state": "Masa",
+   "key": "err.E_ISLE_DISABLED",
+   "note": "bu masada işleme kapalı"
+  },
+  {
+   "code": "E_SWAP_INVALID",
+   "ui": "toast",
+   "state": "T49",
+   "key": "err.E_SWAP_INVALID",
+   "note": "okey kırmızı çerçeve, taş döner"
+  },
+  {
+   "code": "E_NO_UNDO",
+   "ui": "silent",
+   "state": "Masa",
+   "key": "err.E_NO_UNDO",
+   "note": ""
+  },
+  {
+   "code": "E_LEAVE_INVALID",
+   "ui": "silent",
+   "state": "Masa",
+   "key": "err.E_LEAVE_INVALID",
+   "note": ""
+  },
+  {
+   "code": "E_ACTION",
+   "ui": "silent",
+   "state": null,
+   "key": "err.E_ACTION",
+   "note": ""
+  },
+  {
+   "code": "E_SPEC_DUP",
+   "ui": "silent",
+   "state": null,
+   "key": "err.E_SPEC_DUP",
+   "note": "yalnız test"
+  },
+  {
+   "code": "E_RESET_CODE",
+   "ui": "inline",
+   "state": "S03.ŞifremiUnuttum",
+   "key": "err.E_RESET_CODE",
+   "note": "kod yanlış"
+  },
+  {
+   "code": "E_OAUTH_FAILED",
+   "ui": "toast",
+   "state": "S02",
+   "key": "err.E_OAUTH_FAILED",
+   "note": ""
+  },
+  {
+   "code": "E_SEAT_NOT_BOT",
+   "ui": "silent",
+   "state": null,
+   "key": "err.E_SEAT_NOT_BOT",
+   "note": "yalnız motor"
+  }
+ ]
+}

@@ -10,6 +10,7 @@
 <helmet>
 <script src="./g101-clock.js"></script>
 <script src="./planet-renderer.js"></script>
+<script type="module" src="./ships3d.js"></script>
 <script src="./starfield.js"></script>
 <script src="./g101-cursor.js"></script>
 <script src="./g101-rank.js"></script>
@@ -32,6 +33,8 @@ a{color:#FFC94A}a:hover{color:#FFE08A}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes iconShine{0%{transform:translateX(-14px) skewX(-20deg);opacity:0}8%{opacity:1}30%{transform:translateX(34px) skewX(-20deg);opacity:1}31%,100%{transform:translateX(34px) skewX(-20deg);opacity:0}}
+@keyframes itemShine{0%{left:-45%;opacity:0}8%{opacity:1}30%{left:125%;opacity:1}31%,100%{left:125%;opacity:0}}
+@keyframes dealShine{0%{left:-90px}60%,100%{left:calc(100% + 20px)}}
 @keyframes planetFloat{0%,100%{transform:translate(-50%,-50%) rotate(-16deg)}50%{transform:translate(-50%,-52%) rotate(-14deg)}}
 </style>
 </helmet>
@@ -48,7 +51,8 @@ a{color:#FFC94A}a:hover{color:#FFE08A}
             <div style="position:absolute;left:-148px;top:calc(-148px / var(--pf,1));width:296px;height:calc(296px / var(--pf,1));border-radius:50%;box-shadow:-3px -3px 14px -6px var(--atm),0 0 80px var(--pg)"></div>
             <div data-g101-id="menu.planetCanvas" style="position:absolute;left:-150px;top:-150px;width:300px;height:300px">{{ planetCanvas }}</div>
           </div>
-          <div style="position:absolute;inset:0;background:radial-gradient(ellipse 55% 45% at 50% 48%,rgba(0,0,0,.28),transparent 70%)"></div>
+          <div style="position:absolute;inset:0;background:radial-gradient(ellipse 55% 45% at 50% 48%,rgba(0,0,0,.14),transparent 70%)"></div>
+          <div data-g101-id="menu.ships" style="position:absolute;inset:0">{{ shipsCanvas }}</div>
         </div>
 
         <div style="position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:14px;padding:16px 24px">
@@ -172,7 +176,7 @@ a{color:#FFC94A}a:hover{color:#FFE08A}
         <div style="position:absolute;right:20px;bottom:14px;display:flex;align-items:center;gap:8px;font:700 11px var(--fB);color:var(--mt)">
           <div style="display:flex;align-items:center;gap:5px;opacity:.85"><div style="width:9px;height:9px;transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,var(--a1),var(--a2))"></div><span style="font:800 12px var(--fH);letter-spacing:1px;color:#F4F1E8">CDX</span><span style="letter-spacing:1.5px">GAMES</span></div>
           <div style="width:1px;height:10px;background:var(--mt);opacity:.4"></div>
-          <div style="opacity:.6">v0.4.0</div>
+          <div style="opacity:.6">v0.5.0</div>
         </div>
 
         </sc-if>
@@ -288,13 +292,14 @@ a{color:#FFC94A}a:hover{color:#FFE08A}
                           <sc-if value="{{ sec.open }}" hint-placeholder-val="{{ false }}">
                             <div style="padding:2px 14px 14px;animation:fadeIn .2s both">
                               <sc-if value="{{ sec.isView }}" hint-placeholder-val="{{ false }}">
-                                <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
-                                  <sc-for list="{{ lk.views }}" as="v" hint-placeholder-count="3">
+                                <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px">
+                                  <sc-for list="{{ lk.views }}" as="v" hint-placeholder-count="4">
                                     <div data-g101-id="menu.v.pick[{{ $index }}]" onClick="{{ v.pick }}" style="position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px;border-radius:14px;background:{{ v.bg }};box-shadow:{{ v.ring }};cursor:pointer;transition:background .15s" style-hover="background:var(--pnH)">
                                       <div style="width:96px;height:62px;border-radius:11px;background:var(--dp);display:grid;place-items:center;overflow:hidden">
                                         <sc-if value="{{ v.isSeat }}" hint-placeholder-val="{{ true }}"><svg width="96" height="62" viewBox="0 0 96 62"><path d="M26 16h44l16 30H10z" style="fill:var(--f1);stroke:var(--a1)" stroke-width="1.5"></path><rect x="16" y="46" width="64" height="10" rx="3" style="fill:var(--rim)"></rect><g style="fill:var(--tf1)"><rect x="20" y="40" width="6" height="8" rx="1.5"></rect><rect x="28" y="40" width="6" height="8" rx="1.5"></rect><rect x="36" y="40" width="6" height="8" rx="1.5"></rect><rect x="44" y="40" width="6" height="8" rx="1.5"></rect><rect x="52" y="40" width="6" height="8" rx="1.5"></rect><rect x="60" y="40" width="6" height="8" rx="1.5"></rect><rect x="68" y="40" width="6" height="8" rx="1.5"></rect></g></svg></sc-if>
                                         <sc-if value="{{ v.isMid }}" hint-placeholder-val="{{ false }}"><svg width="96" height="62" viewBox="0 0 96 62"><path d="M22 9h52l12 38H10z" style="fill:var(--f1);stroke:var(--a1)" stroke-width="1.5"></path><rect x="16" y="47" width="64" height="9" rx="3" style="fill:var(--rim)"></rect><g style="fill:var(--tf1)"><rect x="21" y="41" width="6" height="8" rx="1.5"></rect><rect x="29" y="41" width="6" height="8" rx="1.5"></rect><rect x="37" y="41" width="6" height="8" rx="1.5"></rect><rect x="45" y="41" width="6" height="8" rx="1.5"></rect><rect x="53" y="41" width="6" height="8" rx="1.5"></rect><rect x="61" y="41" width="6" height="8" rx="1.5"></rect><rect x="69" y="41" width="6" height="8" rx="1.5"></rect></g><rect x="40" y="22" width="16" height="10" rx="2" style="fill:var(--rim)" opacity=".6"></rect></svg></sc-if>
                                         <sc-if value="{{ v.isTop }}" hint-placeholder-val="{{ false }}"><svg width="96" height="62" viewBox="0 0 96 62"><rect x="24" y="5" width="48" height="48" rx="8" style="fill:var(--f1);stroke:var(--a1)" stroke-width="1.5"></rect><rect x="30" y="54" width="36" height="6" rx="2" style="fill:var(--rim)"></rect><rect x="15" y="15" width="6" height="28" rx="2" style="fill:var(--rim)"></rect><rect x="75" y="15" width="6" height="28" rx="2" style="fill:var(--rim)"></rect><rect x="30" y="0" width="36" height="4" rx="2" style="fill:var(--rim)"></rect><rect x="42" y="23" width="12" height="12" rx="2" style="fill:var(--tf1)"></rect></svg></sc-if>
+                                        <sc-if value="{{ v.is2d }}" hint-placeholder-val="{{ false }}"><svg width="96" height="62" viewBox="0 0 96 62"><rect x="22" y="3" width="52" height="34" rx="7" style="fill:var(--f1);stroke:var(--a1)" stroke-width="1.5"></rect><rect x="40" y="15" width="16" height="10" rx="2" style="fill:var(--rim)" opacity=".6"></rect><rect x="12" y="42" width="72" height="17" rx="3" style="fill:var(--rim)"></rect><g style="fill:var(--tf1)"><rect x="15" y="44" width="8" height="13" rx="1.5"></rect><rect x="25" y="44" width="8" height="13" rx="1.5"></rect><rect x="35" y="44" width="8" height="13" rx="1.5"></rect><rect x="45" y="44" width="8" height="13" rx="1.5"></rect><rect x="55" y="44" width="8" height="13" rx="1.5"></rect><rect x="65" y="44" width="8" height="13" rx="1.5"></rect><rect x="75" y="44" width="6" height="13" rx="1.5"></rect></g></svg></sc-if>
                                       </div>
                                       <div style="text-align:center"><div data-g101-id="menu.v.name[{{ $index }}]" style="font:700 15px var(--fH);white-space:nowrap">{{ v.name }}</div><div data-g101-id="menu.v.desc[{{ $index }}]" style="font:700 12px/1.3 var(--fB);color:var(--mt)">{{ v.desc }}</div></div>
                                     </div>
@@ -384,8 +389,11 @@ a{color:#FFC94A}a:hover{color:#FFE08A}
                 <div style="display:flex;align-items:center;gap:12px;padding:16px 28px;border-top:1px solid rgba(255,255,255,.07);background:rgba(0,0,0,.12)">
                   <div data-g101-id="menu.resetSettings" onClick="{{ resetSettings }}" style="font:700 14px var(--fB);color:var(--mt);cursor:pointer" style-hover="color:#F4F1E8">{{ t.reset }}</div>
                   <div style="flex:1"></div>
+                  <sc-if value="{{ dispTab }}" hint-placeholder-val="{{ false }}">
+                    <div data-g101-id="menu.dispNote" style="font:700 12.5px var(--fB);color:{{ dispNoteC }};white-space:nowrap">{{ dispNote }}</div>
+                  </sc-if>
                   <div data-g101-id="menu.closeSettings#3" onClick="{{ closeSettings }}" style="padding:12px 22px;border-radius:14px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);font:700 16px var(--fH);cursor:pointer" style-hover="filter:brightness(1.2)" style-active="transform:translateY(3px)">{{ t.cancel }}</div>
-                  <div data-g101-id="menu.closeSettings#4" onClick="{{ closeSettings }}" style="padding:12px 28px;border-radius:14px;background:linear-gradient(var(--a1),var(--a2));box-shadow:0 4px 0 var(--aS);font:700 16px var(--fH);color:var(--aT);cursor:pointer" style-hover="filter:brightness(1.08)" style-active="transform:translateY(3px);box-shadow:0 1px 0 var(--aS)">{{ t.save }}</div>
+                  <div data-g101-id="menu.closeSettings#4" onClick="{{ saveSettings }}" style="padding:12px 28px;border-radius:14px;background:linear-gradient(var(--a1),var(--a2));box-shadow:0 4px 0 var(--aS);font:700 16px var(--fH);color:var(--aT);cursor:pointer" style-hover="filter:brightness(1.08)" style-active="transform:translateY(3px);box-shadow:0 1px 0 var(--aS)">{{ t.save }}</div>
                 </div>
               </div>
             </div>
@@ -536,7 +544,7 @@ a{color:#FFC94A}a:hover{color:#FFE08A}
                 <sc-if value="{{ pnl.isShop }}" hint-placeholder-val="{{ false }}">
                   <div style="display:flex;flex-direction:column;gap:16px;flex:1;min-height:0">
                     <div style="position:relative;overflow:hidden;flex:none;display:flex;align-items:center;gap:18px;height:96px;padding:0 22px;border-radius:22px;background:linear-gradient(110deg,var(--a2),var(--a1));box-shadow:0 5px 0 var(--aS);color:var(--aT)">
-                      <div style="position:absolute;top:0;bottom:0;width:70px;background:rgba(255,255,255,.35);animation:shine 3.6s infinite"></div>
+                      <div style="position:absolute;top:0;bottom:0;left:-90px;width:70px;background:rgba(255,255,255,.35);transform:skewX(-20deg);animation:dealShine 3.6s infinite;pointer-events:none"></div>
                       <div style="position:relative;width:86px;height:64px;flex:none">
                         <div style="position:absolute;left:0;top:18px;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box;box-shadow:0 4px 0 rgba(0,0,0,.25)"></div>
                         <div style="position:absolute;left:24px;top:0;width:48px;height:48px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box;box-shadow:0 4px 0 rgba(0,0,0,.25)"></div>
@@ -559,22 +567,23 @@ a{color:#FFC94A}a:hover{color:#FFE08A}
                         <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:22px 14px 14px;border-radius:22px;background:var(--sd);box-shadow:{{ i.ring }};cursor:pointer;transition:transform .18s,background .18s" style-hover="transform:translateY(-5px);background:var(--pnH)">
                           <sc-if value="{{ i.pop }}" hint-placeholder-val="{{ false }}"><div data-g101-id="menu.i.popLabel[{{ $index }}]" style="position:absolute;top:0;left:50%;transform:translateX(-50%);padding:5px 14px;border-radius:0 0 12px 12px;background:linear-gradient(var(--a1),var(--a2));color:var(--aT);font:900 10px var(--fB);letter-spacing:1px;white-space:nowrap">{{ i.popLabel }}</div></sc-if>
                           <sc-if value="{{ i.bonus }}" hint-placeholder-val="{{ false }}"><div data-g101-id="menu.i.bonus[{{ $index }}]" style="position:absolute;top:14px;right:14px;padding:3px 8px;border-radius:8px;background:#3CCB6E;color:#fff;font:900 11px var(--fB)">{{ i.bonus }}</div></sc-if>
+                          <div style="flex:1"></div>
                           <div style="height:104px;width:100%;display:grid;place-items:center">
                             <sc-if value="{{ i.isCoin }}" hint-placeholder-val="{{ false }}">
                               <div style="position:relative;width:92px;height:72px;transform:scale({{ i.scale }})">
-                                <div style="position:absolute;left:0;top:26px;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box;box-shadow:0 4px 0 #8A5208"></div>
-                                <div style="position:absolute;left:46px;top:22px;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box;box-shadow:0 4px 0 #8A5208"></div>
-                                <div style="position:absolute;left:22px;top:0;width:50px;height:50px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box;box-shadow:0 4px 0 #8A5208,0 0 20px rgba(255,201,74,.45)"></div>
+                                <div style="position:absolute;left:0;top:26px;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box;overflow:hidden;box-shadow:0 4px 0 #8A5208"><div style="position:absolute;top:-30%;bottom:-30%;left:-45%;width:30%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent);transform:skewX(-20deg);animation:itemShine 3.2s .4s ease-in-out infinite;pointer-events:none"></div></div>
+                                <div style="position:absolute;left:46px;top:22px;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box;overflow:hidden;box-shadow:0 4px 0 #8A5208"><div style="position:absolute;top:-30%;bottom:-30%;left:-45%;width:30%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent);transform:skewX(-20deg);animation:itemShine 3.2s .8s ease-in-out infinite;pointer-events:none"></div></div>
+                                <div style="position:absolute;left:22px;top:0;width:50px;height:50px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box;overflow:hidden;box-shadow:0 4px 0 #8A5208,0 0 20px rgba(255,201,74,.45)"><div style="position:absolute;top:-30%;bottom:-30%;left:-45%;width:30%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent);transform:skewX(-20deg);animation:itemShine 3.2s 0s ease-in-out infinite;pointer-events:none"></div></div>
                               </div>
                             </sc-if>
                             <sc-if value="{{ i.isGem }}" hint-placeholder-val="{{ false }}">
                               <div style="position:relative;width:80px;height:72px;transform:scale({{ i.scale }})">
-                                <div style="position:absolute;left:14px;top:10px;width:46px;height:46px;transform:rotate(45deg);border-radius:10px;background:linear-gradient(135deg,#C8F6FF,#7FE3FF 40%,#3D7BFF);box-shadow:0 0 24px rgba(127,227,255,.6),inset -4px -4px 0 rgba(0,0,0,.15)"></div>
-                                <div style="position:absolute;left:56px;top:40px;width:20px;height:20px;transform:rotate(45deg);border-radius:5px;background:linear-gradient(135deg,#C8F6FF,#3D7BFF)"></div>
+                                <div style="position:absolute;left:14px;top:10px;width:46px;height:46px;transform:rotate(45deg);border-radius:10px;background:linear-gradient(135deg,#C8F6FF,#7FE3FF 40%,#3D7BFF);box-shadow:0 0 24px rgba(127,227,255,.6),inset -4px -4px 0 rgba(0,0,0,.15);overflow:hidden"><div style="position:absolute;top:-30%;bottom:-30%;left:-45%;width:30%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent);transform:skewX(-20deg);animation:itemShine 3.2s 0s ease-in-out infinite;pointer-events:none"></div></div>
+                                <div style="position:absolute;left:56px;top:40px;width:20px;height:20px;transform:rotate(45deg);border-radius:5px;background:linear-gradient(135deg,#C8F6FF,#3D7BFF);overflow:hidden"><div style="position:absolute;top:-30%;bottom:-30%;left:-45%;width:35%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent);transform:skewX(-20deg);animation:itemShine 3.2s .6s ease-in-out infinite;pointer-events:none"></div></div>
                               </div>
                             </sc-if>
                             <sc-if value="{{ i.isTile }}" hint-placeholder-val="{{ false }}">
-                              <div style="width:60px;height:82px;border-radius:11px;background:{{ i.face }};box-shadow:inset 0 -6px 0 {{ i.edge }},0 5px 0 {{ i.edge2 }},{{ i.glow }};display:flex;flex-direction:column;align-items:center;padding-top:8px;box-sizing:border-box;color:{{ i.col }};gap:5px"><svg width="25" height="42" viewBox="0 0 60 100" style="display:block;overflow:visible"><path d="M7 7H53L22 93" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"></path></svg><div style="width:11px;height:11px;border-radius:50%;background:{{ i.col }}"></div></div>
+                              <div style="position:relative;overflow:hidden;width:60px;height:82px;border-radius:11px;background:{{ i.face }};box-shadow:inset 0 -6px 0 {{ i.edge }},0 5px 0 {{ i.edge2 }},{{ i.glow }};display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:6px;box-sizing:border-box;color:{{ i.col }};gap:5px"><svg width="25" height="42" viewBox="0 0 60 100" style="display:block;overflow:visible"><path d="M7 7H53L22 93" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"></path></svg><div style="width:11px;height:11px;border-radius:50%;background:{{ i.col }}"></div><div style="position:absolute;top:-30%;bottom:-30%;left:-45%;width:28%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent);transform:skewX(-20deg);animation:itemShine 3.2s 0s ease-in-out infinite;pointer-events:none"></div></div>
                             </sc-if>
                           </div>
                           <div data-g101-id="menu.i.amount[{{ $index }}]" style="font:700 22px/1.15 var(--fH);text-align:center">{{ i.amount }}</div>
@@ -1017,7 +1026,7 @@ const SET_EN = { 'Oyun': 'Game', 'Ses': 'Sound', 'Görüntü': 'Display', 'Dil':
   'Otomatik sırala': 'Auto-sort', 'Yeni çekilen taş ıstakada uygun yere yerleşsin': 'Drawn tiles go to the right spot on your rack', 'Perleri vurgula': 'Highlight sets', 'Geçerli perlerin çevresi yeşil yansın': 'Valid sets glow green', 'Çift tıkla taş at': 'Double-click to discard', 'Sürüklemeden hızlı atış': 'Discard quickly without dragging', 'Masa sohbeti': 'Table chat', 'Masa içi mesaj ve emojiler görünsün': 'Show messages and emojis at the table',
   'Tur süresi uyarısı': 'Turn timer warning', 'Süre bitmeden kaç saniye önce uyarılsın': 'How many seconds before your time runs out', 'Taş boyutu': 'Tile size', 'Istakadaki taşların büyüklüğü': 'Size of the tiles on your rack', 'Küçük': 'Small', 'Orta': 'Medium', 'Büyük': 'Large',
   'Ana ses': 'Master volume', 'Tüm seslerin genel seviyesi': 'Overall level of all sounds', 'Müzik': 'Music', 'Menü ve masa müziği': 'Menu and table music', 'Efektler': 'Effects', 'Taş, zar ve buton sesleri': 'Tile, dice and button sounds', 'Taş sesleri': 'Tile sounds', 'Taş çekme ve atma sesi': 'Sound when drawing and discarding', 'Bildirim sesi': 'Notification sound', 'Sıra sende ve davet uyarıları': 'Your-turn and invite alerts',
-  'Arka plan hareketi': 'Background motion', 'Dönen gezegen ve kayan yıldızlar': 'Spinning planet and shooting stars', 'Çözünürlük': 'Resolution', 'Görüntü modu': 'Display mode', 'Tam ekran, çerçevesiz pencere veya pencere': 'Fullscreen, borderless or windowed', 'Tam ekran': 'Fullscreen', 'Çerçevesiz': 'Borderless', 'Pencere': 'Windowed', 'Ekran boyutu': 'Screen size', 'Efekt kalitesi': 'Effect quality', 'Düşük ayar eski bilgisayarlarda akıcılığı artırır': 'Lower settings run smoother on older computers', 'Düşük': 'Low', 'Yüksek': 'High',
+  'FPS göster': 'Show FPS', 'Oyunda sol üstte anlık kare hızı (FPS) görünsün': 'Show the live frame rate (FPS) in the top-left corner', 'Arka plan hareketi': 'Background motion', 'Dönen gezegen ve kayan yıldızlar': 'Spinning planet and shooting stars', 'Çözünürlük': 'Resolution', 'Görüntü modu': 'Display mode', 'Tam ekran, çerçevesiz pencere veya pencere': 'Fullscreen, borderless or windowed', 'Tam ekran': 'Fullscreen', 'Çerçevesiz': 'Borderless', 'Pencere': 'Windowed', 'Ekran boyutu': 'Screen size', 'Efekt kalitesi': 'Effect quality', 'Düşük ayar eski bilgisayarlarda akıcılığı artırır': 'Lower settings run smoother on older computers', 'Düşük': 'Low', 'Yüksek': 'High',
   'Arkadaşlık istekleri': 'Friend requests', 'Yeni istekler için bildirim al': 'Get notified about new requests', 'Masa davetleri': 'Table invites', 'Arkadaşların seni masaya çağırabilsin': 'Let friends invite you to their table', 'Türkiye': 'Turkey', 'Uluslararası': 'International' };
 function trDeep(o, d) {
   if (typeof o === 'string') return d[o] || o;
@@ -1104,10 +1113,13 @@ class Component extends DCLogic {
       this.syncFx();
     };
     start();
+    const startShips = () => { if (this._shDead || this.props.settingsOnly) return; if (!window.GalaxyShips || !this._shCv) { this._wait2 = setTimeout(startShips, 80); return; } try { this._sh = window.GalaxyShips.create(this._shCv); } catch (e) { console.warn('ships', e); } this.syncFx(); };
+    startShips();
   }
   syncFx() {
     const paused = !this.state.sv.motion;
     if (this._pr) { this._pr.set(this._pName, this._period, this._rs); this._pr.paused = paused; }
+    if (this._sh) { this._sh.set(this._rs, this._pName); this._sh.paused = paused; }
     (this._st || []).forEach((s, i) => { if (s) { s.set(this._tint, i === 0 ? this._rs : 1); s.paused = paused; } });
   }
   panelVals(lang) {
@@ -1337,7 +1349,7 @@ class Component extends DCLogic {
     const card = (on) => ({ bg: on ? 'var(--pnH)' : 'var(--dp)', ring: on ? 'inset 0 0 0 2px var(--a1),0 0 18px var(--gl)' : 'none' });
     const P = (o, a, k) => o[k] || a[k];
     const lk = {
-      views: LK.views.map((v, i) => ({ ...card(cur.view === v), isSeat: v === 'seat', isMid: v === 'mid', isTop: v === 'top', name: N.views[i][0], desc: N.views[i][1], pick: () => set({ view: v }) })),
+      views: LK.views.map((v, i) => ({ ...card(cur.view === v), isSeat: v === 'seat', isMid: v === 'mid', isTop: v === 'top', is2d: v === '2d', name: N.views[i][0], desc: N.views[i][1], pick: () => set({ view: v }) })),
       tables: LK.tables.map((k, i) => { const p = P(LK.TABLE_PREV, LK.TABLE_PREV_A, k); return { ...card(cur.tableSkin === k), name: N.tables[i][0], rim: p.rim, line: p.line, glow: p.glow, felt: LK.felt(k), pick: () => set({ tableSkin: k }) }; }),
       racks: LK.racks.map((k, i) => { const p = P(LK.RACK_PREV, LK.RACK_PREV_A, k); return { ...card(cur.rackSkin === k), name: N.racks[i][0], desc: N.racks[i][1], back: p.back, ledge: p.ledge, glow: p.glow, pick: () => set({ rackSkin: k }) }; }),
       tiles: LK.tiles.map((k, i) => ({ ...card(cur.tileSkin === k), name: N.tiles[i][0], ...LK.TILE_PREV[k], pick: () => set({ tileSkin: k }) })),
@@ -1373,9 +1385,10 @@ class Component extends DCLogic {
     const out = {
       settingsOpen: this.props.settingsOnly ? true : s.settingsOpen,
       openSettings: () => this.setState({ settingsOpen: true }),
-      closeSettings: () => { if (this.props.settingsOnly) { if (this.props.onCloseSettings) this.props.onCloseSettings(); return; } this.setState({ settingsOpen: false }); },
+      closeSettings: () => this.closeS(),
+      dispTab: tab === 2, applyDisp: () => this.applyDisp(), saveSettings: () => { this.applyDisp(); clearTimeout(this._dpT); this.setState({ dpOk: false }); this.closeS(); }, ...(() => { const dirty = this.dispDirty(), en = sv.lang === 'en'; return { applyLabel: en ? 'Apply' : 'Uygula', applyBg: dirty ? 'linear-gradient(var(--a1),var(--a2))' : 'var(--pnH)', applyFg: dirty ? 'var(--aT)' : 'var(--mt)', applySh: dirty ? 'var(--aS)' : 'var(--pnS)', applyCur: dirty ? 'pointer' : 'not-allowed', dispNote: dirty ? (en ? 'Takes effect on Save' : 'Kaydet ile geçerli olur') : '', dispNoteC: s.dpOk ? '#8EF0B0' : 'var(--mt)' }; })(),
       showMain: !this.props.settingsOnly, rootBg: this.props.settingsOnly ? 'transparent' : 'radial-gradient(ellipse 80% 70% at 50% 35%,var(--bg1) 0%,var(--bg2) 55%,var(--bg3) 100%)',
-      resetSettings: () => this.setState({ sv: { ...SET_DEFAULTS, lang: (this.props && this.props.lang) || SET_DEFAULTS.lang }, res: null }),
+      resetSettings: () => this.setState({ sv: { ...SET_DEFAULTS, lang: (this.props && this.props.lang) || SET_DEFAULTS.lang }, res: null, dp: null }),
       tabTitle: TABS[tab][0], tabSub: TABS[tab][1],
       setTabs: [0, 1, 2, 5, 3, 4].map((i) => [TABS[i][0], i]).map(([name, i]) => ({ name, pick: () => this.setState({ setTab: i }), bg: i === tab ? 'var(--pnH)' : 'transparent', bar: i === tab ? 'inset 4px 0 0 var(--a1)' : 'none', fg: i === tab ? '#F4F1E8' : 'var(--mt)', dot: i === tab ? 'var(--a1)' : 'var(--bd)' })),
       setToggles: [], setSliders: [], setSegs: [], showPlanetRow: false, showLang: tab === 3, showAccount: tab === 4, showMasa: tab === 5, ...this.masaVals(),
@@ -1389,12 +1402,28 @@ class Component extends DCLogic {
       out.setSliders = [sl('master', 'Ana ses', 'Tüm seslerin genel seviyesi', 0, 100, '%'), sl('music', 'Müzik', 'Menü ve masa müziği', 0, 100, '%'), sl('sfx', 'Efektler', 'Taş, zar ve buton sesleri', 0, 100, '%')];
       out.setToggles = [tg('tileSnd', 'Taş sesleri', 'Taş çekme ve atma sesi'), tg('notifSnd', 'Bildirim sesi', 'Sıra sende ve davet uyarıları')];
     } else if (tab === 2) {
-      out.setToggles = [tg('motion', 'Arka plan hareketi', 'Dönen gezegen ve kayan yıldızlar')];
-      out.setSegs = [seg('Görüntü modu', 'Tam ekran, çerçevesiz pencere veya pencere', ['Tam ekran', 'Çerçevesiz', 'Pencere'], this.state.wmode || 'Tam ekran', (o) => this.pickMode(o)), this.resRow(), this.fpsRow(), seg('Efekt kalitesi', 'Düşük ayar eski bilgisayarlarda akıcılığı artırır', ['Düşük', 'Orta', 'Yüksek'], sv.quality, (o) => upd('quality', o)), this.cursorRow()];
+      // Görüntü ayarları beklemeye alınır: ekran değişmez, yalnız Kaydet ile uygulanır (tam ekran, çözünürlük, kare hızı, kalite, imleç, FPS göster).
+      const D = this.dispCur(), stage = (k, v) => this.setState((x) => ({ dp: { ...(x.dp || {}), [k]: v }, dpOk: false })), stg = (k, name, desc) => ({ name, desc, bg: D[k] ? '#3CCB6E' : 'var(--dp)', x: D[k] ? '27px' : '3px', flip: () => stage(k, !D[k]) });
+      out.setToggles = [stg('motion', 'Arka plan hareketi', 'Dönen gezegen ve kayan yıldızlar'), stg('showFps', 'FPS göster', 'Oyunda sol üstte anlık kare hızı (FPS) görünsün')];
+      out.setSegs = [seg('Görüntü modu', 'Tam ekran, çerçevesiz pencere veya pencere', ['Tam ekran', 'Çerçevesiz', 'Pencere'], D.wmode, (o) => stage('wmode', o)), this.resRow(D.gres, (v) => stage('gres', v)), this.fpsRow(D.fps, (v) => stage('fps', v)), seg('Efekt kalitesi', 'Düşük ayar eski bilgisayarlarda akıcılığı artırır', ['Düşük', 'Orta', 'Yüksek'], D.quality, (o) => stage('quality', o)), this.cursorRow(D.cursor, (o) => stage('cursor', o))];
     } else if (tab === 4) {
       out.setToggles = [tg('friendReq', 'Arkadaşlık istekleri', 'Yeni istekler için bildirim al'), tg('invites', 'Masa davetleri', 'Arkadaşların seni masaya çağırabilsin')];
     }
     return out;
+  }
+  dispCur() { const s = this.state, C = window.G101Cursor, G = window.G101Settings; return { motion: s.sv.motion !== false, showFps: !!(G && G.get().showFps), wmode: s.wmode || 'Tam ekran', gres: s.gres, fps: s.fps ?? 'auto', quality: s.sv.quality, cursor: (C && C.mode) || 'Normal', ...(s.dp || {}) }; }
+  dispDirty() { const p = this.state.dp; if (!p) return false; const base = { ...this.dispCur(), ...Object.fromEntries(Object.keys(p).map((k) => [k, undefined])) }; const s = this.state, C = window.G101Cursor, G = window.G101Settings; const now = { motion: s.sv.motion !== false, showFps: !!(G && G.get().showFps), wmode: s.wmode || 'Tam ekran', gres: s.gres, fps: s.fps ?? 'auto', quality: s.sv.quality, cursor: (C && C.mode) || 'Normal' }; return Object.keys(p).some((k) => p[k] !== now[k]) && !!base; }
+  closeS() { this.setState({ dp: null, dpOk: false }); if (this.props.settingsOnly) { if (this.props.onCloseSettings) this.props.onCloseSettings(); return; } this.setState({ settingsOpen: false }); }
+  applyDisp() {
+    const p = this.state.dp; if (!p || !this.dispDirty()) return;
+    const G = window.G101Settings, C = window.G101Cursor;
+    if ('motion' in p || 'quality' in p) { const sv = { ...this.state.sv }; if ('motion' in p) sv.motion = p.motion; if ('quality' in p) sv.quality = p.quality; this.setState({ sv }); if (G) G.set({ ...('motion' in p ? { motion: p.motion } : {}), ...('quality' in p ? { quality: p.quality } : {}) }, 'menu'); }
+    if ('showFps' in p && G) G.set({ showFps: !!p.showFps }, 'menu');
+    if ('gres' in p) { this.setState({ gres: p.gres }); try { localStorage.setItem('galaxy101.gres', p.gres); } catch (e) {} }
+    if ('fps' in p) { this.setState({ fps: p.fps }); try { localStorage.setItem('galaxy101.fps', String(p.fps)); } catch (e) {} }
+    if ('cursor' in p && C) C.setMode(p.cursor);
+    if ('wmode' in p && p.wmode !== (this.state.wmode || 'Tam ekran')) this.pickMode(p.wmode);
+    this.setState({ dp: null, dpOk: true }); clearTimeout(this._dpT); this._dpT = setTimeout(() => this.setState({ dpOk: false }), 2400);
   }
   detectHz() {
     const ts = []; let last = 0;
@@ -1422,11 +1451,11 @@ class Component extends DCLogic {
     list.push(mw + '×' + mh);
     return list;
   }
-  resRow() {
+  resRow(cur0, pick0) {
     const en = this.state.sv.lang === 'en', opts = this.resOpts(), nat = opts[opts.length - 1];
-    let cur = this.state.gres; if (!cur || !opts.includes(cur)) cur = nat;
+    let cur = cur0 !== undefined ? cur0 : this.state.gres; if (!cur || !opts.includes(cur)) cur = nat;
     const i = opts.indexOf(cur);
-    const pick = (v) => { this.setState({ gres: v }); try { localStorage.setItem('galaxy101.gres', v); } catch (e) {} };
+    const pick = pick0 || ((v) => { this.setState({ gres: v }); try { localStorage.setItem('galaxy101.gres', v); } catch (e) {} });
     const go = (d) => { const j = i + d; if (j >= 0 && j < opts.length) pick(opts[j]); };
     const isNat = cur === nat;
     return { isSeg: false, isStep: true, opts: [], name: en ? 'Resolution' : 'Çözünürlük',
@@ -1443,21 +1472,21 @@ class Component extends DCLogic {
       else if (!fs && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
     } catch (e) {}
   }
-  cursorRow() {
-    const C = window.G101Cursor, cur = (C && C.mode) || 'Normal';
+  cursorRow(cur0, pick0) {
+    const C = window.G101Cursor, cur = cur0 || (C && C.mode) || 'Normal';
     return { name: 'İmleç', desc: cur === 'Sistem' ? 'İşletim sisteminin imleci kullanılır' : 'Galaxy 101 imleci · tema rengini izler', isSeg: true, isStep: false,
-      opts: ['Normal', 'Büyük', 'Sistem'].map((o) => { const on = o === cur; return { label: o, bg: on ? 'linear-gradient(var(--a1),var(--a2))' : 'transparent', fg: on ? 'var(--aT)' : 'var(--mt)', sh: on ? '0 3px 0 var(--aS)' : 'none', pick: () => { C && C.setMode(o); this.forceUpdate(); } }; }) };
+      opts: ['Normal', 'Büyük', 'Sistem'].map((o) => { const on = o === cur; return { label: o, bg: on ? 'linear-gradient(var(--a1),var(--a2))' : 'transparent', fg: on ? 'var(--aT)' : 'var(--mt)', sh: on ? '0 3px 0 var(--aS)' : 'none', pick: () => { if (pick0) return pick0(o); C && C.setMode(o); this.forceUpdate(); } }; }) };
   }
   fpsOpts() {
     const hz = this.state.hz || 60;
     const set = [30, 60, 90, 120, 144, 165, 240].filter((v) => v < hz);
     return ['auto', ...set, hz];
   }
-  fpsRow() {
+  fpsRow(cur0, pick0) {
     const en = this.state.sv.lang === 'en', hz = this.state.hz, opts = this.fpsOpts();
-    let cur = this.state.fps ?? 'auto'; if (cur !== 'auto' && !opts.includes(cur)) cur = 'auto';
+    let cur = cur0 !== undefined ? cur0 : this.state.fps ?? 'auto'; if (cur !== 'auto' && !opts.includes(cur)) cur = 'auto';
     const i = opts.indexOf(cur), hzL = hz ? `${hz} Hz` : '…';
-    const pick = (v) => { this.setState({ fps: v }); try { localStorage.setItem('galaxy101.fps', String(v)); } catch (e) {} };
+    const pick = pick0 || ((v) => { this.setState({ fps: v }); try { localStorage.setItem('galaxy101.fps', String(v)); } catch (e) {} });
     const go = (d) => { const j = i + d; if (j >= 0 && j < opts.length) pick(opts[j]); };
     const max = en ? `Monitor ${hzL}` : `Monitör ${hzL}`;
     return { isSeg: false, isStep: true, opts: [], name: en ? 'Frame rate' : 'Kare hızı',
@@ -1466,7 +1495,7 @@ class Component extends DCLogic {
       prev: () => go(-1), next: () => go(1), prevOp: i > 0 ? 1 : 0.3, nextOp: i < opts.length - 1 ? 1 : 0.3, prevCur: i > 0 ? 'pointer' : 'not-allowed', nextCur: i < opts.length - 1 ? 'pointer' : 'not-allowed',
       key: (e) => { if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); } if (e.key === 'ArrowRight') { e.preventDefault(); go(1); } } };
   }
-  componentWillUnmount() { clearTimeout(this._sw); if (this._unsubS) this._unsubS(); this._hzDead = true; cancelAnimationFrame(this._hzRaf); window.removeEventListener('keydown', this._key); clearTimeout(this._wait); if (this._pr) this._pr.destroy(); (this._st || []).forEach((s) => s && s.destroy()); }
+  componentWillUnmount() { clearTimeout(this._sw); if (this._unsubS) this._unsubS(); this._hzDead = true; cancelAnimationFrame(this._hzRaf); window.removeEventListener('keydown', this._key); clearTimeout(this._wait); if (this._pr) this._pr.destroy(); this._shDead = true; clearTimeout(this._wait2); if (this._sh) this._sh.destroy(); (this._st || []).forEach((s) => s && s.destroy()); }
   // Gezegen teması geçişi: eski gezegen kısa bir geri çekilişten sonra sol alta savrulup küçülerek kaybolur,
   // yeni gezegen sağ üstten süzülüp hafif taşarak yerine oturur; ortada ışık halkası yayılır. (anim: menu.planetSwap)
   planetSwap() {
@@ -1474,7 +1503,8 @@ class Component extends DCLogic {
     if (this._swapG) { this._swapG.remove(); this._swapG = null; }
     const g = document.createElement('canvas'); g.width = cv.width; g.height = cv.height;
     try { g.getContext('2d').drawImage(cv, 0, 0); } catch (e) { return; }
-    Object.assign(g.style, { position: 'absolute', left: '-150px', top: '-150px', width: '300px', height: '300px', pointerEvents: 'none' });
+    const cw = parseFloat(cv.style.width) || 300;
+    Object.assign(g.style, { position: 'absolute', left: (-cw / 2) + 'px', top: '-150px', width: cw + 'px', height: '300px', pointerEvents: 'none' });
     const ring = document.createElement('div');
     Object.assign(ring.style, { position: 'absolute', left: '-170px', top: '-170px', width: '340px', height: '340px', borderRadius: '50%', pointerEvents: 'none', boxShadow: '0 0 0 3px var(--a1), 0 0 40px 8px var(--pg)', opacity: '0' });
     anchor.appendChild(g); anchor.appendChild(ring); this._swapG = g;
@@ -1540,6 +1570,7 @@ class Component extends DCLogic {
     if (!this._cvEl) {
       this._cvEl = h('canvas', { ref: (el) => { this._cv = el; }, style: { position: 'absolute', left: 0, top: 0, width: '300px', height: '300px', display: 'block' } });
       this._stCv = [];
+      this._shEl = h('canvas', { ref: (el) => { this._shCv = el; }, style: { position: 'absolute', left: 0, top: 0, width: '1280px', height: '720px', display: 'block' } });
       this._stEl = [0, 1, 2].map((i) => h('canvas', { ref: (el) => { this._stCv[i] = el; }, style: { position: 'absolute', left: 0, top: 0, width: '1280px', height: '720px', display: 'block' } }));
     }
     const lang = this.state.sv.lang === 'en' ? 'en' : 'tr', L = STR[lang];
@@ -1555,7 +1586,7 @@ class Component extends DCLogic {
       t: { ...L, rank: rk.label },
       rk,
       themeVars,
-      planetCanvas: this._cvEl,
+      planetCanvas: this._cvEl, shipsCanvas: this._shEl,
       starsA: this._stEl[0], starsB: this._stEl[1], starsC: this._stEl[2],
       resLabel: resKey,
       planetName: L.pn[pName],

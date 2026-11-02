@@ -1,4 +1,4 @@
-/* Galaxy 101 · g101-sound.js · v0.4.0
+/* Galaxy 101 · g101-sound.js · v0.5.0
  * Ses olayları: tek katalog (EVENTS) + oynatıcı. Oyun kodu yalnız G101Sound.play('olay.id', {seat}) çağırır.
  * Prototipte sesler WebAudio ile anlık sentezlenir (geçici); Unity'de her olay EVENTS[id].file adlı kliple çalınır.
  * Ayarlar (G101Settings): master, sfx, music (0–100), tileSnd (taş sesleri), chatSnd / notifSnd (sohbet ve bildirim sesleri).
@@ -46,7 +46,7 @@
     if (ev.cat === 'chat' && (s.chatSnd === false || s.notifSnd === false)) return 0;
     return Math.max(0, Math.min(1, v));
   }
-  function ac() { if (!ctx) { var C = window.AudioContext || window.webkitAudioContext; if (!C) return null; ctx = new C(); } if (ctx.state === 'suspended') ctx.resume(); return ctx; }
+  function ac() { if (!ctx) { var C = window.AudioContext || window.webkitAudioContext; if (!C) return null; ctx = new C(); } if (ctx.state === 'suspended' && !(API && API.muted)) ctx.resume(); return ctx; }
   ['pointerdown', 'keydown'].forEach(function (t) { window.addEventListener(t, function () { if (!MUTE) ac(); }, { capture: true, passive: true }); });
   // --- geçici sentez parçaları ---
   function env(c, out, t, a, d, peak) { var g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); g.connect(out); return g; }
@@ -162,6 +162,6 @@
       return wav(b);
     });
   }
-  var API = { EVENTS: EVENTS, CAT: CAT, MUSIC: MUSIC, play: play, setMusic: setMusic, render: render, musicLen: musicLen, log: log, muted: false };
+  var API = { EVENTS: EVENTS, CAT: CAT, MUSIC: MUSIC, play: play, setMusic: setMusic, render: render, musicLen: musicLen, log: log, muted: false, setMuted: function (v) { API.muted = !!v; if (ctx) { try { v ? ctx.suspend() : ctx.resume(); } catch (e) {} } } };   // setMuted: tüm sesi (efekt + müzik) kapatır/açar
   window.G101Sound = API;
 })();

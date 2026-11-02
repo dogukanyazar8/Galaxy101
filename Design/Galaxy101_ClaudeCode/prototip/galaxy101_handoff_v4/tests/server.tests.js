@@ -1,4 +1,4 @@
-/* Galaxy 101 · tests/server.tests.js · v0.4.0
+/* Galaxy 101 · tests/server.tests.js · v0.5.0
  * mockServer akış testleri (sanal saat). Gerçek sunucu aynı senaryoları entegrasyon testi olarak koşar.
  * Her test: { id, title, run(env) → hata dizisi }.
  */

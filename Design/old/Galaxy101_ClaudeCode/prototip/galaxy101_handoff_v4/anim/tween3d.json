@@ -1,0 +1,278 @@
+{
+ "version": "0.4.0",
+ "source": "table3d.js",
+ "units": "süre saniye; uzunluk sahne birimi (1 ≈ 1 m, masa yüzeyi y = TY); açı radyan",
+ "dist": "p0 ile hedef arasındaki 3D uzaklık",
+ "clamp": "cl(v,a,b) = min(max(v,a),b)",
+ "tileTween": {
+  "common": "konum: lerp(p0,p1,e2) + y += sin(π·min(1,u))·arc; dönüş: slerp(q0,q1, easeInOutCubic(min(1,u·1.15))); e = easeOutCubic(u); e2 = slide ? e : easeInOutCubic(u); gecikme t0 = now + delay",
+  "modes": {
+   "travel": {
+    "use": "çekme, atma, okey alma, geri topla/bırak (varsayılan)",
+    "dur": "cl(0.42 + dist·0.38, 0.42, 0.85)",
+    "arc": "cl(dist·0.42, 0.05, 0.24)",
+    "roll": "yatay yön ekseni etrafında sin(π·u)·roll; roll = (hash(id+\"roll\") − 0.5)·0.7"
+   },
+   "slide": {
+    "use": "ıstaka içi kaydırma",
+    "dur": "cl(0.18 + dist·0.6, 0.18, 0.34)",
+    "arc": 0,
+    "position": "easeOutCubic",
+    "rotation": "easeOutCubic"
+   },
+   "lay": {
+    "use": "yere açma, işleme",
+    "dur": "cl(0.3 + dist·0.3, 0.3, 0.55)",
+    "arc": 0
+   },
+   "deal": {
+    "use": "balya dizilişi, ıstakaya dizilme",
+    "dur": "0.58 + cl(dist·0.22, 0, 0.28)",
+    "path": "kübik bezier p0 → c1 → c2 → p1, b = easeInOutCubic(u)",
+    "c1": "p0 + (sx·0.05, 0.09 + hash(id+\"y\")·0.04, 0); sx = hash(id+\"x\") − 0.5",
+    "c2": "lerp(p1, p0, 0.22); y = max(y, p1.y) + 0.07",
+    "rotation": "slerp(q0,q1,easeInOutCubic(min(1,u·1.1))) · Y etrafında (1−b)·spin; spin = ±π/2 (hash(id+\"s\") > 0.5)"
+   },
+   "block": {
+    "use": "balya dağıtımı, fazla taş, orta deste",
+    "dur": "cl(0.5 + dist·0.25, 0.5, 0.8) (ya da verilen)",
+    "arc": "cl(0.03 + dist·0.05, 0.03, 0.07)"
+   },
+   "drop": {
+    "use": "gösterge balyasının düşmesi",
+    "dur": "0.3 (ya da verilen)",
+    "slide": true
+   },
+   "flip": {
+    "use": "gösterge çevirme",
+    "dur": "1.1 (ya da verilen)",
+    "path": "bezier; out = −p0 yatay yönü; c1 = p0 + out·0.1 + (0,0.03,0); c2 = p1 + out·0.05 + (0,0.2,0)",
+    "spin": 0
+   },
+   "nuke": {
+    "use": "okeyle bitiş / elden bitiş fırlatması",
+    "dur": 1.75,
+    "apex": "lerp(p0, (0,TY,0), 0.4); y = TY + 0.58",
+    "phases": [
+     {
+      "u": [
+       0,
+       0.46
+      ],
+      "position": "lerp(p0, apex, easeOutCubic(u/0.46))",
+      "scale": "1 + e·0.15",
+      "fx": "kıvılcım #FFE08A (%50 kare)"
+     },
+     {
+      "u": [
+       0.46,
+       0.62
+      ],
+      "position": "apex + titreşim ±0.002·v, y += sin(v·π)·0.015",
+      "scale": "1.15 + v·0.25",
+      "fx": "kıvılcım #FFF1C0 / #FF8A3D her kare"
+     },
+     {
+      "u": [
+       0.62,
+       1
+      ],
+      "position": "lerp(apex, p1, v³)",
+      "scale": "1.4 − v³·0.4",
+      "fx": "kıvılcım #FFB347 + #FFF1C0, duman %80"
+     }
+    ],
+    "rotation": "slerp(q0,q1,easeInOutCubic(min(1,U·1.3))) · Y etrafında (1 − easeInOutCubic(U))·5π",
+    "onLand": "nukeFx"
+   }
+  }
+ },
+ "dice": {
+  "pre": "0.42 (ikinci zar; masadaki yerinden atış noktasına easeInOutCubic, y += sin(π·u)·0.05)",
+  "dur": 1.45,
+  "fall": "lerp(start, land, 1 − (1−u)^2.4)",
+  "bounces": 3,
+  "hide": "0.4 s ölçek 1 → 0 (easeInOutCubic), y += 0.0015/kare",
+  "returnsMs": "round((pre + 1.45)·1000)"
+ },
+ "camera": {
+  "blend": "lerp(a,b, easeInOutCubic(u)), varsayılan 1.6 s",
+  "idleSway": "x += sin(t·0.21)·0.006; y += sin(t·0.33)·0.004",
+  "shake": "shakeUntil − now kadar; genlik (kalan)·0.03 rastgele",
+  "fov": 40,
+  "views": {
+   "deal": {
+    "pos": [
+     0,
+     2.05,
+     1.62
+    ],
+    "target": [
+     0,
+     0.66,
+     -0.12
+    ]
+   },
+   "seat": {
+    "pos": [
+     0,
+     1.55,
+     1.62
+    ],
+    "target": [
+     0,
+     0.62,
+     -0.25
+    ]
+   },
+   "mid": {
+    "pos": [
+     0,
+     2.08,
+     1.62
+    ],
+    "target": [
+     0,
+     0.6,
+     -0.06
+    ]
+   },
+   "top": {
+    "pos": [
+     0,
+     2.6,
+     1.42
+    ],
+    "target": [
+     0,
+     0.58,
+     0.16
+    ]
+   },
+   "over": {
+    "pos": [
+     0,
+     3.2,
+     2.95
+    ],
+    "target": [
+     0,
+     0.45,
+     -0.3
+    ]
+   }
+  },
+  "cues": [
+   {
+    "at": "bekleme odası",
+    "view": "over",
+    "dur": 0
+   },
+   {
+    "at": "geri sayım",
+    "view": "player (ayar)",
+    "dur": 3
+   },
+   {
+    "at": "dealStart",
+    "view": "deal",
+    "dur": 1.2
+   }
+  ]
+ },
+ "gifts": {
+  "fly": {
+   "dur": "1.35 (roket 5.6)",
+   "path": "lerp(start,end,easeInOutCubic(u)) ya da eğri üzerinde k = smoothstepMix(u)",
+   "scale": "s·(0.35 + 0.65·min(1, u·2.2)) (roket: s·min(1, 0.4 + u·6))",
+   "spin": "yaw + (1 − easeInOutCubic(u))·3π; z eğimi sin(u·π)·0.25",
+   "fx": "kıvılcım #FFE08A %35; roket: kıvılcım #FFB347/#FF6A3D/#FFF1C0 + duman %55"
+  },
+  "land": {
+   "dur": 0.5,
+   "squash": "sin(π·v)·(1 − v)",
+   "fx": "burst + wave (roket #FFB347, diğer #FFE08A)"
+  },
+  "scale": "GIFT_SCALE[kind] || 1.4"
+ },
+ "fx": {
+  "burst": {
+   "life": 0.9,
+   "particles": "n (vars. 28)",
+   "speed": "spd (vars. 0.55)",
+   "gravity": "−1.4 /s²"
+  },
+  "wave": {
+   "life": 0.7,
+   "ring": "iç 0.85 / dış 1, 56 parça, additive",
+   "scale": "0.03 + easeOutCubic(u)·0.16",
+   "opacity": "0.9·(1 − u)"
+  },
+  "shock": {
+   "life": "0.9 (verilen)",
+   "ring": "iç 0.9 / dış 1, 72 parça",
+   "scale": "0.02 + easeOutCubic(u)·max",
+   "opacity": "0.95·(1 − u)^1.4"
+  },
+  "fire": {
+   "scale": "0.04 + easeOutQuart(u)·max",
+   "opacity": "op·(1 − u)^1.6"
+  },
+  "smoke": {
+   "scale": "0.02 + easeOutCubic(u)·0.11",
+   "opacity": "0.32·(1 − u)",
+   "rise": "0.03 /s"
+  },
+  "trail": {
+   "scale": "s0·(0.35 + 0.65·(1 − u))",
+   "opacity": "op·(1 − u)²"
+  },
+  "plume": {
+   "count": "34 (14 gövde + 20 başlık)",
+   "life": "2.6 + rnd·0.9",
+   "drag": "gövde 0.975 / başlık 0.982 kare başına"
+  },
+  "dealFx": {
+   "at": "dealStart",
+   "seq": [
+    "wave #FFD964 @0",
+    "wave tema a1 @170 ms",
+    "wave #FFFFFF @340 ms",
+    "burst #FFE08A ×50 hız 0.7",
+    "burst tema a1 ×30 hız 0.5"
+   ],
+   "deckSpin": "0.9 s, Y 0 → 2π easeInOutCubic, y += sin(π·u)·0.05",
+   "holoBoost": "2.6 s"
+  },
+  "nukeFx": {
+   "light": "PointLight #FFB25A, 90·e^(−3t), 2 s, menzil 4.5",
+   "shake": "1.2 s",
+   "glows": [
+    "#FFFFFF 0.55/0.9 s",
+    "#FFD58A 1.2/1.4 s",
+    "#FF6A2E 1.8/1.1 s op 0.85"
+   ],
+   "shocks": [
+    "#FFFFFF life 0.7 max 1.5 @0",
+    "#FFD964 1.0/1.25 @110 ms",
+    "tema a1 1.3/1.0 @240 ms"
+   ],
+   "bursts": [
+    "#FFE08A ×140 hız 1.4",
+    "#FF7A3D ×90 hız 1.0",
+    "#FFFFFF ×50 hız 1.8"
+   ],
+   "tileHop": "masadaki her taş: gecikme dist·0.35 s, genlik 0.012 + 0.05·max(0, 1 − dist/1.1), süre 0.55 s",
+   "deckSpin": true,
+   "holoBoost": "3.2 s"
+  },
+  "celebrate": {
+   "winSpot": "SpotLight #FFE7A3, 3.4 s; şiddet 40·sin(π·min(1, u·1.6)), u > 0.6 ise ·(1 − u)/0.4",
+   "bursts": "8 patlama, renkler #FFD964 #FF6A9A #7FE3FF #8EF0B0 #B79CFF, çift sıradakilerde wave"
+  }
+ },
+ "ambient": {
+  "led": "emissive 2.2 + sin(t·1.2)·0.25",
+  "holo": "Y dönüş 0.12 rad/s (+ boost·1.6), opaklık 0.34 + sin(t·0.9)·0.05"
+ }
+}

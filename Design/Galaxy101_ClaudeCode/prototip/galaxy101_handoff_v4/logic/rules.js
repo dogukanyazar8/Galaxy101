@@ -1,4 +1,4 @@
-/* Galaxy 101 · logic/rules.js · v0.4.0
+/* Galaxy 101 · logic/rules.js · v0.5.0
  * Saf 101 Okey kural motoru. DOM, three.js, zamanlayıcı ve Math.random YOK.
  * Rastgelelik yalnız durumdaki seed'li RNG'den (mulberry32) gelir.
  * Arayüz ve mockServer yalnız bu modülü çağırır. C#'a satır satır çevrilecek şekilde yazıldı:
@@ -7,7 +7,7 @@
 (function (root) {
   'use strict';
 
-  var VERSION = '0.4.0';
+  var VERSION = '0.5.0';
   var COLORS = ['R', 'B', 'Y', 'K'];            // Kırmızı, Mavi, Sarı, Siyah
   var C = {
     OPEN_RUN_MIN: 101,        // R-20
@@ -91,7 +91,8 @@
     var o = opts || {};
     return {
       v: VERSION,
-      opts: { mode: o.mode === 'pairs' ? 'pairs' : 'solo', hands: o.hands || 5, penalties: o.penalties !== false, isle: o.isle !== false, katlama: !!o.katlama, katlamaPartner: o.katlamaPartner !== false },
+      opts: { mode: o.mode === 'pairs' ? 'pairs' : 'solo', hands: o.hands || 5, penalties: o.penalties !== false, isle: o.isle !== false, katlama: !!o.katlama, katlamaPartner: o.katlamaPartner !== false,
+        penOkey: o.penOkey !== false, penIslek: o.penIslek !== false, penOpener: o.penOpener !== false },   // R-41/R-42/R-43 masa seçenekleri (lobi "Kural özelleştirme")
       seed: seed >>> 0, rng: { s: seed >>> 0 },
       status: 'lobby', handNo: 0, dealer: -1,
       totals: [0, 0, 0, 0], history: [],
@@ -244,7 +245,7 @@
   function addSides(H, meld, tile) {
     var out = [];
     if (meld.kind === 'pair') return out;
-    if (meld.kind === 'group') { if (groupKeepsOkeys(H.okey, meld.tiles, meld.tiles.concat([tile]))) out.push('post'); return out; }
+    if (meld.kind === 'group') { if (analyzeMeld(H.okey, 'group', meld.tiles.concat([tile])).ok) out.push('post'); return out; }
     if (analyzeMeld(H.okey, 'run', [tile].concat(meld.tiles)).ok) out.push('pre');
     if (analyzeMeld(H.okey, 'run', meld.tiles.concat([tile])).ok) out.push('post');
     return out;
@@ -252,20 +253,7 @@
   function swapFits(H, meld, index, tile) {
     if (meld.kind === 'pair' || isOkey(H.okey, tile) || !isOkey(H.okey, meld.tiles[index])) return false;
     var t2 = meld.tiles.slice(); t2[index] = tile;
-    if (meld.kind === 'group') {                                                         // R08/R09: yalnız okeyin temsil ettiği taş; diğer okey yüzünü korur
-      var was = analyzeMeld(H.okey, 'group', meld.tiles), real = realOf(H.okey, tile);
-      if (!was.ok || was.repr[index].c !== real.c || was.repr[index].n !== real.n) return false;
-      return groupKeepsOkeys(H.okey, meld.tiles, t2);
-    }
     return analyzeMeld(H.okey, meld.kind, t2).ok;
-  }
-  // R08: gruptaki okey masaya konduğu andaki yüzünü korur; onu başka renge çevirecek değişiklik reddedilir.
-  function groupKeepsOkeys(ok, before, after) {
-    var a = analyzeMeld(ok, 'group', after); if (!a.ok) return false;
-    var b = analyzeMeld(ok, 'group', before); if (!b.ok) return true;
-    for (var i = 0; i < before.length; i++)
-      if (isOkey(ok, before[i]) && isOkey(ok, after[i]) && (a.repr[i].c !== b.repr[i].c || a.repr[i].n !== b.repr[i].n)) return false;
-    return true;
   }
   function isIslek(H, tile) {
     for (var m = 0; m < H.melds.length; m++) {
@@ -433,7 +421,7 @@
     snap(H);
     var ids = placeMelds(H, k, a.melds);
     H.opened[k] = total; H.openMode[k] = c.mode; H.openedTurn[k] = T.n;
-    if (T.sideTake && c.used[T.sideTake] && T.sideMust) {                                        // R-43 açtıran taş
+    if (S.opts.penOpener !== false && T.sideTake && c.used[T.sideTake] && T.sideMust) {                                        // R-43 açtıran taş
       var m = null; for (var i = 0; i < H.melds.length; i++) if (idxOf(H.melds[i].tiles, T.sideTake) >= 0) m = H.melds[i];
       var v = tileValueInMeld(H, m, T.sideTake);
       T.pending.push({ seat: leftOf(k), code: 'P_OPENED_WITH', amount: v * C.OPENED_WITH_X, by: k, tile: T.sideTake, value: v });
@@ -514,13 +502,13 @@
       if (!H.opened[k]) return err('E_NOT_OPENED');
       commitPending(S, ev);
       H.finishTile = a.tile;
-      ev.push({ e: 'finished', seat: k, tile: a.tile });
+      ev.push({ e: 'finished', seat: k, tile: a.tile, fx: a.fx || null });   // fx: oyuncunun seçtiği bitiş efekti (yalnız görsel; herkese yayınlanır)
       return endHand(S, k, ev);
     }
     H.discards[k].push(a.tile);
     ev.push({ e: 'discarded', seat: k, tile: a.tile });
-    if (isOkey(ok, a.tile)) addPenalty(S, { seat: k, code: 'P_OKEY_DISCARD', amount: C.PENALTY, by: k, tile: a.tile }, ev);      // R-42
-    else if (S.opts.isle && isIslek(H, a.tile)) addPenalty(S, { seat: k, code: 'P_ISLEK', amount: C.PENALTY, by: k, tile: a.tile }, ev);  // R-41
+    if (isOkey(ok, a.tile)) { if (S.opts.penOkey !== false) addPenalty(S, { seat: k, code: 'P_OKEY_DISCARD', amount: C.PENALTY, by: k, tile: a.tile }, ev); }      // R-42
+    else if (S.opts.isle && S.opts.penIslek !== false && isIslek(H, a.tile)) addPenalty(S, { seat: k, code: 'P_ISLEK', amount: C.PENALTY, by: k, tile: a.tile }, ev);  // R-41
     commitPending(S, ev);
     if (!H.deck.length) return endHand(S, -1, ev);                                               // R-55 taş bitti
     var n = nextOf(k);
@@ -537,11 +525,6 @@
     if (T.phase === 'play' && T.sideMust && idxOf(H.racks[k], T.sideTake) >= 0) { r = doReturnSide(S, ev); if (r) return r; }
     if (H.turn.phase === 'draw') { r = doDraw(S, { src: 'deck' }, ev); if (r) return r; }
     var id = autoDiscardTile(S, k);
-    if (id == null && H.turn.sideTake != null) {                                         // yalnız yandan alınan taş kaldı (R-32 atılamaz): geri ver, desteden çek
-      r = doReturnSide(S, ev); if (r) return r;
-      r = doDraw(S, { src: 'deck' }, ev); if (r) return r;
-      id = autoDiscardTile(S, k);
-    }
     return doDiscard(S, { tile: id }, ev);
   }
 

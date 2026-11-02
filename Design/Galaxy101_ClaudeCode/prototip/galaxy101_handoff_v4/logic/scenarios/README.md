@@ -1,4 +1,4 @@
-# logic/scenarios · senaryolar · v0.4.0
+# logic/scenarios · senaryolar · v0.5.0
 
 Sunucu senaryosu, ilk elin dağıtımını sabitler; gerisi gerçek motor, gerçek botlar ve gerçek tören ile oynanır.
 

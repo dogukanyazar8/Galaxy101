@@ -64,7 +64,7 @@ $('go').onclick = async () => {
   $('st').textContent = `${ok}/${list.length} döküm alındı`;
   $('dl').disabled = !ok; $('go').disabled = false;
 };
-$('dl').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ version: '0.4.0', seed: 42, states: all }, null, 1)], { type: 'application/json' })); a.download = 'layout-all.json'; a.click(); };
+$('dl').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ version: '0.5.0', seed: 42, states: all }, null, 1)], { type: 'application/json' })); a.download = 'layout-all.json'; a.click(); };
 if (new URLSearchParams(location.search).get('auto') === '1') { const o = new URLSearchParams(location.search).get('only'); if (o) $('only').value = o; $('go').click(); }
 </script>
 </body>

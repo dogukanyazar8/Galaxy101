@@ -1,0 +1,17 @@
+{
+ "version": "0.5.0",
+ "files": [
+  "deal.json",
+  "copies.json",
+  "melds.json",
+  "isle.json",
+  "open.json",
+  "side.json",
+  "penalties.json",
+  "scoring.json",
+  "turns.json",
+  "match.json",
+  "katlama.json",
+  "scenarios.json"
+ ]
+}

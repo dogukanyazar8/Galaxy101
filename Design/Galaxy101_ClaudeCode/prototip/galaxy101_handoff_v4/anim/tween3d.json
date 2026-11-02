@@ -1,5 +1,5 @@
 {
- "version": "0.4.0",
+ "version": "0.5.0",
  "source": "table3d.js",
  "units": "süre saniye; uzunluk sahne birimi (1 ≈ 1 m, masa yüzeyi y = TY); açı radyan",
  "dist": "p0 ile hedef arasındaki 3D uzaklık",

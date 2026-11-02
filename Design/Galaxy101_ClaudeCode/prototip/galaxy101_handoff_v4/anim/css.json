@@ -1,5 +1,5 @@
 {
- "version": "0.4.0",
+ "version": "0.5.0",
  "unit": "ms; konumlar 1280×720 tasarım pikseli; yüzde = anahtar kare konumu",
  "note": "Tüm CSS @keyframes ve kullanım yerleri, oyun sayfası ve içe aktardığı DC dosyalarından otomatik çıkarıldı. element = aynı etiketteki data-g101-id; null ise near en yakın önceki kimlik.",
  "dynamic": {

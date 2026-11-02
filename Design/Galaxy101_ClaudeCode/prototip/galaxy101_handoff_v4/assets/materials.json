@@ -1,5 +1,5 @@
 {
- "version": "0.4.0",
+ "version": "0.5.0",
  "source": "table3d.js · tiles3d.js · racks3d.js · gifts3d.js",
  "units": "three.js PBR (metalness/roughness). Unity URP Lit: metallic = metalness, smoothness = 1 − roughness; clearcoat → URP Complex Lit Clear Coat.",
  "table": [

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0b0e17;font-family:Nunito,system-ui,sans-serif;color:#F4F1E8}
+a{color:#FFC94A}a:hover{color:#FFE08A}
+.dv-turn{background:#0b0e17;padding:40px 44px 40px;border-bottom:1px solid rgba(255,255,255,.07)}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#FFC94A;color:#1a1200;border-radius:4px;text-decoration:none}
+.dv-tname{font:700 15px/1.2 Nunito,sans-serif;color:#F4F1E8}
+.dv-desc{font:600 13px/1.55 Nunito,sans-serif;color:#9aa6c4;max-width:900px;margin:0 0 22px}
+.dv-opts{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:10px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(255,255,255,.1);color:#F4F1E8;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:600 12px/1.3 Nunito,sans-serif;color:#9aa6c4}
+.dv-card{border-radius:10px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.dv-opt:target .dv-oid{background:#FFC94A;color:#1a1200}
+@keyframes dealIn{from{opacity:0;transform:translateY(-200px) rotate(-25deg) scale(.6)}to{opacity:1;transform:none}}
+@keyframes load{from{width:4%}to{width:100%}}
+@keyframes floatA{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-12px) rotate(var(--r,0deg))}}
+@keyframes ping{0%{transform:scale(.3);opacity:.9}100%{transform:scale(1.6);opacity:0}}
+@keyframes spinS{to{transform:rotate(360deg)}}
+@keyframes popScaleC{0%{transform:translate(-50%,-50%) scale(0)}70%{transform:translate(-50%,-50%) scale(1.05)}100%{transform:translate(-50%,-50%) scale(1)}}
+@keyframes popScale{0%{transform:scale(0)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes pulseG{0%,100%{box-shadow:0 6px 0 #B86E0F,0 0 0 0 rgba(255,201,74,.6)}50%{box-shadow:0 6px 0 #B86E0F,0 0 0 14px rgba(255,201,74,0)}}
+@keyframes shine{0%{transform:translateX(-160%) skewX(-20deg)}60%,100%{transform:translateX(420%) skewX(-20deg)}}
+@keyframes slideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+@keyframes flyUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-160px) scale(.5)}}
+@keyframes twinkle{0%,100%{opacity:.2}50%{opacity:1}}
+</style>
+</helmet>
+
+<section class="dv-turn" id="t1">
+  <div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Galaxy 101 · Diğer ekranlar</span></div>
+  <p class="dv-desc">Açılış, giriş, salon seçimi, eşleşme, profil ve liderlik, arkadaşlar, mağaza, günlük ödül, ayarlar ve kurallar. Giriş ekranındaki TR/EN düğmesi, salon sekmeleri, günlük ödülde "Topla" ve ayarlardaki anahtarlar tıklanabilir.</p>
+  <div class="dv-opts">
+
+    <!-- 1i -->
+    <div class="dv-opt" id="1i">
+      <div class="dv-olabel"><a class="dv-oid" href="#1i">1i</a>Açılış / yükleme · taşlar düşerek logo olur (tıkla: tekrar)</div>
+      <div onClick="{{ replaySplash }}" class="dv-card" style="width:1280px;height:720px;position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#1E3573,#0A1532 70%);cursor:pointer">
+        <div key="{{ splashKey }}" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
+          <div style="display:flex;gap:14px">
+            <sc-for list="{{ splashTiles }}" as="t" hint-placeholder-count="3">
+              <div style="width:100px;height:140px;border-radius:15px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -9px 0 #D9C9A2,0 7px 0 #A8925F,0 20px 34px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;padding-top:10px;box-sizing:border-box;font:700 84px/1 Fredoka;color:{{ t.col }};animation:dealIn .7s {{ t.del }} cubic-bezier(.3,1.4,.5,1) both">{{ t.n }}<div style="width:17px;height:17px;border-radius:50%;background:{{ t.col }};margin-top:4px"></div></div>
+            </sc-for>
+          </div>
+          <div style="font:700 68px/1 Fredoka;letter-spacing:8px;color:#FFC94A;text-shadow:0 5px 0 #8A4E06;animation:popScale .5s .9s both">GALAXY</div>
+          <div style="width:360px;height:14px;border-radius:7px;background:#0A1430;margin-top:50px;overflow:hidden;box-shadow:inset 0 2px 0 rgba(0,0,0,.4)"><div style="height:100%;border-radius:7px;background:linear-gradient(90deg,#F5A623,#FFE08A);animation:load 3s 1s ease-out both"></div></div>
+          <div style="font:800 13px Nunito;color:#9DB0DE">Masalar hazırlanıyor…</div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:30px;text-align:center;font:700 13px Nunito;color:#9DB0DE">İpucu: Gösterge taşının bir üstü okeydir ve her taşın yerine geçer.</div>
+        <div style="position:absolute;right:22px;bottom:14px;font:700 11px Nunito;color:#5C6E9E">v0.4.0</div>
+      </div>
+    </div>
+
+    <!-- 1j -->
+    <div class="dv-opt" id="1j">
+      <div class="dv-olabel"><a class="dv-oid" href="#1j">1j</a>Giriş / kayıt · misafir, Google, e-posta · TR/EN</div>
+      <div class="dv-card" style="width:1280px;height:720px;position:relative;overflow:hidden;background:#0D1A3D;display:grid;grid-template-columns:1fr 520px">
+        <div style="position:relative;background:radial-gradient(ellipse at 40% 50%,#244A9E,#0D1A3D 75%);display:flex;flex-direction:column;justify-content:center;padding:0 80px;gap:14px">
+          <div style="position:absolute;right:60px;top:90px;--r:12deg;animation:floatA 3.4s infinite;width:76px;height:106px;border-radius:12px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -6px 0 #D9C9A2,0 5px 0 #A8925F;font:700 62px/96px Fredoka;text-align:center;color:#E8A317">13</div>
+          <div style="position:absolute;right:170px;bottom:110px;--r:-16deg;animation:floatA 3.4s .6s infinite;width:76px;height:106px;border-radius:12px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -6px 0 #D9C9A2,0 5px 0 #A8925F;font:700 62px/96px Fredoka;text-align:center;color:#D7263D">5</div>
+          <div style="display:flex;align-items:center;gap:14px"><div style="font:700 80px/1 Fredoka;color:#FFC94A;text-shadow:0 6px 0 #8A4E06">GALAXY</div><div style="font:700 38px Fredoka;background:#FF5E6C;padding:2px 14px;border-radius:14px;transform:rotate(-6deg);box-shadow:0 5px 0 #C23E4A">101</div></div>
+          <div style="font:700 22px/1.4 Nunito;color:#C9D6FF;max-width:420px">{{ L.tag }}</div>
+        </div>
+        <div style="background:#0A1532;padding:56px 56px;display:flex;flex-direction:column;gap:14px;justify-content:center">
+          <div style="display:flex;align-self:flex-end;background:#14254F;border-radius:12px;padding:4px">
+            <div onClick="{{ setTR }}" style="font:800 13px Nunito;padding:6px 14px;border-radius:9px;cursor:pointer;background:{{ trBg }};color:{{ trFg }}">TR</div>
+            <div onClick="{{ setEN }}" style="font:800 13px Nunito;padding:6px 14px;border-radius:9px;cursor:pointer;background:{{ enBg }};color:{{ enFg }}">EN</div>
+          </div>
+          <div style="font:700 34px Fredoka;margin-top:10px">{{ L.title }}</div>
+          <div style="font:700 15px Nunito;color:#9DB0DE;margin-bottom:12px">{{ L.sub }}</div>
+          <div style="position:relative;overflow:hidden;height:62px;border-radius:18px;background:linear-gradient(#FFD964,#F5A623);animation:pulseG 2.2s infinite;display:grid;place-items:center;font:700 22px Fredoka;color:#3A1F00;cursor:pointer" style-active="transform:translateY(4px)"><div style="position:absolute;left:0;top:0;bottom:0;width:50px;background:rgba(255,255,255,.4);animation:shine 3s infinite"></div>{{ L.guest }}</div>
+          <div style="height:58px;border-radius:18px;background:#fff;box-shadow:0 5px 0 #A9B4D0;display:flex;align-items:center;justify-content:center;gap:12px;font:700 19px Fredoka;color:#1B2340;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none"><div style="width:22px;height:22px;border-radius:50%;border:4px solid #3D7BFF;border-right-color:#3CCB6E;border-bottom-color:#FFC94A;border-left-color:#FF5E6C;box-sizing:border-box"></div>{{ L.google }}</div>
+          <div style="height:58px;border-radius:18px;background:#3D7BFF;box-shadow:0 5px 0 #2148B0;display:grid;place-items:center;font:700 19px Fredoka;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">{{ L.email }}</div>
+          <div style="font:700 12px/1.5 Nunito;color:#7385B5;margin-top:14px">{{ L.terms }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1k -->
+    <div class="dv-opt" id="1k">
+      <div class="dv-olabel"><a class="dv-oid" href="#1k">1k</a>Salon / masa seçimi · mod sekmeleri · bahis salonları · özel oda kur</div>
+      <div class="dv-card" style="width:1280px;height:720px;position:relative;overflow:hidden;background:#0D1A3D;padding:20px 26px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="width:44px;height:44px;border-radius:14px;background:#22397A;box-shadow:0 4px 0 #0A1430;display:grid;place-items:center;font:700 22px Fredoka;cursor:pointer">‹</div>
+          <div style="font:700 28px Fredoka">Salonlar</div>
+          <div style="display:flex;gap:6px;background:#0A1532;border-radius:16px;padding:5px;margin-left:16px">
+            <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="6">
+              <div onClick="{{ t.pick }}" style="font:700 15px Fredoka;padding:8px 16px;border-radius:12px;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }};transition:background .15s">{{ t.name }}</div>
+            </sc-for>
+          </div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:8px;background:#0A1430;border-radius:999px;padding:5px 12px 5px 6px"><div style="width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)"></div><div style="font:700 16px Fredoka">125.400</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px">
+          <sc-for list="{{ salons }}" as="s" hint-placeholder-count="5">
+            <div style="position:relative;overflow:hidden;height:150px;border-radius:22px;background:{{ s.bg }};box-shadow:0 6px 0 {{ s.sh }};padding:16px;box-sizing:border-box;cursor:pointer;transition:transform .15s;animation:slideIn .4s {{ s.del }} both" style-hover="transform:translateY(-5px)">
+              <div style="position:absolute;right:-14px;bottom:-26px;width:110px;height:110px;border-radius:50%;border:14px dashed rgba(255,255,255,.18)"></div>
+              <div style="font:900 11px Nunito;letter-spacing:1px;color:rgba(255,255,255,.85)">{{ s.tier }}</div>
+              <div style="font:700 34px/1.1 Fredoka;color:#fff">{{ s.bet }}</div>
+              <div style="font:800 12px Nunito;color:rgba(255,255,255,.85)">Min. {{ s.min }}</div>
+              <div style="position:absolute;left:16px;bottom:14px;font:800 12px Nunito;color:#fff;background:rgba(0,0,0,.22);padding:4px 10px;border-radius:999px">{{ s.online }}</div>
+              <sc-if value="{{ s.locked }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;background:rgba(10,21,50,.55);display:grid;place-items:center"><div style="font:900 12px Nunito;background:#8B5CF6;padding:6px 12px;border-radius:10px">VIP gerekli</div></div></sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 330px;gap:16px;flex:1;min-height:0">
+          <div style="background:#0A1532;border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center"><div style="font:700 18px Fredoka">Açık masalar · Orta salon</div><div style="margin-left:auto;font:800 12px Nunito;color:#9DB0DE">Boş yeri olanlar önce</div></div>
+            <sc-for list="{{ tables }}" as="t" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:16px;background:#14254F;border-radius:16px;padding:10px 14px">
+                <div style="font:700 16px Fredoka;width:90px">Masa {{ t.no }}</div>
+                <div style="display:flex;gap:6px">
+                  <sc-for list="{{ t.seats }}" as="z" hint-placeholder-count="4"><div style="width:34px;height:34px;border-radius:50%;background:{{ z.bg }};border:2px dashed {{ z.bd }};box-sizing:border-box;display:grid;place-items:center;font:700 12px Fredoka">{{ z.ini }}</div></sc-for>
+                </div>
+                <div style="font:800 13px Nunito;color:#9DB0DE">{{ t.info }}</div>
+                <div style="margin-left:auto;font:700 15px Fredoka;padding:8px 18px;border-radius:12px;background:{{ t.btnBg }};box-shadow:0 4px 0 {{ t.btnSh }};cursor:pointer">{{ t.btn }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="background:#14254F;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 6px 0 #07102A">
+            <div style="font:700 20px Fredoka">Özel oda kur</div>
+            <div style="height:44px;border-radius:12px;background:#0A1532;font:700 14px/44px Nunito;padding:0 14px;color:#C9D6FF">Mert'in masası</div>
+            <div style="height:44px;border-radius:12px;background:#0A1532;font:700 14px/44px Nunito;padding:0 14px;color:#C9D6FF;display:flex;justify-content:space-between"><div>••••</div><div style="color:#9DB0DE;font-size:12px">Şifre</div></div>
+            <div style="display:flex;align-items:center;gap:10px"><div style="font:800 13px Nunito;color:#9DB0DE;flex:1">Bahis</div><div style="width:34px;height:34px;border-radius:10px;background:#22397A;display:grid;place-items:center;font:700 18px Fredoka">−</div><div style="font:700 18px Fredoka;width:70px;text-align:center">10.000</div><div style="width:34px;height:34px;border-radius:10px;background:#22397A;display:grid;place-items:center;font:700 18px Fredoka">+</div></div>
+            <div style="display:flex;gap:6px"><div style="flex:1;text-align:center;font:700 13px Fredoka;padding:7px;border-radius:10px;background:#3D7BFF">Tekli</div><div style="flex:1;text-align:center;font:700 13px Fredoka;padding:7px;border-radius:10px;background:#0A1532;color:#9DB0DE">Eşli</div><div style="flex:1;text-align:center;font:700 13px Fredoka;padding:7px;border-radius:10px;background:#0A1532;color:#9DB0DE">Katlamalı</div></div>
+            <div style="margin-top:auto;height:52px;border-radius:16px;background:linear-gradient(#FFD964,#F5A623);box-shadow:0 5px 0 #B86E0F;display:grid;place-items:center;font:700 19px Fredoka;color:#3A1F00;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">Odayı kur ve davet et</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1l -->
+    <div class="dv-opt" id="1l">
+      <div class="dv-olabel"><a class="dv-oid" href="#1l">1l</a>Eşleşme bekleme · radar · koltuklar doluyor</div>
+      <div class="dv-card" style="width:1280px;height:720px;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 42%,#1E3A80,#0A1532 65%)">
+        <div style="position:absolute;left:50%;top:300px;width:560px;height:560px;margin:-280px 0 0 -280px">
+          <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(255,201,74,.5);animation:ping 2.4s infinite"></div>
+          <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(255,201,74,.5);animation:ping 2.4s .8s infinite"></div>
+          <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(255,201,74,.5);animation:ping 2.4s 1.6s infinite"></div>
+          <div style="position:absolute;inset:80px;border-radius:50%;background:conic-gradient(from 0deg,rgba(255,201,74,.35),transparent 70deg);animation:spinS 2s linear infinite"></div>
+          <div style="position:absolute;inset:80px;border-radius:50%;border:2px solid rgba(255,255,255,.08)"></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;top:56px;text-align:center">
+          <div style="font:700 40px Fredoka">Rakipler aranıyor</div>
+          <div style="font:800 15px Nunito;color:#9DB0DE;margin-top:4px">Tekli · Orta salon · Bahis 5.000 · <span style="color:#FFC94A">00:{{ waitSec }}</span></div>
+        </div>
+        <div style="position:absolute;left:50%;top:300px;transform:translate(-50%,-50%);display:grid;grid-template-columns:repeat(2,130px);gap:26px">
+          <sc-for list="{{ seats }}" as="z" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+              <div style="width:100px;height:100px;border-radius:50%;background:{{ z.bg }};border:4px {{ z.bs }} {{ z.bd }};box-sizing:border-box;display:grid;place-items:center;font:700 32px Fredoka;animation:{{ z.anim }}">{{ z.ini }}</div>
+              <div style="font:700 15px Fredoka;color:{{ z.fg }}">{{ z.name }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="position:absolute;left:50%;bottom:60px;transform:translateX(-50%);display:flex;gap:14px">
+          <div style="font:700 18px Fredoka;padding:14px 30px;border-radius:16px;background:#22397A;box-shadow:0 5px 0 #0A1430;cursor:pointer">İptal</div>
+          <div style="font:700 18px Fredoka;padding:14px 30px;border-radius:16px;background:#3CCB6E;box-shadow:0 5px 0 #22914A;color:#062B14;cursor:pointer">Botlarla başla</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1m -->
+    <div class="dv-opt" id="1m">
+      <div class="dv-olabel"><a class="dv-oid" href="#1m">1m</a>Profil + liderlik tablosu</div>
+      <div class="dv-card" style="width:1280px;height:720px;position:relative;overflow:hidden;background:#0D1A3D;display:grid;grid-template-columns:420px 1fr;gap:20px;padding:22px;box-sizing:border-box">
+        <div style="background:#14254F;border-radius:26px;padding:22px;display:flex;flex-direction:column;gap:16px;box-shadow:0 6px 0 #07102A">
+          <div style="display:flex;align-items:center;gap:16px">
+            <div style="position:relative;width:110px;height:110px">
+              <div style="position:absolute;inset:-6px;border-radius:50%;background:conic-gradient(#FFC94A,#FF6B6B,#8B5CF6,#3D7BFF,#FFC94A);animation:spinS 6s linear infinite"></div>
+              <div style="position:absolute;inset:0;border-radius:50%;background:#FF8A5B;border:4px solid #14254F;display:grid;place-items:center;font:700 38px Fredoka">MK</div>
+              <div style="position:absolute;right:-4px;bottom:0;width:34px;height:34px;border-radius:10px;background:#22397A;display:grid;place-items:center;font:700 16px Fredoka;box-shadow:0 3px 0 #0A1430">✎</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font:700 26px Fredoka">Mert K.</div>
+              <div style="display:flex;gap:6px"><div style="font:900 11px Nunito;background:#8B5CF6;padding:3px 8px;border-radius:7px">VIP 2</div><div style="font:900 11px Nunito;background:#FFC94A;color:#3A1F00;padding:3px 8px;border-radius:7px">Altın II</div></div>
+              <div style="font:800 12px Nunito;color:#9DB0DE">Seviye 24 · Üye: Mart 2026</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+            <sc-for list="{{ stats }}" as="s" hint-placeholder-count="6">
+              <div style="background:#0A1532;border-radius:16px;padding:12px;text-align:center"><div style="font:700 22px Fredoka;color:{{ s.c }}">{{ s.v }}</div><div style="font:800 10px Nunito;color:#9DB0DE;letter-spacing:.5px">{{ s.k }}</div></div>
+            </sc-for>
+          </div>
+          <div style="font:900 11px Nunito;color:#9DB0DE;letter-spacing:1px">ROZETLER</div>
+          <div style="display:flex;gap:10px">
+            <sc-for list="{{ badges }}" as="b" hint-placeholder-count="5">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;width:64px;opacity:{{ b.op }}"><div style="width:44px;height:44px;transform:rotate(45deg);border-radius:10px;background:{{ b.c }};box-shadow:0 4px 0 rgba(0,0,0,.3)"></div><div style="font:800 10px/1.2 Nunito;text-align:center;color:#C9D6FF;margin-top:4px">{{ b.k }}</div></div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#0A1532;border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="font:700 26px Fredoka">Liderlik</div>
+            <div style="display:flex;gap:6px;background:#14254F;border-radius:14px;padding:4px;margin-left:auto">
+              <div style="font:700 14px Fredoka;padding:7px 14px;border-radius:10px;background:#FFC94A;color:#3A1F00">Haftalık</div>
+              <div style="font:700 14px Fredoka;padding:7px 14px;border-radius:10px;color:#9DB0DE">Sezon</div>
+              <div style="font:700 14px Fredoka;padding:7px 14px;border-radius:10px;color:#9DB0DE">Arkadaşlar</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+            <sc-for list="{{ board }}" as="p" hint-placeholder-count="7">
+              <div style="display:flex;align-items:center;gap:14px;background:{{ p.bg }};border-radius:14px;padding:9px 14px;animation:slideIn .4s {{ p.del }} both;box-shadow:{{ p.ring }}">
+                <div style="width:34px;height:34px;border-radius:50%;background:{{ p.mc }};display:grid;place-items:center;font:700 16px Fredoka;color:{{ p.mf }}">{{ p.rank }}</div>
+                <div style="width:38px;height:38px;border-radius:50%;background:{{ p.av }};display:grid;place-items:center;font:700 14px Fredoka">{{ p.ini }}</div>
+                <div style="font:700 17px Fredoka;flex:1">{{ p.name }}</div>
+                <div style="font:800 12px Nunito;color:#9DB0DE">{{ p.league }}</div>
+                <div style="font:700 18px Fredoka;color:#FFC94A;width:90px;text-align:right">{{ p.pts }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1n -->
+    <div class="dv-opt" id="1n">
+      <div class="dv-olabel"><a class="dv-oid" href="#1n">1n</a>Arkadaşlar / davet · hediye gönderme</div>
+      <div class="dv-card" style="width:1280px;height:720px;position:relative;overflow:hidden;background:#0D1A3D;display:grid;grid-template-columns:1fr 440px;gap:20px;padding:22px;box-sizing:border-box">
+        <div style="background:#0A1532;border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="font:700 26px Fredoka">Arkadaşlar</div>
+            <div style="display:flex;gap:6px;background:#14254F;border-radius:14px;padding:4px;margin-left:16px">
+              <div style="font:700 14px Fredoka;padding:7px 14px;border-radius:10px;background:#3D7BFF">Tümü · 24</div>
+              <div style="font:700 14px Fredoka;padding:7px 14px;border-radius:10px;color:#9DB0DE;display:flex;gap:6px;align-items:center">İstekler <span style="background:#FF5E6C;color:#fff;font:900 11px Nunito;padding:1px 6px;border-radius:6px">2</span></div>
+            </div>
+            <div style="margin-left:auto;width:240px;height:42px;border-radius:12px;background:#14254F;font:700 14px/42px Nunito;color:#5C6E9E;padding:0 14px">Kullanıcı adı ya da kod ara</div>
+          </div>
+          <sc-for list="{{ friends }}" as="f" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;gap:14px;background:{{ f.bg }};border-radius:16px;padding:10px 14px;animation:slideIn .35s {{ f.del }} both">
+              <div style="position:relative;width:46px;height:46px;border-radius:50%;background:{{ f.av }};display:grid;place-items:center;font:700 16px Fredoka">{{ f.ini }}<div style="position:absolute;right:-1px;bottom:-1px;width:14px;height:14px;border-radius:50%;background:{{ f.dot }};border:3px solid #14254F"></div></div>
+              <div style="flex:1"><div style="font:700 17px Fredoka">{{ f.name }}</div><div style="font:800 12px Nunito;color:{{ f.sc }}">{{ f.status }}</div></div>
+              <div style="font:700 14px Fredoka;padding:8px 14px;border-radius:12px;background:#22397A;box-shadow:0 3px 0 #0A1430;cursor:pointer">Hediye</div>
+              <div style="font:700 14px Fredoka;padding:8px 16px;border-radius:12px;background:{{ f.bb }};box-shadow:0 3px 0 {{ f.bs }};color:{{ f.bf }};cursor:pointer">{{ f.btn }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#14254F;border-radius:26px;padding:22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 6px 0 #07102A;animation:popScale .35s both">
+          <div style="display:flex;align-items:center;gap:12px"><div style="width:50px;height:50px;border-radius:50%;background:#3D7BFF;display:grid;place-items:center;font:700 18px Fredoka">AY</div><div><div style="font:900 11px Nunito;color:#9DB0DE;letter-spacing:1px">HEDİYE GÖNDER</div><div style="font:700 22px Fredoka">Ayşe Y.</div></div></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+            <sc-for list="{{ gifts }}" as="g" hint-placeholder-count="6">
+              <div onClick="{{ g.pick }}" style="background:#0A1532;border-radius:16px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;box-shadow:{{ g.ring }};transition:transform .12s" style-hover="transform:translateY(-3px)">
+                <div style="width:46px;height:46px;border-radius:12px;background:repeating-linear-gradient(45deg,{{ g.c }} 0 6px,rgba(255,255,255,.12) 6px 12px);animation:{{ g.anim }}"></div>
+                <div style="font:700 14px Fredoka">{{ g.name }}</div>
+                <div style="display:flex;align-items:center;gap:4px;font:800 12px Nunito;color:#FFC94A"><div style="width:12px;height:12px;border-radius:50%;background:#F5A623"></div>{{ g.price }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font:700 12px Nunito;color:#9DB0DE">Hediyeler profilinde ve masada avatarının yanında görünür.</div>
+          <div style="margin-top:auto;height:56px;border-radius:16px;background:linear-gradient(#FFD964,#F5A623);box-shadow:0 5px 0 #B86E0F;display:grid;place-items:center;font:700 20px Fredoka;color:#3A1F00;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">{{ giftCta }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1o -->
+    <div class="dv-opt" id="1o">
+      <div class="dv-olabel"><a class="dv-oid" href="#1o">1o</a>Mağaza · çip paketleri · VIP · avatar ve taş temaları</div>
+      <div class="dv-card" style="width:1280px;height:720px;position:relative;overflow:hidden;background:#0D1A3D;padding:22px 26px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="width:44px;height:44px;border-radius:14px;background:#22397A;box-shadow:0 4px 0 #0A1430;display:grid;place-items:center;font:700 22px Fredoka">‹</div>
+          <div style="font:700 28px Fredoka">Mağaza</div>
+          <div style="display:flex;gap:6px;background:#0A1532;border-radius:16px;padding:5px;margin-left:16px">
+            <div style="font:700 15px Fredoka;padding:8px 16px;border-radius:12px;background:#FFC94A;color:#3A1F00">Çip</div>
+            <div style="font:700 15px Fredoka;padding:8px 16px;border-radius:12px;color:#9DB0DE">Elmas</div>
+            <div style="font:700 15px Fredoka;padding:8px 16px;border-radius:12px;color:#9DB0DE">VIP</div>
+            <div style="font:700 15px Fredoka;padding:8px 16px;border-radius:12px;color:#9DB0DE">Avatar & çerçeve</div>
+            <div style="font:700 15px Fredoka;padding:8px 16px;border-radius:12px;color:#9DB0DE">Taş temaları</div>
+          </div>
+        </div>
+        <div style="position:relative;overflow:hidden;height:150px;border-radius:24px;background:linear-gradient(110deg,#8B5CF6,#5B34B8);box-shadow:0 6px 0 #3E2187;display:flex;align-items:center;padding:0 34px;gap:30px">
+          <div style="position:absolute;top:0;bottom:0;width:90px;background:rgba(255,255,255,.18);animation:shine 4s infinite"></div>
+          <div style="width:90px;height:90px;transform:rotate(45deg);border-radius:20px;background:linear-gradient(135deg,#FFE08A,#F5A623);display:grid;place-items:center;box-shadow:0 0 40px rgba(255,201,74,.5)"><div style="transform:rotate(-45deg);font:700 26px Fredoka;color:#3A1F00">VIP</div></div>
+          <div><div style="font:700 30px Fredoka">VIP Kulüp · 30 gün</div><div style="font:700 15px/1.5 Nunito;opacity:.9">Günlük 10.000 çip, özel VIP salonu, altın çerçeve, reklamsız oyun</div></div>
+          <div style="margin-left:auto;font:700 22px Fredoka;padding:14px 30px;border-radius:16px;background:#fff;color:#5B34B8;box-shadow:0 5px 0 #3E2187">₺149,99</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;flex:1">
+          <sc-for list="{{ packs }}" as="p" hint-placeholder-count="4">
+            <div style="position:relative;border-radius:24px;background:#14254F;box-shadow:0 6px 0 #07102A,{{ p.ring }};padding:18px;display:flex;flex-direction:column;align-items:center;gap:10px;animation:slideIn .4s {{ p.del }} both;transition:transform .15s;cursor:pointer" style-hover="transform:translateY(-6px)">
+              <sc-if value="{{ p.hot }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);font:900 11px Nunito;background:#FF5E6C;padding:4px 12px;border-radius:999px;letter-spacing:.5px;white-space:nowrap">EN POPÜLER</div></sc-if>
+              <div style="position:relative;width:120px;height:96px;margin-top:8px">
+                <sc-for list="{{ p.coins }}" as="c" hint-placeholder-count="3"><div style="position:absolute;left:{{ c.x }};top:{{ c.y }};width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F);border:3px dashed #FFF3C8;box-sizing:border-box;box-shadow:0 4px 0 #8A4E06"></div></sc-for>
+              </div>
+              <div style="font:700 30px Fredoka;color:#FFC94A">{{ p.amt }}</div>
+              <div style="font:800 12px Nunito;color:#8EF0B0;min-height:16px">{{ p.bonus }}</div>
+              <div style="margin-top:auto;width:100%;height:50px;border-radius:14px;background:#3CCB6E;box-shadow:0 4px 0 #22914A;display:grid;place-items:center;font:700 20px Fredoka;color:#062B14">{{ p.price }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1p -->
+    <div class="dv-opt" id="1p">
+      <div class="dv-olabel"><a class="dv-oid" href="#1p">1p</a>Günlük ödül · 7 günlük seri (tıkla: Topla)</div>
+      <div class="dv-card" style="width:1280px;height:720px;position:relative;overflow:hidden;background:#081230">
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(61,123,255,.25),transparent 70%)"></div>
+        <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:960px;background:#0F1E47;border:2px solid #22397A;border-radius:32px;padding:28px 32px;box-shadow:0 10px 0 #050B1E,0 30px 60px rgba(0,0,0,.6);animation:popScaleC .4s both">
+          <div style="text-align:center"><div style="font:700 36px Fredoka;color:#FFC94A;text-shadow:0 4px 0 #8A4E06">Günlük ödül</div><div style="font:800 14px Nunito;color:#9DB0DE">Her gün gir, seriyi bozma. 7. gün büyük sandık.</div></div>
+          <div style="display:grid;grid-template-columns:repeat(6,1fr) 1.6fr;gap:12px;margin-top:24px;align-items:stretch">
+            <sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+              <div style="position:relative;border-radius:20px;background:{{ d.bg }};box-shadow:0 5px 0 {{ d.sh }},{{ d.ring }};padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;animation:{{ d.anim }};opacity:{{ d.op }}">
+                <div style="font:900 11px Nunito;letter-spacing:1px;color:{{ d.lc }}">{{ d.label }}</div>
+                <div style="width:{{ d.size }};height:{{ d.size }};border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F);border:3px dashed #FFF3C8;box-sizing:border-box"></div>
+                <div style="font:700 17px Fredoka;color:{{ d.vc }}">{{ d.val }}</div>
+                <sc-if value="{{ d.done }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;border-radius:20px;background:rgba(10,21,50,.55);display:grid;place-items:center"><div style="width:40px;height:40px;border-radius:50%;background:#3CCB6E;display:grid;place-items:center;font:900 20px Nunito;color:#062B14;animation:popScale .3s both">✓</div></div></sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <div style="position:relative;display:flex;justify-content:center;margin-top:26px">
+            <sc-if value="{{ claimed }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:-30px;font:700 34px Fredoka;color:#FFC94A;animation:flyUp 1.2s both">+5.000</div></sc-if>
+            <div onClick="{{ claim }}" style="position:relative;overflow:hidden;font:700 24px Fredoka;padding:16px 70px;border-radius:20px;background:{{ claimBg }};box-shadow:0 6px 0 {{ claimSh }};color:{{ claimFg }};cursor:pointer;animation:{{ claimAnim }}" style-active="transform:translateY(5px)"><div style="position:absolute;left:0;top:0;bottom:0;width:50px;background:rgba(255,255,255,.35);animation:shine 2.6s infinite"></div>{{ claimLabel }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1q -->
+    <div class="dv-opt" id="1q">
+      <div class="dv-olabel"><a class="dv-oid" href="#1q">1q</a>Ayarlar · ses, görüntü, oyun, dil, hesap</div>
+      <div class="dv-card" style="width:1280px;height:720px;position:relative;overflow:hidden;background:#0D1A3D;display:grid;grid-template-columns:260px 1fr;gap:20px;padding:22px;box-sizing:border-box">
+        <div style="background:#0A1532;border-radius:26px;padding:16px;display:flex;flex-direction:column;gap:6px">
+          <div style="font:700 26px Fredoka;padding:6px 10px 14px">Ayarlar</div>
+          <div style="font:700 17px Fredoka;padding:12px 14px;border-radius:14px;background:#22397A;box-shadow:inset 4px 0 0 #FFC94A">Oyun</div>
+          <div style="font:700 17px Fredoka;padding:12px 14px;border-radius:14px;color:#9DB0DE">Ses</div>
+          <div style="font:700 17px Fredoka;padding:12px 14px;border-radius:14px;color:#9DB0DE">Görüntü</div>
+          <div style="font:700 17px Fredoka;padding:12px 14px;border-radius:14px;color:#9DB0DE">Dil</div>
+          <div style="font:700 17px Fredoka;padding:12px 14px;border-radius:14px;color:#9DB0DE">Hesap</div>
+          <div style="font:700 17px Fredoka;padding:12px 14px;border-radius:14px;color:#9DB0DE">Kurallar</div>
+        </div>
+        <div style="background:#14254F;border-radius:26px;padding:24px 28px;display:flex;flex-direction:column;gap:6px;overflow:hidden">
+          <sc-for list="{{ toggles }}" as="t" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:2px solid #1B3066">
+              <div style="flex:1"><div style="font:700 18px Fredoka">{{ t.name }}</div><div style="font:700 13px Nunito;color:#9DB0DE">{{ t.desc }}</div></div>
+              <div onClick="{{ t.flip }}" style="width:62px;height:34px;border-radius:17px;background:{{ t.bg }};position:relative;cursor:pointer;transition:background .2s"><div style="position:absolute;top:4px;left:{{ t.x }};width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 2px 0 rgba(0,0,0,.25);transition:left .2s cubic-bezier(.3,1.5,.5,1)"></div></div>
+            </div>
+          </sc-for>
+          <div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:2px solid #1B3066">
+            <div style="flex:1"><div style="font:700 18px Fredoka">Tur süresi uyarısı</div><div style="font:700 13px Nunito;color:#9DB0DE">Süre bitmeden kaç saniye önce titreşsin</div></div>
+            <div style="width:260px;height:10px;border-radius:5px;background:#0A1532;position:relative"><div style="width:40%;height:100%;border-radius:5px;background:#FFC94A"></div><div style="position:absolute;left:40%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:#fff;box-shadow:0 3px 0 #B86E0F"></div></div>
+            <div style="font:700 17px Fredoka;width:40px">5 sn</div>
+          </div>
+          <div style="padding:14px 0 0">
+            <div style="font:700 18px Fredoka;margin-bottom:10px">Taş teması</div>
+            <div style="display:flex;gap:14px">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 18px;border-radius:16px;background:#0A1532;box-shadow:0 0 0 3px #FFC94A"><div style="width:40px;height:56px;border-radius:8px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -4px 0 #D9C9A2,0 3px 0 #A8925F;font:700 28px/52px Fredoka;text-align:center;color:#D7263D">7</div><div style="font:800 12px Nunito">Kemik</div></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 18px;border-radius:16px;background:#0A1532"><div style="width:40px;height:56px;border-radius:8px;background:#fff;box-shadow:0 3px 0 #B7C2DD;font:700 28px/56px Fredoka;text-align:center;color:#1F5FBF">7</div><div style="font:800 12px Nunito;color:#9DB0DE">Beyaz</div></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 18px;border-radius:16px;background:#0A1532"><div style="width:40px;height:56px;border-radius:8px;background:#22314F;box-shadow:0 3px 0 #0A1430;font:700 28px/56px Fredoka;text-align:center;color:#FFC94A">7</div><div style="font:800 12px Nunito;color:#9DB0DE">Gece</div></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 18px;border-radius:16px;background:#0A1532;position:relative"><div style="width:40px;height:56px;border-radius:8px;background:linear-gradient(#FFE08A,#F5A623);box-shadow:0 3px 0 #B86E0F;font:700 28px/56px Fredoka;text-align:center;color:#3A1F00">7</div><div style="font:800 12px Nunito;color:#9DB0DE">Altın · VIP</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1r -->
+    <div class="dv-opt" id="1r">
+      <div class="dv-olabel"><a class="dv-oid" href="#1r">1r</a>Kurallar / nasıl oynanır · görselli adımlar</div>
+      <div class="dv-card" style="width:1280px;height:720px;position:relative;overflow:hidden;background:#0D1A3D;display:grid;grid-template-columns:260px 1fr;gap:20px;padding:22px;box-sizing:border-box">
+        <div style="background:#0A1532;border-radius:26px;padding:16px;display:flex;flex-direction:column;gap:6px">
+          <div style="font:700 26px Fredoka;padding:6px 10px 14px">Nasıl oynanır</div>
+          <sc-for list="{{ ruleNav }}" as="r" hint-placeholder-count="6"><div style="display:flex;align-items:center;gap:10px;font:700 16px Fredoka;padding:11px 14px;border-radius:14px;background:{{ r.bg }};color:{{ r.fg }}"><div style="width:24px;height:24px;border-radius:50%;background:{{ r.nb }};display:grid;place-items:center;font:800 12px Nunito;color:{{ r.nf }}">{{ r.i }}</div>{{ r.name }}</div></sc-for>
+        </div>
+        <div style="background:#14254F;border-radius:26px;padding:28px 34px;display:flex;flex-direction:column;gap:18px">
+          <div style="font:900 12px Nunito;color:#FFC94A;letter-spacing:1px">ADIM 3 / 6</div>
+          <div style="font:700 34px Fredoka">Elini açmak</div>
+          <div style="font:700 16px/1.6 Nunito;color:#C9D6FF;max-width:760px">Masaya taş işleyebilmek için önce elini açman gerekir. Seri ya da sayı perlerinin toplamı en az 101 olmalı, veya en az 5 çift ile açabilirsin.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div style="background:#0A1532;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px">
+              <div style="font:700 17px Fredoka">Seri per · aynı renk, ardışık</div>
+              <div style="display:flex;gap:4px"><sc-for list="{{ exRun }}" as="t" hint-placeholder-count="4"><div style="width:44px;height:62px;border-radius:8px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -4px 0 #D9C9A2,0 3px 0 #A8925F;font:700 30px/58px Fredoka;text-align:center;color:{{ t.col }};animation:slideIn .4s {{ t.del }} both">{{ t.n }}</div></sc-for><div style="margin-left:auto;align-self:center;font:700 22px Fredoka;color:#8EF0B0">= 46</div></div>
+            </div>
+            <div style="background:#0A1532;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px">
+              <div style="font:700 17px Fredoka">Sayı peri · aynı sayı, farklı renk</div>
+              <div style="display:flex;gap:4px"><sc-for list="{{ exGrp }}" as="t" hint-placeholder-count="3"><div style="width:44px;height:62px;border-radius:8px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -4px 0 #D9C9A2,0 3px 0 #A8925F;font:700 30px/58px Fredoka;text-align:center;color:{{ t.col }};animation:slideIn .4s {{ t.del }} both">{{ t.n }}</div></sc-for><div style="margin-left:auto;align-self:center;font:700 22px Fredoka;color:#8EF0B0">= 36</div></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <div style="font:800 13px Nunito;background:#0A1532;padding:8px 12px;border-radius:10px">Açamayan oyuncu el sonunda 202 ceza alır</div>
+            <div style="font:800 13px Nunito;background:#0A1532;padding:8px 12px;border-radius:10px">Okey atarak biten elde cezalar ikiye katlanır</div>
+            <div style="font:800 13px Nunito;background:#0A1532;padding:8px 12px;border-radius:10px">Çiftle açan, diğerlerinden daha yüksek çift sayısıyla açmalıdır</div>
+          </div>
+          <div style="margin-top:auto;display:flex;justify-content:space-between">
+            <div style="font:700 17px Fredoka;padding:12px 24px;border-radius:14px;background:#22397A;box-shadow:0 4px 0 #0A1430">‹ Önceki</div>
+            <div style="font:700 17px Fredoka;padding:12px 24px;border-radius:14px;background:#3CCB6E;box-shadow:0 4px 0 #22914A;color:#062B14">Botlarla dene</div>
+            <div style="font:700 17px Fredoka;padding:12px 24px;border-radius:14px;background:linear-gradient(#FFD964,#F5A623);box-shadow:0 4px 0 #B86E0F;color:#3A1F00">Sonraki ›</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const COL = { R: '#D7263D', B: '#1F5FBF', K: '#1B1B1B', Y: '#E8A317' };
+const tl = (a, step) => a.map((x, i) => ({ n: +x.slice(1), col: COL[x[0]], del: i * (step || 100) + 'ms' }));
+const LANG = {
+  tr: { tag: 'Arkadaşlarınla ya da Türkiye\'nin dört bir yanından oyuncularla 101 oyna.', title: 'Hoş geldin', sub: 'Hesabınla ilerlemen, çiplerin ve arkadaşların kaybolmaz.', guest: 'Misafir olarak oyna', google: 'Google ile devam et', email: 'E-posta ile giriş yap', terms: 'Devam ederek Kullanım Koşulları ve Gizlilik Politikası\'nı kabul etmiş olursun. Oyun 18 yaş üstü içindir ve gerçek para kazanılmaz.' },
+  en: { tag: 'Play Galaxy 101 with friends or players from all over Turkey.', title: 'Welcome', sub: 'Sign in to keep your progress, chips and friends.', guest: 'Play as guest', google: 'Continue with Google', email: 'Sign in with email', terms: 'By continuing you accept the Terms of Use and Privacy Policy. 18+ only. No real money can be won.' },
+};
+class Component extends DCLogic {
+  state = { lang: 'tr', tab: 0, found: 1, sec: 3, gift: 1, claimed: false, splashKey: 0, tg: [true, true, false, true] };
+  componentDidMount() {
+    this.iv = setInterval(() => this.setState(s => ({ found: s.found >= 4 ? 1 : s.found + 1, sec: s.found >= 4 ? 1 : s.sec + 2 })), 1400);
+  }
+  componentWillUnmount() { clearInterval(this.iv); }
+  renderVals() {
+    const s = this.state;
+    const tabNames = ['Tekli', 'Eşli', 'Katlamalı', 'Dereceli', 'Botlar', 'Özel oda'];
+    const seatP = [{ ini: 'MK', name: 'Sen', bg: '#FF8A5B' }, { ini: 'AY', name: 'Ayşe Y.', bg: '#3D7BFF' }, { ini: 'BC', name: 'Burak C.', bg: '#8B5CF6' }, { ini: 'ZE', name: 'Zeynep E.', bg: '#16B6A8' }];
+    const av = ['#3D7BFF', '#8B5CF6', '#16B6A8', '#FF6B6B', '#3CCB6E', '#E8A317', '#FF8A5B'];
+    return {
+      splashKey: s.splashKey, replaySplash: () => this.setState({ splashKey: s.splashKey + 1 }),
+      splashTiles: tl(['R1', 'B0', 'Y1'], 220).map(t => ({ ...t, n: t.n })),
+      L: LANG[s.lang],
+      setTR: () => this.setState({ lang: 'tr' }), setEN: () => this.setState({ lang: 'en' }),
+      trBg: s.lang === 'tr' ? '#FFC94A' : 'transparent', trFg: s.lang === 'tr' ? '#3A1F00' : '#9DB0DE',
+      enBg: s.lang === 'en' ? '#FFC94A' : 'transparent', enFg: s.lang === 'en' ? '#3A1F00' : '#9DB0DE',
+      tabs: tabNames.map((name, i) => ({ name, pick: () => this.setState({ tab: i }), bg: i === s.tab ? '#3D7BFF' : 'transparent', fg: i === s.tab ? '#fff' : '#9DB0DE' })),
+      salons: [
+        { tier: 'ÇAYLAK', bet: '1.000', min: '5.000', online: '2.140 oyuncu', bg: '#3CCB6E', sh: '#22914A' },
+        { tier: 'ORTA', bet: '5.000', min: '25.000', online: '3.412 oyuncu', bg: '#3D7BFF', sh: '#2148B0' },
+        { tier: 'USTA', bet: '25.000', min: '125.000', online: '1.208 oyuncu', bg: '#FF6B6B', sh: '#C23E4A' },
+        { tier: 'ELİT', bet: '100.000', min: '500.000', online: '388 oyuncu', bg: '#E8A317', sh: '#A86F0A' },
+        { tier: 'VIP SALON', bet: '500.000', min: '2.5M', online: '94 oyuncu', bg: '#8B5CF6', sh: '#5B34B8', locked: true },
+      ].map((x, i) => ({ locked: false, ...x, del: i * 70 + 'ms' })),
+      tables: [[1, 1, 1, 0], [1, 1, 0, 0], [1, 0, 0, 0], [1, 1, 1, 1]].map((seats, i) => {
+        const full = seats.every(Boolean);
+        return { no: 214 + i * 7, info: full ? 'Dolu · 3. el' : `${seats.filter(Boolean).length}/4 · bekliyor`,
+          seats: seats.map((f, j) => ({ bg: f ? av[(i + j) % 7] : 'transparent', bd: f ? 'transparent' : '#3A5BB0', ini: f ? 'AB CD EF GH'.split(' ')[j] : '' })),
+          btn: full ? 'İzle' : 'Otur', btnBg: full ? '#22397A' : '#3CCB6E', btnSh: full ? '#0A1430' : '#22914A' };
+      }),
+      waitSec: String(s.sec).padStart(2, '0'),
+      seats: seatP.map((p, i) => {
+        const on = i < s.found;
+        return { ini: on ? p.ini : '?', name: on ? p.name : 'Aranıyor…', bg: on ? p.bg : 'rgba(255,255,255,.04)', bd: on ? '#FFC94A' : '#3A5BB0', bs: on ? 'solid' : 'dashed', fg: on ? '#F4F1E8' : '#7385B5', anim: on && i === s.found - 1 ? 'popScale .4s both' : 'none' };
+      }),
+      stats: [{ k: 'OYNANAN EL', v: '1.284', c: '#F4F1E8' }, { k: 'KAZANMA', v: '%41', c: '#3CCB6E' }, { k: 'EN İYİ AÇILIŞ', v: '186', c: '#FFC94A' }, { k: 'OKEY BİTİŞ', v: '73', c: '#F4F1E8' }, { k: 'ÇİFTTEN AÇMA', v: '212', c: '#F4F1E8' }, { k: 'SERİ', v: '6', c: '#FF8A5B' }],
+      badges: [{ k: 'İlk zafer', c: '#3CCB6E', op: 1 }, { k: 'Okey ustası', c: '#FFC94A', op: 1 }, { k: '5 çift', c: '#3D7BFF', op: 1 }, { k: '100 el', c: '#FF6B6B', op: 1 }, { k: 'Elmas lig', c: '#7FE3FF', op: .3 }],
+      board: [
+        ['Selin A.', 'Elmas I', '4.820'], ['Okeyci_34', 'Elmas II', '4.615'], ['Hakan T.', 'Elmas II', '4.402'], ['Derya K.', 'Altın I', '3.990'], ['Emre B.', 'Altın I', '3.877'], ['…', '', ''], ['Mert K. (sen)', 'Altın II', '2.760'],
+      ].map(([name, league, pts], i) => {
+        const me = i === 6, gap = i === 5; const rank = me ? '128' : gap ? '' : String(i + 1);
+        const medal = ['#FFC94A', '#C9D6FF', '#E3A777'][i];
+        return { name, league, pts, rank, ini: gap ? '' : name.slice(0, 2).toUpperCase(), av: gap ? 'transparent' : av[i % 7],
+          mc: medal || (gap ? 'transparent' : '#22397A'), mf: medal ? '#3A1F00' : '#C9D6FF',
+          bg: me ? 'rgba(255,201,74,.12)' : gap ? 'transparent' : '#14254F', ring: me ? '0 0 0 2px #FFC94A' : 'none', del: i * 60 + 'ms' };
+      }),
+      friends: [
+        ['Ayşe Y.', 'Lobide', '#3CCB6E', 'Davet et'], ['Burak C.', 'Masada · Eşli · 2. el', '#FFC94A', 'İzle'], ['Can D.', 'Lobide', '#3CCB6E', 'Davet et'], ['Elif S.', 'Son görülme 2 saat önce', '#5C6E9E', 'Mesaj'], ['Okan P.', 'Son görülme dün', '#5C6E9E', 'Mesaj'],
+      ].map(([name, status, dot, btn], i) => ({ name, status, dot, btn, sc: dot === '#5C6E9E' ? '#7385B5' : dot, ini: name.slice(0, 2).toUpperCase(), av: av[i], bg: '#14254F', del: i * 60 + 'ms',
+        bb: btn === 'Davet et' ? '#3CCB6E' : '#22397A', bs: btn === 'Davet et' ? '#22914A' : '#0A1430', bf: btn === 'Davet et' ? '#062B14' : '#F4F1E8' })),
+      gifts: [['Çay', '#FF6B6B', '500'], ['Simit', '#E8A317', '1.000'], ['Lokum', '#FF8A5B', '2.500'], ['Gül', '#D7263D', '5.000'], ['Kupa', '#FFC94A', '10.000'], ['Taç', '#8B5CF6', '50.000']]
+        .map(([name, c, price], i) => ({ name, c, price, pick: () => this.setState({ gift: i }), ring: i === s.gift ? '0 0 0 3px #FFC94A' : 'none', anim: i === s.gift ? 'wiggle .6s infinite' : 'none' })),
+      giftCta: `Gönder · ${['500', '1.000', '2.500', '5.000', '10.000', '50.000'][s.gift]} çip`,
+      packs: [
+        { amt: '50.000', bonus: '', price: '₺29,99', n: 1 }, { amt: '250.000', bonus: '+%20 bonus', price: '₺99,99', n: 2, hot: true }, { amt: '1.000.000', bonus: '+%40 bonus', price: '₺299,99', n: 3 }, { amt: '5.000.000', bonus: '+%60 bonus', price: '₺999,99', n: 3 },
+      ].map((p, i) => ({ hot: false, ...p, del: i * 80 + 'ms', ring: p.hot ? '0 0 0 3px #FF5E6C' : '0 0 0 0 transparent',
+        coins: [{ x: '32px', y: '30px' }, { x: '8px', y: '18px' }, { x: '56px', y: '10px' }].slice(0, p.n) })),
+      days: [1, 2, 3, 4, 5, 6, 7].map(d => {
+        const done = d < 5 || (d === 5 && s.claimed), today = d === 5 && !s.claimed;
+        return { label: d === 7 ? 'BÜYÜK SANDIK' : `${d}. GÜN`, val: ['1.000', '1.500', '2.000', '3.000', '5.000', '7.500', '25.000'][d - 1], done,
+          bg: today ? 'linear-gradient(#FFD964,#F5A623)' : d === 7 ? 'linear-gradient(#8B5CF6,#5B34B8)' : '#14254F', sh: today ? '#B86E0F' : d === 7 ? '#3E2187' : '#07102A',
+          ring: today ? '0 0 0 4px rgba(255,201,74,.35)' : 'none', anim: today ? 'floatA 1.6s infinite' : 'none', op: 1,
+          lc: today ? '#3A1F00' : '#C9D6FF', vc: today ? '#3A1F00' : '#FFC94A', size: d === 7 ? '72px' : '46px' };
+      }),
+      claimed: s.claimed,
+      claim: () => this.setState({ claimed: !s.claimed }),
+      claimLabel: s.claimed ? 'Yarın tekrar gel' : 'Topla · 5.000',
+      claimBg: s.claimed ? '#22397A' : 'linear-gradient(#FFD964,#F5A623)', claimSh: s.claimed ? '#0A1430' : '#B86E0F', claimFg: s.claimed ? '#9DB0DE' : '#3A1F00', claimAnim: s.claimed ? 'none' : 'pulseG 2s infinite',
+      toggles: [['Otomatik sırala', 'Yeni çekilen taş uygun yere yerleşsin'], ['Perleri vurgula', 'Geçerli perlerin çevresi yeşil yansın'], ['Çift tıkla taş at', 'Sürüklemeden hızlı atış'], ['Sohbet', 'Masa içi mesaj ve emojiler görünsün']]
+        .map(([name, desc], i) => ({ name, desc, bg: s.tg[i] ? '#3CCB6E' : '#0A1532', x: s.tg[i] ? '32px' : '4px', flip: () => this.setState(st => ({ tg: st.tg.map((v, j) => j === i ? !v : v) })) })),
+      ruleNav: ['Taşlar ve okey', 'Dağıtım', 'Elini açmak', 'Taş işlemek', 'Bitirmek', 'Puanlama'].map((name, i) => ({ name, i: i + 1, bg: i === 2 ? '#22397A' : 'transparent', fg: i === 2 ? '#F4F1E8' : '#9DB0DE', nb: i < 2 ? '#3CCB6E' : i === 2 ? '#FFC94A' : '#14254F', nf: i <= 2 ? '#0A1532' : '#9DB0DE' })),
+      exRun: tl(['R10', 'R11', 'R12', 'R13']), exGrp: tl(['B12', 'K12', 'Y12']),
+    };
+  }
+}
+</script>
+</body>
+</html>

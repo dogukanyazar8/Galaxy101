@@ -1,4 +1,4 @@
-# screenshots/ · durum görüntüleri · v0.4.0
+# screenshots/ · durum görüntüleri · v0.5.0
 
 Her görüntü oyun sayfasından `?state=ID&seed=42&theme=saturn` ile alındı (02–05 kendi gezegen temalarıyla). Oyuncu her koşuda aynı misafir hesaptır ("Doğukan Y."); gerçek kayıt değişmez.
 Kare: 924 × 540 (1280 × 720 tasarımın ölçekli görünümü). Başka boyut için aynı adres istenen pencere boyutunda açılır; öğe ölçüleri `export/layout-all.html` dökümünde 1280 × 720 birimindedir.

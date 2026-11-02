@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<script src="./planet-renderer.js"></script>
+<script src="./starfield.js"></script>
+<script src="./g101-cursor.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Fredoka:wght@500;600;700&family=Lilita+One&family=Rubik:wght@600;700;800;900&family=Outfit:wght@600;700;800;900&family=Poppins:wght@600;700;800;900&family=Exo+2:wght@600;700;800;900&family=Sora:wght@600;700;800&family=Lexend:wght@600;700;800;900&family=Quicksand:wght@600;700&family=Nunito:wght@600;700;800;900&family=Montserrat:wght@600;700;800;900&family=Orbitron:wght@700;800;900&family=Audiowide&family=Russo+One&family=Bungee&family=Righteous&family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0b0e17;font-family:Nunito,system-ui,sans-serif;color:#F4F1E8}
+a{color:#FFC94A}a:hover{color:#FFE08A}
+@keyframes g101Float{0%,100%{translate:0 0}50%{translate:0 -7px}}
+@keyframes g101Glint{0%,62%{transform:translateX(-200%) skewX(-18deg);opacity:0}66%{opacity:1}86%,100%{transform:translateX(330%) skewX(-18deg);opacity:0}}
+@keyframes g101TileIn{0%{opacity:0;transform:translateY(46px) rotateX(-70deg) scale(.82)}55%{opacity:1}100%{opacity:1;transform:none}}
+@keyframes floatA{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-14px) rotate(var(--r,0deg))}}
+@keyframes pulseG{0%,100%{box-shadow:0 7px 0 var(--aS),0 0 0 0 var(--gl),0 14px 26px rgba(0,0,0,.4)}50%{box-shadow:0 7px 0 var(--aS),0 0 0 16px transparent,0 14px 26px rgba(0,0,0,.4)}}
+@keyframes shine{0%{transform:translateX(-160%) skewX(-20deg)}60%,100%{transform:translateX(320%) skewX(-20deg)}}
+@keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.9}}
+@keyframes spinS{to{transform:rotate(360deg)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes tableSpin{to{transform:rotateX(62deg) rotateZ(360deg)}}
+@keyframes planetSpin{to{transform:translateX(-50%)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes iconShine{0%{transform:translateX(-14px) skewX(-20deg);opacity:0}8%{opacity:1}30%{transform:translateX(34px) skewX(-20deg);opacity:1}31%,100%{transform:translateX(34px) skewX(-20deg);opacity:0}}
+@keyframes planetFloat{0%,100%{transform:translate(-50%,-50%) rotate(-16deg)}50%{transform:translate(-50%,-52%) rotate(-14deg)}}
+</style>
+</helmet>
+
+<div style="--bg1:#2A2F6E;--bg2:#161A45;--bg3:#0A0C28;--pn:#232A66;--pnH:#2D3680;--pnS:#0B0D2B;--dp:#0B0E2E;--sd:#10133A;--bd:#2E3680;--a1:#FFD964;--a2:#F5A623;--aS:#B86E0F;--aT:#3A1F00;--lS:#8A4E06;--gl:rgba(255,201,74,.45);--mt:#A9AEDD;--ic:#D3D6FF;--rgA:rgba(236,214,172,.95);--rgB:rgba(190,170,135,.35);--rgC:rgba(212,190,150,.8);--rgM:rgba(200,176,132,.7);--ro:1;--atm:rgba(255,226,175,.45);--cap:0;--hz:0;--pg:rgba(255,214,140,.35);--st:#FFE7A3;--lg1:#FFF4C8;--tf1:#FFFDF6;--tf2:#EEE2C6;--te:#D9C9A2;--te2:#A8925F;--t1:#C8462E;--t2:#2B5DA8;--t3:#D9951A;--rs1a:1;--fH:'Montserrat',sans-serif;--fB:'Baloo 2',sans-serif;--fL:'Montserrat',sans-serif;font-synthesis:none">
+<div style="{{ themeVars }}">
+      <div style="width:calc(1280px * var(--rs1a,1));height:calc(720px * var(--rs1a,1));position:relative;overflow:hidden">
+      <div style="position:absolute;left:0;top:0;width:1280px;height:720px;overflow:hidden;transform-origin:0 0;transform:scale(var(--rs1a,1));background:radial-gradient(ellipse 80% 70% at 50% 35%,var(--bg1) 0%,var(--bg2) 55%,var(--bg3) 100%);font-family:var(--fB);color:#F4F1E8">
+        <div style="position:absolute;inset:0;pointer-events:none">
+          <div style="position:absolute;inset:0">{{ starsA }}</div>
+          <div style="position:absolute;left:50%;top:300px;width:0;height:0;animation:planetFloat 14s ease-in-out infinite;transform:translate(-50%,-50%) rotate(-16deg)">
+            <div style="position:absolute;left:-330px;top:-330px;width:660px;height:660px;border-radius:50%;background:radial-gradient(closest-side,var(--pg),transparent 70%)"></div>
+            <div style="position:absolute;left:-148px;top:calc(-148px / var(--pf,1));width:296px;height:calc(296px / var(--pf,1));border-radius:50%;box-shadow:-3px -3px 14px -6px var(--atm),0 0 80px var(--pg)"></div>
+            <div style="position:absolute;left:-150px;top:-150px;width:300px;height:300px">{{ planetCanvas }}</div>
+          </div>
+          <div style="position:absolute;inset:0;background:radial-gradient(ellipse 55% 45% at 50% 48%,rgba(0,0,0,.28),transparent 70%)"></div>
+        </div>
+
+        <div style="position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:14px;padding:16px 24px">
+          <div onClick="{{ openMe }}" title="{{ t.myProfile }}" style="position:relative;width:62px;height:62px;flex:none;cursor:pointer;transition:transform .15s,filter .15s" style-hover="transform:scale(1.06);filter:brightness(1.1)" style-active="transform:scale(.97)">
+            <div style="position:absolute;inset:0;border-radius:50%;background:{{ me.fr.bg }};box-shadow:{{ me.fr.sh }}"></div>
+            <sc-if value="{{ me.fr.studs }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;left:50%;top:-4px;width:9px;height:9px;margin-left:-4.5px;transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,#FFF6D0,#E8A317);box-shadow:0 0 0 1.5px #5A3A08,0 0 6px rgba(255,201,74,.8)"></div>
+            </sc-if>
+            <div style="position:absolute;inset:{{ me.fr.insetS }};border-radius:50%;background:{{ me.color }};display:grid;place-items:center;font:700 20px var(--fH);color:#fff;border:3px solid {{ me.fr.gapS }}">{{ me.ini }}</div>
+            <div style="position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);background:var(--a1);color:var(--aT);font:900 10px var(--fB);padding:1px 7px;border-radius:7px;white-space:nowrap">SV 24</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="font:700 18px var(--fH);white-space:nowrap">{{ me.name }}</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:18px;height:18px;transform:rotate(45deg);border-radius:4px;background:linear-gradient(135deg,#FFE08A,#F5A623);box-shadow:0 0 10px rgba(255,201,74,.5);display:grid;place-items:center;margin:0 2px"><div style="transform:rotate(-45deg);font:700 9px var(--fH);color:#3A1F00">II</div></div>
+              <div style="font:700 14px var(--fH);color:#FFC94A">{{ t.rank }}</div>
+            </div>
+          </div>
+          <div style="flex:1"></div>
+          <div style="display:flex;align-items:center;gap:8px;background:var(--dp);border-radius:999px;padding:5px 5px 5px 6px;box-shadow:inset 0 2px 0 rgba(0,0,0,.3)">
+            <div style="position:relative;overflow:hidden;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box;box-shadow:0 0 10px rgba(255,201,74,.45)"><div style="position:absolute;top:-4px;bottom:-4px;left:0;width:9px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent);animation:iconShine 3.2s ease-in-out infinite"></div></div>
+            <div style="font:700 17px var(--fH);min-width:84px">{{ chipsLabel }}</div>
+            <div onClick="{{ buyChips }}" title="{{ t.buyChips }}" style="width:28px;height:28px;border-radius:50%;background:#3CCB6E;box-shadow:0 3px 0 #22914A;display:grid;place-items:center;font:700 20px var(--fH);color:#fff;cursor:pointer;transition:transform .12s,filter .12s" style-hover="filter:brightness(1.12);transform:scale(1.08)" style-active="transform:translateY(2px)">+</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;background:var(--dp);border-radius:999px;padding:5px 5px 5px 8px">
+            <div style="position:relative;width:22px;height:22px;transform:rotate(45deg);background:linear-gradient(135deg,#7FE3FF,#3D7BFF);border-radius:4px;overflow:hidden;box-shadow:0 0 10px rgba(127,227,255,.5)"><div style="position:absolute;top:-6px;bottom:-6px;left:0;width:8px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent);animation:iconShine 3.2s 1.6s ease-in-out infinite"></div></div>
+            <div style="font:700 17px var(--fH);min-width:44px">{{ gemsLabel }}</div>
+            <div onClick="{{ buyGems }}" title="{{ t.buyGems }}" style="width:28px;height:28px;border-radius:50%;background:#3CCB6E;box-shadow:0 3px 0 #22914A;display:grid;place-items:center;font:700 20px var(--fH);color:#fff;cursor:pointer;transition:transform .12s,filter .12s" style-hover="filter:brightness(1.12);transform:scale(1.08)" style-active="transform:translateY(2px)">+</div>
+          </div>
+          <div title="Ayarlar" onClick="{{ openSettings }}" style="width:46px;height:46px;border-radius:14px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);display:grid;place-items:center;cursor:pointer;transition:filter .15s,transform .15s" style-hover="filter:brightness(1.25);transform:translateY(-2px)" style-active="transform:translateY(3px)">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--ic)"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></svg>
+          </div>
+        </div>
+
+        <div style="position:absolute;left:0;right:0;top:84px;display:flex;flex-direction:column;align-items:center">
+          <div style="font:700 64px/1.15 var(--fL);letter-spacing:7px;background:linear-gradient(180deg,var(--lg1) 0%,var(--a1) 45%,var(--a2) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 5px 0 var(--lS)) drop-shadow(0 10px 18px rgba(0,0,0,.5)) drop-shadow(0 0 26px var(--gl))">GALAXY</div>
+          <div style="display:flex;gap:12px;align-items:flex-end;height:132px;margin-top:10px;perspective:900px">
+            <div style="rotate:-10deg;animation:g101TileIn 1.1s 0.15s cubic-bezier(.16,1,.3,1) both,g101Float 6s 0s cubic-bezier(.45,0,.55,1) infinite;width:78px;height:108px;border-radius:12px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -7px 0 var(--te),0 5px 0 var(--te2),0 16px 26px rgba(0,0,0,.45),0 0 22px var(--gl);display:flex;flex-direction:column;align-items:center;padding-top:8px;box-sizing:border-box;font:700 64px/1 var(--fH);color:var(--t1)">1<div style="width:14px;height:14px;border-radius:50%;background:var(--t1);margin-top:3px"></div></div>
+            <div style="rotate:2deg;animation:g101TileIn 1.1s 0.29000000000000004s cubic-bezier(.16,1,.3,1) both,g101Float 6s -2s cubic-bezier(.45,0,.55,1) infinite;width:88px;height:122px;border-radius:13px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -8px 0 var(--te),0 6px 0 var(--te2),0 18px 30px rgba(0,0,0,.45),0 0 26px var(--gl);display:flex;flex-direction:column;align-items:center;padding-top:8px;box-sizing:border-box;font:700 74px/1 var(--fH);color:var(--t2)">0<div style="width:16px;height:16px;border-radius:50%;background:var(--t2);margin-top:3px"></div></div>
+            <div style="rotate:10deg;animation:g101TileIn 1.1s 0.43000000000000005s cubic-bezier(.16,1,.3,1) both,g101Float 6s -4s cubic-bezier(.45,0,.55,1) infinite;width:78px;height:108px;border-radius:12px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -7px 0 var(--te),0 5px 0 var(--te2),0 16px 26px rgba(0,0,0,.45),0 0 22px var(--gl);display:flex;flex-direction:column;align-items:center;padding-top:8px;box-sizing:border-box;font:700 64px/1 var(--fH);color:var(--t3)">1<div style="width:14px;height:14px;border-radius:50%;background:var(--t3);margin-top:3px"></div></div>
+          </div>
+        </div>
+
+        <div style="position:absolute;left:50%;top:352px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px">
+          <div onClick="{{ play }}" style="position:relative;overflow:hidden;width:360px;height:86px;border-radius:24px;background:linear-gradient(var(--a1),var(--a2));animation:pulseG 2.2s infinite;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--aT);transition:transform .12s" style-hover="transform:translateY(-3px) scale(1.02)" style-active="transform:translateY(5px)">
+            <div style="position:absolute;top:0;bottom:0;width:60px;background:rgba(255,255,255,.45);animation:shine 2.8s infinite"></div>
+            <div style="font:700 34px/1.05 var(--fH);letter-spacing:1px;white-space:nowrap">{{ t.play }}</div>
+            <div style="font:800 13px var(--fB);opacity:.8;margin-top:4px;white-space:nowrap">{{ playSub }}</div>
+          </div>
+        </div>
+
+        <div style="position:absolute;left:0;right:0;top:474px;display:flex;justify-content:center;gap:12px">
+          <sc-for list="{{ modes }}" as="m" hint-placeholder-count="6">
+            <div onClick="{{ m.pick }}" style="position:relative;overflow:hidden;width:208px;height:78px;border-radius:18px;background:{{ m.bg }};box-shadow:{{ m.shadow }};display:flex;flex-direction:column;justify-content:center;padding:0 14px;box-sizing:border-box;cursor:pointer;transition:transform .2s cubic-bezier(.3,1.5,.6,1),filter .2s,box-shadow .2s;transform:{{ m.lift }};filter:{{ m.filter }}" style-hover="transform:translateY(-7px) scale(1.04);filter:none;box-shadow:0 5px 0 rgba(0,0,0,.35),0 2.5px 0 5px rgba(255,255,255,.9),0 14px 28px rgba(0,0,0,.45)">
+              <div style="position:absolute;right:-4px;bottom:-14px;font:700 58px/1 var(--fH);color:rgba(255,255,255,.16)">{{ m.glyph }}</div>
+              <div style="position:absolute;left:0;right:0;top:0;height:50%;background:linear-gradient(rgba(255,255,255,.18),transparent)"></div>
+              <div style="position:relative;font:700 18px/1.1 var(--fH);color:#fff">{{ m.name }}</div>
+              <div style="position:relative;display:flex;align-items:center;gap:5px;font:800 11px var(--fB);color:rgba(255,255,255,.9);margin-top:4px"><div style="width:6px;height:6px;border-radius:50%;background:#8EF0B0;box-shadow:0 0 6px #8EF0B0"></div>{{ m.online }}</div>
+              <sc-if value="{{ m.soon }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;right:10px;bottom:9px;font:900 9px var(--fB);letter-spacing:1.2px;padding:3px 7px;border-radius:6px;background:rgba(0,0,0,.32);color:#fff">{{ t.soon }}</div>
+              </sc-if>
+              <sc-if value="{{ m.on }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;right:8px;top:8px;width:22px;height:22px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.3)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" style="stroke:#1B2440"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="position:absolute;left:0;right:0;bottom:0;height:110px;background:linear-gradient(transparent,rgba(0,0,0,.55));pointer-events:none"></div>
+        <div style="position:absolute;left:0;right:0;bottom:14px;display:flex;justify-content:center;align-items:flex-end;gap:22px">
+          <div onClick="{{ openShop }}" style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;position:relative;transition:transform .15s,filter .15s" style-hover="transform:translateY(-5px);filter:brightness(1.12)">
+            <div style="width:56px;height:56px;border-radius:18px;background:linear-gradient(160deg,var(--a1),var(--a2));box-shadow:0 4px 0 var(--aS),0 0 22px var(--gl),inset 0 1px 0 rgba(255,255,255,.5);display:grid;place-items:center">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--aT)"><path d="M3 8.5 4.6 3.5h14.8L21 8.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z" style="fill:rgba(255,255,255,.6)"></path><path d="M4.5 11v8.5a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V11"></path><path d="M10 20.5V15.5h4v5"></path></svg>
+            </div>
+            <div style="font:800 12px var(--fB);color:var(--a1)">{{ t.shop }}</div>
+            <div style="position:absolute;top:-7px;right:-14px;font:900 10px/1 Nunito;background:#FF5E6C;color:#fff;padding:4px 6px;border-radius:7px;box-shadow:0 2px 0 #C23E4A">%50</div>
+          </div>
+          <div onClick="{{ openFriends }}" style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;position:relative;transition:transform .15s,filter .15s" style-hover="transform:translateY(-5px);filter:brightness(1.12)">
+            <div style="width:56px;height:56px;border-radius:18px;background:linear-gradient(160deg,#7AA6FF,#3D6BF0);box-shadow:0 4px 0 #2448B8,0 0 20px rgba(80,130,255,.4),inset 0 1px 0 rgba(255,255,255,.4);display:grid;place-items:center">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="8.5" r="2.6" fill="rgba(255,255,255,.6)" stroke="none"></circle><path d="M15.6 14.2a5 5 0 0 1 6 5.3" stroke="rgba(255,255,255,.7)"></path><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20a6.5 6.5 0 0 1 13 0"></path></svg>
+            </div>
+            <div style="font:800 12px var(--fB);color:#A9C4FF">{{ t.friends }}</div>
+            <div style="position:absolute;top:-6px;right:-4px;min-width:20px;height:20px;border-radius:10px;background:#FF5E6C;font:900 11px/20px var(--fB);text-align:center;color:#fff">3</div>
+          </div>
+          <div onClick="{{ openLeader }}" style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:transform .15s,filter .15s" style-hover="transform:translateY(-5px);filter:brightness(1.12)">
+            <div style="width:56px;height:56px;border-radius:18px;background:linear-gradient(160deg,#C2A4FF,#7C4DEB);box-shadow:0 4px 0 #5530B0,0 0 20px rgba(150,110,255,.4),inset 0 1px 0 rgba(255,255,255,.4);display:grid;place-items:center">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h10v5.5a5 5 0 0 1-10 0z" fill="rgba(255,255,255,.55)"></path><path d="M7 5.5H4.5a2.5 2.5 0 0 0 2.8 3.9"></path><path d="M17 5.5h2.5a2.5 2.5 0 0 1-2.8 3.9"></path><path d="M12 14v3.5"></path><path d="M8.5 20.5h7"></path><path d="M9.5 17.5h5v3h-5z"></path></svg>
+            </div>
+            <div style="font:800 12px var(--fB);color:#D4C2FF">{{ t.leader }}</div>
+          </div>
+          <div onClick="{{ openDaily }}" style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;position:relative;animation:bob 1.6s infinite">
+            <div style="position:relative;width:56px;height:56px;border-radius:18px;background:linear-gradient(160deg,#4FDB80,#25A857);box-shadow:0 4px 0 #18793F,0 0 20px rgba(60,203,110,.4),inset 0 1px 0 rgba(255,255,255,.35);display:grid;place-items:center">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8S10.4 3.6 7.9 4.3C6 4.9 6.8 8 12 8zM12 8s1.6-4.4 4.1-3.7C18 4.9 17.2 8 12 8z" fill="#FFE08A" stroke="#FFE08A"></path><rect x="3" y="8" width="18" height="4.2" rx="1.2"></rect><path d="M5 12.2v7.3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7.3"></path><path d="M12 8v12.5"></path></svg>
+              <div style="position:absolute;top:-7px;right:-8px;min-width:20px;height:20px;border-radius:10px;background:#FF5E6C;font:900 11px/20px var(--fB);text-align:center;color:#fff">1</div>
+            </div>
+            <div style="font:800 12px var(--fB);color:#8EF0B0">{{ t.daily }}</div>
+          </div>
+          <div onClick="{{ openRules }}" style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:transform .15s,filter .15s" style-hover="transform:translateY(-5px);filter:brightness(1.12)">
+            <div style="width:56px;height:56px;border-radius:18px;background:linear-gradient(160deg,#5BE6D6,#14A596);box-shadow:0 4px 0 #0C746A,0 0 20px rgba(40,210,190,.4),inset 0 1px 0 rgba(255,255,255,.4);display:grid;place-items:center">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z" fill="rgba(255,255,255,.2)"></path><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"></path><path d="M10 8.3a2.1 2.1 0 1 1 2.9 1.9c-.6.3-.9.8-.9 1.4v.4"></path><circle cx="12" cy="14.6" r=".7" fill="#fff"></circle></svg>
+            </div>
+            <div style="font:800 12px var(--fB);color:#9AF2E8">{{ t.rules }}</div>
+          </div>
+        </div>
+
+        <div style="position:absolute;left:24px;bottom:22px;display:flex;flex-direction:column;gap:8px">
+          <div style="font:900 10px var(--fB);letter-spacing:1.5px;color:var(--mt);padding-left:4px">{{ t.planetTheme }}</div>
+          <div style="display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 16px 6px 6px;backdrop-filter:blur(8px)">
+            <div style="display:flex;align-items:center;gap:6px">
+              <sc-for list="{{ planets }}" as="p" hint-placeholder-count="5">
+                <div onClick="{{ p.pick }}" title="{{ p.name }}" style="width:{{ p.size }};height:{{ p.size }};border-radius:50%;background:{{ p.orb }};box-shadow:{{ p.ring }};cursor:pointer;transition:transform .15s,width .2s,height .2s" style-hover="transform:scale(1.15)"></div>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;min-width:64px">
+              <div style="font:700 15px/1.1 var(--fH);color:var(--a1)">{{ planetName }}</div>
+              <div style="font:700 10px var(--fB);color:var(--mt)">{{ planetDesc }}</div>
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute;right:20px;bottom:14px;display:flex;align-items:center;gap:8px;font:700 11px var(--fB);color:var(--mt)">
+          <div style="display:flex;align-items:center;gap:5px;opacity:.85"><div style="width:9px;height:9px;transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,var(--a1),var(--a2))"></div><span style="font:800 12px var(--fH);letter-spacing:1px;color:#F4F1E8">CDX</span><span style="letter-spacing:1.5px">GAMES</span></div>
+          <div style="width:1px;height:10px;background:var(--mt);opacity:.4"></div>
+          <div style="opacity:.6">v0.2.0</div>
+        </div>
+
+        <sc-if value="{{ settingsOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;z-index:20;display:grid;place-items:center;animation:fadeIn .2s ease-out both">
+            <div onClick="{{ closeSettings }}" style="position:absolute;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px)"></div>
+            <div style="position:relative;width:900px;height:560px;display:grid;grid-template-columns:230px 1fr;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:28px;box-shadow:0 10px 0 var(--pnS),0 40px 90px rgba(0,0,0,.6);overflow:hidden;animation:modalIn .28s cubic-bezier(.2,1.2,.4,1) both">
+              <div style="background:var(--sd);padding:22px 14px;display:flex;flex-direction:column;gap:6px;border-right:1px solid rgba(255,255,255,.06)">
+                <div style="display:flex;align-items:center;gap:10px;padding:0 10px 16px">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--a1)"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></svg>
+                  <div style="font:700 26px/1.1 var(--fH)">{{ t.settings }}</div>
+                </div>
+                <sc-for list="{{ setTabs }}" as="t" hint-placeholder-count="5">
+                  <div onClick="{{ t.pick }}" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:{{ t.bg }};box-shadow:{{ t.bar }};color:{{ t.fg }};cursor:pointer;transition:background .15s,color .15s" style-hover="background:var(--pnH);color:#F4F1E8">
+                    <div style="width:8px;height:8px;border-radius:3px;transform:rotate(45deg);background:{{ t.dot }}"></div>
+                    <div style="font:700 17px/1.2 var(--fH)">{{ t.name }}</div>
+                  </div>
+                </sc-for>
+                <div style="flex:1"></div>
+                <div onClick="{{ askQuit }}" title="{{ quitTip }}" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:rgba(255,94,108,.1);box-shadow:inset 0 0 0 1px rgba(255,94,108,.32);color:#FF8A94;cursor:pointer;transition:background .15s,color .15s,box-shadow .15s,transform .12s" style-hover="background:#FF5E6C;color:#fff;box-shadow:0 4px 0 #C23E4A" style-active="transform:translateY(3px);box-shadow:0 1px 0 #C23E4A">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M12 3.5v8"></path><path d="M7.2 6.3a7.5 7.5 0 1 0 9.6 0"></path></svg>
+                  <div style="font:700 17px/1.2 var(--fH)">{{ quitLabel }}</div>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;min-width:0">
+                <div style="display:flex;align-items:center;gap:12px;padding:22px 28px 14px">
+                  <div>
+                    <div style="font:700 24px/1.15 var(--fH)">{{ tabTitle }}</div>
+                    <div style="font:700 13px var(--fB);color:var(--mt);margin-top:2px">{{ tabSub }}</div>
+                  </div>
+                  <div style="flex:1"></div>
+                  <div onClick="{{ closeSettings }}" title="{{ t.close }}" style="width:42px;height:42px;border-radius:13px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);display:grid;place-items:center;cursor:pointer;transition:transform .12s,filter .12s" style-hover="filter:brightness(1.25)" style-active="transform:translateY(3px)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.8" stroke-linecap="round" style="stroke:var(--ic)"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+                  </div>
+                </div>
+
+                <div style="flex:1;min-height:0;overflow-x:hidden;overflow-y:auto;scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:var(--bd) transparent;padding:0 20px 0 28px">
+                  <sc-for list="{{ setToggles }}" as="t" hint-placeholder-count="0">
+                    <div style="display:flex;align-items:center;gap:16px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07)">
+                      <div style="flex:1;min-width:0"><div style="font:700 17px/1.25 var(--fH)">{{ t.name }}</div><div style="font:700 13px var(--fB);color:var(--mt)">{{ t.desc }}</div></div>
+                      <div onClick="{{ t.flip }}" style="flex:none;width:56px;height:32px;border-radius:16px;background:{{ t.bg }};box-shadow:inset 0 2px 0 rgba(0,0,0,.25);position:relative;cursor:pointer;transition:background .2s"><div style="position:absolute;top:3px;left:{{ t.x }};width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 2px 0 rgba(0,0,0,.25);transition:left .22s cubic-bezier(.3,1.5,.5,1)"></div></div>
+                    </div>
+                  </sc-for>
+                  <sc-for list="{{ setSliders }}" as="s" hint-placeholder-count="0">
+                    <div style="display:flex;align-items:center;gap:18px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07)">
+                      <div style="flex:1;min-width:0"><div style="font:700 17px/1.25 var(--fH)">{{ s.name }}</div><div style="font:700 13px var(--fB);color:var(--mt)">{{ s.desc }}</div></div>
+                      <div onPointerDown="{{ s.down }}" onPointerMove="{{ s.move }}" onPointerUp="{{ s.up }}" onPointerCancel="{{ s.up }}" onKeyDown="{{ s.step }}" tabIndex="0" role="slider" style="flex:none;width:270px;height:34px;display:flex;align-items:center;cursor:pointer;touch-action:none;user-select:none;outline:none;padding:0 12px;box-sizing:border-box">
+                        <div style="position:relative;width:100%;height:12px;border-radius:6px;background:var(--dp);box-shadow:inset 0 2px 3px rgba(0,0,0,.4)">
+                          <div style="position:absolute;left:0;top:0;bottom:0;width:{{ s.pct }};border-radius:6px;background:linear-gradient(90deg,var(--a2),var(--a1));box-shadow:0 0 12px var(--gl);transition:{{ s.ease }}"></div>
+                          <div style="position:absolute;left:{{ s.pct }};top:50%;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 50% 35%,#fff,#E8EAF2);transform:{{ s.knob }};box-shadow:{{ s.halo }};transition:{{ s.kEase }};display:grid;place-items:center"><div style="width:8px;height:8px;border-radius:50%;background:linear-gradient(var(--a1),var(--a2))"></div></div>
+                        </div>
+                      </div>
+                      <div style="flex:none;min-width:58px;padding:6px 0;border-radius:10px;background:var(--dp);text-align:center;font:700 15px var(--fH);color:{{ s.vc }};font-variant-numeric:tabular-nums">{{ s.label }}</div>
+                    </div>
+                  </sc-for>
+                  <sc-for list="{{ setSegs }}" as="g" hint-placeholder-count="0">
+                    <div style="display:flex;align-items:center;gap:16px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07)">
+                      <div style="flex:1;min-width:0"><div style="font:700 17px/1.25 var(--fH)">{{ g.name }}</div><div style="font:700 13px var(--fB);color:var(--mt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.desc }}</div></div>
+                      <sc-if value="{{ g.isSeg }}" hint-placeholder-val="{{ true }}">
+                        <div style="flex:none;display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--dp)">
+                          <sc-for list="{{ g.opts }}" as="o" hint-placeholder-count="3">
+                            <div onClick="{{ o.pick }}" style="padding:8px 14px;border-radius:10px;font:700 14px var(--fH);background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.sh }};cursor:pointer;white-space:nowrap;transition:background .15s">{{ o.label }}</div>
+                          </sc-for>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ g.isStep }}" hint-placeholder-val="{{ false }}">
+                        <div onKeyDown="{{ g.key }}" tabIndex="0" style="flex:none;display:flex;align-items:center;width:236px;height:44px;border-radius:14px;background:var(--dp);outline:none;user-select:none">
+                          <div onClick="{{ g.prev }}" style="flex:none;width:38px;height:100%;display:grid;place-items:center;font:700 20px var(--fH);color:var(--mt);opacity:{{ g.prevOp }};cursor:{{ g.prevCur }}" style-hover="color:#F4F1E8">‹</div>
+                          <div style="flex:1;min-width:0;text-align:center;font:700 15px var(--fH);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums">{{ g.label }}</div>
+                          <div onClick="{{ g.next }}" style="flex:none;width:38px;height:100%;display:grid;place-items:center;font:700 20px var(--fH);color:var(--mt);opacity:{{ g.nextOp }};cursor:{{ g.nextCur }}" style-hover="color:#F4F1E8">›</div>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+
+                  <sc-if value="{{ showPlanetRow }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;align-items:center;gap:16px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07)">
+                      <div style="flex:1;min-width:0"><div style="font:700 17px/1.25 var(--fH)">{{ t.ptRow }}</div><div style="font:700 13px var(--fB);color:var(--mt)">{{ t.ptDesc }}</div></div>
+                      <div style="flex:none;display:flex;gap:8px">
+                        <sc-for list="{{ planets }}" as="p" hint-placeholder-count="5">
+                          <div onClick="{{ p.pick }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;width:62px;padding:8px 0;border-radius:14px;background:{{ p.tileBg }};cursor:pointer;transition:background .15s" style-hover="background:var(--pnH)">
+                            <div style="width:30px;height:30px;border-radius:50%;background:{{ p.orb }};box-shadow:{{ p.ring }}"></div>
+                            <div style="font:700 12px var(--fB);color:{{ p.fg }}">{{ p.name }}</div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ showLang }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:6px 0">
+                      <sc-for list="{{ langs }}" as="l" hint-placeholder-count="2">
+                        <div onClick="{{ l.pick }}" style="display:flex;align-items:center;gap:14px;padding:18px;border-radius:20px;background:var(--sd);box-shadow:{{ l.sh }};cursor:pointer;transition:box-shadow .15s" style-hover="background:var(--pnH)">
+                          <div style="width:44px;height:44px;border-radius:12px;background:var(--dp);display:grid;place-items:center;font:700 16px var(--fH);color:var(--a1)">{{ l.code }}</div>
+                          <div style="flex:1"><div style="font:700 18px/1.2 var(--fH)">{{ l.name }}</div><div style="font:700 12px var(--fB);color:var(--mt)">{{ l.sub }}</div></div>
+                          <div style="width:24px;height:24px;border-radius:50%;border:2px solid {{ l.dotBd }};display:grid;place-items:center;box-sizing:border-box"><div style="width:12px;height:12px;border-radius:50%;background:{{ l.dot }}"></div></div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ showAccount }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-direction:column;gap:14px;padding:6px 0">
+                      <div style="display:flex;align-items:center;gap:16px;padding:18px;border-radius:20px;background:var(--sd)">
+                        <div style="width:58px;height:58px;border-radius:50%;background:{{ me.color }};border:3px solid {{ me.fr.bd }};box-shadow:{{ me.fr.sh }};display:grid;place-items:center;font:700 20px var(--fH);color:#fff">{{ me.ini }}</div>
+                        <div style="flex:1"><div style="font:700 20px/1.2 var(--fH)">{{ me.name }}</div><div style="font:700 13px var(--fB);color:var(--mt)">{{ t.playerId }}</div></div>
+                        <div onClick="{{ openProfile }}" style="padding:9px 16px;border-radius:12px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);font:700 14px var(--fH);cursor:pointer" style-hover="filter:brightness(1.2)" style-active="transform:translateY(3px)">{{ t.editProfile }}</div>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:18px;background:var(--sd)">
+                        <div style="width:36px;height:36px;border-radius:10px;background:#fff;display:grid;place-items:center;font:700 18px var(--fH);color:#4285F4">G</div>
+                        <div style="flex:1"><div style="font:700 16px/1.2 var(--fH)">Google</div><div style="font:700 12px var(--fB);color:var(--mt)">dogukan•••@gmail.com</div></div>
+                        <div style="display:flex;align-items:center;gap:6px;font:800 12px var(--fB);color:#8EF0B0"><div style="width:8px;height:8px;border-radius:50%;background:#3CCB6E"></div>{{ t.linked }}</div>
+                      </div>
+                      <div style="display:flex;gap:12px;margin-top:4px">
+                        <div onClick="{{ askLogout }}" style="padding:12px 20px;border-radius:14px;background:#FF5E6C;box-shadow:0 4px 0 #C23E4A;font:700 15px var(--fH);color:#fff;cursor:pointer" style-active="transform:translateY(3px)">{{ t.logout }}</div>
+                        <div onClick="{{ askDelete }}" style="padding:12px 4px;font:700 14px var(--fB);color:var(--mt);cursor:pointer" style-hover="color:#FF8A94">{{ t.del }}</div>
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:12px;padding:16px 28px;border-top:1px solid rgba(255,255,255,.07);background:rgba(0,0,0,.12)">
+                  <div onClick="{{ resetSettings }}" style="font:700 14px var(--fB);color:var(--mt);cursor:pointer" style-hover="color:#F4F1E8">{{ t.reset }}</div>
+                  <div style="flex:1"></div>
+                  <div onClick="{{ closeSettings }}" style="padding:12px 22px;border-radius:14px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);font:700 16px var(--fH);cursor:pointer" style-active="transform:translateY(3px)">{{ t.cancel }}</div>
+                  <div onClick="{{ closeSettings }}" style="padding:12px 28px;border-radius:14px;background:linear-gradient(var(--a1),var(--a2));box-shadow:0 4px 0 var(--aS);font:700 16px var(--fH);color:var(--aT);cursor:pointer" style-hover="filter:brightness(1.08)" style-active="transform:translateY(3px);box-shadow:0 1px 0 var(--aS)">{{ t.save }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;z-index:20;display:grid;place-items:center;animation:fadeIn .2s ease-out both">
+            <div onClick="{{ closePanel }}" style="position:absolute;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px)"></div>
+            <div style="position:relative;width:980px;height:610px;display:flex;flex-direction:column;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:28px;box-shadow:0 10px 0 var(--pnS),0 40px 90px rgba(0,0,0,.6);overflow:hidden;animation:modalIn .28s cubic-bezier(.2,1.2,.4,1) both">
+              <div style="display:flex;align-items:center;gap:14px;padding:20px 24px 16px;flex:none">
+                <div style="flex:none;width:50px;height:50px;border-radius:16px;background:{{ pnl.tile }};box-shadow:0 4px 0 {{ pnl.sh }},inset 0 1px 0 rgba(255,255,255,.4);display:grid;place-items:center">
+                  <sc-if value="{{ pnl.isMe }}" hint-placeholder-val="{{ false }}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4" fill="rgba(255,255,255,.35)"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg></sc-if>
+                  <sc-if value="{{ pnl.isShop }}" hint-placeholder-val="{{ false }}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--aT)"><path d="M3 8.5 4.6 3.5h14.8L21 8.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z" style="fill:rgba(255,255,255,.6)"></path><path d="M4.5 11v8.5a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V11"></path><path d="M10 20.5V15.5h4v5"></path></svg></sc-if>
+                  <sc-if value="{{ pnl.isFriends }}" hint-placeholder-val="{{ false }}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="8.5" r="2.6" fill="rgba(255,255,255,.6)" stroke="none"></circle><path d="M15.6 14.2a5 5 0 0 1 6 5.3" stroke="rgba(255,255,255,.7)"></path><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20a6.5 6.5 0 0 1 13 0"></path></svg></sc-if>
+                  <sc-if value="{{ pnl.isLeader }}" hint-placeholder-val="{{ false }}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h10v5.5a5 5 0 0 1-10 0z" fill="rgba(255,255,255,.55)"></path><path d="M7 5.5H4.5a2.5 2.5 0 0 0 2.8 3.9"></path><path d="M17 5.5h2.5a2.5 2.5 0 0 1-2.8 3.9"></path><path d="M12 14v3.5"></path><path d="M8.5 20.5h7"></path><path d="M9.5 17.5h5v3h-5z"></path></svg></sc-if>
+                  <sc-if value="{{ pnl.isDaily }}" hint-placeholder-val="{{ false }}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8S10.4 3.6 7.9 4.3C6 4.9 6.8 8 12 8zM12 8s1.6-4.4 4.1-3.7C18 4.9 17.2 8 12 8z" fill="#FFE08A" stroke="#FFE08A"></path><rect x="3" y="8" width="18" height="4.2" rx="1.2"></rect><path d="M5 12.2v7.3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7.3"></path><path d="M12 8v12.5"></path></svg></sc-if>
+                  <sc-if value="{{ pnl.isRules }}" hint-placeholder-val="{{ false }}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z" fill="rgba(255,255,255,.2)"></path><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"></path><path d="M10 8.3a2.1 2.1 0 1 1 2.9 1.9c-.6.3-.9.8-.9 1.4v.4"></path><circle cx="12" cy="14.6" r=".7" fill="#fff"></circle></svg></sc-if>
+                </div>
+                <div style="min-width:0">
+                  <div style="font:700 26px/1.15 var(--fH)">{{ pnl.title }}</div>
+                  <div style="font:700 13px var(--fB);color:var(--mt);margin-top:2px">{{ pnl.sub }}</div>
+                </div>
+                <div style="flex:1"></div>
+                <sc-if value="{{ pnl.hasTabs }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--dp)">
+                    <sc-for list="{{ pnl.tabs }}" as="o" hint-placeholder-count="3">
+                      <div onClick="{{ o.pick }}" style="padding:9px 16px;border-radius:10px;font:700 15px var(--fH);background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.sh }};cursor:pointer;white-space:nowrap;transition:background .15s,color .15s" style-hover="color:#F4F1E8">{{ o.label }}</div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <div onClick="{{ closePanel }}" title="{{ t.close }}" style="flex:none;width:42px;height:42px;border-radius:13px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);display:grid;place-items:center;cursor:pointer;transition:transform .12s,filter .12s" style-hover="filter:brightness(1.25)" style-active="transform:translateY(3px)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.8" stroke-linecap="round" style="stroke:var(--ic)"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+                </div>
+              </div>
+
+              <div style="flex:1;min-height:0;display:flex;flex-direction:column;padding:0 24px 24px">
+
+                <sc-if value="{{ pnl.isMe }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:grid;grid-template-columns:290px minmax(0,1fr);gap:18px;flex:1;min-height:0">
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:22px 18px 18px;border-radius:22px;background:radial-gradient(ellipse at 50% 20%,var(--pnH),var(--sd) 70%)">
+                      <div style="position:relative;width:124px;height:124px">
+                        <div style="position:absolute;inset:0;border-radius:50%;background:{{ me.fr.bg }};box-shadow:{{ me.fr.sh }}"></div>
+                        <sc-if value="{{ me.fr.studs }}" hint-placeholder-val="{{ false }}">
+                          <div style="position:absolute;left:50%;top:-6px;width:13px;height:13px;margin-left:-6.5px;transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,#FFF6D0,#E8A317);box-shadow:0 0 0 1.5px #5A3A08,0 0 8px rgba(255,201,74,.8)"></div>
+                          <div style="position:absolute;left:-5px;top:50%;width:10px;height:10px;margin-top:-5px;transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,#FFF6D0,#E8A317);box-shadow:0 0 0 1.5px #5A3A08"></div>
+                          <div style="position:absolute;right:-5px;top:50%;width:10px;height:10px;margin-top:-5px;transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,#FFF6D0,#E8A317);box-shadow:0 0 0 1.5px #5A3A08"></div>
+                        </sc-if>
+                        <div style="position:absolute;inset:9px;border-radius:50%;background:{{ me.color }};display:grid;place-items:center;font:700 40px var(--fH);color:#fff;border:3px solid {{ me.fr.gap }}">{{ me.ini }}</div>
+                        <div style="position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:var(--a1);color:var(--aT);font:900 12px var(--fB);padding:2px 10px;border-radius:8px;white-space:nowrap">{{ mp.lv }}</div>
+                      </div>
+                      <div style="font:700 24px/1.15 var(--fH);margin-top:8px;text-align:center">{{ me.name }}</div>
+                      <div style="font:700 13px/1.4 var(--fB);color:var(--mt);text-align:center;min-height:18px">{{ mp.status }}</div>
+                      <div style="width:100%;display:flex;flex-direction:column;gap:6px;margin-top:4px">
+                        <div style="display:flex;justify-content:space-between;font:800 12px var(--fB);color:var(--mt)"><div>{{ mp.xpLabel }}</div><div style="font-variant-numeric:tabular-nums">{{ mp.xp }}</div></div>
+                        <div style="height:10px;border-radius:5px;background:var(--dp);overflow:hidden;box-shadow:inset 0 2px 3px rgba(0,0,0,.35)"><div style="width:69%;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--a2),var(--a1));box-shadow:0 0 10px var(--gl)"></div></div>
+                      </div>
+                      <div style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;border:1px dashed var(--bd);box-sizing:border-box;margin-top:4px">
+                        <div style="font:700 12px var(--fB);color:var(--mt)">{{ fr.codeLabel }}</div>
+                        <div style="font:700 16px var(--fH);letter-spacing:1px;color:var(--a1)">DY-4821</div>
+                        <div style="flex:1"></div>
+                        <div onClick="{{ af.copy }}" style="font:700 13px var(--fH);color:var(--ic);cursor:pointer" style-hover="color:#fff">{{ af.copyLabel }}</div>
+                      </div>
+                      <div style="flex:1"></div>
+                      <div style="width:100%;display:flex;gap:10px">
+                        <div onClick="{{ openProfile }}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 0;border-radius:14px;background:linear-gradient(var(--a1),var(--a2));box-shadow:0 4px 0 var(--aS);color:var(--aT);font:700 15px var(--fH);cursor:pointer" style-hover="filter:brightness(1.08)" style-active="transform:translateY(3px)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--aT)"><path d="M4 20h4L19 9l-4-4L4 16z"></path><path d="M13.5 6.5l4 4"></path></svg>{{ t.editProfile }}</div>
+                        <div onClick="{{ openShare }}" title="{{ mp.share }}" style="flex:none;width:46px;display:grid;place-items:center;border-radius:14px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);cursor:pointer" style-hover="filter:brightness(1.2)" style-active="transform:translateY(3px)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--ic)"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"></path></svg></div>
+                      </div>
+                    </div>
+
+                    <div style="display:flex;flex-direction:column;gap:14px;min-height:0;overflow-y:auto;scrollbar-gutter:stable;padding-right:4px;scrollbar-width:thin;scrollbar-color:var(--bd) transparent">
+                      <sc-if value="{{ mp.tabStats }}" hint-placeholder-val="{{ true }}">
+                        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;flex:none">
+                          <sc-for list="{{ mp.stats }}" as="x" hint-placeholder-count="4">
+                            <div style="display:flex;flex-direction:column;gap:4px;padding:14px 14px 12px;border-radius:18px;background:var(--sd)">
+                              <div style="font:900 10px var(--fB);letter-spacing:1.2px;color:var(--mt)">{{ x.k }}</div>
+                              <div style="font:700 28px/1.1 var(--fH);color:{{ x.c }};font-variant-numeric:tabular-nums">{{ x.v }}</div>
+                              <div style="font:700 12px var(--fB);color:var(--mt)">{{ x.sub }}</div>
+                            </div>
+                          </sc-for>
+                        </div>
+                        <div style="display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:10px;flex:none">
+                          <div style="display:flex;flex-direction:column;gap:12px;padding:16px 18px;border-radius:18px;background:var(--sd)">
+                            <div style="display:flex;align-items:center;gap:14px">
+                              <div style="width:52px;height:52px;transform:rotate(45deg);border-radius:12px;background:linear-gradient(135deg,#FFE08A,#F5A623);box-shadow:0 0 22px rgba(255,201,74,.5);display:grid;place-items:center;margin:4px"><div style="transform:rotate(-45deg);font:700 20px var(--fH);color:#3A1F00">II</div></div>
+                              <div style="flex:1;min-width:0"><div style="font:900 10px var(--fB);letter-spacing:1.2px;color:var(--mt)">{{ mp.season }}</div><div style="font:700 22px/1.15 var(--fH);color:#FFC94A">{{ t.rank }}</div></div>
+                              <div style="text-align:right"><div style="font:900 10px var(--fB);letter-spacing:1.2px;color:var(--mt)">{{ mp.bestLabel }}</div><div style="font:700 15px var(--fH)">{{ mp.best }}</div></div>
+                            </div>
+                            <div style="height:10px;border-radius:5px;background:var(--dp);overflow:hidden"><div style="width:72%;height:100%;border-radius:5px;background:linear-gradient(90deg,#F5A623,#FFE08A)"></div></div>
+                            <div style="display:flex;justify-content:space-between;font:800 12px var(--fB);color:var(--mt)"><div>720 / 1000 LP</div><div>{{ mp.toNext }}</div></div>
+                          </div>
+                          <div style="display:flex;flex-direction:column;gap:9px;padding:14px 18px;border-radius:18px;background:var(--sd)">
+                            <div style="font:900 10px var(--fB);letter-spacing:1.2px;color:var(--mt)">{{ mp.byMode }}</div>
+                            <sc-for list="{{ mp.modes }}" as="m" hint-placeholder-count="4">
+                              <div style="display:grid;grid-template-columns:86px minmax(0,1fr) 40px;align-items:center;gap:10px">
+                                <div style="font:700 13px var(--fH);white-space:nowrap">{{ m.name }}</div>
+                                <div style="height:8px;border-radius:4px;background:var(--dp);overflow:hidden"><div style="width:{{ m.pct }};height:100%;border-radius:4px;background:{{ m.c }}"></div></div>
+                                <div style="font:700 13px var(--fH);text-align:right;font-variant-numeric:tabular-nums">{{ m.pct }}</div>
+                              </div>
+                            </sc-for>
+                          </div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:10px;padding:14px 18px;border-radius:18px;background:var(--sd);flex:none">
+                          <div style="display:flex;align-items:center"><div style="font:900 10px var(--fB);letter-spacing:1.2px;color:var(--mt)">{{ mp.framesLabel }}</div><div style="flex:1"></div><div style="font:700 12px var(--fB);color:var(--mt)">{{ mp.framesHint }}</div></div>
+                          <div style="display:flex;gap:10px">
+                            <sc-for list="{{ mp.frames }}" as="f" hint-placeholder-count="3">
+                              <div onClick="{{ f.pick }}" style="flex:1;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;background:{{ f.tileBg }};box-shadow:{{ f.ring }};cursor:{{ f.cur }};opacity:{{ f.op }};transition:background .15s" style-hover="background:var(--pnH)">
+                                <div style="position:relative;width:40px;height:40px;flex:none"><div style="position:absolute;inset:0;border-radius:50%;background:{{ f.bg }};box-shadow:{{ f.sh }}"></div><div style="position:absolute;inset:5px;border-radius:50%;background:{{ me.color }};border:2px solid {{ f.gap }}"></div></div>
+                                <div style="min-width:0"><div style="font:700 15px/1.2 var(--fH)">{{ f.name }}</div><div style="font:700 11px var(--fB);color:{{ f.sc }}">{{ f.state }}</div></div>
+                              </div>
+                            </sc-for>
+                          </div>
+                        </div>
+                      </sc-if>
+
+                      <sc-if value="{{ mp.tabBadges }}" hint-placeholder-val="{{ false }}">
+                        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+                          <sc-for list="{{ mp.badges }}" as="b" hint-placeholder-count="9">
+                            <div style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:18px;background:var(--sd);opacity:{{ b.op }}">
+                              <div style="flex:none;width:46px;height:46px;border-radius:14px;background:{{ b.bg }};box-shadow:{{ b.sh }};display:grid;place-items:center;font:700 18px var(--fH);color:#fff">{{ b.g }}</div>
+                              <div style="flex:1;min-width:0">
+                                <div style="font:700 15px/1.2 var(--fH)">{{ b.name }}</div>
+                                <div style="font:700 12px var(--fB);color:var(--mt);margin-top:2px">{{ b.desc }}</div>
+                                <sc-if value="{{ b.locked }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:8px;margin-top:6px"><div style="flex:1;height:6px;border-radius:3px;background:var(--dp);overflow:hidden"><div style="width:{{ b.pct }};height:100%;background:var(--mt)"></div></div><div style="font:800 11px var(--fB);color:var(--mt)">{{ b.prog }}</div></div></sc-if>
+                              </div>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </sc-if>
+
+                      <sc-if value="{{ mp.tabHistory }}" hint-placeholder-val="{{ false }}">
+                        <div style="display:grid;grid-template-columns:44px minmax(0,1fr) 110px 110px 90px;padding:0 14px 2px;font:900 10px var(--fB);letter-spacing:1.2px;color:var(--mt)"><div></div><div>{{ mp.hMode }}</div><div>{{ mp.hPlace }}</div><div style="text-align:right">{{ mp.hChips }}</div><div style="text-align:right">{{ mp.hWhen }}</div></div>
+                        <sc-for list="{{ mp.history }}" as="h" hint-placeholder-count="7">
+                          <div style="display:grid;grid-template-columns:44px minmax(0,1fr) 110px 110px 90px;align-items:center;padding:9px 14px;border-radius:14px;background:var(--sd)">
+                            <div style="width:30px;height:30px;border-radius:9px;background:{{ h.c }};display:grid;place-items:center;font:700 13px var(--fH);color:#fff">{{ h.g }}</div>
+                            <div style="min-width:0"><div style="font:700 15px/1.2 var(--fH)">{{ h.mode }}</div><div style="font:700 12px var(--fB);color:var(--mt)">{{ h.detail }}</div></div>
+                            <div style="display:flex;align-items:center;gap:6px"><div style="padding:3px 9px;border-radius:8px;background:{{ h.pb }};color:{{ h.pf }};font:800 12px var(--fB)">{{ h.place }}</div></div>
+                            <div style="text-align:right;font:700 15px var(--fH);color:{{ h.dc }};font-variant-numeric:tabular-nums">{{ h.delta }}</div>
+                            <div style="text-align:right;font:700 12px var(--fB);color:var(--mt)">{{ h.when }}</div>
+                          </div>
+                        </sc-for>
+                      </sc-if>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ pnl.isShop }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:16px;flex:1;min-height:0">
+                    <div style="position:relative;overflow:hidden;flex:none;display:flex;align-items:center;gap:18px;height:96px;padding:0 22px;border-radius:22px;background:linear-gradient(110deg,var(--a2),var(--a1));box-shadow:0 5px 0 var(--aS);color:var(--aT)">
+                      <div style="position:absolute;top:0;bottom:0;width:70px;background:rgba(255,255,255,.35);animation:shine 3.6s infinite"></div>
+                      <div style="position:relative;width:86px;height:64px;flex:none">
+                        <div style="position:absolute;left:0;top:18px;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box;box-shadow:0 4px 0 rgba(0,0,0,.25)"></div>
+                        <div style="position:absolute;left:24px;top:0;width:48px;height:48px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box;box-shadow:0 4px 0 rgba(0,0,0,.25)"></div>
+                        <div style="position:absolute;left:54px;top:24px;width:26px;height:26px;transform:rotate(45deg);border-radius:6px;background:linear-gradient(135deg,#B8F1FF,#3D7BFF);box-shadow:0 0 14px rgba(127,227,255,.8)"></div>
+                      </div>
+                      <div style="position:relative">
+                        <div style="font:900 11px var(--fB);letter-spacing:1.5px;opacity:.75">{{ shop.dealTag }}</div>
+                        <div style="font:700 26px/1.15 var(--fH)">{{ shop.dealTitle }}</div>
+                      </div>
+                      <div style="flex:1"></div>
+                      <div style="position:relative;display:flex;align-items:center;gap:7px;padding:8px 12px;border-radius:12px;background:rgba(0,0,0,.16);font:700 15px var(--fH)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" style="stroke:var(--aT)"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2M9 2h6"></path></svg>{{ shop.timer }}</div>
+                      <div style="position:relative;text-align:right">
+                        <div style="font:700 13px var(--fB);text-decoration:line-through;opacity:.6">{{ shop.oldPrice }}</div>
+                        <div style="font:700 26px/1 var(--fH)">{{ shop.newPrice }}</div>
+                      </div>
+                      <div style="position:relative;padding:13px 24px;border-radius:14px;background:var(--aT);color:var(--a1);font:700 17px var(--fH);cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.3)" style-active="transform:translateY(3px)">{{ shop.buy }}</div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;flex:1;min-height:0">
+                      <sc-for list="{{ shop.items }}" as="i" hint-placeholder-count="4">
+                        <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:22px 14px 14px;border-radius:22px;background:var(--sd);box-shadow:{{ i.ring }};cursor:pointer;transition:transform .18s,background .18s" style-hover="transform:translateY(-5px);background:var(--pnH)">
+                          <sc-if value="{{ i.pop }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:0;left:50%;transform:translateX(-50%);padding:5px 14px;border-radius:0 0 12px 12px;background:linear-gradient(var(--a1),var(--a2));color:var(--aT);font:900 10px var(--fB);letter-spacing:1px;white-space:nowrap">{{ i.popLabel }}</div></sc-if>
+                          <sc-if value="{{ i.bonus }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:14px;right:14px;padding:3px 8px;border-radius:8px;background:#3CCB6E;color:#fff;font:900 11px var(--fB)">{{ i.bonus }}</div></sc-if>
+                          <div style="height:104px;width:100%;display:grid;place-items:center">
+                            <sc-if value="{{ i.isCoin }}" hint-placeholder-val="{{ false }}">
+                              <div style="position:relative;width:92px;height:72px;transform:scale({{ i.scale }})">
+                                <div style="position:absolute;left:0;top:26px;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box;box-shadow:0 4px 0 #8A5208"></div>
+                                <div style="position:absolute;left:46px;top:22px;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box;box-shadow:0 4px 0 #8A5208"></div>
+                                <div style="position:absolute;left:22px;top:0;width:50px;height:50px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box;box-shadow:0 4px 0 #8A5208,0 0 20px rgba(255,201,74,.45)"></div>
+                              </div>
+                            </sc-if>
+                            <sc-if value="{{ i.isGem }}" hint-placeholder-val="{{ false }}">
+                              <div style="position:relative;width:80px;height:72px;transform:scale({{ i.scale }})">
+                                <div style="position:absolute;left:14px;top:10px;width:46px;height:46px;transform:rotate(45deg);border-radius:10px;background:linear-gradient(135deg,#C8F6FF,#7FE3FF 40%,#3D7BFF);box-shadow:0 0 24px rgba(127,227,255,.6),inset -4px -4px 0 rgba(0,0,0,.15)"></div>
+                                <div style="position:absolute;left:56px;top:40px;width:20px;height:20px;transform:rotate(45deg);border-radius:5px;background:linear-gradient(135deg,#C8F6FF,#3D7BFF)"></div>
+                              </div>
+                            </sc-if>
+                            <sc-if value="{{ i.isTile }}" hint-placeholder-val="{{ false }}">
+                              <div style="width:60px;height:82px;border-radius:11px;background:{{ i.face }};box-shadow:inset 0 -6px 0 {{ i.edge }},0 5px 0 {{ i.edge2 }},{{ i.glow }};display:flex;flex-direction:column;align-items:center;padding-top:8px;box-sizing:border-box;color:{{ i.col }};gap:5px"><svg width="25" height="42" viewBox="0 0 60 100" style="display:block;overflow:visible"><path d="M7 7H53L22 93" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"></path></svg><div style="width:11px;height:11px;border-radius:50%;background:{{ i.col }}"></div></div>
+                            </sc-if>
+                          </div>
+                          <div style="font:700 22px/1.15 var(--fH);text-align:center">{{ i.amount }}</div>
+                          <div style="font:700 12px var(--fB);color:var(--mt)">{{ i.sub }}</div>
+                          <div style="flex:1"></div>
+                          <div style="width:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 0;border-radius:14px;background:linear-gradient(var(--a1),var(--a2));box-shadow:0 4px 0 var(--aS);color:var(--aT);font:700 17px var(--fH)" style-active="transform:translateY(3px)">
+                            <sc-if value="{{ i.gemPrice }}" hint-placeholder-val="{{ false }}"><div style="width:13px;height:13px;transform:rotate(45deg);border-radius:3px;background:linear-gradient(135deg,#C8F6FF,#3D7BFF)"></div></sc-if>
+                            <div>{{ i.price }}</div>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ pnl.isFriends }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:14px;flex:1;min-height:0">
+                    <div style="display:flex;gap:12px;flex:none">
+                      <div style="flex:1;display:flex;align-items:center;gap:10px;height:48px;padding:0 6px 0 16px;border-radius:14px;background:var(--dp);box-shadow:{{ fr.focusRing }};box-sizing:border-box;transition:box-shadow .15s">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" style="flex:none;stroke:var(--mt)"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+                        <input value="{{ fr.q }}" onInput="{{ fr.onQ }}" onFocus="{{ fr.onFocus }}" onBlur="{{ fr.onBlur }}" placeholder="{{ fr.search }}" spellcheck="false" style="flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;font:700 15px var(--fB);color:#F4F1E8">
+                        <sc-if value="{{ fr.hasQ }}" hint-placeholder-val="{{ false }}"><div onClick="{{ fr.clearQ }}" style="flex:none;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;cursor:pointer" style-hover="background:var(--pnH)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" style="stroke:var(--mt)"><path d="M6 6l12 12M18 6L6 18"></path></svg></div></sc-if>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:10px;height:48px;padding:0 16px;border-radius:14px;background:var(--sd);border:1px dashed var(--bd);box-sizing:border-box">
+                        <div style="font:700 12px var(--fB);color:var(--mt)">{{ fr.codeLabel }}</div>
+                        <div style="font:700 17px var(--fH);letter-spacing:1px;color:var(--a1);white-space:nowrap">DY-4821</div>
+                        <svg onClick="{{ af.copy }}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--ic);cursor:pointer"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"></path></svg>
+                      </div>
+                      <div onClick="{{ openAddFriend }}" style="display:flex;align-items:center;gap:8px;height:48px;padding:0 20px;border-radius:14px;background:linear-gradient(var(--a1),var(--a2));box-shadow:0 4px 0 var(--aS);color:var(--aT);font:700 16px var(--fH);cursor:pointer;box-sizing:border-box;white-space:nowrap" style-hover="filter:brightness(1.08)" style-active="transform:translateY(3px)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" style="stroke:var(--aT)"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20a6.5 6.5 0 0 1 13 0M19 8v6M16 11h6"></path></svg>{{ fr.add }}
+                      </div>
+                    </div>
+                    <div style="flex:1;min-height:0;overflow-y:auto;scrollbar-gutter:stable;padding-right:4px;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin;scrollbar-color:var(--bd) transparent">
+                      <sc-for list="{{ fr.rows }}" as="r" hint-placeholder-count="4">
+                        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:18px;background:var(--sd);flex:none;transition:background .15s" style-hover="background:var(--pnH)">
+                          <div style="position:relative;width:48px;height:48px;flex:none">
+                            <div style="width:100%;height:100%;border-radius:50%;background:{{ r.c }};opacity:{{ r.op }};display:grid;place-items:center;font:700 17px var(--fH);color:#fff">{{ r.ini }}</div>
+                            <div style="position:absolute;right:-2px;bottom:-2px;width:16px;height:16px;border-radius:50%;background:{{ r.dot }};border:3px solid var(--sd);box-sizing:border-box"></div>
+                          </div>
+                          <div style="flex:1;min-width:0">
+                            <div style="display:flex;align-items:center;gap:8px"><div style="font:700 17px/1.2 var(--fH)">{{ r.name }}</div><div style="font:900 10px var(--fB);padding:2px 7px;border-radius:6px;background:var(--dp);color:var(--a1)">{{ r.lv }}</div></div>
+                            <div style="font:700 13px var(--fB);color:{{ r.sc }};margin-top:2px">{{ r.status }}</div>
+                          </div>
+                          <div style="display:flex;gap:8px;flex:none">
+                            <sc-for list="{{ r.actions }}" as="a" hint-placeholder-count="1">
+                              <div onClick="{{ a.go }}" style="padding:10px 18px;border-radius:12px;background:{{ a.bg }};box-shadow:0 3px 0 {{ a.sh }};color:{{ a.fg }};font:700 14px var(--fH);cursor:pointer;white-space:nowrap;transition:filter .12s" style-hover="filter:brightness(1.12)" style-active="transform:translateY(2px)">{{ a.label }}</div>
+                            </sc-for>
+                          </div>
+                        </div>
+                      </sc-for>
+                      <sc-if value="{{ fr.empty }}" hint-placeholder-val="{{ false }}"><div style="padding:40px 0;text-align:center;font:700 15px var(--fB);color:var(--mt)">{{ fr.emptyText }}</div></sc-if>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ pnl.isLeader }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:grid;grid-template-columns:370px minmax(0,1fr);gap:18px;flex:1;min-height:0">
+                    <div style="display:flex;align-items:flex-end;justify-content:center;gap:12px;padding:20px 18px 0;border-radius:22px;background:radial-gradient(ellipse at 50% 35%,var(--pnH),var(--sd) 72%);overflow:hidden">
+                      <sc-for list="{{ lb.podium }}" as="p" hint-placeholder-count="3">
+                        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;width:104px">
+                          <sc-if value="{{ p.crown }}" hint-placeholder-val="{{ false }}"><svg width="34" height="24" viewBox="0 0 34 24"><path d="M3 20 1 5l9 7 7-11 7 11 9-7-2 15z" fill="#FFD964" stroke="#B8790F" stroke-width="1.5" stroke-linejoin="round"></path></svg></sc-if>
+                          <div style="width:{{ p.av }};height:{{ p.av }};border-radius:50%;background:{{ p.c }};border:3px solid {{ p.m1 }};box-sizing:border-box;display:grid;place-items:center;font:700 18px var(--fH);color:#fff;box-shadow:0 0 22px {{ p.glow }}">{{ p.ini }}</div>
+                          <div style="font:700 15px/1.2 var(--fH);white-space:nowrap">{{ p.name }}</div>
+                          <div style="display:flex;align-items:center;gap:5px;font:800 13px var(--fB);color:var(--mt)"><div style="width:9px;height:9px;transform:rotate(45deg);border-radius:2px;background:{{ p.lc }}"></div>{{ p.pts }}</div>
+                          <div style="width:100%;height:{{ p.h }};margin-top:4px;border-radius:14px 14px 0 0;background:linear-gradient({{ p.m1 }},{{ p.m2 }});box-shadow:inset 0 2px 0 rgba(255,255,255,.5);display:flex;justify-content:center;padding-top:10px;box-sizing:border-box;font:700 42px/1 var(--fH);color:rgba(0,0,0,.32)">{{ p.rank }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px;min-height:0">
+                      <div style="display:grid;grid-template-columns:48px minmax(0,1fr) 120px 90px;padding:0 16px 4px;font:900 11px var(--fB);letter-spacing:1.2px;color:var(--mt)"><div>{{ lb.h0 }}</div><div>{{ lb.h1 }}</div><div>{{ lb.h2 }}</div><div style="text-align:right">{{ lb.h3 }}</div></div>
+                      <sc-for list="{{ lb.rows }}" as="r" hint-placeholder-count="6">
+                        <div style="display:grid;grid-template-columns:48px minmax(0,1fr) 120px 90px;align-items:center;padding:8px 16px;border-radius:14px;background:{{ r.bg }};box-shadow:{{ r.ring }}">
+                          <div style="font:700 16px var(--fH);color:var(--mt)">{{ r.rank }}</div>
+                          <div style="display:flex;align-items:center;gap:10px;min-width:0"><div style="flex:none;width:32px;height:32px;border-radius:50%;background:{{ r.c }};display:grid;place-items:center;font:700 12px var(--fH);color:#fff">{{ r.ini }}</div><div style="font:700 15px var(--fH);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</div></div>
+                          <div style="display:flex;align-items:center;gap:6px;font:700 13px var(--fB);color:{{ r.lc }}"><div style="width:9px;height:9px;transform:rotate(45deg);border-radius:2px;background:{{ r.lc }}"></div>{{ r.league }}</div>
+                          <div style="text-align:right;font:700 16px var(--fH)">{{ r.pts }}</div>
+                        </div>
+                      </sc-for>
+                      <div style="flex:1"></div>
+                      <div style="display:grid;grid-template-columns:48px minmax(0,1fr) 120px 90px;align-items:center;padding:10px 16px;border-radius:16px;background:linear-gradient(90deg,var(--pnH),var(--sd));box-shadow:inset 0 0 0 2px var(--a1),0 0 20px var(--gl)">
+                        <div style="font:700 16px var(--fH);color:var(--a1)">{{ lb.me.rank }}</div>
+                        <div style="display:flex;align-items:center;gap:10px;min-width:0"><div style="flex:none;width:34px;height:34px;border-radius:50%;background:#FF8A5B;border:2px solid var(--a1);box-sizing:border-box;display:grid;place-items:center;font:700 12px var(--fH);color:#fff">DY</div><div style="font:700 15px var(--fH)">{{ lb.me.name }}</div></div>
+                        <div style="display:flex;align-items:center;gap:6px;font:700 13px var(--fB);color:#FFC94A"><div style="width:9px;height:9px;transform:rotate(45deg);border-radius:2px;background:#FFC94A"></div>{{ lb.me.league }}</div>
+                        <div style="text-align:right;font:700 16px var(--fH)">{{ lb.me.pts }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ pnl.isDaily }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:14px;flex:1;min-height:0">
+                    <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr)) 1.5fr;gap:10px;flex:none">
+                      <sc-for list="{{ dl.days }}" as="d" hint-placeholder-count="7">
+                        <div style="position:relative;height:120px;border-radius:18px;background:{{ d.bg }};box-shadow:{{ d.sh }};opacity:{{ d.op }};animation:{{ d.anim }};display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:10px 8px;box-sizing:border-box">
+                          <div style="font:800 11px var(--fB);letter-spacing:.5px;color:{{ d.lc }}">{{ d.label }}</div>
+                          <sc-if value="{{ d.chest }}" hint-placeholder-val="{{ false }}">
+                            <div style="position:relative;width:64px;height:46px">
+                              <div style="position:absolute;left:2px;right:2px;bottom:0;height:28px;border-radius:4px 4px 8px 8px;background:linear-gradient(#C67B3A,#8E4E1E);box-shadow:0 3px 0 #5A2E0E"></div>
+                              <div style="position:absolute;left:0;right:0;top:4px;height:18px;border-radius:12px 12px 3px 3px;background:linear-gradient(#D98C48,#A25A24)"></div>
+                              <div style="position:absolute;left:28px;top:4px;width:8px;height:42px;background:linear-gradient(var(--a1),var(--a2))"></div>
+                              <div style="position:absolute;left:25px;top:18px;width:14px;height:12px;border-radius:3px;background:var(--a1);box-shadow:0 0 12px var(--gl)"></div>
+                            </div>
+                          </sc-if>
+                          <sc-if value="{{ d.coin }}" hint-placeholder-val="{{ true }}">
+                            <div style="width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F);border:2px dashed #FFF3C8;box-sizing:border-box;box-shadow:0 3px 0 #8A5208"></div>
+                          </sc-if>
+                          <sc-if value="{{ d.showAmt }}" hint-placeholder-val="{{ true }}"><div style="font:700 15px/1 var(--fH);color:{{ d.ac }}">{{ d.amt }}</div></sc-if>
+                          <sc-if value="{{ d.today }}" hint-placeholder-val="{{ false }}"><div onClick="{{ dl.claimDay }}" style="width:100%;padding:6px 0;border-radius:10px;background:#fff;color:#146B3C;font:700 14px var(--fH);text-align:center;box-shadow:0 3px 0 #0E5A31;cursor:pointer" style-active="transform:translateY(2px);box-shadow:none">{{ dl.claim }}</div></sc-if>
+                          <sc-if value="{{ d.done }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;border-radius:18px;background:rgba(0,0,0,.38);display:grid;place-items:center"><div style="width:36px;height:36px;border-radius:50%;background:#3CCB6E;box-shadow:0 3px 0 #22914A;display:grid;place-items:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div></div></sc-if>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:12px;flex:none;margin-top:2px">
+                      <div style="font:700 20px/1.2 var(--fH)">{{ dl.tasksTitle }}</div>
+                      <div style="font:800 12px var(--fB);padding:4px 10px;border-radius:8px;background:var(--dp);color:var(--a1)">{{ dl.doneCount }}</div>
+                      <div style="flex:1"></div>
+                      <div style="display:flex;align-items:center;gap:6px;font:700 13px var(--fB);color:var(--mt)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" style="stroke:var(--mt)"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2M9 2h6"></path></svg>{{ dl.refresh }}</div>
+                    </div>
+                    <div style="flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;overflow-y:auto;scrollbar-gutter:stable;padding-right:4px;scrollbar-width:thin;scrollbar-color:var(--bd) transparent">
+                      <sc-for list="{{ dl.tasks }}" as="k" hint-placeholder-count="5">
+                        <div style="flex:none;display:flex;align-items:center;gap:14px;padding:9px 14px;border-radius:16px;background:var(--sd);opacity:{{ k.op }}">
+                          <div style="flex:none;width:36px;height:36px;border-radius:50%;background:{{ k.ib }};display:grid;place-items:center;font:700 14px var(--fH);color:var(--mt)">
+                            <sc-if value="{{ k.complete }}" hint-placeholder-val="{{ false }}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+                            <sc-if value="{{ k.open }}" hint-placeholder-val="{{ true }}"><div>{{ k.n }}</div></sc-if>
+                          </div>
+                          <div style="flex:1;min-width:0">
+                            <div style="display:flex;justify-content:space-between;gap:12px"><div style="font:700 15px/1.25 var(--fH)">{{ k.name }}</div><div style="font:800 13px var(--fB);color:{{ k.pc }}">{{ k.prog }}</div></div>
+                            <div style="height:8px;border-radius:4px;background:var(--dp);margin-top:6px;overflow:hidden"><div style="width:{{ k.pct }};height:100%;border-radius:4px;background:{{ k.bar }};transition:width .3s"></div></div>
+                          </div>
+                          <div style="flex:none;width:150px;display:flex;align-items:center;justify-content:flex-end;gap:6px;font:700 15px var(--fH)">
+                            <div style="width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F)"></div>{{ k.reward }}
+                            <sc-if value="{{ k.gem }}" hint-placeholder-val="{{ false }}"><div style="width:12px;height:12px;margin-left:6px;transform:rotate(45deg);border-radius:3px;background:linear-gradient(135deg,#C8F6FF,#3D7BFF)"></div><div>{{ k.gem }}</div></sc-if>
+                          </div>
+                          <div style="flex:none;width:118px">
+                            <sc-if value="{{ k.canClaim }}" hint-placeholder-val="{{ false }}"><div onClick="{{ k.claim }}" style="padding:9px 0;text-align:center;border-radius:12px;background:#3CCB6E;box-shadow:0 3px 0 #22914A,0 0 16px rgba(60,203,110,.45);color:#fff;font:700 15px var(--fH);cursor:pointer" style-active="transform:translateY(2px);box-shadow:none">{{ dl.take }}</div></sc-if>
+                            <sc-if value="{{ k.claimed }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 0;font:700 14px var(--fH);color:#8EF0B0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8EF0B0" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>{{ dl.taken }}</div></sc-if>
+                            <sc-if value="{{ k.going }}" hint-placeholder-val="{{ true }}"><div style="padding:9px 0;text-align:center;border-radius:12px;background:var(--dp);color:var(--mt);font:700 13px var(--fB)">{{ dl.going }}</div></sc-if>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ pnl.isRules }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:grid;grid-template-columns:230px minmax(0,1fr);gap:18px;flex:1;min-height:0">
+                    <div style="display:flex;flex-direction:column;gap:6px">
+                      <sc-for list="{{ rl.nav }}" as="n" hint-placeholder-count="6">
+                        <div onClick="{{ n.pick }}" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:14px;background:{{ n.bg }};box-shadow:{{ n.bar }};color:{{ n.fg }};cursor:pointer;transition:background .15s,color .15s" style-hover="background:var(--pnH);color:#F4F1E8">
+                          <div style="flex:none;width:28px;height:28px;border-radius:9px;background:{{ n.nb }};color:{{ n.nf }};display:grid;place-items:center;font:700 14px var(--fH)">{{ n.i }}</div>
+                          <div style="font:700 16px/1.2 var(--fH)">{{ n.name }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:18px;padding:24px 28px;border-radius:22px;background:var(--sd);min-height:0;overflow-y:auto;scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:var(--bd) transparent">
+                      <div style="font:700 28px/1.15 var(--fH)">{{ rl.title }}</div>
+                      <div style="display:flex;flex-direction:column;gap:12px">
+                        <sc-for list="{{ rl.points }}" as="p" hint-placeholder-count="3">
+                          <div style="display:flex;gap:14px;align-items:flex-start"><div style="flex:none;width:9px;height:9px;margin-top:8px;transform:rotate(45deg);border-radius:2px;background:var(--a1)"></div><div style="font:700 16px/1.55 var(--fB);color:#E6E8F4;text-wrap:pretty">{{ p.text }}</div></div>
+                        </sc-for>
+                      </div>
+                      <sc-if value="{{ rl.hasEx }}" hint-placeholder-val="{{ false }}">
+                        <div style="margin-top:auto;padding:18px 20px;border-radius:18px;background:var(--dp)">
+                          <div style="font:900 11px var(--fB);letter-spacing:1.5px;color:var(--mt)">{{ rl.exLabel }}</div>
+                          <div style="display:flex;align-items:flex-end;gap:8px;margin-top:14px;padding-bottom:20px">
+                            <sc-for list="{{ rl.tiles }}" as="x" hint-placeholder-count="4">
+                              <sc-if value="{{ x.gap }}" hint-placeholder-val="{{ false }}"><div style="width:22px"></div></sc-if>
+                              <sc-if value="{{ x.tile }}" hint-placeholder-val="{{ true }}">
+                                <div style="position:relative;width:46px;height:62px;border-radius:9px;background:linear-gradient(var(--tf1),var(--tf2));box-shadow:inset 0 -5px 0 var(--te),0 3px 0 var(--te2),{{ x.glow }};display:flex;flex-direction:column;align-items:center;padding-top:6px;box-sizing:border-box;font:700 28px/1 var(--fH);color:{{ x.c }}">{{ x.n }}<div style="width:8px;height:8px;border-radius:50%;background:{{ x.c }};margin-top:3px"></div>
+                                  <sc-if value="{{ x.tag }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:70px;left:50%;transform:translateX(-50%);font:800 11px var(--fB);color:var(--a1);white-space:nowrap">{{ x.tag }}</div></sc-if>
+                                </div>
+                              </sc-if>
+                            </sc-for>
+                          </div>
+                          <div style="font:700 14px/1.5 var(--fB);color:var(--mt);margin-top:6px">{{ rl.caption }}</div>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </div>
+                </sc-if>
+
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ dlgOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;z-index:30;display:grid;place-items:center;animation:fadeIn .18s ease-out both">
+            <div onClick="{{ closeDlg }}" style="position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px)"></div>
+
+            <sc-if value="{{ dlg.isProfile }}" hint-placeholder-val="{{ false }}">
+              <div style="position:relative;width:720px;display:flex;flex-direction:column;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:26px;box-shadow:0 10px 0 var(--pnS),0 40px 90px rgba(0,0,0,.6);overflow:hidden;animation:modalIn .26s cubic-bezier(.2,1.2,.4,1) both">
+                <div style="display:flex;align-items:center;gap:12px;padding:20px 24px 6px">
+                  <div style="font:700 24px/1.15 var(--fH)">{{ pf.title }}</div>
+                  <div style="flex:1"></div>
+                  <div onClick="{{ closeDlg }}" style="width:40px;height:40px;border-radius:12px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);display:grid;place-items:center;cursor:pointer" style-hover="filter:brightness(1.25)" style-active="transform:translateY(3px)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.8" stroke-linecap="round" style="stroke:var(--ic)"><path d="M6 6l12 12M18 6L6 18"></path></svg></div>
+                </div>
+                <div style="display:grid;grid-template-columns:220px minmax(0,1fr);gap:24px;padding:14px 24px 22px">
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 14px;border-radius:20px;background:var(--sd)">
+                    <div style="position:relative;width:110px;height:110px">
+                      <div style="position:absolute;inset:0;border-radius:50%;background:{{ pf.fr.bg }};box-shadow:{{ pf.fr.sh }};transition:box-shadow .2s"></div>
+                      <sc-if value="{{ pf.fr.studs }}" hint-placeholder-val="{{ false }}">
+                        <div style="position:absolute;left:50%;top:-5px;width:12px;height:12px;margin-left:-6px;transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,#FFF6D0,#E8A317);box-shadow:0 0 0 1.5px #5A3A08,0 0 8px rgba(255,201,74,.8)"></div>
+                        <div style="position:absolute;left:-5px;top:50%;width:10px;height:10px;margin-top:-5px;transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,#FFF6D0,#E8A317);box-shadow:0 0 0 1.5px #5A3A08"></div>
+                        <div style="position:absolute;right:-5px;top:50%;width:10px;height:10px;margin-top:-5px;transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,#FFF6D0,#E8A317);box-shadow:0 0 0 1.5px #5A3A08"></div>
+                      </sc-if>
+                      <div style="position:absolute;inset:{{ pf.fr.inset }};border-radius:50%;background:{{ pf.color }};display:grid;place-items:center;font:700 36px var(--fH);color:#fff;border:3px solid {{ pf.fr.gap }};transition:background .2s">{{ pf.ini }}</div>
+                      <div style="position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);background:var(--a1);color:var(--aT);font:900 11px var(--fB);padding:2px 9px;border-radius:8px;white-space:nowrap">{{ pf.lv }}</div>
+                    </div>
+                    <div style="font:900 10px var(--fB);letter-spacing:1.4px;color:var(--mt);margin-top:6px">{{ pf.colorLabel }}</div>
+                    <div style="display:grid;grid-template-columns:repeat(4,28px);gap:8px">
+                      <sc-for list="{{ pf.colors }}" as="c" hint-placeholder-count="8">
+                        <div onClick="{{ c.pick }}" style="width:28px;height:28px;border-radius:50%;background:{{ c.c }};box-shadow:{{ c.ring }};cursor:pointer;transition:transform .12s" style-hover="transform:scale(1.12)"></div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+                    <div style="display:flex;flex-direction:column;gap:6px">
+                      <div style="display:flex;justify-content:space-between;font:800 12px var(--fB);color:var(--mt)"><div>{{ pf.nameLabel }}</div><div style="font-variant-numeric:tabular-nums">{{ pf.count }}</div></div>
+                      <div style="display:flex;align-items:center;height:48px;padding:0 14px;border-radius:14px;background:var(--dp);box-shadow:{{ pf.nameRing }};box-sizing:border-box">
+                        <input value="{{ pf.name }}" onInput="{{ pf.onName }}" maxlength="16" spellcheck="false" style="flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;font:700 17px var(--fH);color:#F4F1E8">
+                      </div>
+                      <div style="font:700 12px var(--fB);color:{{ pf.hintC }}">{{ pf.hint }}</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px">
+                      <div style="font:800 12px var(--fB);color:var(--mt)">{{ pf.statusLabel }}</div>
+                      <div style="display:flex;align-items:center;height:48px;padding:0 14px;border-radius:14px;background:var(--dp);box-sizing:border-box">
+                        <input value="{{ pf.status }}" onInput="{{ pf.onStatus }}" maxlength="40" placeholder="{{ pf.statusPh }}" spellcheck="false" style="flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;font:700 15px var(--fB);color:#F4F1E8">
+                      </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px">
+                      <div style="font:800 12px var(--fB);color:var(--mt)">{{ pf.frameLabel }}</div>
+                      <div style="display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--dp);align-self:flex-start">
+                        <sc-for list="{{ pf.frames }}" as="o" hint-placeholder-count="3">
+                          <div onClick="{{ o.pick }}" style="display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:10px;font:700 14px var(--fH);background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.sh }};cursor:pointer;white-space:nowrap"><sc-if value="{{ o.locked }}" hint-placeholder-val="{{ false }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" style="stroke:currentColor"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></sc-if>{{ o.label }}</div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:14px 24px;border-top:1px solid rgba(255,255,255,.07);background:rgba(0,0,0,.12)">
+                  <div style="font:700 12px var(--fB);color:var(--mt)">{{ pf.note }}</div>
+                  <div style="flex:1"></div>
+                  <div onClick="{{ closeDlg }}" style="padding:12px 22px;border-radius:14px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);font:700 16px var(--fH);cursor:pointer" style-active="transform:translateY(3px)">{{ t.cancel }}</div>
+                  <div onClick="{{ pf.save }}" style="padding:12px 28px;border-radius:14px;background:{{ pf.saveBg }};box-shadow:0 4px 0 {{ pf.saveSh }};font:700 16px var(--fH);color:{{ pf.saveFg }};cursor:{{ pf.saveCur }}" style-active="transform:translateY(3px)">{{ t.save }}</div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ dlg.isConfirm }}" hint-placeholder-val="{{ false }}">
+              <div style="position:relative;width:480px;display:flex;flex-direction:column;align-items:center;gap:12px;padding:30px 30px 24px;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:26px;box-shadow:0 10px 0 var(--pnS),0 40px 90px rgba(0,0,0,.6);text-align:center;animation:modalIn .26s cubic-bezier(.2,1.2,.4,1) both;box-sizing:border-box">
+                <div style="width:72px;height:72px;border-radius:22px;background:{{ cf.tile }};box-shadow:0 5px 0 {{ cf.tileSh }},0 0 30px {{ cf.glow }};display:grid;place-items:center">
+                  <sc-if value="{{ cf.isLogout }}" hint-placeholder-val="{{ false }}"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"></path><path d="M10 16l-4-4 4-4M6 12h10"></path></svg></sc-if>
+                  <sc-if value="{{ cf.isDelete }}" hint-placeholder-val="{{ false }}"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"></path></svg></sc-if>
+                  <sc-if value="{{ cf.isQuit }}" hint-placeholder-val="{{ false }}"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v8"></path><path d="M7.2 6.3a7.5 7.5 0 1 0 9.6 0"></path></svg></sc-if>
+                </div>
+                <div style="font:700 24px/1.2 var(--fH);margin-top:6px">{{ cf.title }}</div>
+                <div style="font:700 14px/1.55 var(--fB);color:var(--mt);max-width:380px;text-wrap:pretty">{{ cf.body }}</div>
+                <sc-if value="{{ cf.isDelete }}" hint-placeholder-val="{{ false }}">
+                  <div style="width:100%;display:flex;flex-direction:column;gap:8px;margin-top:6px;text-align:left">
+                    <div style="display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:14px;background:rgba(255,94,108,.1);box-shadow:inset 0 0 0 1px rgba(255,94,108,.3)">
+                      <sc-for list="{{ cf.losses }}" as="l" hint-placeholder-count="3">
+                        <div style="display:flex;align-items:center;gap:10px;font:700 13px var(--fB);color:#FFC2C8"><div style="width:6px;height:6px;border-radius:50%;background:#FF5E6C"></div>{{ l.t }}</div>
+                      </sc-for>
+                    </div>
+                    <div style="font:800 12px var(--fB);color:var(--mt);margin-top:4px">{{ cf.typeHint }}</div>
+                    <div style="display:flex;align-items:center;height:46px;padding:0 14px;border-radius:14px;background:var(--dp);box-shadow:{{ cf.ring }};box-sizing:border-box">
+                      <input value="{{ cf.typed }}" onInput="{{ cf.onType }}" placeholder="{{ cf.word }}" spellcheck="false" style="flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;font:700 16px var(--fH);letter-spacing:2px;color:#F4F1E8">
+                    </div>
+                  </div>
+                </sc-if>
+                <div style="display:flex;gap:12px;width:100%;margin-top:10px">
+                  <div onClick="{{ closeDlg }}" style="flex:1;padding:13px 0;border-radius:14px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);font:700 16px var(--fH);cursor:pointer" style-active="transform:translateY(3px)">{{ t.cancel }}</div>
+                  <div onClick="{{ cf.go }}" style="flex:1;padding:13px 0;border-radius:14px;background:{{ cf.btnBg }};box-shadow:0 4px 0 {{ cf.btnSh }};font:700 16px var(--fH);color:{{ cf.btnFg }};cursor:{{ cf.btnCur }};transition:background .15s" style-active="transform:translateY(3px)">{{ cf.btn }}</div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ dlg.isAdd }}" hint-placeholder-val="{{ false }}">
+              <div style="position:relative;width:560px;display:flex;flex-direction:column;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:26px;box-shadow:0 10px 0 var(--pnS),0 40px 90px rgba(0,0,0,.6);overflow:hidden;animation:modalIn .26s cubic-bezier(.2,1.2,.4,1) both">
+                <div style="display:flex;align-items:center;gap:12px;padding:20px 24px 4px">
+                  <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(160deg,#7AA6FF,#3D6BF0);box-shadow:0 4px 0 #2448B8;display:grid;place-items:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20a6.5 6.5 0 0 1 13 0M19 8v6M16 11h6"></path></svg></div>
+                  <div><div style="font:700 22px/1.15 var(--fH)">{{ af.title }}</div><div style="font:700 13px var(--fB);color:var(--mt)">{{ af.sub }}</div></div>
+                  <div style="flex:1"></div>
+                  <div onClick="{{ closeDlg }}" style="width:40px;height:40px;border-radius:12px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);display:grid;place-items:center;cursor:pointer" style-hover="filter:brightness(1.25)" style-active="transform:translateY(3px)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.8" stroke-linecap="round" style="stroke:var(--ic)"><path d="M6 6l12 12M18 6L6 18"></path></svg></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:14px;padding:16px 24px 22px">
+                  <div style="display:flex;gap:10px">
+                    <div style="flex:1;display:flex;align-items:center;gap:10px;height:50px;padding:0 14px;border-radius:14px;background:var(--dp);box-shadow:{{ af.ring }};box-sizing:border-box">
+                      <div style="font:700 16px var(--fH);color:var(--mt)">#</div>
+                      <input value="{{ af.q }}" onInput="{{ af.onQ }}" onKeyDown="{{ af.onKey }}" placeholder="{{ af.ph }}" spellcheck="false" style="flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;font:700 16px var(--fH);letter-spacing:1px;color:#F4F1E8;text-transform:uppercase">
+                    </div>
+                    <div onClick="{{ af.find }}" style="display:grid;place-items:center;height:50px;padding:0 22px;border-radius:14px;background:linear-gradient(var(--a1),var(--a2));box-shadow:0 4px 0 var(--aS);color:var(--aT);font:700 16px var(--fH);cursor:pointer;box-sizing:border-box" style-active="transform:translateY(3px)">{{ af.findLabel }}</div>
+                  </div>
+                  <div style="height:96px;display:flex;align-items:center;border-radius:18px;background:var(--sd);padding:0 16px;box-sizing:border-box">
+                    <sc-if value="{{ af.idle }}" hint-placeholder-val="{{ true }}"><div style="width:100%;text-align:center;font:700 14px var(--fB);color:var(--mt)">{{ af.idleText }}</div></sc-if>
+                    <sc-if value="{{ af.none }}" hint-placeholder-val="{{ false }}"><div style="width:100%;text-align:center;font:700 14px var(--fB);color:#FF8A94">{{ af.noneText }}</div></sc-if>
+                    <sc-if value="{{ af.found }}" hint-placeholder-val="{{ false }}">
+                      <div style="width:100%;display:flex;align-items:center;gap:14px">
+                        <div style="width:52px;height:52px;border-radius:50%;background:{{ af.r.c }};display:grid;place-items:center;font:700 18px var(--fH);color:#fff;flex:none">{{ af.r.ini }}</div>
+                        <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px"><div style="font:700 18px/1.2 var(--fH)">{{ af.r.name }}</div><div style="font:900 10px var(--fB);padding:2px 7px;border-radius:6px;background:var(--dp);color:var(--a1)">{{ af.r.lv }}</div></div><div style="font:700 13px var(--fB);color:var(--mt)">#{{ af.r.code }}</div></div>
+                        <div onClick="{{ af.send }}" style="flex:none;padding:11px 18px;border-radius:12px;background:{{ af.btnBg }};box-shadow:0 3px 0 {{ af.btnSh }};color:{{ af.btnFg }};font:700 15px var(--fH);cursor:pointer;white-space:nowrap" style-active="transform:translateY(2px)">{{ af.btn }}</div>
+                      </div>
+                    </sc-if>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;border:1px dashed var(--bd)">
+                    <div style="font:700 13px var(--fB);color:var(--mt)">{{ fr.codeLabel }}</div>
+                    <div style="font:700 18px var(--fH);letter-spacing:1px;color:var(--a1)">DY-4821</div>
+                    <div style="flex:1"></div>
+                    <div onClick="{{ af.copy }}" style="display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:12px;background:var(--pnH);box-shadow:0 3px 0 var(--pnS);font:700 14px var(--fH);cursor:pointer;white-space:nowrap" style-active="transform:translateY(2px)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="stroke:currentColor"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"></path></svg>{{ af.copyLabel }}</div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ dlg.isShare }}" hint-placeholder-val="{{ false }}">
+              <div style="position:relative;width:640px;display:flex;flex-direction:column;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:26px;box-shadow:0 10px 0 var(--pnS),0 40px 90px rgba(0,0,0,.6);overflow:hidden;animation:modalIn .26s cubic-bezier(.2,1.2,.4,1) both">
+                <div style="display:flex;align-items:center;gap:12px;padding:20px 24px 4px">
+                  <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(160deg,#FFA27A,#F0683A);box-shadow:0 4px 0 #B2441E;display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"></path></svg></div>
+                  <div><div style="font:700 22px/1.15 var(--fH)">{{ sh.title }}</div><div style="font:700 13px var(--fB);color:var(--mt)">{{ sh.sub }}</div></div>
+                  <div style="flex:1"></div>
+                  <div onClick="{{ closeDlg }}" style="width:40px;height:40px;border-radius:12px;background:var(--pnH);box-shadow:0 4px 0 var(--pnS);display:grid;place-items:center;cursor:pointer" style-hover="filter:brightness(1.25)" style-active="transform:translateY(3px)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.8" stroke-linecap="round" style="stroke:var(--ic)"><path d="M6 6l12 12M18 6L6 18"></path></svg></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:16px;padding:16px 24px 22px">
+                  <div style="position:relative;overflow:hidden;display:flex;align-items:center;gap:20px;height:180px;padding:0 26px;border-radius:22px;background:radial-gradient(ellipse 70% 120% at 85% 50%,var(--bg1),var(--bg2) 55%,var(--bg3));box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),0 6px 20px rgba(0,0,0,.35)">
+                    <div style="position:absolute;right:-40px;top:-30px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--lg1),var(--a2) 55%,var(--aS));opacity:.35;filter:blur(1px)"></div>
+                    <div style="position:absolute;right:28px;top:18px;width:3px;height:3px;border-radius:50%;background:var(--st);box-shadow:-60px 40px 0 var(--st),-140px 10px 0 var(--st),-30px 120px 0 var(--st),-200px 130px 0 var(--st)"></div>
+                    <div style="position:relative;width:104px;height:104px;flex:none">
+                      <div style="position:absolute;inset:0;border-radius:50%;background:{{ me.fr.bg }};box-shadow:{{ me.fr.sh }}"></div>
+                      <div style="position:absolute;inset:8px;border-radius:50%;background:{{ me.color }};display:grid;place-items:center;font:700 34px var(--fH);color:#fff;border:3px solid {{ me.fr.gap }}">{{ me.ini }}</div>
+                      <div style="position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);background:var(--a1);color:var(--aT);font:900 11px var(--fB);padding:2px 9px;border-radius:8px;white-space:nowrap">{{ mp.lv }}</div>
+                    </div>
+                    <div style="position:relative;flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">
+                      <div style="font:700 26px/1.1 var(--fH)">{{ me.name }}</div>
+                      <div style="display:flex;align-items:center;gap:8px"><div style="width:14px;height:14px;transform:rotate(45deg);border-radius:3px;background:linear-gradient(135deg,#FFE08A,#F5A623)"></div><div style="font:700 15px var(--fH);color:#FFC94A">{{ t.rank }}</div><div style="font:700 13px var(--fB);color:var(--mt)">· {{ sh.season }}</div></div>
+                      <div style="display:flex;gap:8px;margin-top:4px">
+                        <sc-for list="{{ sh.chips }}" as="c" hint-placeholder-count="3">
+                          <div style="padding:6px 10px;border-radius:10px;background:rgba(0,0,0,.28)"><div style="font:700 16px/1.1 var(--fH);color:{{ c.col }}">{{ c.v }}</div><div style="font:800 9px var(--fB);letter-spacing:1px;color:var(--mt)">{{ c.k }}</div></div>
+                        </sc-for>
+                      </div>
+                    </div>
+                    <div style="position:absolute;right:20px;bottom:14px;display:flex;align-items:center;gap:6px"><div style="font:700 15px var(--fL);letter-spacing:2px;color:var(--a1)">GALAXY</div><div style="font:700 11px var(--fH);background:var(--a1);color:var(--aT);border-radius:5px;padding:1px 5px">101</div></div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px">
+                    <div style="font:800 12px var(--fB);color:var(--mt)">{{ sh.linkLabel }}</div>
+                    <div style="display:flex;gap:10px">
+                      <div style="flex:1;min-width:0;display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border-radius:14px;background:var(--dp);box-sizing:border-box">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none;stroke:var(--mt)"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"></path><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"></path></svg>
+                        <div style="flex:1;min-width:0;font:700 15px var(--fB);color:#F4F1E8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">galaxy101.app/p/DY-4821</div>
+                      </div>
+                      <div onClick="{{ sh.copy }}" style="flex:none;display:flex;align-items:center;justify-content:center;gap:8px;width:180px;height:48px;border-radius:14px;background:{{ sh.copyBg }};box-shadow:0 4px 0 {{ sh.copySh }};color:{{ sh.copyFg }};font:700 15px var(--fH);white-space:nowrap;cursor:pointer;box-sizing:border-box;transition:background .15s" style-active="transform:translateY(3px)">
+                        <sc-if value="{{ sh.copied }}" hint-placeholder-val="{{ false }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>{{ sh.copyLabel }}
+                      </div>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <div style="font:800 12px var(--fB);color:var(--mt)">{{ sh.viaLabel }}</div>
+                    <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px">
+                      <sc-for list="{{ sh.apps }}" as="a" hint-placeholder-count="5">
+                        <div onClick="{{ a.go }}" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 0 12px;border-radius:18px;background:var(--sd);cursor:pointer;transition:transform .15s,background .15s" style-hover="transform:translateY(-4px);background:var(--pnH)" style-active="transform:translateY(0)">
+                          <div style="width:46px;height:46px;border-radius:14px;background:{{ a.bg }};box-shadow:0 3px 0 {{ a.sh }};display:grid;place-items:center;font:700 18px var(--fH);color:#fff">{{ a.g }}</div>
+                          <div style="font:700 13px var(--fH);white-space:nowrap">{{ a.name }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:16px;background:var(--sd)">
+                    <div style="flex:1;min-width:0"><div style="font:700 15px/1.25 var(--fH)">{{ sh.inviteTitle }}</div><div style="font:700 12px var(--fB);color:var(--mt)">{{ sh.inviteSub }}</div></div>
+                    <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:10px;background:rgba(255,201,74,.14);font:700 15px var(--fH);color:#FFC94A"><div style="width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F)"></div>+2.000</div>
+                  </div>
+                  <sc-if value="{{ sh.toast }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;background:#3CCB6E;box-shadow:0 4px 0 #22914A,0 10px 24px rgba(0,0,0,.4);font:700 14px var(--fH);color:#fff;white-space:nowrap;animation:modalIn .2s ease-out both"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>{{ sh.toast }}</div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ dlg.isBye }}" hint-placeholder-val="{{ false }}">
+              <div style="position:relative;width:420px;display:flex;flex-direction:column;align-items:center;gap:10px;padding:34px 30px 26px;background:var(--pn);border:1px solid rgba(255,255,255,.1);border-radius:26px;box-shadow:0 10px 0 var(--pnS),0 40px 90px rgba(0,0,0,.6);text-align:center;animation:modalIn .26s cubic-bezier(.2,1.2,.4,1) both;box-sizing:border-box">
+                <div style="width:64px;height:64px;border-radius:50%;background:#3CCB6E;box-shadow:0 5px 0 #22914A,0 0 30px rgba(60,203,110,.5);display:grid;place-items:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+                <div style="font:700 22px/1.2 var(--fH);margin-top:6px">{{ cf.doneTitle }}</div>
+                <div style="font:700 14px/1.5 var(--fB);color:var(--mt)">{{ cf.doneBody }}</div>
+                <div onClick="{{ closeDlg }}" style="margin-top:10px;padding:12px 30px;border-radius:14px;background:linear-gradient(var(--a1),var(--a2));box-shadow:0 4px 0 var(--aS);color:var(--aT);font:700 16px var(--fH);cursor:pointer" style-active="transform:translateY(3px)">{{ cf.doneBtn }}</div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+      </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;planet&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Satürn&quot;,&quot;Mars&quot;,&quot;Neptün&quot;,&quot;Jüpiter&quot;,&quot;Venüs&quot;],&quot;default&quot;:&quot;Satürn&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Tema&quot;},&quot;spinSpeed&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Yavaş&quot;,&quot;Normal&quot;,&quot;Hızlı&quot;],&quot;default&quot;:&quot;Hızlı&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Tema&quot;},&quot;logoFont&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Baloo 2&quot;,&quot;Fredoka&quot;,&quot;Lilita One&quot;,&quot;Rubik&quot;,&quot;Outfit&quot;,&quot;Poppins&quot;,&quot;Exo 2&quot;,&quot;Sora&quot;,&quot;Lexend&quot;,&quot;Montserrat&quot;,&quot;Orbitron&quot;,&quot;Audiowide&quot;,&quot;Russo One&quot;,&quot;Bungee&quot;,&quot;Righteous&quot;,&quot;Chakra Petch&quot;],&quot;default&quot;:&quot;Montserrat&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Yazı tipleri&quot;},&quot;headingFont&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Baloo 2&quot;,&quot;Fredoka&quot;,&quot;Lilita One&quot;,&quot;Rubik&quot;,&quot;Outfit&quot;,&quot;Poppins&quot;,&quot;Exo 2&quot;,&quot;Sora&quot;,&quot;Lexend&quot;,&quot;Quicksand&quot;,&quot;Montserrat&quot;,&quot;Russo One&quot;,&quot;Chakra Petch&quot;],&quot;default&quot;:&quot;Montserrat&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Yazı tipleri&quot;},&quot;bodyFont&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Nunito&quot;,&quot;Rubik&quot;,&quot;Outfit&quot;,&quot;Poppins&quot;,&quot;Lexend&quot;,&quot;Quicksand&quot;,&quot;Montserrat&quot;,&quot;Sora&quot;,&quot;Exo 2&quot;,&quot;Baloo 2&quot;],&quot;default&quot;:&quot;Baloo 2&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Yazı tipleri&quot;},&quot;resolution&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1280×720 (önizleme)&quot;,&quot;1920×1080 (1080p)&quot;,&quot;2560×1440 (2K)&quot;],&quot;default&quot;:&quot;1280×720 (önizleme)&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;1a ekranı&quot;}}">
+const PLANETS = {
+  'Satürn': { desc: 'Altın halkalar', orb: ['#FBEBC4', '#D9B06A', '#8A6430'], v: { bg1: '#2A2F6E', bg2: '#161A45', bg3: '#0A0C28', pn: '#232A66', pnH: '#2D3680', pnS: '#0B0D2B', dp: '#0B0E2E', sd: '#10133A', bd: '#2E3680', a1: '#FFD964', a2: '#F5A623', aS: '#B86E0F', aT: '#3A1F00', lS: '#8A4E06', gl: 'rgba(255,201,74,.45)', mt: '#A9AEDD', ic: '#D3D6FF', p1: '#F3E1B5', p2: '#D9B77A', p3: '#EBD3A0', p4: '#B98F55', rg: '#E8CF98', ro: 1, pg: 'rgba(255,214,140,.35)', st: '#FFE7A3' } },
+  'Mars': { desc: 'Kızıl çöl', orb: ['#FFB08A', '#D2532E', '#7A2412'], v: { bg1: '#5A1F17', bg2: '#2C0E0B', bg3: '#140605', pn: '#4A1E19', pnH: '#5C2620', pnS: '#1C0907', dp: '#1E0A08', sd: '#2A0F0C', bd: '#6A2A22', a1: '#FFA26B', a2: '#E8552E', aS: '#8E2A12', aT: '#2A0800', lS: '#7A1E0C', gl: 'rgba(255,120,70,.45)', mt: '#E3B2A4', ic: '#FFD8CC', p1: '#E0754A', p2: '#B8482A', p3: '#D9633C', p4: '#8E3420', rg: 'transparent', ro: 0, pg: 'rgba(255,110,60,.35)', st: '#FFC9B0' } },
+  'Neptün': { desc: 'Buz mavisi', orb: ['#A8D4FF', '#3A7BEA', '#14357F'], v: { bg1: '#0F3C80', bg2: '#081F52', bg3: '#03102E', pn: '#12407F', pnH: '#185099', pnS: '#04163A', dp: '#061A40', sd: '#071C46', bd: '#1F5AA8', a1: '#8CEBFF', a2: '#2FB4E8', aS: '#11699A', aT: '#021C2E', lS: '#0A4F75', gl: 'rgba(100,220,255,.45)', mt: '#A6CDF0', ic: '#D2EEFF', p1: '#5FA8FF', p2: '#2F6FE0', p3: '#4A8EF5', p4: '#1F4FB8', rg: '#9CC8FF', ro: .35, pg: 'rgba(80,170,255,.4)', st: '#CDEBFF' } },
+  'Jüpiter': { desc: 'Fırtına kuşakları', orb: ['#F7E2C6', '#D0905E', '#7A4520'], v: { bg1: '#4E3522', bg2: '#26180E', bg3: '#120A05', pn: '#47321F', pnH: '#5A3F28', pnS: '#1A1008', dp: '#1E140A', sd: '#2A1B0F', bd: '#6E4E30', a1: '#FFC88A', a2: '#E58B45', aS: '#8F4C18', aT: '#2E1405', lS: '#7A3C10', gl: 'rgba(255,170,100,.45)', mt: '#DCC2A6', ic: '#F7E3CC', p1: '#F2DCC0', p2: '#C98A5A', p3: '#E8C49C', p4: '#A8643A', rg: '#D9B48A', ro: .25, pg: 'rgba(255,190,130,.3)', st: '#FFE2C2' } },
+  'Venüs': { desc: 'Pembe sis', orb: ['#FFF0D2', '#EBC07E', '#9A6A34'], v: { bg1: '#5A2A4E', bg2: '#2C1428', bg3: '#140812', pn: '#4C2444', pnH: '#5E2E54', pnS: '#1C0A19', dp: '#1F0C1C', sd: '#2B1127', bd: '#7A3A6A', a1: '#FFD3A8', a2: '#F28AA0', aS: '#A33F5E', aT: '#3A0A18', lS: '#8A2E48', gl: 'rgba(255,170,190,.45)', mt: '#E2B9D2', ic: '#FFE0EE', p1: '#FBE7C2', p2: '#EFC98E', p3: '#F7DAB0', p4: '#DDAE72', rg: 'transparent', ro: 0, pg: 'rgba(255,200,170,.35)', st: '#FFE0C8' } },
+};
+const RINGS = {
+  'Satürn': { rgA: 'rgba(236,214,172,.95)', rgB: 'rgba(190,170,135,.35)', rgC: 'rgba(212,190,150,.8)', rgM: 'rgba(200,176,132,.7)', ro: 1 },
+  'Mars': { rgA: 'transparent', rgB: 'transparent', rgC: 'transparent', rgM: 'transparent', ro: 0 },
+  'Neptün': { rgA: 'transparent', rgB: 'transparent', rgC: 'transparent', rgM: 'transparent', ro: 0 },
+  'Jüpiter': { rgA: 'transparent', rgB: 'transparent', rgC: 'transparent', rgM: 'transparent', ro: 0 },
+  'Venüs': { rgA: 'transparent', rgB: 'transparent', rgC: 'transparent', rgM: 'transparent', ro: 0 },
+};
+const ATM = { 'Satürn': 'rgba(255,226,175,.55)', 'Mars': 'rgba(255,150,110,.45)', 'Neptün': 'rgba(150,210,255,.8)', 'Jüpiter': 'rgba(255,220,180,.5)', 'Venüs': 'rgba(255,238,205,.9)' };
+const LOGO = {
+  'Satürn': { lg1: '#FFF4C8', tf1: '#FFFDF6', tf2: '#EEE2C6', te: '#D9C9A2', te2: '#A8925F', t1: '#C8462E', t2: '#2B5DA8', t3: '#D9951A' },
+  'Mars': { lg1: '#FFE2CC', tf1: '#FFF7F0', tf2: '#F0D8C6', te: '#DDB8A0', te2: '#A3705A', t1: '#B3261E', t2: '#E0612E', t3: '#6E1A10' },
+  'Neptün': { lg1: '#E6FBFF', tf1: '#F8FCFF', tf2: '#DCE8F4', te: '#B8CADC', te2: '#7C93AE', t1: '#1F5FBF', t2: '#0E9CC4', t3: '#2D3B9A' },
+  'Jüpiter': { lg1: '#FFF0DC', tf1: '#FFFAF2', tf2: '#F0E0CA', te: '#DCC4A4', te2: '#A08060', t1: '#B4532A', t2: '#6E4A2E', t3: '#D08A3A' },
+  'Venüs': { lg1: '#FFF3E6', tf1: '#FFFBF6', tf2: '#F4E4D8', te: '#E0C6B8', te2: '#AC8878', t1: '#C2416A', t2: '#D98A2B', t3: '#8E3A7A' },
+};
+const SPEED = { 'Yavaş': 80, 'Normal': 40, 'Hızlı': 16 };
+const SET_DEFAULTS = { autoSort: true, highlight: true, dbl: false, chat: true, warn: 5, tile: 'Orta', master: 80, music: 60, sfx: 90, tileSnd: true, notifSnd: true, motion: true, quality: 'Yüksek', lang: 'tr', friendReq: true, invites: true };
+const RES = { '1280×720 (önizleme)': 1, '1920×1080 (1080p)': 1.5, '2560×1440 (2K)': 2 };
+const STR = {
+  tr: { play: 'HEMEN OYNA', planetTheme: 'GEZEGEN TEMASI', rank: 'Altın II', shop: 'Mağaza', friends: 'Arkadaşlar', leader: 'Liderlik', daily: 'Günlük ödül', rules: 'Kurallar', settings: 'Ayarlar', close: 'Kapat', reset: 'Varsayılana dön', cancel: 'Vazgeç', save: 'Kaydet', ptRow: 'Gezegen teması', ptDesc: 'Renkler, logo ve arka plan seçtiğin gezegene göre değişir', editProfile: 'Profili düzenle', myProfile: 'Profilim', buyChips: 'Çip satın al', buyGems: 'Elmas satın al', playerId: 'Oyuncu ID · 4821 9930', linked: 'Bağlı', logout: 'Çıkış yap', del: 'Hesabı sil', offline: 'Çevrimdışı',
+    modes: ['Klasik', 'Dereceli', 'Botlara karşı'], soon: 'YAKINDA',
+    subs: ['Klasik · Tekli / Eşli · masalar', 'Dereceli · yakında açılıyor', 'Botlara karşı · yakında açılıyor'],
+    pn: { 'Satürn': 'Satürn', 'Mars': 'Mars', 'Neptün': 'Neptün', 'Jüpiter': 'Jüpiter', 'Venüs': 'Venüs' },
+    pd: { 'Satürn': 'Altın halkalar', 'Mars': 'Kızıl çöl', 'Neptün': 'Buz mavisi', 'Jüpiter': 'Fırtına kuşakları', 'Venüs': 'Pembe sis' } },
+  en: { play: 'PLAY NOW', planetTheme: 'PLANET THEME', rank: 'Gold II', shop: 'Shop', friends: 'Friends', leader: 'Leaderboard', daily: 'Daily reward', rules: 'Rules', settings: 'Settings', close: 'Close', reset: 'Reset to default', cancel: 'Cancel', save: 'Save', ptRow: 'Planet theme', ptDesc: 'Colors, logo and background follow the planet you pick', editProfile: 'Edit profile', myProfile: 'My profile', buyChips: 'Buy chips', buyGems: 'Buy gems', playerId: 'Player ID · 4821 9930', linked: 'Linked', logout: 'Log out', del: 'Delete account', offline: 'Offline',
+    modes: ['Classic', 'Ranked', 'Vs bots'], soon: 'SOON',
+    subs: ['Classic · Singles / Pairs · tables', 'Ranked · coming soon', 'Vs bots · coming soon'],
+    pn: { 'Satürn': 'Saturn', 'Mars': 'Mars', 'Neptün': 'Neptune', 'Jüpiter': 'Jupiter', 'Venüs': 'Venus' },
+    pd: { 'Satürn': 'Golden rings', 'Mars': 'Red desert', 'Neptün': 'Ice blue', 'Jüpiter': 'Storm belts', 'Venüs': 'Pink haze' } },
+};
+const SET_EN = { 'Oyun': 'Game', 'Ses': 'Sound', 'Görüntü': 'Display', 'Dil': 'Language', 'Hesap': 'Account',
+  'Taş hareketleri ve masa davranışı': 'Tile movement and table behavior', 'Müzik, efektler ve bildirim sesleri': 'Music, effects and notification sounds', 'Tema, çözünürlük ve görsel efektler': 'Theme, resolution and visual effects', 'Uygulamanın dili': 'App language', 'Profil, bağlı hesaplar ve bildirimler': 'Profile, linked accounts and notifications',
+  'Otomatik sırala': 'Auto-sort', 'Yeni çekilen taş ıstakada uygun yere yerleşsin': 'Drawn tiles go to the right spot on your rack', 'Perleri vurgula': 'Highlight sets', 'Geçerli perlerin çevresi yeşil yansın': 'Valid sets glow green', 'Çift tıkla taş at': 'Double-click to discard', 'Sürüklemeden hızlı atış': 'Discard quickly without dragging', 'Masa sohbeti': 'Table chat', 'Masa içi mesaj ve emojiler görünsün': 'Show messages and emojis at the table',
+  'Tur süresi uyarısı': 'Turn timer warning', 'Süre bitmeden kaç saniye önce uyarılsın': 'How many seconds before your time runs out', 'Taş boyutu': 'Tile size', 'Istakadaki taşların büyüklüğü': 'Size of the tiles on your rack', 'Küçük': 'Small', 'Orta': 'Medium', 'Büyük': 'Large',
+  'Ana ses': 'Master volume', 'Tüm seslerin genel seviyesi': 'Overall level of all sounds', 'Müzik': 'Music', 'Menü ve masa müziği': 'Menu and table music', 'Efektler': 'Effects', 'Taş, zar ve buton sesleri': 'Tile, dice and button sounds', 'Taş sesleri': 'Tile sounds', 'Taş çekme ve atma sesi': 'Sound when drawing and discarding', 'Bildirim sesi': 'Notification sound', 'Sıra sende ve davet uyarıları': 'Your-turn and invite alerts',
+  'Arka plan hareketi': 'Background motion', 'Dönen gezegen ve kayan yıldızlar': 'Spinning planet and shooting stars', 'Çözünürlük': 'Resolution', 'Görüntü modu': 'Display mode', 'Tam ekran, çerçevesiz pencere veya pencere': 'Fullscreen, borderless or windowed', 'Tam ekran': 'Fullscreen', 'Çerçevesiz': 'Borderless', 'Pencere': 'Windowed', 'Ekran boyutu': 'Screen size', 'Efekt kalitesi': 'Effect quality', 'Düşük ayar eski bilgisayarlarda akıcılığı artırır': 'Lower settings run smoother on older computers', 'Düşük': 'Low', 'Yüksek': 'High',
+  'Arkadaşlık istekleri': 'Friend requests', 'Yeni istekler için bildirim al': 'Get notified about new requests', 'Masa davetleri': 'Table invites', 'Arkadaşların seni masaya çağırabilsin': 'Let friends invite you to their table', 'Türkiye': 'Turkey', 'Uluslararası': 'International' };
+function trDeep(o, d) {
+  if (typeof o === 'string') return d[o] || o;
+  if (Array.isArray(o)) return o.map((x) => trDeep(x, d));
+  if (o && typeof o === 'object' && !React.isValidElement(o)) { const r = {}; for (const k in o) r[k] = trDeep(o[k], d); return r; }
+  return o;
+}
+const TC = { R: '#C8302E', Y: '#D9951A', B: '#2B5DA8', K: '#1E1E24' };
+const RULES = [
+  { tr: ['Taşlar ve okey', ['Oyunda 106 taş var: kırmızı, sarı, mavi ve siyah renklerde 1\'den 13\'e kadar ikişer taş ve 2 sahte okey.', 'Ortadan açılan taş göstergedir. Göstergenin bir üstü okeydir ve her taşın yerine geçebilir.', 'Sahte okey, okeyin kendisi yerine kullanılır; değeri okeyin değeridir.'], 'Gösterge sarı 7 ise okey sarı 8 olur.'],
+    en: ['Tiles and the okey', ['There are 106 tiles: two of each number from 1 to 13 in red, yellow, blue and black, plus 2 false okeys.', 'The tile turned up in the middle is the indicator. The tile one above it is the okey and can stand in for any tile.', 'A false okey takes the place of the okey itself and has the okey\'s value.'], 'If the indicator is yellow 7, the okey is yellow 8.'],
+    tiles: ['Y7:g', '|', 'Y8*:o'] },
+  { tr: ['Dağıtım', ['Taşlar karıştırılır ve her oyuncuya 21 taş dağıtılır.', 'Oyunu başlatan oyuncu 22 taş alır ve ilk hamlede bir taş atarak başlar.', 'Kalan taşlar ortada çekme destesi olur. Sıra saat yönünün tersine ilerler.'], ''],
+    en: ['Dealing', ['The tiles are shuffled and every player gets 21 tiles.', 'The starting player gets 22 tiles and begins by discarding one.', 'The remaining tiles form the draw pile in the middle. Play goes counter-clockwise.'], ''], tiles: [] },
+  { tr: ['Elini açmak', ['Elini açabilmek için perlerinin toplamı en az 101 olmalı.', 'Seri: aynı renkte en az 3 ardışık taş. Grup: aynı sayıda, farklı renklerde 3 veya 4 taş.', 'İstersen en az 5 çiftle çiftten de açabilirsin.'], 'Seri 46 + grup 36 = 82 puan. Açmak için 19 puan daha gerekir.'],
+    en: ['Opening your hand', ['To open your hand, your sets must add up to at least 101.', 'Run: at least 3 consecutive tiles of the same color. Group: 3 or 4 tiles of the same number in different colors.', 'You can also open with at least 5 pairs.'], 'Run 46 + group 36 = 82 points. You need 19 more to open.'],
+    tiles: ['K10', 'K11', 'K12', 'K13', '|', 'B12', 'R12', 'Y12'] },
+  { tr: ['Taş işlemek', ['Elini açtıktan sonra masadaki tüm perlere uygun taş ekleyebilirsin.', 'Masadaki bir perde okeyin yerini tutan taş sende varsa, onu koyup okeyi alabilirsin.'], 'Kırmızı 13\'ü masadaki kırmızı seriye işleyebilirsin.'],
+    en: ['Adding tiles', ['Once you have opened, you can add matching tiles to any set on the table.', 'If you hold the tile the okey stands for in a set on the table, you can swap it in and take the okey.'], 'You can add red 13 to the red run on the table.'],
+    tiles: ['R10', 'R11', 'R12', '|', 'R13*:a'] },
+  { tr: ['Bitirmek', ['Elindeki tüm taşları perlere yerleştirip son taşını atan oyuncu eli bitirir.', 'Son taş olarak okeyi atarak bitirirsen bütün cezalar ikiye katlanır.'], 'Son taş olarak okeyi atmak cezaları ikiye katlar.'],
+    en: ['Finishing', ['The player who places all their tiles in sets and discards their last tile finishes the hand.', 'If you finish by discarding the okey, every penalty is doubled.'], 'Discarding the okey as your last tile doubles all penalties.'],
+    tiles: ['B5', 'B6', 'B7', '|', 'Y8*:l'] },
+  { tr: ['Puanlama', ['Eli bitiren oyuncu -101 puan alır.', 'Elini açan oyuncular ellerinde kalan taşların toplamı kadar ceza alır.', 'Elini açamayan oyuncu 202 ceza alır. Çiftten açanların cezası ikiye katlanır.', 'Oyun sonunda en düşük puana sahip oyuncu kazanır.'], ''],
+    en: ['Scoring', ['The player who finishes gets -101 points.', 'Players who opened get a penalty equal to the sum of the tiles left in their hand.', 'A player who never opened gets 202 penalty points. Players who opened with pairs get double penalties.', 'The player with the lowest score at the end wins.'], ''], tiles: [] },
+];
+const TAGS = { tr: { g: 'Gösterge', o: 'Okey', a: 'İşle', l: 'Son taş' }, en: { g: 'Indicator', o: 'Okey', a: 'Add', l: 'Last tile' } };
+const PPL = [['Selin A.', 'SA', '#FF6B6B', 4820, 'd1'], ['Okeyci_34', 'OK', '#16B6A8', 4615, 'd2'], ['Hakan T.', 'HT', '#3D7BFF', 4402, 'd2'], ['Derya K.', 'DK', '#8B5CF6', 3990, 'g1'], ['Emre B.', 'EB', '#3CCB6E', 3877, 'g1'], ['Can Y.', 'CY', '#FF8A5B', 3740, 'g1'], ['Melis T.', 'MT', '#E85D9A', 3655, 'g1'], ['Ali R.', 'AR', '#5B8CFF', 3590, 'g1'], ['Nazlı E.', 'NE', '#F5A623', 3512, 'g1'], ['Ozan K.', 'OZ', '#22B8CF', 3480, 'g1']];
+const FPPL = [['Burak C.', 'BC', '#8B5CF6', 3120, 'g1'], ['Ayşe Y.', 'AY', '#3D7BFF', 2610, 'g2'], ['Doğukan Y.', 'DY', '#FF8A5B', 2140, 'g2', true], ['Hakan T.', 'HT', '#3D7BFF', 1980, 'g2'], ['Derya K.', 'DK', '#8B5CF6', 1720, 'g2'], ['Emre B.', 'EB', '#3CCB6E', 1405, 'g2']];
+const LG = { tr: { d1: 'Elmas I', d2: 'Elmas II', g1: 'Altın I', g2: 'Altın II' }, en: { d1: 'Diamond I', d2: 'Diamond II', g1: 'Gold I', g2: 'Gold II' } };
+const FRIENDS = [
+  { id: 'ay', name: 'Ayşe Y.', ini: 'AY', c: '#3D7BFF', lv: 28, on: true, st: ['Lobide', 'In lobby'], sc: '#8EF0B0', act: 'invite' },
+  { id: 'bc', name: 'Burak C.', ini: 'BC', c: '#8B5CF6', lv: 41, on: true, st: ['Masada · Eşli', 'At a table · Pairs'], sc: 'var(--a1)', act: 'watch' },
+  { id: 'sa', name: 'Selin A.', ini: 'SA', c: '#FF6B6B', lv: 52, on: true, st: ['Dereceli maç arıyor', 'Looking for a ranked match'], sc: '#8EF0B0', act: 'invite' },
+  { id: 'eb', name: 'Emre B.', ini: 'EB', c: '#3CCB6E', lv: 19, on: false, st: ['2 saat önce', '2 hours ago'], act: 'msg' },
+  { id: 'ht', name: 'Hakan T.', ini: 'HT', c: '#22B8CF', lv: 33, on: false, st: ['Dün', 'Yesterday'], act: 'msg' },
+  { id: 'dk', name: 'Derya K.', ini: 'DK', c: '#E85D9A', lv: 24, on: false, st: ['3 gün önce', '3 days ago'], act: 'msg' },
+];
+const CODES = { ay: 'AY-2187', bc: 'BC-5530', sa: 'SA-7712', eb: 'EB-3054', ht: 'HT-6621', dk: 'DK-9408', kd: 'KD-1290', zo: 'ZO-4416' };
+const DIR = [
+  { name: 'Mert K.', ini: 'MK', c: '#FF8A5B', lv: 31, code: 'MK-3321' },
+  { name: 'Elif S.', ini: 'ES', c: '#E85D9A', lv: 18, code: 'ES-8842' },
+  { name: 'Barış Ö.', ini: 'BÖ', c: '#16B6A8', lv: 45, code: 'BO-5170' },
+  { name: 'Cem A.', ini: 'CA', c: '#3D7BFF', lv: 9, code: 'CA-2604' },
+  { name: 'Kerem D.', ini: 'KD', c: '#F5A623', lv: 12, code: 'KD-1290' },
+];
+const REQS = [
+  { id: 'kd', name: 'Kerem D.', ini: 'KD', c: '#F5A623', lv: 12, st: ['Ortak arkadaş: Ayşe Y.', 'Mutual friend: Ayşe Y.'] },
+  { id: 'zo', name: 'Zeynep O.', ini: 'ZO', c: '#16B6A8', lv: 37, st: ['Son maçta rakibindi', 'Your opponent last match'] },
+];
+const TASKS = [
+  { tr: '3 el kazan', en: 'Win 3 hands', cur: 1, max: 3, rw: 2000 },
+  { tr: 'Çiftten aç', en: 'Open with pairs', cur: 1, max: 1, rw: 1500 },
+  { tr: '5 el oyna', en: 'Play 5 hands', cur: 5, max: 5, rw: 1000, pre: true },
+  { tr: 'Okey atarak bitir', en: 'Finish by discarding the okey', cur: 0, max: 1, rw: 5000, gem: 5 },
+  { tr: '40 taş işle', en: 'Add 40 tiles to sets', cur: 26, max: 40, rw: 2500 },
+];
+const PANEL_META = {
+  shop: { tile: 'linear-gradient(160deg,var(--a1),var(--a2))', sh: 'var(--aS)', tr: ['Mağaza', 'Çip, elmas ve taş görünümleri'], en: ['Shop', 'Chips, gems and tile skins'] },
+  friends: { tile: 'linear-gradient(160deg,#7AA6FF,#3D6BF0)', sh: '#2448B8', tr: ['Arkadaşlar', '3 arkadaşın çevrimiçi'], en: ['Friends', '3 friends online'] },
+  leader: { tile: 'linear-gradient(160deg,#C2A4FF,#7C4DEB)', sh: '#5530B0', tr: ['Liderlik', 'Sezon 3 · bitişe 12 gün'], en: ['Leaderboard', 'Season 3 · 12 days left'] },
+  daily: { tile: 'linear-gradient(160deg,#4FDB80,#25A857)', sh: '#18793F', tr: ['Günlük ödül', '5 günlük seri · her gün gir, ödül büyüsün'], en: ['Daily reward', '5-day streak · log in daily to grow your reward'] },
+  me: { tile: 'linear-gradient(160deg,#FFA27A,#F0683A)', sh: '#B2441E', tr: ['Profilim', 'İstatistikler, derece ve rozetler'], en: ['My profile', 'Stats, rank and badges'] },
+  rules: { tile: 'linear-gradient(160deg,#5BE6D6,#14A596)', sh: '#0C746A', tr: ['Kurallar', '101 Okey nasıl oynanır'], en: ['Rules', 'How to play 101 Okey'] },
+};
+class Component extends DCLogic {
+  state = { sel: 0, planet: null, settingsOpen: false, setTab: 0, res: null, sv: { ...SET_DEFAULTS, lang: (this.props && this.props.lang) || SET_DEFAULTS.lang }, panel: null, pTab: {}, rulesSec: 0, dayClaimed: false, taskClaimed: {}, invited: {}, reqGone: {}, drag: null,
+    dlg: null, draft: null, prof: { name: (this.props && this.props.user && this.props.user.name) || 'Doğukan Y.', color: (this.props && this.props.user && this.props.user.color) || '#FF8A5B', status: '', frame: 0 }, delTyped: '', q: '', qFocus: false, af: { q: '', res: null, sent: {} }, copied: false };
+  componentDidMount() {
+    this._key = (e) => { if (e.key !== 'Escape') return; if (this.state.dlg) this.setState({ dlg: null }); else if (this.state.settingsOpen || this.state.panel) this.setState({ settingsOpen: false, panel: null }); };
+    window.addEventListener('keydown', this._key);
+    if (this.props.openPanel) this.setState({ panel: this.props.openPanel });
+    try { const r = localStorage.getItem('galaxy101.gres'), m = localStorage.getItem('galaxy101.wmode'); if (r) this.setState({ gres: r }); if (m) this.setState({ wmode: m }); } catch (e) {}
+    try { const f = localStorage.getItem('galaxy101.fps'); if (f) this.setState({ fps: f === 'auto' ? 'auto' : +f }); } catch (e) {}
+    this.detectHz();
+    const start = () => {
+      if (!window.GalaxyPlanet || !window.GalaxyStars) { this._wait = setTimeout(start, 50); return; }
+      if (this._cv && !this._pr) { this._pr = window.GalaxyPlanet.create(this._cv); }
+      this._st = (this._stCv || []).map((cv) => cv && window.GalaxyStars.create(cv, 1280, 720));
+      this.syncFx();
+    };
+    start();
+  }
+  syncFx() {
+    const paused = !this.state.sv.motion;
+    if (this._pr) { this._pr.set(this._pName, this._period, this._rs); this._pr.paused = paused; }
+    (this._st || []).forEach((s, i) => { if (s) { s.set(this._tint, i === 0 ? this._rs : 1); s.paused = paused; } });
+  }
+  panelVals(lang) {
+    const s = this.state, en = lang === 'en', P = s.panel || 'shop', li = en ? 1 : 0;
+    const fmt = (n) => n.toLocaleString(en ? 'en-US' : 'tr-TR');
+    const money = (n) => '₺' + n.toLocaleString(en ? 'en-US' : 'tr-TR', { minimumFractionDigits: 2 });
+    const tabsOf = (labels, cur, key) => labels.map((label, i) => { const on = i === cur; return { label, bg: on ? 'linear-gradient(var(--a1),var(--a2))' : 'transparent', fg: on ? 'var(--aT)' : 'var(--mt)', sh: on ? '0 3px 0 var(--aS)' : 'none', pick: () => this.setState((st) => ({ pTab: { ...st.pTab, [key]: i } })) }; });
+    const meta = PANEL_META[P], tab = s.pTab[P] || 0;
+    const TABS = { shop: en ? ['Chips', 'Gems', 'Cosmetics'] : ['Çip', 'Elmas', 'Görünüm'],
+      friends: en ? [`Online · 3`, `All · ${FRIENDS.length}`, `Requests · ${REQS.filter((r) => !s.reqGone[r.id]).length}`] : [`Çevrimiçi · 3`, `Tümü · ${FRIENDS.length}`, `İstekler · ${REQS.filter((r) => !s.reqGone[r.id]).length}`],
+      leader: en ? ['Weekly', 'Season', 'Friends'] : ['Haftalık', 'Sezon', 'Arkadaşlar'],
+      me: en ? ['Overview', 'Badges', 'Match history'] : ['Genel', 'Rozetler', 'Maç geçmişi'] };
+    const pnl = { ...meta, title: meta[lang][0], sub: meta[lang][1], isShop: P === 'shop', isFriends: P === 'friends', isLeader: P === 'leader', isDaily: P === 'daily', isRules: P === 'rules', isMe: P === 'me', hasTabs: !!TABS[P], tabs: TABS[P] ? tabsOf(TABS[P], tab, P) : [] };
+
+    const now = new Date(), mid = new Date(now); mid.setHours(24, 0, 0, 0);
+    const left = Math.max(0, mid - now), hh = Math.floor(left / 3.6e6), mm = Math.floor(left % 3.6e6 / 6e4), ss = Math.floor(left % 6e4 / 1e3);
+    const pad = (x) => String(x).padStart(2, '0');
+
+    const st = tab;
+    let items = [];
+    if (st === 0) items = [[50000, null, 19.99, .8], [250000, 10, 79.99, .9], [1000000, 25, 249.99, 1, true], [5000000, 50, 899.99, 1.12]].map(([a, b, p, sc, pop]) => ({ isCoin: true, amount: fmt(a), sub: en ? 'chips' : 'çip', bonus: b ? (en ? `+${b}%` : `+%${b}`) : '', price: money(p), scale: sc, pop: !!pop }));
+    if (st === 1) items = [[100, null, 29.99, .8], [550, 10, 139.99, .9], [1200, 20, 279.99, 1, true], [2500, 25, 549.99, 1.12]].map(([a, b, p, sc, pop]) => ({ isGem: true, amount: fmt(a), sub: en ? 'gems' : 'elmas', bonus: b ? (en ? `+${b}%` : `+%${b}`) : '', price: money(p), scale: sc, pop: !!pop }));
+    if (st === 2) items = [
+      [['Galaksi taşı', 'Galaxy tiles'], 800, 'linear-gradient(#3B2F7A,#1C1648)', '#120E30', '#0A0820', '#FFD964', '0 0 18px rgba(140,110,255,.5)', true],
+      [['Altın taş', 'Gold tiles'], 1200, 'linear-gradient(#1d1d24,#050507)', '#D9B25A', '#8A6A20', '#FFC83D', '0 0 18px rgba(255,201,74,.45)'],
+      [['Neon taş', 'Neon tiles'], 600, 'linear-gradient(#14202E,#0A1018)', '#06090E', '#000', '#3DF5E0', '0 0 18px rgba(61,245,224,.45)'],
+      [['Mermer taş', 'Marble tiles'], 400, 'linear-gradient(#FFFFFF,#E4E6EC)', '#C9CCD6', '#9499A8', '#2B3A55', '0 0 0 0 transparent'],
+    ].map(([n, p, face, edge, edge2, col, glow, pop]) => ({ isTile: true, amount: n[li], sub: en ? 'Tile skin' : 'Taş görünümü', price: fmt(p), gemPrice: true, face, edge, edge2, col, glow, pop: !!pop }));
+    items = items.map((i) => ({ isCoin: false, isGem: false, isTile: false, gemPrice: false, bonus: '', ...i, popLabel: en ? 'MOST POPULAR' : 'EN POPÜLER', ring: i.pop ? 'inset 0 0 0 2px var(--a1),0 0 24px var(--gl)' : 'inset 0 0 0 1px rgba(255,255,255,.07)' }));
+    const shop = { dealTag: en ? 'WEEKEND DEAL · 50% OFF' : 'HAFTA SONU FIRSATI · %50', dealTitle: en ? '1,000,000 chips + 50 gems' : '1.000.000 çip + 50 elmas', timer: `${pad(hh)}:${pad(mm)}:${pad(ss)}`, oldPrice: money(199.99), newPrice: money(99.99), buy: en ? 'Buy' : 'Satın al', items };
+
+    const AL = { invite: en ? 'Invite' : 'Davet et', sent: en ? 'Sent' : 'Gönderildi', watch: en ? 'Watch' : 'İzle', msg: en ? 'Message' : 'Mesaj', accept: en ? 'Accept' : 'Kabul et', decline: en ? 'Decline' : 'Reddet' };
+    const prim = { bg: 'linear-gradient(var(--a1),var(--a2))', sh: 'var(--aS)', fg: 'var(--aT)' }, sec = { bg: 'var(--pnH)', sh: 'var(--pnS)', fg: '#F4F1E8' }, grn = { bg: '#3CCB6E', sh: '#22914A', fg: '#fff' };
+    let rows = [];
+    if (P === 'friends' && tab < 2) rows = FRIENDS.filter((f) => tab === 1 || f.on).map((f) => {
+      const sent = s.invited[f.id];
+      const a = f.act === 'invite' ? { ...(sent ? sec : prim), label: sent ? AL.sent : AL.invite, go: () => this.setState((x) => ({ invited: { ...x.invited, [f.id]: true } })) } : f.act === 'watch' ? { ...sec, label: AL.watch, go: () => {} } : { ...sec, label: AL.msg, go: () => {} };
+      return { name: f.name, ini: f.ini, c: f.c, op: f.on ? 1 : .55, dot: f.on ? '#3CCB6E' : '#5C6680', lv: (en ? 'LV ' : 'SV ') + f.lv, status: f.st[li], sc: f.on ? f.sc : 'var(--mt)', actions: [a] };
+    });
+    if (P === 'friends' && tab === 2) rows = REQS.filter((r) => !s.reqGone[r.id]).map((r) => ({ name: r.name, ini: r.ini, c: r.c, op: 1, dot: '#5C6680', lv: (en ? 'LV ' : 'SV ') + r.lv, status: r.st[li], sc: 'var(--mt)',
+      actions: [{ ...grn, label: AL.accept, go: () => this.setState((x) => ({ reqGone: { ...x.reqGone, [r.id]: true } })) }, { ...sec, label: AL.decline, go: () => this.setState((x) => ({ reqGone: { ...x.reqGone, [r.id]: true } })) }] }));
+    const q = (s.q || '').trim().toLocaleLowerCase('tr-TR').replace(/^#/, '');
+    if (q) {
+      const ids = (tab === 2 ? REQS.filter((r) => !s.reqGone[r.id]) : FRIENDS.filter((f) => tab === 1 || f.on)).map((x) => x.id);
+      rows = rows.filter((r, i) => { const id = ids[i]; return r.name.toLocaleLowerCase('tr-TR').includes(q) || (CODES[id] || '').toLowerCase().replace('-', '').includes(q.replace('-', '')); });
+    }
+    const fr = { search: en ? 'Search by name or code' : 'Oyuncu adı veya kod ara', codeLabel: en ? 'Your code' : 'Kodun', add: en ? 'Add friend' : 'Arkadaş ekle', rows, empty: rows.length === 0,
+      emptyText: q ? (en ? `No friends match "${s.q.trim()}"` : `"${s.q.trim()}" ile eşleşen arkadaş yok`) : tab === 2 ? (en ? 'No pending requests' : 'Bekleyen istek yok') : (en ? 'No friends here yet' : 'Burada henüz arkadaş yok'),
+      q: s.q, hasQ: !!s.q, onQ: (e) => this.setState({ q: e.target.value }), clearQ: () => this.setState({ q: '' }),
+      onFocus: () => this.setState({ qFocus: true }), onBlur: () => this.setState({ qFocus: false }),
+      focusRing: s.qFocus ? 'inset 0 0 0 2px var(--a1),0 0 16px var(--gl)' : 'inset 0 2px 0 rgba(0,0,0,.25)' };
+
+    const LGN = LG[lang], lcol = (k) => (k[0] === 'd' ? '#7FE3FF' : '#FFC94A');
+    const mult = tab === 0 ? .32 : 1;
+    const list = (P === 'leader' && tab === 2) ? FPPL : PPL;
+    const M = [['#FFE58A', '#E8A317', 'rgba(255,201,74,.6)'], ['#EEF2F8', '#A9B4C6', 'rgba(220,230,245,.45)'], ['#F4C08C', '#B8703A', 'rgba(240,170,110,.45)']];
+    const pts = (p) => fmt(Math.round(p * mult));
+    const podium = [1, 0, 2].map((i) => { const p = list[i]; return { rank: i + 1, name: p[0], ini: p[1], c: p[2], pts: pts(p[3]), lc: lcol(p[4]), crown: i === 0, av: i === 0 ? '66px' : '54px', h: ['150px', '112px', '86px'][i], m1: M[i][0], m2: M[i][1], glow: M[i][2] }; });
+    const lbRows = list.slice(3, 10).map((p, k) => ({ rank: k + 4, name: p[0], ini: p[1], c: p[2], league: LGN[p[4]], lc: lcol(p[4]), pts: pts(p[3]), bg: p[5] ? 'var(--pnH)' : 'var(--sd)', ring: p[5] ? 'inset 0 0 0 2px var(--a1)' : 'none' }));
+    const meRank = tab === 2 ? 3 : tab === 0 ? 128 : 1204;
+    const lb = { podium, rows: lbRows, h0: en ? 'RANK' : 'SIRA', h1: en ? 'PLAYER' : 'OYUNCU', h2: en ? 'LEAGUE' : 'LİG', h3: en ? 'POINTS' : 'PUAN', me: { rank: fmt(meRank), name: 'Doğukan Y.', league: LGN.g2, pts: fmt(Math.round(2140 * mult)) } };
+
+    const AM = [1000, 2000, 3000, 4000, 5000, 7500, 15000];
+    const days = AM.map((a, i) => {
+      const d = i + 1, done = d < 5 || (d === 5 && s.dayClaimed), today = d === 5 && !s.dayClaimed, big = d === 7;
+      return { label: en ? `Day ${d}` : `${d}. Gün`, amt: fmt(a), chest: big, coin: !big, done, today, showAmt: !today,
+        bg: today ? 'linear-gradient(160deg,#4FDB80,#1FA35A)' : big ? 'linear-gradient(160deg,var(--pnH),var(--sd))' : 'var(--sd)',
+        sh: today ? '0 5px 0 #146B3C,0 0 26px rgba(60,203,110,.55)' : big ? 'inset 0 0 0 2px var(--a1),0 0 20px var(--gl)' : 'inset 0 0 0 1px rgba(255,255,255,.07)',
+        op: d > 5 && !big ? .6 : 1, anim: today ? 'bob 1.6s infinite' : 'none', lc: today ? '#fff' : 'var(--mt)', ac: big ? 'var(--a1)' : '#F4F1E8' };
+    });
+    let doneN = 0;
+    const tasks = TASKS.map((k, i) => {
+      const complete = k.cur >= k.max; if (complete) doneN++;
+      const claimed = k.pre || !!s.taskClaimed[i];
+      return { n: i + 1, name: k[lang], prog: `${k.cur}/${k.max}`, pct: Math.round(k.cur / k.max * 100) + '%', reward: fmt(k.rw), gem: k.gem || 0,
+        complete, open: !complete, canClaim: complete && !claimed, claimed: complete && claimed, going: !complete,
+        ib: complete ? '#3CCB6E' : 'var(--dp)', pc: complete ? '#8EF0B0' : 'var(--a1)', bar: complete ? '#3CCB6E' : 'linear-gradient(90deg,var(--a2),var(--a1))', op: complete && claimed ? .6 : 1,
+        claim: () => this.setState((x) => ({ taskClaimed: { ...x.taskClaimed, [i]: true } })) };
+    });
+    const dl = { days, tasks, claim: en ? 'Collect' : 'Topla', claimDay: () => this.setState({ dayClaimed: true }), tasksTitle: en ? 'Daily quests' : 'Günlük görevler', doneCount: en ? `${doneN}/${TASKS.length} completed` : `${doneN}/${TASKS.length} tamamlandı`, refresh: en ? `Resets in ${hh}h ${mm}m` : `Yenilenmeye ${hh} sa ${mm} dk`, take: en ? 'Claim' : 'Al', taken: en ? 'Claimed' : 'Alındı', going: en ? 'In progress' : 'Devam ediyor' };
+
+    const R = RULES[s.rulesSec], RL = R[lang];
+    const tiles = R.tiles.map((code) => {
+      if (code === '|') return { gap: true, tile: false };
+      const [body, tg] = code.split(':'), hi = body.endsWith('*'), b = body.replace('*', '');
+      return { gap: false, tile: true, c: TC[b[0]], n: b.slice(1), tag: tg ? TAGS[lang][tg] : '', glow: hi ? '0 0 0 3px var(--a1),0 0 18px var(--gl)' : '0 0 0 0 transparent' };
+    });
+    const rl = { nav: RULES.map((r, i) => { const on = i === s.rulesSec; return { i: i + 1, name: r[lang][0], pick: () => this.setState({ rulesSec: i }), bg: on ? 'var(--pnH)' : 'transparent', bar: on ? 'inset 4px 0 0 var(--a1)' : 'none', fg: on ? '#F4F1E8' : 'var(--mt)', nb: on ? 'linear-gradient(var(--a1),var(--a2))' : 'var(--dp)', nf: on ? 'var(--aT)' : 'var(--mt)' }; }),
+      title: RL[0], points: RL[1].map((text) => ({ text })), hasEx: tiles.length > 0, tiles, caption: RL[2], exLabel: en ? 'EXAMPLE' : 'ÖRNEK' };
+
+    const MC = ['#3D7BFF', '#FF6B6B', '#8B5CF6', '#16B6A8'], MN = STR[lang].modes;
+    const FRN = en ? ['Classic', 'Gold', 'Galaxy'] : ['Klasik', 'Altın', 'Galaksi'];
+    const BD = [
+      ['1', '#3CCB6E', 'İlk zafer', 'First win', 'İlk elini kazan', 'Win your first hand'],
+      ['OK', '#F5A623', 'Okey ustası', 'Okey master', '50 kez okey atarak bitir', 'Finish 50 hands with the okey'],
+      ['5', '#3D7BFF', '5 çift', '5 pairs', 'Çiftten 5 kez aç', 'Open with pairs 5 times'],
+      ['100', '#FF6B6B', '100 el', '100 hands', '100 el oyna', 'Play 100 hands'],
+      ['×2', '#8B5CF6', 'Katlama kralı', 'Doubling king', 'Katlamalıda 25 el kazan', 'Win 25 Doubling hands'],
+      ['7', '#16B6A8', 'Seri galibiyet', 'Win streak', 'Üst üste 7 el kazan', 'Win 7 hands in a row', 4, 7],
+      ['◆', '#7FE3FF', 'Elmas lig', 'Diamond league', 'Elmas lige yüksel', 'Reach Diamond league', 720, 1000],
+      ['★', '#FFD964', 'Galaksi gezgini', 'Galaxy explorer', 'Tüm gezegen temalarını dene', 'Try every planet theme', 3, 5],
+      ['1K', '#E85D9A', 'Efsane', 'Legend', '1.000 el kazan', 'Win 1,000 hands', 527, 1000],
+    ];
+    const HS = [[0, '1', 4800, 12], [1, '2', 1200, 38], [3, '1', 0, 64, '+24 LP'], [0, '3', -2500, 95], [2, '1', 9600, 140], [1, '4', -5000, 210], [0, '2', 1500, 1440]];
+    const fmtAgo = (m) => m < 60 ? (en ? `${m} min ago` : `${m} dk önce`) : m < 1440 ? (en ? `${Math.floor(m / 60)} h ago` : `${Math.floor(m / 60)} sa önce`) : (en ? 'Yesterday' : 'Dün');
+    const mp = {
+      lv: en ? 'LEVEL 24' : 'SEVİYE 24', status: s.prof.status || (en ? 'No status message yet' : 'Henüz durum mesajı yok'),
+      xpLabel: en ? 'To level 25' : 'Seviye 25\'e', xp: en ? '6,240 / 9,000 XP' : '6.240 / 9.000 XP', share: en ? 'Share profile' : 'Profili paylaş',
+      tabStats: tab === 0, tabBadges: tab === 1, tabHistory: tab === 2,
+      stats: [[en ? 'HANDS PLAYED' : 'OYNANAN EL', fmt(1284), '#F4F1E8', en ? '527 won' : '527 kazanıldı'], [en ? 'WIN RATE' : 'KAZANMA', en ? '41%' : '%41', '#3CCB6E', en ? '+3% this month' : 'Bu ay +%3'], [en ? 'BEST OPENING' : 'EN İYİ AÇILIŞ', '186', 'var(--a1)', en ? 'points' : 'puan'], [en ? 'OKEY FINISH' : 'OKEY BİTİŞ', '73', '#F4F1E8', en ? 'doubled hands' : 'katlanan el']].map(([k, v, c, sub]) => ({ k, v, c, sub })),
+      season: en ? 'SEASON 3 · RANKED' : 'SEZON 3 · DERECELİ', bestLabel: en ? 'SEASON BEST' : 'SEZON EN İYİ', best: en ? 'Gold I' : 'Altın I', toNext: en ? '280 LP to Gold I' : 'Altın I\'e 280 LP',
+      byMode: en ? 'WIN RATE BY MODE' : 'MODLARA GÖRE KAZANMA', modes: [44, 38, 36, 42].map((p, i) => ({ name: MN[i], pct: en ? `${p}%` : `%${p}`, c: MC[i] })),
+      framesLabel: en ? 'FRAMES' : 'ÇERÇEVELER', framesHint: en ? 'Tap to equip' : 'Takmak için dokun',
+      frames: [0, 1, 2].map((i) => { const on = s.prof.frame === i, locked = i === 2, f = locked ? { bg: 'conic-gradient(from 0deg,#3B2F7A,#8C6EFF,#3DF5E0,#3B2F7A)', sh: '0 0 10px rgba(140,110,255,.5)', gap: 'var(--sd)' } : this.frameOf(i);
+        return { name: FRN[i], bg: f.bg, sh: f.sh, gap: f.gap, state: locked ? (en ? 'Unlocks at level 30' : 'Seviye 30\'da açılır') : on ? (en ? 'Equipped' : 'Takılı') : (en ? 'Owned' : 'Sahipsin'), sc: on ? '#8EF0B0' : 'var(--mt)',
+          tileBg: on ? 'var(--pnH)' : 'var(--dp)', ring: on ? 'inset 0 0 0 2px var(--a1)' : 'none', cur: locked ? 'not-allowed' : 'pointer', op: locked ? .55 : 1,
+          pick: () => { if (!locked) this.setState((x) => ({ prof: { ...x.prof, frame: i } })); } }; }),
+      badges: BD.map(([g, c, n1, n2, d1, d2, cur, max]) => { const locked = !!max; return { g, name: en ? n2 : n1, desc: en ? d2 : d1, locked, pct: locked ? Math.round(cur / max * 100) + '%' : '0%', prog: locked ? `${fmt(cur)}/${fmt(max)}` : '',
+        bg: locked ? 'var(--dp)' : `linear-gradient(160deg,${c},${c}AA)`, sh: locked ? 'inset 0 0 0 1px rgba(255,255,255,.08)' : `0 3px 0 rgba(0,0,0,.3),0 0 16px ${c}66`, op: locked ? .75 : 1 }; }),
+      hMode: en ? 'MODE' : 'MOD', hPlace: en ? 'PLACE' : 'SIRA', hChips: en ? 'CHIPS' : 'ÇİP', hWhen: en ? 'WHEN' : 'ZAMAN',
+      history: HS.map(([m, pl, d, ago, lp]) => ({ g: ['1', '2', '×2', 'II'][m], c: MC[m], mode: MN[m], detail: lp || (en ? '101 · 5K table' : '101 · 5K masa'),
+        place: en ? `#${pl}` : `${pl}.`, pb: pl === '1' ? 'rgba(255,201,74,.18)' : 'var(--dp)', pf: pl === '1' ? '#FFC94A' : 'var(--mt)',
+        delta: d === 0 ? '—' : (d > 0 ? '+' : '−') + fmt(Math.abs(d)), dc: d > 0 ? '#8EF0B0' : d < 0 ? '#FF8A94' : 'var(--mt)', when: fmtAgo(ago) })),
+    };
+    const open = (k) => () => this.setState({ panel: k, settingsOpen: false });
+    return { panelOpen: !!s.panel, closePanel: () => this.setState({ panel: null }), pnl, shop, fr, lb, dl, rl, mp, openMe: open('me'),
+      buyChips: () => this.setState((x) => ({ panel: 'shop', settingsOpen: false, pTab: { ...x.pTab, shop: 0 } })),
+      buyGems: () => this.setState((x) => ({ panel: 'shop', settingsOpen: false, pTab: { ...x.pTab, shop: 1 } })),
+      openShop: open('shop'), openFriends: open('friends'), openLeader: open('leader'), openDaily: open('daily'), openRules: open('rules') };
+  }
+  frameOf(i) {
+    if (i === 1) return { bg: 'conic-gradient(from 210deg,#8A5A12,#FFE9A8 12%,#E8A317 25%,#FFF6D0 38%,#B8790F 52%,#FFE08A 66%,#C88A1A 80%,#8A5A12)', sh: '0 0 0 2px #5A3A08,0 0 16px rgba(255,201,74,.55)', studs: true, inset: '8px', insetS: '5px', gap: '#3A2604', gapS: '#3A2604', bd: '#FFD964' };
+    return { bg: 'conic-gradient(var(--a1) 0 245deg,var(--dp) 245deg)', sh: 'none', studs: false, inset: '7px', insetS: '5px', gap: 'var(--sd)', gapS: 'var(--pn)', bd: 'var(--a1)' };
+  }
+  dlgVals(lang) {
+    const s = this.state, en = lang === 'en', D = s.dlg, P = s.prof, dr = s.draft || P;
+    const close = () => this.setState({ dlg: null });
+    const nm = (dr.name || '').trim(), okName = nm.length >= 3 && nm.length <= 16 && /^[\p{L}\p{N} ._]+$/u.test(nm);
+    const ini = (n) => n.trim().split(/\s+/).map((w) => w[0] || '').join('').slice(0, 2).toLocaleUpperCase('tr-TR') || '?';
+    const upd = (o) => this.setState((x) => ({ draft: { ...(x.draft || x.prof), ...o } }));
+    const FR = en ? ['Classic', 'Gold', 'Galaxy'] : ['Klasik', 'Altın', 'Galaksi'];
+    const pf = { title: en ? 'Edit profile' : 'Profili düzenle', ini: ini(dr.name || ''), color: dr.color, fr: this.frameOf(dr.frame), lv: en ? 'LV 24' : 'SV 24',
+      colorLabel: en ? 'AVATAR COLOR' : 'AVATAR RENGİ', nameLabel: en ? 'Player name' : 'Oyuncu adı', count: `${nm.length}/16`, name: dr.name,
+      onName: (e) => upd({ name: e.target.value }), nameRing: okName ? 'inset 0 0 0 2px transparent' : 'inset 0 0 0 2px #FF5E6C',
+      hint: okName ? (en ? 'Other players see this name at the table.' : 'Masadaki diğer oyuncular bu adı görür.') : (en ? '3–16 characters: letters, numbers, space, dot or underscore.' : '3–16 karakter: harf, rakam, boşluk, nokta veya alt çizgi.'),
+      hintC: okName ? 'var(--mt)' : '#FF8A94', statusLabel: en ? 'Status message' : 'Durum mesajı', status: dr.status, statusPh: en ? 'e.g. Always up for a quick game' : 'Örn. Hızlı bir el için hep hazırım', onStatus: (e) => upd({ status: e.target.value }),
+      frameLabel: en ? 'Avatar frame' : 'Avatar çerçevesi',
+      frames: FR.map((label, i) => { const on = dr.frame === i, locked = i === 2; return { label: locked ? `${label} · ${en ? 'LV 30' : 'SV 30'}` : label, locked, bg: on ? 'linear-gradient(var(--a1),var(--a2))' : 'transparent', fg: on ? 'var(--aT)' : locked ? 'rgba(255,255,255,.35)' : 'var(--mt)', sh: on ? '0 3px 0 var(--aS)' : 'none', pick: () => { if (!locked) upd({ frame: i }); } }; }),
+      colors: ['#FF8A5B', '#FF5E6C', '#E85D9A', '#8B5CF6', '#3D7BFF', '#16B6A8', '#3CCB6E', '#F5A623'].map((c) => ({ c, ring: c === dr.color ? '0 0 0 3px var(--sd),0 0 0 5px #fff' : 'none', pick: () => upd({ color: c }) })),
+      note: en ? 'You can change your name once every 30 days.' : 'Adını 30 günde bir değiştirebilirsin.',
+      saveBg: okName ? 'linear-gradient(var(--a1),var(--a2))' : 'var(--dp)', saveSh: okName ? 'var(--aS)' : 'transparent', saveFg: okName ? 'var(--aT)' : 'var(--mt)', saveCur: okName ? 'pointer' : 'not-allowed',
+      save: () => { if (okName) this.setState({ prof: { ...dr, name: nm }, draft: null, dlg: null }); } };
+
+    const word = en ? 'DELETE' : 'SİL', typed = s.delTyped || '', match = typed.trim().toLocaleUpperCase(en ? 'en-US' : 'tr-TR') === word;
+    const isDel = D === 'delete', isQuit = D === 'quit', last = s.byeFrom, red = isDel || isQuit;
+    const cf = { isLogout: D === 'logout', isDelete: isDel, isQuit,
+      tile: red ? 'linear-gradient(160deg,#FF7A86,#E23B4C)' : 'linear-gradient(160deg,var(--pnH),var(--pn))', tileSh: red ? '#A82434' : 'var(--pnS)', glow: red ? 'rgba(255,94,108,.4)' : 'transparent',
+      title: isQuit ? (en ? 'Quit the game?' : 'Oyundan çıkmak istiyor musun?') : isDel ? (en ? 'Delete your account?' : 'Hesabını silmek istiyor musun?') : (en ? 'Log out?' : 'Çıkış yapmak istiyor musun?'),
+      body: isQuit ? (en ? 'Galaxy 101 will close. Your chips, progress and settings are saved.' : 'Galaxy 101 kapanacak. Çiplerin, ilerlemen ve ayarların kayıtlı kalır.') : isDel ? (en ? 'Your account will be deleted after 30 days. Logging in during that time cancels the deletion.' : 'Hesabın 30 gün sonra kalıcı olarak silinir. Bu süre içinde giriş yaparsan silme işlemi iptal olur.') : (en ? 'Your chips, progress and friends are saved to your Google account. You can log back in anytime.' : 'Çiplerin, ilerlemen ve arkadaşların Google hesabında saklanır. İstediğin zaman tekrar giriş yapabilirsin.'),
+      losses: (en ? ['125,400 chips and 340 gems', 'Level 24, Gold II rank and badges', 'Friend list and match history'] : ['125.400 çip ve 340 elmas', 'Seviye 24, Altın II derecesi ve rozetler', 'Arkadaş listesi ve maç geçmişi']).map((t) => ({ t })),
+      typeHint: en ? `Type ${word} to confirm` : `Onaylamak için ${word} yaz`, word, typed, onType: (e) => this.setState({ delTyped: e.target.value }),
+      ring: match ? 'inset 0 0 0 2px #FF5E6C' : 'inset 0 0 0 1px rgba(255,255,255,.08)',
+      btn: isQuit ? (en ? 'Quit game' : 'Oyundan çık') : isDel ? (en ? 'Delete account' : 'Hesabı sil') : (en ? 'Log out' : 'Çıkış yap'),
+      btnBg: isDel && !match ? 'var(--dp)' : '#FF5E6C', btnSh: isDel && !match ? 'transparent' : '#C23E4A', btnFg: isDel && !match ? 'var(--mt)' : '#fff', btnCur: isDel && !match ? 'not-allowed' : 'pointer',
+      go: () => { if (isDel && !match) return; this.setState({ dlg: 'bye', byeFrom: D, delTyped: '', settingsOpen: isQuit ? false : s.settingsOpen }); if (isQuit) { if (this.props.onQuit) setTimeout(() => this.props.onQuit(), 1100); return; } if (this.props.onLogout) setTimeout(() => this.props.onLogout(D), 1500); },
+      doneTitle: last === 'quit' ? (en ? 'See you soon' : 'Görüşmek üzere') : last === 'delete' ? (en ? 'Deletion scheduled' : 'Silme talebin alındı') : (en ? 'Logged out' : 'Çıkış yapıldı'),
+      doneBody: last === 'quit' ? (en ? 'Closing Galaxy 101…' : 'Galaxy 101 kapatılıyor…') : last === 'delete' ? (en ? 'Log in within 30 days to cancel.' : '30 gün içinde giriş yaparak iptal edebilirsin.') : (en ? 'See you at the table soon.' : 'Masada görüşmek üzere.'),
+      doneBtn: en ? 'OK' : 'Tamam' };
+
+    const A = s.af, res = A.res, sent = res && res !== 'none' && res !== 'friend' && A.sent[res.code];
+    const norm = (x) => x.replace(/[#\s]/g, '').toLocaleUpperCase('tr-TR');
+    const find = () => {
+      const q = norm(A.q); if (!q) return;
+      const qd = q.includes('-') ? q : q.replace(/^([A-ZÇĞİÖŞÜ]{2})(\d+)$/, '$1-$2');
+      if (FRIENDS.some((f) => CODES[f.id] === qd)) return this.setState((x) => ({ af: { ...x.af, res: 'friend' } }));
+      const hit = DIR.find((d) => d.code === qd) || DIR.find((d) => norm(d.name).includes(q));
+      this.setState((x) => ({ af: { ...x.af, res: hit || 'none' } }));
+    };
+    const af = { title: en ? 'Add friend' : 'Arkadaş ekle', sub: en ? 'Search with a friend code or player name' : 'Arkadaş kodu veya oyuncu adıyla ara', q: A.q, ph: en ? 'e.g. MK-3321' : 'Örn. MK-3321',
+      onQ: (e) => { const v = e.target.value; this.setState((x) => ({ af: { ...x.af, q: v, res: null } })); }, onKey: (e) => { if (e.key === 'Enter') find(); }, find, findLabel: en ? 'Search' : 'Ara',
+      ring: res === 'none' ? 'inset 0 0 0 2px #FF5E6C' : 'inset 0 2px 0 rgba(0,0,0,.25)',
+      idle: !res, none: res === 'none' || res === 'friend', found: !!res && res !== 'none' && res !== 'friend',
+      idleText: en ? 'Enter a code or name and press Search.' : 'Kod ya da ad girip Ara\'ya bas.',
+      noneText: res === 'friend' ? (en ? 'You are already friends with this player.' : 'Bu oyuncuyla zaten arkadaşsınız.') : (en ? 'No player found. Check the code and try again.' : 'Oyuncu bulunamadı. Kodu kontrol edip tekrar dene.'),
+      r: res && res.code ? { ...res, lv: (en ? 'LV ' : 'SV ') + res.lv } : { name: '', ini: '', c: 'transparent', lv: '', code: '' },
+      btn: sent ? (en ? 'Request sent' : 'İstek gönderildi') : (en ? 'Send request' : 'İstek gönder'),
+      btnBg: sent ? 'var(--pnH)' : 'linear-gradient(var(--a1),var(--a2))', btnSh: sent ? 'var(--pnS)' : 'var(--aS)', btnFg: sent ? '#8EF0B0' : 'var(--aT)',
+      send: () => { if (res && res.code) this.setState((x) => ({ af: { ...x.af, sent: { ...x.af.sent, [res.code]: true } } })); },
+      copy: () => { try { navigator.clipboard && navigator.clipboard.writeText('DY-4821'); } catch (_) {} this.setState({ copied: true }); clearTimeout(this._cp); this._cp = setTimeout(() => this.setState({ copied: false }), 1500); },
+      copyLabel: s.copied ? (en ? 'Copied' : 'Kopyalandı') : (en ? 'Copy' : 'Kopyala') };
+
+    const toast = (m) => { this.setState({ shToast: m }); clearTimeout(this._shT); this._shT = setTimeout(() => this.setState({ shToast: '' }), 1800); };
+    const shCopied = !!s.shCopied;
+    const APPS = [['WhatsApp', 'W', '#25D366', '#128C4A'], ['Telegram', 'T', '#2AABEE', '#1A7DB0'], ['X', 'X', '#2A2F3A', '#0E1116'], ['Instagram', 'IG', 'linear-gradient(135deg,#F9A13A,#E1306C 55%,#8A3AB9)', '#7A2A8A'], [en ? 'More' : 'Diğer', '•••', 'var(--pnH)', 'var(--pnS)']];
+    const sh = { title: en ? 'Share profile' : 'Profili paylaş', sub: en ? 'Send your profile card to friends' : 'Profil kartını arkadaşlarına gönder', season: en ? 'Season 3' : 'Sezon 3',
+      chips: [[en ? 'HANDS' : 'EL', '1.284', '#F4F1E8'], [en ? 'WIN' : 'KAZANMA', en ? '41%' : '%41', '#8EF0B0'], [en ? 'BEST' : 'EN İYİ', '186', 'var(--a1)']].map(([k, v, col]) => ({ k, v: en ? v.replace('.', ',') : v, col })),
+      linkLabel: en ? 'Profile link' : 'Profil bağlantısı', viaLabel: en ? 'Share via' : 'Şununla paylaş',
+      copied: shCopied, copyLabel: shCopied ? (en ? 'Copied' : 'Kopyalandı') : (en ? 'Copy link' : 'Bağlantıyı kopyala'),
+      copyBg: shCopied ? '#3CCB6E' : 'linear-gradient(var(--a1),var(--a2))', copySh: shCopied ? '#22914A' : 'var(--aS)', copyFg: shCopied ? '#fff' : 'var(--aT)',
+      copy: () => { try { navigator.clipboard && navigator.clipboard.writeText('https://galaxy101.app/p/DY-4821'); } catch (_) {} this.setState({ shCopied: true }); clearTimeout(this._shC); this._shC = setTimeout(() => this.setState({ shCopied: false }), 1800); },
+      apps: APPS.map(([name, g, bg, shc]) => ({ name, g, bg, sh: shc, go: () => toast(en ? `Opening ${name}…` : `${name} açılıyor…`) })),
+      inviteTitle: en ? 'Invite a friend, earn chips' : 'Arkadaşını davet et, çip kazan', inviteSub: en ? 'You both get 2,000 chips when they play their first hand with your link.' : 'Bağlantınla gelen arkadaşın ilk elini oynayınca ikiniz de 2.000 çip kazanırsınız.',
+      toast: s.shToast || '' };
+    return { dlgOpen: !!D, closeDlg: close, dlg: { isProfile: D === 'profile', isConfirm: D === 'logout' || D === 'delete' || D === 'quit', isAdd: D === 'add', isBye: D === 'bye', isShare: D === 'share' }, pf, cf, af, sh,
+      openShare: () => this.setState({ dlg: 'share', shCopied: false, shToast: '' }),
+      me: { name: P.name, ini: ini(P.name), color: P.color, fr: this.frameOf(P.frame) },
+      openProfile: () => this.setState({ dlg: 'profile', draft: { ...this.state.prof } }),
+      askQuit: () => this.setState({ dlg: 'quit' }), quitLabel: en ? 'Quit game' : 'Oyundan çık', quitTip: en ? 'Close Galaxy 101' : 'Galaxy 101’i kapat',
+      askLogout: () => this.setState({ dlg: 'logout' }), askDelete: () => this.setState({ dlg: 'delete', delTyped: '' }),
+      openAddFriend: () => this.setState((x) => ({ dlg: 'add', af: { ...x.af, q: '', res: null } })) };
+  }
+  settingsVals(pName) {
+    const s = this.state, sv = s.sv, tab = s.setTab;
+    const upd = (k, v) => this.setState((st) => ({ sv: { ...st.sv, [k]: v } }));
+    const tg = (k, name, desc) => ({ name, desc, bg: sv[k] ? '#3CCB6E' : 'var(--dp)', x: sv[k] ? '27px' : '3px', flip: () => upd(k, !sv[k]) });
+    const sl = (k, name, desc, min, max, unit) => {
+      const pick = (el, x) => { const r = (el.firstElementChild || el).getBoundingClientRect(); const t = Math.max(0, Math.min(1, (x - r.left) / r.width)); upd(k, Math.round(min + t * (max - min))); };
+      const drag = this.state.drag === k, zero = sv[k] === min;
+      return { name, desc, pct: ((sv[k] - min) / (max - min) * 100) + '%', label: sv[k] + unit,
+        knob: drag ? 'translate(-50%,-50%) scale(1.06)' : 'translate(-50%,-50%)',
+        halo: drag ? '0 0 0 4px var(--gl),0 2px 6px rgba(0,0,0,.4)' : '0 0 0 0 transparent,0 2px 6px rgba(0,0,0,.4)',
+        ease: drag ? 'none' : 'width .15s ease-out', kEase: drag ? 'transform .12s,box-shadow .12s' : 'left .15s ease-out,transform .12s,box-shadow .12s', vc: zero ? 'var(--mt)' : '#F4F1E8',
+        down: (e) => { const el = e.currentTarget; el.setPointerCapture && el.setPointerCapture(e.pointerId); this._slEl = el; this.setState({ drag: k }); pick(el, e.clientX); },
+        move: (e) => { if (this.state.drag === k && this._slEl) pick(this._slEl, e.clientX); },
+        up: (e) => { if (this._slEl && this._slEl.releasePointerCapture) { try { this._slEl.releasePointerCapture(e.pointerId); } catch (_) {} } this._slEl = null; this.setState({ drag: null }); },
+        step: (e) => { if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); upd(k, Math.min(max, sv[k] + 1)); } if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); upd(k, Math.max(min, sv[k] - 1)); } } };
+    };
+    const seg = (name, desc, opts, cur, pick) => ({ name, desc, isSeg: true, isStep: false, opts: opts.map((o) => { const on = o === cur; return { label: o, bg: on ? 'linear-gradient(var(--a1),var(--a2))' : 'transparent', fg: on ? 'var(--aT)' : 'var(--mt)', sh: on ? '0 3px 0 var(--aS)' : 'none', pick: () => pick(o) }; }) });
+    const TABS = [['Oyun', 'Taş hareketleri ve masa davranışı'], ['Ses', 'Müzik, efektler ve bildirim sesleri'], ['Görüntü', 'Tema, çözünürlük ve görsel efektler'], ['Dil', 'Uygulamanın dili'], ['Hesap', 'Profil, bağlı hesaplar ve bildirimler']];
+    const resNow = s.res || this.props.resolution || '1280×720 (önizleme)';
+    const RS = { '720p': '1280×720 (önizleme)', '1080p': '1920×1080 (1080p)', '2K': '2560×1440 (2K)' };
+    const resShort = Object.keys(RS).find((k) => RS[k] === resNow) || '720p';
+    const out = {
+      settingsOpen: s.settingsOpen,
+      openSettings: () => this.setState({ settingsOpen: true }),
+      closeSettings: () => this.setState({ settingsOpen: false }),
+      resetSettings: () => this.setState({ sv: { ...SET_DEFAULTS, lang: (this.props && this.props.lang) || SET_DEFAULTS.lang }, res: null }),
+      tabTitle: TABS[tab][0], tabSub: TABS[tab][1],
+      setTabs: TABS.map(([name], i) => ({ name, pick: () => this.setState({ setTab: i }), bg: i === tab ? 'var(--pnH)' : 'transparent', bar: i === tab ? 'inset 4px 0 0 var(--a1)' : 'none', fg: i === tab ? '#F4F1E8' : 'var(--mt)', dot: i === tab ? 'var(--a1)' : 'var(--bd)' })),
+      setToggles: [], setSliders: [], setSegs: [], showPlanetRow: false, showLang: tab === 3, showAccount: tab === 4,
+      langs: [['TR', 'Türkçe', 'Türkiye', 'tr'], ['EN', 'English', 'Uluslararası', 'en']].map(([code, name, sub, id]) => { const on = sv.lang === id; return { code, name, sub, sh: on ? 'inset 0 0 0 2px var(--a1)' : 'inset 0 0 0 1px rgba(255,255,255,.08)', dot: on ? 'var(--a1)' : 'transparent', dotBd: on ? 'var(--a1)' : 'var(--bd)', pick: () => upd('lang', id) }; }),
+    };
+    if (tab === 0) {
+      out.setToggles = [tg('autoSort', 'Otomatik sırala', 'Yeni çekilen taş ıstakada uygun yere yerleşsin'), tg('highlight', 'Perleri vurgula', 'Geçerli perlerin çevresi yeşil yansın'), tg('dbl', 'Çift tıkla taş at', 'Sürüklemeden hızlı atış'), tg('chat', 'Masa sohbeti', 'Masa içi mesaj ve emojiler görünsün')];
+      out.setSliders = [sl('warn', 'Tur süresi uyarısı', 'Süre bitmeden kaç saniye önce uyarılsın', 1, 10, ' sn')];
+      out.setSegs = [seg('Taş boyutu', 'Istakadaki taşların büyüklüğü', ['Küçük', 'Orta', 'Büyük'], sv.tile, (o) => upd('tile', o))];
+    } else if (tab === 1) {
+      out.setSliders = [sl('master', 'Ana ses', 'Tüm seslerin genel seviyesi', 0, 100, '%'), sl('music', 'Müzik', 'Menü ve masa müziği', 0, 100, '%'), sl('sfx', 'Efektler', 'Taş, zar ve buton sesleri', 0, 100, '%')];
+      out.setToggles = [tg('tileSnd', 'Taş sesleri', 'Taş çekme ve atma sesi'), tg('notifSnd', 'Bildirim sesi', 'Sıra sende ve davet uyarıları')];
+    } else if (tab === 2) {
+      out.setToggles = [tg('motion', 'Arka plan hareketi', 'Dönen gezegen ve kayan yıldızlar')];
+      out.setSegs = [seg('Görüntü modu', 'Tam ekran, çerçevesiz pencere veya pencere', ['Tam ekran', 'Çerçevesiz', 'Pencere'], this.state.wmode || 'Tam ekran', (o) => this.pickMode(o)), this.resRow(), this.fpsRow(), seg('Efekt kalitesi', 'Düşük ayar eski bilgisayarlarda akıcılığı artırır', ['Düşük', 'Orta', 'Yüksek'], sv.quality, (o) => upd('quality', o)), this.cursorRow()];
+    } else if (tab === 4) {
+      out.setToggles = [tg('friendReq', 'Arkadaşlık istekleri', 'Yeni istekler için bildirim al'), tg('invites', 'Masa davetleri', 'Arkadaşların seni masaya çağırabilsin')];
+    }
+    return out;
+  }
+  detectHz() {
+    const ts = []; let last = 0;
+    const loop = (t) => {
+      if (this._hzDead) return;
+      if (last) ts.push(t - last); last = t;
+      if (ts.length < 90) { this._hzRaf = requestAnimationFrame(loop); return; }
+      const d = ts.slice(10).sort((a, b) => a - b), med = d[Math.floor(d.length / 2)], raw = 1000 / med;
+      const STD = [30, 48, 50, 60, 72, 75, 90, 100, 120, 144, 160, 165, 170, 180, 200, 240, 280, 300, 360];
+      const near = STD.reduce((a, b) => (Math.abs(b - raw) < Math.abs(a - raw) ? b : a));
+      const hz = Math.abs(near - raw) / near < 0.04 ? near : Math.round(raw);
+      this.setState({ hz: Math.max(30, hz) });
+    };
+    this._hzRaf = requestAnimationFrame(loop);
+  }
+  maxRes() {
+    const d = window.devicePixelRatio || 1, s = window.screen || {};
+    const w = Math.round((s.width || 1920) * d), h = Math.round((s.height || 1080) * d);
+    return w >= h ? [w, h] : [h, w];
+  }
+  resOpts() {
+    const [mw, mh] = this.maxRes();
+    const STD = [[1280, 720], [1366, 768], [1600, 900], [1920, 1080], [2560, 1440], [3200, 1800], [3840, 2160], [5120, 2880], [7680, 4320]];
+    const list = STD.filter(([w, h]) => w <= mw && h <= mh && !(w === mw && h === mh)).map(([w, h]) => w + '×' + h);
+    list.push(mw + '×' + mh);
+    return list;
+  }
+  resRow() {
+    const en = this.state.sv.lang === 'en', opts = this.resOpts(), nat = opts[opts.length - 1];
+    let cur = this.state.gres; if (!cur || !opts.includes(cur)) cur = nat;
+    const i = opts.indexOf(cur);
+    const pick = (v) => { this.setState({ gres: v }); try { localStorage.setItem('galaxy101.gres', v); } catch (e) {} };
+    const go = (d) => { const j = i + d; if (j >= 0 && j < opts.length) pick(opts[j]); };
+    const isNat = cur === nat;
+    return { isSeg: false, isStep: true, opts: [], name: en ? 'Resolution' : 'Çözünürlük',
+      desc: isNat ? (en ? `Native · Monitor max ${nat}` : `Yerel · Monitör en fazla ${nat}`) : (en ? `Monitor max ${nat}` : `Monitör en fazla ${nat}`),
+      label: cur,
+      prev: () => go(-1), next: () => go(1), prevOp: i > 0 ? 1 : 0.3, nextOp: i < opts.length - 1 ? 1 : 0.3, prevCur: i > 0 ? 'pointer' : 'default', nextCur: i < opts.length - 1 ? 'pointer' : 'default',
+      key: (e) => { if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); } if (e.key === 'ArrowRight') { e.preventDefault(); go(1); } } };
+  }
+  pickMode(o) {
+    this.setState({ wmode: o }); try { localStorage.setItem('galaxy101.wmode', o); } catch (e) {}
+    try {
+      const fs = document.fullscreenElement;
+      if (o === 'Pencere') { if (fs) document.exitFullscreen(); }
+      else if (!fs && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+    } catch (e) {}
+  }
+  cursorRow() {
+    const C = window.G101Cursor, cur = (C && C.mode) || 'Normal';
+    return { name: 'İmleç', desc: cur === 'Sistem' ? 'İşletim sisteminin imleci kullanılır' : 'Galaxy 101 imleci · tema rengini izler', isSeg: true, isStep: false,
+      opts: ['Normal', 'Büyük', 'Sistem'].map((o) => { const on = o === cur; return { label: o, bg: on ? 'linear-gradient(var(--a1),var(--a2))' : 'transparent', fg: on ? 'var(--aT)' : 'var(--mt)', sh: on ? '0 3px 0 var(--aS)' : 'none', pick: () => { C && C.setMode(o); this.forceUpdate(); } }; }) };
+  }
+  fpsOpts() {
+    const hz = this.state.hz || 60;
+    const set = [30, 60, 90, 120, 144, 165, 240].filter((v) => v < hz);
+    return ['auto', ...set, hz];
+  }
+  fpsRow() {
+    const en = this.state.sv.lang === 'en', hz = this.state.hz, opts = this.fpsOpts();
+    let cur = this.state.fps ?? 'auto'; if (cur !== 'auto' && !opts.includes(cur)) cur = 'auto';
+    const i = opts.indexOf(cur), hzL = hz ? `${hz} Hz` : '…';
+    const pick = (v) => { this.setState({ fps: v }); try { localStorage.setItem('galaxy101.fps', String(v)); } catch (e) {} };
+    const go = (d) => { const j = i + d; if (j >= 0 && j < opts.length) pick(opts[j]); };
+    const max = en ? `Monitor ${hzL}` : `Monitör ${hzL}`;
+    return { isSeg: false, isStep: true, opts: [], name: en ? 'Frame rate' : 'Kare hızı',
+      desc: cur === 'auto' ? (en ? `Matches refresh rate (VSync) · ${max}` : `Ekranla eşitlenir (VSync) · ${max}`) : (en ? `Locked to ${cur} FPS · ${max}` : `Sabit ${cur} FPS · ${max}`),
+      label: cur === 'auto' ? (en ? `Auto · ${hzL}` : `Otomatik · ${hzL}`) : `${cur} FPS`,
+      prev: () => go(-1), next: () => go(1), prevOp: i > 0 ? 1 : 0.3, nextOp: i < opts.length - 1 ? 1 : 0.3, prevCur: i > 0 ? 'pointer' : 'default', nextCur: i < opts.length - 1 ? 'pointer' : 'default',
+      key: (e) => { if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); } if (e.key === 'ArrowRight') { e.preventDefault(); go(1); } } };
+  }
+  componentWillUnmount() { this._hzDead = true; cancelAnimationFrame(this._hzRaf); window.removeEventListener('keydown', this._key); clearTimeout(this._wait); if (this._pr) this._pr.destroy(); (this._st || []).forEach((s) => s && s.destroy()); }
+  componentDidUpdate(prev) {
+    const prevS = this._ps || this.state; this._ps = this.state;
+    if (prev.planet !== this.props.planet && this.state.planet) this.setState({ planet: null });
+    if (prevS.sv.lang !== this.state.sv.lang && this.props.onLang) this.props.onLang(this.state.sv.lang === 'en' ? 'en' : 'tr');
+    if (prev.lang !== this.props.lang && this.props.lang && this.props.lang !== this.state.sv.lang) this.setState((s) => ({ sv: { ...s.sv, lang: this.props.lang } }));
+  }
+  renderVals() {
+    const M = [
+      { name: 'Klasik', glyph: '101', bg: '#3D7BFF', sh: '#2148B0', online: '14.233', desc: 'Tekli ya da eşli, katlamalı seçenekli masalar', soon: false },
+      { name: 'Dereceli', glyph: 'II', bg: '#16B6A8', sh: '#0C7F75', online: '5.630', desc: 'Lig puanı kazan, sezonda yüksel', soon: true },
+      { name: 'Botlara karşı', glyph: '•', bg: '#3CCB6E', sh: '#22914A', online: 'Çevrimdışı', desc: '', soon: true },
+    ];
+    const sel = this.state.sel;
+    const map = (m, i) => {
+      const on = i === sel;
+      return { ...m, on, pick: () => this.setState({ sel: i }),
+        ring: on ? '0 0 0 4px var(--a1)' : '0 0 0 0 transparent',
+        lift: on ? 'translateY(-6px)' : 'none',
+        filter: on ? 'none' : 'saturate(.7) brightness(.78)',
+        shadow: on ? `0 5px 0 ${m.sh}, 0 2.5px 0 5.5px var(--bg3), 0 2.5px 0 8.5px #fff, 0 14px 32px ${m.bg === 'var(--pnH)' ? 'rgba(0,0,0,.5)' : m.bg + '99'}` : `0 5px 0 ${m.sh}` };
+    };
+    const subs = ['Tekli · 101 · 5K masa', 'Eşli · 101 · 5K masa', 'Katlamalı · 101 · 10K masa', 'Dereceli · Altın II', 'Botlara karşı · antrenman', 'Özel oda · şifreli'];
+    const pName = PLANETS[this.state.planet] ? this.state.planet : (PLANETS[this.props.planet] ? this.props.planet : 'Satürn');
+    const P = PLANETS[pName];
+    const themeVars = {};
+    Object.entries(P.v).forEach(([k, val]) => { themeVars['--' + k] = val; });
+    Object.entries(RINGS[pName]).forEach(([k, val]) => { themeVars['--' + k] = val; });
+    themeVars['--atm'] = ATM[pName];
+    const fam = (n, d) => `'${n || d}', sans-serif`;
+    themeVars['--fL'] = fam(this.props.logoFont, 'Montserrat');
+    themeVars['--fH'] = fam(this.props.headingFont, 'Montserrat');
+    themeVars['--fB'] = fam(this.props.bodyFont, 'Baloo 2');
+    themeVars['--pf'] = { 'Satürn': 1.1, 'Jüpiter': 1.07, 'Neptün': 1.02 }[pName] || 1;
+    Object.entries(LOGO[pName]).forEach(([k, val]) => { themeVars['--' + k] = val; });
+    const resWant = this.state.res || this.props.resolution;
+    const resKey = RES[resWant] ? resWant : '1280×720 (önizleme)';
+    const rsv = this.props.scale || RES[resKey];
+    themeVars['--rs1a'] = rsv;
+    this._pName = pName; this._period = SPEED[this.props.spinSpeed] || 16; this._rs = rsv; this._tint = P.v.st;
+    this.syncFx();
+    const h = React.createElement;
+    if (!this._cvEl) {
+      this._cvEl = h('canvas', { ref: (el) => { this._cv = el; }, style: { position: 'absolute', left: 0, top: 0, width: '300px', height: '300px', display: 'block' } });
+      this._stCv = [];
+      this._stEl = [0, 1, 2].map((i) => h('canvas', { ref: (el) => { this._stCv[i] = el; }, style: { position: 'absolute', left: 0, top: 0, width: '1280px', height: '720px', display: 'block' } }));
+    }
+    const lang = this.state.sv.lang === 'en' ? 'en' : 'tr', L = STR[lang];
+    const setV = this.settingsVals(pName);
+    return {
+      ...(lang === 'en' ? trDeep(setV, SET_EN) : setV),
+      ...this.panelVals(lang),
+      ...this.dlgVals(lang),
+      t: L,
+      themeVars,
+      planetCanvas: this._cvEl,
+      starsA: this._stEl[0], starsB: this._stEl[1], starsC: this._stEl[2],
+      resLabel: resKey,
+      planetName: L.pn[pName],
+      planetDesc: L.pd[pName],
+      planets: Object.entries(PLANETS).map(([name, p]) => {
+        const on = name === pName;
+        return {
+          name: L.pn[name],
+          orb: `radial-gradient(circle at 35% 30%, ${p.orb[0]}, ${p.orb[1]} 55%, ${p.orb[2]})`,
+          size: on ? '34px' : '26px',
+          ring: on ? `0 0 0 2px #0008, 0 0 0 4px ${p.v.a1}, 0 0 14px ${p.v.gl}` : '0 0 0 1px rgba(255,255,255,.15)',
+          tileBg: on ? 'var(--pnH)' : 'transparent',
+          fg: on ? '#F4F1E8' : 'var(--mt)',
+          pick: () => { this.setState({ planet: name }); if (this.props.onPlanet) this.props.onPlanet(name); },
+        };
+      }),
+      modes: M.map((m, i) => ({ ...map(m, i), name: L.modes[i], online: m.online === 'Çevrimdışı' ? L.offline : m.online })),
+      modesB: M.map(map),
+      chipsLabel: (this.props.chips ?? 125400).toLocaleString(lang === 'en' ? 'en-US' : 'tr-TR'), gemsLabel: String(this.props.gems ?? 340),
+      playSub: L.subs[sel],
+      play: () => { if (sel === 0 && this.props.onPlay) this.props.onPlay('klasik'); },
+      menuC: [
+        { name: 'Salonlar', sub: '6 mod', c: '#3D7BFF' },
+        { name: 'Dereceli', sub: 'Altın II', c: '#16B6A8' },
+        { name: 'Özel oda', sub: 'Şifreli', c: '#8B5CF6' },
+        { name: 'Botlara karşı', sub: 'Antrenman', c: '#3CCB6E' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -13,6 +13,7 @@
 <script src="./g101-cursor.js"></script>
 <script src="./g101-rank.js"></script>
 <script src="./g101-sound.js"></script>
+<script src="./g101-settings.js"></script>
 <link href="./vendor/fonts.css" rel="stylesheet">
 <script src="./planet-renderer.js"></script>
 <script src="./starfield.js"></script>
@@ -81,7 +82,7 @@ input::placeholder{color:rgba(169,174,221,.5)}
             <div data-g101-id="app.splash.brand" style="position:absolute;right:20px;bottom:14px;display:flex;align-items:center;gap:8px;font:700 11px var(--fB);color:var(--mt)">
               <div style="display:flex;align-items:center;gap:5px;opacity:.85"><div style="width:9px;height:9px;transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,var(--a1),var(--a2))"></div><span style="font:800 12px var(--fH);letter-spacing:1px;color:#F4F1E8">CDX</span><span style="letter-spacing:1.5px">GAMES</span></div>
               <div style="width:1px;height:10px;background:var(--mt);opacity:.4"></div>
-              <div style="opacity:.6">v0.4.0</div>
+              <div style="opacity:.6">v0.5.0</div>
             </div>
           </div>
         </sc-if>
@@ -257,12 +258,15 @@ input::placeholder{color:rgba(169,174,221,.5)}
 
       <sc-if value="{{ gameOn }}" hint-placeholder-val="{{ false }}">
         <div style="position:absolute;left:0;top:0">
-          <dc-import name="G101-Masa" scale="{{ k }}" planet="{{ planet }}" language="{{ gameLang }}" chips="{{ chips }}" bet="{{ g.bet }}" hands="{{ g.hands }}" turn-seconds="{{ g.turn }}" room-label="{{ g.room }}" bet-label="{{ g.betLabel }}" seats="{{ g.seats }}" start-hand="{{ g.startHand }}" spectate="{{ g.spectate }}" auto-start="{{ true }}" on-ready="{{ gameReady }}" on-exit="{{ gameExit }}" on-match-end="{{ matchEnd }}" on-open-settings="{{ openGameSet }}" hint-size="{{ stageHint }}"></dc-import>
+          <dc-import name="G101-Masa" scale="{{ k }}" planet="{{ planet }}" language="{{ gameLang }}" chips="{{ chips }}" bet="{{ g.bet }}" hands="{{ g.hands }}" turn-seconds="{{ g.turn }}" room-label="{{ g.room }}" bet-label="{{ g.betLabel }}" seats="{{ g.seats }}" table-rules="{{ g.rules }}" test-finish="{{ tFinish }}" test-eject="{{ tEject }}" test-elden="{{ tElden }}" start-hand="{{ g.startHand }}" spectate="{{ g.spectate }}" auto-start="{{ true }}" on-ready="{{ gameReady }}" on-exit="{{ gameExit }}" on-match-end="{{ matchEnd }}" on-open-settings="{{ openGameSet }}" hint-size="{{ stageHint }}"></dc-import>
         </div>
       </sc-if>
 
       <sc-if value="{{ showVer }}" hint-placeholder-val="{{ false }}">
-        <div data-g101-id="app.version" style="position:absolute;right:8px;bottom:3px;z-index:90;pointer-events:none;font:700 10px Nunito,sans-serif;letter-spacing:.5px;color:#9DA6D8;opacity:.55">Galaxy 101 · v0.4.0</div>
+        <div data-g101-id="app.version" style="position:absolute;right:8px;bottom:3px;z-index:90;pointer-events:none;font:700 10px Nunito,sans-serif;letter-spacing:.5px;color:#9DA6D8;opacity:.55">Galaxy 101 · {{ appVersion }}</div>
+      </sc-if>
+      <sc-if value="{{ showFps }}" hint-placeholder-val="{{ false }}">
+        <div data-g101-id="app.fps" style="position:absolute;left:8px;top:{{ fpsTop }};z-index:99;pointer-events:none">{{ fpsEl }}</div>
       </sc-if>
 
       <sc-if value="{{ gameSet }}" hint-placeholder-val="{{ false }}">
@@ -327,7 +331,7 @@ input::placeholder{color:rgba(169,174,221,.5)}
   </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;firstRun&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Akış&quot;},&quot;failFirstLoad&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Akış&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;firstRun&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Akış&quot;},&quot;failFirstLoad&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Akış&quot;},&quot;testFinish&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Kapalı&quot;,&quot;Nükleer&quot;,&quot;Kara delik&quot;,&quot;Süpernova&quot;,&quot;Meteor&quot;],&quot;default&quot;:&quot;Kapalı&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Test (masada)&quot;},&quot;testEject&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Test (masada)&quot;},&quot;testElden&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Test (masada)&quot;},&quot;muted&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Ses&quot;}}">
 const SAVE_KEY = 'galaxy101.save.v1';
 const PV = {
   'Satürn': { bg1: '#2A2F6E', bg2: '#161A45', bg3: '#0A0C28', pn: '#232A66', pnH: '#2D3680', pnS: '#0B0D2B', dp: '#0B0E2E', sd: '#10133A', bd: '#2E3680', a1: '#FFD964', a2: '#F5A623', aS: '#B86E0F', aT: '#3A1F00', lS: '#8A4E06', gl: 'rgba(255,201,74,.45)', mt: '#A9AEDD', ic: '#D3D6FF', p1: '#F3E1B5', p2: '#D9B77A', p3: '#EBD3A0', p4: '#B98F55', rg: '#E8CF98', pg: 'rgba(255,214,140,.35)', st: '#FFE7A3', lg1: '#FFF4C8', tf1: '#FFFDF6', tf2: '#EEE2C6', te: '#D9C9A2', te2: '#A8925F', t1: '#C8462E', t2: '#2B5DA8', t3: '#D9951A', atm: 'rgba(255,226,175,.55)', pf: 1.1, ro: 0.85 },
@@ -421,6 +425,9 @@ class Component extends DCLogic {
   }
   componentDidMount() {
     (window.__g101 = window.__g101 || {}).App = this;   // g101-state.js durum yönlendiricisi
+    const fpsHook = () => { const G = window.G101Settings; if (!G) { this._fpsW = setTimeout(fpsHook, 120); return; } this.setState({ showFps: !!G.get().showFps }); this._fpsUn = G.on((p) => { if ('showFps' in p) this.setState({ showFps: !!p.showFps }); }); };
+    fpsHook();
+    this._muteT = setInterval(() => { const S = window.G101Sound; if (S && S.setMuted && S.muted !== !!this.props.muted) S.setMuted(!!this.props.muted); }, 400);   // tweak: sesi kapat
     if (window.G101Sound) window.G101Sound.setMusic('menu');   // ilk dokunuşta başlar (tarayıcı ses izni)
     setTimeout(() => this.grantTest(), 0);
     try { if (new URLSearchParams(location.search).get('to') === 'lobby' && this.state.save.acct) setTimeout(() => this.go('lobby'), 0); } catch (e) {}
@@ -437,8 +444,15 @@ class Component extends DCLogic {
     fx();
     this.runSplash();
   }
-  componentWillUnmount() { window.removeEventListener('resize', this._rz); clearInterval(this._spI); clearInterval(this._ldI); clearTimeout(this._fxT); clearTimeout(this._toT); if (this._pr) this._pr.destroy(); if (this._st) this._st.destroy(); }
-  componentDidUpdate() { const s = this.state, ps = this._ps || {}; this._ps = s; if (ps.k !== s.k || (ps.save && ps.save.planet) !== s.save.planet || ps.screen !== s.screen) this.syncFx(); }
+  // FPS göstergesi (Ayarlar › Görüntü › FPS göster): rAF sayacı, yarım saniyede bir güncellenir; React yeniden çizimi yok.
+  startFps() {
+    if (this._fpsRaf) return; let n = 0, t0 = performance.now();
+    const loop = (t) => { this._fpsRaf = requestAnimationFrame(loop); n++; if (t - t0 >= 500) { const f = Math.round((n * 1000) / (t - t0)), ms = ((t - t0) / n).toFixed(1); if (this._fpsEl) { this._fpsEl.textContent = `FPS ${f} · ${ms} ms`; this._fpsEl.style.color = f >= 50 ? '#8EF0B0' : f >= 30 ? '#FFD964' : '#FF8A94'; } n = 0; t0 = t; } };
+    this._fpsRaf = requestAnimationFrame(loop);
+  }
+  stopFps() { cancelAnimationFrame(this._fpsRaf); this._fpsRaf = 0; }
+  componentWillUnmount() { this.stopFps(); clearInterval(this._muteT); clearTimeout(this._fpsW); if (this._fpsUn) this._fpsUn(); window.removeEventListener('resize', this._rz); clearInterval(this._spI); clearInterval(this._ldI); clearTimeout(this._fxT); clearTimeout(this._toT); if (this._pr) this._pr.destroy(); if (this._st) this._st.destroy(); }
+  componentDidUpdate() { const s = this.state, ps = this._ps || {}; this._ps = s; if (s.showFps && !this._fpsRaf) this.startFps(); else if (!s.showFps && this._fpsRaf) this.stopFps(); if (ps.k !== s.k || (ps.save && ps.save.planet) !== s.save.planet || ps.screen !== s.screen) this.syncFx(); }
   syncFx() {
     const s = this.state, name = PV[s.save.planet] ? s.save.planet : 'Satürn', hidden = s.screen === 'menu' || s.screen === 'game';
     if (this._pr) { this._pr.set(name, 40, s.k); this._pr.paused = hidden; }
@@ -620,7 +634,7 @@ class Component extends DCLogic {
       starsEl: this._starsEl, planetEl: this._planetEl, pl: { x: pp.x + 'px', y: pp.y + 'px', s: pp.s, o: pp.o },
       L, lang: this.lang, gameLang: en ? 'English' : 'Türkçe', planet: pName,
       isSplash: scr === 'splash', spAnim: s.spOut ? 'splashOut .75s cubic-bezier(.7,0,.3,1) both' : 'fadeIn .5s both', tilesAnim: s.spOut ? 'tilesOut .75s cubic-bezier(.7,0,.3,1) both' : 'none', menuAnim: s.fromSplash ? 'menuIn 1.2s cubic-bezier(.16,1,.3,1) both' : 'fadeIn .35s both', isAuthSide: scr === 'auth' || isForm, isAuth: scr === 'auth', isForm, isLogin: scr === 'login', isRegister: scr === 'register', isGuest: scr === 'guest',
-      showVer: scr !== 'splash' && scr !== 'menu', appVersion: 'v0.4.0',
+      showVer: scr !== 'splash' && scr !== 'menu', appVersion: 'v0.5.0',
       isMenu: scr === 'menu', isLobby: scr === 'lobby', isLoading: scr === 'loading', gameOn: s.gameOn,
       skipSplash: () => { if (s.sp > 60) { clearInterval(this._spI); this.afterSplash(); } },
       sp: { w: sp + '%', label: Math.floor(sp) + '%', msg: spMsg, tip: L.tips[this._tip] },
@@ -646,7 +660,7 @@ class Component extends DCLogic {
       quitGame: () => this.setState({ quit: true }), isQuit: !!s.quit, unquit: () => this.setState({ quit: false, menuPanel: null }),
       logout: () => { this.persist({ acct: null }); this.go('auth', { menuPanel: null }); this.flash(L.bye); },
       startGame: (cfg) => this.startGame(cfg),
-      g: { bet: g.bet ?? 5000, hands: g.hands || 5, turn: g.turn || 30, room: g.room || '', betLabel: g.betLabel || '', seats: g.seats || null, startHand: g.startHand || 1, spectate: !!g.spectate },
+      g: { rules: (g.cfg && g.cfg.table && g.cfg.table.rules) || null, bet: g.bet ?? 5000, hands: g.hands || 5, turn: g.turn || 30, room: g.room || '', betLabel: g.betLabel || '', seats: g.seats || null, startHand: g.startHand || 1, spectate: !!g.spectate },
       ld: { w: lp + '%', label: Math.floor(lp) + '%', msg: L.ldMsg[lp >= 100 ? 3 : lp > 70 ? 2 : lp > 25 ? 1 : 0], kick: g.kick || '', tip: ld.tip || '', err: !!ld.err, op: ld.out ? 0 : 1, po: ld.err ? 0.5 : 0.9, ro: ld.err ? 0.4 : P.ro },
       gameReady: () => this.setState((st) => (st.ld ? { ld: { ...st.ld, ready: true } } : null)),
       failLobby: () => { const gg = s.game; if (gg && !gg.spectate) this.setWallet({ chips: this.wallet.chips + gg.bet }); if (gg && gg.cfg && gg.cfg.ranked) return this.endGame(null, null, 'ranked'); this.endGame(gg && !gg.spectate ? L.refund : null, 'ok'); },
@@ -660,7 +674,8 @@ class Component extends DCLogic {
         if (res.won && gg.bet) { this.setWallet({ chips: this.wallet.chips + gg.bet * 4 }); this.endGame(L.won(this.fmt(gg.bet * 4)), 'gold'); }
         else this.endGame(L.rankT(rank), 'info');
       },
-      busyCur: s.busy ? 'wait' : '',
+      busyCur: s.busy ? 'wait' : '', tFinish: this.props.testFinish || 'Kapalı', tEject: !!this.props.testEject, tElden: !!this.props.testElden,
+      showFps: !!s.showFps, fpsTop: Math.round(64 * k) + 'px', fpsEl: this._fpsNode || (this._fpsNode = h('div', { ref: (el) => { this._fpsEl = el; }, style: { font: '800 12px/1 Montserrat,sans-serif', letterSpacing: '.5px', color: '#8EF0B0', background: 'rgba(3,5,14,.72)', border: '1px solid rgba(255,255,255,.12)', borderRadius: '8px', padding: '6px 9px', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums', boxShadow: '0 4px 14px rgba(0,0,0,.4)' } }, 'FPS –')),
       reward: (r) => { const ww = this.wallet; this.setWallet({ chips: ww.chips + (r.chips || 0), gems: ww.gems + (r.gems || 0) }); const amt = '+' + this.fmt(r.chips || 0) + (en ? ' chips' : ' çip') + (r.gems ? ' · +' + r.gems + (en ? ' gems' : ' elmas') : ''); this.flash(r.kind === 'day' ? (en ? `Day ${r.day} reward collected · ${amt}` : `${r.day}. gün ödülü alındı · ${amt}`) : (en ? `Quest reward · ${r.name} · ${amt}` : `Görev ödülü · ${r.name} · ${amt}`), 'gold'); },
       hasToast: !!s.toast, toast: s.toast || { text: '', bg: '', fg: '', key: 0 },
     };

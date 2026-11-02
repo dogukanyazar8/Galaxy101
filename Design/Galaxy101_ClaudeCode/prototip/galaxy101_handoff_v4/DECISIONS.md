@@ -1,4 +1,4 @@
-# DECISIONS.md · kullanıcıya sorulmadan seçilen değerler · v0.4.0
+# DECISIONS.md · kullanıcıya sorulmadan seçilen değerler · v0.5.0
 
 Her satır geri alınabilir; değişirse RULES.md, rules.js ve ilgili test vektörü birlikte güncellenir.
 
@@ -51,6 +51,20 @@ Her satır geri alınabilir; değişirse RULES.md, rules.js ve ilgili test vekt�
 | D-60 | Ortak saat: `g101-clock.js` oyun sayfasında ilk betik. `Math.random` seed'li mulberry32 ile değiştirilir (`?seed`, yoksa seed bir kez tarayıcıdan çekilir ve `G101Clock.seed`'de görünür). `performance.now`, `Date.now`, `requestAnimationFrame` zamanı sanal saatten gelir. | Bütün prototip rastgeleliği tek akıştan; Unity: `GameClock` + `System.Random(seed)` | — |
 | D-61 | `?ft` (donma zamanı; host kendi `?t` belirtecini kullandığı için `t` değil) anlamı: durum yoluna varıldıktan sonra ft ms beklenir, sonra kare **kanonik zamanda** (100000 + ft ms) dondurulur: bütün CSS/Web animasyonları `currentTime = 100000 + ft`, JS saati aynı değere sabitlenir, bekleyen zamanlayıcılar kuyruğa alınır. Böylece açılış animasyonları bitmiş, sonsuz döngüler (gezegen, nabız) her açılışta aynı fazda olur; yükleme süresi sonucu etkilemez. | Gerçek "sayfa açılışından t ms" yükleme süresine bağlı olduğu için tekrarlanamıyordu | — |
 | D-62 | Öğe kimlikleri (`data-g101-id`) şablondan türetildi: tıklanabilir öğe → işleyici adı (`menu.openDaily`), metin yaprağı → metin anahtarı (`lobby.text.summary`), döngü içinde `[index]` (`table.p.name[0]`). Önek: app / menu / lobby / ranked / table. Aynı ad tekrarlanırsa `#2`. | Unity eleman adları bunlarla aynı olacak | — |
+| D-63 | Açtıktan sonra tek düğme **İşle**: ıstakadaki geçerli perleri yere açar (seri açan seri/grup, çift açan çift; R-24), sonra masadaki perlere uyan taşları işler (R-25). Okey otomatik işlenmez. Seri açan için "Yere çift aç" ayrı kalır. | Kullanıcı isteği: Aç düğmesi açtıktan sonra İşle olur. | R-24, R-25, R-35 |
+| D-64 | Açtıktan sonra gösterge ve durum satırı **elde kalan puanı** yazar: seri açan = kalan taş toplamı, çift açan = ×2 (okey 101, sahte okey okeyin sayısı). | Kullanıcı isteği. | R-52, R-56 |
+| D-65 | Çekilen taş ıstakada **perlerin arasına girmez**: komşuları boş ve geçerli bir pere değmeyen boş yuvaya gelir (alt sıra, sağdan sola). Sürükleyip bırakmada oyuncunun seçtiği yuva geçerli. | Kullanıcı isteği. | — |
+| D-66 | Ortak tahtada **çift alanı ayrı**: seri/grup sütun 0–13, çift sütun 15–19; arada ince ayraç ve "ÇİFTLER" etiketi. Yer kalmazsa diğer alana taşar. | Kullanıcı isteği. | — |
+| D-67 | İŞLEK etiketi motordan hesaplanır (`isIslek`, per türüyle). 2 taşlı per her zaman çifttir: okeyli çift seri sayılmaz, çifte taş işlenmez, çiftteki okey alınmaz. | Okeyli çiftler yanlış İŞLEK gösteriyordu. | R-15, R-26, R-41 |
+| D-68 | Masa kuralı **Açtıran taş cezası** (varsayılan açık) lobide "Kural özelleştirme"de; kapalıysa R-43 yazılmaz. Okey ve işlek cezası seçenekleri de artık motora gider (`penOkey`, `penIslek`, `penOpener`). | Kullanıcı isteği. | R-41…R-43, PEN-07…09 |
+| D-69 | Tur saati: aktif oyuncunun kalan saniyesi avatarında rozet olarak yazar; halka gerçek süreyle (sunucuda deadline) boşalır, uyarı eşiğinde kırmızı. | Kullanıcı isteği. | R-70 |
+| D-70 | **2D masa**: görüş açısı seçeneği "2D masa" (Ayarlar › Masa ve üst çubuktaki 2D/3D düğmesi). Eski masa v1 görünümünde DOM masa (`table2d.js`, table3d ile aynı API): mavi çuha, 2×15 ıstaka, ortada gösterge/deste/okey, "YANDAN AL" ve "TAŞ AT" alanları, ortak tahta + çift alanı; sürükle-bırak, çift tıkla at, toplu taşıma, işleme hedefleri, zar, hediye ve elden bitiş efektleri dahil. 3D sahne bu sırada askıya alınır. | Kullanıcı isteği. | — |
+| D-71 | Elden bitiş efekti oyuncu seçimi: Nükleer, Kara delik, Süpernova, Meteor ("Elden bit" yanında). Seçim `gDiscard.fx` → `finished.fx` ile herkese gider; botlar rastgele seçer. Diğer oyuncular an kartında tepki (emoji) gönderir. | Kullanıcı isteği. | R-53 |
+| D-72 | Maç sonu: en düşük toplamı tutmayan herkes (beraberlikte paylaşan kalır) hava kilidinden uzaya atılır (≈6,5 sn, dokununca geçilir), sonra sonuç ekranı. | Kullanıcı isteği; "kaybedenler" = kazanan dışındakiler. | R-59 |
+| D-73 | Görüntü ayarları (görüntü modu, çözünürlük, kare hızı, efekt kalitesi, imleç, arka plan hareketi, FPS göster) **Uygula** ile uygulanır; seçim anında ekran değişmez. Kapatınca uygulanmamış görüntü değişiklikleri atılır. | Kullanıcı isteği. | — |
+| D-74 | FPS göster (Ayarlar › Görüntü): sol üstte anlık FPS ve kare süresi; rAF sayacı, yarım saniyede güncellenir. | Kullanıcı isteği. | — |
+| D-75 | Masada isim altında yalnız "Açtı · değer" ya da "Açmadı" yazar; taş sayısı gösterilmez. | Kullanıcı isteği. | — |
+| D-76 | Oyun sayfası tweak'leri: "Elden bitme testi" (efekti oyunu bozmadan oynatır), "Maç sonu testi" (uzaya atılma animasyonu, maçı bitirmez), "Ses kapalı" (efekt + müzik). | Kullanıcı isteği. | — |
 
 
 ## 2026-10-25 · R-24 güncellendi

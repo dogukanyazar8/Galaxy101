@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0b0e17;font-family:Nunito,system-ui,sans-serif;color:#F4F1E8}
+a{color:#FFC94A}a:hover{color:#FFE08A}
+.dv-turn{background:#0b0e17;padding:40px 44px 40px;border-bottom:1px solid rgba(255,255,255,.07)}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#FFC94A;color:#1a1200;border-radius:4px;text-decoration:none}
+.dv-tname{font:700 15px/1.2 Nunito,sans-serif;color:#F4F1E8}
+.dv-desc{font:600 13px/1.55 Nunito,sans-serif;color:#9aa6c4;max-width:900px;margin:0 0 22px}
+.dv-opts{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:10px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(255,255,255,.1);color:#F4F1E8;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:600 12px/1.3 Nunito,sans-serif;color:#9aa6c4}
+.dv-card{border-radius:10px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.dv-opt:target .dv-oid{background:#FFC94A;color:#1a1200}
+.dv-next{margin:24px 0 0;font:600 12px/1.5 Nunito,sans-serif;color:#7d89a8}
+@property --p{syntax:'<number>';inherits:false;initial-value:100}
+@keyframes ring{from{--p:100}to{--p:0}}
+@keyframes dealIn{from{opacity:0;transform:translate(0,-260px) rotate(-30deg) scale(.6)}to{opacity:1;transform:none}}
+@keyframes popIn{0%{transform:translateY(-40px) scale(.5);opacity:0}60%{transform:translateY(4px) scale(1.12);opacity:1}100%{transform:none}}
+@keyframes settle{0%{transform:scale(1.15)}100%{transform:none}}
+@keyframes glowB{0%,100%{box-shadow:0 0 0 0 rgba(255,201,74,.7)}50%{box-shadow:0 0 0 10px rgba(255,201,74,0)}}
+@keyframes dash{to{background-position:40px 0}}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes bubble{0%{opacity:0;transform:translateY(10px) scale(.6)}15%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0;transform:translateY(-14px)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:none}}
+@keyframes pulseG{0%,100%{box-shadow:0 6px 0 #B86E0F,0 0 0 0 rgba(255,201,74,.6)}50%{box-shadow:0 6px 0 #B86E0F,0 0 0 14px rgba(255,201,74,0)}}
+@keyframes fall{0%{transform:translateY(-40px) rotate(0)}100%{transform:translateY(780px) rotate(720deg)}}
+@keyframes spinS{to{transform:rotate(360deg)}}
+@keyframes floatA{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes rise{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes fillX{from{width:0}}
+@keyframes popScaleC{0%{transform:translate(-50%,-50%) scale(0)}70%{transform:translate(-50%,-50%) scale(1.05)}100%{transform:translate(-50%,-50%) scale(1)}}
+@keyframes popScale{0%{transform:scale(0)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+</style>
+</helmet>
+
+<section class="dv-turn" id="t1">
+  <div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Galaxy 101 · Oyun masası ve el akışı</span></div>
+  <p class="dv-desc"><a class="dv-oid" href="#1d">1d</a> oynanabilir bir prototip. Taşları sürükleyip ıstakada yer değiştirebilirsin. Desteye tıkla ya da desteyi veya Burak'ın attığı taşı ıstakaya sürükle. Atacağın taşı sağdaki alana bırak. Açılış sayacı ıstakadaki geçerli perleri canlı olarak topluyor. İpucu: Sarı 7'yi Sarı 6'nın yanına koy, 12'leri yan yana diz, 101'i geçince "Aç" butonu aktif oluyor. Kalabalık buton satırı kaldırıldı; yalnızca o an gereken eylemler görünüyor.</p>
+  <div class="dv-opts">
+
+    <!-- 1d -->
+    <div class="dv-opt" id="1d">
+      <div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Etkileşimli masa · sürükle-bırak · bağlamsal butonlar</div>
+      <div class="dv-card" style="width:1280px;height:720px;position:relative;overflow:hidden;background:#081230;font-family:Nunito,sans-serif;color:#F4F1E8;user-select:none">
+        <div style="position:absolute;left:24px;right:24px;top:62px;bottom:16px;border-radius:56px;background:radial-gradient(ellipse 70% 65% at 50% 42%,#2457B5 0%,#173F8C 55%,#112F6B 100%);box-shadow:inset 0 0 0 10px #0B1838,inset 0 0 0 12px #2A4A8F,inset 0 0 80px rgba(0,0,0,.45),0 10px 40px rgba(0,0,0,.5)"></div>
+        <div style="position:absolute;left:50%;top:330px;width:520px;height:520px;margin:-260px 0 0 -260px;border-radius:50%;border:2px dashed rgba(255,255,255,.07)"></div>
+
+        <div style="position:absolute;left:0;right:0;top:0;height:58px;display:flex;align-items:center;gap:10px;padding:0 24px">
+          <div style="width:40px;height:40px;border-radius:12px;background:#14254F;box-shadow:0 4px 0 #050B1E;display:grid;place-items:center;font:700 20px Fredoka;color:#C9D6FF;cursor:pointer">≡</div>
+          <div style="font:700 18px Fredoka;color:#FFC94A;margin-left:6px">GALAXY 101</div>
+          <div style="font:800 12px Nunito;background:#14254F;padding:6px 12px;border-radius:999px;color:#C9D6FF">Tekli · Bahis 5.000</div>
+          <div style="flex:1"></div>
+          <div style="display:flex;gap:6px;align-items:center;font:800 12px Nunito;color:#C9D6FF;background:#14254F;padding:6px 12px;border-radius:999px">Desteden kalan <span style="font:700 15px Fredoka;color:#fff">{{ deckCount }}</span></div>
+          <div style="display:flex;align-items:center;gap:8px;background:#14254F;border-radius:999px;padding:4px 12px 4px 5px"><div style="width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)"></div><div style="font:700 15px Fredoka">125.400</div></div>
+        </div>
+
+        <!-- top player -->
+        <div style="position:absolute;left:50%;top:82px;transform:translateX(-50%);display:flex;align-items:center;gap:12px">
+          <div style="position:relative;width:64px;height:64px">
+            <sc-if value="{{ act2 }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:-6px;border-radius:50%;background:conic-gradient(#FFC94A calc(var(--p) * 1%),rgba(255,255,255,.12) 0);animation:ring 3.3s linear forwards"></div></sc-if>
+            <div style="position:absolute;inset:0;border-radius:50%;background:#3D7BFF;border:3px solid #0B1838;display:grid;place-items:center;font:700 22px Fredoka">AY</div>
+            <sc-if value="{{ bub2 }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:70px;top:-14px;background:#fff;color:#14254F;font:800 13px Nunito;padding:7px 12px;border-radius:14px 14px 14px 4px;white-space:nowrap;animation:bubble 2.4s forwards">Kolay gelsin!</div></sc-if>
+          </div>
+          <div><div style="font:700 16px Fredoka">Ayşe Y.</div><div style="font:800 11px Nunito;color:#8EF0B0">Açtı · 118</div><div style="font:800 11px Nunito;color:#9DB0DE">14 taş</div></div>
+        </div>
+        <div style="position:absolute;left:50%;top:160px;transform:translateX(-50%);display:flex;gap:14px">
+          <sc-for list="{{ ayseMelds }}" as="m" hint-placeholder-count="3">
+            <div style="display:flex;gap:2px;padding:4px;border-radius:8px;background:rgba(0,0,0,.18)">
+              <sc-for list="{{ m.tiles }}" as="t" hint-placeholder-count="3">
+                <div style="width:24px;height:34px;border-radius:5px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -3px 0 #D9C9A2,0 2px 0 #A8925F;font:700 17px/30px Fredoka;text-align:center;color:{{ t.col }}">{{ t.n }}</div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+        <div style="position:absolute;left:470px;top:96px;width:36px;height:50px;border-radius:7px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -4px 0 #D9C9A2,0 3px 0 #A8925F;font:700 24px/44px Fredoka;text-align:center;color:#1B1B1B;transform:rotate(-8deg);opacity:.95">3</div>
+
+        <!-- left player -->
+        <div style="position:absolute;left:60px;top:250px;display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="position:relative;width:64px;height:64px">
+            <sc-if value="{{ act3 }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:-6px;border-radius:50%;background:conic-gradient(#FFC94A calc(var(--p) * 1%),rgba(255,255,255,.12) 0);animation:ring 3.3s linear forwards"></div></sc-if>
+            <div style="position:absolute;inset:0;border-radius:50%;background:#8B5CF6;border:3px solid #0B1838;display:grid;place-items:center;font:700 22px Fredoka">BC</div>
+          </div>
+          <div style="text-align:center"><div style="font:700 16px Fredoka">Burak C.</div><div style="font:800 11px Nunito;color:#9DB0DE">Açmadı · 21 taş</div></div>
+        </div>
+
+        <!-- right player -->
+        <div style="position:absolute;right:60px;top:250px;display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="position:relative;width:64px;height:64px">
+            <sc-if value="{{ act1 }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:-6px;border-radius:50%;background:conic-gradient(#FFC94A calc(var(--p) * 1%),rgba(255,255,255,.12) 0);animation:ring 3.3s linear forwards"></div></sc-if>
+            <div style="position:absolute;inset:0;border-radius:50%;background:#16B6A8;border:3px solid #0B1838;display:grid;place-items:center;font:700 22px Fredoka">ZE</div>
+          </div>
+          <div style="text-align:center"><div style="font:700 16px Fredoka">Zeynep E.</div><div style="font:800 11px Nunito;color:#9DB0DE">Açmadı · 21 taş</div></div>
+          <div style="width:36px;height:50px;border-radius:7px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -4px 0 #D9C9A2,0 3px 0 #A8925F;font:700 24px/44px Fredoka;text-align:center;color:#D7263D;transform:rotate(6deg);margin-top:6px">1</div>
+        </div>
+
+        <!-- center deck + indicator -->
+        <div style="position:absolute;left:50%;top:268px;transform:translateX(-50%);display:flex;align-items:flex-end;gap:30px">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+            <div style="width:48px;height:68px;border-radius:9px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -5px 0 #D9C9A2,0 4px 0 #A8925F,0 10px 18px rgba(0,0,0,.35);display:flex;flex-direction:column;align-items:center;padding-top:6px;box-sizing:border-box;font:700 34px/1 Fredoka;color:#1F5FBF">6<div style="width:8px;height:8px;border-radius:50%;background:#1F5FBF;margin-top:3px"></div></div>
+            <div style="font:900 10px Nunito;letter-spacing:1px;color:#C9D6FF">GÖSTERGE</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+            <div draggable="true" onDragStart="{{ startDeck }}" onClick="{{ clickDeck }}" style="position:relative;width:62px;height:84px;cursor:pointer;border-radius:11px;animation:{{ deckGlow }}" style-hover="transform:translateY(-3px)">
+              <div style="position:absolute;left:6px;top:8px;width:56px;height:76px;border-radius:10px;background:#0A1532"></div>
+              <div style="position:absolute;left:3px;top:4px;width:56px;height:76px;border-radius:10px;background:#0E1D45"></div>
+              <div style="position:absolute;left:0;top:0;width:56px;height:76px;border-radius:10px;background:linear-gradient(#1E3A80,#14295E);border:2px solid #3A5BB0;box-sizing:border-box;display:grid;place-items:center;font:700 18px Fredoka;color:#FFC94A">101</div>
+            </div>
+            <div style="font:900 10px Nunito;letter-spacing:1px;color:#C9D6FF">DESTE</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+            <div style="position:relative;width:48px;height:68px;border-radius:9px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -5px 0 #D9C9A2,0 4px 0 #A8925F,0 0 22px rgba(255,201,74,.7);display:flex;flex-direction:column;align-items:center;padding-top:6px;box-sizing:border-box;font:700 34px/1 Fredoka;color:#1F5FBF">7<div style="width:8px;height:8px;border-radius:50%;background:#1F5FBF;margin-top:3px"></div><div style="position:absolute;inset:-4px;border-radius:12px;border:2px solid #FFC94A"></div></div>
+            <div style="font:900 10px Nunito;letter-spacing:1px;color:#FFC94A">OKEY</div>
+          </div>
+        </div>
+
+        <!-- context bar -->
+        <div style="position:absolute;left:50%;top:438px;transform:translateX(-50%);display:flex;align-items:center;gap:10px">
+          <div onClick="{{ sortRun }}" style="height:44px;padding:0 18px;border-radius:14px;background:#14254F;box-shadow:0 4px 0 #050B1E;display:flex;align-items:center;font:700 16px Fredoka;cursor:pointer" style-hover="background:#1C3370" style-active="transform:translateY(3px);box-shadow:none">Seri diz</div>
+          <div onClick="{{ sortPair }}" style="height:44px;padding:0 18px;border-radius:14px;background:#14254F;box-shadow:0 4px 0 #050B1E;display:flex;align-items:center;font:700 16px Fredoka;cursor:pointer" style-hover="background:#1C3370" style-active="transform:translateY(3px);box-shadow:none">Çift diz</div>
+          <div style="display:flex;align-items:center;gap:10px;height:44px;padding:0 14px 0 6px;border-radius:14px;background:rgba(5,11,30,.6)">
+            <div style="width:34px;height:34px;border-radius:50%;background:conic-gradient({{ openCol }} {{ openDeg }},rgba(255,255,255,.12) 0);display:grid;place-items:center"><div style="width:24px;height:24px;border-radius:50%;background:#0B1838"></div></div>
+            <div style="white-space:nowrap;min-width:78px"><div style="font:700 17px/1 Fredoka;color:{{ openCol }}">{{ openSum }}<span style="font:700 12px Fredoka;color:#9DB0DE"> / 101</span></div><div style="font:800 10px Nunito;color:#9DB0DE">Çift {{ pairCount }}/5</div></div>
+          </div>
+          <div onClick="{{ doOpen }}" style="height:44px;padding:0 22px;border-radius:14px;background:{{ openBtnBg }};box-shadow:0 4px 0 {{ openBtnSh }};display:flex;align-items:center;font:700 18px Fredoka;color:{{ openBtnFg }};cursor:pointer;animation:{{ openBtnAnim }}" style-active="transform:translateY(3px)">{{ openLabel }}</div>
+        </div>
+
+        <!-- toast -->
+        <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;left:50%;top:400px;transform:translateX(-50%);animation:toastIn .3s both;background:{{ toastBg }};color:{{ toastFg }};font:800 13px Nunito;padding:6px 14px;border-radius:999px;white-space:nowrap">{{ toast }}</div>
+        </sc-if>
+
+        <!-- me -->
+        <div style="position:absolute;left:46px;top:520px;display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="position:relative;width:70px;height:70px">
+            <sc-if value="{{ act0 }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;inset:-6px;border-radius:50%;background:conic-gradient(#3CCB6E calc(var(--p) * 1%),rgba(255,255,255,.12) 0);animation:ring {{ turnDur }} linear forwards"></div></sc-if>
+            <div style="position:absolute;inset:0;border-radius:50%;background:#FF8A5B;border:3px solid #FFC94A;display:grid;place-items:center;font:700 24px Fredoka">MK</div>
+            <sc-if value="{{ myBubble }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:30px;top:-56px;background:#fff;color:#14254F;font:700 26px Nunito;padding:4px 12px;border-radius:16px 16px 16px 4px;white-space:nowrap;animation:bubble 2.4s forwards">{{ myBubbleText }}</div></sc-if>
+          </div>
+          <div style="text-align:center"><div style="font:700 15px Fredoka">Sen</div><div style="font:800 11px Nunito;color:{{ myStatusCol }}">{{ myStatus }}</div></div>
+        </div>
+
+        <!-- side discard (Burak) -->
+        <div style="position:absolute;left:148px;top:572px;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:56px;height:76px;border-radius:11px;border:2px dashed rgba(255,255,255,.18);display:grid;place-items:center;animation:{{ sideGlow }}">
+            <sc-if value="{{ hasSide }}" hint-placeholder-val="{{ true }}">
+              <div draggable="true" onDragStart="{{ startSide }}" style="width:48px;height:68px;border-radius:9px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -5px 0 #D9C9A2,0 4px 0 #A8925F;display:flex;flex-direction:column;align-items:center;padding-top:6px;box-sizing:border-box;font:700 32px/1 Fredoka;color:{{ side.col }};cursor:grab;animation:popIn .4s both">{{ side.n }}<div style="width:8px;height:8px;border-radius:50%;background:{{ side.col }};margin-top:3px"></div></div>
+            </sc-if>
+          </div>
+          <div style="font:900 9px Nunito;letter-spacing:.5px;color:#C9D6FF">YANDAN AL</div>
+        </div>
+
+        <!-- rack -->
+        <div style="position:absolute;left:222px;top:494px;width:836px;padding:10px 12px 14px;box-sizing:border-box;border-radius:20px;background:linear-gradient(#1A2C5C,#0E1B3E);box-shadow:inset 0 2px 0 rgba(255,255,255,.12),0 8px 0 #050B1E,0 18px 30px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:8px;margin-top:0">
+          <div style="display:flex;gap:4px">
+            <sc-for list="{{ row0 }}" as="s" hint-placeholder-count="15">
+              <div onDragOver="{{ s.over }}" onDrop="{{ s.drop }}" style="width:50px;height:70px;border-radius:9px;background:rgba(0,0,0,.22);box-shadow:inset 0 2px 4px rgba(0,0,0,.35)">
+                <sc-if value="{{ s.has }}" hint-placeholder-val="{{ false }}">
+                  <div draggable="true" onDragStart="{{ s.start }}" style="width:50px;height:70px;border-radius:9px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -5px 0 #D9C9A2,0 3px 0 #A8925F,{{ s.ring }};display:flex;flex-direction:column;align-items:center;padding-top:7px;box-sizing:border-box;font:700 34px/1 Fredoka;color:{{ s.col }};cursor:grab;animation:{{ s.anim }};transition:transform .12s" style-hover="transform:translateY(-6px)">{{ s.n }}<div style="width:8px;height:8px;border-radius:50%;background:{{ s.col }};margin-top:3px"></div></div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:4px">
+            <sc-for list="{{ row1 }}" as="s" hint-placeholder-count="15">
+              <div onDragOver="{{ s.over }}" onDrop="{{ s.drop }}" style="width:50px;height:70px;border-radius:9px;background:rgba(0,0,0,.22);box-shadow:inset 0 2px 4px rgba(0,0,0,.35)">
+                <sc-if value="{{ s.has }}" hint-placeholder-val="{{ false }}">
+                  <div draggable="true" onDragStart="{{ s.start }}" style="width:50px;height:70px;border-radius:9px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -5px 0 #D9C9A2,0 3px 0 #A8925F,{{ s.ring }};display:flex;flex-direction:column;align-items:center;padding-top:7px;box-sizing:border-box;font:700 34px/1 Fredoka;color:{{ s.col }};cursor:grab;animation:{{ s.anim }};transition:transform .12s" style-hover="transform:translateY(-6px)">{{ s.n }}<div style="width:8px;height:8px;border-radius:50%;background:{{ s.col }};margin-top:3px"></div></div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- discard zone -->
+        <div style="position:absolute;left:1076px;top:560px;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div onDragOver="{{ overAny }}" onDrop="{{ dropDiscard }}" style="width:64px;height:86px;border-radius:13px;display:grid;place-items:center;background:{{ discardBg }};border:2px dashed {{ discardBorder }};animation:{{ discardAnim }}">
+            <sc-if value="{{ hasMyDiscard }}" hint-placeholder-val="{{ false }}">
+              <div style="width:50px;height:70px;border-radius:9px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -5px 0 #D9C9A2,0 3px 0 #A8925F;display:flex;flex-direction:column;align-items:center;padding-top:7px;box-sizing:border-box;font:700 34px/1 Fredoka;color:{{ myDiscard.col }};animation:popIn .35s both">{{ myDiscard.n }}<div style="width:8px;height:8px;border-radius:50%;background:{{ myDiscard.col }};margin-top:3px"></div></div>
+            </sc-if>
+          </div>
+          <div style="font:900 9px Nunito;letter-spacing:.5px;color:#C9D6FF">TAŞ AT</div>
+        </div>
+
+        <!-- emoji / chat -->
+        <div style="position:absolute;right:40px;top:640px;display:flex;gap:8px">
+          <div onClick="{{ toggleEmoji }}" style="width:46px;height:46px;border-radius:14px;background:#FFC94A;box-shadow:0 4px 0 #B86E0F;display:grid;place-items:center;font:20px Nunito;cursor:pointer" style-active="transform:translateY(3px)">😄</div>
+        </div>
+        <sc-if value="{{ emojiOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;right:40px;top:440px;width:220px;background:#fff;border-radius:18px;padding:12px;box-shadow:0 12px 30px rgba(0,0,0,.4);display:flex;flex-direction:column;gap:8px;animation:popScale .25s both;transform-origin:bottom right">
+            <div style="display:flex;justify-content:space-between">
+              <sc-for list="{{ emojis }}" as="e" hint-placeholder-count="6"><div onClick="{{ e.pick }}" style="font:24px Nunito;cursor:pointer;transition:transform .1s" style-hover="transform:scale(1.3)">{{ e.t }}</div></sc-for>
+            </div>
+            <sc-for list="{{ quick }}" as="q" hint-placeholder-count="4"><div onClick="{{ q.pick }}" style="font:800 13px Nunito;color:#14254F;background:#EEF2FF;border-radius:10px;padding:7px 10px;cursor:pointer" style-hover="background:#DCE4FF">{{ q.t }}</div></sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <!-- 1e -->
+    <div class="dv-opt" id="1e">
+      <div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>Alternatif: perspektifli masa · tek sıra büyük taş · yan sohbet çekmecesi</div>
+      <div class="dv-card" style="width:1280px;height:720px;position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,#1B3170,#0A1532 70%);font-family:Nunito,sans-serif;color:#F4F1E8">
+        <div style="position:absolute;left:90px;right:330px;top:40px;height:560px;perspective:900px">
+          <div style="position:absolute;inset:0;transform:rotateX(38deg);transform-origin:50% 100%;border-radius:60px;background:radial-gradient(ellipse at 50% 50%,#2E66CC,#1A4596 60%,#123372);box-shadow:inset 0 0 0 14px #0B1838,inset 0 0 0 16px #3A5BB0,0 30px 60px rgba(0,0,0,.6)">
+            <div style="position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);display:flex;gap:20px;align-items:center">
+              <div style="width:60px;height:84px;border-radius:10px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -6px 0 #D9C9A2,0 5px 0 #A8925F;font:700 44px/78px Fredoka;text-align:center;color:#D7263D">11</div>
+              <div style="width:76px;height:96px;border-radius:12px;background:linear-gradient(#1E3A80,#14295E);border:2px solid #3A5BB0;box-shadow:6px 6px 0 #0A1532;font:700 22px/92px Fredoka;text-align:center;color:#FFC94A">44</div>
+            </div>
+            <div style="position:absolute;left:50%;top:14%;transform:translateX(-50%);display:flex;gap:10px">
+              <sc-for list="{{ ayseMelds }}" as="m" hint-placeholder-count="3"><div style="display:flex;gap:2px"><sc-for list="{{ m.tiles }}" as="t" hint-placeholder-count="3"><div style="width:30px;height:42px;border-radius:6px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:0 3px 0 #A8925F;font:700 22px/40px Fredoka;text-align:center;color:{{ t.col }}">{{ t.n }}</div></sc-for></div></sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute;left:400px;top:24px;display:flex;align-items:center;gap:10px;background:rgba(10,21,50,.85);border-radius:999px;padding:6px 16px 6px 6px;box-shadow:0 0 0 3px #FFC94A,0 0 24px rgba(255,201,74,.5)">
+          <div style="width:44px;height:44px;border-radius:50%;background:#3D7BFF;display:grid;place-items:center;font:700 17px Fredoka">AY</div>
+          <div><div style="font:700 15px Fredoka">Ayşe Y. · oynuyor</div><div style="height:5px;width:110px;border-radius:3px;background:rgba(255,255,255,.15);margin-top:4px;overflow:hidden"><div style="height:100%;width:62%;background:#FFC94A;animation:fillX 6s linear infinite reverse"></div></div></div>
+        </div>
+        <div style="position:absolute;left:40px;top:300px;display:flex;align-items:center;gap:10px;background:rgba(10,21,50,.85);border-radius:999px;padding:6px 16px 6px 6px">
+          <div style="width:44px;height:44px;border-radius:50%;background:#8B5CF6;display:grid;place-items:center;font:700 17px Fredoka">BC</div>
+          <div><div style="font:700 15px Fredoka">Burak C.</div><div style="font:800 11px Nunito;color:#9DB0DE">21 taş</div></div>
+        </div>
+        <div style="position:absolute;right:360px;top:300px;display:flex;align-items:center;gap:10px;background:rgba(10,21,50,.85);border-radius:999px;padding:6px 16px 6px 6px">
+          <div style="width:44px;height:44px;border-radius:50%;background:#16B6A8;display:grid;place-items:center;font:700 17px Fredoka">ZE</div>
+          <div><div style="font:700 15px Fredoka">Zeynep E.</div><div style="font:800 11px Nunito;color:#9DB0DE">21 taş</div></div>
+          <div style="position:absolute;top:-38px;right:0;background:#fff;color:#14254F;font:800 13px Nunito;padding:6px 12px;border-radius:14px 14px 4px 14px;animation:floatA 2s infinite">Güzel hamle!</div>
+        </div>
+
+        <div style="position:absolute;left:30px;right:330px;bottom:18px;display:flex;flex-direction:column;align-items:center;gap:10px">
+          <div style="display:flex;gap:10px;align-items:center">
+            <div style="font:800 12px Nunito;color:#9DB0DE">Açılış</div>
+            <div style="width:240px;height:12px;border-radius:6px;background:rgba(0,0,0,.35);overflow:hidden"><div style="width:87%;height:100%;border-radius:6px;background:linear-gradient(90deg,#3CCB6E,#8EF0B0);animation:fillX 1.2s both"></div></div>
+            <div style="font:700 16px Fredoka;color:#8EF0B0">88 / 101</div>
+          </div>
+          <div style="display:flex;gap:2px;padding:10px;border-radius:20px;background:linear-gradient(#1A2C5C,#0E1B3E);box-shadow:0 8px 0 #050B1E">
+            <sc-for list="{{ handE }}" as="t" hint-placeholder-count="21">
+              <div style="width:34px;height:50px;border-radius:7px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -4px 0 #D9C9A2,0 3px 0 #A8925F;display:flex;flex-direction:column;align-items:center;padding-top:4px;box-sizing:border-box;font:700 24px/1 Fredoka;color:{{ t.col }};margin-left:{{ t.gap }};transform:translateY({{ t.lift }});transition:transform .12s" style-hover="transform:translateY(-10px)">{{ t.n }}<div style="width:6px;height:6px;border-radius:50%;background:{{ t.col }};margin-top:2px"></div></div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="position:absolute;right:0;top:0;bottom:0;width:310px;background:#0A1532;border-left:2px solid #16295A;display:flex;flex-direction:column">
+          <div style="display:flex;gap:6px;padding:14px">
+            <div style="flex:1;text-align:center;font:700 14px Fredoka;padding:8px;border-radius:12px;background:#22397A">Sohbet</div>
+            <div style="flex:1;text-align:center;font:700 14px Fredoka;padding:8px;border-radius:12px;color:#9DB0DE">Skor</div>
+            <div style="flex:1;text-align:center;font:700 14px Fredoka;padding:8px;border-radius:12px;color:#9DB0DE">Masa</div>
+          </div>
+          <div style="flex:1;padding:0 14px;display:flex;flex-direction:column;gap:10px;justify-content:flex-end">
+            <div style="animation:slideIn .4s both"><div style="font:800 11px Nunito;color:#9DB0DE">Burak C.</div><div style="font:700 13px Nunito;background:#14254F;padding:8px 10px;border-radius:4px 12px 12px 12px;display:inline-block">Herkese iyi oyunlar</div></div>
+            <div style="animation:slideIn .4s .2s both"><div style="font:800 11px Nunito;color:#9DB0DE">Ayşe Y.</div><div style="font:700 13px Nunito;background:#14254F;padding:8px 10px;border-radius:4px 12px 12px 12px;display:inline-block">Size de 👋</div></div>
+            <div style="align-self:flex-end;animation:slideIn .4s .4s both"><div style="font:700 13px Nunito;background:#3D7BFF;padding:8px 10px;border-radius:12px 4px 12px 12px">Hadi bakalım 🔥</div></div>
+            <div style="font:800 11px Nunito;color:#FFC94A;text-align:center;padding:4px;background:rgba(255,201,74,.08);border-radius:8px">Ayşe elini açtı · 118</div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px">
+            <div style="font:800 12px Nunito;background:#14254F;padding:6px 10px;border-radius:999px">Kolay gelsin</div>
+            <div style="font:800 12px Nunito;background:#14254F;padding:6px 10px;border-radius:999px">Şanslısın</div>
+            <div style="font:800 12px Nunito;background:#14254F;padding:6px 10px;border-radius:999px">Çabuk ol</div>
+          </div>
+          <div style="display:flex;gap:8px;padding:0 14px 14px">
+            <div style="flex:1;height:42px;border-radius:12px;background:#14254F;font:700 13px/42px Nunito;color:#5C6E9E;padding:0 12px">Mesaj yaz…</div>
+            <div style="width:42px;height:42px;border-radius:12px;background:#FFC94A;box-shadow:0 3px 0 #B86E0F;display:grid;place-items:center;font:700 18px Fredoka;color:#3A1F00">➤</div>
+          </div>
+        </div>
+        <div style="position:absolute;right:340px;bottom:150px;display:flex;flex-direction:column;gap:8px">
+          <div style="width:62px;height:62px;border-radius:50%;background:linear-gradient(#FFD964,#F5A623);animation:pulseG 2s infinite;display:grid;place-items:center;font:700 16px Fredoka;color:#3A1F00">AÇ</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="dv-next">Örnek: "<a class="dv-oid" href="#1d">1d</a>'ye <a class="dv-oid" href="#1e">1e</a>'deki sohbet çekmecesini ekle" · "masa rengini koyulaştır"</p>
+</section>
+
+<section class="dv-turn" id="t1b">
+  <div class="dv-thd"><a class="dv-tid" href="#t1b">1</a><span class="dv-tname">Açma, el sonu ve oyun sonu</span></div>
+  <div class="dv-opts">
+
+    <!-- 1f -->
+    <div class="dv-opt" id="1f">
+      <div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a>Açma akışı · otomatik bulunan perler · canlı toplam</div>
+      <div class="dv-card" style="width:1280px;height:720px;position:relative;overflow:hidden;background:#081230;font-family:Nunito,sans-serif;color:#F4F1E8">
+        <div style="position:absolute;inset:62px 24px 16px;border-radius:56px;background:radial-gradient(ellipse at 50% 42%,#2457B5,#112F6B);filter:blur(2px)"></div>
+        <div style="position:absolute;inset:0;background:rgba(4,9,26,.72)"></div>
+        <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:760px;background:#0F1E47;border:2px solid #22397A;border-radius:30px;box-shadow:0 10px 0 #050B1E,0 30px 60px rgba(0,0,0,.6);padding:26px 30px;animation:popScaleC .35s both">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="font:700 30px Fredoka">Elini aç</div>
+            <div style="display:flex;background:#0A1532;border-radius:14px;padding:4px;margin-left:auto">
+              <div style="font:700 15px Fredoka;padding:8px 18px;border-radius:11px;background:#FFC94A;color:#3A1F00">Seri / Sayı</div>
+              <div style="font:700 15px Fredoka;padding:8px 18px;border-radius:11px;color:#9DB0DE">Çift (2/5)</div>
+            </div>
+          </div>
+          <div style="font:700 13px Nunito;color:#9DB0DE;margin:6px 0 18px">Istakandan bulunan perler. Dahil etmek istemediğine dokunup çıkarabilirsin.</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ openRows }}" as="r" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:14px;background:#14254F;border-radius:16px;padding:10px 14px;animation:slideIn .4s {{ r.delay }} both">
+                <div style="width:26px;height:26px;border-radius:50%;background:#3CCB6E;display:grid;place-items:center;font:900 14px Nunito;color:#0B3A1E;animation:popScale .3s {{ r.delay2 }} both">✓</div>
+                <div style="display:flex;gap:3px">
+                  <sc-for list="{{ r.tiles }}" as="t" hint-placeholder-count="3"><div style="width:36px;height:50px;border-radius:7px;background:linear-gradient(#FFFDF6,#EEE2C6);box-shadow:inset 0 -4px 0 #D9C9A2,0 3px 0 #A8925F;font:700 26px/46px Fredoka;text-align:center;color:{{ t.col }}">{{ t.n }}</div></sc-for>
+                </div>
+                <div style="font:800 12px Nunito;color:#9DB0DE">{{ r.kind }}</div>
+                <div style="margin-left:auto;font:700 24px Fredoka">{{ r.sum }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:18px;margin-top:20px">
+            <div style="flex:1">
+              <div style="display:flex;justify-content:space-between;font:800 12px Nunito;color:#9DB0DE"><div>Toplam</div><div>Gereken 101</div></div>
+              <div style="position:relative;height:16px;border-radius:8px;background:#0A1532;margin-top:6px;overflow:hidden"><div style="height:100%;width:100%;border-radius:8px;background:linear-gradient(90deg,#3CCB6E,#FFC94A);animation:fillX 1.4s .6s both"></div><div style="position:absolute;top:0;bottom:0;left:77%;width:3px;background:#fff"></div></div>
+            </div>
+            <div style="font:700 46px/1 Fredoka;color:#FFC94A;text-shadow:0 4px 0 #8A4E06">131</div>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:20px;justify-content:flex-end">
+            <div style="font:700 18px Fredoka;padding:14px 26px;border-radius:16px;background:#22397A;box-shadow:0 5px 0 #0A1430;cursor:pointer">Vazgeç</div>
+            <div style="font:700 20px Fredoka;padding:14px 40px;border-radius:16px;background:linear-gradient(#FFD964,#F5A623);color:#3A1F00;animation:pulseG 2s infinite;cursor:pointer">AÇ · 131</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1g -->
+    <div class="dv-opt" id="1g">
+      <div class="dv-olabel"><a class="dv-oid" href="#1g">1g</a>El sonu skor tablosu · el geçmişi · otomatik sonraki el</div>
+      <div class="dv-card" style="width:1280px;height:720px;position:relative;overflow:hidden;background:#081230;font-family:Nunito,sans-serif;color:#F4F1E8">
+        <div style="position:absolute;inset:62px 24px 16px;border-radius:56px;background:radial-gradient(ellipse at 50% 42%,#2457B5,#112F6B);filter:blur(2px)"></div>
+        <div style="position:absolute;inset:0;background:rgba(4,9,26,.75)"></div>
+        <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:900px;background:#0F1E47;border:2px solid #22397A;border-radius:30px;box-shadow:0 10px 0 #050B1E,0 30px 60px rgba(0,0,0,.6);overflow:hidden;animation:popScaleC .35s both">
+          <div style="background:linear-gradient(90deg,#FF6B6B,#FF8A5B);padding:18px 28px;display:flex;align-items:center;gap:16px">
+            <div><div style="font:900 12px Nunito;letter-spacing:1px;opacity:.85">3. EL BİTTİ</div><div style="font:700 28px Fredoka">Ayşe okey atarak bitirdi · ceza ×2</div></div>
+            <div style="margin-left:auto;position:relative;width:62px;height:62px">
+              <div style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(#fff calc(var(--p) * 1%),rgba(0,0,0,.2) 0);animation:ring 10s linear infinite"></div>
+              <div style="position:absolute;inset:6px;border-radius:50%;background:#E8574F;display:grid;place-items:center;font:700 13px/1.1 Fredoka;text-align:center">Sonraki<br>el</div>
+            </div>
+          </div>
+          <div style="padding:18px 28px 24px">
+            <div style="display:grid;grid-template-columns:1.6fr repeat(3,.7fr) .9fr 1fr;gap:0;font:900 11px Nunito;color:#9DB0DE;letter-spacing:.5px;padding:0 14px 8px">
+              <div>OYUNCU</div><div style="text-align:center">1. EL</div><div style="text-align:center">2. EL</div><div style="text-align:center">3. EL</div><div style="text-align:center">TOPLAM</div><div style="text-align:right">SIRA</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ scores }}" as="p" hint-placeholder-count="4">
+                <div style="display:grid;grid-template-columns:1.6fr repeat(3,.7fr) .9fr 1fr;align-items:center;background:{{ p.bg }};border-radius:16px;padding:10px 14px;animation:slideIn .4s {{ p.delay }} both;box-shadow:{{ p.ring }}">
+                  <div style="display:flex;align-items:center;gap:10px"><div style="width:40px;height:40px;border-radius:50%;background:{{ p.av }};display:grid;place-items:center;font:700 15px Fredoka">{{ p.ini }}</div><div style="font:700 17px Fredoka">{{ p.name }}</div></div>
+                  <div style="text-align:center;font:700 17px Fredoka;color:#C9D6FF">{{ p.h1 }}</div>
+                  <div style="text-align:center;font:700 17px Fredoka;color:#C9D6FF">{{ p.h2 }}</div>
+                  <div style="text-align:center;font:700 18px Fredoka;color:{{ p.h3c }}">{{ p.h3 }}</div>
+                  <div style="text-align:center;font:700 22px Fredoka">{{ p.tot }}</div>
+                  <div style="text-align:right;font:700 20px Fredoka;color:{{ p.rc }}">{{ p.rank }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:18px">
+              <div style="font:700 13px Nunito;color:#9DB0DE">En düşük puan kazanır · Açamayan 202 ceza alır · 5 el sonunda oyun biter</div>
+              <div style="margin-left:auto;font:700 17px Fredoka;padding:12px 22px;border-radius:14px;background:#22397A;box-shadow:0 4px 0 #0A1430">Masadan kalk</div>
+              <div style="font:700 17px Fredoka;padding:12px 26px;border-radius:14px;background:#3CCB6E;box-shadow:0 4px 0 #22914A;color:#062B14">Hazırım</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1h -->
+    <div class="dv-opt" id="1h">
+      <div class="dv-olabel"><a class="dv-oid" href="#1h">1h</a>Oyun sonu · kazanan · kürsü · çip ve XP ödülü (tıkla: tekrar oynat)</div>
+      <div onClick="{{ replayWin }}" class="dv-card" style="width:1280px;height:720px;position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,#2A4FA8,#0F1E47 60%,#081230);font-family:Nunito,sans-serif;color:#F4F1E8;cursor:pointer">
+        <div style="position:absolute;left:50%;top:230px;width:900px;height:900px;margin:-450px 0 0 -450px;border-radius:50%;background:repeating-conic-gradient(rgba(255,201,74,.10) 0 10deg,transparent 10deg 24deg);animation:spinS 40s linear infinite"></div>
+        <sc-for list="{{ confetti }}" as="c" hint-placeholder-count="0">
+          <div style="position:absolute;top:-30px;left:{{ c.x }};width:{{ c.w }};height:16px;background:{{ c.col }};border-radius:3px;animation:fall {{ c.dur }} {{ c.del }} linear infinite"></div>
+        </sc-for>
+        <div style="position:absolute;left:0;right:0;top:40px;text-align:center">
+          <div style="font:900 14px Nunito;letter-spacing:3px;color:#FFE08A">OYUN BİTTİ</div>
+          <div style="font:700 60px/1.1 Fredoka;color:#FFC94A;text-shadow:0 6px 0 #8A4E06,0 16px 30px rgba(0,0,0,.5);animation:popScale .6s both">Kazandın!</div>
+        </div>
+        <div style="position:absolute;left:50%;top:200px;transform:translateX(-50%);display:flex;align-items:flex-end;gap:16px">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+            <div style="width:70px;height:70px;border-radius:50%;background:#3D7BFF;border:4px solid #C9D6FF;display:grid;place-items:center;font:700 24px Fredoka">AY</div>
+            <div style="font:700 15px Fredoka">Ayşe Y. · 148</div>
+            <div style="width:150px;height:130px;border-radius:18px 18px 0 0;background:#22397A;display:grid;place-items:center;font:700 54px Fredoka;color:#C9D6FF;transform-origin:bottom;animation:rise .6s .3s both">2</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+            <div style="position:relative;width:104px;height:104px;animation:floatA 2.4s infinite">
+              <div style="position:absolute;inset:-8px;border-radius:50%;background:conic-gradient(#FFC94A,#FFE08A,#F5A623,#FFC94A);animation:spinS 3s linear infinite"></div>
+              <div style="position:absolute;inset:0;border-radius:50%;background:#FF8A5B;border:4px solid #0F1E47;display:grid;place-items:center;font:700 36px Fredoka">MK</div>
+            </div>
+            <div style="font:700 18px Fredoka;color:#FFC94A">Sen · 62</div>
+            <div style="width:170px;height:180px;border-radius:18px 18px 0 0;background:linear-gradient(#FFD964,#F5A623);display:grid;place-items:center;font:700 70px Fredoka;color:#3A1F00;transform-origin:bottom;animation:rise .6s both">1</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+            <div style="width:70px;height:70px;border-radius:50%;background:#16B6A8;border:4px solid #E3A777;display:grid;place-items:center;font:700 24px Fredoka">ZE</div>
+            <div style="font:700 15px Fredoka">Zeynep E. · 233</div>
+            <div style="width:150px;height:96px;border-radius:18px 18px 0 0;background:#22397A;display:grid;place-items:center;font:700 48px Fredoka;color:#E3A777;transform-origin:bottom;animation:rise .6s .5s both">3</div>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:150px;background:#0A1532;border-top:2px solid #22397A;display:flex;align-items:center;gap:30px;padding:0 50px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:50px;height:50px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F);border:3px dashed #FFF3C8;box-sizing:border-box;animation:spinS 4s linear infinite"></div>
+            <div><div style="font:900 11px Nunito;color:#9DB0DE;letter-spacing:1px">KAZANILAN ÇİP</div><div style="font:700 36px/1 Fredoka;color:#FFC94A">+{{ winChips }}</div></div>
+          </div>
+          <div style="flex:1;max-width:360px">
+            <div style="display:flex;justify-content:space-between;font:800 12px Nunito;color:#9DB0DE"><div>Seviye 24 → 25</div><div style="color:#8EF0B0">+340 XP</div></div>
+            <div style="height:14px;border-radius:7px;background:#14254F;margin-top:6px;overflow:hidden"><div style="height:100%;width:94%;border-radius:7px;background:linear-gradient(90deg,#3CCB6E,#8EF0B0);animation:fillX 1.6s .4s both"></div></div>
+            <div style="font:800 12px Nunito;color:#9DB0DE;margin-top:6px">Lig puanı <span style="color:#FFC94A">+28 LP</span> · Altın II</div>
+          </div>
+          <div style="margin-left:auto;display:flex;gap:12px">
+            <div style="font:700 18px Fredoka;padding:16px 26px;border-radius:18px;background:#22397A;box-shadow:0 5px 0 #050B1E">Lobiye dön</div>
+            <div style="font:700 20px Fredoka;padding:16px 34px;border-radius:18px;background:linear-gradient(#FFD964,#F5A623);color:#3A1F00;animation:pulseG 2s infinite">Tekrar oyna</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;turnSeconds&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:30,&quot;min&quot;:5,&quot;max&quot;:90,&quot;unit&quot;:&quot;sn&quot;,&quot;tsType&quot;:&quot;number&quot;},&quot;autoOpponents&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const COL = { R: '#D7263D', B: '#1F5FBF', K: '#1B1B1B', Y: '#E8A317' };
+const T = (s, anim) => s ? { c: s[0], n: +s.slice(1), anim: anim || '' } : null;
+const NAMES = ['Sen', 'Zeynep', 'Ayşe', 'Burak'];
+
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    const r0 = ['R10','R11','R12','R13',null,'B9','Y9','K9',null,'Y4','Y5','Y6',null,'K12',null];
+    const r1 = ['B2','K7',null,'R3','Y7','B11',null,'Y12',null,'B5','R7',null,'B12','K11',null];
+    let k = 0;
+    const deal = s => T(s, `dealIn .5s ${(k++) * 35}ms both`);
+    this.state = {
+      rows: [r0.map(deal), r1.map(deal)],
+      phase: 'draw', active: 0, deck: ['K5','R1','B8','Y10','K3','R6','Y2','B4','R5','K10'],
+      deckCount: 48, side: T('R9'), sideQueue: ['K4','Y11','B10','R2'], myDiscard: null,
+      opened: 0, emojiOpen: false, bubble: null, bub2: false, winChips: 0,
+    };
+    this.drag = null;
+  }
+  componentDidMount() { this.countUp(); }
+  componentWillUnmount() { clearInterval(this.cu); (this.tm || []).forEach(clearTimeout); }
+  countUp() {
+    clearInterval(this.cu); let v = 0;
+    this.cu = setInterval(() => { v = Math.min(24000, v + 600); this.setState({ winChips: v }); if (v >= 24000) clearInterval(this.cu); }, 30);
+  }
+  evalHand(rows) {
+    let sum = 0, pairs = 0; const valid = [[], []];
+    rows.forEach((row, ri) => {
+      let i = 0;
+      while (i < row.length) {
+        if (!row[i]) { i++; continue; }
+        let j = i; while (j < row.length && row[j]) j++;
+        const seg = row.slice(i, j);
+        const run = seg.length >= 3 && seg.every((t, x) => t.c === seg[0].c && (x === 0 || t.n === seg[x - 1].n + 1));
+        const grp = seg.length >= 3 && seg.length <= 4 && seg.every(t => t.n === seg[0].n) && new Set(seg.map(t => t.c)).size === seg.length;
+        if (run || grp) { sum += seg.reduce((a, t) => a + t.n, 0); for (let x = i; x < j; x++) valid[ri][x] = true; }
+        if (seg.length === 2 && seg[0].c === seg[1].c && seg[0].n === seg[1].n) pairs++;
+        i = j;
+      }
+    });
+    return { sum, pairs, valid };
+  }
+  place(rows, r, i, tile) {
+    const row = rows[r];
+    if (!row[i]) { row[i] = tile; return; }
+    let e = row.indexOf(null, i);
+    if (e === -1) { e = row.lastIndexOf(null, i); if (e === -1) return false; for (let x = e; x < i; x++) row[x] = row[x + 1]; row[i] = tile; return; }
+    for (let x = e; x > i; x--) row[x] = row[x - 1]; row[i] = tile;
+  }
+  takeTile(src, r, i) {
+    const s = this.state; if (s.phase !== 'draw') return;
+    const rows = s.rows.map(x => x.slice());
+    let tile, patch = {};
+    if (src === 'deck') { tile = T(s.deck[0], 'popIn .45s both'); patch = { deck: s.deck.slice(1), deckCount: s.deckCount - 1 }; }
+    else { if (!s.side) return; tile = { ...s.side, anim: 'popIn .45s both' }; patch = { side: null }; }
+    if (r == null) { r = rows[0].indexOf(null) !== -1 ? 0 : 1; i = rows[r].indexOf(null); }
+    if (this.place(rows, r, i, tile) === false) return;
+    this.setState({ ...patch, rows, phase: 'discard' });
+  }
+  runOpponents() {
+    const tm = this.tm = [];
+    const at = (ms, fn) => tm.push(setTimeout(fn, ms));
+    at(200, () => this.setState({ active: 1 }));
+    at(1300, () => this.setState({ active: 2, bub2: Math.random() > .4 }));
+    at(2500, () => this.setState({ active: 3, bub2: false }));
+    at(3600, () => this.setState(s => ({ active: 0, phase: 'draw', side: T(s.sideQueue[0]), sideQueue: s.sideQueue.slice(1).concat(s.sideQueue[0]), deckCount: s.deckCount - 3 })));
+  }
+  sortBy(mode) {
+    const tiles = this.state.rows.flat().filter(Boolean).map(t => ({ ...t, anim: 'settle .3s both' }));
+    const ord = { R: 0, B: 1, Y: 2, K: 3 };
+    tiles.sort(mode === 'run' ? (a, b) => ord[a.c] - ord[b.c] || a.n - b.n : (a, b) => a.n - b.n || ord[a.c] - ord[b.c]);
+    const out = [];
+    tiles.forEach((t, x) => {
+      const p = tiles[x - 1];
+      if (p && (mode === 'run' ? (p.c !== t.c || t.n !== p.n + 1) : p.n !== t.n)) out.push(null);
+      out.push(t);
+    });
+    while (out.length > 30) { const ix = out.lastIndexOf(null); if (ix < 0) break; out.splice(ix, 1); }
+    while (out.length < 30) out.push(null);
+    this.setState({ rows: [out.slice(0, 15), out.slice(15, 30)] });
+  }
+  renderVals() {
+    const s = this.state;
+    const ev = this.evalHand(s.rows);
+    const prevent = e => e.preventDefault();
+    const mkRow = r => s.rows[r].map((t, i) => ({
+      has: !!t, n: t ? t.n : '', col: t ? COL[t.c] : 'transparent', anim: t && t.anim ? t.anim : 'none',
+      ring: ev.valid[r][i] ? '0 0 0 2px #3CCB6E' : '0 0 0 0 transparent',
+      over: prevent,
+      start: e => { this.drag = { src: 'rack', r, i }; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', 'tile'); },
+      drop: e => {
+        e.preventDefault(); const d = this.drag; this.drag = null; if (!d) return;
+        if (d.src === 'rack') {
+          if (d.r === r && d.i === i) return;
+          const rows = s.rows.map(x => x.slice());
+          const a = rows[d.r][d.i]; const b = rows[r][i];
+          rows[r][i] = a ? { ...a, anim: 'settle .25s both' } : null; rows[d.r][d.i] = b ? { ...b, anim: 'settle .25s both' } : null;
+          this.setState({ rows });
+        } else this.takeTile(d.src, r, i);
+      },
+    }));
+    const canOpen = ev.sum >= 101 && !s.opened;
+    const toastMap = {
+      draw: ["Sıra sende · desteden ya da Burak'ın taşından çek", '#FFC94A', '#3A1F00'],
+      discard: ['Atacağın taşı sağdaki alana sürükle', '#3CCB6E', '#062B14'],
+      wait: [`${NAMES[s.active] || 'Rakip'} oynuyor…`, 'rgba(5,11,30,.75)', '#C9D6FF'],
+    };
+    const tst = toastMap[s.phase];
+    const emo = ['😄', '👏', '😮', '😅', '🔥', '🙏'];
+    const say = t => { this.setState({ bubble: { t, k: Date.now() }, emojiOpen: false }); clearTimeout(this.bt); this.bt = setTimeout(() => this.setState({ bubble: null }), 2400); };
+    const meld = a => ({ tiles: a.map(x => ({ n: +x.slice(1), col: COL[x[0]] })) });
+    const tl = a => a.map(x => ({ n: +x.slice(1), col: COL[x[0]] }));
+    const confCols = ['#FFC94A', '#FF6B6B', '#3D7BFF', '#3CCB6E', '#8B5CF6', '#7FE3FF'];
+    const handE = ['R10','R11','R12','R13','B9','Y9','K9','Y4','Y5','Y6','Y7','K12','B12','Y12','B2','K7','R3','B11','B5','R7','K11'];
+    const gapsAt = { 4: 1, 7: 1, 11: 1, 14: 1 };
+    return {
+      deckCount: s.deckCount,
+      act0: s.active === 0 && s.phase !== 'wait', act1: s.active === 1, act2: s.active === 2, act3: s.active === 3,
+      turnDur: (this.props.turnSeconds ?? 30) + 's',
+      bub2: s.bub2,
+      row0: mkRow(0), row1: mkRow(1),
+      startDeck: e => { if (s.phase !== 'draw') { e.preventDefault(); return; } this.drag = { src: 'deck' }; e.dataTransfer.setData('text/plain', 'deck'); },
+      startSide: e => { if (s.phase !== 'draw') { e.preventDefault(); return; } this.drag = { src: 'side' }; e.dataTransfer.setData('text/plain', 'side'); },
+      clickDeck: () => this.takeTile('deck'),
+      deckGlow: s.phase === 'draw' ? 'glowB 1.2s infinite' : 'none',
+      sideGlow: s.phase === 'draw' && s.side ? 'glowB 1.2s infinite' : 'none',
+      hasSide: !!s.side, side: s.side ? { n: s.side.n, col: COL[s.side.c] } : { n: '', col: '#000' },
+      overAny: prevent,
+      dropDiscard: e => {
+        e.preventDefault(); const d = this.drag; this.drag = null;
+        if (!d || d.src !== 'rack' || s.phase !== 'discard') return;
+        const rows = s.rows.map(x => x.slice()); const t = rows[d.r][d.i]; rows[d.r][d.i] = null;
+        this.setState({ rows, myDiscard: t, phase: 'wait', active: 1 });
+        if (this.props.autoOpponents ?? true) this.runOpponents();
+      },
+      discardBg: s.phase === 'discard' ? 'rgba(60,203,110,.15)' : 'rgba(0,0,0,.15)',
+      discardBorder: s.phase === 'discard' ? '#3CCB6E' : 'rgba(255,255,255,.18)',
+      discardAnim: s.phase === 'discard' ? 'glowB 1.2s infinite' : 'none',
+      hasMyDiscard: !!s.myDiscard, myDiscard: s.myDiscard ? { n: s.myDiscard.n, col: COL[s.myDiscard.c] } : { n: '', col: '#000' },
+      openSum: s.opened || ev.sum, pairCount: ev.pairs,
+      openDeg: Math.min(100, Math.round((s.opened || ev.sum) / 101 * 100)) + '%',
+      openCol: (s.opened || ev.sum) >= 101 ? '#3CCB6E' : '#FFC94A',
+      openLabel: s.opened ? 'Açıldı ✓' : 'Aç',
+      openBtnBg: canOpen ? 'linear-gradient(#FFD964,#F5A623)' : s.opened ? '#3CCB6E' : '#2A3866',
+      openBtnSh: canOpen ? '#B86E0F' : s.opened ? '#22914A' : '#121B3A',
+      openBtnFg: canOpen ? '#3A1F00' : s.opened ? '#062B14' : '#6E7FAE',
+      openBtnAnim: canOpen ? 'pulseG 1.6s infinite' : 'none',
+      doOpen: () => { if (canOpen) this.setState({ opened: ev.sum }); },
+      sortRun: () => this.sortBy('run'), sortPair: () => this.sortBy('pair'),
+      hasToast: !!tst, toast: tst ? tst[0] : '', toastBg: tst ? tst[1] : '', toastFg: tst ? tst[2] : '',
+      myStatus: s.opened ? `Açtı · ${s.opened}` : `Açmadı · ${s.rows.flat().filter(Boolean).length} taş`,
+      myStatusCol: s.opened ? '#8EF0B0' : '#9DB0DE',
+      myBubble: !!s.bubble, myBubbleText: s.bubble ? s.bubble.t : '',
+      emojiOpen: s.emojiOpen, toggleEmoji: () => this.setState({ emojiOpen: !s.emojiOpen }),
+      emojis: emo.map(t => ({ t, pick: () => say(t) })),
+      quick: ['Kolay gelsin', 'Hadi bakalım', 'Güzel hamle!', 'Şanslısın'].map(t => ({ t, pick: () => say(t) })),
+      ayseMelds: [meld(['K5','K6','K7','K8']), meld(['R12','B12','Y12']), meld(['B9','B10','B11','B12','B13'])],
+      handE: handE.map((x, ix) => ({ n: +x.slice(1), col: COL[x[0]], gap: gapsAt[ix] ? '10px' : '0px', lift: ix === 10 ? '-12px' : '0px' })),
+      openRows: [
+        { tiles: tl(['R10','R11','R12','R13']), kind: 'Sıralı per', sum: 46 },
+        { tiles: tl(['B12','K12','Y12']), kind: 'Sayı grubu', sum: 36 },
+        { tiles: tl(['B9','Y9','K9']), kind: 'Sayı grubu', sum: 27 },
+        { tiles: tl(['Y4','Y5','Y6','Y7']), kind: 'Sıralı per', sum: 22 },
+      ].map((r, ix) => ({ ...r, delay: ix * 120 + 'ms', delay2: ix * 120 + 300 + 'ms' })),
+      scores: [
+        { name: 'Ayşe Y.', ini: 'AY', av: '#3D7BFF', h1: 12, h2: 34, h3: -202, h3c: '#3CCB6E', tot: -156, rank: '1.', rc: '#FFC94A', bg: 'rgba(255,201,74,.12)', ring: '0 0 0 2px #FFC94A' },
+        { name: 'Sen', ini: 'MK', av: '#FF8A5B', h1: 48, h2: -101, h3: 62, h3c: '#FF8A8A', tot: 9, rank: '2.', rc: '#C9D6FF', bg: '#14254F', ring: 'none' },
+        { name: 'Zeynep E.', ini: 'ZE', av: '#16B6A8', h1: 22, h2: 56, h3: 88, h3c: '#FF8A8A', tot: 166, rank: '3.', rc: '#C9D6FF', bg: '#14254F', ring: 'none' },
+        { name: 'Burak C.', ini: 'BC', av: '#8B5CF6', h1: 202, h2: 77, h3: 404, h3c: '#FF5E6C', tot: 683, rank: '4.', rc: '#C9D6FF', bg: '#14254F', ring: 'none' },
+      ].map((p, ix) => ({ ...p, delay: ix * 120 + 'ms' })),
+      confetti: Array.from({ length: 46 }, (_, ix) => ({ x: ((ix * 37) % 100) + '%', w: (6 + (ix % 4) * 3) + 'px', col: confCols[ix % 6], dur: (3 + (ix % 5) * .7) + 's', del: -((ix * 0.31) % 4) + 's' })),
+      winChips: s.winChips.toLocaleString('tr-TR'),
+      replayWin: () => this.countUp(),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-# OPEN_QUESTIONS.md · kullanıcı kararı gerekenler · v0.4.0
+# OPEN_QUESTIONS.md · kullanıcı kararı gerekenler · v0.5.0
 
 Cevaplanana dek motor DECISIONS.md'deki geçici değerle çalışır (varsa). Cevap gelince RULES.md, rules.js ve test vektörü birlikte güncellenir.
 

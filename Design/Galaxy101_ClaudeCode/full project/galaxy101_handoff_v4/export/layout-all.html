@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Galaxy 101 · Yerleşim dökümü (toplu)</title>
+<style>
+body{margin:0;background:#0A0C28;color:#F4F1E8;font:14px/1.4 system-ui,sans-serif}
+header{display:flex;gap:12px;align-items:center;padding:14px 18px;background:#161A45;position:sticky;top:0;z-index:2;flex-wrap:wrap}
+button{font:700 14px system-ui;padding:8px 14px;border-radius:10px;border:0;background:#FFD964;color:#2A1600;cursor:pointer}
+button:disabled{opacity:.4;cursor:default}
+input{font:14px system-ui;padding:7px 10px;border-radius:8px;border:1px solid #2E3680;background:#0B0E2E;color:#F4F1E8;width:260px}
+main{display:grid;grid-template-columns:minmax(0,1fr) 660px;gap:16px;padding:16px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:5px 8px;border-bottom:1px solid #232A66;text-align:left;white-space:nowrap}
+.ok{color:#3CCB6E}.bad{color:#FF5E6C}.man{color:#9DA6D8}
+iframe{width:640px;height:360px;border:0;border-radius:10px;background:#000}
+a{color:#FFD964}
+</style>
+</head>
+<body>
+<header>
+  <b>Galaxy 101 · layout-all</b>
+  <input id="only" placeholder="Yalnız bunlar: S10,G13 (boş = hepsi)">
+  <label><input id="twice" type="checkbox" style="width:auto"> İki kez aç, karşılaştır</label>
+  <button id="go">Başlat</button>
+  <button id="dl" disabled>Tümünü indir (JSON)</button>
+  <span id="st"></span>
+</header>
+<main>
+  <table><thead><tr><th>Durum</th><th>Başlık</th><th>Sonuç</th><th>Öğe</th><th>Tekrar</th></tr></thead><tbody id="rows"></tbody></table>
+  <div><iframe id="fr"></iframe><p>Her durum oyun sayfasında <code>?state=ID&amp;seed=42&amp;dump=1&amp;nodl=1</code> ile açılır; sayfa dondurulunca döküm buraya gelir.</p></div>
+</main>
+<script>
+const GAME = '../../Galaxy 101 - Gerçek Ana Oyun.dc.html';
+const $ = (id) => document.getElementById(id), all = {};
+const fp = (d) => d ? d.items.map((i) => i.id + ':' + i.box.x + ',' + i.box.y + ',' + i.box.w + ',' + i.box.h).join('|') : '';
+function openState(id, timeout) {
+  return new Promise((res) => {
+    const fr = $('fr'); let done = false;
+    const on = (e) => { if (e.data && e.data.g101dump && e.data.g101dump.state === id && !done) { done = true; removeEventListener('message', on); res({ ok: true, dump: e.data.g101dump }); } };
+    addEventListener('message', on);
+    setTimeout(() => { if (done) return; done = true; removeEventListener('message', on); let err = 'zaman aşımı'; try { err = fr.contentWindow.G101State && fr.contentWindow.G101State.error || err; } catch (e) {} res({ ok: false, err }); }, timeout);
+    fr.src = GAME + '?state=' + encodeURIComponent(id) + '&seed=42&dump=1&nodl=1&tweaks=0&_=' + Date.now();
+  });
+}
+$('go').onclick = async () => {
+  $('go').disabled = true;
+  const doc = await fetch('../states/states.json').then((r) => r.json());
+  const only = $('only').value.split(',').map((s) => s.trim()).filter(Boolean);
+  const list = doc.states.filter((s) => !only.length || only.includes(s.id));
+  $('rows').innerHTML = '';
+  let n = 0, ok = 0;
+  for (const s of list) {
+    const tr = document.createElement('tr'); tr.innerHTML = `<td>${s.id}</td><td>${s.title}</td><td>…</td><td></td><td></td>`; $('rows').appendChild(tr);
+    $('st').textContent = `${++n}/${list.length}`;
+    if (s.auto === false) { tr.children[2].innerHTML = '<span class="man">elle · ' + (s.note || '') + '</span>'; continue; }
+    const r = await openState(s.id, (s.scenario ? 120000 : 60000) + (s.hold || 0));
+    if (!r.ok) { tr.children[2].innerHTML = '<span class="bad">' + r.err + '</span>'; continue; }
+    if (r.dump.error) { tr.children[2].innerHTML = '<span class="bad">yol hatası · ' + r.dump.error + '</span>'; continue; }
+    all[s.id] = r.dump; ok++;
+    tr.children[2].innerHTML = '<span class="ok">tamam</span>'; tr.children[3].textContent = r.dump.count;
+    if ($('twice').checked) { const r2 = await openState(s.id, 60000 + (s.hold || 0)); tr.children[4].innerHTML = r2.ok && fp(r2.dump) === fp(r.dump) ? '<span class="ok">aynı</span>' : '<span class="bad">farklı</span>'; }
+  }
+  $('st').textContent = `${ok}/${list.length} döküm alındı`;
+  $('dl').disabled = !ok; $('go').disabled = false;
+};
+$('dl').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ version: '0.5.0', seed: 42, states: all }, null, 1)], { type: 'application/json' })); a.download = 'layout-all.json'; a.click(); };
+if (new URLSearchParams(location.search).get('auto') === '1') { const o = new URLSearchParams(location.search).get('only'); if (o) $('only').value = o; $('go').click(); }
+</script>
+</body>
+</html>

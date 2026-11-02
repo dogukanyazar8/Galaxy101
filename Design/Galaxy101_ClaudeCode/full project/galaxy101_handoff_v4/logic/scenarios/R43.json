@@ -1,0 +1,88 @@
+{
+ "id": "R43",
+ "title": "Açtıran taş cezası: attığın K9 ile sağındaki bot (koltuk 1) açtı (+90)",
+ "rules": [
+  "R-43",
+  "R-30"
+ ],
+ "states": [
+  "T34"
+ ],
+ "note": "Sen (koltuk 0) başlarsın, 22 taşla K9 atarsın. Açmamış koltuk 1 botu (koltuk 1) soldan K9'u alır, K9-K10-K11 + iki 13/12 grubuyla 105 açar. Turu bitince sana 9 × 10 = +90 yazılır.",
+ "opts": {
+  "mode": "solo",
+  "hands": 5
+ },
+ "seed": 7,
+ "deal": {
+  "dealer": 3,
+  "dice": [
+   4,
+   3
+  ],
+  "indicator": "Y4a",
+  "racks": [
+   [
+    "K9b",
+    "R1a",
+    "R3a",
+    "R5b",
+    "R7b",
+    "R9a",
+    "R11b",
+    "B2a",
+    "B5a",
+    "B7b",
+    "B11a",
+    "B13b",
+    "K4a",
+    "K7b",
+    "Y1a",
+    "Y3b",
+    "Y6a",
+    "Y10b",
+    "Y12b",
+    "R10b",
+    "B4b",
+    "K2b"
+   ],
+   [
+    "R13a",
+    "B13a",
+    "Y13a",
+    "R12a",
+    "B12a",
+    "Y12a",
+    "K10a",
+    "K11a",
+    "R2a",
+    "R4a",
+    "R6a",
+    "R8a",
+    "B1a",
+    "B3a",
+    "B6a",
+    "B9a",
+    "K1a",
+    "K3a",
+    "K5a",
+    "Y8a",
+    "Y11a"
+   ]
+  ]
+ },
+ "me": [
+  {
+   "do": "discard",
+   "tile": "K9b"
+  }
+ ],
+ "expect": {
+  "penalty": {
+   "seat": 0,
+   "code": "P_OPENED_WITH",
+   "amount": 90,
+   "by": 1
+  }
+ }
+}

@@ -1,0 +1,1439 @@
+{
+ "suite": "scoring",
+ "version": "0.5.0",
+ "note": "Aksi belirtilmedikçe gösterge B6a → okey B7 (B7a, B7b), sahte okey Ja/Jb = B7.",
+ "tests": [
+  {
+   "id": "FIN-01",
+   "title": "Normal bitiş: bitiren −101; açanlar kalan taş toplamı (okey 101, sahte okey 7); açmayan 202",
+   "rules": [
+    "R-50",
+    "R-51",
+    "R-52"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a"
+      ],
+      [
+       "K13a",
+       "Y2a"
+      ],
+      [
+       "R1a",
+       "R1b",
+       "Y4a"
+      ],
+      [
+       "B7b",
+       "Ja"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      120,
+      110,
+      0,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "openMode": [
+      "run",
+      "run",
+      null,
+      "run"
+     ]
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R3a"
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "finished",
+        "seat": 0
+       },
+       {
+        "e": "handEnd"
+       }
+      ],
+      "state": {
+       "hand.result.mul": 1,
+       "hand.result.score": [
+        -101,
+        15,
+        202,
+        108
+       ],
+       "totals": [
+        -101,
+        15,
+        202,
+        108
+       ],
+       "status": "handOver"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "FIN-02",
+   "title": "Okeyle bitiş ×2 (okey atma cezası yok)",
+   "rules": [
+    "R-54",
+    "R-42"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "B7a"
+      ],
+      [
+       "K13a",
+       "Y2a"
+      ],
+      [
+       "R1a",
+       "R1b",
+       "Y4a"
+      ],
+      [
+       "B7b",
+       "Ja"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      120,
+      110,
+      0,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "openMode": [
+      "run",
+      "run",
+      null,
+      "run"
+     ]
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "B7a"
+     },
+     "expect": {
+      "ok": true,
+      "noEvents": [
+       {
+        "e": "penalty"
+       }
+      ],
+      "state": {
+       "hand.result.okeyFinish": true,
+       "hand.result.mul": 2,
+       "hand.result.score": [
+        -202,
+        30,
+        404,
+        216
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "FIN-03",
+   "title": "Elden bitiş ×2; ceza çarpılmaz (+101 sabit eklenir)",
+   "rules": [
+    "R-53",
+    "R-58"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "K10a",
+       "K11a",
+       "K12a",
+       "K13a",
+       "Y11a",
+       "R11a",
+       "B11a",
+       "Y5a",
+       "Y6a",
+       "Y7a",
+       "Y8a",
+       "R2a"
+      ],
+      [
+       "K13b",
+       "Y2a"
+      ],
+      [
+       "R1a"
+      ],
+      [
+       "R9a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      110,
+      0,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "pen": [
+      0,
+      101,
+      0,
+      0
+     ]
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "K10a",
+         "K11a",
+         "K12a",
+         "K13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "Y11a",
+         "R11a",
+         "B11a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "Y5a",
+         "Y6a",
+         "Y7a",
+         "Y8a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R2a"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.result.elden": true,
+       "hand.result.mul": 2,
+       "hand.result.score": [
+        -202,
+        131,
+        404,
+        18
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "FIN-04",
+   "title": "Çiftle bitiş ×2; çift açmış rakip ayrıca ×2",
+   "rules": [
+    "R-54",
+    "R-56"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "Y4a"
+      ],
+      [
+       "K13a",
+       "Y2a"
+      ],
+      [
+       "R10a"
+      ],
+      [
+       "R1a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      6,
+      110,
+      5,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "openMode": [
+      "pair",
+      "run",
+      "pair",
+      null
+     ]
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "Y4a"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.result.pairFinish": true,
+       "hand.result.mul": 2,
+       "hand.result.pairX": [
+        1,
+        1,
+        2,
+        1
+       ],
+       "hand.result.score": [
+        -202,
+        30,
+        40,
+        404
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "FIN-05",
+   "title": "Elden + çift + okeyle bitiş = ×8 (bitiren −808)",
+   "rules": [
+    "R-53",
+    "R-54",
+    "R-56"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R5a",
+       "R5b",
+       "Y9a",
+       "Y9b",
+       "K1a",
+       "K1b",
+       "B2a",
+       "B2b",
+       "R13a",
+       "R13b",
+       "Y3a",
+       "Y3b",
+       "K11a",
+       "K11b",
+       "B7a"
+      ],
+      [
+       "R4a"
+      ],
+      [
+       "R1a"
+      ],
+      [
+       "Y12a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      110,
+      5
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "openMode": [
+      null,
+      null,
+      "run",
+      "pair"
+     ]
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "pair",
+        "tiles": [
+         "R5a",
+         "R5b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "Y9a",
+         "Y9b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "K1a",
+         "K1b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "B2a",
+         "B2b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "R13a",
+         "R13b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "Y3a",
+         "Y3b"
+        ]
+       },
+       {
+        "kind": "pair",
+        "tiles": [
+         "K11a",
+         "K11b"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "B7a"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.result.mul": 8,
+       "hand.result.score": [
+        -808,
+        1616,
+        8,
+        192
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "FIN-06",
+   "title": "Aynı turda işle + bitir (elden sayılmaz)",
+   "rules": [
+    "R-36",
+    "R-25"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R7a",
+       "Y1b"
+      ],
+      [
+       "Y2a"
+      ],
+      [
+       "Y3a"
+      ],
+      [
+       "Y4a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      120,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "add",
+      "seat": 0,
+      "tile": "R7a",
+      "meld": "m1",
+      "side": "post"
+     },
+     "expect": {
+      "ok": true
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "Y1b"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.result.finisher": 0,
+       "hand.result.elden": false,
+       "hand.result.mul": 1,
+       "hand.result.score": [
+        -101,
+        2,
+        3,
+        4
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "FIN-07",
+   "title": "Taş bitti, kimse açmamış: herkes 202 + ceza",
+   "rules": [
+    "R-55"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "Y1a",
+       "Y2a"
+      ],
+      [
+       "R1a"
+      ],
+      [
+       "R2a"
+      ],
+      [
+       "R3a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "deck": [],
+     "pen": [
+      0,
+      101,
+      0,
+      0
+     ]
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "Y1a"
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "handEnd"
+       }
+      ],
+      "state": {
+       "hand.result.reason": "deckOut",
+       "hand.result.score": [
+        202,
+        303,
+        202,
+        202
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "FIN-08",
+   "title": "Eşli: bitirenin ortağı 0 (+ kendi cezası); takım puanı toplam",
+   "rules": [
+    "R-57"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a"
+      ],
+      [
+       "R1a"
+      ],
+      [
+       "K13a"
+      ],
+      [
+       "Y2a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      120,
+      0,
+      110,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "opts": {
+      "mode": "pairs"
+     },
+     "pen": [
+      0,
+      0,
+      101,
+      0
+     ]
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R3a"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.result.score": [
+        -101,
+        202,
+        101,
+        2
+       ],
+       "hand.result.teamScore": [
+        0,
+        204
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "FIN-09",
+   "title": "Açmamış oyuncu atışla bitiremez (son taşta değil)",
+   "rules": [
+    "R-36"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a",
+       "R4a"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R3a"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.racks.0": [
+        "R4a"
+       ],
+       "status": "playing"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "FIN-09",
+   "title": "Taş bitti, açanlar ıstakasını yazar: seri N, çift 2×, okey 101, sahte okey okeyin sayısı; çarpan ve −101 yok",
+   "rules": [
+    "R-55",
+    "R-52"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "Y1a",
+       "Y2a"
+      ],
+      [
+       "B7a",
+       "R5a"
+      ],
+      [
+       "R2a"
+      ],
+      [
+       "Ja"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      110,
+      5,
+      0,
+      104
+     ],
+     "openMode": [
+      "run",
+      "pair",
+      null,
+      "run"
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 9
+     },
+     "deck": [],
+     "pen": [
+      0,
+      101,
+      0,
+      0
+     ]
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "Y1a"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.result.reason": "deckOut",
+       "hand.result.score": [
+        2,
+        313,
+        202,
+        7
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "FIN-10",
+   "title": "Elden bitiş (101 ile aç + son taşı at): bitiren −202, açmamış 404, açmış kalan × 2, çift açmış ayrıca × 2",
+   "rules": [
+    "R-53",
+    "R-56"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R10a",
+       "R11a",
+       "R12a",
+       "R13a",
+       "B10a",
+       "B11a",
+       "B12a",
+       "B13a",
+       "K3a",
+       "Y3a",
+       "R3a",
+       "K13a"
+      ],
+      [
+       "R9a"
+      ],
+      [
+       "R2a",
+       "R5b"
+      ],
+      [
+       "Y6a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      110,
+      5
+     ],
+     "openMode": [
+      null,
+      null,
+      "run",
+      "pair"
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "R10a",
+         "R11a",
+         "R12a",
+         "R13a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "B10a",
+         "B11a",
+         "B12a",
+         "B13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "K3a",
+         "Y3a",
+         "R3a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "opened",
+        "value": 101
+       }
+      ]
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "K13a"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.result.elden": true,
+       "hand.result.mul": 2,
+       "hand.result.score": [
+        -202,
+        404,
+        14,
+        24
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "FIN-11",
+   "title": "Elden bitişte eşik aranır: 42 puanlık perler eksik açılış (+101)",
+   "rules": [
+    "R-53",
+    "R-23"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R1a",
+       "R2a",
+       "R3a",
+       "B1a",
+       "B2a",
+       "B3a",
+       "Y1a",
+       "Y2a",
+       "Y3a",
+       "K1a",
+       "K2a",
+       "K3a",
+       "R5a",
+       "R6a",
+       "R7a",
+       "K13a"
+      ],
+      [
+       "R9a"
+      ],
+      [
+       "R10a"
+      ],
+      [
+       "R11a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "R1a",
+         "R2a",
+         "R3a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "B1a",
+         "B2a",
+         "B3a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "Y1a",
+         "Y2a",
+         "Y3a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "K1a",
+         "K2a",
+         "K3a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "R5a",
+         "R6a",
+         "R7a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "openShort",
+        "need": 101
+       },
+       {
+        "e": "penalty",
+        "seat": 0,
+        "code": "P_OPEN_SHORT"
+       }
+      ],
+      "state": {
+       "hand.opened.0": 0
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "FIN-12",
+   "title": "Elden + okey kafa (×4): bitiren −404, açmamış 808, açmış kalan × 4, çift açmış ayrıca × 2",
+   "rules": [
+    "R-53",
+    "R-54"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R10a",
+       "R11a",
+       "R12a",
+       "R13a",
+       "B10a",
+       "B11a",
+       "B12a",
+       "B13a",
+       "K3a",
+       "Y3a",
+       "R3a",
+       "B7a"
+      ],
+      [
+       "R9a"
+      ],
+      [
+       "R2a",
+       "R5b"
+      ],
+      [
+       "Y6a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      110,
+      5
+     ],
+     "openMode": [
+      null,
+      null,
+      "run",
+      "pair"
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "R10a",
+         "R11a",
+         "R12a",
+         "R13a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "B10a",
+         "B11a",
+         "B12a",
+         "B13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "K3a",
+         "Y3a",
+         "R3a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "B7a"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.result.elden": true,
+       "hand.result.okeyFinish": true,
+       "hand.result.mul": 4,
+       "hand.result.score": [
+        -404,
+        808,
+        28,
+        48
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "FIN-13",
+   "title": "Katlamalıda elden bitiş yükselmiş eşiği ister: önceki 105 → 101 eksik açılış (gereken 106)",
+   "rules": [
+    "R-53",
+    "R-64"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R10a",
+       "R11a",
+       "R12a",
+       "R13a",
+       "B10a",
+       "B11a",
+       "B12a",
+       "B13a",
+       "K3a",
+       "Y3a",
+       "R3a",
+       "K13a"
+      ],
+      [
+       "R9a"
+      ],
+      [
+       "R2a",
+       "R5b"
+      ],
+      [
+       "Y6a"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      105,
+      0,
+      0
+     ],
+     "openMode": [
+      null,
+      "run",
+      null,
+      null
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "opts": {
+      "katlama": true
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "R10a",
+         "R11a",
+         "R12a",
+         "R13a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "B10a",
+         "B11a",
+         "B12a",
+         "B13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "K3a",
+         "Y3a",
+         "R3a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "openShort",
+        "need": 106
+       }
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}

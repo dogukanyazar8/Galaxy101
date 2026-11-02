@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Galaxy 101 · 3D Varlık Dışa Aktarma</title>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.184.0/build/three.module.js",
+    "three/addons/controls/OrbitControls.js": "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js",
+    "three/addons/exporters/OBJExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js",
+    "three/addons/exporters/GLTFExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js"
+  },
+  "integrity": {
+    "https://unpkg.com/three@0.184.0/build/three.module.js": "sha384-8FCZ1eVO6it4+pbec2aDtnTrwjWXZLJRC+MAGCIPDgsYnUrl/E0A2YlF8ioMKI/J",
+    "https://unpkg.com/three@0.184.0/build/three.core.js": "sha384-dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT",
+    "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js": "sha384-4rziNxOBZKQ69i+w+f89KJ55TCYquwchVbByQwmaOeIOXdOU2PLDn3kOfXHwIJC9",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js": "sha384-nbwtoZENJD3Vq+ACK0CuGQdPMuDWHkamC2KJD70EV5nfg6jQjfppKOea07YJN+N3",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js": "sha384-VofkvpG6HERhFCYbsUOHeNXBCqID2nfqkQqnVzE1jc/oPcz+qJ13ADdXH08hE+cQ"
+  }
+}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;height:100%;background:#0B0E2E;color:#F4F1E8;font-family:'Baloo 2',sans-serif}
+  a{color:#FFD964}a:hover{color:#FFE08A}
+  three-d-stage:not(:defined){visibility:hidden}
+  .wrap{display:grid;grid-template-columns:300px minmax(0,1fr);height:100vh}
+  .side{background:#10133A;border-right:1px solid rgba(255,255,255,.07);padding:20px 16px;overflow-y:auto;overflow-x:hidden;min-width:0;box-sizing:border-box;display:flex;flex-direction:column;gap:14px}
+  h1{font:800 20px/1.15 Montserrat,sans-serif;margin:0}
+  .sub{font:700 12px/1.45 'Baloo 2',sans-serif;color:#A9AEDD;margin:0}
+  .cap{font:800 10px 'Baloo 2',sans-serif;letter-spacing:1.6px;color:#A9AEDD;margin-top:6px}
+  .list{display:flex;flex-direction:column;gap:4px}
+  .it{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border-radius:12px;background:#0B0E2E;cursor:pointer;font:700 14px Montserrat,sans-serif;border:0;color:inherit;text-align:left}
+  .it:hover{background:#2D3680}
+  .it.on{background:#2D3680;box-shadow:inset 3px 0 0 #FFD964}
+  .it small{font:700 11px 'Baloo 2',sans-serif;color:#A9AEDD}
+  select{width:100%;height:38px;border-radius:12px;border:0;background:#0B0E2E;color:#F4F1E8;font:700 14px Montserrat,sans-serif;padding:0 10px}
+  .btn{border:0;border-radius:14px;padding:12px 14px;font:800 14px Montserrat,sans-serif;cursor:pointer;background:linear-gradient(#FFD964,#F5A623);color:#3A1F00;box-shadow:0 4px 0 #B86E0F}
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 #B86E0F}
+  .btn[disabled]{opacity:.5;pointer-events:none}
+  .status{font:700 12px 'Baloo 2',sans-serif;color:#8EF0B0;min-height:16px}
+  three-d-stage{width:100%;height:100vh;display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside class="side">
+    <div>
+      <h1>3D varlık dışa aktarma <small style="font:700 11px 'Baloo 2',sans-serif;color:#A9AEDD">v0.5.0</small></h1>
+      <p class="sub">Oyundaki tüm 3D modeller (menü + masa), parça ve malzeme isimleriyle. GLB → Blender veya doğrudan Unity. Ölçü: metre, Y yukarı. Taş: 50 × 70 × 10 mm.</p>
+    </div>
+    <div>
+      <div class="cap">GEZEGEN TEMASI</div>
+      <select id="theme"></select>
+    </div>
+    <div class="list" id="list"></div>
+    <label style="display:flex;align-items:center;gap:8px;font:700 13px 'Baloo 2',sans-serif;color:#D3D6FF;cursor:pointer"><input type="checkbox" id="allThemes" style="width:16px;height:16px;accent-color:#FFD964"> 5 gezegen temasının hepsi</label>
+    <button class="btn" id="all">Tümünü GLB olarak indir (.zip)</button>
+    <div class="status" id="status"></div>
+  </aside>
+  <three-d-stage name="galaxy101_masa_istasyon" background="#0B0E2E"></three-d-stage>
+</div>
+<script src="three-d-stage.js"></script>
+<script type="module">
+  import * as THREE from 'three';
+  import { createTable } from './table3d.js';
+  import './ships3d.js';
+  const THEMES = {
+    'Satürn': { a1: '#FFD964', a2: '#F5A623', f1: '#2C3790', f2: '#11153F', tile: '#FFFDF6', rim: '#4a5080', leather: '#232A66', glow: '#F5A623', sky: '#FFE7A3', lg1: '#FFF4C8' },
+    'Mars': { a1: '#FFA26B', a2: '#E8552E', f1: '#74291E', f2: '#2A0D09', tile: '#FFF7F0', rim: '#6e3e36', leather: '#4A1E19', glow: '#E8552E', sky: '#FFC9B0', lg1: '#FFE2CC' },
+    'Neptün': { a1: '#8CEBFF', a2: '#2FB4E8', f1: '#164FA4', f2: '#061A40', tile: '#F8FCFF', rim: '#3e5e8e', leather: '#12407F', glow: '#2FB4E8', sky: '#CDEBFF', lg1: '#E6FBFF' },
+    'Jüpiter': { a1: '#FFC88A', a2: '#E58B45', f1: '#66462A', f2: '#22150A', tile: '#FFFAF2', rim: '#6c5538', leather: '#47321F', glow: '#E58B45', sky: '#FFE2C2', lg1: '#FFF0DC' },
+    'Venüs': { a1: '#FFD3A8', a2: '#F28AA0', f1: '#713464', f2: '#260E23', tile: '#FFFBF6', rim: '#704668', leather: '#4C2444', glow: '#F28AA0', sky: '#FFE0C8', lg1: '#FFF3E6' },
+  };
+  const TR = { saturn: 'Satürn', mars: 'Mars', neptun: 'Neptün', jupiter: 'Jüpiter', venus: 'Venüs' };
+  const ASSETS = [
+    { cap: 'MASA', items: [['table', 'station', 'İstasyon', 'masa_istasyon'], ['table', 'wood', 'Ceviz salon', 'masa_ceviz'], ['table', 'holo', 'Hologram', 'masa_hologram'], ['table', 'andromeda', 'Andromeda', 'masa_andromeda']] },
+    { cap: 'ISTAKA', items: [['rack', 'walnut', 'Klasik ceviz', 'istaka_ceviz'], ['rack', 'sedef', 'Sedef kakma', 'istaka_sedef'], ['rack', 'chrome', 'Alüminyum', 'istaka_aluminyum'], ['rack', 'carbon', 'Karbon', 'istaka_karbon'], ['rack', 'neon', 'Neon cam', 'istaka_neon'], ['rack', 'andromeda', 'Andromeda', 'istaka_andromeda']] },
+    { cap: 'TAŞ SETİ · 52 + ARKA + SAHTE OKEY', items: [['tiles', 'classic', 'Klasik', 'tas_seti_klasik'], ['tiles', 'galaxy', 'Galaksi', 'tas_seti_galaksi'], ['tiles', 'gold', 'Altın', 'tas_seti_altin'], ['tiles', 'neon', 'Neon', 'tas_seti_neon'], ['tiles', 'marble', 'Mermer', 'tas_seti_mermer'], ['tile', 'R7', 'Tek taş (son seçilen set)', 'tas_tek']] },
+    { cap: 'ZAR', items: [['die', null, 'Zar (30 mm, 6 yüz)', 'zar']] },
+    { cap: 'OYUN İŞARETLERİ', items: [['markers', null, 'Hale, atma/soldan halkası, işleme hedefi, simgeler', 'isaretler']] },
+    { cap: 'UZAY GEMİLERİ · MENÜ + MASA ARKA PLANI', items: [['ship', 'kervan', 'Kervan (yük gemisi)', 'gemi_kervan'], ['ship', 'ok', 'Ok (hızlı kurye)', 'gemi_ok'], ['ship', 'halka', 'Halka (salon kruvazörü)', 'gemi_halka'], ['ship', 'kacak', 'Avcı · Kaçak', 'gemi_avci_kacak'], ['ship', 'avci', 'Avcı · Kovalayan', 'gemi_avci_kovalayan']] },
+    { cap: 'TAM SAHNE', items: [['scene', null, 'Oda + masa + ıstaka + koltuk + ışıklar', 'sahne_tam']] },
+    { cap: 'ORTAM', items: [['chair', null, 'Koltuk', 'koltuk'], ['room', null, 'Oda (zemin, pencere, duvar)', 'oda_istasyon']] },
+    { cap: 'İKRAM', items: [['gift', 'tea', 'Çay'], ['gift', 'coffee', 'Türk kahvesi'], ['gift', 'cola', 'Soğuk içecek'], ['gift', 'simit', 'Simit'], ['gift', 'baklava', 'Baklava'], ['gift', 'seeds', 'Çekirdek']].map((x) => [...x, 'ikram_' + x[1]]) },
+    { cap: 'HEDİYE', items: [['gift', 'flower', 'Çiçek'], ['gift', 'cake', 'Pasta'], ['gift', 'trophy', 'Kupa'], ['gift', 'rocket', 'Roket']].map((x) => [...x, 'hediye_' + x[1]]) },
+  ];
+  const stage = document.querySelector('three-d-stage');
+  await stage.ready;
+  // studio env so metals read correctly in the preview
+  const pm = new THREE.PMREMGenerator(stage._renderer), es = new THREE.Scene();
+  es.add(new THREE.Mesh(new THREE.BoxGeometry(12, 12, 12), new THREE.MeshBasicMaterial({ color: '#141826', side: THREE.BackSide })));
+  [[5, 1.4, 3.2, 0, 5.5, 0, Math.PI / 2, 0], [3, 3, 1.6, -5.5, 2, 1, 0, Math.PI / 2], [6, 2.5, 1.2, 0, 1.5, -5.8, 0, 0]].forEach(([w, h, k, x, y, z, rx, ry]) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffffff').multiplyScalar(k), side: THREE.DoubleSide })); m.position.set(x, y, z); m.rotation.set(rx, ry, 0); es.add(m); });
+  stage._scene.environment = pm.fromScene(es, 0.04).texture;
+
+  const hidden = document.createElement('canvas'); hidden.width = 64; hidden.height = 64; hidden.style.display = 'none'; document.body.appendChild(hidden);
+  let theme = 'Satürn';
+  await document.fonts.load('800 98px "Montserrat"').catch(() => {});
+  const T = createTable(hidden, { theme: THEMES[theme], font: 'Montserrat', tableSkin: 'station', rackSkin: 'walnut', tileDepth: 0.010 });
+  const sel = document.getElementById('theme'), list = document.getElementById('list'), status = document.getElementById('status');
+  Object.keys(THEMES).forEach((k) => { const o = document.createElement('option'); o.value = k; o.textContent = k; sel.appendChild(o); });
+  const slug = (s) => s.toLowerCase().replace('ü', 'u').replace('ö', 'o').replace('ç', 'c').replace('ş', 's').replace('ı', 'i').replace('ğ', 'g');
+  let current = null;
+  function build(a) { return a[0] === 'ship' ? window.GalaxyShips.exportShip(a[1]) : T.exportAsset(a[0], a[1]); }
+  function show(a, btn) {
+    current = a; [...list.querySelectorAll('.it')].forEach((b) => b.classList.toggle('on', b === btn));
+    const g = build(a); if (!g) return;
+    stage.setAttribute('name', 'galaxy101_' + a[3] + (['table', 'rack', 'tiles', 'tile', 'markers', 'scene'].includes(a[0]) ? '_' + slug(theme) : ''));
+    stage.setObject(g);
+  }
+  ASSETS.forEach((grp) => {
+    const c = document.createElement('div'); c.className = 'cap'; c.textContent = grp.cap; list.appendChild(c);
+    grp.items.forEach((a) => { const b = document.createElement('button'); b.className = 'it'; b.innerHTML = `<span>${a[2]}</span><small>${a[3]}.glb</small>`; b.onclick = () => show(a, b); list.appendChild(b); a.btn = b; });
+  });
+  sel.onchange = () => { theme = sel.value; T.setTheme(THEMES[theme]); if (current) show(current, current.btn); };
+  const loadZip = () => window.JSZip ? Promise.resolve(window.JSZip) : new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://unpkg.com/jszip@3.10.1/dist/jszip.min.js'; s.onload = () => res(window.JSZip); s.onerror = () => rej(new Error('JSZip yüklenemedi')); document.head.appendChild(s); });
+  const THEMED = ['table', 'rack', 'tiles', 'tile', 'markers', 'scene'];
+  document.getElementById('all').onclick = async (e) => {
+    const btn = e.currentTarget; btn.disabled = true;
+    try {
+      const [{ GLTFExporter }, JSZip] = await Promise.all([import('three/addons/exporters/GLTFExporter.js'), loadZip()]), ex = new GLTFExporter(), zip = new JSZip();
+      const themes = document.getElementById('allThemes').checked ? Object.keys(THEMES) : [theme], keep = theme;
+      const all = ASSETS.flatMap((g) => g.items), jobs = [];
+      themes.forEach((th, ti) => all.forEach((a) => { if (ti === 0 || THEMED.includes(a[0])) jobs.push([th, a]); }));
+      let i = 0;
+      for (const [th, a] of jobs) {
+        if (th !== theme) { theme = th; T.setTheme(THEMES[th]); }
+        i++; status.textContent = `${i}/${jobs.length} · ${a[3]}.glb`;
+        const buf = await ex.parseAsync(build(a), { binary: true });
+        const name = 'galaxy101_' + a[3] + (THEMED.includes(a[0]) ? '_' + slug(th) : '') + '.glb';
+        zip.file(themes.length > 1 && THEMED.includes(a[0]) ? slug(th) + '/' + name : name, buf);
+        await new Promise((r) => setTimeout(r, 0));
+      }
+      if (theme !== keep) { theme = keep; T.setTheme(THEMES[keep]); }
+      status.textContent = 'Zip hazırlanıyor…';
+      const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } }, (m) => { status.textContent = `Zip hazırlanıyor · %${Math.round(m.percent)}`; });
+      const url = URL.createObjectURL(blob), l = document.createElement('a');
+      l.href = url; l.download = 'galaxy101_3d_' + (themes.length > 1 ? 'tum_temalar' : slug(theme)) + '.zip'; document.body.appendChild(l); l.click(); l.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 8000);
+      status.textContent = `${jobs.length} GLB · tek zip indirildi (${(blob.size / 1048576).toFixed(1)} MB)`;
+      if (current) show(current, current.btn);
+    } catch (err) { status.textContent = 'Hata: ' + err.message; }
+    btn.disabled = false;
+  };
+  show(ASSETS[0].items[0], ASSETS[0].items[0].btn);
+</script>
+</body>
+</html>

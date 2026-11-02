@@ -1,0 +1,17 @@
+{
+ "version": "0.5.0",
+ "source": "table3d.js · ışıklar ve görüntü ayarları (oyundaki değerler)",
+ "renderer": { "toneMapping": "ACES Filmic", "exposure": 1.05, "outputColorSpace": "sRGB", "shadows": "PCF, 2048×2048 (ana ışık)", "pixelRatio": "min(2, ölçek × cihaz)", "clear": "şeffaf (arkada CSS gezegen/yıldız katmanı)" },
+ "lights": [
+  { "name": "hemi", "type": "Hemisphere", "sky": "#c9d6ff (tema sky ile değişir)", "ground": "#0a0a14", "intensity": 0.45, "glb": "GLB'ye aktarılamaz (glTF desteklemez) → Unity: Environment Lighting · Gradient, Sky #c9d6ff, Ground #0a0a14, yoğunluk 0.45" },
+  { "name": "key", "type": "Directional", "color": "#fff4e2", "intensity": 1.7, "position": [1.1, 4.2, 2.0], "target": [0, 0.76, 0], "shadow": { "map": 2048, "ortho": [-1.5, 1.5, 1.5, -1.5], "near": 1, "far": 8, "bias": -0.0004 } },
+  { "name": "spot", "type": "Spot", "color": "#ffffff", "intensity": 9, "distance": 7, "angle": 0.62, "penumbra": 0.7, "decay": 1.6, "position": [0, 3.2, 0.3], "target": [0, 0.76, 0] },
+  { "name": "back", "type": "Point", "color": "#FFC94A (tema glow ile değişir)", "intensity": 5, "distance": 7, "decay": 1.4, "position": [0, 1.5, -2.3] },
+  { "name": "fill", "type": "Point", "color": "#9fb6ff", "intensity": 1.6, "distance": 6, "decay": 1.5, "position": [0, 1.6, 2.2] },
+  { "name": "nukeLight", "type": "Point", "color": "#FFB25A", "intensity": "0 → 90·e^(−3t), 2 sn (okeyle/elden bitiş)", "distance": 4.5, "decay": 1.4, "position": "iniş noktası + 0,3 m" },
+  { "name": "winSpot", "type": "Spot", "color": "#FFE7A3", "intensity": "0 → 40 (kutlama, 3,4 sn)", "distance": 5, "angle": 0.32, "penumbra": 0.6, "decay": 1.4, "position": "kazananın 1,8 m üstü" }
+ ],
+ "environment": "Önizlemede stüdyo ortamı (PMREM, kutu + 3 ışıklı panel). Unity: Reflection Probe ya da HDRI ile eşdeğer.",
+ "ambient": { "led": "emissive 2.2 + sin(t·1.2)·0.25", "holo": "Y ekseninde 0.12 rad/sn dönüş, opaklık 0.34 + sin(t·0.9)·0.05", "cameraSway": "x += sin(t·0.21)·0.006, y += sin(t·0.33)·0.004" },
+ "glbNote": "sahne_tam.glb ışıkları KHR_lights_punctual olarak içerir; Hemisphere ve ışık azalma (decay) değerleri bu dosyadaki değerlerle kurulur."
+}

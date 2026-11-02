@@ -1,5 +1,5 @@
 {
- "version": "0.4.0",
+ "version": "0.5.0",
  "transport": {
   "note": "Tek WebSocket. Her mesaj JSON nesnesi, alan \"t\" mesaj adı. C2S mesajlarında \"rid\" (istemci sıra no) zorunlu; sunucu her C2S için tam bir \"ack\" döner. S2C olaylarında \"at\" = sunucu saati (ms). Prova: logic/mockServer.js → createServer({clock,seed}).connect(onMessage).send(msg).",
   "envelopeC2S": {
@@ -369,7 +369,7 @@
     "bet": "1000|5000|10000|50000|100000",
     "katlama": "bool",
     "turnSec": "15|20|30|45",
-    "rules": "{spectate:bool,chat:\"open\"|\"quick\"|\"off\",gifts:bool,isle:bool,penalties:bool}",
+    "rules": "{spectate:bool,chat:\"open\"|\"quick\"|\"off\",gifts:bool,isle:bool,penalties:bool,penOkey:bool?,penIslek:bool?,penOpener:bool? (R-41/R-42/R-43, varsayılan true)}",
     "katlamaPartner": "bool? (yalnız eşli + katlamalı; varsayılan true)"
    },
    "returns": {

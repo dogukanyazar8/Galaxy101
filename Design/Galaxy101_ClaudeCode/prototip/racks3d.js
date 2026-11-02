@@ -7,7 +7,7 @@ const LEN = 0.84;
 // shape (u = -z, v = y), extruded along w → rack x
 const XF = new THREE.Matrix4().set(0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1);
 function cvs(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return [c, c.getContext('2d')]; }
-function tex(c, rep = [1, 1], srgb = true) { const t = new THREE.CanvasTexture(c); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep[0], rep[1]); t.anisotropy = 8; return t; }
+function tex(c, rep = [1, 1], srgb = true) { const t = new THREE.CanvasTexture(c); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep[0], rep[1]); t.anisotropy = 16; t.minFilter = THREE.LinearMipmapLinearFilter; t.generateMipmaps = true; return t; }
 function shape(pts, rad, cham) {
   const s = new THREE.Shape(), n = pts.length;
   for (let i = 0; i < n; i++) {
@@ -40,14 +40,16 @@ function prof(TD, o) {
 }
 
 // ---------- textures ----------
+// Ahşap: 1024² dikişsiz (y yönünde döşenir) damar dokusu. Damarlar dikey → ıstaka boyunca uzanır.
 function woodTex(base, dark, light, seed) {
-  const [c, x] = cvs(512, 512); x.fillStyle = base; x.fillRect(0, 0, 512, 512);
-  let s = seed; const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
-  for (let i = 0; i < 110; i++) {
-    const x0 = i * 4.7 + rnd() * 3, w = 0.6 + rnd() * 2.2; x.strokeStyle = rnd() < 0.75 ? dark : light; x.globalAlpha = 0.12 + rnd() * 0.32; x.lineWidth = w;
-    x.beginPath(); for (let y = 0; y <= 512; y += 8) { const px = x0 + Math.sin(y * 0.011 + i * 0.6) * 3 + Math.sin(y * 0.0035 + i * 0.21) * 7; y ? x.lineTo(px, y) : x.moveTo(px, y); } x.stroke();
+  const S = 1024, [c, x] = cvs(S, S); x.fillStyle = base; x.fillRect(0, 0, S, S);
+  let s = seed; const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647), TAU = Math.PI * 2;
+  for (let i = 0; i < 170; i++) {
+    const x0 = (i / 170) * S + rnd() * 4, w = 0.8 + rnd() * 2.6, f1 = 1 + Math.floor(rnd() * 3), f2 = 2 + Math.floor(rnd() * 4), p1 = rnd() * TAU, p2 = rnd() * TAU;
+    x.strokeStyle = rnd() < 0.72 ? dark : light; x.globalAlpha = 0.08 + rnd() * 0.22; x.lineWidth = w;
+    for (const dx of [0, -S, S]) { x.beginPath(); for (let y = 0; y <= S; y += 6) { const a = y / S * TAU, px = dx + x0 + Math.sin(a * f1 + p1) * 7 + Math.sin(a * f2 + p2) * 3; y ? x.lineTo(px, y) : x.moveTo(px, y); } x.stroke(); }
   }
-  x.globalAlpha = 0.25; x.fillStyle = dark; for (let i = 0; i < 900; i++) x.fillRect(rnd() * 512, rnd() * 512, 0.8, 3 + rnd() * 6);
+  x.globalAlpha = 0.16; x.fillStyle = dark; for (let i = 0; i < 2600; i++) x.fillRect(rnd() * S, rnd() * S, 1, 4 + rnd() * 10);
   x.globalAlpha = 1; return c;
 }
 function sedefTex() {
@@ -80,18 +82,38 @@ function brushedTex() {
   return c;
 }
 
+// Kutu izdüşümlü UV (ıstaka yerel koordinatı, metre): baskın normale göre düzlem seçilir; boy yönü (x) dokunun v ekseni.
+function boxUV(g) {
+  const p = new THREE.Vector3(), n = new THREE.Vector3(), nm = new THREE.Matrix3();
+  g.updateMatrixWorld(true);
+  g.traverse((m) => {
+    const k = m.isMesh && m.material && m.material.userData && m.material.userData.uvk; if (!k) return;
+    const G = m.geometry, P = G.attributes.position, N = G.attributes.normal; if (!P || !N) return;
+    m.updateMatrix(); nm.getNormalMatrix(m.matrix);
+    const uv = new Float32Array(P.count * 2), a = 1 / k[0], b = 1 / k[1];
+    for (let i = 0; i < P.count; i++) {
+      p.fromBufferAttribute(P, i).applyMatrix4(m.matrix); n.fromBufferAttribute(N, i).applyMatrix3(nm);
+      const ax = Math.abs(n.x), ay = Math.abs(n.y), az = Math.abs(n.z);
+      if (ax > ay && ax > az) { uv[i * 2] = p.z / k[0]; uv[i * 2 + 1] = p.y / k[0]; }
+      else if (ay > az) { uv[i * 2] = p.z * a; uv[i * 2 + 1] = p.x * b; }
+      else { uv[i * 2] = p.y * a; uv[i * 2 + 1] = p.x * b; }
+    }
+    G.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  });
+}
+
 export const RACK_SKINS = ['walnut', 'sedef', 'chrome', 'carbon', 'neon', 'andromeda'];
 
 export function createRackKit(o = {}) {
   const P = (p) => new THREE.MeshPhysicalMaterial(p), S = (p) => new THREE.MeshStandardMaterial(p);
   const wood = woodTex('#6B3A20', 'rgba(28,12,4,.9)', 'rgba(255,214,160,.35)', 3), woodD = woodTex('#4A2614', 'rgba(14,5,1,.9)', 'rgba(230,170,120,.25)', 17), rose = woodTex('#4A1E12', 'rgba(10,3,1,.95)', 'rgba(170,80,50,.35)', 29);
   const M = {
-    walnut: P({ name: 'istaka_ceviz', map: tex(wood, [7, 1.2]), roughness: 0.42, clearcoat: 0.9, clearcoatRoughness: 0.22 }),
-    walnutEnd: P({ name: 'istaka_ceviz_uc', map: tex(woodD, [9, 9]), roughness: 0.4, clearcoat: 0.9, clearcoatRoughness: 0.2 }),
+    walnut: P({ name: 'istaka_ceviz', map: tex(wood), roughness: 0.42, clearcoat: 0.9, clearcoatRoughness: 0.22 }),
+    walnutEnd: P({ name: 'istaka_ceviz_uc', map: tex(woodD), roughness: 0.4, clearcoat: 0.9, clearcoatRoughness: 0.2 }),
     maple: P({ name: 'istaka_akcaagac_kakma', color: '#EBD5A8', roughness: 0.45, clearcoat: 0.8 }),
     brass: S({ name: 'istaka_pirinc', color: '#D6A649', metalness: 1, roughness: 0.24 }),
-    rose: P({ name: 'istaka_gulagaci', map: tex(rose, [7, 1.2]), roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.12 }),
-    roseEnd: P({ name: 'istaka_gulagaci_uc', map: tex(rose, [9, 9]), roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.12 }),
+    rose: P({ name: 'istaka_gulagaci', map: tex(rose), roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.12 }),
+    roseEnd: P({ name: 'istaka_gulagaci_uc', map: tex(rose), roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.12 }),
     sedef: P({ name: 'istaka_sedef_panel', map: tex(sedefTex(), [2, 1]), roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.06, iridescence: 0.55, iridescenceIOR: 1.45, iridescenceThicknessRange: [260, 620] }),
     pearl: P({ name: 'istaka_sedef', color: '#F6F0E6', roughness: 0.18, clearcoat: 1, iridescence: 1, iridescenceIOR: 1.5, iridescenceThicknessRange: [240, 640] }),
     gold: S({ name: 'istaka_yaldiz', color: '#E4BE62', metalness: 1, roughness: 0.2 }),
@@ -99,7 +121,7 @@ export function createRackKit(o = {}) {
     aluDark: P({ name: 'istaka_eloksal', color: '#2b3044', map: tex(brushedTex(), [1, 1]), metalness: 0.95, roughness: 0.34, clearcoat: 0.4 }),
     smoke: P({ name: 'istaka_fume_cam', color: '#0a0d18', roughness: 0.04, metalness: 0.25, clearcoat: 1, clearcoatRoughness: 0.02 }),
     led: S({ name: 'istaka_led', color: '#000', emissive: '#FFD964', emissiveIntensity: 2.6 }),
-    carbon: P({ name: 'istaka_karbon', map: tex(carbonTex(), [22, 22]), roughness: 0.32, metalness: 0.35, clearcoat: 1, clearcoatRoughness: 0.04 }),
+    carbon: P({ name: 'istaka_karbon', map: tex(carbonTex()), roughness: 0.32, metalness: 0.35, clearcoat: 1, clearcoatRoughness: 0.04 }),
     carbonEdge: S({ name: 'istaka_karbon_cerceve', color: '#14161d', metalness: 0.9, roughness: 0.28 }),
     seam: S({ name: 'istaka_karbon_dikis', color: '#000', emissive: '#FFD964', emissiveIntensity: 2.2 }),
     nGlass: P({ name: 'istaka_neon_cam', color: '#141a36', roughness: 0.05, metalness: 0.1, clearcoat: 1, transparent: true, opacity: 0.62 }),
@@ -111,6 +133,9 @@ export function createRackKit(o = {}) {
     galaxy: P({ name: 'istaka_andromeda_panel', color: '#ffffff', roughness: 0.2, clearcoat: 1, emissive: '#ffffff', emissiveIntensity: 0.45 }),
     aled: S({ name: 'istaka_andromeda_led', color: '#000', emissive: '#B79CFF', emissiveIntensity: 3 }),
   };
+  // Doku ölçeği (m): [kesit yönü, boy yönü]. Bu malzemeler kutu izdüşümlü UV alır → çizgiler esnemez/kaymaz.
+  const UVK = { walnut: [0.11, 0.55], walnutEnd: [0.09, 0.09], rose: [0.11, 0.55], roseEnd: [0.09, 0.09], alu: [0.06, 0.3], aluDark: [0.06, 0.3], carbon: [0.05, 0.05] };
+  Object.entries(UVK).forEach(([k, v]) => { M[k].userData.uvk = v; });
   if (o.constellationTex) { const t = o.constellationTex(); M.galaxy.map = t; M.galaxy.emissiveMap = t; }
 
   // end piece outline (u,v) and builder
@@ -199,6 +224,7 @@ export function createRackKit(o = {}) {
     build(skin, TD) {
       const g = new THREE.Group(); g.name = 'istaka_govde_grubu';
       (B[skin] || B.chrome)(g, TD);
+      boxUV(g);
       return g;
     },
     theme(th) {

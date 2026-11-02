@@ -1,6 +1,6 @@
 {
  "suite": "penalties",
- "version": "0.4.0",
+ "version": "0.5.0",
  "note": "Aksi belirtilmedikçe gösterge B6a → okey B7 (B7a, B7b), sahte okey Ja/Jb = B7.",
  "tests": [
   {
@@ -665,6 +665,378 @@
         "e": "penalty"
        }
       ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "PEN-07",
+   "title": "Masa seçeneği \"İşlek taş atma cezası: kapalı\" → işlek atış cezasız",
+   "rules": [
+    "R-41"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R7a",
+       "B7b",
+       "Ja",
+       "K4a",
+       "R2a",
+       "R3b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      0,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "opts": {
+      "penIslek": false
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R7a"
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "discarded",
+        "tile": "R7a"
+       }
+      ],
+      "noEvents": [
+       {
+        "e": "penalty"
+       }
+      ],
+      "state": {
+       "hand.pen.0": 0
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "PEN-08",
+   "title": "Masa seçeneği \"Okey atma cezası: kapalı\" → okey atışı cezasız",
+   "rules": [
+    "R-42"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R7a",
+       "B7b",
+       "Ja",
+       "K4a",
+       "R2a",
+       "R3b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      0,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "opts": {
+      "penOkey": false
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "B7b"
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "discarded",
+        "tile": "B7b"
+       }
+      ],
+      "noEvents": [
+       {
+        "e": "penalty"
+       }
+      ],
+      "state": {
+       "hand.pen.0": 0
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "PEN-09",
+   "title": "Masa seçeneği \"Açtıran taş cezası: kapalı\" → soldan alınan taşla açılınca atana ceza yazılmaz",
+   "rules": [
+    "R-43",
+    "R-31"
+   ],
+   "init": {
+    "spec": {
+     "opts": {
+      "penOpener": false
+     },
+     "indicator": "B6a",
+     "racks": [
+      [
+       "K10a",
+       "K11a",
+       "K12a",
+       "K13a",
+       "Y11a",
+       "R11a",
+       "B11a",
+       "Y5a",
+       "Y6a",
+       "Y7a",
+       "R2a",
+       "R6b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      [
+       "Y2a",
+       "K9a"
+      ]
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "draw",
+      "n": 9
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "draw",
+      "seat": 0,
+      "src": "side"
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "drew",
+        "src": "side",
+        "tile": "K9a",
+        "mustOpen": true
+       }
+      ]
+     }
+    },
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "K9a",
+         "K10a",
+         "K11a",
+         "K12a",
+         "K13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "Y11a",
+         "R11a",
+         "B11a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "Y5a",
+         "Y6a",
+         "Y7a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "opened",
+        "value": 106
+       }
+      ]
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R2a"
+     },
+     "expect": {
+      "ok": true,
+      "noEvents": [
+       {
+        "e": "penalty",
+        "code": "P_OPENED_WITH"
+       }
+      ],
+      "state": {
+       "hand.pen.3": 0
+      }
      }
     }
    ]

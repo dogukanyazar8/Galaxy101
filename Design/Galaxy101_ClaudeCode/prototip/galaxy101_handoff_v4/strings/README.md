@@ -1,4 +1,4 @@
-# strings/ · metinler · v0.4.0
+# strings/ · metinler · v0.5.0
 
 | Dosya | İçerik |
 |---|---|

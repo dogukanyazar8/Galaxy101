@@ -1,0 +1,425 @@
+{
+ "suite": "turns",
+ "version": "0.5.0",
+ "note": "Aksi belirtilmedikçe gösterge B6a → okey B7 (B7a, B7b), sahte okey Ja/Jb = B7.",
+ "tests": [
+  {
+   "id": "TURN-01",
+   "title": "Sıra başkasındayken eylem reddedilir",
+   "rules": [
+    "R-30"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a"
+      ],
+      [
+       "R4a"
+      ],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 1,
+      "phase": "draw",
+      "n": 3
+     }
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R3a"
+     },
+     "expect": {
+      "error": "E_NOT_YOUR_TURN"
+     }
+    }
+   ]
+  },
+  {
+   "id": "TURN-02",
+   "title": "El bitince eylem reddedilir; sonraki elde dağıtan bir sonraki koltuğa geçer",
+   "rules": [
+    "R-02"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R3a"
+      ],
+      [
+       "K13a",
+       "Y2a"
+      ],
+      [
+       "R1a",
+       "R1b",
+       "Y4a"
+      ],
+      [
+       "B7b",
+       "Ja"
+      ]
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      120,
+      110,
+      0,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     },
+     "openMode": [
+      "run",
+      "run",
+      null,
+      "run"
+     ],
+     "dealer": 3
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R3a"
+     },
+     "expect": {
+      "ok": true
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 1,
+      "tile": "Y2a"
+     },
+     "expect": {
+      "error": "E_HAND_OVER"
+     }
+    },
+    {
+     "do": {
+      "t": "nextHand"
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "status": "playing",
+       "handNo": 2,
+       "hand.deal.dealer": 0,
+       "hand.turn.seat": 1,
+       "hand.racks.1#len": 22,
+       "invariants": []
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "AUTO-01",
+   "title": "Süre doldu (çekme aşaması): desteden çek, en az bağlantılı taşı at (eşitse büyük sayı)",
+   "rules": [
+    "R-70",
+    "R-71"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R1a",
+       "R2a",
+       "R3a",
+       "K9a"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "draw",
+      "n": 4
+     },
+     "deck": [
+      "Y13a",
+      "R10a"
+     ]
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "timeout",
+      "seat": 0
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "auto"
+       },
+       {
+        "e": "drew",
+        "src": "deck",
+        "tile": "Y13a"
+       },
+       {
+        "e": "discarded",
+        "tile": "Y13a"
+       },
+       {
+        "e": "turn",
+        "seat": 1
+       }
+      ],
+      "state": {
+       "hand.racks.0#set": [
+        "R1a",
+        "R2a",
+        "R3a",
+        "K9a"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "AUTO-02",
+   "title": "Süre doldu, soldan alınmış ve açılamamış taş: geri bırakılır, desteden çekilir",
+   "rules": [
+    "R-70",
+    "R-32"
+   ],
+   "init": {
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "K10a",
+       "K11a",
+       "K12a",
+       "K13a",
+       "Y11a",
+       "R11a",
+       "B11a",
+       "Y5a",
+       "Y6a",
+       "Y7a",
+       "R2a",
+       "R6b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      [
+       "Y2a",
+       "K9a"
+      ]
+     ],
+     "melds": [],
+     "opened": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "draw",
+      "n": 9
+     },
+     "deck": [
+      "R1a",
+      "R1b"
+     ]
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "draw",
+      "seat": 0,
+      "src": "side"
+     },
+     "expect": {
+      "ok": true
+     }
+    },
+    {
+     "do": {
+      "t": "timeout",
+      "seat": 0
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "sideReturned",
+        "tile": "K9a"
+       },
+       {
+        "e": "drew",
+        "src": "deck",
+        "tile": "R1a"
+       },
+       {
+        "e": "discarded"
+       }
+      ],
+      "state": {
+       "hand.discards.3": [
+        "Y2a",
+        "K9a"
+       ],
+       "hand.turn.seat": 1
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "AUTO-03",
+   "title": "Otomatik atış okeyi ve işlek taşı atmaz",
+   "rules": [
+    "R-71"
+   ],
+   "call": {
+    "fn": "autoDiscardTile",
+    "seat": 0,
+    "spec": {
+     "indicator": "B6a",
+     "racks": [
+      [
+       "R7a",
+       "B7b",
+       "K4a",
+       "Y13b"
+      ],
+      [],
+      [],
+      []
+     ],
+     "discards": [
+      [],
+      [],
+      [],
+      []
+     ],
+     "melds": [
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "R4a",
+        "R5a",
+        "R6a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "group",
+       "tiles": [
+        "Y9a",
+        "K9a",
+        "R9a"
+       ]
+      },
+      {
+       "owner": 3,
+       "kind": "pair",
+       "tiles": [
+        "K2a",
+        "K2b"
+       ]
+      },
+      {
+       "owner": 1,
+       "kind": "run",
+       "tiles": [
+        "K3a",
+        "B7a",
+        "K5a"
+       ]
+      },
+      {
+       "owner": 2,
+       "kind": "run",
+       "tiles": [
+        "Y11a",
+        "Y12a",
+        "Y13a"
+       ]
+      }
+     ],
+     "opened": [
+      0,
+      110,
+      105,
+      104
+     ],
+     "turn": {
+      "seat": 0,
+      "phase": "play",
+      "n": 7
+     }
+    }
+   },
+   "expect": {
+    "tile": "Y13b"
+   }
+  }
+ ]
+}

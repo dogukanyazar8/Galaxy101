@@ -1,0 +1,6702 @@
+{
+ "version": "0.5.0",
+ "locales": [
+  "tr",
+  "en"
+ ],
+ "defaultLocale": "tr",
+ "format": {
+  "placeholders": "{0}, {1} … sırayla işlev parametreleri (params alanında adları). Satır içi metinlerde {ifade} kaynak koddaki ifadedir; Unity'de adlandırılmış parametreye çevrilir.",
+  "numbers": "tr: 125.400 (tr-TR) · en: 125,400 (en-US)",
+  "percent": "tr: %44 · en: 44%",
+  "turkishSuffix": "Ek uyumu ('ın/'in, 'e/'a) kaynakta genTR gibi yardımcılarla yapılır; çeviride ICU select ya da kod tarafı ek kullanılmalı."
+ },
+ "counts": {
+  "tables": 751,
+  "inline": 241,
+  "errors": 49
+ },
+ "tables": [
+  {
+   "key": "app.STR.tag",
+   "tr": "Masalar dolu, taşlar hazır.\nArkadaşlarınla otur, 101 açıp eli bitir.",
+   "en": "Tables are full and the tiles are ready.\nSit with friends, open 101 and finish the hand."
+  },
+  {
+   "key": "app.STR.welcome",
+   "tr": "Hoş geldin",
+   "en": "Welcome"
+  },
+  {
+   "key": "app.STR.howCont",
+   "tr": "Nasıl devam etmek istersin?",
+   "en": "How do you want to continue?"
+  },
+  {
+   "key": "app.STR.guest",
+   "tr": "MİSAFİR OLARAK OYNA",
+   "en": "PLAY AS GUEST"
+  },
+  {
+   "key": "app.STR.guestSub",
+   "tr": "Kayıt yok · hemen başla",
+   "en": "No sign-up · start now"
+  },
+  {
+   "key": "app.STR.login",
+   "tr": "Giriş yap",
+   "en": "Log in"
+  },
+  {
+   "key": "app.STR.register",
+   "tr": "Kayıt ol",
+   "en": "Sign up"
+  },
+  {
+   "key": "app.STR.regGift",
+   "tr": "+25.000",
+   "en": "+25,000"
+  },
+  {
+   "key": "app.STR.or",
+   "tr": "ya da",
+   "en": "or"
+  },
+  {
+   "key": "app.STR.orEmail",
+   "tr": "ya da e-postayla",
+   "en": "or with email"
+  },
+  {
+   "key": "app.STR.google",
+   "tr": "Google ile devam et",
+   "en": "Continue with Google"
+  },
+  {
+   "key": "app.STR.googleBusy",
+   "tr": "Google’a bağlanılıyor…",
+   "en": "Connecting to Google…"
+  },
+  {
+   "key": "app.STR.terms",
+   "tr": "Devam ederek Kullanım Koşulları’nı ve Gizlilik Politikası’nı kabul etmiş olursun. Oyun sanal çiple oynanır; gerçek para kazandırmaz.",
+   "en": "By continuing you accept the Terms of Use and Privacy Policy. The game uses virtual chips and pays out no real money."
+  },
+  {
+   "key": "app.STR.back",
+   "tr": "Geri",
+   "en": "Back"
+  },
+  {
+   "key": "app.STR.remember",
+   "tr": "Beni hatırla",
+   "en": "Remember me"
+  },
+  {
+   "key": "app.STR.forgot",
+   "tr": "Şifremi unuttum",
+   "en": "Forgot password"
+  },
+  {
+   "key": "app.STR.avatarColor",
+   "tr": "AVATAR RENGİ",
+   "en": "AVATAR COLOR"
+  },
+  {
+   "key": "app.STR.agree",
+   "tr": "Kullanım Koşulları’nı ve Gizlilik Politikası’nı okudum, kabul ediyorum.",
+   "en": "I have read and accept the Terms of Use and Privacy Policy."
+  },
+  {
+   "key": "app.STR.loginT",
+   "tr": "Giriş yap",
+   "en": "Log in"
+  },
+  {
+   "key": "app.STR.loginS",
+   "tr": "Hesabınla kaldığın yerden devam et",
+   "en": "Pick up where you left off"
+  },
+  {
+   "key": "app.STR.loginCta",
+   "tr": "Giriş yap",
+   "en": "Log in"
+  },
+  {
+   "key": "app.STR.noAcc",
+   "tr": "Hesabın yok mu?",
+   "en": "No account yet?"
+  },
+  {
+   "key": "app.STR.toReg",
+   "tr": "Kayıt ol",
+   "en": "Sign up"
+  },
+  {
+   "key": "app.STR.regT",
+   "tr": "Kayıt ol",
+   "en": "Sign up"
+  },
+  {
+   "key": "app.STR.regS",
+   "tr": "Hesap aç, 25.000 çip hediye",
+   "en": "Create an account, get 25,000 chips"
+  },
+  {
+   "key": "app.STR.regCta",
+   "tr": "Hesabı oluştur",
+   "en": "Create account"
+  },
+  {
+   "key": "app.STR.hasAcc",
+   "tr": "Zaten hesabın var mı?",
+   "en": "Already have an account?"
+  },
+  {
+   "key": "app.STR.toLogin",
+   "tr": "Giriş yap",
+   "en": "Log in"
+  },
+  {
+   "key": "app.STR.guestChips",
+   "tr": "Başlangıçta 10.000 çip hesabına yüklenir.",
+   "en": "You start with 10,000 chips."
+  },
+  {
+   "key": "app.STR.guestDevice",
+   "tr": "Uygulamayı silersen ya da cihaz değiştirirsen ilerlemen kaybolur.",
+   "en": "If you delete the app or switch devices, your progress is lost."
+  },
+  {
+   "key": "app.STR.guestT",
+   "tr": "Misafir girişi",
+   "en": "Guest login"
+  },
+  {
+   "key": "app.STR.guestS",
+   "tr": "İlerlemen bu cihazda saklanır",
+   "en": "Your progress is saved on this device"
+  },
+  {
+   "key": "app.STR.guestCta",
+   "tr": "Oynamaya başla",
+   "en": "Start playing"
+  },
+  {
+   "key": "app.STR.later",
+   "tr": "Sonra hesaba bağlayabilirsin.",
+   "en": "You can link an account later."
+  },
+  {
+   "key": "app.STR.toAuth",
+   "tr": "Seçeneklere dön",
+   "en": "Back to options"
+  },
+  {
+   "key": "app.STR.fEmail",
+   "tr": "E-POSTA",
+   "en": "EMAIL"
+  },
+  {
+   "key": "app.STR.fPass",
+   "tr": "ŞİFRE",
+   "en": "PASSWORD"
+  },
+  {
+   "key": "app.STR.fName",
+   "tr": "KULLANICI ADI",
+   "en": "USERNAME"
+  },
+  {
+   "key": "app.STR.fPass2",
+   "tr": "ŞİFRE TEKRAR",
+   "en": "REPEAT PASSWORD"
+  },
+  {
+   "key": "app.STR.fNick",
+   "tr": "TAKMA AD",
+   "en": "NICKNAME"
+  },
+  {
+   "key": "app.STR.phEmail",
+   "tr": "ornek@mail.com",
+   "en": "you@mail.com"
+  },
+  {
+   "key": "app.STR.phPass",
+   "tr": "En az 6 karakter",
+   "en": "At least 6 characters"
+  },
+  {
+   "key": "app.STR.phName",
+   "tr": "3–16 karakter",
+   "en": "3–16 characters"
+  },
+  {
+   "key": "app.STR.phPass2",
+   "tr": "Şifreni tekrar yaz",
+   "en": "Type your password again"
+  },
+  {
+   "key": "app.STR.phNick",
+   "tr": "Masada görünecek adın",
+   "en": "Name shown at the table"
+  },
+  {
+   "key": "app.STR.eEmail",
+   "tr": "Geçerli bir e-posta yaz",
+   "en": "Enter a valid email"
+  },
+  {
+   "key": "app.STR.ePass",
+   "tr": "En az 6 karakter",
+   "en": "At least 6 characters"
+  },
+  {
+   "key": "app.STR.eName",
+   "tr": "3–16 harf, rakam ya da _",
+   "en": "3–16 letters, digits or _"
+  },
+  {
+   "key": "app.STR.eTaken",
+   "tr": "Bu ad alınmış",
+   "en": "This name is taken"
+  },
+  {
+   "key": "app.STR.eMatch",
+   "tr": "Şifreler aynı değil",
+   "en": "Passwords don’t match"
+  },
+  {
+   "key": "app.STR.eTerms",
+   "tr": "Devam etmek için koşulları kabul et",
+   "en": "Accept the terms to continue"
+  },
+  {
+   "key": "app.STR.eExists",
+   "tr": "Bu e-postayla zaten hesap var",
+   "en": "An account with this email exists"
+  },
+  {
+   "key": "app.STR.okName",
+   "tr": "Kullanılabilir",
+   "en": "Available"
+  },
+  {
+   "key": "app.STR.show",
+   "tr": "Göster",
+   "en": "Show"
+  },
+  {
+   "key": "app.STR.hide",
+   "tr": "Gizle",
+   "en": "Hide"
+  },
+  {
+   "key": "app.STR.noAcct",
+   "tr": "Bu e-postayla kayıtlı hesap bulunamadı.",
+   "en": "No account found for this email."
+  },
+  {
+   "key": "app.STR.badPass",
+   "tr": "Şifre hatalı. {0} deneme hakkın kaldı.",
+   "en": "Wrong password. {0} attempts left.",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "app.STR.locked",
+   "tr": "Çok fazla deneme. Şifreni sıfırla.",
+   "en": "Too many attempts. Reset your password."
+  },
+  {
+   "key": "app.STR.forgotNeed",
+   "tr": "Sıfırlama için önce e-postanı yaz.",
+   "en": "Type your email first to reset."
+  },
+  {
+   "key": "app.STR.forgotSent",
+   "tr": "Sıfırlama bağlantısı {0} adresine gönderildi.",
+   "en": "A reset link was sent to {0}.",
+   "params": [
+    "e"
+   ]
+  },
+  {
+   "key": "app.STR.weak",
+   "tr": "Zayıf",
+   "en": "Weak"
+  },
+  {
+   "key": "app.STR.mid",
+   "tr": "Orta",
+   "en": "Medium"
+  },
+  {
+   "key": "app.STR.strong",
+   "tr": "Güçlü",
+   "en": "Strong"
+  },
+  {
+   "key": "app.STR.splash.0",
+   "tr": "Gezegenler hizalanıyor…",
+   "en": "Aligning planets…"
+  },
+  {
+   "key": "app.STR.splash.1",
+   "tr": "Taşlar diziliyor…",
+   "en": "Racking tiles…"
+  },
+  {
+   "key": "app.STR.splash.2",
+   "tr": "Masalar hazırlanıyor…",
+   "en": "Setting up tables…"
+  },
+  {
+   "key": "app.STR.splash.3",
+   "tr": "Neredeyse hazır…",
+   "en": "Almost ready…"
+  },
+  {
+   "key": "app.STR.splash.4",
+   "tr": "Hazır",
+   "en": "Ready"
+  },
+  {
+   "key": "app.STR.tips.0",
+   "tr": "İpucu: Göstergenin bir üstü okeydir ve her taşın yerine geçer.",
+   "en": "Tip: The tile above the indicator is the okey and stands in for any tile."
+  },
+  {
+   "key": "app.STR.tips.1",
+   "tr": "İpucu: Elini açmak için 101 puanlık per ya da 5 çift gerekir.",
+   "en": "Tip: You need 101 points in sets or 5 pairs to open."
+  },
+  {
+   "key": "app.STR.tips.2",
+   "tr": "İpucu: Bir pere basılı tutarak toplu taşıyabilirsin.",
+   "en": "Tip: Press and hold a set to move it as a group."
+  },
+  {
+   "key": "app.STR.tips.3",
+   "tr": "İpucu: İşlek taşı atarsan +101 ceza yazılır.",
+   "en": "Tip: Discarding a playable tile costs +101."
+  },
+  {
+   "key": "app.STR.ldMsg.0",
+   "tr": "Masaya bağlanılıyor…",
+   "en": "Connecting to the table…"
+  },
+  {
+   "key": "app.STR.ldMsg.1",
+   "tr": "3D masa yükleniyor…",
+   "en": "Loading 3D table…"
+  },
+  {
+   "key": "app.STR.ldMsg.2",
+   "tr": "Taşlar karılıyor…",
+   "en": "Shuffling tiles…"
+  },
+  {
+   "key": "app.STR.ldMsg.3",
+   "tr": "Hazır",
+   "en": "Ready"
+  },
+  {
+   "key": "app.STR.failTitle",
+   "tr": "Masa açılamadı",
+   "en": "Couldn’t open the table"
+  },
+  {
+   "key": "app.STR.failBody",
+   "tr": "Bağlantı kurulamadı. İnternetini kontrol edip yeniden dene.",
+   "en": "We couldn’t connect. Check your connection and try again."
+  },
+  {
+   "key": "app.STR.toLobby",
+   "tr": "Lobiye dön",
+   "en": "Back to lobby"
+  },
+  {
+   "key": "app.STR.retry",
+   "tr": "Yeniden dene",
+   "en": "Try again"
+  },
+  {
+   "key": "app.STR.hello",
+   "tr": "Hoş geldin, {0}!",
+   "en": "Welcome, {0}!",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "app.STR.helloGift",
+   "tr": "Hoş geldin, {0}! {1} çip hesabına eklendi",
+   "en": "Welcome, {0}! {1} chips added",
+   "params": [
+    "n",
+    "c"
+   ]
+  },
+  {
+   "key": "app.STR.bye",
+   "tr": "Çıkış yapıldı",
+   "en": "Logged out"
+  },
+  {
+   "key": "app.STR.quitDone",
+   "tr": "Oyun kapatıldı",
+   "en": "Game closed"
+  },
+  {
+   "key": "app.STR.quitBack",
+   "tr": "Oyunu yeniden aç",
+   "en": "Open the game again"
+  },
+  {
+   "key": "app.STR.leftT",
+   "tr": "Masadan kalktın · bahis kaybedildi",
+   "en": "You left the table · bet lost"
+  },
+  {
+   "key": "app.STR.netT",
+   "tr": "Bağlantı koptu · lobiye dönüldü",
+   "en": "Connection lost · back in the lobby"
+  },
+  {
+   "key": "app.STR.specEnd",
+   "tr": "İzlediğin maç bitti",
+   "en": "The match you watched is over"
+  },
+  {
+   "key": "app.STR.won",
+   "tr": "Maçı kazandın! +{0} çip",
+   "en": "You won the match! +{0} chips",
+   "params": [
+    "c"
+   ]
+  },
+  {
+   "key": "app.STR.rankT",
+   "tr": "Maç bitti · {0}. sıradasın",
+   "en": "Match over · you placed {0}",
+   "params": [
+    "r"
+   ]
+  },
+  {
+   "key": "app.STR.refund",
+   "tr": "Bahsin iade edildi",
+   "en": "Your bet was refunded"
+  },
+  {
+   "key": "app.STR.single",
+   "tr": "TEKLİ",
+   "en": "SINGLES"
+  },
+  {
+   "key": "app.STR.pairs",
+   "tr": "EŞLİ",
+   "en": "PAIRS"
+  },
+  {
+   "key": "app.STR.hands",
+   "tr": "EL",
+   "en": "HANDS"
+  },
+  {
+   "key": "app.STR.classic",
+   "tr": "KLASİK",
+   "en": "CLASSIC"
+  },
+  {
+   "key": "app.STR.watching",
+   "tr": "İZLEYİCİ",
+   "en": "SPECTATOR"
+  },
+  {
+   "key": "menu.STR.play",
+   "tr": "HEMEN OYNA",
+   "en": "PLAY NOW"
+  },
+  {
+   "key": "menu.STR.planetTheme",
+   "tr": "GEZEGEN TEMASI",
+   "en": "PLANET THEME"
+  },
+  {
+   "key": "menu.STR.rank",
+   "tr": "Altın II",
+   "en": "Gold II"
+  },
+  {
+   "key": "menu.STR.shop",
+   "tr": "Mağaza",
+   "en": "Shop"
+  },
+  {
+   "key": "menu.STR.friends",
+   "tr": "Arkadaşlar",
+   "en": "Friends"
+  },
+  {
+   "key": "menu.STR.leader",
+   "tr": "Liderlik",
+   "en": "Leaderboard"
+  },
+  {
+   "key": "menu.STR.daily",
+   "tr": "Günlük ödül",
+   "en": "Daily reward"
+  },
+  {
+   "key": "menu.STR.rules",
+   "tr": "Kurallar",
+   "en": "Rules"
+  },
+  {
+   "key": "menu.STR.settings",
+   "tr": "Ayarlar",
+   "en": "Settings"
+  },
+  {
+   "key": "menu.STR.close",
+   "tr": "Kapat",
+   "en": "Close"
+  },
+  {
+   "key": "menu.STR.reset",
+   "tr": "Varsayılana dön",
+   "en": "Reset to default"
+  },
+  {
+   "key": "menu.STR.cancel",
+   "tr": "Vazgeç",
+   "en": "Cancel"
+  },
+  {
+   "key": "menu.STR.save",
+   "tr": "Kaydet",
+   "en": "Save"
+  },
+  {
+   "key": "menu.STR.ptRow",
+   "tr": "Gezegen teması",
+   "en": "Planet theme"
+  },
+  {
+   "key": "menu.STR.ptDesc",
+   "tr": "Renkler, logo ve arka plan seçtiğin gezegene göre değişir",
+   "en": "Colors, logo and background follow the planet you pick"
+  },
+  {
+   "key": "menu.STR.editProfile",
+   "tr": "Profili düzenle",
+   "en": "Edit profile"
+  },
+  {
+   "key": "menu.STR.myProfile",
+   "tr": "Profilim",
+   "en": "My profile"
+  },
+  {
+   "key": "menu.STR.buyChips",
+   "tr": "Çip satın al",
+   "en": "Buy chips"
+  },
+  {
+   "key": "menu.STR.buyGems",
+   "tr": "Elmas satın al",
+   "en": "Buy gems"
+  },
+  {
+   "key": "menu.STR.playerId",
+   "tr": "Oyuncu ID · 4821 9930",
+   "en": "Player ID · 4821 9930"
+  },
+  {
+   "key": "menu.STR.linked",
+   "tr": "Bağlı",
+   "en": "Linked"
+  },
+  {
+   "key": "menu.STR.logout",
+   "tr": "Çıkış yap",
+   "en": "Log out"
+  },
+  {
+   "key": "menu.STR.del",
+   "tr": "Hesabı sil",
+   "en": "Delete account"
+  },
+  {
+   "key": "menu.STR.offline",
+   "tr": "Çevrimdışı",
+   "en": "Offline"
+  },
+  {
+   "key": "menu.STR.modes.0",
+   "tr": "Klasik",
+   "en": "Classic"
+  },
+  {
+   "key": "menu.STR.modes.1",
+   "tr": "Dereceli",
+   "en": "Ranked"
+  },
+  {
+   "key": "menu.STR.modes.2",
+   "tr": "Botlara karşı",
+   "en": "Vs bots"
+  },
+  {
+   "key": "menu.STR.soon",
+   "tr": "YAKINDA",
+   "en": "SOON"
+  },
+  {
+   "key": "menu.STR.subs.0",
+   "tr": "Klasik · Tekli / Eşli · masalar",
+   "en": "Classic · Singles / Pairs · tables"
+  },
+  {
+   "key": "menu.STR.subs.1",
+   "tr": "Dereceli · Solo / Duo / Squad",
+   "en": "Ranked · Solo / Duo / Squad"
+  },
+  {
+   "key": "menu.STR.subs.2",
+   "tr": "Botlara karşı · antrenman · bahis yok",
+   "en": "Vs bots · practice · no stake"
+  },
+  {
+   "key": "menu.STR.pn.Satürn",
+   "tr": "Satürn",
+   "en": "Saturn"
+  },
+  {
+   "key": "menu.STR.pn.Mars",
+   "tr": "Mars",
+   "en": "Mars"
+  },
+  {
+   "key": "menu.STR.pn.Neptün",
+   "tr": "Neptün",
+   "en": "Neptune"
+  },
+  {
+   "key": "menu.STR.pn.Jüpiter",
+   "tr": "Jüpiter",
+   "en": "Jupiter"
+  },
+  {
+   "key": "menu.STR.pn.Venüs",
+   "tr": "Venüs",
+   "en": "Venus"
+  },
+  {
+   "key": "menu.STR.pd.Satürn",
+   "tr": "Altın halkalar",
+   "en": "Golden rings"
+  },
+  {
+   "key": "menu.STR.pd.Mars",
+   "tr": "Kızıl çöl",
+   "en": "Red desert"
+  },
+  {
+   "key": "menu.STR.pd.Neptün",
+   "tr": "Buz mavisi",
+   "en": "Ice blue"
+  },
+  {
+   "key": "menu.STR.pd.Jüpiter",
+   "tr": "Fırtına kuşakları",
+   "en": "Storm belts"
+  },
+  {
+   "key": "menu.STR.pd.Venüs",
+   "tr": "Pembe sis",
+   "en": "Pink haze"
+  },
+  {
+   "key": "menu.TAGS.g",
+   "tr": "Gösterge",
+   "en": "Indicator"
+  },
+  {
+   "key": "menu.TAGS.o",
+   "tr": "Okey",
+   "en": "Okey"
+  },
+  {
+   "key": "menu.TAGS.a",
+   "tr": "İşle",
+   "en": "Add"
+  },
+  {
+   "key": "menu.TAGS.l",
+   "tr": "Son taş",
+   "en": "Last tile"
+  },
+  {
+   "key": "menu.LG.d1",
+   "tr": "Elmas I",
+   "en": "Diamond I"
+  },
+  {
+   "key": "menu.LG.d2",
+   "tr": "Elmas II",
+   "en": "Diamond II"
+  },
+  {
+   "key": "menu.LG.g1",
+   "tr": "Altın I",
+   "en": "Gold I"
+  },
+  {
+   "key": "menu.LG.g2",
+   "tr": "Altın II",
+   "en": "Gold II"
+  },
+  {
+   "key": "menu.RULES.0.0",
+   "tr": "Taşlar ve okey",
+   "en": "Tiles and the okey"
+  },
+  {
+   "key": "menu.RULES.0.1.0",
+   "tr": "Oyunda 106 taş var: kırmızı, sarı, mavi ve siyah renklerde 1'den 13'e kadar ikişer taş ve 2 sahte okey.",
+   "en": "There are 106 tiles: two of each number from 1 to 13 in red, yellow, blue and black, plus 2 false okeys."
+  },
+  {
+   "key": "menu.RULES.0.1.1",
+   "tr": "Ortadan açılan taş göstergedir. Göstergenin bir üstü okeydir ve her taşın yerine geçebilir.",
+   "en": "The tile turned up in the middle is the indicator. The tile one above it is the okey and can stand in for any tile."
+  },
+  {
+   "key": "menu.RULES.0.1.2",
+   "tr": "Sahte okey, okeyin kendisi yerine kullanılır; değeri okeyin değeridir.",
+   "en": "A false okey takes the place of the okey itself and has the okey's value."
+  },
+  {
+   "key": "menu.RULES.0.2",
+   "tr": "Gösterge sarı 7 ise okey sarı 8 olur.",
+   "en": "If the indicator is yellow 7, the okey is yellow 8."
+  },
+  {
+   "key": "menu.RULES.1.0",
+   "tr": "Dağıtım",
+   "en": "Dealing"
+  },
+  {
+   "key": "menu.RULES.1.1.0",
+   "tr": "Taşlar karıştırılır ve her oyuncuya 21 taş dağıtılır.",
+   "en": "The tiles are shuffled and every player gets 21 tiles."
+  },
+  {
+   "key": "menu.RULES.1.1.1",
+   "tr": "Oyunu başlatan oyuncu 22 taş alır ve ilk hamlede bir taş atarak başlar.",
+   "en": "The starting player gets 22 tiles and begins by discarding one."
+  },
+  {
+   "key": "menu.RULES.1.1.2",
+   "tr": "Kalan taşlar ortada çekme destesi olur. Sıra saat yönünün tersine ilerler.",
+   "en": "The remaining tiles form the draw pile in the middle. Play goes counter-clockwise."
+  },
+  {
+   "key": "menu.RULES.1.2",
+   "tr": "",
+   "en": ""
+  },
+  {
+   "key": "menu.RULES.2.0",
+   "tr": "Elini açmak",
+   "en": "Opening your hand"
+  },
+  {
+   "key": "menu.RULES.2.1.0",
+   "tr": "Elini açabilmek için perlerinin toplamı en az 101 olmalı.",
+   "en": "To open your hand, your sets must add up to at least 101."
+  },
+  {
+   "key": "menu.RULES.2.1.1",
+   "tr": "Seri: aynı renkte en az 3 ardışık taş. Grup: aynı sayıda, farklı renklerde 3 veya 4 taş.",
+   "en": "Run: at least 3 consecutive tiles of the same color. Group: 3 or 4 tiles of the same number in different colors."
+  },
+  {
+   "key": "menu.RULES.2.1.2",
+   "tr": "İstersen en az 5 çiftle çiftten de açabilirsin.",
+   "en": "You can also open with at least 5 pairs."
+  },
+  {
+   "key": "menu.RULES.2.2",
+   "tr": "Seri 46 + grup 36 = 82 puan. Açmak için 19 puan daha gerekir.",
+   "en": "Run 46 + group 36 = 82 points. You need 19 more to open."
+  },
+  {
+   "key": "menu.RULES.3.0",
+   "tr": "Taş işlemek",
+   "en": "Adding tiles"
+  },
+  {
+   "key": "menu.RULES.3.1.0",
+   "tr": "Elini açtıktan sonra masadaki tüm perlere uygun taş ekleyebilirsin.",
+   "en": "Once you have opened, you can add matching tiles to any set on the table."
+  },
+  {
+   "key": "menu.RULES.3.1.1",
+   "tr": "Masadaki bir perde okeyin yerini tutan taş sende varsa, onu koyup okeyi alabilirsin.",
+   "en": "If you hold the tile the okey stands for in a set on the table, you can swap it in and take the okey."
+  },
+  {
+   "key": "menu.RULES.3.2",
+   "tr": "Kırmızı 13'ü masadaki kırmızı seriye işleyebilirsin.",
+   "en": "You can add red 13 to the red run on the table."
+  },
+  {
+   "key": "menu.RULES.4.0",
+   "tr": "Bitirmek",
+   "en": "Finishing"
+  },
+  {
+   "key": "menu.RULES.4.1.0",
+   "tr": "Elindeki tüm taşları perlere yerleştirip son taşını atan oyuncu eli bitirir.",
+   "en": "The player who places all their tiles in sets and discards their last tile finishes the hand."
+  },
+  {
+   "key": "menu.RULES.4.1.1",
+   "tr": "Son taş olarak okeyi atarak bitirirsen bütün cezalar ikiye katlanır.",
+   "en": "If you finish by discarding the okey, every penalty is doubled."
+  },
+  {
+   "key": "menu.RULES.4.2",
+   "tr": "Son taş olarak okeyi atmak cezaları ikiye katlar.",
+   "en": "Discarding the okey as your last tile doubles all penalties."
+  },
+  {
+   "key": "menu.RULES.5.0",
+   "tr": "Puanlama",
+   "en": "Scoring"
+  },
+  {
+   "key": "menu.RULES.5.1.0",
+   "tr": "Eli bitiren oyuncu -101 puan alır.",
+   "en": "The player who finishes gets -101 points."
+  },
+  {
+   "key": "menu.RULES.5.1.1",
+   "tr": "Elini açan oyuncular ellerinde kalan taşların toplamı kadar ceza alır.",
+   "en": "Players who opened get a penalty equal to the sum of the tiles left in their hand."
+  },
+  {
+   "key": "menu.RULES.5.1.2",
+   "tr": "Elini açamayan oyuncu 202 ceza alır. Çiftten açanların cezası ikiye katlanır.",
+   "en": "A player who never opened gets 202 penalty points. Players who opened with pairs get double penalties."
+  },
+  {
+   "key": "menu.RULES.5.1.3",
+   "tr": "Oyun sonunda en düşük puana sahip oyuncu kazanır.",
+   "en": "The player with the lowest score at the end wins."
+  },
+  {
+   "key": "menu.RULES.5.2",
+   "tr": "",
+   "en": ""
+  },
+  {
+   "key": "menu.TASKS.0",
+   "tr": "3 el kazan",
+   "en": "Win 3 hands"
+  },
+  {
+   "key": "menu.TASKS.1",
+   "tr": "Çiftten aç",
+   "en": "Open with pairs"
+  },
+  {
+   "key": "menu.TASKS.2",
+   "tr": "5 el oyna",
+   "en": "Play 5 hands"
+  },
+  {
+   "key": "menu.TASKS.3",
+   "tr": "Okey atarak bitir",
+   "en": "Finish by discarding the okey"
+  },
+  {
+   "key": "menu.TASKS.4",
+   "tr": "40 taş işle",
+   "en": "Add 40 tiles to sets"
+  },
+  {
+   "key": "menu.SET_EN.Oyun",
+   "tr": "Oyun",
+   "en": "Game"
+  },
+  {
+   "key": "menu.SET_EN.Ses",
+   "tr": "Ses",
+   "en": "Sound"
+  },
+  {
+   "key": "menu.SET_EN.Görüntü",
+   "tr": "Görüntü",
+   "en": "Display"
+  },
+  {
+   "key": "menu.SET_EN.Dil",
+   "tr": "Dil",
+   "en": "Language"
+  },
+  {
+   "key": "menu.SET_EN.Hesap",
+   "tr": "Hesap",
+   "en": "Account"
+  },
+  {
+   "key": "menu.SET_EN.Taş_hareketleri_ve_masa_davranışı",
+   "tr": "Taş hareketleri ve masa davranışı",
+   "en": "Tile movement and table behavior"
+  },
+  {
+   "key": "menu.SET_EN.Müzik_efektler_ve_bildirim_sesleri",
+   "tr": "Müzik, efektler ve bildirim sesleri",
+   "en": "Music, effects and notification sounds"
+  },
+  {
+   "key": "menu.SET_EN.Tema_çözünürlük_ve_görsel_efektler",
+   "tr": "Tema, çözünürlük ve görsel efektler",
+   "en": "Theme, resolution and visual effects"
+  },
+  {
+   "key": "menu.SET_EN.Uygulamanın_dili",
+   "tr": "Uygulamanın dili",
+   "en": "App language"
+  },
+  {
+   "key": "menu.SET_EN.Profil_bağlı_hesaplar_ve_bildirimler",
+   "tr": "Profil, bağlı hesaplar ve bildirimler",
+   "en": "Profile, linked accounts and notifications"
+  },
+  {
+   "key": "menu.SET_EN.Otomatik_sırala",
+   "tr": "Otomatik sırala",
+   "en": "Auto-sort"
+  },
+  {
+   "key": "menu.SET_EN.Yeni_çekilen_taş_ıstakada_uygun_yere_yer",
+   "tr": "Yeni çekilen taş ıstakada uygun yere yerleşsin",
+   "en": "Drawn tiles go to the right spot on your rack"
+  },
+  {
+   "key": "menu.SET_EN.Perleri_vurgula",
+   "tr": "Perleri vurgula",
+   "en": "Highlight sets"
+  },
+  {
+   "key": "menu.SET_EN.Geçerli_perlerin_çevresi_yeşil_yansın",
+   "tr": "Geçerli perlerin çevresi yeşil yansın",
+   "en": "Valid sets glow green"
+  },
+  {
+   "key": "menu.SET_EN.Çift_tıkla_taş_at",
+   "tr": "Çift tıkla taş at",
+   "en": "Double-click to discard"
+  },
+  {
+   "key": "menu.SET_EN.Sürüklemeden_hızlı_atış",
+   "tr": "Sürüklemeden hızlı atış",
+   "en": "Discard quickly without dragging"
+  },
+  {
+   "key": "menu.SET_EN.Masa_sohbeti",
+   "tr": "Masa sohbeti",
+   "en": "Table chat"
+  },
+  {
+   "key": "menu.SET_EN.Masa_içi_mesaj_ve_emojiler_görünsün",
+   "tr": "Masa içi mesaj ve emojiler görünsün",
+   "en": "Show messages and emojis at the table"
+  },
+  {
+   "key": "menu.SET_EN.Tur_süresi_uyarısı",
+   "tr": "Tur süresi uyarısı",
+   "en": "Turn timer warning"
+  },
+  {
+   "key": "menu.SET_EN.Süre_bitmeden_kaç_saniye_önce_uyarılsın",
+   "tr": "Süre bitmeden kaç saniye önce uyarılsın",
+   "en": "How many seconds before your time runs out"
+  },
+  {
+   "key": "menu.SET_EN.Taş_boyutu",
+   "tr": "Taş boyutu",
+   "en": "Tile size"
+  },
+  {
+   "key": "menu.SET_EN.Istakadaki_taşların_büyüklüğü",
+   "tr": "Istakadaki taşların büyüklüğü",
+   "en": "Size of the tiles on your rack"
+  },
+  {
+   "key": "menu.SET_EN.Küçük",
+   "tr": "Küçük",
+   "en": "Small"
+  },
+  {
+   "key": "menu.SET_EN.Orta",
+   "tr": "Orta",
+   "en": "Medium"
+  },
+  {
+   "key": "menu.SET_EN.Büyük",
+   "tr": "Büyük",
+   "en": "Large"
+  },
+  {
+   "key": "menu.SET_EN.Ana_ses",
+   "tr": "Ana ses",
+   "en": "Master volume"
+  },
+  {
+   "key": "menu.SET_EN.Tüm_seslerin_genel_seviyesi",
+   "tr": "Tüm seslerin genel seviyesi",
+   "en": "Overall level of all sounds"
+  },
+  {
+   "key": "menu.SET_EN.Müzik",
+   "tr": "Müzik",
+   "en": "Music"
+  },
+  {
+   "key": "menu.SET_EN.Menü_ve_masa_müziği",
+   "tr": "Menü ve masa müziği",
+   "en": "Menu and table music"
+  },
+  {
+   "key": "menu.SET_EN.Efektler",
+   "tr": "Efektler",
+   "en": "Effects"
+  },
+  {
+   "key": "menu.SET_EN.Taş_zar_ve_buton_sesleri",
+   "tr": "Taş, zar ve buton sesleri",
+   "en": "Tile, dice and button sounds"
+  },
+  {
+   "key": "menu.SET_EN.Taş_sesleri",
+   "tr": "Taş sesleri",
+   "en": "Tile sounds"
+  },
+  {
+   "key": "menu.SET_EN.Taş_çekme_ve_atma_sesi",
+   "tr": "Taş çekme ve atma sesi",
+   "en": "Sound when drawing and discarding"
+  },
+  {
+   "key": "menu.SET_EN.Bildirim_sesi",
+   "tr": "Bildirim sesi",
+   "en": "Notification sound"
+  },
+  {
+   "key": "menu.SET_EN.Sıra_sende_ve_davet_uyarıları",
+   "tr": "Sıra sende ve davet uyarıları",
+   "en": "Your-turn and invite alerts"
+  },
+  {
+   "key": "menu.SET_EN.Arka_plan_hareketi",
+   "tr": "Arka plan hareketi",
+   "en": "Background motion"
+  },
+  {
+   "key": "menu.SET_EN.Dönen_gezegen_ve_kayan_yıldızlar",
+   "tr": "Dönen gezegen ve kayan yıldızlar",
+   "en": "Spinning planet and shooting stars"
+  },
+  {
+   "key": "menu.SET_EN.Çözünürlük",
+   "tr": "Çözünürlük",
+   "en": "Resolution"
+  },
+  {
+   "key": "menu.SET_EN.Görüntü_modu",
+   "tr": "Görüntü modu",
+   "en": "Display mode"
+  },
+  {
+   "key": "menu.SET_EN.Tam_ekran_çerçevesiz_pencere_veya_pencer",
+   "tr": "Tam ekran, çerçevesiz pencere veya pencere",
+   "en": "Fullscreen, borderless or windowed"
+  },
+  {
+   "key": "menu.SET_EN.Tam_ekran",
+   "tr": "Tam ekran",
+   "en": "Fullscreen"
+  },
+  {
+   "key": "menu.SET_EN.Çerçevesiz",
+   "tr": "Çerçevesiz",
+   "en": "Borderless"
+  },
+  {
+   "key": "menu.SET_EN.Pencere",
+   "tr": "Pencere",
+   "en": "Windowed"
+  },
+  {
+   "key": "menu.SET_EN.Ekran_boyutu",
+   "tr": "Ekran boyutu",
+   "en": "Screen size"
+  },
+  {
+   "key": "menu.SET_EN.Efekt_kalitesi",
+   "tr": "Efekt kalitesi",
+   "en": "Effect quality"
+  },
+  {
+   "key": "menu.SET_EN.Düşük_ayar_eski_bilgisayarlarda_akıcılığ",
+   "tr": "Düşük ayar eski bilgisayarlarda akıcılığı artırır",
+   "en": "Lower settings run smoother on older computers"
+  },
+  {
+   "key": "menu.SET_EN.Düşük",
+   "tr": "Düşük",
+   "en": "Low"
+  },
+  {
+   "key": "menu.SET_EN.Yüksek",
+   "tr": "Yüksek",
+   "en": "High"
+  },
+  {
+   "key": "menu.SET_EN.Arkadaşlık_istekleri",
+   "tr": "Arkadaşlık istekleri",
+   "en": "Friend requests"
+  },
+  {
+   "key": "menu.SET_EN.Yeni_istekler_için_bildirim_al",
+   "tr": "Yeni istekler için bildirim al",
+   "en": "Get notified about new requests"
+  },
+  {
+   "key": "menu.SET_EN.Masa_davetleri",
+   "tr": "Masa davetleri",
+   "en": "Table invites"
+  },
+  {
+   "key": "menu.SET_EN.Arkadaşların_seni_masaya_çağırabilsin",
+   "tr": "Arkadaşların seni masaya çağırabilsin",
+   "en": "Let friends invite you to their table"
+  },
+  {
+   "key": "menu.SET_EN.Türkiye",
+   "tr": "Türkiye",
+   "en": "Turkey"
+  },
+  {
+   "key": "menu.SET_EN.Uluslararası",
+   "tr": "Uluslararası",
+   "en": "International"
+  },
+  {
+   "key": "lobby.STR.back",
+   "tr": "Ana menü",
+   "en": "Main menu"
+  },
+  {
+   "key": "lobby.STR.classic",
+   "tr": "Klasik",
+   "en": "Classic"
+  },
+  {
+   "key": "lobby.STR.classicSub",
+   "tr": "Tekli ve eşli masalar · 101 Okey",
+   "en": "Singles and pairs tables · 101 Okey"
+  },
+  {
+   "key": "lobby.STR.buy",
+   "tr": "Çip satın al",
+   "en": "Buy chips"
+  },
+  {
+   "key": "lobby.STR.joinCode",
+   "tr": "Kodla katıl",
+   "en": "Join by code"
+  },
+  {
+   "key": "lobby.STR.create",
+   "tr": "Masa aç",
+   "en": "Open table"
+  },
+  {
+   "key": "lobby.STR.all",
+   "tr": "Tümü",
+   "en": "All"
+  },
+  {
+   "key": "lobby.STR.tekli",
+   "tr": "Tekli",
+   "en": "Singles"
+  },
+  {
+   "key": "lobby.STR.esli",
+   "tr": "Eşli",
+   "en": "Pairs"
+  },
+  {
+   "key": "lobby.STR.fFree",
+   "tr": "Boş yer var",
+   "en": "Has free seat"
+  },
+  {
+   "key": "lobby.STR.fKat",
+   "tr": "Katlamalı",
+   "en": "Doubling"
+  },
+  {
+   "key": "lobby.STR.allBets",
+   "tr": "Tümü",
+   "en": "All"
+  },
+  {
+   "key": "lobby.STR.search",
+   "tr": "Masa ara",
+   "en": "Search tables"
+  },
+  {
+   "key": "lobby.STR.locked",
+   "tr": "Şifreli masa",
+   "en": "Password protected"
+  },
+  {
+   "key": "lobby.STR.sWait",
+   "tr": "Bekliyor",
+   "en": "Waiting"
+  },
+  {
+   "key": "lobby.STR.sFull",
+   "tr": "Dolu · başlıyor",
+   "en": "Full · starting"
+  },
+  {
+   "key": "lobby.STR.sPlay",
+   "tr": "Oyunda · El {0}/{1}",
+   "en": "Playing · Hand {0}/{1}",
+   "params": [
+    "h",
+    "n"
+   ]
+  },
+  {
+   "key": "lobby.STR.meta",
+   "tr": "· {0} el · {1} sn",
+   "en": "· {0} hands · {1}s",
+   "params": [
+    "h",
+    "t"
+   ]
+  },
+  {
+   "key": "lobby.STR.sit",
+   "tr": "Otur",
+   "en": "Sit"
+  },
+  {
+   "key": "lobby.STR.joinRun",
+   "tr": "Katıl",
+   "en": "Join"
+  },
+  {
+   "key": "lobby.STR.watch",
+   "tr": "İzle",
+   "en": "Watch"
+  },
+  {
+   "key": "lobby.STR.full",
+   "tr": "Dolu",
+   "en": "Full"
+  },
+  {
+   "key": "lobby.STR.bot",
+   "tr": "BOT",
+   "en": "BOT"
+  },
+  {
+   "key": "lobby.STR.emptyT",
+   "tr": "Bu filtrelere uygun masa yok",
+   "en": "No tables match these filters"
+  },
+  {
+   "key": "lobby.STR.emptyB",
+   "tr": "Filtreleri temizle ya da kendi masanı aç; açık masalar lobide hemen listelenir.",
+   "en": "Clear the filters or open your own table; open tables show up in the lobby right away."
+  },
+  {
+   "key": "lobby.STR.clearF",
+   "tr": "Filtreleri temizle",
+   "en": "Clear filters"
+  },
+  {
+   "key": "lobby.STR.bKat",
+   "tr": "Katlamalı",
+   "en": "Doubling"
+  },
+  {
+   "key": "lobby.STR.bKatP",
+   "tr": "Ortak eşiği yükseltir",
+   "en": "Partner raises the bar"
+  },
+  {
+   "key": "lobby.STR.bKatNP",
+   "tr": "Yalnız rakip yükseltir",
+   "en": "Only opponents raise"
+  },
+  {
+   "key": "lobby.STR.bHands",
+   "tr": "{0} el",
+   "en": "{0} hands",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "lobby.STR.bTurn",
+   "tr": "{0} sn",
+   "en": "{0}s",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "lobby.STR.bOkey",
+   "tr": "Okey +101",
+   "en": "Okey +101"
+  },
+  {
+   "key": "lobby.STR.bIsle",
+   "tr": "İşlek +101",
+   "en": "Playable +101"
+  },
+  {
+   "key": "lobby.STR.bNoSpec",
+   "tr": "İzleyici yok",
+   "en": "No spectators"
+  },
+  {
+   "key": "lobby.STR.bSpec",
+   "tr": "İzleyici açık",
+   "en": "Spectators on"
+  },
+  {
+   "key": "lobby.STR.bQuick",
+   "tr": "Hazır sohbet",
+   "en": "Quick chat"
+  },
+  {
+   "key": "lobby.STR.bChatOff",
+   "tr": "Sohbet kapalı",
+   "en": "Chat off"
+  },
+  {
+   "key": "lobby.STR.bNoGift",
+   "tr": "Hediye kapalı",
+   "en": "Gifts off"
+  },
+  {
+   "key": "lobby.STR.bPriv",
+   "tr": "Özel",
+   "en": "Private"
+  },
+  {
+   "key": "lobby.STR.bPass",
+   "tr": "Şifreli",
+   "en": "Password"
+  },
+  {
+   "key": "lobby.STR.createT",
+   "tr": "Masa aç",
+   "en": "Open a table"
+  },
+  {
+   "key": "lobby.STR.createS",
+   "tr": "Klasik · 101 · masayı açınca otomatik oturursun",
+   "en": "Classic · 101 · you sit down automatically"
+  },
+  {
+   "key": "lobby.STR.rMode",
+   "tr": "Oyun modu",
+   "en": "Game mode"
+  },
+  {
+   "key": "lobby.STR.rModeD",
+   "tr": "Girdiğin moda göre; tip seçebilirsin",
+   "en": "Set by the mode you entered; pick a type"
+  },
+  {
+   "key": "lobby.STR.rName",
+   "tr": "Masa adı",
+   "en": "Table name"
+  },
+  {
+   "key": "lobby.STR.rNameD",
+   "tr": "Lobide ve davette görünür",
+   "en": "Shown in the lobby and invites"
+  },
+  {
+   "key": "lobby.STR.rNameErr",
+   "tr": "Masa adı boş olamaz",
+   "en": "Table name can’t be empty"
+  },
+  {
+   "key": "lobby.STR.rVis",
+   "tr": "Görünürlük",
+   "en": "Visibility"
+  },
+  {
+   "key": "lobby.STR.visOpen",
+   "tr": "Açık",
+   "en": "Open"
+  },
+  {
+   "key": "lobby.STR.visPriv",
+   "tr": "Özel",
+   "en": "Private"
+  },
+  {
+   "key": "lobby.STR.visOpenD",
+   "tr": "Lobide listelenir, herkes oturabilir",
+   "en": "Listed in the lobby, anyone can sit"
+  },
+  {
+   "key": "lobby.STR.visPrivD",
+   "tr": "Lobide görünmez, davet koduyla girilir",
+   "en": "Hidden from the lobby, join by invite code"
+  },
+  {
+   "key": "lobby.STR.rPass",
+   "tr": "Şifre",
+   "en": "Password"
+  },
+  {
+   "key": "lobby.STR.passOffD",
+   "tr": "İsteğe bağlı · 4 haneli",
+   "en": "Optional · 4 digits"
+  },
+  {
+   "key": "lobby.STR.passOnD",
+   "tr": "Girenler bu şifreyi yazacak",
+   "en": "Players must enter this password"
+  },
+  {
+   "key": "lobby.STR.passErr",
+   "tr": "4 rakam gir",
+   "en": "Enter 4 digits"
+  },
+  {
+   "key": "lobby.STR.rHands",
+   "tr": "El sayısı",
+   "en": "Hands"
+  },
+  {
+   "key": "lobby.STR.rHandsD",
+   "tr": "Maç bu kadar el sürer, en düşük toplam kazanır",
+   "en": "The match lasts this many hands; lowest total wins"
+  },
+  {
+   "key": "lobby.STR.rBet",
+   "tr": "Bahis",
+   "en": "Bet"
+  },
+  {
+   "key": "lobby.STR.bal",
+   "tr": "Bakiyen {0}",
+   "en": "Balance {0}",
+   "params": [
+    "b"
+   ]
+  },
+  {
+   "key": "lobby.STR.lowT",
+   "tr": "Bakiyen yetersiz",
+   "en": "Not enough chips"
+  },
+  {
+   "key": "lobby.STR.lowB",
+   "tr": "{0} bahis için {1} çip daha gerekiyor.",
+   "en": "You need {1} more chips for a {0} bet.",
+   "params": [
+    "t",
+    "n"
+   ]
+  },
+  {
+   "key": "lobby.STR.lowAll",
+   "tr": "En düşük bahis için {0} çip daha gerekiyor.",
+   "en": "You need {0} more chips for the lowest bet.",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "lobby.STR.buyChips",
+   "tr": "Çip al",
+   "en": "Get chips"
+  },
+  {
+   "key": "lobby.STR.tierLocked",
+   "tr": "Yetersiz",
+   "en": "Too high"
+  },
+  {
+   "key": "lobby.STR.tierOk",
+   "tr": "Uygun",
+   "en": "Available"
+  },
+  {
+   "key": "lobby.STR.rPrize",
+   "tr": "Ödül",
+   "en": "Prize"
+  },
+  {
+   "key": "lobby.STR.prizeT",
+   "tr": "Kazanan alır · masadaki tüm bahisler",
+   "en": "Winner takes all bets at the table"
+  },
+  {
+   "key": "lobby.STR.prizeE",
+   "tr": "Kazanan takım alır · kişi başı yarısı",
+   "en": "Winning team takes it · half each"
+  },
+  {
+   "key": "lobby.STR.pool",
+   "tr": "Toplam havuz",
+   "en": "Total pool"
+  },
+  {
+   "key": "lobby.STR.rKat",
+   "tr": "Katlamalı",
+   "en": "Doubling"
+  },
+  {
+   "key": "lobby.STR.rKatD",
+   "tr": "Sonradan açan önceki açılışı geçmeli: 101 → 102 → 103, 5 → 6 → 7 çift",
+   "en": "Each later opening must beat the previous one: 101 → 102 → 103, 5 → 6 → 7 pairs"
+  },
+  {
+   "key": "lobby.STR.rKatP",
+   "tr": "Ortağın açılışı eşiği yükseltsin mi?",
+   "en": "Should your partner’s opening raise the bar?"
+  },
+  {
+   "key": "lobby.STR.rKatPD",
+   "tr": "Kapalıysa eşiği yalnız rakip takımın açılışları yükseltir",
+   "en": "If off, only the opposing team’s openings raise it"
+  },
+  {
+   "key": "lobby.STR.rTurn",
+   "tr": "Tur süresi",
+   "en": "Turn time"
+  },
+  {
+   "key": "lobby.STR.rTurnD",
+   "tr": "Süre dolunca otomatik oynanır",
+   "en": "Auto-plays when time runs out"
+  },
+  {
+   "key": "lobby.STR.rRules",
+   "tr": "Kural özelleştirme",
+   "en": "Customize rules"
+  },
+  {
+   "key": "lobby.STR.rulesDef",
+   "tr": "Varsayılan kurallar",
+   "en": "Default rules"
+  },
+  {
+   "key": "lobby.STR.rulesCh",
+   "tr": "{0} kural değişti",
+   "en": "{0} rules changed",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "lobby.STR.resetRules",
+   "tr": "Varsayılana dön",
+   "en": "Reset to default"
+  },
+  {
+   "key": "lobby.STR.rOkey",
+   "tr": "Okey atma cezası (+101)",
+   "en": "Okey discard penalty (+101)"
+  },
+  {
+   "key": "lobby.STR.rOkeyD",
+   "tr": "Okeyi yere atan +101 yazar",
+   "en": "Discarding the okey costs +101"
+  },
+  {
+   "key": "lobby.STR.rIsle",
+   "tr": "İşlek taş atma cezası (+101)",
+   "en": "Playable tile penalty (+101)"
+  },
+  {
+   "key": "lobby.STR.rIsleD",
+   "tr": "Masadaki pere işlenebilen taşı atan +101 yazar",
+   "en": "Discarding a tile that fits a set on the table costs +101"
+  },
+  {
+   "key": "lobby.STR.rSpec",
+   "tr": "İzleyici",
+   "en": "Spectators"
+  },
+  {
+   "key": "lobby.STR.rSpecD",
+   "tr": "Oyun sürerken başkaları izleyebilsin",
+   "en": "Others can watch while you play"
+  },
+  {
+   "key": "lobby.STR.allow",
+   "tr": "İzin ver",
+   "en": "Allow"
+  },
+  {
+   "key": "lobby.STR.deny",
+   "tr": "Verme",
+   "en": "Don’t allow"
+  },
+  {
+   "key": "lobby.STR.rChat",
+   "tr": "Sohbet",
+   "en": "Chat"
+  },
+  {
+   "key": "lobby.STR.rChatD",
+   "tr": "Masa içi yazışma",
+   "en": "Table messages"
+  },
+  {
+   "key": "lobby.STR.chOn",
+   "tr": "Açık",
+   "en": "On"
+  },
+  {
+   "key": "lobby.STR.chQuick",
+   "tr": "Yalnız hazır cümleler",
+   "en": "Quick phrases only"
+  },
+  {
+   "key": "lobby.STR.chOff",
+   "tr": "Kapalı",
+   "en": "Off"
+  },
+  {
+   "key": "lobby.STR.rGift",
+   "tr": "İkram ve hediye",
+   "en": "Treats and gifts"
+  },
+  {
+   "key": "lobby.STR.rGiftD",
+   "tr": "Oyuncular birbirine ikram gönderebilsin",
+   "en": "Players can send each other treats"
+  },
+  {
+   "key": "lobby.STR.on",
+   "tr": "Açık",
+   "en": "On"
+  },
+  {
+   "key": "lobby.STR.off",
+   "tr": "Kapalı",
+   "en": "Off"
+  },
+  {
+   "key": "lobby.STR.summary",
+   "tr": "ÖZET",
+   "en": "SUMMARY"
+  },
+  {
+   "key": "lobby.STR.kRules",
+   "tr": "MASA KURALLARI",
+   "en": "TABLE RULES"
+  },
+  {
+   "key": "lobby.STR.sKatOn",
+   "tr": "101 → 102 → 103",
+   "en": "101 → 102 → 103"
+  },
+  {
+   "key": "lobby.STR.sKatP",
+   "tr": "Ortağın açılışı eşiği yükseltir",
+   "en": "Partner’s opening raises the bar"
+  },
+  {
+   "key": "lobby.STR.sYes",
+   "tr": "Evet",
+   "en": "Yes"
+  },
+  {
+   "key": "lobby.STR.sNo",
+   "tr": "Hayır",
+   "en": "No"
+  },
+  {
+   "key": "lobby.STR.sOkey",
+   "tr": "Okey atma cezası",
+   "en": "Okey discard penalty"
+  },
+  {
+   "key": "lobby.STR.sIsle",
+   "tr": "İşlek taş atma cezası",
+   "en": "Playable tile penalty"
+  },
+  {
+   "key": "lobby.STR.sQuick",
+   "tr": "Hazır cümleler",
+   "en": "Quick phrases"
+  },
+  {
+   "key": "lobby.STR.kBet",
+   "tr": "BAHİS",
+   "en": "BET"
+  },
+  {
+   "key": "lobby.STR.kHands",
+   "tr": "EL",
+   "en": "HANDS"
+  },
+  {
+   "key": "lobby.STR.kTurn",
+   "tr": "TUR SÜRESİ",
+   "en": "TURN TIME"
+  },
+  {
+   "key": "lobby.STR.kPool",
+   "tr": "HAVUZ",
+   "en": "POOL"
+  },
+  {
+   "key": "lobby.STR.balance",
+   "tr": "Bakiyen",
+   "en": "Balance"
+  },
+  {
+   "key": "lobby.STR.ctaCreate",
+   "tr": "Masayı oluştur · {0}",
+   "en": "Create table · {0}",
+   "params": [
+    "b"
+   ]
+  },
+  {
+   "key": "lobby.STR.ctaLow",
+   "tr": "Yetersiz bakiye",
+   "en": "Not enough chips"
+  },
+  {
+   "key": "lobby.STR.ctaFix",
+   "tr": "Eksikleri tamamla",
+   "en": "Fix the highlighted fields"
+  },
+  {
+   "key": "lobby.STR.cancel",
+   "tr": "Vazgeç",
+   "en": "Cancel"
+  },
+  {
+   "key": "lobby.STR.close",
+   "tr": "Kapat",
+   "en": "Close"
+  },
+  {
+   "key": "lobby.STR.modeLine",
+   "tr": "Klasik · {0} · {1}",
+   "en": "Classic · {0} · {1}",
+   "params": [
+    "t",
+    "v"
+   ]
+  },
+  {
+   "key": "lobby.STR.open",
+   "tr": "Açık",
+   "en": "Open"
+  },
+  {
+   "key": "lobby.STR.priv",
+   "tr": "Özel",
+   "en": "Private"
+  },
+  {
+   "key": "lobby.STR.passT",
+   "tr": "Şifreli masa",
+   "en": "Password protected"
+  },
+  {
+   "key": "lobby.STR.enter",
+   "tr": "Gir",
+   "en": "Enter"
+  },
+  {
+   "key": "lobby.STR.wrongPass",
+   "tr": "Yanlış şifre. Tekrar dene.",
+   "en": "Wrong password. Try again."
+  },
+  {
+   "key": "lobby.STR.passBody",
+   "tr": "{0} · {1} bahis",
+   "en": "{0} · {1} bet",
+   "params": [
+    "n",
+    "b"
+   ]
+  },
+  {
+   "key": "lobby.STR.codeT",
+   "tr": "Kodla katıl",
+   "en": "Join by code"
+  },
+  {
+   "key": "lobby.STR.codeS",
+   "tr": "Özel masalar lobide görünmez; arkadaşından aldığın kodu yaz.",
+   "en": "Private tables are hidden from the lobby; type the code a friend sent you."
+  },
+  {
+   "key": "lobby.STR.codeErr",
+   "tr": "Bu koda ait açık bir masa bulunamadı.",
+   "en": "No open table found for this code."
+  },
+  {
+   "key": "lobby.STR.codeShort",
+   "tr": "Kod 6 karakter olmalı",
+   "en": "The code has 6 characters"
+  },
+  {
+   "key": "lobby.STR.join",
+   "tr": "Katıl",
+   "en": "Join"
+  },
+  {
+   "key": "lobby.STR.connT",
+   "tr": "Masaya bağlanılıyor…",
+   "en": "Connecting to the table…"
+  },
+  {
+   "key": "lobby.STR.fullT",
+   "tr": "Masa doldu",
+   "en": "Table is full"
+  },
+  {
+   "key": "lobby.STR.fullB",
+   "tr": "Son koltuk sen bağlanırken doldu.",
+   "en": "The last seat was taken while you were connecting."
+  },
+  {
+   "key": "lobby.STR.closedT",
+   "tr": "Masa kapandı",
+   "en": "Table closed"
+  },
+  {
+   "key": "lobby.STR.closedB",
+   "tr": "Oda sahibi masayı kapattı.",
+   "en": "The host closed the table."
+  },
+  {
+   "key": "lobby.STR.similar",
+   "tr": "Benzer masa bul",
+   "en": "Find a similar table"
+  },
+  {
+   "key": "lobby.STR.watchIt",
+   "tr": "İzle",
+   "en": "Watch"
+  },
+  {
+   "key": "lobby.STR.noSimilar",
+   "tr": "Şu an benzer boş masa yok",
+   "en": "No similar free table right now"
+  },
+  {
+   "key": "lobby.STR.ok",
+   "tr": "Tamam",
+   "en": "OK"
+  },
+  {
+   "key": "lobby.STR.shareT",
+   "tr": "Özel masan hazır",
+   "en": "Your private table is ready"
+  },
+  {
+   "key": "lobby.STR.shareS",
+   "tr": "Masa lobide listelenmez. Kodu arkadaşlarına gönder, kodla katılsınlar.",
+   "en": "It isn’t listed in the lobby. Send the code to friends so they can join."
+  },
+  {
+   "key": "lobby.STR.inviteCode",
+   "tr": "DAVET KODU",
+   "en": "INVITE CODE"
+  },
+  {
+   "key": "lobby.STR.passLbl",
+   "tr": "Şifre",
+   "en": "Password"
+  },
+  {
+   "key": "lobby.STR.copy",
+   "tr": "Kodu kopyala",
+   "en": "Copy code"
+  },
+  {
+   "key": "lobby.STR.copied",
+   "tr": "Kopyalandı",
+   "en": "Copied"
+  },
+  {
+   "key": "lobby.STR.share",
+   "tr": "Paylaş",
+   "en": "Share"
+  },
+  {
+   "key": "lobby.STR.shared",
+   "tr": "Davet metni kopyalandı",
+   "en": "Invite text copied"
+  },
+  {
+   "key": "lobby.STR.toRoom",
+   "tr": "Bekleme odasına geç",
+   "en": "Go to waiting room"
+  },
+  {
+   "key": "lobby.STR.back2",
+   "tr": "Odaya dön",
+   "en": "Back to room"
+  },
+  {
+   "key": "lobby.STR.shareText",
+   "tr": "Galaxy 101'de \"{0}\" masasına gel! Kod: {1} · Şifre: {2}",
+   "en": "Join my \"{0}\" table on Galaxy 101! Code: {1} · Password: {2}",
+   "params": [
+    "n",
+    "c",
+    "p"
+   ]
+  },
+  {
+   "key": "lobby.STR.waitRoom",
+   "tr": "BEKLEME ODASI",
+   "en": "WAITING ROOM"
+  },
+  {
+   "key": "lobby.STR.youOwn",
+   "tr": "Oda sahibi sensin",
+   "en": "You are the host"
+  },
+  {
+   "key": "lobby.STR.leaveRoom",
+   "tr": "Ayrıl",
+   "en": "Leave"
+  },
+  {
+   "key": "lobby.STR.code",
+   "tr": "Kod",
+   "en": "Code"
+  },
+  {
+   "key": "lobby.STR.kick",
+   "tr": "Masadan çıkar",
+   "en": "Remove from table"
+  },
+  {
+   "key": "lobby.STR.addBot",
+   "tr": "Bot ekle",
+   "en": "Add bot"
+  },
+  {
+   "key": "lobby.STR.emptySeat",
+   "tr": "Boş koltuk",
+   "en": "Empty seat"
+  },
+  {
+   "key": "lobby.STR.ownerT",
+   "tr": "Oda sahibi",
+   "en": "Host"
+  },
+  {
+   "key": "lobby.STR.teamA",
+   "tr": "Takım A",
+   "en": "Team A"
+  },
+  {
+   "key": "lobby.STR.teamB",
+   "tr": "Takım B",
+   "en": "Team B"
+  },
+  {
+   "key": "lobby.STR.you",
+   "tr": "SEN",
+   "en": "YOU"
+  },
+  {
+   "key": "lobby.STR.waitN",
+   "tr": "Oyuncular bekleniyor · {0}/4",
+   "en": "Waiting for players · {0}/4",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "lobby.STR.ready",
+   "tr": "Masa hazır",
+   "en": "Table is ready"
+  },
+  {
+   "key": "lobby.STR.start",
+   "tr": "Başlat",
+   "en": "Start"
+  },
+  {
+   "key": "lobby.STR.startN",
+   "tr": "Başlat · {0}/4",
+   "en": "Start · {0}/4",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "lobby.STR.hintOwner",
+   "tr": "Dört koltuk dolunca başlatabilirsin. Boş koltuğa bot ekleyebilirsin.",
+   "en": "You can start once all four seats are taken. Add bots to empty seats."
+  },
+  {
+   "key": "lobby.STR.hintReady",
+   "tr": "Herkes yerinde, oyunu başlat.",
+   "en": "Everyone is seated, start the game."
+  },
+  {
+   "key": "lobby.STR.hintGuest",
+   "tr": "Oda sahibi oyunu başlatınca masa açılır.",
+   "en": "The table opens when the host starts the game."
+  },
+  {
+   "key": "lobby.STR.guestWait",
+   "tr": "Oda sahibi bekleniyor",
+   "en": "Waiting for the host"
+  },
+  {
+   "key": "lobby.STR.starting",
+   "tr": "Oyun başlıyor · {0}",
+   "en": "Starting · {0}",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "lobby.STR.joined",
+   "tr": "{0} masaya oturdu",
+   "en": "{0} sat down",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "lobby.STR.kicked",
+   "tr": "{0} masadan çıkarıldı",
+   "en": "{0} was removed",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "lobby.STR.botAdded",
+   "tr": "Bot koltuğa oturdu",
+   "en": "A bot took the seat"
+  },
+  {
+   "key": "lobby.STR.closedMine",
+   "tr": "Masan kapatıldı",
+   "en": "Your table was closed"
+  },
+  {
+   "key": "lobby.STR.leftRoom",
+   "tr": "Bekleme odasından ayrıldın",
+   "en": "You left the waiting room"
+  },
+  {
+   "key": "lobby.STR.invite",
+   "tr": "Davet et",
+   "en": "Invite"
+  },
+  {
+   "key": "lobby.STR.inviteS",
+   "tr": "Davet",
+   "en": "Invite"
+  },
+  {
+   "key": "lobby.STR.invT",
+   "tr": "Arkadaşlarını davet et",
+   "en": "Invite friends"
+  },
+  {
+   "key": "lobby.STR.invSub",
+   "tr": "{0} boş koltuk · davet 30 sn geçerli",
+   "en": "{0} empty seat · invites last 30 s",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "lobby.STR.tabFr",
+   "tr": "Arkadaşlar",
+   "en": "Friends"
+  },
+  {
+   "key": "lobby.STR.tabRe",
+   "tr": "Son oynadıkların",
+   "en": "Recent players"
+  },
+  {
+   "key": "lobby.STR.invSearch",
+   "tr": "Oyuncu ara",
+   "en": "Search players"
+  },
+  {
+   "key": "lobby.STR.invNone",
+   "tr": "Bu isimde oyuncu yok",
+   "en": "No player with that name"
+  },
+  {
+   "key": "lobby.STR.invSeats",
+   "tr": "KOLTUKLAR",
+   "en": "SEATS"
+  },
+  {
+   "key": "lobby.STR.invSeatLine",
+   "tr": "NaN/4 dolu · {1} davet bekliyor",
+   "en": "NaN/4 taken · {1} pending",
+   "params": [
+    "n",
+    "p"
+   ]
+  },
+  {
+   "key": "lobby.STR.invByCode",
+   "tr": "KODLA DAVET",
+   "en": "INVITE BY CODE"
+  },
+  {
+   "key": "lobby.STR.invOpen",
+   "tr": "Açık masa lobide listelenir; davet edilen arkadaşın doğrudan boş koltuğa oturur.",
+   "en": "Open tables are listed in the lobby; invited friends sit straight into an empty seat."
+  },
+  {
+   "key": "lobby.STR.invNote",
+   "tr": "Kabul eden arkadaşın boş koltuğa otomatik oturur.",
+   "en": "Friends who accept take an empty seat automatically."
+  },
+  {
+   "key": "lobby.STR.stOn",
+   "tr": "Çevrimiçi",
+   "en": "Online"
+  },
+  {
+   "key": "lobby.STR.stGame",
+   "tr": "Oyunda",
+   "en": "In a game"
+  },
+  {
+   "key": "lobby.STR.stOff",
+   "tr": "Son görülme {0}",
+   "en": "Last seen {0}",
+   "params": [
+    "h"
+   ]
+  },
+  {
+   "key": "lobby.STR.stRecent",
+   "tr": "Birlikte oynadınız · {0}",
+   "en": "Played together · {0}",
+   "params": [
+    "h"
+   ]
+  },
+  {
+   "key": "lobby.STR.bInv",
+   "tr": "Davet et",
+   "en": "Invite"
+  },
+  {
+   "key": "lobby.STR.bPend",
+   "tr": "Bekleniyor {0}",
+   "en": "Waiting {0}",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "lobby.STR.bCancel",
+   "tr": "İptal etmek için tıkla",
+   "en": "Click to cancel"
+  },
+  {
+   "key": "lobby.STR.bIn",
+   "tr": "Masada",
+   "en": "Seated"
+  },
+  {
+   "key": "lobby.STR.bNo",
+   "tr": "Reddetti",
+   "en": "Declined"
+  },
+  {
+   "key": "lobby.STR.bExp",
+   "tr": "Tekrar davet",
+   "en": "Invite again"
+  },
+  {
+   "key": "lobby.STR.bGame",
+   "tr": "Oyunda",
+   "en": "In a game"
+  },
+  {
+   "key": "lobby.STR.bOff",
+   "tr": "Çevrimdışı",
+   "en": "Offline"
+  },
+  {
+   "key": "lobby.STR.bFull",
+   "tr": "Masa dolu",
+   "en": "Table full"
+  },
+  {
+   "key": "lobby.STR.invSent",
+   "tr": "{0} davet edildi",
+   "en": "{0} invited",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "lobby.STR.invNo",
+   "tr": "{0} daveti reddetti",
+   "en": "{0} declined",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "lobby.STR.invExp",
+   "tr": "{0} yanıt vermedi",
+   "en": "{0} didn’t respond",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "lobby.STR.prizeSum",
+   "tr": "Kazanan {0} çipin tamamını alır.",
+   "en": "The winner takes all {0} chips.",
+   "params": [
+    "p"
+   ]
+  },
+  {
+   "key": "lobby.STR.prizeSumE",
+   "tr": "Kazanan takım {0} çipi alır; kişi başı {1}.",
+   "en": "The winning team takes {0} chips; {1} each.",
+   "params": [
+    "p",
+    "h"
+   ]
+  },
+  {
+   "key": "ranked.STR.back",
+   "tr": "Geri",
+   "en": "Back"
+  },
+  {
+   "key": "ranked.STR.title",
+   "tr": "Dereceli",
+   "en": "Ranked"
+  },
+  {
+   "key": "ranked.STR.seasonTag",
+   "tr": "SEZON 3 · DERECELİ",
+   "en": "SEASON 3 · RANKED"
+  },
+  {
+   "key": "ranked.STR.days",
+   "tr": "18 gün kaldı",
+   "en": "18 days left"
+  },
+  {
+   "key": "ranked.STR.home",
+   "tr": "Maç ara",
+   "en": "Find match"
+  },
+  {
+   "key": "ranked.STR.progress",
+   "tr": "İlerleme",
+   "en": "Progress"
+  },
+  {
+   "key": "ranked.STR.seeProgress",
+   "tr": "Dereceli ilerlemem",
+   "en": "My ranked progress"
+  },
+  {
+   "key": "ranked.STR.invite",
+   "tr": "Davet et",
+   "en": "Invite"
+  },
+  {
+   "key": "ranked.STR.friendSlot",
+   "tr": "Arkadaş yeri",
+   "en": "Friend slot"
+  },
+  {
+   "key": "ranked.STR.pending",
+   "tr": "Davet bekleniyor",
+   "en": "Waiting for reply"
+  },
+  {
+   "key": "ranked.STR.remove",
+   "tr": "Takımdan çıkar",
+   "en": "Remove from party"
+  },
+  {
+   "key": "ranked.STR.searching",
+   "tr": "Rakip aranıyor",
+   "en": "Finding opponents"
+  },
+  {
+   "key": "ranked.STR.cancel",
+   "tr": "İptal",
+   "en": "Cancel"
+  },
+  {
+   "key": "ranked.STR.decline",
+   "tr": "Reddet",
+   "en": "Decline"
+  },
+  {
+   "key": "ranked.STR.cont",
+   "tr": "Devam",
+   "en": "Continue"
+  },
+  {
+   "key": "ranked.STR.road",
+   "tr": "Lig yolu",
+   "en": "League road"
+  },
+  {
+   "key": "ranked.STR.roadSub",
+   "tr": "16 basamak · her kademe 100 LP",
+   "en": "16 steps · 100 LP per tier"
+  },
+  {
+   "key": "ranked.STR.youHere",
+   "tr": "BURADASIN",
+   "en": "YOU ARE HERE"
+  },
+  {
+   "key": "ranked.STR.rewards",
+   "tr": "Sezon ödülleri",
+   "en": "Season rewards"
+  },
+  {
+   "key": "ranked.STR.rewardsSub",
+   "tr": "Sezonda ulaştığın en yüksek lige göre · çip, avatar çerçevesi ve profil rozeti",
+   "en": "Based on the highest league you reach · chips, avatar frame and profile badge"
+  },
+  {
+   "key": "ranked.STR.recent",
+   "tr": "Son maçlar",
+   "en": "Recent matches"
+  },
+  {
+   "key": "ranked.STR.noHist",
+   "tr": "Henüz dereceli maç oynamadın. İlk maçını bitirince sonuçların burada görünür.",
+   "en": "No ranked matches yet. Your results show up here after your first match."
+  },
+  {
+   "key": "ranked.STR.you",
+   "tr": "SEN",
+   "en": "YOU"
+  },
+  {
+   "key": "ranked.STR.team",
+   "tr": "TAKIM",
+   "en": "TEAM"
+  },
+  {
+   "key": "ranked.STR.rival",
+   "tr": "RAKİP",
+   "en": "RIVAL"
+  },
+  {
+   "key": "ranked.STR.friend",
+   "tr": "ARKADAŞ",
+   "en": "FRIEND"
+  },
+  {
+   "key": "ranked.STR.opp",
+   "tr": "Rakip",
+   "en": "Opponent"
+  },
+  {
+   "key": "table.STR.room",
+   "tr": "Tekli · 101",
+   "en": "Solo · 101"
+  },
+  {
+   "key": "table.STR.bet",
+   "tr": "Bahis 5.000",
+   "en": "Stake 5,000"
+  },
+  {
+   "key": "table.STR.deck",
+   "tr": "Taş",
+   "en": "Deck"
+  },
+  {
+   "key": "table.STR.loading",
+   "tr": "3D masa yükleniyor…",
+   "en": "Loading 3D table…"
+  },
+  {
+   "key": "table.STR.tDiscardFirst",
+   "tr": "İlk hamle senin · ıstakadan bir taş at",
+   "en": "You start · discard a tile from your rack"
+  },
+  {
+   "key": "table.STR.tDraw",
+   "tr": "Sıra sende · desteden ya da {0}'ın taşından çek",
+   "en": "Your turn · draw from the deck or {0}'s tile",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.tDiscard",
+   "tr": "Atacağın taşı halkaya sürükle ya da çift tıkla",
+   "en": "Drag a tile onto the ring or double-click it"
+  },
+  {
+   "key": "table.STR.tWait",
+   "tr": "{0} oynuyor…",
+   "en": "{0} is playing…",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.tDeal",
+   "tr": "Taşlar dağıtılıyor…",
+   "en": "Dealing tiles…"
+  },
+  {
+   "key": "table.STR.dealYou",
+   "tr": "Taşları sen dağıtıyorsun",
+   "en": "You are dealing"
+  },
+  {
+   "key": "table.STR.dealBy",
+   "tr": "Taşları {0} dağıtıyor",
+   "en": "{0} is dealing",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.dsBuild",
+   "tr": "106 taş 7’li balyalara diziliyor",
+   "en": "Stacking 106 tiles into piles of 7"
+  },
+  {
+   "key": "table.STR.dsRoll",
+   "tr": "{0} zar atıyor",
+   "en": "{0} is rolling",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.dsYourRoll",
+   "tr": "Zarı iki kez at",
+   "en": "Roll the die twice"
+  },
+  {
+   "key": "table.STR.dsRolling",
+   "tr": "Zar yuvarlanıyor…",
+   "en": "Rolling…"
+  },
+  {
+   "key": "table.STR.dsInd",
+   "tr": "{0}. balya · alttan {1}. taş gösterge",
+   "en": "Pile {0} · tile {1} from the bottom is the indicator",
+   "params": [
+    "a",
+    "b"
+   ]
+  },
+  {
+   "key": "table.STR.dsFake",
+   "tr": "Sahte okey çıktı · üstündeki taş gösterge oldu",
+   "en": "Fake okey turned up · the tile above is the indicator"
+  },
+  {
+   "key": "table.STR.dsExtra",
+   "tr": "Fazla taş yandaki balyanın üstüne",
+   "en": "Extra tile onto the next pile"
+  },
+  {
+   "key": "table.STR.dsDist",
+   "tr": "Balyalar dağıtılıyor",
+   "en": "Handing out the piles"
+  },
+  {
+   "key": "table.STR.dsCenter",
+   "tr": "Kalan balyalar ortaya",
+   "en": "Remaining piles to the centre"
+  },
+  {
+   "key": "table.STR.dsStart",
+   "tr": "22 taşla sen başlıyorsun",
+   "en": "You start with 22 tiles",
+   "params": [
+    "n",
+    "me"
+   ]
+  },
+  {
+   "key": "table.STR.roll",
+   "tr": "Zar at",
+   "en": "Roll"
+  },
+  {
+   "key": "table.STR.rollAgain",
+   "tr": "Tekrar at",
+   "en": "Roll again"
+  },
+  {
+   "key": "table.STR.diceCap",
+   "tr": "ZAR",
+   "en": "DIE"
+  },
+  {
+   "key": "table.STR.okeyCap",
+   "tr": "OKEY",
+   "en": "OKEY"
+  },
+  {
+   "key": "table.STR.dealerCap",
+   "tr": "DAĞITAN",
+   "en": "DEALER"
+  },
+  {
+   "key": "table.STR.tOpened",
+   "tr": "Elini açtın · şimdi bir taş at",
+   "en": "Hand opened · now discard a tile"
+  },
+  {
+   "key": "table.STR.sortRun",
+   "tr": "Seri diz",
+   "en": "Sort runs"
+  },
+  {
+   "key": "table.STR.sortPair",
+   "tr": "Çift diz",
+   "en": "Sort pairs"
+  },
+  {
+   "key": "table.STR.open",
+   "tr": "Aç",
+   "en": "Open"
+  },
+  {
+   "key": "table.STR.opened",
+   "tr": "Açıldı ✓",
+   "en": "Opened ✓"
+  },
+  {
+   "key": "table.STR.notOpened",
+   "tr": "Açmadı · {0} taş",
+   "en": "Not opened · {0} tiles",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.openedS",
+   "tr": "Açtı · {0}",
+   "en": "Opened · {0}",
+   "params": [
+    "v"
+   ]
+  },
+  {
+   "key": "table.STR.tilesS",
+   "tr": "{0} taş",
+   "en": "{0} tiles",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.discHere",
+   "tr": "BURAYA AT",
+   "en": "DISCARD HERE"
+  },
+  {
+   "key": "table.STR.indicator",
+   "tr": "GÖSTERGE",
+   "en": "INDICATOR"
+  },
+  {
+   "key": "table.STR.invite",
+   "tr": "Davet et",
+   "en": "Invite"
+  },
+  {
+   "key": "table.STR.waitTitle",
+   "tr": "MASA HAZIRLANIYOR",
+   "en": "SETTING UP THE TABLE"
+  },
+  {
+   "key": "table.STR.waitSub",
+   "tr": "Oyuncular bekleniyor · {0}/4",
+   "en": "Waiting for players · {0}/4",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.waitFull",
+   "tr": "Masa doldu · oyun başlıyor",
+   "en": "Table full · starting"
+  },
+  {
+   "key": "table.STR.giftTitle",
+   "tr": "İkram ve hediye",
+   "en": "Treats & gifts"
+  },
+  {
+   "key": "table.STR.to",
+   "tr": "KİME",
+   "en": "TO"
+  },
+  {
+   "key": "table.STR.all",
+   "tr": "Herkes",
+   "en": "Everyone"
+  },
+  {
+   "key": "table.STR.tabs.0",
+   "tr": "İkram",
+   "en": "Treats"
+  },
+  {
+   "key": "table.STR.tabs.1",
+   "tr": "Hediye",
+   "en": "Gifts"
+  },
+  {
+   "key": "table.STR.tabs.2",
+   "tr": "Emoji",
+   "en": "Emoji"
+  },
+  {
+   "key": "table.STR.free",
+   "tr": "Ücretsiz",
+   "en": "Free"
+  },
+  {
+   "key": "table.STR.send",
+   "tr": "Gönder",
+   "en": "Send"
+  },
+  {
+   "key": "table.STR.notEnough",
+   "tr": "Yetersiz çip",
+   "en": "Not enough chips"
+  },
+  {
+   "key": "table.STR.balance",
+   "tr": "BAKİYE",
+   "en": "BALANCE"
+  },
+  {
+   "key": "table.STR.pick",
+   "tr": "Bir şey seç",
+   "en": "Pick something"
+  },
+  {
+   "key": "table.STR.chatTitle",
+   "tr": "Masa sohbeti",
+   "en": "Table chat"
+  },
+  {
+   "key": "table.STR.chatPh",
+   "tr": "Mesaj yaz…",
+   "en": "Type a message…"
+  },
+  {
+   "key": "table.STR.quick.0",
+   "tr": "Kolay gelsin",
+   "en": "Good luck"
+  },
+  {
+   "key": "table.STR.quick.1",
+   "tr": "Hadi bakalım",
+   "en": "Let's go"
+  },
+  {
+   "key": "table.STR.quick.2",
+   "tr": "Güzel hamle!",
+   "en": "Nice move!"
+  },
+  {
+   "key": "table.STR.quick.3",
+   "tr": "Şanslısın",
+   "en": "Lucky you"
+  },
+  {
+   "key": "table.STR.quick.4",
+   "tr": "Çaylar benden!",
+   "en": "Tea's on me!"
+  },
+  {
+   "key": "table.STR.quick.5",
+   "tr": "Bir el daha?",
+   "en": "One more?"
+  },
+  {
+   "key": "table.STR.recvTitle",
+   "tr": "SANA İKRAM VAR",
+   "en": "A TREAT FOR YOU"
+  },
+  {
+   "key": "table.STR.thanks",
+   "tr": "Teşekkür et",
+   "en": "Say thanks"
+  },
+  {
+   "key": "table.STR.thanksMsg",
+   "tr": "Eyvallah, eline sağlık!",
+   "en": "Thank you, that's kind!"
+  },
+  {
+   "key": "table.STR.quickGift",
+   "tr": "HIZLI İKRAM",
+   "en": "QUICK TREAT"
+  },
+  {
+   "key": "table.STR.allGifts",
+   "tr": "Tüm hediyeler",
+   "en": "All gifts"
+  },
+  {
+   "key": "table.STR.addFriend",
+   "tr": "Arkadaş ekle",
+   "en": "Add friend"
+  },
+  {
+   "key": "table.STR.friendSent",
+   "tr": "İstek gönderildi",
+   "en": "Request sent"
+  },
+  {
+   "key": "table.STR.stLv",
+   "tr": "SEVİYE",
+   "en": "LEVEL"
+  },
+  {
+   "key": "table.STR.stWin",
+   "tr": "KAZANMA",
+   "en": "WIN RATE"
+  },
+  {
+   "key": "table.STR.stHands",
+   "tr": "EL",
+   "en": "HANDS"
+  },
+  {
+   "key": "table.STR.resTitle",
+   "tr": "{0}. EL BİTTİ",
+   "en": "HAND {0} OVER",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.resSub",
+   "tr": "TAŞ BİTTİ",
+   "en": "DECK EMPTY"
+  },
+  {
+   "key": "table.STR.youWin",
+   "tr": "Kazandın!",
+   "en": "You won!"
+  },
+  {
+   "key": "table.STR.winner",
+   "tr": "{0} kazandı",
+   "en": "{0} won",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.chipsCap",
+   "tr": "ÇİP",
+   "en": "CHIPS"
+  },
+  {
+   "key": "table.STR.colPlayer",
+   "tr": "OYUNCU",
+   "en": "PLAYER"
+  },
+  {
+   "key": "table.STR.colHand",
+   "tr": "EL PUANI",
+   "en": "HAND"
+  },
+  {
+   "key": "table.STR.colTotal",
+   "tr": "TOPLAM",
+   "en": "TOTAL"
+  },
+  {
+   "key": "table.STR.noteOpen",
+   "tr": "açtı",
+   "en": "opened"
+  },
+  {
+   "key": "table.STR.noteClosed",
+   "tr": "açmadı",
+   "en": "not opened"
+  },
+  {
+   "key": "table.STR.giftsGot",
+   "tr": "ALDIĞIN İKRAMLAR",
+   "en": "TREATS RECEIVED"
+  },
+  {
+   "key": "table.STR.noGifts",
+   "tr": "Bu elde ikram gelmedi",
+   "en": "No treats this hand"
+  },
+  {
+   "key": "table.STR.next",
+   "tr": "Sonraki el",
+   "en": "Next hand"
+  },
+  {
+   "key": "table.STR.leave",
+   "tr": "Masadan kalk",
+   "en": "Leave table"
+  },
+  {
+   "key": "table.STR.exitTitle",
+   "tr": "Masadan kalkmak istiyor musun?",
+   "en": "Leave the table?"
+  },
+  {
+   "key": "table.STR.exitBody",
+   "tr": "El bitmeden kalkarsan 5.000 bahsin kaybedilir ve yerine bot oynar.",
+   "en": "If you leave before the hand ends you lose your 5,000 stake and a bot takes your seat."
+  },
+  {
+   "key": "table.STR.stay",
+   "tr": "Masada kal",
+   "en": "Stay"
+  },
+  {
+   "key": "table.STR.leaveBtn",
+   "tr": "Kalk",
+   "en": "Leave"
+  },
+  {
+   "key": "table.STR.bye",
+   "tr": "Masadan kalktın · lobiye dönülüyor",
+   "en": "You left the table · back to lobby"
+  },
+  {
+   "key": "table.STR.netTitle",
+   "tr": "Bağlantı koptu",
+   "en": "Connection lost"
+  },
+  {
+   "key": "table.STR.netBody",
+   "tr": "Yeniden bağlanıyoruz. Bu sırada botun senin yerine oynuyor, elin korunuyor.",
+   "en": "Reconnecting. A bot is playing for you meanwhile and your hand is kept."
+  },
+  {
+   "key": "table.STR.netAttempt",
+   "tr": "Deneme {0}/5",
+   "en": "Attempt {0}/5",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.netWait",
+   "tr": "Bağlanıyor",
+   "en": "Connecting"
+  },
+  {
+   "key": "table.STR.retry",
+   "tr": "Şimdi dene",
+   "en": "Retry now"
+  },
+  {
+   "key": "table.STR.lobby",
+   "tr": "Lobiye dön",
+   "en": "Back to lobby"
+  },
+  {
+   "key": "table.STR.netBack",
+   "tr": "Bağlantı yeniden kuruldu",
+   "en": "Connection restored"
+  },
+  {
+   "key": "table.STR.flows.0",
+   "tr": "Bekleme",
+   "en": "Waiting"
+  },
+  {
+   "key": "table.STR.flows.1",
+   "tr": "Dağıtım",
+   "en": "Deal"
+  },
+  {
+   "key": "table.STR.flows.2",
+   "tr": "Oyun",
+   "en": "Play"
+  },
+  {
+   "key": "table.STR.flows.3",
+   "tr": "El açma",
+   "en": "Open hand"
+  },
+  {
+   "key": "table.STR.flows.4",
+   "tr": "Elden bitiş",
+   "en": "Bomb finish"
+  },
+  {
+   "key": "table.STR.flows.5",
+   "tr": "Hediye",
+   "en": "Gifts"
+  },
+  {
+   "key": "table.STR.flows.6",
+   "tr": "Sohbet",
+   "en": "Chat"
+  },
+  {
+   "key": "table.STR.flows.7",
+   "tr": "El sonu",
+   "en": "Hand over"
+  },
+  {
+   "key": "table.STR.flows.8",
+   "tr": "Çıkış",
+   "en": "Leave"
+  },
+  {
+   "key": "table.STR.flows.9",
+   "tr": "Bağlantı koptu",
+   "en": "Disconnected"
+  },
+  {
+   "key": "table.STR.flows.10",
+   "tr": "Ayarlar",
+   "en": "Settings"
+  },
+  {
+   "key": "table.STR.setTitle",
+   "tr": "Masa ayarları",
+   "en": "Table settings"
+  },
+  {
+   "key": "table.STR.setFoot",
+   "tr": "Değişiklikler anında uygulanır",
+   "en": "Changes apply instantly"
+  },
+  {
+   "key": "table.STR.reset",
+   "tr": "Varsayılana dön",
+   "en": "Reset to default"
+  },
+  {
+   "key": "table.STR.done",
+   "tr": "Tamam",
+   "en": "Done"
+  },
+  {
+   "key": "table.STR.inUse",
+   "tr": "SEÇİLİ",
+   "en": "IN USE"
+  },
+  {
+   "key": "table.STR.warnToast",
+   "tr": "Süren bitiyor!",
+   "en": "Time is running out!"
+  },
+  {
+   "key": "table.STR.lkView",
+   "tr": "GÖRÜŞ AÇISI",
+   "en": "CAMERA VIEW"
+  },
+  {
+   "key": "table.STR.lkTable",
+   "tr": "MASA TEMASI",
+   "en": "TABLE THEME"
+  },
+  {
+   "key": "table.STR.lkRack",
+   "tr": "ISTAKA TEMASI",
+   "en": "RACK THEME"
+  },
+  {
+   "key": "table.STR.lkTile",
+   "tr": "TAŞ GÖRÜNÜMÜ",
+   "en": "TILE STYLE"
+  },
+  {
+   "key": "table.STR.tlSkins.0.0",
+   "tr": "Klasik",
+   "en": "Classic"
+  },
+  {
+   "key": "table.STR.tlSkins.0.1",
+   "tr": "Fildişi, klasik renkler",
+   "en": "Ivory, classic colours"
+  },
+  {
+   "key": "table.STR.tlSkins.1.0",
+   "tr": "Galaksi",
+   "en": "Galaxy"
+  },
+  {
+   "key": "table.STR.tlSkins.1.1",
+   "tr": "Nebula doku, parlayan rakam",
+   "en": "Nebula texture, glowing numbers"
+  },
+  {
+   "key": "table.STR.tlSkins.2.0",
+   "tr": "Altın",
+   "en": "Gold"
+  },
+  {
+   "key": "table.STR.tlSkins.2.1",
+   "tr": "Siyah oniks, altın çerçeve",
+   "en": "Black onyx, gold frame"
+  },
+  {
+   "key": "table.STR.tlSkins.3.0",
+   "tr": "Neon",
+   "en": "Neon"
+  },
+  {
+   "key": "table.STR.tlSkins.3.1",
+   "tr": "Füme gövde, ışıklı kenar",
+   "en": "Smoked body, glowing edge"
+  },
+  {
+   "key": "table.STR.tlSkins.4.0",
+   "tr": "Mermer",
+   "en": "Marble"
+  },
+  {
+   "key": "table.STR.tlSkins.4.1",
+   "tr": "Beyaz mermer, altın damar",
+   "en": "White marble, gold veins"
+  },
+  {
+   "key": "table.STR.sTabs.0.0",
+   "tr": "Oyun",
+   "en": "Game"
+  },
+  {
+   "key": "table.STR.sTabs.0.1",
+   "tr": "Taş hareketleri ve masa davranışı",
+   "en": "Tile movement and table behavior"
+  },
+  {
+   "key": "table.STR.sTabs.1.0",
+   "tr": "Ses",
+   "en": "Sound"
+  },
+  {
+   "key": "table.STR.sTabs.1.1",
+   "tr": "Müzik, efektler ve bildirim sesleri",
+   "en": "Music, effects and notification sounds"
+  },
+  {
+   "key": "table.STR.sTabs.2.0",
+   "tr": "Görünüm",
+   "en": "Look"
+  },
+  {
+   "key": "table.STR.sTabs.2.1",
+   "tr": "Görüş açısı, masa ve ıstaka temaları",
+   "en": "Camera view, table and rack themes"
+  },
+  {
+   "key": "table.STR.sTabs.3.0",
+   "tr": "Bildirimler",
+   "en": "Alerts"
+  },
+  {
+   "key": "table.STR.sTabs.3.1",
+   "tr": "Masada gördüğün uyarılar ve efektler",
+   "en": "Hints and effects shown at the table"
+  },
+  {
+   "key": "table.STR.sRows.autoSort.0",
+   "tr": "Otomatik yerleştir",
+   "en": "Auto-place"
+  },
+  {
+   "key": "table.STR.sRows.autoSort.1",
+   "tr": "Çektiğin taş ıstakada uyduğu taşın yanına gelsin",
+   "en": "Drawn tiles go next to a matching tile"
+  },
+  {
+   "key": "table.STR.sRows.highlight.0",
+   "tr": "Perleri vurgula",
+   "en": "Highlight sets"
+  },
+  {
+   "key": "table.STR.sRows.highlight.1",
+   "tr": "Geçerli perlerin altında yeşil çizgi görünsün",
+   "en": "Valid sets get a green line underneath"
+  },
+  {
+   "key": "table.STR.sRows.dbl.0",
+   "tr": "Çift tıkla at",
+   "en": "Double-click to discard"
+  },
+  {
+   "key": "table.STR.sRows.dbl.1",
+   "tr": "Taşa çift tıklayınca doğrudan atılsın",
+   "en": "Double-clicking a tile discards it"
+  },
+  {
+   "key": "table.STR.sRows.warn.0",
+   "tr": "Tur süresi uyarısı",
+   "en": "Turn timer warning"
+  },
+  {
+   "key": "table.STR.sRows.warn.1",
+   "tr": "Süre bitmeden kaç saniye önce uyarılsın",
+   "en": "How many seconds before your time runs out"
+  },
+  {
+   "key": "table.STR.sRows.lang.0",
+   "tr": "Dil",
+   "en": "Language"
+  },
+  {
+   "key": "table.STR.sRows.lang.1",
+   "tr": "Masadaki tüm yazıların dili",
+   "en": "Language of all text at the table"
+  },
+  {
+   "key": "table.STR.sRows.master.0",
+   "tr": "Ana ses",
+   "en": "Master volume"
+  },
+  {
+   "key": "table.STR.sRows.master.1",
+   "tr": "Tüm seslerin genel seviyesi",
+   "en": "Overall level of all sounds"
+  },
+  {
+   "key": "table.STR.sRows.music.0",
+   "tr": "Masa müziği",
+   "en": "Table music"
+  },
+  {
+   "key": "table.STR.sRows.music.1",
+   "tr": "Arka planda çalan müzik",
+   "en": "Background music"
+  },
+  {
+   "key": "table.STR.sRows.sfx.0",
+   "tr": "Efektler",
+   "en": "Effects"
+  },
+  {
+   "key": "table.STR.sRows.sfx.1",
+   "tr": "Taş, zar ve hediye sesleri",
+   "en": "Tile, dice and gift sounds"
+  },
+  {
+   "key": "table.STR.sRows.tileSnd.0",
+   "tr": "Taş sesleri",
+   "en": "Tile sounds"
+  },
+  {
+   "key": "table.STR.sRows.tileSnd.1",
+   "tr": "Taş çekme, dizme ve atma sesleri",
+   "en": "Drawing, arranging and discarding"
+  },
+  {
+   "key": "table.STR.sRows.chatSnd.0",
+   "tr": "Mesaj sesi",
+   "en": "Message sound"
+  },
+  {
+   "key": "table.STR.sRows.chatSnd.1",
+   "tr": "Yeni sohbet mesajında kısa bir ses çalsın",
+   "en": "Short sound for new chat messages"
+  },
+  {
+   "key": "table.STR.sRows.bubbles.0",
+   "tr": "Sohbet balonları",
+   "en": "Chat bubbles"
+  },
+  {
+   "key": "table.STR.sRows.bubbles.1",
+   "tr": "Mesajlar oyuncuların yanında balon olarak görünsün",
+   "en": "Messages appear as bubbles next to players"
+  },
+  {
+   "key": "table.STR.sRows.giftNotif.0",
+   "tr": "İkram bildirimleri",
+   "en": "Treat alerts"
+  },
+  {
+   "key": "table.STR.sRows.giftNotif.1",
+   "tr": "Sana ikram geldiğinde sağ üstte bildirim çıksın",
+   "en": "Show a card when someone sends you a treat"
+  },
+  {
+   "key": "table.STR.sRows.emojiFx.0",
+   "tr": "Emoji efektleri",
+   "en": "Emoji effects"
+  },
+  {
+   "key": "table.STR.sRows.emojiFx.1",
+   "tr": "Gönderilen emojiler masada uçarak görünsün",
+   "en": "Sent emojis fly across the table"
+  },
+  {
+   "key": "table.STR.sRows.turnHint.0",
+   "tr": "Sıra ipuçları",
+   "en": "Turn hints"
+  },
+  {
+   "key": "table.STR.sRows.turnHint.1",
+   "tr": "Üstteki sıra bilgisi ve \"Buraya at\" etiketi",
+   "en": "Top turn banner and \"Discard here\" label"
+  },
+  {
+   "key": "table.STR.views.0.0",
+   "tr": "Oyuncu gözü",
+   "en": "Player view"
+  },
+  {
+   "key": "table.STR.views.0.1",
+   "tr": "Alçak açı, ıstaka önde",
+   "en": "Low angle, rack up front"
+  },
+  {
+   "key": "table.STR.views.1.0",
+   "tr": "Yarı yüksek",
+   "en": "Mid view"
+  },
+  {
+   "key": "table.STR.views.1.1",
+   "tr": "Orta açı, ıstaka ve masa dengeli",
+   "en": "Medium angle, rack and table balanced"
+  },
+  {
+   "key": "table.STR.views.2.0",
+   "tr": "Kuşbakışı",
+   "en": "Top view"
+  },
+  {
+   "key": "table.STR.views.2.1",
+   "tr": "Yüksek açı, tüm masa görünür",
+   "en": "High angle, whole table visible"
+  },
+  {
+   "key": "table.STR.tSkins.0.0",
+   "tr": "İstasyon",
+   "en": "Station"
+  },
+  {
+   "key": "table.STR.tSkins.0.1",
+   "tr": "Metal kenar, ışık şeridi",
+   "en": "Metal rim, light strip"
+  },
+  {
+   "key": "table.STR.tSkins.1.0",
+   "tr": "Ceviz salon",
+   "en": "Walnut lounge"
+  },
+  {
+   "key": "table.STR.tSkins.1.1",
+   "tr": "Cilalı ceviz, pirinç detay",
+   "en": "Polished walnut, brass trim"
+  },
+  {
+   "key": "table.STR.tSkins.2.0",
+   "tr": "Hologram",
+   "en": "Hologram"
+  },
+  {
+   "key": "table.STR.tSkins.2.1",
+   "tr": "Cam kenar, ışıklı ızgara",
+   "en": "Glass rim, glowing grid"
+  },
+  {
+   "key": "table.STR.tSkins.3.0",
+   "tr": "Andromeda",
+   "en": "Andromeda"
+  },
+  {
+   "key": "table.STR.tSkins.3.1",
+   "tr": "Sarmal galaksi, yanardöner kenar",
+   "en": "Spiral galaxy, iridescent rim"
+  },
+  {
+   "key": "table.STR.rSkins.0.0",
+   "tr": "Klasik ceviz",
+   "en": "Classic walnut"
+  },
+  {
+   "key": "table.STR.rSkins.0.1",
+   "tr": "Masif ceviz, akçaağaç kakma",
+   "en": "Solid walnut, maple inlay"
+  },
+  {
+   "key": "table.STR.rSkins.1.0",
+   "tr": "Sedef kakma",
+   "en": "Mother-of-pearl"
+  },
+  {
+   "key": "table.STR.rSkins.1.1",
+   "tr": "Gül ağacı, sedef desen",
+   "en": "Rosewood, pearl inlay"
+  },
+  {
+   "key": "table.STR.rSkins.2.0",
+   "tr": "Alüminyum",
+   "en": "Aluminium"
+  },
+  {
+   "key": "table.STR.rSkins.2.1",
+   "tr": "Eloksal metal, füme cam",
+   "en": "Anodised metal, smoked glass"
+  },
+  {
+   "key": "table.STR.rSkins.3.0",
+   "tr": "Karbon",
+   "en": "Carbon"
+  },
+  {
+   "key": "table.STR.rSkins.3.1",
+   "tr": "Karbon fiber, ışıklı dikiş",
+   "en": "Carbon fibre, glowing seams"
+  },
+  {
+   "key": "table.STR.rSkins.4.0",
+   "tr": "Neon cam",
+   "en": "Neon glass"
+  },
+  {
+   "key": "table.STR.rSkins.4.1",
+   "tr": "Füme cam, neon tüpler",
+   "en": "Smoked glass, neon tubes"
+  },
+  {
+   "key": "table.STR.rSkins.5.0",
+   "tr": "Andromeda",
+   "en": "Andromeda"
+  },
+  {
+   "key": "table.STR.rSkins.5.1",
+   "tr": "Galaksi panel, yanardöner",
+   "en": "Galaxy panel, iridescent"
+  },
+  {
+   "key": "table.STR.engErr.E_SIDE_DISCARD",
+   "tr": "Soldan aldığın taşı aynı turda atamazsın",
+   "en": "You can't discard the tile you took from the left this turn"
+  },
+  {
+   "key": "table.STR.engErr.E_SIDE_MUST_OPEN",
+   "tr": "Soldan aldığın taşla açman gerekiyor",
+   "en": "You must open with the tile you took from the left"
+  },
+  {
+   "key": "table.STR.engErr.E_NOT_OPENED",
+   "tr": "Açmadan bitemezsin",
+   "en": "You can't finish without opening"
+  },
+  {
+   "key": "table.STR.engErr.E_MELD_INVALID",
+   "tr": "Bu per geçersiz",
+   "en": "That set is not valid"
+  },
+  {
+   "key": "table.STR.engErr.E_LAST_TILE",
+   "tr": "Son taşı işleyemezsin",
+   "en": "You can't add your last tile"
+  },
+  {
+   "key": "table.STR.engErr.E_SWAP_INVALID",
+   "tr": "Bu taş okeyin yerine geçmiyor",
+   "en": "That tile doesn't replace the okey"
+  },
+  {
+   "key": "table.STR.engErrAny",
+   "tr": "Bu hamle kurallara uymuyor",
+   "en": "That move breaks the rules"
+  },
+  {
+   "key": "table.STR.okeyTaken",
+   "tr": "Okeyi aldın!",
+   "en": "You took the okey!"
+  },
+  {
+   "key": "table.STR.undoBtn",
+   "tr": "Geri topla",
+   "en": "Take back"
+  },
+  {
+   "key": "table.STR.undoTip",
+   "tr": "Bu turda açtığın ve işlediğin taşları ıstakana geri al",
+   "en": "Return the tiles you opened or added this turn to your rack"
+  },
+  {
+   "key": "table.STR.undone",
+   "tr": "Taşlar ıstakana geri toplandı",
+   "en": "Tiles returned to your rack"
+  },
+  {
+   "key": "table.STR.shortTip",
+   "tr": "Sayı yetmiyor · açarsan hatalı açma cezası alırsın",
+   "en": "Not enough points · opening now is a wrong-open penalty"
+  },
+  {
+   "key": "table.STR.penOpenRun",
+   "tr": "hatalı el açma · {0}/101",
+   "en": "wrong open · {0}/101",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.penOpenPair",
+   "tr": "hatalı çift açma · {0}/5 çift",
+   "en": "wrong pair open · {0}/5 pairs",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.penIslek",
+   "tr": "işlek taş attı",
+   "en": "discarded a playable tile"
+  },
+  {
+   "key": "table.STR.penCode.P_OKEY_DISCARD",
+   "tr": "okey attı",
+   "en": "discarded the okey"
+  },
+  {
+   "key": "table.STR.penCode.P_OPENED_WITH",
+   "tr": "açtıran taşı attı",
+   "en": "fed the opening tile"
+  },
+  {
+   "key": "table.STR.penCode.P_OKEY_TAKEN",
+   "tr": "okeyi aldırdı",
+   "en": "lost the okey"
+  },
+  {
+   "key": "table.STR.penCode.P_OPEN_SHORT",
+   "tr": "eksik açılış",
+   "en": "short opening"
+  },
+  {
+   "key": "table.STR.penFlash",
+   "tr": "{0} +{1} ceza · {2}",
+   "en": "{0} +{1} penalty · {2}",
+   "params": [
+    "w",
+    "a",
+    "why"
+   ]
+  },
+  {
+   "key": "table.STR.penS",
+   "tr": "Ceza +{0}",
+   "en": "Penalty +{0}",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.penOpenTest",
+   "tr": "Test · per toplamı 101’e yetmiyor · Aç’a basarsan hatalı açma cezası",
+   "en": "Test · your sets total under 101 · pressing Open costs a wrong-open penalty"
+  },
+  {
+   "key": "table.STR.penIslekTest",
+   "tr": "Test · işlenebilir bir taşı atarsan işlek ceza · botlar da işlek atabilir",
+   "en": "Test · discarding a playable tile is a penalty · bots may do it too"
+  },
+  {
+   "key": "table.STR.isleTestHint",
+   "tr": "Test masası · herkes elini açtı, ellerde az taş kaldı · taşları perlere işle, okeyleri al, elini bitir",
+   "en": "Test table · everyone has opened, few tiles left · add to the sets, take the okeys, finish your hand"
+  },
+  {
+   "key": "table.STR.returnBtn",
+   "tr": "Geri bırak",
+   "en": "Put back"
+  },
+  {
+   "key": "table.STR.returnTip",
+   "tr": "Soldan aldığın taşı geri koy · ya da taşı soldaki halkaya sürükle",
+   "en": "Return the tile you took from the left · or drag it onto the left ring"
+  },
+  {
+   "key": "table.STR.bombBtn",
+   "tr": "Elden bit",
+   "en": "Bomb out"
+  },
+  {
+   "key": "table.STR.bombTip",
+   "tr": "Elini açmadan son taşı masaya çak",
+   "en": "Slam your last tile without opening"
+  },
+  {
+   "key": "table.STR.bombTitle",
+   "tr": "ELDEN BİTTİN!",
+   "en": "BOMBED OUT!"
+  },
+  {
+   "key": "table.STR.bombSub",
+   "tr": "El açmadan bitirdin · rakiplere ×2 ceza",
+   "en": "Finished without opening · ×2 penalty to rivals"
+  },
+  {
+   "key": "table.STR.finTitle",
+   "tr": "{0} BİTİRDİ!",
+   "en": "{0} FINISHED!",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.finYou",
+   "tr": "BİTİRDİN!",
+   "en": "YOU FINISHED!"
+  },
+  {
+   "key": "table.STR.finSub",
+   "tr": "Son taşını desteye kapattı · −101 puan",
+   "en": "Closed the last tile on the deck · −101 points"
+  },
+  {
+   "key": "table.STR.deckOutTitle",
+   "tr": "TAŞ BİTTİ",
+   "en": "DECK EMPTY"
+  },
+  {
+   "key": "table.STR.deckOutSub",
+   "tr": "En düşük puanlı oyuncu eli alır",
+   "en": "Lowest score takes the hand"
+  },
+  {
+   "key": "table.STR.resFin",
+   "tr": "{0} BİTİRDİ",
+   "en": "{0} FINISHED",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.noteFin",
+   "tr": "bitirdi",
+   "en": "finished"
+  },
+  {
+   "key": "table.STR.groupToast",
+   "tr": "Per taşınıyor · ıstakada istediğin yere bırak",
+   "en": "Moving set · drop it anywhere on your rack"
+  },
+  {
+   "key": "table.STR.openedRun",
+   "tr": "AÇILDI · SERİ {0}",
+   "en": "OPENED · RUNS {0}",
+   "params": [
+    "v"
+   ]
+  },
+  {
+   "key": "table.STR.openedPairs",
+   "tr": "AÇILDI · {0} ÇİFT",
+   "en": "OPENED · {0} PAIRS",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.layMore",
+   "tr": "Yere aç",
+   "en": "Lay down"
+  },
+  {
+   "key": "table.STR.isle",
+   "tr": "İşle",
+   "en": "Add on"
+  },
+  {
+   "key": "table.STR.pairOpen",
+   "tr": "Çift aç · {0}/5",
+   "en": "Open pairs · {0}/5",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.gaugeOpen",
+   "tr": "AÇIK",
+   "en": "OPEN"
+  },
+  {
+   "key": "table.STR.layPair",
+   "tr": "Yere çift aç",
+   "en": "Lay pairs"
+  },
+  {
+   "key": "table.STR.cantIsleClosed",
+   "tr": "İşlemek için önce elini açmalısın",
+   "en": "Open your hand before adding to the table"
+  },
+  {
+   "key": "table.STR.layPairNo",
+   "tr": "Çiftle açtın · yalnızca çift açabilirsin",
+   "en": "You opened with pairs · you can only lay pairs"
+  },
+  {
+   "key": "table.STR.isleDrawFirst",
+   "tr": "Önce desteden ya da soldan taş çek, sonra işle",
+   "en": "Draw a tile first, then add it to the table"
+  },
+  {
+   "key": "table.STR.gaugePair",
+   "tr": "/ {0} ÇİFT",
+   "en": "/ {0} PAIRS",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.tagSide",
+   "tr": "YERDEN",
+   "en": "FROM LEFT"
+  },
+  {
+   "key": "table.STR.tagIslek",
+   "tr": "İŞLEK",
+   "en": "PLAYABLE"
+  },
+  {
+   "key": "table.STR.cantIsle",
+   "tr": "Bu taş o pere işlenemez",
+   "en": "That tile does not fit this set"
+  },
+  {
+   "key": "table.STR.nextIn",
+   "tr": "Sonraki el · {0}",
+   "en": "Next hand · {0}",
+   "params": [
+    "n"
+   ]
+  },
+  {
+   "key": "table.STR.gave",
+   "tr": "{0}, {1} için {2} gönderdin",
+   "en": "{0} sent {1} {2}",
+   "params": [
+    "a",
+    "b",
+    "it",
+    "tab",
+    "me"
+   ]
+  },
+  {
+   "key": "table.STR.gaveAll",
+   "tr": "{0} herkese {1} gönderdin",
+   "en": "{0} sent everyone {1}",
+   "params": [
+    "a",
+    "it",
+    "tab",
+    "me"
+   ]
+  },
+  {
+   "key": "table.STR.toYou",
+   "tr": "{0} sana {1} gönderdi",
+   "en": "{0} sent you {1}",
+   "params": [
+    "a",
+    "it",
+    "tab"
+   ]
+  },
+  {
+   "key": "table.STR.you",
+   "tr": "Sen",
+   "en": "You"
+  },
+  {
+   "key": "table.STR.bot.0",
+   "tr": "Selam!",
+   "en": "Hi!"
+  },
+  {
+   "key": "table.STR.bot.1",
+   "tr": "Kolay gelsin",
+   "en": "Good luck"
+  },
+  {
+   "key": "table.STR.bot.2",
+   "tr": "Hadi bakalım",
+   "en": "Let's go"
+  },
+  {
+   "key": "table.STR.bot.3",
+   "tr": "Haha",
+   "en": "Haha"
+  },
+  {
+   "key": "table.STR.bot.4",
+   "tr": "Bakalım bakalım",
+   "en": "We'll see"
+  },
+  {
+   "key": "table.STR.bot.5",
+   "tr": "Bu el benim",
+   "en": "This hand is mine"
+  },
+  {
+   "key": "table.STR.bot.6",
+   "tr": "Güzel taş",
+   "en": "Nice tile"
+  },
+  {
+   "key": "table.STR.botThanks.0",
+   "tr": "Eyvallah!",
+   "en": "Thanks!"
+  },
+  {
+   "key": "table.STR.botThanks.1",
+   "tr": "Sağ ol!",
+   "en": "Cheers!"
+  },
+  {
+   "key": "table.STR.botThanks.2",
+   "tr": "Çok naziksin",
+   "en": "So kind"
+  },
+  {
+   "key": "table.GIFTS.tea",
+   "tr": "Çay",
+   "en": "Tea"
+  },
+  {
+   "key": "table.GIFTS.tea.short",
+   "tr": "çay",
+   "en": "tea"
+  },
+  {
+   "key": "table.GIFTS.coffee",
+   "tr": "Türk kahvesi",
+   "en": "Turkish coffee"
+  },
+  {
+   "key": "table.GIFTS.coffee.short",
+   "tr": "Türk kahvesi",
+   "en": "Turkish coffee"
+  },
+  {
+   "key": "table.GIFTS.cola",
+   "tr": "Soğuk içecek",
+   "en": "Cold drink"
+  },
+  {
+   "key": "table.GIFTS.cola.short",
+   "tr": "soğuk içecek",
+   "en": "a cold drink"
+  },
+  {
+   "key": "table.GIFTS.simit",
+   "tr": "Simit",
+   "en": "Simit"
+  },
+  {
+   "key": "table.GIFTS.simit.short",
+   "tr": "simit",
+   "en": "simit"
+  },
+  {
+   "key": "table.GIFTS.baklava",
+   "tr": "Baklava",
+   "en": "Baklava"
+  },
+  {
+   "key": "table.GIFTS.baklava.short",
+   "tr": "baklava",
+   "en": "baklava"
+  },
+  {
+   "key": "table.GIFTS.seeds",
+   "tr": "Çekirdek",
+   "en": "Seeds"
+  },
+  {
+   "key": "table.GIFTS.seeds.short",
+   "tr": "çekirdek",
+   "en": "sunflower seeds"
+  },
+  {
+   "key": "table.GIFTS.flower",
+   "tr": "Çiçek",
+   "en": "Flowers"
+  },
+  {
+   "key": "table.GIFTS.flower.short",
+   "tr": "çiçek",
+   "en": "flowers"
+  },
+  {
+   "key": "table.GIFTS.cake",
+   "tr": "Pasta",
+   "en": "Cake"
+  },
+  {
+   "key": "table.GIFTS.cake.short",
+   "tr": "pasta",
+   "en": "a cake"
+  },
+  {
+   "key": "table.GIFTS.trophy",
+   "tr": "Kupa",
+   "en": "Trophy"
+  },
+  {
+   "key": "table.GIFTS.trophy.short",
+   "tr": "kupa",
+   "en": "a trophy"
+  },
+  {
+   "key": "table.GIFTS.rocket",
+   "tr": "Roket",
+   "en": "Rocket"
+  },
+  {
+   "key": "table.GIFTS.rocket.short",
+   "tr": "roket",
+   "en": "a rocket"
+  },
+  {
+   "key": "shared.rank.bronze",
+   "tr": "Bronz",
+   "en": "Bronze"
+  },
+  {
+   "key": "shared.rank.bronze.motif",
+   "tr": "Bronz · Kehribar",
+   "en": "Bronze · Amber"
+  },
+  {
+   "key": "shared.rank.silver",
+   "tr": "Gümüş",
+   "en": "Silver"
+  },
+  {
+   "key": "shared.rank.silver.motif",
+   "tr": "Gümüş · Safir",
+   "en": "Silver · Sapphire"
+  },
+  {
+   "key": "shared.rank.gold",
+   "tr": "Altın",
+   "en": "Gold"
+  },
+  {
+   "key": "shared.rank.gold.motif",
+   "tr": "Altın · Zümrüt",
+   "en": "Gold · Emerald"
+  },
+  {
+   "key": "shared.rank.diamond",
+   "tr": "Elmas",
+   "en": "Diamond"
+  },
+  {
+   "key": "shared.rank.diamond.motif",
+   "tr": "Platin · Elmas",
+   "en": "Platinum · Diamond"
+  },
+  {
+   "key": "shared.rank.master",
+   "tr": "Usta",
+   "en": "Master"
+  },
+  {
+   "key": "shared.rank.master.motif",
+   "tr": "Gül altın · Yakut",
+   "en": "Rose gold · Ruby"
+  },
+  {
+   "key": "shared.rank.galaxy",
+   "tr": "Galaksi",
+   "en": "Galaxy"
+  },
+  {
+   "key": "shared.rank.galaxy.motif",
+   "tr": "Titanyum · Opal",
+   "en": "Titanium · Opal"
+  }
+ ],
+ "inline": [
+  {
+   "key": "app.inline.setTimeout@419",
+   "tr": "Test: +10.000.000 çip eklendi",
+   "en": "Test: +10,000,000 chips added",
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:419"
+   ]
+  },
+  {
+   "key": "app.inline.name@524",
+   "tr": "Botlara karşı",
+   "en": "Vs bots",
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:524"
+   ]
+  },
+  {
+   "key": "app.inline.room@538",
+   "tr": "Dereceli",
+   "en": "Ranked",
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:538",
+    "G101-Dereceli.dc.html:469"
+   ]
+  },
+  {
+   "key": "app.inline.type@538",
+   "tr": " · Katlamalı",
+   "en": " · Doubling",
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:538"
+   ]
+  },
+  {
+   "key": "app.inline.type@538",
+   "tr": " (yalnız rakip)",
+   "en": " (opponents only)",
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:538"
+   ]
+  },
+  {
+   "key": "app.inline.betLabel@538",
+   "tr": "Antrenman · bahis yok",
+   "en": "Practice · no stake",
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:538"
+   ]
+  },
+  {
+   "key": "app.inline.lang@538",
+   "tr": "Dereceli · LP",
+   "en": "Ranked · LP",
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:538"
+   ]
+  },
+  {
+   "key": "app.inline.lang@538",
+   "tr": "Bahis ",
+   "en": "Bet ",
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:538"
+   ]
+  },
+  {
+   "key": "app.inline.kick@539",
+   "tr": "BOTLARA KARŞI · ANTRENMAN",
+   "en": "VS BOTS · PRACTICE",
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:539"
+   ]
+  },
+  {
+   "key": "app.inline.x@539",
+   "tr": "DERECELİ",
+   "en": "RANKED",
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:539"
+   ]
+  },
+  {
+   "key": "app.inline.gameLang@618",
+   "tr": "Türkçe",
+   "en": "English",
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:618"
+   ]
+  },
+  {
+   "key": "app.inline.nick@625",
+   "tr": "Misafir",
+   "en": "Guest",
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:625"
+   ]
+  },
+  {
+   "key": "app.inline.endGame@651",
+   "tr": "Dereceli maçtan ayrıldın · 4. sayıldı",
+   "en": "You left a ranked match · counted as 4th",
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:651"
+   ]
+  },
+  {
+   "key": "app.inline.amt@661",
+   "tr": " çip",
+   "en": " chips",
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:661"
+   ]
+  },
+  {
+   "key": "app.inline.fmt@661",
+   "tr": " elmas",
+   "en": " gems",
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:661"
+   ]
+  },
+  {
+   "key": "app.inline.flash@661",
+   "tr": "{r.day}. gün ödülü alındı · {amt}",
+   "en": "Day {r.day} reward collected · {amt}",
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:661"
+   ]
+  },
+  {
+   "key": "app.inline.x@661",
+   "tr": "Görev ödülü · {r.name} · {amt}",
+   "en": "Quest reward · {r.name} · {amt}",
+   "uses": [
+    "Galaxy 101 - Gerçek Ana Oyun.dc.html:661"
+   ]
+  },
+  {
+   "key": "menu.inline.sub@1132",
+   "tr": "çip",
+   "en": "chips",
+   "uses": [
+    "G101-Menu.dc.html:1132"
+   ]
+  },
+  {
+   "key": "menu.inline.bonus@1132",
+   "tr": "+%{b}",
+   "en": "+{b}%",
+   "uses": [
+    "G101-Menu.dc.html:1132",
+    "G101-Menu.dc.html:1133"
+   ]
+  },
+  {
+   "key": "menu.inline.sub@1133",
+   "tr": "elmas",
+   "en": "gems",
+   "uses": [
+    "G101-Menu.dc.html:1133"
+   ]
+  },
+  {
+   "key": "menu.inline.sub@1139",
+   "tr": "Taş görünümü",
+   "en": "Tile skin",
+   "uses": [
+    "G101-Menu.dc.html:1139"
+   ]
+  },
+  {
+   "key": "menu.inline.popLabel@1140",
+   "tr": "EN POPÜLER",
+   "en": "MOST POPULAR",
+   "uses": [
+    "G101-Menu.dc.html:1140"
+   ]
+  },
+  {
+   "key": "menu.inline.dealTag@1141",
+   "tr": "HAFTA SONU FIRSATI · %50",
+   "en": "WEEKEND DEAL · 50% OFF",
+   "uses": [
+    "G101-Menu.dc.html:1141"
+   ]
+  },
+  {
+   "key": "menu.inline.dealTitle@1141",
+   "tr": "1.000.000 çip + 50 elmas",
+   "en": "1,000,000 chips + 50 gems",
+   "uses": [
+    "G101-Menu.dc.html:1141"
+   ]
+  },
+  {
+   "key": "menu.inline.buy@1141",
+   "tr": "Satın al",
+   "en": "Buy",
+   "uses": [
+    "G101-Menu.dc.html:1141"
+   ]
+  },
+  {
+   "key": "menu.inline.invite@1143",
+   "tr": "Davet et",
+   "en": "Invite",
+   "uses": [
+    "G101-Menu.dc.html:1143"
+   ]
+  },
+  {
+   "key": "menu.inline.sent@1143",
+   "tr": "Gönderildi",
+   "en": "Sent",
+   "uses": [
+    "G101-Menu.dc.html:1143",
+    "G101-Dereceli.dc.html:525"
+   ]
+  },
+  {
+   "key": "menu.inline.watch@1143",
+   "tr": "İzle",
+   "en": "Watch",
+   "uses": [
+    "G101-Menu.dc.html:1143"
+   ]
+  },
+  {
+   "key": "menu.inline.msg@1143",
+   "tr": "Mesaj",
+   "en": "Message",
+   "uses": [
+    "G101-Menu.dc.html:1143"
+   ]
+  },
+  {
+   "key": "menu.inline.accept@1143",
+   "tr": "Kabul et",
+   "en": "Accept",
+   "uses": [
+    "G101-Menu.dc.html:1143"
+   ]
+  },
+  {
+   "key": "menu.inline.decline@1143",
+   "tr": "Reddet",
+   "en": "Decline",
+   "uses": [
+    "G101-Menu.dc.html:1143"
+   ]
+  },
+  {
+   "key": "menu.inline.lv@1149",
+   "tr": "SV ",
+   "en": "LV ",
+   "uses": [
+    "G101-Menu.dc.html:1149",
+    "G101-Menu.dc.html:1151",
+    "G101-Menu.dc.html:1306",
+    "G101-Lobi.dc.html:813",
+    "G101-Lobi.dc.html:1001",
+    "G101-Masa.dc.html:2024",
+    "G101-Masa.dc.html:2082"
+   ]
+  },
+  {
+   "key": "menu.inline.search@1158",
+   "tr": "Oyuncu adı veya kod ara",
+   "en": "Search by name or code",
+   "uses": [
+    "G101-Menu.dc.html:1158"
+   ]
+  },
+  {
+   "key": "menu.inline.codeLabel@1158",
+   "tr": "Kodun",
+   "en": "Your code",
+   "uses": [
+    "G101-Menu.dc.html:1158"
+   ]
+  },
+  {
+   "key": "menu.inline.add@1158",
+   "tr": "Arkadaş ekle",
+   "en": "Add friend",
+   "uses": [
+    "G101-Menu.dc.html:1158",
+    "G101-Menu.dc.html:1300"
+   ]
+  },
+  {
+   "key": "menu.inline.emptyText@1159",
+   "tr": "\"{s.q.trim()}\" ile eşleşen arkadaş yok",
+   "en": "No friends match \"{s.q.trim()}\"",
+   "uses": [
+    "G101-Menu.dc.html:1159"
+   ]
+  },
+  {
+   "key": "menu.inline.trim@1159",
+   "tr": "Bekleyen istek yok",
+   "en": "No pending requests",
+   "uses": [
+    "G101-Menu.dc.html:1159"
+   ]
+  },
+  {
+   "key": "menu.inline.tab@1159",
+   "tr": "Burada henüz arkadaş yok",
+   "en": "No friends here yet",
+   "uses": [
+    "G101-Menu.dc.html:1159"
+   ]
+  },
+  {
+   "key": "menu.inline.h0@1172",
+   "tr": "SIRA",
+   "en": "RANK",
+   "uses": [
+    "G101-Menu.dc.html:1172"
+   ]
+  },
+  {
+   "key": "menu.inline.h1@1172",
+   "tr": "OYUNCU",
+   "en": "PLAYER",
+   "uses": [
+    "G101-Menu.dc.html:1172"
+   ]
+  },
+  {
+   "key": "menu.inline.h2@1172",
+   "tr": "LİG",
+   "en": "LEAGUE",
+   "uses": [
+    "G101-Menu.dc.html:1172"
+   ]
+  },
+  {
+   "key": "menu.inline.h3@1172",
+   "tr": "PUAN",
+   "en": "POINTS",
+   "uses": [
+    "G101-Menu.dc.html:1172"
+   ]
+  },
+  {
+   "key": "menu.inline.label@1177",
+   "tr": "{d}. Gün",
+   "en": "Day {d}",
+   "uses": [
+    "G101-Menu.dc.html:1177"
+   ]
+  },
+  {
+   "key": "menu.inline.claim@1191",
+   "tr": "Topla",
+   "en": "Collect",
+   "uses": [
+    "G101-Menu.dc.html:1191"
+   ]
+  },
+  {
+   "key": "menu.inline.tasksTitle@1191",
+   "tr": "Günlük görevler",
+   "en": "Daily quests",
+   "uses": [
+    "G101-Menu.dc.html:1191"
+   ]
+  },
+  {
+   "key": "menu.inline.doneCount@1191",
+   "tr": "{doneN}/{TASKS.length} tamamlandı",
+   "en": "{doneN}/{TASKS.length} completed",
+   "uses": [
+    "G101-Menu.dc.html:1191"
+   ]
+  },
+  {
+   "key": "menu.inline.refresh@1191",
+   "tr": "Yenilenmeye {hh} sa {mm} dk",
+   "en": "Resets in {hh}h {mm}m",
+   "uses": [
+    "G101-Menu.dc.html:1191"
+   ]
+  },
+  {
+   "key": "menu.inline.take@1191",
+   "tr": "Al",
+   "en": "Claim",
+   "uses": [
+    "G101-Menu.dc.html:1191"
+   ]
+  },
+  {
+   "key": "menu.inline.taken@1191",
+   "tr": "Alındı",
+   "en": "Claimed",
+   "uses": [
+    "G101-Menu.dc.html:1191"
+   ]
+  },
+  {
+   "key": "menu.inline.going@1191",
+   "tr": "Devam ediyor",
+   "en": "In progress",
+   "uses": [
+    "G101-Menu.dc.html:1191"
+   ]
+  },
+  {
+   "key": "menu.inline.exLabel@1200",
+   "tr": "ÖRNEK",
+   "en": "EXAMPLE",
+   "uses": [
+    "G101-Menu.dc.html:1200"
+   ]
+  },
+  {
+   "key": "menu.inline.fmtAgo@1216",
+   "tr": "{m} dk önce",
+   "en": "{m} min ago",
+   "uses": [
+    "G101-Menu.dc.html:1216"
+   ]
+  },
+  {
+   "key": "menu.inline.fmtAgo@1216",
+   "tr": "{Math.floor(m / 60)} sa önce",
+   "en": "{Math.floor(m / 60)} h ago",
+   "uses": [
+    "G101-Menu.dc.html:1216"
+   ]
+  },
+  {
+   "key": "menu.inline.floor@1216",
+   "tr": "Dün",
+   "en": "Yesterday",
+   "uses": [
+    "G101-Menu.dc.html:1216"
+   ]
+  },
+  {
+   "key": "menu.inline.lv@1218",
+   "tr": "SEVİYE 24",
+   "en": "LEVEL 24",
+   "uses": [
+    "G101-Menu.dc.html:1218"
+   ]
+  },
+  {
+   "key": "menu.inline.status@1218",
+   "tr": "Henüz durum mesajı yok",
+   "en": "No status message yet",
+   "uses": [
+    "G101-Menu.dc.html:1218"
+   ]
+  },
+  {
+   "key": "menu.inline.xpLabel@1219",
+   "tr": "Seviye 25'e",
+   "en": "To level 25",
+   "uses": [
+    "G101-Menu.dc.html:1219"
+   ]
+  },
+  {
+   "key": "menu.inline.xp@1219",
+   "tr": "6.240 / 9.000 XP",
+   "en": "6,240 / 9,000 XP",
+   "uses": [
+    "G101-Menu.dc.html:1219"
+   ]
+  },
+  {
+   "key": "menu.inline.share@1219",
+   "tr": "Profili paylaş",
+   "en": "Share profile",
+   "uses": [
+    "G101-Menu.dc.html:1219",
+    "G101-Menu.dc.html:1316"
+   ]
+  },
+  {
+   "key": "menu.inline.stats@1221",
+   "tr": "OYNANAN EL",
+   "en": "HANDS PLAYED",
+   "uses": [
+    "G101-Menu.dc.html:1221"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1221",
+   "tr": "527 kazanıldı",
+   "en": "527 won",
+   "uses": [
+    "G101-Menu.dc.html:1221"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1221",
+   "tr": "KAZANMA",
+   "en": "WIN RATE",
+   "uses": [
+    "G101-Menu.dc.html:1221"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1221",
+   "tr": "%41",
+   "en": "41%",
+   "uses": [
+    "G101-Menu.dc.html:1221",
+    "G101-Menu.dc.html:1317"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1221",
+   "tr": "Bu ay +%3",
+   "en": "+3% this month",
+   "uses": [
+    "G101-Menu.dc.html:1221"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1221",
+   "tr": "EN İYİ AÇILIŞ",
+   "en": "BEST OPENING",
+   "uses": [
+    "G101-Menu.dc.html:1221"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1221",
+   "tr": "puan",
+   "en": "points",
+   "uses": [
+    "G101-Menu.dc.html:1221"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1221",
+   "tr": "OKEY BİTİŞ",
+   "en": "OKEY FINISH",
+   "uses": [
+    "G101-Menu.dc.html:1221"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1221",
+   "tr": "katlanan el",
+   "en": "doubled hands",
+   "uses": [
+    "G101-Menu.dc.html:1221"
+   ]
+  },
+  {
+   "key": "menu.inline.season@1222",
+   "tr": "SEZON 3 · DERECELİ",
+   "en": "SEASON 3 · RANKED",
+   "uses": [
+    "G101-Menu.dc.html:1222"
+   ]
+  },
+  {
+   "key": "menu.inline.bestLabel@1222",
+   "tr": "SEZON EN İYİ",
+   "en": "SEASON BEST",
+   "uses": [
+    "G101-Menu.dc.html:1222"
+   ]
+  },
+  {
+   "key": "menu.inline.best@1222",
+   "tr": "Altın I",
+   "en": "Gold I",
+   "uses": [
+    "G101-Menu.dc.html:1222"
+   ]
+  },
+  {
+   "key": "menu.inline.toNext@1222",
+   "tr": "Altın I'e 28 LP",
+   "en": "28 LP to Gold I",
+   "uses": [
+    "G101-Menu.dc.html:1222"
+   ]
+  },
+  {
+   "key": "menu.inline.byMode@1223",
+   "tr": "MODLARA GÖRE KAZANMA",
+   "en": "WIN RATE BY MODE",
+   "uses": [
+    "G101-Menu.dc.html:1223"
+   ]
+  },
+  {
+   "key": "menu.inline.pct@1223",
+   "tr": "%{p}",
+   "en": "{p}%",
+   "uses": [
+    "G101-Menu.dc.html:1223"
+   ]
+  },
+  {
+   "key": "menu.inline.framesLabel@1224",
+   "tr": "ÇERÇEVELER",
+   "en": "FRAMES",
+   "uses": [
+    "G101-Menu.dc.html:1224"
+   ]
+  },
+  {
+   "key": "menu.inline.framesHint@1224",
+   "tr": "Lig çerçeveleri derecelide açılır",
+   "en": "League frames unlock in ranked",
+   "uses": [
+    "G101-Menu.dc.html:1224"
+   ]
+  },
+  {
+   "key": "menu.inline.hMode@1228",
+   "tr": "MOD",
+   "en": "MODE",
+   "uses": [
+    "G101-Menu.dc.html:1228"
+   ]
+  },
+  {
+   "key": "menu.inline.hPlace@1228",
+   "tr": "SIRA",
+   "en": "PLACE",
+   "uses": [
+    "G101-Menu.dc.html:1228"
+   ]
+  },
+  {
+   "key": "menu.inline.hChips@1228",
+   "tr": "ÇİP",
+   "en": "CHIPS",
+   "uses": [
+    "G101-Menu.dc.html:1228"
+   ]
+  },
+  {
+   "key": "menu.inline.hWhen@1228",
+   "tr": "ZAMAN",
+   "en": "WHEN",
+   "uses": [
+    "G101-Menu.dc.html:1228"
+   ]
+  },
+  {
+   "key": "menu.inline.detail@1229",
+   "tr": "101 · 5K masa",
+   "en": "101 · 5K table",
+   "uses": [
+    "G101-Menu.dc.html:1229"
+   ]
+  },
+  {
+   "key": "menu.inline.place@1230",
+   "tr": "{pl}.",
+   "en": "#{pl}",
+   "uses": [
+    "G101-Menu.dc.html:1230"
+   ]
+  },
+  {
+   "key": "menu.inline.name@1249",
+   "tr": "Klasik",
+   "en": "Classic",
+   "uses": [
+    "G101-Menu.dc.html:1249"
+   ]
+  },
+  {
+   "key": "menu.inline.tip@1250",
+   "tr": "Derecelide {l.tr} ligine ulaşınca açılır",
+   "en": "Reach {l.en} in ranked to unlock",
+   "uses": [
+    "G101-Menu.dc.html:1250"
+   ]
+  },
+  {
+   "key": "menu.inline.state@1251",
+   "tr": "{l.tr} liginde açılır",
+   "en": "Unlocks at {l.en}",
+   "uses": [
+    "G101-Menu.dc.html:1251"
+   ]
+  },
+  {
+   "key": "menu.inline.state@1251",
+   "tr": "Takılı",
+   "en": "Equipped",
+   "uses": [
+    "G101-Menu.dc.html:1251",
+    "G101-Menu.dc.html:1252"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1251",
+   "tr": "Sahipsin",
+   "en": "Owned",
+   "uses": [
+    "G101-Menu.dc.html:1251",
+    "G101-Menu.dc.html:1252"
+   ]
+  },
+  {
+   "key": "menu.inline.short@1252",
+   "tr": "Kilitli",
+   "en": "Locked",
+   "uses": [
+    "G101-Menu.dc.html:1252",
+    "G101-Dereceli.dc.html:557"
+   ]
+  },
+  {
+   "key": "menu.inline.title@1263",
+   "tr": "Profili düzenle",
+   "en": "Edit profile",
+   "uses": [
+    "G101-Menu.dc.html:1263"
+   ]
+  },
+  {
+   "key": "menu.inline.lv@1263",
+   "tr": "SV 24",
+   "en": "LV 24",
+   "uses": [
+    "G101-Menu.dc.html:1263"
+   ]
+  },
+  {
+   "key": "menu.inline.colorLabel@1264",
+   "tr": "AVATAR RENGİ",
+   "en": "AVATAR COLOR",
+   "uses": [
+    "G101-Menu.dc.html:1264"
+   ]
+  },
+  {
+   "key": "menu.inline.nameLabel@1264",
+   "tr": "Oyuncu adı",
+   "en": "Player name",
+   "uses": [
+    "G101-Menu.dc.html:1264"
+   ]
+  },
+  {
+   "key": "menu.inline.hint@1266",
+   "tr": "Masadaki diğer oyuncular bu adı görür.",
+   "en": "Other players see this name at the table.",
+   "uses": [
+    "G101-Menu.dc.html:1266"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1266",
+   "tr": "3–16 karakter: harf, rakam, boşluk, nokta veya alt çizgi.",
+   "en": "3–16 characters: letters, numbers, space, dot or underscore.",
+   "uses": [
+    "G101-Menu.dc.html:1266"
+   ]
+  },
+  {
+   "key": "menu.inline.statusLabel@1267",
+   "tr": "Durum mesajı",
+   "en": "Status message",
+   "uses": [
+    "G101-Menu.dc.html:1267"
+   ]
+  },
+  {
+   "key": "menu.inline.statusPh@1267",
+   "tr": "Örn. Hızlı bir el için hep hazırım",
+   "en": "e.g. Always up for a quick game",
+   "uses": [
+    "G101-Menu.dc.html:1267"
+   ]
+  },
+  {
+   "key": "menu.inline.frameLabel@1268",
+   "tr": "Avatar çerçevesi",
+   "en": "Avatar frame",
+   "uses": [
+    "G101-Menu.dc.html:1268"
+   ]
+  },
+  {
+   "key": "menu.inline.note@1271",
+   "tr": "Adını 30 günde bir değiştirebilirsin.",
+   "en": "You can change your name once every 30 days.",
+   "uses": [
+    "G101-Menu.dc.html:1271"
+   ]
+  },
+  {
+   "key": "menu.inline.word@1275",
+   "tr": "SİL",
+   "en": "DELETE",
+   "uses": [
+    "G101-Menu.dc.html:1275"
+   ]
+  },
+  {
+   "key": "menu.inline.title@1279",
+   "tr": "Oyundan çıkmak istiyor musun?",
+   "en": "Quit the game?",
+   "uses": [
+    "G101-Menu.dc.html:1279"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1279",
+   "tr": "Hesabını silmek istiyor musun?",
+   "en": "Delete your account?",
+   "uses": [
+    "G101-Menu.dc.html:1279"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1279",
+   "tr": "Çıkış yapmak istiyor musun?",
+   "en": "Log out?",
+   "uses": [
+    "G101-Menu.dc.html:1279"
+   ]
+  },
+  {
+   "key": "menu.inline.body@1280",
+   "tr": "Galaxy 101 kapanacak. Çiplerin, ilerlemen ve ayarların kayıtlı kalır.",
+   "en": "Galaxy 101 will close. Your chips, progress and settings are saved.",
+   "uses": [
+    "G101-Menu.dc.html:1280"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1280",
+   "tr": "Hesabın 30 gün sonra kalıcı olarak silinir. Bu süre içinde giriş yaparsan silme işlemi iptal olur.",
+   "en": "Your account will be deleted after 30 days. Logging in during that time cancels the deletion.",
+   "uses": [
+    "G101-Menu.dc.html:1280"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1280",
+   "tr": "Çiplerin, ilerlemen ve arkadaşların Google hesabında saklanır. İstediğin zaman tekrar giriş yapabilirsin.",
+   "en": "Your chips, progress and friends are saved to your Google account. You can log back in anytime.",
+   "uses": [
+    "G101-Menu.dc.html:1280"
+   ]
+  },
+  {
+   "key": "menu.inline.typeHint@1282",
+   "tr": "Onaylamak için {word} yaz",
+   "en": "Type {word} to confirm",
+   "uses": [
+    "G101-Menu.dc.html:1282"
+   ]
+  },
+  {
+   "key": "menu.inline.btn@1284",
+   "tr": "Oyundan çık",
+   "en": "Quit game",
+   "uses": [
+    "G101-Menu.dc.html:1284",
+    "G101-Menu.dc.html:1329"
+   ]
+  },
+  {
+   "key": "menu.inline.btn@1284",
+   "tr": "Hesabı sil",
+   "en": "Delete account",
+   "uses": [
+    "G101-Menu.dc.html:1284"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1284",
+   "tr": "Çıkış yap",
+   "en": "Log out",
+   "uses": [
+    "G101-Menu.dc.html:1284"
+   ]
+  },
+  {
+   "key": "menu.inline.doneTitle@1287",
+   "tr": "Görüşmek üzere",
+   "en": "See you soon",
+   "uses": [
+    "G101-Menu.dc.html:1287"
+   ]
+  },
+  {
+   "key": "menu.inline.st@1287",
+   "tr": "Silme talebin alındı",
+   "en": "Deletion scheduled",
+   "uses": [
+    "G101-Menu.dc.html:1287"
+   ]
+  },
+  {
+   "key": "menu.inline.last@1287",
+   "tr": "Çıkış yapıldı",
+   "en": "Logged out",
+   "uses": [
+    "G101-Menu.dc.html:1287"
+   ]
+  },
+  {
+   "key": "menu.inline.doneBody@1288",
+   "tr": "Galaxy 101 kapatılıyor…",
+   "en": "Closing Galaxy 101…",
+   "uses": [
+    "G101-Menu.dc.html:1288"
+   ]
+  },
+  {
+   "key": "menu.inline.last@1288",
+   "tr": "30 gün içinde giriş yaparak iptal edebilirsin.",
+   "en": "Log in within 30 days to cancel.",
+   "uses": [
+    "G101-Menu.dc.html:1288"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1288",
+   "tr": "Masada görüşmek üzere.",
+   "en": "See you at the table soon.",
+   "uses": [
+    "G101-Menu.dc.html:1288"
+   ]
+  },
+  {
+   "key": "menu.inline.doneBtn@1289",
+   "tr": "Tamam",
+   "en": "OK",
+   "uses": [
+    "G101-Menu.dc.html:1289"
+   ]
+  },
+  {
+   "key": "menu.inline.sub@1300",
+   "tr": "Arkadaş kodu veya oyuncu adıyla ara",
+   "en": "Search with a friend code or player name",
+   "uses": [
+    "G101-Menu.dc.html:1300"
+   ]
+  },
+  {
+   "key": "menu.inline.ph@1300",
+   "tr": "Örn. MK-3321",
+   "en": "e.g. MK-3321",
+   "uses": [
+    "G101-Menu.dc.html:1300"
+   ]
+  },
+  {
+   "key": "menu.inline.findLabel@1301",
+   "tr": "Ara",
+   "en": "Search",
+   "uses": [
+    "G101-Menu.dc.html:1301"
+   ]
+  },
+  {
+   "key": "menu.inline.idleText@1304",
+   "tr": "Kod ya da ad girip Ara'ya bas.",
+   "en": "Enter a code or name and press Search.",
+   "uses": [
+    "G101-Menu.dc.html:1304"
+   ]
+  },
+  {
+   "key": "menu.inline.noneText@1305",
+   "tr": "Bu oyuncuyla zaten arkadaşsınız.",
+   "en": "You are already friends with this player.",
+   "uses": [
+    "G101-Menu.dc.html:1305"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1305",
+   "tr": "Oyuncu bulunamadı. Kodu kontrol edip tekrar dene.",
+   "en": "No player found. Check the code and try again.",
+   "uses": [
+    "G101-Menu.dc.html:1305"
+   ]
+  },
+  {
+   "key": "menu.inline.btn@1307",
+   "tr": "İstek gönderildi",
+   "en": "Request sent",
+   "uses": [
+    "G101-Menu.dc.html:1307"
+   ]
+  },
+  {
+   "key": "menu.inline.btn@1307",
+   "tr": "İstek gönder",
+   "en": "Send request",
+   "uses": [
+    "G101-Menu.dc.html:1307"
+   ]
+  },
+  {
+   "key": "menu.inline.copyLabel@1311",
+   "tr": "Kopyalandı",
+   "en": "Copied",
+   "uses": [
+    "G101-Menu.dc.html:1311",
+    "G101-Menu.dc.html:1319"
+   ]
+  },
+  {
+   "key": "menu.inline.copyLabel@1311",
+   "tr": "Kopyala",
+   "en": "Copy",
+   "uses": [
+    "G101-Menu.dc.html:1311"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1315",
+   "tr": "Diğer",
+   "en": "More",
+   "uses": [
+    "G101-Menu.dc.html:1315"
+   ]
+  },
+  {
+   "key": "menu.inline.sub@1316",
+   "tr": "Profil kartını arkadaşlarına gönder",
+   "en": "Send your profile card to friends",
+   "uses": [
+    "G101-Menu.dc.html:1316"
+   ]
+  },
+  {
+   "key": "menu.inline.season@1316",
+   "tr": "Sezon 3",
+   "en": "Season 3",
+   "uses": [
+    "G101-Menu.dc.html:1316"
+   ]
+  },
+  {
+   "key": "menu.inline.chips@1317",
+   "tr": "EL",
+   "en": "HANDS",
+   "uses": [
+    "G101-Menu.dc.html:1317"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1317",
+   "tr": "KAZANMA",
+   "en": "WIN",
+   "uses": [
+    "G101-Menu.dc.html:1317"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1317",
+   "tr": "EN İYİ",
+   "en": "BEST",
+   "uses": [
+    "G101-Menu.dc.html:1317"
+   ]
+  },
+  {
+   "key": "menu.inline.linkLabel@1318",
+   "tr": "Profil bağlantısı",
+   "en": "Profile link",
+   "uses": [
+    "G101-Menu.dc.html:1318"
+   ]
+  },
+  {
+   "key": "menu.inline.viaLabel@1318",
+   "tr": "Şununla paylaş",
+   "en": "Share via",
+   "uses": [
+    "G101-Menu.dc.html:1318"
+   ]
+  },
+  {
+   "key": "menu.inline.copyLabel@1319",
+   "tr": "Bağlantıyı kopyala",
+   "en": "Copy link",
+   "uses": [
+    "G101-Menu.dc.html:1319"
+   ]
+  },
+  {
+   "key": "menu.inline.go@1322",
+   "tr": "{name} açılıyor…",
+   "en": "Opening {name}…",
+   "uses": [
+    "G101-Menu.dc.html:1322"
+   ]
+  },
+  {
+   "key": "menu.inline.inviteTitle@1323",
+   "tr": "Arkadaşını davet et, çip kazan",
+   "en": "Invite a friend, earn chips",
+   "uses": [
+    "G101-Menu.dc.html:1323"
+   ]
+  },
+  {
+   "key": "menu.inline.inviteSub@1323",
+   "tr": "Bağlantınla gelen arkadaşın ilk elini oynayınca ikiniz de 2.000 çip kazanırsınız.",
+   "en": "You both get 2,000 chips when they play their first hand with your link.",
+   "uses": [
+    "G101-Menu.dc.html:1323"
+   ]
+  },
+  {
+   "key": "menu.inline.quitTip@1329",
+   "tr": "Galaxy 101’i kapat",
+   "en": "Close Galaxy 101",
+   "uses": [
+    "G101-Menu.dc.html:1329"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1348",
+   "tr": "Görüş açısı",
+   "en": "Camera view",
+   "uses": [
+    "G101-Menu.dc.html:1348"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1348",
+   "tr": "Masayı hangi açıdan göreceğin",
+   "en": "How you see the table",
+   "uses": [
+    "G101-Menu.dc.html:1348"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1348",
+   "tr": "Masa teması",
+   "en": "Table theme",
+   "uses": [
+    "G101-Menu.dc.html:1348"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1348",
+   "tr": "Çuha ve kenar stili",
+   "en": "Felt and rim style",
+   "uses": [
+    "G101-Menu.dc.html:1348"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1348",
+   "tr": "Istaka teması",
+   "en": "Rack theme",
+   "uses": [
+    "G101-Menu.dc.html:1348"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1348",
+   "tr": "Istakanın malzemesi",
+   "en": "Material of your rack",
+   "uses": [
+    "G101-Menu.dc.html:1348"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1348",
+   "tr": "Taş görünümü",
+   "en": "Tile style",
+   "uses": [
+    "G101-Menu.dc.html:1348"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1348",
+   "tr": "Taş yüzü ve rakam renkleri",
+   "en": "Face and number colours",
+   "uses": [
+    "G101-Menu.dc.html:1348"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1348",
+   "tr": "Masa bildirimleri",
+   "en": "Table notifications",
+   "uses": [
+    "G101-Menu.dc.html:1348"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1348",
+   "tr": "Balonlar, ikramlar, emojiler ve ipuçları",
+   "en": "Bubbles, treats, emojis and hints",
+   "uses": [
+    "G101-Menu.dc.html:1348"
+   ]
+  },
+  {
+   "key": "menu.inline.cur@1349",
+   "tr": "{lk.notifs.filter((t) => t.x === '27px').length}/5 açık",
+   "en": "{lk.notifs.filter((t) => t.x === '27px').length}/5 on",
+   "uses": [
+    "G101-Menu.dc.html:1349"
+   ]
+  },
+  {
+   "key": "menu.inline.name@1433",
+   "tr": "Çözünürlük",
+   "en": "Resolution",
+   "uses": [
+    "G101-Menu.dc.html:1433"
+   ]
+  },
+  {
+   "key": "menu.inline.desc@1434",
+   "tr": "Yerel · Monitör en fazla {nat}",
+   "en": "Native · Monitor max {nat}",
+   "uses": [
+    "G101-Menu.dc.html:1434"
+   ]
+  },
+  {
+   "key": "menu.inline.x@1434",
+   "tr": "Monitör en fazla {nat}",
+   "en": "Monitor max {nat}",
+   "uses": [
+    "G101-Menu.dc.html:1434"
+   ]
+  },
+  {
+   "key": "menu.inline.max@1463",
+   "tr": "Monitör {hzL}",
+   "en": "Monitor {hzL}",
+   "uses": [
+    "G101-Menu.dc.html:1463"
+   ]
+  },
+  {
+   "key": "menu.inline.name@1464",
+   "tr": "Kare hızı",
+   "en": "Frame rate",
+   "uses": [
+    "G101-Menu.dc.html:1464"
+   ]
+  },
+  {
+   "key": "menu.inline.desc@1465",
+   "tr": "Ekranla eşitlenir (VSync) · {max}",
+   "en": "Matches refresh rate (VSync) · {max}",
+   "uses": [
+    "G101-Menu.dc.html:1465"
+   ]
+  },
+  {
+   "key": "menu.inline.rate@1465",
+   "tr": "Sabit {cur} FPS · {max}",
+   "en": "Locked to {cur} FPS · {max}",
+   "uses": [
+    "G101-Menu.dc.html:1465"
+   ]
+  },
+  {
+   "key": "menu.inline.label@1466",
+   "tr": "Otomatik · {hzL}",
+   "en": "Auto · {hzL}",
+   "uses": [
+    "G101-Menu.dc.html:1466"
+   ]
+  },
+  {
+   "key": "menu.inline.next@1550",
+   "tr": "İlk 100",
+   "en": "Top 100",
+   "uses": [
+    "G101-Menu.dc.html:1550",
+    "G101-Dereceli.dc.html:486"
+   ]
+  },
+  {
+   "key": "menu.inline.next@1550",
+   "tr": "Galaksi'ye {100 - rv.lp} LP",
+   "en": "{100 - rv.lp} LP to Galaxy",
+   "uses": [
+    "G101-Menu.dc.html:1550"
+   ]
+  },
+  {
+   "key": "menu.inline.g@1550",
+   "tr": "{RR.label(rv.idx + 1, 'tr')}'e {100 - rv.lp} LP",
+   "en": "{100 - rv.lp} LP to {RR.label(rv.idx + 1, 'en')}",
+   "uses": [
+    "G101-Menu.dc.html:1550"
+   ]
+  },
+  {
+   "key": "lobby.inline.name@851",
+   "tr": "{genTR(first)} masası",
+   "en": "{first}'s table",
+   "uses": [
+    "G101-Lobi.dc.html:851"
+   ]
+  },
+  {
+   "key": "ranked.inline.flash@420",
+   "tr": "{f.name} takıma katıldı",
+   "en": "{f.name} joined your party",
+   "uses": [
+    "G101-Dereceli.dc.html:420"
+   ]
+  },
+  {
+   "key": "ranked.inline.flash@445",
+   "tr": "Arama iptal edildi",
+   "en": "Search cancelled",
+   "uses": [
+    "G101-Dereceli.dc.html:445"
+   ]
+  },
+  {
+   "key": "ranked.inline.flash@459",
+   "tr": "Maç zamanında kabul edilmedi",
+   "en": "Match not accepted in time",
+   "uses": [
+    "G101-Dereceli.dc.html:459"
+   ]
+  },
+  {
+   "key": "ranked.inline.flash@464",
+   "tr": "Maçı reddettin",
+   "en": "You declined the match",
+   "uses": [
+    "G101-Dereceli.dc.html:464"
+   ]
+  },
+  {
+   "key": "ranked.inline.next@486",
+   "tr": "Galaksi'ye {100 - rk.lp} LP",
+   "en": "{100 - rk.lp} LP to Galaxy",
+   "uses": [
+    "G101-Dereceli.dc.html:486"
+   ]
+  },
+  {
+   "key": "ranked.inline.x@486",
+   "tr": "{R.label(rk.idx + 1, lang)}'e {100 - rk.lp} LP",
+   "en": "{100 - rk.lp} LP to {R.label(rk.idx + 1, lang)}",
+   "uses": [
+    "G101-Dereceli.dc.html:486"
+   ]
+  },
+  {
+   "key": "ranked.inline.prot@487",
+   "tr": "Düşme koruması · {rk.prot} maç",
+   "en": "Demotion shield · {rk.prot} matches",
+   "uses": [
+    "G101-Dereceli.dc.html:487"
+   ]
+  },
+  {
+   "key": "ranked.inline.tag@491",
+   "tr": "4 OYUNCU",
+   "en": "4 PLAYERS",
+   "uses": [
+    "G101-Dereceli.dc.html:491"
+   ]
+  },
+  {
+   "key": "ranked.inline.desc@491",
+   "tr": "Tek başına · seviyende 3 rakip",
+   "en": "Alone · 3 opponents at your level",
+   "uses": [
+    "G101-Dereceli.dc.html:491"
+   ]
+  },
+  {
+   "key": "ranked.inline.tag@492",
+   "tr": "EŞLİ",
+   "en": "PAIRS",
+   "uses": [
+    "G101-Dereceli.dc.html:492"
+   ]
+  },
+  {
+   "key": "ranked.inline.desc@492",
+   "tr": "Sen + 1 arkadaş · karşıda bir çift",
+   "en": "You + 1 friend vs a pair",
+   "uses": [
+    "G101-Dereceli.dc.html:492"
+   ]
+  },
+  {
+   "key": "ranked.inline.tag@493",
+   "tr": "4 ARKADAŞ",
+   "en": "4 FRIENDS",
+   "uses": [
+    "G101-Dereceli.dc.html:493"
+   ]
+  },
+  {
+   "key": "ranked.inline.desc@493",
+   "tr": "4 arkadaş aynı dereceli masada",
+   "en": "4 friends on one ranked table",
+   "uses": [
+    "G101-Dereceli.dc.html:493"
+   ]
+  },
+  {
+   "key": "ranked.inline.label@513",
+   "tr": "Takım aralığı · ±1 lig",
+   "en": "Party range · ±1 league",
+   "uses": [
+    "G101-Dereceli.dc.html:513"
+   ]
+  },
+  {
+   "key": "ranked.inline.hint@513",
+   "tr": "{LG[lo].tr} – {LG[hi].tr} arası arkadaşlar katılabilir · herkes kendi sırasına göre LP kazanır",
+   "en": "Friends from {LG[lo].en} to {LG[hi].en} can join · everyone earns LP for their own place",
+   "uses": [
+    "G101-Dereceli.dc.html:513"
+   ]
+  },
+  {
+   "key": "ranked.inline.label@514",
+   "tr": "Eşleşme aralığı · ",
+   "en": "Match range · ",
+   "uses": [
+    "G101-Dereceli.dc.html:514"
+   ]
+  },
+  {
+   "key": "ranked.inline.hint@515",
+   "tr": "30 sn geçti · arama ±2 lige genişledi",
+   "en": "Search widened to ±2 leagues after 30 s",
+   "uses": [
+    "G101-Dereceli.dc.html:515"
+   ]
+  },
+  {
+   "key": "ranked.inline.x@515",
+   "tr": "Seviyene uygun rakipler · 30 sn sonra ±2 lige genişler",
+   "en": "Opponents at your level · widens to ±2 leagues after 30 s",
+   "uses": [
+    "G101-Dereceli.dc.html:515"
+   ]
+  },
+  {
+   "key": "ranked.inline.why@517",
+   "tr": "Duo için 1 arkadaş davet et",
+   "en": "Invite 1 friend for Duo",
+   "uses": [
+    "G101-Dereceli.dc.html:517"
+   ]
+  },
+  {
+   "key": "ranked.inline.x@517",
+   "tr": "Squad için {need - joined} arkadaş daha davet et",
+   "en": "Invite {need - joined} more friend{need - joined > 1 ? 's' : ''} for Squad",
+   "uses": [
+    "G101-Dereceli.dc.html:517"
+   ]
+  },
+  {
+   "key": "ranked.inline.label@518",
+   "tr": "MASAYI KUR",
+   "en": "START TABLE",
+   "uses": [
+    "G101-Dereceli.dc.html:518"
+   ]
+  },
+  {
+   "key": "ranked.inline.label@518",
+   "tr": "MAÇ ARA",
+   "en": "FIND MATCH",
+   "uses": [
+    "G101-Dereceli.dc.html:518"
+   ]
+  },
+  {
+   "key": "ranked.inline.sub@518",
+   "tr": "4 arkadaş · dereceli",
+   "en": "4 friends · ranked",
+   "uses": [
+    "G101-Dereceli.dc.html:518"
+   ]
+  },
+  {
+   "key": "ranked.inline.mode@518",
+   "tr": "Dereceli · 101 · 5 el",
+   "en": "Ranked · 101 · 5 hands",
+   "uses": [
+    "G101-Dereceli.dc.html:518"
+   ]
+  },
+  {
+   "key": "ranked.inline.length@522",
+   "tr": "bulundu",
+   "en": "found",
+   "uses": [
+    "G101-Dereceli.dc.html:522"
+   ]
+  },
+  {
+   "key": "ranked.inline.title@523",
+   "tr": "Dereceliye davet et",
+   "en": "Invite to ranked",
+   "uses": [
+    "G101-Dereceli.dc.html:523"
+   ]
+  },
+  {
+   "key": "ranked.inline.sub@523",
+   "tr": "Duo · 1 arkadaş seç",
+   "en": "Duo · pick 1 friend",
+   "uses": [
+    "G101-Dereceli.dc.html:523"
+   ]
+  },
+  {
+   "key": "ranked.inline.sub@523",
+   "tr": "Squad · {s.party.length}/3 davet edildi",
+   "en": "Squad · {s.party.length}/3 invited",
+   "uses": [
+    "G101-Dereceli.dc.html:523"
+   ]
+  },
+  {
+   "key": "ranked.inline.btn@525",
+   "tr": "Takımda",
+   "en": "In party",
+   "uses": [
+    "G101-Dereceli.dc.html:525"
+   ]
+  },
+  {
+   "key": "ranked.inline.x@525",
+   "tr": "Çevrimdışı",
+   "en": "Offline",
+   "uses": [
+    "G101-Dereceli.dc.html:525"
+   ]
+  },
+  {
+   "key": "ranked.inline.x@525",
+   "tr": "Aralık dışı",
+   "en": "Out of range",
+   "uses": [
+    "G101-Dereceli.dc.html:525"
+   ]
+  },
+  {
+   "key": "ranked.inline.note@527",
+   "tr": "· yalnızca ±1 lig",
+   "en": "· ±1 league only",
+   "uses": [
+    "G101-Dereceli.dc.html:527"
+   ]
+  },
+  {
+   "key": "ranked.inline.why@528",
+   "tr": "Dereceli takımlar ±1 lig içinde olmalı",
+   "en": "Ranked parties must be within ±1 league",
+   "uses": [
+    "G101-Dereceli.dc.html:528"
+   ]
+  },
+  {
+   "key": "ranked.inline.kicker@530",
+   "tr": "SQUAD HAZIR",
+   "en": "SQUAD READY",
+   "uses": [
+    "G101-Dereceli.dc.html:530"
+   ]
+  },
+  {
+   "key": "ranked.inline.kicker@530",
+   "tr": "MAÇ BULUNDU",
+   "en": "MATCH FOUND",
+   "uses": [
+    "G101-Dereceli.dc.html:530"
+   ]
+  },
+  {
+   "key": "ranked.inline.title@530",
+   "tr": "Hazır mısınız?",
+   "en": "Ready check",
+   "uses": [
+    "G101-Dereceli.dc.html:530"
+   ]
+  },
+  {
+   "key": "ranked.inline.title@530",
+   "tr": "Rakiplerin hazır",
+   "en": "Your opponents are here",
+   "uses": [
+    "G101-Dereceli.dc.html:530"
+   ]
+  },
+  {
+   "key": "ranked.inline.acceptLabel@531",
+   "tr": "Kabul et · ",
+   "en": "Accept · ",
+   "uses": [
+    "G101-Dereceli.dc.html:531"
+   ]
+  },
+  {
+   "key": "ranked.inline.status@532",
+   "tr": "Masa hazırlanıyor…",
+   "en": "Setting up the table…",
+   "uses": [
+    "G101-Dereceli.dc.html:532"
+   ]
+  },
+  {
+   "key": "ranked.inline.x@532",
+   "tr": "Oyuncular bekleniyor…",
+   "en": "Waiting for players…",
+   "uses": [
+    "G101-Dereceli.dc.html:532"
+   ]
+  },
+  {
+   "key": "ranked.inline.team@534",
+   "tr": "TAKIM A",
+   "en": "TEAM A",
+   "uses": [
+    "G101-Dereceli.dc.html:534"
+   ]
+  },
+  {
+   "key": "ranked.inline.team@534",
+   "tr": "TAKIM B",
+   "en": "TEAM B",
+   "uses": [
+    "G101-Dereceli.dc.html:534"
+   ]
+  },
+  {
+   "key": "ranked.inline.downTier@539",
+   "tr": "{R.label(r.to.idx, lang)} kademesine düştün",
+   "en": "Dropped to {R.label(r.to.idx, lang)}",
+   "uses": [
+    "G101-Dereceli.dc.html:539"
+   ]
+  },
+  {
+   "key": "ranked.inline.downLeague@539",
+   "tr": "{ta.league.tr} ligine düştün · {R.label(r.to.idx, lang)}",
+   "en": "Dropped to {R.label(r.to.idx, lang)}",
+   "uses": [
+    "G101-Dereceli.dc.html:539"
+   ]
+  },
+  {
+   "key": "ranked.inline.protected@539",
+   "tr": "Düşme koruması seni bu ligde tuttu",
+   "en": "Demotion shield kept you in this league",
+   "uses": [
+    "G101-Dereceli.dc.html:539"
+   ]
+  },
+  {
+   "key": "ranked.inline.note@540",
+   "tr": "Maçtan ayrıldın · 4. sayıldın",
+   "en": "You left the match · counted as 4th",
+   "uses": [
+    "G101-Dereceli.dc.html:540"
+   ]
+  },
+  {
+   "key": "ranked.inline.kicker@541",
+   "tr": "DERECELİ · ",
+   "en": "RANKED · ",
+   "uses": [
+    "G101-Dereceli.dc.html:541"
+   ]
+  },
+  {
+   "key": "ranked.inline.title@542",
+   "tr": "Galibiyet!",
+   "en": "Victory!",
+   "uses": [
+    "G101-Dereceli.dc.html:542"
+   ]
+  },
+  {
+   "key": "ranked.inline.title@542",
+   "tr": "{r.place}. oldun",
+   "en": "{r.place}{['st', 'nd', 'rd', 'th'][r.place - 1]} place",
+   "uses": [
+    "G101-Dereceli.dc.html:542"
+   ]
+  },
+  {
+   "key": "ranked.inline.closeLabel@546",
+   "tr": "Tamam",
+   "en": "Done",
+   "uses": [
+    "G101-Dereceli.dc.html:546"
+   ]
+  },
+  {
+   "key": "ranked.inline.againLabel@546",
+   "tr": "Tekrar ara",
+   "en": "Play again",
+   "uses": [
+    "G101-Dereceli.dc.html:546"
+   ]
+  },
+  {
+   "key": "ranked.inline.pKicker@547",
+   "tr": "KADEME ATLADIN",
+   "en": "TIER UP",
+   "uses": [
+    "G101-Dereceli.dc.html:547"
+   ]
+  },
+  {
+   "key": "ranked.inline.r@547",
+   "tr": "ZİRVEYE ULAŞTIN",
+   "en": "YOU REACHED THE TOP",
+   "uses": [
+    "G101-Dereceli.dc.html:547"
+   ]
+  },
+  {
+   "key": "ranked.inline.ev@547",
+   "tr": "LİG ATLADIN",
+   "en": "LEAGUE UP",
+   "uses": [
+    "G101-Dereceli.dc.html:547"
+   ]
+  },
+  {
+   "key": "ranked.inline.pTitle@548",
+   "tr": "{ta.league.tr} ligi",
+   "en": "{ta.league.en} league",
+   "uses": [
+    "G101-Dereceli.dc.html:548"
+   ]
+  },
+  {
+   "key": "ranked.inline.ev@548",
+   "tr": "Galaksi · #87",
+   "en": "Galaxy · #87",
+   "uses": [
+    "G101-Dereceli.dc.html:548"
+   ]
+  },
+  {
+   "key": "ranked.inline.pSub@549",
+   "tr": "{R.label(r.to.idx, lang)} kademesinden başlıyorsun. 3 maç boyunca bu ligden düşmezsin.",
+   "en": "You start at {R.label(r.to.idx, lang)}. You can't drop out of this league for 3 matches.",
+   "uses": [
+    "G101-Dereceli.dc.html:549"
+   ]
+  },
+  {
+   "key": "ranked.inline.ev@549",
+   "tr": "Usta I'in üstündeki ilk 100 oyuncunun arasındasın.",
+   "en": "You are among the top 100 players above Master I.",
+   "uses": [
+    "G101-Dereceli.dc.html:549"
+   ]
+  },
+  {
+   "key": "ranked.inline.st@557",
+   "tr": "Ulaşıldı",
+   "en": "Reached",
+   "uses": [
+    "G101-Dereceli.dc.html:557"
+   ]
+  },
+  {
+   "key": "ranked.inline.st@557",
+   "tr": "Kazanacağın",
+   "en": "You get this",
+   "uses": [
+    "G101-Dereceli.dc.html:557"
+   ]
+  },
+  {
+   "key": "ranked.inline.mode@559",
+   "tr": "Dereceli · ",
+   "en": "Ranked · ",
+   "uses": [
+    "G101-Dereceli.dc.html:559"
+   ]
+  },
+  {
+   "key": "ranked.inline.sub@565",
+   "tr": "Sezon 3 · 18 gün kaldı · Solo / Duo / Squad",
+   "en": "Season 3 · 18 days left · Solo / Duo / Squad",
+   "uses": [
+    "G101-Dereceli.dc.html:565"
+   ]
+  },
+  {
+   "key": "ranked.inline.table@566",
+   "tr": "Squad masan",
+   "en": "Your squad",
+   "uses": [
+    "G101-Dereceli.dc.html:566"
+   ]
+  },
+  {
+   "key": "ranked.inline.mode@566",
+   "tr": "Duo masan",
+   "en": "Your duo",
+   "uses": [
+    "G101-Dereceli.dc.html:566"
+   ]
+  },
+  {
+   "key": "ranked.inline.mode@566",
+   "tr": "Masan",
+   "en": "Your table",
+   "uses": [
+    "G101-Dereceli.dc.html:566"
+   ]
+  },
+  {
+   "key": "ranked.inline.sub@566",
+   "tr": "Eş",
+   "en": "Partner",
+   "uses": [
+    "G101-Dereceli.dc.html:566"
+   ]
+  },
+  {
+   "key": "ranked.inline.rules@566",
+   "tr": "101 · 5 el · 30 sn · katlamasız",
+   "en": "101 · 5 hands · 30 s · no doubling",
+   "uses": [
+    "G101-Dereceli.dc.html:566"
+   ]
+  },
+  {
+   "key": "ranked.inline.k@567",
+   "tr": "MAÇ",
+   "en": "MATCHES",
+   "uses": [
+    "G101-Dereceli.dc.html:567"
+   ]
+  },
+  {
+   "key": "ranked.inline.k@567",
+   "tr": "1.LİK",
+   "en": "1ST PLACES",
+   "uses": [
+    "G101-Dereceli.dc.html:567"
+   ]
+  },
+  {
+   "key": "ranked.inline.k@567",
+   "tr": "1.LİK ORANI",
+   "en": "TOP RATE",
+   "uses": [
+    "G101-Dereceli.dc.html:567"
+   ]
+  },
+  {
+   "key": "ranked.inline.v@567",
+   "tr": "%{Math.round(top / games * 100)}",
+   "en": "{Math.round(top / games * 100)}%",
+   "uses": [
+    "G101-Dereceli.dc.html:567"
+   ]
+  },
+  {
+   "key": "table.inline.sec@1991",
+   "tr": " sn",
+   "en": "s",
+   "uses": [
+    "G101-Masa.dc.html:1991"
+   ]
+  },
+  {
+   "key": "table.inline.x@1993",
+   "tr": "Kapalı",
+   "en": "Off",
+   "uses": [
+    "G101-Masa.dc.html:1993"
+   ]
+  },
+  {
+   "key": "table.inline.rankLine@2029",
+   "tr": "SV",
+   "en": "LV",
+   "uses": [
+    "G101-Masa.dc.html:2029"
+   ]
+  },
+  {
+   "key": "table.inline.toLocaleString@2071",
+   "tr": "Maç bitmeden kalkarsan yerine bot oynar. Antrenman masasında bahis yoktur.",
+   "en": "If you leave before the match ends, a bot takes your seat. Practice tables have no stake.",
+   "uses": [
+    "G101-Masa.dc.html:2071"
+   ]
+  },
+  {
+   "key": "table.inline.chipsCap@2071",
+   "tr": "EL",
+   "en": "HAND",
+   "uses": [
+    "G101-Masa.dc.html:2071"
+   ]
+  },
+  {
+   "key": "table.inline.specTitle@2073",
+   "tr": "İZLİYORSUN",
+   "en": "SPECTATING",
+   "uses": [
+    "G101-Masa.dc.html:2073"
+   ]
+  },
+  {
+   "key": "table.inline.specLeave@2073",
+   "tr": "Ayrıl",
+   "en": "Leave",
+   "uses": [
+    "G101-Masa.dc.html:2073"
+   ]
+  },
+  {
+   "key": "table.inline.nextLabel@2098",
+   "tr": "Maçı bitir",
+   "en": "Finish match",
+   "uses": [
+    "G101-Masa.dc.html:2098"
+   ]
+  }
+ ],
+ "errors": [
+  {
+   "code": "E_BAD_MESSAGE",
+   "ui": "silent",
+   "state": null,
+   "text": null
+  },
+  {
+   "code": "E_UNKNOWN_MESSAGE",
+   "ui": "silent",
+   "state": null,
+   "text": null
+  },
+  {
+   "code": "E_AUTH_REQUIRED",
+   "ui": "screen",
+   "state": "S02",
+   "key": "err.E_AUTH_REQUIRED",
+   "tr": "Devam etmek için giriş yap",
+   "en": "Sign in to continue",
+   "source": "yeni"
+  },
+  {
+   "code": "E_SESSION_EXPIRED",
+   "ui": "screen",
+   "state": "S02",
+   "key": "err.E_SESSION_EXPIRED",
+   "tr": "Oturumun sona erdi · tekrar giriş yap",
+   "en": "Your session expired · sign in again",
+   "source": "yeni"
+  },
+  {
+   "code": "E_EMAIL_INVALID",
+   "ui": "inline",
+   "state": "S04",
+   "key": "app.STR.eEmail",
+   "tr": "Geçerli bir e-posta yaz",
+   "en": "Enter a valid email",
+   "source": "oyun"
+  },
+  {
+   "code": "E_PASS_SHORT",
+   "ui": "inline",
+   "state": "S04",
+   "key": "app.STR.ePass",
+   "tr": "En az 6 karakter",
+   "en": "At least 6 characters",
+   "source": "oyun"
+  },
+  {
+   "code": "E_NAME_INVALID",
+   "ui": "inline",
+   "state": "S04|S05|ProfilDüzenle",
+   "key": "app.STR.eName",
+   "tr": "3–16 harf, rakam ya da _",
+   "en": "3–16 letters, digits or _",
+   "source": "oyun"
+  },
+  {
+   "code": "E_EMAIL_EXISTS",
+   "ui": "inline",
+   "state": "S04",
+   "key": "app.STR.eExists",
+   "tr": "Bu e-postayla zaten hesap var",
+   "en": "An account with this email exists",
+   "source": "oyun"
+  },
+  {
+   "code": "E_NAME_TAKEN",
+   "ui": "inline",
+   "state": "S04",
+   "key": "app.STR.eTaken",
+   "tr": "Bu ad alınmış",
+   "en": "This name is taken",
+   "source": "oyun"
+  },
+  {
+   "code": "E_ACCOUNT_UNKNOWN",
+   "ui": "inline",
+   "state": "S03",
+   "key": "app.STR.noAcct",
+   "tr": "Bu e-postayla kayıtlı hesap bulunamadı.",
+   "en": "No account found for this email.",
+   "source": "oyun"
+  },
+  {
+   "code": "E_PASS_WRONG",
+   "ui": "inline",
+   "state": "S03",
+   "key": "app.STR.badPass",
+   "tr": "Şifre hatalı. {0} deneme hakkın kaldı.",
+   "en": "Wrong password. {0} attempts left.",
+   "source": "oyun"
+  },
+  {
+   "code": "E_ACCOUNT_LOCKED",
+   "ui": "inline",
+   "state": "S03",
+   "key": "err.E_ACCOUNT_LOCKED",
+   "tr": "Çok fazla hatalı deneme · {0} dakika sonra tekrar dene",
+   "en": "Too many wrong attempts · try again in {0} minutes",
+   "source": "yeni",
+   "params": [
+    "detail"
+   ]
+  },
+  {
+   "code": "E_CONFIRM_MISMATCH",
+   "ui": "inline",
+   "state": "Ayarlar.Hesap.Sil",
+   "key": "err.E_CONFIRM_MISMATCH",
+   "tr": "Onaylamak için SİL yaz",
+   "en": "Type DELETE to confirm",
+   "source": "yeni"
+  },
+  {
+   "code": "E_IN_GAME",
+   "ui": "toast",
+   "state": "Ayarlar.Hesap",
+   "key": "err.E_IN_GAME",
+   "tr": "Masadayken bu işlem yapılamaz",
+   "en": "You can’t do this while at a table",
+   "source": "yeni"
+  },
+  {
+   "code": "E_STATUS_LONG",
+   "ui": "inline",
+   "state": "ProfilDüzenle",
+   "key": "err.E_STATUS_LONG",
+   "tr": "Durum mesajı en çok 40 karakter olabilir",
+   "en": "Status can be at most 40 characters",
+   "source": "yeni"
+  },
+  {
+   "code": "E_FRAME_LOCKED",
+   "ui": "toast",
+   "state": "ProfilDüzenle",
+   "key": "err.E_FRAME_LOCKED",
+   "tr": "Bu çerçeve henüz açılmadı",
+   "en": "This frame is still locked",
+   "source": "yeni"
+  },
+  {
+   "code": "E_SKU_UNKNOWN",
+   "ui": "toast",
+   "state": "Mağaza",
+   "key": "err.E_SKU_UNKNOWN",
+   "tr": "Bu paket artık satışta değil",
+   "en": "This pack is no longer available",
+   "source": "yeni"
+  },
+  {
+   "code": "E_ALREADY_OWNED",
+   "ui": "toast",
+   "state": "Mağaza.Görünüm",
+   "key": "err.E_ALREADY_OWNED",
+   "tr": "Bu görünüme zaten sahipsin",
+   "en": "You already own this item",
+   "source": "yeni"
+  },
+  {
+   "code": "E_NO_GEMS",
+   "ui": "toast",
+   "state": "Mağaza.Görünüm",
+   "key": "err.E_NO_GEMS",
+   "tr": "Yetersiz elmas · {0} elmas eksik",
+   "en": "Not enough gems · {0} short",
+   "source": "yeni",
+   "params": [
+    "detail"
+   ]
+  },
+  {
+   "code": "E_NOT_OWNED",
+   "ui": "toast",
+   "state": "Mağaza.Görünüm",
+   "key": "err.E_NOT_OWNED",
+   "tr": "Önce bu görünümü satın al",
+   "en": "Buy this item first",
+   "source": "yeni"
+  },
+  {
+   "code": "E_DAILY_CLAIMED",
+   "ui": "silent",
+   "state": "GünlükÖdül",
+   "text": null
+  },
+  {
+   "code": "E_QUEST_UNKNOWN",
+   "ui": "silent",
+   "state": "GünlükÖdül",
+   "text": null
+  },
+  {
+   "code": "E_QUEST_INCOMPLETE",
+   "ui": "silent",
+   "state": "GünlükÖdül",
+   "text": null
+  },
+  {
+   "code": "E_QUEST_CLAIMED",
+   "ui": "silent",
+   "state": "GünlükÖdül",
+   "text": null
+  },
+  {
+   "code": "E_USER_UNKNOWN",
+   "ui": "inline",
+   "state": "ArkadaşEkle",
+   "key": "menu.inline.x@1305",
+   "tr": "Oyuncu bulunamadı. Kodu kontrol edip tekrar dene.",
+   "en": "No player found. Check the code and try again.",
+   "source": "oyun"
+  },
+  {
+   "code": "E_ALREADY_FRIENDS",
+   "ui": "inline",
+   "state": "ArkadaşEkle",
+   "key": "menu.inline.noneText@1305",
+   "tr": "Bu oyuncuyla zaten arkadaşsınız.",
+   "en": "You are already friends with this player.",
+   "source": "oyun"
+  },
+  {
+   "code": "E_REQUEST_PENDING",
+   "ui": "inline",
+   "state": "ArkadaşEkle",
+   "key": "err.E_REQUEST_PENDING",
+   "tr": "Bu oyuncuya zaten istek gönderdin",
+   "en": "You already sent this player a request",
+   "source": "yeni"
+  },
+  {
+   "code": "E_REQUEST_UNKNOWN",
+   "ui": "silent",
+   "state": "Arkadaşlar.İstekler",
+   "text": null
+  },
+  {
+   "code": "E_NOT_FRIENDS",
+   "ui": "silent",
+   "state": "Arkadaşlar",
+   "text": null
+  },
+  {
+   "code": "E_ALREADY_SEATED",
+   "ui": "toast",
+   "state": "S09",
+   "key": "err.E_ALREADY_SEATED",
+   "tr": "Zaten bir masada oturuyorsun",
+   "en": "You are already seated at a table",
+   "source": "yeni"
+  },
+  {
+   "code": "E_TABLE_NAME",
+   "ui": "inline",
+   "state": "S10",
+   "key": "lobby.STR.rNameErr",
+   "tr": "Masa adı boş olamaz",
+   "en": "Table name can’t be empty",
+   "source": "oyun"
+  },
+  {
+   "code": "E_PIN_FORMAT",
+   "ui": "inline",
+   "state": "S10",
+   "key": "err.E_PIN_FORMAT",
+   "tr": "Şifre 4 haneli olmalı",
+   "en": "The PIN must be 4 digits",
+   "source": "yeni"
+  },
+  {
+   "code": "E_TABLE_OPTIONS",
+   "ui": "silent",
+   "state": "S10",
+   "text": null
+  },
+  {
+   "code": "E_NO_CHIPS",
+   "ui": "toast",
+   "state": "S09|S10|Masa.Hediye",
+   "key": "table.STR.notEnough",
+   "tr": "Yetersiz çip",
+   "en": "Not enough chips",
+   "source": "oyun"
+  },
+  {
+   "code": "E_TABLE_CLOSED",
+   "ui": "dialog",
+   "state": "S09.MasaKapandı",
+   "key": "lobby.STR.closedT",
+   "tr": "Masa kapandı",
+   "en": "Table closed",
+   "source": "oyun"
+  },
+  {
+   "code": "E_PIN_WRONG",
+   "ui": "shake",
+   "state": "S11",
+   "key": "lobby.STR.wrongPass",
+   "tr": "Yanlış şifre. Tekrar dene.",
+   "en": "Wrong password. Try again.",
+   "source": "oyun"
+  },
+  {
+   "code": "E_TABLE_FULL",
+   "ui": "dialog",
+   "state": "S09.MasaDoldu",
+   "key": "err.E_TABLE_FULL",
+   "tr": "Masa doldu",
+   "en": "The table is full",
+   "source": "yeni"
+  },
+  {
+   "code": "E_TABLE_PLAYING",
+   "ui": "toast",
+   "state": "S09",
+   "key": "err.E_TABLE_PLAYING",
+   "tr": "Bu masada oyun başladı",
+   "en": "A game is already under way at this table",
+   "source": "yeni"
+  },
+  {
+   "code": "E_CODE_FORMAT",
+   "ui": "inline",
+   "state": "S12",
+   "key": "lobby.STR.codeShort",
+   "tr": "Kod 6 karakter olmalı",
+   "en": "The code has 6 characters",
+   "source": "oyun"
+  },
+  {
+   "code": "E_CODE_UNKNOWN",
+   "ui": "inline",
+   "state": "S12",
+   "key": "lobby.STR.codeErr",
+   "tr": "Bu koda ait açık bir masa bulunamadı.",
+   "en": "No open table found for this code.",
+   "source": "oyun"
+  },
+  {
+   "code": "E_SPECTATE_OFF",
+   "ui": "toast",
+   "state": "S09",
+   "key": "err.E_SPECTATE_OFF",
+   "tr": "Bu masa izleyiciye kapalı",
+   "en": "Spectating is off at this table",
+   "source": "yeni"
+  },
+  {
+   "code": "E_NOT_SEATED",
+   "ui": "silent",
+   "state": null,
+   "text": null
+  },
+  {
+   "code": "E_NOT_OWNER",
+   "ui": "silent",
+   "state": "S13",
+   "text": null
+  },
+  {
+   "code": "E_STATUS",
+   "ui": "silent",
+   "state": null,
+   "text": null
+  },
+  {
+   "code": "E_SEAT_TAKEN",
+   "ui": "toast",
+   "state": "S13",
+   "key": "lobby.STR.fullB",
+   "tr": "Son koltuk sen bağlanırken doldu.",
+   "en": "The last seat was taken while you were connecting.",
+   "source": "oyun"
+  },
+  {
+   "code": "E_SEAT_EMPTY",
+   "ui": "silent",
+   "state": "S13",
+   "text": null
+  },
+  {
+   "code": "E_TABLE_NOT_FULL",
+   "ui": "silent",
+   "state": "S13",
+   "text": null
+  },
+  {
+   "code": "E_USER_OFFLINE",
+   "ui": "silent",
+   "state": "S14",
+   "text": null
+  },
+  {
+   "code": "E_USER_BUSY",
+   "ui": "silent",
+   "state": "S14",
+   "text": null
+  },
+  {
+   "code": "E_INVITE_EXPIRED",
+   "ui": "toast",
+   "state": "S14|DavetKartı",
+   "key": "err.E_INVITE_EXPIRED",
+   "tr": "Davetin süresi doldu",
+   "en": "The invite has expired",
+   "source": "yeni"
+  },
+  {
+   "code": "E_ALREADY_QUEUED",
+   "ui": "silent",
+   "state": "Dereceli",
+   "text": null
+  },
+  {
+   "code": "E_MODE",
+   "ui": "silent",
+   "state": "Dereceli",
+   "text": null
+  },
+  {
+   "code": "E_PARTY_SIZE",
+   "ui": "silent",
+   "state": "Dereceli",
+   "text": null
+  },
+  {
+   "code": "E_PARTY_RANGE",
+   "ui": "toast",
+   "state": "Dereceli.Davet",
+   "key": "ranked.inline.x@525",
+   "tr": "Aralık dışı",
+   "en": "Out of range",
+   "source": "oyun"
+  },
+  {
+   "code": "E_MATCH_EXPIRED",
+   "ui": "toast",
+   "state": "Dereceli.MaçBulundu",
+   "key": "err.E_MATCH_EXPIRED",
+   "tr": "Eşleşme süresi doldu · aramaya dönülüyor",
+   "en": "Match expired · back to search",
+   "source": "yeni"
+  },
+  {
+   "code": "E_NOT_QUEUED",
+   "ui": "silent",
+   "state": "Dereceli",
+   "text": null
+  },
+  {
+   "code": "E_SPECTATOR",
+   "ui": "silent",
+   "state": "Masa",
+   "text": null
+  },
+  {
+   "code": "E_DEALING",
+   "ui": "silent",
+   "state": "G02–G12",
+   "text": null
+  },
+  {
+   "code": "E_NOT_DEALER",
+   "ui": "silent",
+   "state": "G05",
+   "text": null
+  },
+  {
+   "code": "E_RACK_MISMATCH",
+   "ui": "resync",
+   "state": null,
+   "text": null
+  },
+  {
+   "code": "E_CHAT_OFF",
+   "ui": "silent",
+   "state": "T06",
+   "text": null
+  },
+  {
+   "code": "E_CHAT_QUICK_ONLY",
+   "ui": "silent",
+   "state": "T06",
+   "text": null
+  },
+  {
+   "code": "E_CHAT_LENGTH",
+   "ui": "inline",
+   "state": "T06",
+   "key": "err.E_CHAT_LENGTH",
+   "tr": "Mesaj 1–120 karakter olmalı",
+   "en": "Messages must be 1–120 characters",
+   "source": "yeni"
+  },
+  {
+   "code": "E_CHAT_QUICK_UNKNOWN",
+   "ui": "silent",
+   "state": "T06",
+   "text": null
+  },
+  {
+   "code": "E_GIFTS_OFF",
+   "ui": "silent",
+   "state": "T07",
+   "text": null
+  },
+  {
+   "code": "E_GIFT_UNKNOWN",
+   "ui": "silent",
+   "state": "T07",
+   "text": null
+  },
+  {
+   "code": "E_GIFT_TARGET",
+   "ui": "silent",
+   "state": "T07",
+   "text": null
+  },
+  {
+   "code": "E_NOT_YOUR_TURN",
+   "ui": "silent",
+   "state": "Masa",
+   "text": null
+  },
+  {
+   "code": "E_PHASE",
+   "ui": "silent",
+   "state": "Masa",
+   "text": null
+  },
+  {
+   "code": "E_HAND_OVER",
+   "ui": "silent",
+   "state": "Masa",
+   "text": null
+  },
+  {
+   "code": "E_TILE_NOT_IN_RACK",
+   "ui": "resync",
+   "state": null,
+   "text": null
+  },
+  {
+   "code": "E_SIDE_EMPTY",
+   "ui": "silent",
+   "state": "Masa",
+   "text": null
+  },
+  {
+   "code": "E_SIDE_RETURNED",
+   "ui": "toast",
+   "state": "T38",
+   "key": "table.STR.engErr.E_SIDE_RETURNED",
+   "tr": "Geri bıraktığın taşı bu turda tekrar alamazsın",
+   "en": "You can’t take back a tile you returned this turn",
+   "source": "oyun"
+  },
+  {
+   "code": "E_SIDE_DISCARD",
+   "ui": "toast",
+   "state": "T38",
+   "key": "table.STR.engErr.E_SIDE_DISCARD",
+   "tr": "Soldan aldığın taşı aynı turda atamazsın",
+   "en": "You can't discard the tile you took from the left this turn",
+   "source": "oyun"
+  },
+  {
+   "code": "E_SIDE_MUST_OPEN",
+   "ui": "toast",
+   "state": "T39",
+   "key": "table.STR.engErr.E_SIDE_MUST_OPEN",
+   "tr": "Soldan aldığın taşla açman gerekiyor",
+   "en": "You must open with the tile you took from the left",
+   "source": "oyun"
+  },
+  {
+   "code": "E_RETURN_INVALID",
+   "ui": "silent",
+   "state": "T39",
+   "text": null
+  },
+  {
+   "code": "E_DECK_EMPTY",
+   "ui": "silent",
+   "state": "Masa",
+   "text": null
+  },
+  {
+   "code": "E_MELD_INVALID",
+   "ui": "toast",
+   "state": "T40",
+   "key": "table.STR.engErr.E_MELD_INVALID",
+   "tr": "Bu per geçersiz",
+   "en": "That set is not valid",
+   "source": "oyun"
+  },
+  {
+   "code": "E_MELD_MIX",
+   "ui": "toast",
+   "state": "T40",
+   "key": "table.STR.engErr.E_MELD_MIX",
+   "tr": "Bir açılışta seri ve çift karışmaz",
+   "en": "You can’t mix runs and pairs in one opening",
+   "source": "oyun"
+  },
+  {
+   "code": "E_MELD_NOT_FOUND",
+   "ui": "resync",
+   "state": null,
+   "text": null
+  },
+  {
+   "code": "E_ALREADY_OPENED",
+   "ui": "silent",
+   "state": "Masa",
+   "text": null
+  },
+  {
+   "code": "E_NOT_OPENED",
+   "ui": "toast",
+   "state": "T41",
+   "key": "table.STR.engErr.E_NOT_OPENED",
+   "tr": "Açmadan bitemezsin",
+   "en": "You can't finish without opening",
+   "source": "oyun"
+  },
+  {
+   "code": "E_OPEN_MODE",
+   "ui": "toast",
+   "state": "T41",
+   "key": "table.STR.layPairNo",
+   "tr": "Çiftle açtın · yalnızca çift açabilirsin",
+   "en": "You opened with pairs · you can only lay pairs",
+   "source": "oyun"
+  },
+  {
+   "code": "E_LAST_TILE",
+   "ui": "toast",
+   "state": "T40",
+   "key": "table.STR.engErr.E_LAST_TILE",
+   "tr": "Son taşı işleyemezsin",
+   "en": "You can't add your last tile",
+   "source": "oyun"
+  },
+  {
+   "code": "E_ISLE_INVALID",
+   "ui": "silent",
+   "state": "Masa",
+   "text": null
+  },
+  {
+   "code": "E_ISLE_DISABLED",
+   "ui": "toast",
+   "state": "Masa",
+   "key": "table.STR.engErr.E_ISLE_DISABLED",
+   "tr": "Bu masada işleme kapalı",
+   "en": "Adding on is off at this table",
+   "source": "oyun"
+  },
+  {
+   "code": "E_SWAP_INVALID",
+   "ui": "toast",
+   "state": "T49",
+   "key": "table.STR.engErr.E_SWAP_INVALID",
+   "tr": "Bu taş okeyin yerine geçmiyor",
+   "en": "That tile doesn't replace the okey",
+   "source": "oyun"
+  },
+  {
+   "code": "E_NO_UNDO",
+   "ui": "silent",
+   "state": "Masa",
+   "text": null
+  },
+  {
+   "code": "E_LEAVE_INVALID",
+   "ui": "silent",
+   "state": "Masa",
+   "text": null
+  },
+  {
+   "code": "E_ACTION",
+   "ui": "silent",
+   "state": null,
+   "text": null
+  },
+  {
+   "code": "E_SPEC_DUP",
+   "ui": "silent",
+   "state": null,
+   "text": null
+  },
+  {
+   "code": "E_RESET_CODE",
+   "ui": "inline",
+   "state": "S03.ŞifremiUnuttum",
+   "key": "err.E_RESET_CODE",
+   "tr": "Kod yanlış ya da süresi doldu",
+   "en": "The code is wrong or has expired",
+   "source": "yeni"
+  },
+  {
+   "code": "E_OAUTH_FAILED",
+   "ui": "toast",
+   "state": "S02",
+   "key": "err.E_OAUTH_FAILED",
+   "tr": "Google ile giriş yapılamadı · tekrar dene",
+   "en": "Google sign-in failed · try again",
+   "source": "yeni"
+  },
+  {
+   "code": "E_SEAT_NOT_BOT",
+   "ui": "silent",
+   "state": null,
+   "text": null
+  }
+ ],
+ "notes": [
+  {
+   "key": "menu.inline.tip@1250",
+   "sorun": "dil kuralı: ifade iki dilde farklı (beklenen)",
+   "tr": "Derecelide {l.tr} ligine ulaşınca açılır",
+   "en": "Reach {l.en} in ranked to unlock"
+  },
+  {
+   "key": "menu.inline.state@1251",
+   "sorun": "dil kuralı: ifade iki dilde farklı (beklenen)",
+   "tr": "{l.tr} liginde açılır",
+   "en": "Unlocks at {l.en}"
+  },
+  {
+   "key": "menu.inline.g@1550",
+   "sorun": "dil kuralı: ifade iki dilde farklı (beklenen)",
+   "tr": "{RR.label(rv.idx + 1, 'tr')}'e {100 - rv.lp} LP",
+   "en": "{100 - rv.lp} LP to {RR.label(rv.idx + 1, 'en')}"
+  },
+  {
+   "key": "lobby.inline.name@851",
+   "sorun": "dil kuralı: ifade iki dilde farklı (beklenen)",
+   "tr": "{genTR(first)} masası",
+   "en": "{first}'s table"
+  },
+  {
+   "key": "ranked.inline.hint@513",
+   "sorun": "dil kuralı: ifade iki dilde farklı (beklenen)",
+   "tr": "{LG[lo].tr} – {LG[hi].tr} arası arkadaşlar katılabilir · herkes kendi sırasına göre LP kazanır",
+   "en": "Friends from {LG[lo].en} to {LG[hi].en} can join · everyone earns LP for their own place"
+  },
+  {
+   "key": "ranked.inline.x@517",
+   "sorun": "dil kuralı: ifade iki dilde farklı (beklenen)",
+   "tr": "Squad için {need - joined} arkadaş daha davet et",
+   "en": "Invite {need - joined} more friend{need - joined > 1 ? 's' : ''} for Squad"
+  },
+  {
+   "key": "ranked.inline.downLeague@539",
+   "sorun": "dil kuralı: ifade iki dilde farklı (beklenen)",
+   "tr": "{ta.league.tr} ligine düştün · {R.label(r.to.idx, lang)}",
+   "en": "Dropped to {R.label(r.to.idx, lang)}"
+  },
+  {
+   "key": "ranked.inline.title@542",
+   "sorun": "dil kuralı: ifade iki dilde farklı (beklenen)",
+   "tr": "{r.place}. oldun",
+   "en": "{r.place}{['st', 'nd', 'rd', 'th'][r.place - 1]} place"
+  },
+  {
+   "key": "ranked.inline.pTitle@548",
+   "sorun": "dil kuralı: ifade iki dilde farklı (beklenen)",
+   "tr": "{ta.league.tr} ligi",
+   "en": "{ta.league.en} league"
+  }
+ ]
+}

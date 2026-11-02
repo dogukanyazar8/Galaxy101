@@ -1,0 +1,60 @@
+{
+  "baseSize": 32,
+  "note": "Hotspot 32 px tabanına göre; 48 için ×1.5, 64 için ×2.",
+  "hotspots": {
+    "default": [
+      4,
+      3
+    ],
+    "pointer": [
+      4,
+      3
+    ],
+    "grab": [
+      16,
+      15
+    ],
+    "grabbing": [
+      16,
+      16
+    ],
+    "drop": [
+      16,
+      16
+    ],
+    "text": [
+      16,
+      16
+    ],
+    "no": [
+      4,
+      3
+    ],
+    "wait": [
+      16,
+      16
+    ],
+    "progress": [
+      4,
+      3
+    ],
+    "ew": [
+      16,
+      16
+    ],
+    "ns": [
+      16,
+      16
+    ]
+  },
+  "animated": {
+    "wait": {
+      "frames": 12,
+      "fps": 11
+    },
+    "progress": {
+      "frames": 12,
+      "fps": 11
+    }
+  }
+}

@@ -1,4 +1,4 @@
-/* Galaxy 101 · g101-clock.js · v0.4.0
+/* Galaxy 101 · g101-clock.js · v0.5.0
  * Ortak saat + seed'li rastgelelik. Oyun sayfasında İLK yüklenen betik olmalı.
  *  ?seed=N   → bütün rastgelelik (Math.random dahil) bu seed'den türetilir (mulberry32). Yoksa seed tarayıcıdan bir kez çekilir ve G101Clock.seed'de görünür.
  *  ?ft=MS    → ("freeze time"; host kendi ?t belirtecini kullandığı için t değil) sayfa açıldıktan MS milisaniye sonra kare dondurulur: performance.now / Date.now / requestAnimationFrame zamanı sabitlenir,
@@ -22,7 +22,7 @@
   function vnow() { return frozenAt != null ? frozenAt : (pNow() - t0) * speed; }
 
   var C = {
-    version: '0.4.0', seed: seed, speed: speed, frozen: false,
+    version: '0.5.0', seed: seed, speed: speed, frozen: false,
     /** Sayfa açılışından bu yana sanal milisaniye (tüm animasyonların ortak saati). */
     now: vnow,
     /** Bağımsız alt akış: aynı seed + aynı ad → her açılışta aynı dizi. */

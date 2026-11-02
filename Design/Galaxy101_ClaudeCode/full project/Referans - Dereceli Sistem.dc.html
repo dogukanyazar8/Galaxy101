@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<script src="./g101-rank.js"></script>
+<script src="./g101-cursor.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#071331;color:#F4F1E8;font-family:'Baloo 2',system-ui,sans-serif}
+a{color:#3DF5E0}a:hover{color:#DFFFFB}
+@keyframes rkRays{to{transform:rotate(360deg)}}
+@keyframes rkPop{0%{opacity:0;transform:scale(.4) rotate(-12deg)}60%{opacity:1;transform:scale(1.08) rotate(2deg)}100%{transform:none}}
+@keyframes rkUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes rkToast{from{opacity:0;transform:translate(-50%,-14px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes rkFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+</style>
+</helmet>
+<div style="min-height:100vh;padding:48px 56px 80px;box-sizing:border-box;background:radial-gradient(ellipse at 70% -10%,#1B2E78 0%,#071331 55%);display:flex;flex-direction:column;gap:56px;max-width:1440px;margin:0 auto">
+
+  <div style="display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap">
+    <div style="flex:1;min-width:320px">
+      <div style="font:800 13px 'Baloo 2';letter-spacing:2px;color:#9DB0D8">GALAXY 101 · DERECELİ</div>
+      <div style="font:800 44px/1.1 Montserrat;margin-top:6px">Lig ve kademe sistemi</div>
+      <div style="font:600 17px/1.5 'Baloo 2';color:#9DB0D8;margin-top:8px;max-width:640px;text-wrap:pretty">5 lig × 3 kademe ve zirvede Galaksi: toplam 16 basamak. Her kademe 100 LP. Herkes Bronz III'ten başlar.</div>
+    </div>
+    <div style="display:flex;gap:4px;padding:4px;border-radius:14px;background:#0B1C46">
+      <sc-for list="{{ langs }}" as="l" hint-placeholder-count="2">
+        <div onClick="{{ l.pick }}" style="padding:8px 16px;border-radius:10px;font:700 14px Montserrat;background:{{ l.bg }};color:{{ l.fg }};cursor:pointer">{{ l.name }}</div>
+      </sc-for>
+    </div>
+  </div>
+
+  <section style="display:flex;flex-direction:column;gap:18px">
+    <div style="font:800 24px Montserrat;white-space:nowrap">1 · Amblemler</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px">
+      <sc-for list="{{ leagues }}" as="l" hint-placeholder-count="6">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:26px 16px 18px;border-radius:24px;background:radial-gradient(ellipse at 50% 30%,{{ l.glow }},transparent 62%),#0F2558;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)">
+          <div style="width:160px;height:160px;flex:none"><x-import component-from-global-scope="G101Emblem" from="./g101-rank.js" league="{{ l.key }}" tier="{{ l.tierEx }}" rank="{{ l.rankEx }}" size="160" hint-size="160px,160px"></x-import></div>
+          <div style="font:800 22px Montserrat;color:{{ l.txt }};margin-top:4px">{{ l.name }}</div>
+          <div style="font:700 14px 'Baloo 2';color:#9DB0D8;text-align:center;text-wrap:balance">{{ l.motif }} · {{ l.tiers }}</div>
+          <div style="width:100%;height:10px;border-radius:5px;background:#071331;overflow:hidden"><div style="width:72%;height:100%;border-radius:5px;background:{{ l.bar }}"></div></div>
+          <div style="display:flex;width:100%;justify-content:space-between;align-items:center">
+            <div style="display:flex;gap:4px">
+              <sc-for list="{{ l.sw }}" as="c" hint-placeholder-count="4"><div title="{{ c }}" style="width:16px;height:16px;border-radius:5px;background:{{ c }};box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)"></div></sc-for>
+            </div>
+            <div style="font:800 13px 'Baloo 2';color:#9DB0D8;white-space:nowrap">{{ l.dist }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><div style="font:800 24px Montserrat;white-space:nowrap">2 · Boyutlar ve kademe işareti</div><div style="font:600 15px 'Baloo 2';color:#9DB0D8">Kademe işareti 5 ligde ortak: madalyanın alt kenarına oturtulmuş lig taşları. III = 1 taş, II = 2, I = 3. Galaksi'de taş yerine sıra numarası.</div></div>
+    <div style="border-radius:24px;background:#0F2558;overflow:hidden">
+      <div style="display:grid;grid-template-columns:140px 70px 110px repeat(3,minmax(0,1fr));align-items:center;gap:12px;padding:14px 24px;font:800 12px 'Baloo 2';letter-spacing:1.2px;color:#9DB0D8;background:#0B1C46">
+        <div>LİG</div><div>24 PX</div><div>52 PX</div><div style="text-align:center">III</div><div style="text-align:center">II</div><div style="text-align:center">I</div>
+      </div>
+      <sc-for list="{{ leagues }}" as="l" hint-placeholder-count="6">
+        <div style="display:grid;grid-template-columns:140px 70px 110px repeat(3,minmax(0,1fr));align-items:center;gap:12px;padding:14px 24px;border-top:1px solid rgba(255,255,255,.05)">
+          <div style="font:800 17px Montserrat;color:{{ l.txt }}">{{ l.name }}</div>
+          <div style="width:24px;height:24px;flex:none"><x-import component-from-global-scope="G101Emblem" from="./g101-rank.js" league="{{ l.key }}" tier="{{ l.tierEx }}" size="24" hint-size="24px,24px"></x-import></div>
+          <div style="width:52px;height:52px;flex:none"><x-import component-from-global-scope="G101Emblem" from="./g101-rank.js" league="{{ l.key }}" tier="{{ l.tierEx }}" rank="{{ l.rankEx }}" size="52" hint-size="52px,52px"></x-import></div>
+          <sc-for list="{{ l.ex }}" as="e" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;justify-content:center;gap:10px">
+              <div style="width:52px;height:52px;flex:none"><x-import component-from-global-scope="G101Emblem" from="./g101-rank.js" league="{{ l.key }}" tier="{{ e.tier }}" rank="{{ e.rank }}" size="52" hint-size="52px,52px"></x-import></div>
+              <div style="font:700 14px 'Baloo 2';color:#C9D4EA">{{ e.label }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><div style="font:800 24px Montserrat;white-space:nowrap">3 · Ekranlar ve LP simülatörü</div><div style="font:600 15px 'Baloo 2';color:#9DB0D8">Maç sırası seçerek oynat; lig atlama, kademe atlama, düşme ve sezon sonu ekranları kurala göre açılır.</div></div>
+    <div style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start">
+      <div style="position:relative;flex:1 1 560px;min-width:0;min-height:580px;aspect-ratio:16/9;border-radius:24px;overflow:hidden;background:radial-gradient(ellipse at 50% 120%,#1B2E78,#0A1840 60%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)">
+        <div style="position:absolute;left:28px;right:28px;top:24px;display:flex;align-items:center;gap:16px;padding:16px 20px;border-radius:20px;background:#0F2558">
+          <div style="width:52px;height:52px;flex:none"><x-import component-from-global-scope="G101Emblem" from="./g101-rank.js" league="{{ cur.key }}" tier="{{ cur.tier }}" rank="{{ cur.rank }}" size="52" hint-size="52px,52px"></x-import></div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:baseline;gap:10px"><div style="font:800 22px Montserrat;color:{{ cur.txt }};white-space:nowrap">{{ cur.label }}</div><div style="font:700 13px 'Baloo 2';color:#9DB0D8">{{ cur.prot }}</div></div>
+            <div style="height:10px;border-radius:5px;background:#071331;overflow:hidden"><div style="width:{{ cur.pct }};height:100%;border-radius:5px;background:{{ cur.bar }};transition:width .5s cubic-bezier(.2,.9,.3,1)"></div></div>
+            <div style="display:flex;justify-content:space-between;gap:10px;font:800 13px 'Baloo 2';color:#9DB0D8;white-space:nowrap"><div>{{ cur.lpText }}</div><div>{{ cur.next }}</div></div>
+          </div>
+          <div style="flex:none;text-align:right;white-space:nowrap"><div style="font:800 11px 'Baloo 2';letter-spacing:1.2px;color:#9DB0D8">SEZON EN İYİ</div><div style="font:800 15px Montserrat;color:{{ peak.txt }}">{{ peak.label }}</div></div>
+        </div>
+        <div style="position:absolute;left:28px;right:28px;bottom:24px;display:flex;flex-direction:column;gap:6px">
+          <sc-for list="{{ log }}" as="g" hint-placeholder-count="0">
+            <div style="display:flex;align-items:center;gap:10px;font:700 14px 'Baloo 2';color:#C9D4EA"><div style="width:44px;font:800 14px Montserrat;color:{{ g.dc }}">{{ g.d }}</div><div>{{ g.t }}</div></div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ toast.on }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:50%;top:20px;z-index:4;display:flex;align-items:center;gap:12px;padding:10px 18px 10px 12px;border-radius:16px;background:#14234F;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 12px 30px rgba(0,0,0,.45);animation:rkToast .3s ease-out both">
+            <div style="width:24px;height:24px;flex:none"><x-import component-from-global-scope="G101Emblem" from="./g101-rank.js" league="{{ toast.key }}" tier="{{ toast.tier }}" size="24" hint-size="24px,24px"></x-import></div>
+            <div style="display:flex;flex-direction:column"><div style="font:800 15px Montserrat;white-space:nowrap">{{ toast.title }}</div><div style="font:700 13px 'Baloo 2';color:#9DB0D8;white-space:nowrap">{{ toast.sub }}</div></div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ ov.on }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(4,10,30,.82);backdrop-filter:blur(6px)">
+            <div style="position:absolute;left:50%;top:44%;width:620px;height:620px;margin:-310px 0 0 -310px;border-radius:50%;background:repeating-conic-gradient(from 0deg,{{ ov.glow }} 0 8deg,transparent 8deg 24deg);opacity:{{ ov.rays }};-webkit-mask:radial-gradient(circle,#000 10%,transparent 62%);mask:radial-gradient(circle,#000 10%,transparent 62%);animation:rkRays 24s linear infinite"></div>
+            <div style="position:relative;font:800 13px 'Baloo 2';letter-spacing:2.4px;white-space:nowrap;color:{{ ov.txt }};animation:rkUp .4s .1s ease-out both">{{ ov.kicker }}</div>
+            <div style="position:relative;animation:rkPop .7s cubic-bezier(.2,1.3,.4,1) both">
+              <div style="animation:rkFloat 3s 0.8s ease-in-out infinite">
+                <div style="width:160px;height:160px;flex:none"><x-import component-from-global-scope="G101Emblem" from="./g101-rank.js" league="{{ ov.key }}" tier="{{ ov.tier }}" rank="{{ ov.rank }}" size="160" hint-size="160px,160px"></x-import></div>
+              </div>
+            </div>
+            <div style="position:relative;font:800 34px/1.15 Montserrat;color:{{ ov.txt }};text-align:center;animation:rkUp .4s .25s ease-out both">{{ ov.title }}</div>
+            <div style="position:relative;font:700 16px/1.45 'Baloo 2';color:#C9D4EA;text-align:center;max-width:440px;text-wrap:pretty;animation:rkUp .4s .35s ease-out both">{{ ov.sub }}</div>
+            <sc-if value="{{ ov.isSeason }}" hint-placeholder-val="{{ false }}">
+              <div style="position:relative;display:flex;gap:12px;margin-top:8px;animation:rkUp .4s .45s ease-out both">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;width:130px;padding:12px 10px;border-radius:16px;background:#0F2558">
+                  <div style="width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3C2,#FFC93A 50%,#C27F0C);box-shadow:inset 0 0 0 2px #8A5A08"></div>
+                  <div style="font:800 17px Montserrat;color:#FFD45C">{{ ov.chips }}</div><div style="font:700 12px 'Baloo 2';color:#9DB0D8">Çip</div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;width:130px;padding:12px 10px;border-radius:16px;background:#0F2558">
+                  <div style="width:36px;height:36px;margin-top:4px"><x-import component-from-global-scope="G101FramedAvatar" from="./g101-rank.js" league="{{ ov.key }}" size="36" ini="D" color="#FF8A5B" hint-size="36px,36px"></x-import></div>
+                  <div style="font:800 15px Montserrat;color:{{ ov.txt }}">{{ ov.lname }}</div><div style="font:700 12px 'Baloo 2';color:#9DB0D8">Avatar çerçevesi</div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;width:130px;padding:12px 10px;border-radius:16px;background:#0F2558">
+                  <div style="width:36px;height:36px;flex:none"><x-import component-from-global-scope="G101Emblem" from="./g101-rank.js" league="{{ ov.key }}" size="36" hint-size="36px,36px"></x-import></div>
+                  <div style="font:800 15px Montserrat;color:{{ ov.txt }}">Sezon 3</div><div style="font:700 12px 'Baloo 2';color:#9DB0D8">Profil rozeti</div>
+                </div>
+              </div>
+            </sc-if>
+            <div onClick="{{ closeOv }}" style="position:relative;margin-top:14px;padding:13px 42px;border-radius:14px;background:linear-gradient(#5BE38A,#2BB45F);box-shadow:0 4px 0 #1A7A40;font:800 16px Montserrat;color:#fff;cursor:pointer;transition:filter .15s" style-hover="filter:brightness(1.2)" style-active="transform:translateY(3px);box-shadow:0 1px 0 #1A7A40">{{ ov.btn }}</div>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="flex:1 1 300px;max-width:100%;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:10px;padding:18px;border-radius:20px;background:#0F2558">
+          <div style="font:800 12px 'Baloo 2';letter-spacing:1.2px;color:#9DB0D8">MAÇI BİTİR · SIRAN</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+            <sc-for list="{{ places }}" as="p" hint-placeholder-count="4">
+              <div onClick="{{ p.go }}" style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 0;border-radius:12px;background:#163170;box-shadow:0 4px 0 #0A1A44;cursor:pointer;transition:filter .15s" style-hover="filter:brightness(1.2)" style-active="transform:translateY(3px);box-shadow:0 1px 0 #0A1A44">
+                <div style="font:800 18px Montserrat">{{ p.n }}</div><div style="font:800 13px 'Baloo 2';color:{{ p.c }}">{{ p.d }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div onClick="{{ win5 }}" style="padding:10px 0;text-align:center;border-radius:12px;background:#163170;box-shadow:0 4px 0 #0A1A44;font:700 14px Montserrat;cursor:pointer;transition:filter .15s" style-hover="filter:brightness(1.2)" style-active="transform:translateY(3px);box-shadow:0 1px 0 #0A1A44">5 × 1.</div>
+            <div onClick="{{ lose5 }}" style="padding:10px 0;text-align:center;border-radius:12px;background:#163170;box-shadow:0 4px 0 #0A1A44;font:700 14px Montserrat;cursor:pointer;transition:filter .15s" style-hover="filter:brightness(1.2)" style-active="transform:translateY(3px);box-shadow:0 1px 0 #0A1A44">5 × 4.</div>
+          </div>
+          <div onClick="{{ endSeason }}" style="padding:12px 0;text-align:center;border-radius:12px;background:linear-gradient(#A68BFF,#7457F0);box-shadow:0 4px 0 #4B2FC0;font:800 15px Montserrat;color:#fff;cursor:pointer;transition:filter .15s" style-hover="filter:brightness(1.2)" style-active="transform:translateY(3px);box-shadow:0 1px 0 #4B2FC0">Sezonu bitir</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:18px;border-radius:20px;background:#0F2558">
+          <div style="font:800 12px 'Baloo 2';letter-spacing:1.2px;color:#9DB0D8">BAŞLANGIÇ</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ jumps }}" as="j" hint-placeholder-count="6">
+              <div onClick="{{ j.go }}" title="{{ j.label }}" style="padding:4px;border-radius:10px;background:#0B1C46;cursor:pointer;transition:background .15s" style-hover="background:#163170">
+                <div style="width:28px;height:28px;flex:none"><x-import component-from-global-scope="G101Emblem" from="./g101-rank.js" league="{{ j.key }}" tier="{{ j.tier }}" size="28" hint-size="28px,28px"></x-import></div>
+              </div>
+            </sc-for>
+          </div>
+          <div onClick="{{ reset }}" style="font:700 13px 'Baloo 2';color:#9DB0D8;cursor:pointer;margin-top:2px" style-hover="color:#F4F1E8">Bronz III'e sıfırla</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:18px">
+    <div style="font:800 24px Montserrat;white-space:nowrap">4 · Kurallar</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
+      <div style="display:flex;flex-direction:column;gap:10px;padding:22px;border-radius:22px;background:#0F2558">
+        <div style="font:800 17px Montserrat">Maç sonu LP · 4 kişilik</div>
+        <div style="display:grid;grid-template-columns:1fr repeat(4,48px);gap:6px;font:800 12px 'Baloo 2';color:#9DB0D8"><div></div><div>1.</div><div>2.</div><div>3.</div><div>4.</div></div>
+        <div style="display:grid;grid-template-columns:1fr repeat(4,48px);gap:6px;font:700 15px 'Baloo 2'"><div>Bronz – Altın</div><div style="color:#5BE38A">+30</div><div style="color:#5BE38A">+10</div><div style="color:#FF8A94">−10</div><div style="color:#FF8A94">−20</div></div>
+        <div style="display:grid;grid-template-columns:1fr repeat(4,48px);gap:6px;font:700 15px 'Baloo 2'"><div>Elmas – Usta</div><div style="color:#5BE38A">+25</div><div style="color:#5BE38A">+5</div><div style="color:#FF8A94">−12</div><div style="color:#FF8A94">−22</div></div>
+        <div style="font:600 14px/1.5 'Baloo 2';color:#9DB0D8;text-wrap:pretty">Her kademe 100 LP. Ekranda kademe içi "72 / 100 LP" gösterilir, sunucu toplam LP'yi tutar.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;padding:22px;border-radius:22px;background:#0F2558">
+        <div style="font:800 17px Montserrat">Düşme koruması ve eşleştirme</div>
+        <div style="font:600 15px/1.5 'Baloo 2';color:#C9D4EA;text-wrap:pretty">Bir lige yeni çıkan oyuncu 3 maç boyunca alt lige düşmez.</div>
+        <div style="font:600 15px/1.5 'Baloo 2';color:#C9D4EA;text-wrap:pretty">Bronz III'ün altı yok; LP sıfırın altına inmez.</div>
+        <div style="font:600 15px/1.5 'Baloo 2';color:#C9D4EA;text-wrap:pretty">Eşleştirme en fazla ±1 lig. Bekleme 30 saniyeyi geçerse ±2.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;padding:22px;border-radius:22px;background:#0F2558">
+        <div style="font:800 17px Montserrat">Sezon · 8 hafta</div>
+        <div style="font:600 15px/1.5 'Baloo 2';color:#C9D4EA;text-wrap:pretty">Sezon sonunda her oyuncu 4 kademe aşağıdan başlar. Bronz'a ve sıfıra kadar düşülmez.</div>
+        <div style="font:600 15px/1.5 'Baloo 2';color:#C9D4EA;text-wrap:pretty">Ödül, sezonda ulaşılan en yüksek lige göre verilir: çip, o lige özel avatar çerçevesi ve profilde sezon rozeti.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+          <sc-for list="{{ rewards }}" as="r" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border-radius:10px;background:#0B1C46">
+              <div style="width:24px;height:24px;flex:none"><x-import component-from-global-scope="G101Emblem" from="./g101-rank.js" league="{{ r.key }}" size="24" hint-size="24px,24px"></x-import></div>
+              <div style="font:800 13px 'Baloo 2';color:#FFD45C">{{ r.chips }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><div style="font:800 24px Montserrat;white-space:nowrap">5 · Sezon avatar çerçeveleri</div><div style="font:600 15px 'Baloo 2';color:#9DB0D8">Her lige bir çerçeve: lig metalinden çentikli halka, dört ana yönde V çentikte lig taşı.</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px">
+      <sc-for list="{{ frames }}" as="f" hint-placeholder-count="6">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:44px 12px 20px;border-radius:22px;background:#0F2558">
+          <div style="width:120px;height:120px"><x-import component-from-global-scope="G101FramedAvatar" from="./g101-rank.js" league="{{ f.key }}" size="120" ini="C" hint-size="120px,120px"></x-import></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px"><div style="font:800 16px Montserrat;color:{{ f.txt }}">{{ f.name }}</div><div style="font:700 13px 'Baloo 2';color:#9DB0D8;white-space:nowrap">{{ f.motif }}</div></div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { idx: 7, lp: 72, prot: 0, peak: 7, rank: 0, log: [], ov: null, toast: null, lang: 'tr' };
+  R() { return window.G101Rank; }
+  componentDidMount() { if (!window.G101Rank) { const t = setInterval(() => { if (window.G101Rank) { clearInterval(t); this.forceUpdate(); } }, 60); } }
+  componentWillUnmount() { clearTimeout(this._tt); }
+  fmt(n) { return n.toLocaleString('tr-TR'); }
+  showToast(t) { clearTimeout(this._tt); this.setState({ toast: t }); this._tt = setTimeout(() => this.setState({ toast: null }), 2600); }
+  play(place) {
+    const R = this.R(), s = this.state; let { idx, lp, prot, peak, rank } = s;
+    const d = R.deltas(Math.min(idx, 14))[place]; lp += d; let ov = null, toast = null;
+    const before = idx;
+    if (idx === 15) {
+      rank = Math.max(1, Math.min(100, rank - Math.round(d / 3)));
+      if (lp < 0) { idx = 14; lp += 100; rank = 0; toast = { kind: 'league', from: 15 }; }
+    } else if (lp >= 100) {
+      if (idx === 14) { idx = 15; lp -= 100; rank = 87; prot = 3; ov = 'galaxy'; }
+      else { idx++; lp -= 100; if (idx % 3 === 0) { prot = 3; ov = 'league'; } else ov = 'tier'; }
+    } else if (lp < 0) {
+      if (idx === 0) lp = 0;
+      else if (idx % 3 === 0 && prot > 0) lp = 0;
+      else { idx--; lp += 100; toast = { kind: (idx + 1) % 3 === 0 ? 'league' : 'tier', from: idx + 1 }; }
+    }
+    if (prot > 0 && !ov) prot--;
+    peak = Math.max(peak, idx);
+    const log = [{ d: (d > 0 ? '+' : '−') + Math.abs(d), up: d > 0, t: `${place + 1}. sıra · ${R.label(before)} → ${R.label(idx)}` }, ...s.log].slice(0, 4);
+    this.setState({ idx, lp, prot, peak, rank, log, ov: ov ? { kind: ov } : s.ov });
+    if (toast) this.showToast({ ...toast, to: idx });
+  }
+  renderVals() {
+    const R = this.R(), s = this.state;
+    if (!R) return { langs: [], leagues: [], log: [], places: [], jumps: [], rewards: [], frames: [], cur: {}, peak: {}, ov: { on: false }, toast: { on: false } };
+    const L = R.LEAGUES, lang = s.lang, en = lang === 'en';
+    const nm = (l) => l[lang];
+    const leagues = L.map((l, i) => ({ key: l.key, motif: l.motif[en ? 1 : 0], name: nm(l), txt: l.txt, bar: l.bar, glow: l.glow, sw: l.c, dist: l.dist, tierEx: i < 5 ? '2' : '0', rankEx: i === 5 ? '12' : '',
+      tiers: i < 5 ? 'III · II · I' : (en ? 'No tiers · rank #1–100' : 'Kademe yok · sıra #1–100'),
+      ex: i < 5 ? [3, 2, 1].map((t) => ({ tier: String(t), rank: '', label: R.ROMAN[t] })) : ['1', '12', '87'].map((r) => ({ tier: '0', rank: r, label: '#' + r })) }));
+    const a = R.at(s.idx), gal = s.idx === 15;
+    const cur = { key: a.league.key, tier: String(a.tier), rank: gal ? String(s.rank) : '', txt: a.league.txt, bar: a.league.bar,
+      label: R.label(s.idx, lang) + (gal ? ` · #${s.rank}` : ''), pct: gal ? '100%' : s.lp + '%',
+      lpText: gal ? `${this.fmt(1400 + s.lp)} LP` : `${s.lp} / 100 LP`,
+      next: gal ? 'İlk 100 içinde' : s.idx === 14 ? `Galaksi'ye ${100 - s.lp} LP` : `${R.label(s.idx + 1, lang)}'e ${100 - s.lp} LP`,
+      prot: s.prot > 0 && s.idx % 3 === 0 ? `Düşme koruması · ${s.prot} maç` : '' };
+    const pa = R.at(s.peak); const peak = { txt: pa.league.txt, label: R.label(s.peak, lang) };
+    let ov = { on: false };
+    if (s.ov) {
+      const k = s.ov.kind, A = k === 'season' ? R.at(s.ov.peak) : a, l = A.league;
+      ov = { on: true, key: l.key, tier: k === 'season' ? '0' : String(A.tier), rank: k === 'galaxy' ? String(s.rank) : '', txt: l.txt, glow: l.glow, rays: k === 'tier' ? .45 : 1, isSeason: k === 'season', btn: 'Devam',
+        lname: nm(l), fr: R.frame(l.key), chips: this.fmt(R.REWARD_CHIPS[l.i]) };
+      if (k === 'league') Object.assign(ov, { kicker: 'LİG ATLADIN', title: `${nm(l)} ligi`, sub: `${R.label(s.idx, lang)} kademesinden başlıyorsun. 3 maç boyunca alt lige düşmezsin.` });
+      if (k === 'tier') Object.assign(ov, { kicker: 'KADEME ATLADIN', title: R.label(s.idx, lang), sub: `${R.label(s.idx - 1, lang)} → ${R.label(s.idx, lang)}` });
+      if (k === 'galaxy') Object.assign(ov, { kicker: 'ZİRVEYE ULAŞTIN', title: `Galaksi · #${s.rank}`, sub: 'Usta I\'in üstündeki ilk 100 oyuncunun arasındasın.' });
+      if (k === 'season') Object.assign(ov, { kicker: 'SEZON 3 BİTTİ', title: `Sezon en iyi: ${R.label(s.ov.peak, lang)}`, sub: `Yeni sezona ${R.label(s.ov.to, lang)} kademesinden başlıyorsun.`, btn: 'Ödülleri al' });
+    }
+    let toast = { on: false };
+    if (s.toast) { const t = R.at(s.toast.to); toast = { on: true, key: t.league.key, tier: String(t.tier), title: s.toast.kind === 'league' ? `${nm(t.league)} ligine düştün` : `${R.label(s.toast.to, lang)} kademesine düştün`, sub: `${R.label(s.toast.from, lang)} → ${R.label(s.toast.to, lang)}` }; }
+    const ds = R.deltas(Math.min(s.idx, 14));
+    return {
+      langs: [['tr', 'TR'], ['en', 'EN']].map(([k, n]) => ({ name: n, bg: s.lang === k ? '#163170' : 'transparent', fg: s.lang === k ? '#F4F1E8' : '#9DB0D8', pick: () => this.setState({ lang: k }) })),
+      leagues, cur, peak, ov, toast,
+      log: s.log.map((g) => ({ d: g.d, t: g.t, dc: g.up ? '#5BE38A' : '#FF8A94' })),
+      places: ds.map((d, i) => ({ n: `${i + 1}.`, d: (d > 0 ? '+' : '−') + Math.abs(d), c: d > 0 ? '#5BE38A' : '#FF8A94', go: () => this.play(i) })),
+      win5: () => { for (let i = 0; i < 5; i++) setTimeout(() => this.play(0), i * 30); },
+      lose5: () => { for (let i = 0; i < 5; i++) setTimeout(() => this.play(3), i * 30); },
+      endSeason: () => { const to = R.seasonReset(s.idx); this.setState({ ov: { kind: 'season', peak: s.peak, to }, idx: to, lp: 0, prot: 0, rank: 0, log: [] }); },
+      closeOv: () => this.setState((x) => (x.ov && x.ov.kind === 'season' ? { ov: null, peak: x.idx } : { ov: null })),
+      reset: () => this.setState({ idx: 0, lp: 0, prot: 0, peak: 0, rank: 0, log: [], ov: null }),
+      jumps: [0, 3, 6, 9, 12, 14].map((i) => { const q = R.at(i); return { key: q.league.key, tier: String(q.tier), label: R.label(i), go: () => this.setState({ idx: i, lp: 72, prot: 0, peak: Math.max(s.peak, i), log: [] }) }; }),
+      rewards: L.map((l) => ({ key: l.key, chips: this.fmt(R.REWARD_CHIPS[l.i]) })),
+      frames: L.map((l) => ({ key: l.key, name: nm(l), txt: l.txt, motif: l.motif[en ? 1 : 0] }))
+    };
+  }
+}
+</script>
+</body>
+</html>

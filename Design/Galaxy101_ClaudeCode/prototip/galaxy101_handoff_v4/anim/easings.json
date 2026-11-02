@@ -1,5 +1,5 @@
 {
- "version": "0.4.0",
+ "version": "0.5.0",
  "note": "u ∈ [0,1] normalize zaman. CSS eğrileri cubic-bezier(x1,y1,x2,y2). 3D eğrileri table3d.js içindeki formüllerdir; Unity AnimationCurve için bezier yaklaşımı verildi.",
  "curves": {
   "easeOutCubic": {

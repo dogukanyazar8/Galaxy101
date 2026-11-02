@@ -41,8 +41,8 @@
 <div class="wrap">
   <aside class="side">
     <div>
-      <h1>3D varlık dışa aktarma</h1>
-      <p class="sub">Oyun masasındaki tüm modeller, parça ve malzeme isimleriyle. GLB → Blender veya doğrudan Unity. Ölçü: metre, Y yukarı. Taş: 50 × 70 × 10 mm.</p>
+      <h1>3D varlık dışa aktarma <small style="font:700 11px 'Baloo 2',sans-serif;color:#A9AEDD">v0.5.0</small></h1>
+      <p class="sub">Oyundaki tüm 3D modeller (menü + masa), parça ve malzeme isimleriyle. GLB → Blender veya doğrudan Unity. Ölçü: metre, Y yukarı. Taş: 50 × 70 × 10 mm.</p>
     </div>
     <div>
       <div class="cap">GEZEGEN TEMASI</div>
@@ -59,6 +59,7 @@
 <script type="module">
   import * as THREE from 'three';
   import { createTable } from './table3d.js';
+  import './ships3d.js';
   const THEMES = {
     'Satürn': { a1: '#FFD964', a2: '#F5A623', f1: '#2C3790', f2: '#11153F', tile: '#FFFDF6', rim: '#4a5080', leather: '#232A66', glow: '#F5A623', sky: '#FFE7A3', lg1: '#FFF4C8' },
     'Mars': { a1: '#FFA26B', a2: '#E8552E', f1: '#74291E', f2: '#2A0D09', tile: '#FFF7F0', rim: '#6e3e36', leather: '#4A1E19', glow: '#E8552E', sky: '#FFC9B0', lg1: '#FFE2CC' },
@@ -73,6 +74,7 @@
     { cap: 'TAŞ SETİ · 52 + ARKA + SAHTE OKEY', items: [['tiles', 'classic', 'Klasik', 'tas_seti_klasik'], ['tiles', 'galaxy', 'Galaksi', 'tas_seti_galaksi'], ['tiles', 'gold', 'Altın', 'tas_seti_altin'], ['tiles', 'neon', 'Neon', 'tas_seti_neon'], ['tiles', 'marble', 'Mermer', 'tas_seti_mermer'], ['tile', 'R7', 'Tek taş (son seçilen set)', 'tas_tek']] },
     { cap: 'ZAR', items: [['die', null, 'Zar (30 mm, 6 yüz)', 'zar']] },
     { cap: 'OYUN İŞARETLERİ', items: [['markers', null, 'Hale, atma/soldan halkası, işleme hedefi, simgeler', 'isaretler']] },
+    { cap: 'UZAY GEMİLERİ · MENÜ + MASA ARKA PLANI', items: [['ship', 'kervan', 'Kervan (yük gemisi)', 'gemi_kervan'], ['ship', 'ok', 'Ok (hızlı kurye)', 'gemi_ok'], ['ship', 'halka', 'Halka (salon kruvazörü)', 'gemi_halka'], ['ship', 'kacak', 'Avcı · Kaçak', 'gemi_avci_kacak'], ['ship', 'avci', 'Avcı · Kovalayan', 'gemi_avci_kovalayan']] },
     { cap: 'TAM SAHNE', items: [['scene', null, 'Oda + masa + ıstaka + koltuk + ışıklar', 'sahne_tam']] },
     { cap: 'ORTAM', items: [['chair', null, 'Koltuk', 'koltuk'], ['room', null, 'Oda (zemin, pencere, duvar)', 'oda_istasyon']] },
     { cap: 'İKRAM', items: [['gift', 'tea', 'Çay'], ['gift', 'coffee', 'Türk kahvesi'], ['gift', 'cola', 'Soğuk içecek'], ['gift', 'simit', 'Simit'], ['gift', 'baklava', 'Baklava'], ['gift', 'seeds', 'Çekirdek']].map((x) => [...x, 'ikram_' + x[1]]) },
@@ -94,7 +96,7 @@
   Object.keys(THEMES).forEach((k) => { const o = document.createElement('option'); o.value = k; o.textContent = k; sel.appendChild(o); });
   const slug = (s) => s.toLowerCase().replace('ü', 'u').replace('ö', 'o').replace('ç', 'c').replace('ş', 's').replace('ı', 'i').replace('ğ', 'g');
   let current = null;
-  function build(a) { return T.exportAsset(a[0], a[1]); }
+  function build(a) { return a[0] === 'ship' ? window.GalaxyShips.exportShip(a[1]) : T.exportAsset(a[0], a[1]); }
   function show(a, btn) {
     current = a; [...list.querySelectorAll('.it')].forEach((b) => b.classList.toggle('on', b === btn));
     const g = build(a); if (!g) return;

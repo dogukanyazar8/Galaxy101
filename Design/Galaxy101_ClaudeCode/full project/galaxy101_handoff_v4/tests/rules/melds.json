@@ -1,0 +1,502 @@
+{
+ "suite": "melds",
+ "version": "0.5.0",
+ "note": "Aksi belirtilmedikçe gösterge B6a → okey B7 (B7a, B7b), sahte okey Ja/Jb = B7.",
+ "tests": [
+  {
+   "id": "MELD-01",
+   "title": "Seri R3-R4-R5 = 12",
+   "rules": [
+    "R-10"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "run",
+    "tiles": [
+     "R3a",
+     "R4a",
+     "R5a"
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "value": 12
+   }
+  },
+  {
+   "id": "MELD-02",
+   "title": "Okey ortada R3-okey-R5 → okey R4",
+   "rules": [
+    "R-10",
+    "R-13"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "run",
+    "tiles": [
+     "R3a",
+     "B7a",
+     "R5a"
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "value": 12,
+    "repr": [
+     {
+      "c": "R",
+      "n": 3
+     },
+     {
+      "c": "R",
+      "n": 4
+     },
+     {
+      "c": "R",
+      "n": 5
+     }
+    ]
+   }
+  },
+  {
+   "id": "MELD-03",
+   "title": "Sahte okey okeyin değerini alır: B5-B6-sahte = B5-B6-B7",
+   "rules": [
+    "R-13"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "run",
+    "tiles": [
+     "B5a",
+     "B6b",
+     "Ja"
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "value": 18
+   }
+  },
+  {
+   "id": "MELD-04",
+   "title": "Grup R7-Y7-K7 = 21",
+   "rules": [
+    "R-11"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "group",
+    "tiles": [
+     "R7a",
+     "Y7a",
+     "K7a"
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "value": 21
+   }
+  },
+  {
+   "id": "MELD-05",
+   "title": "Grupta okey eksik rengi alır (R, B, Y, K sırasıyla ilk eksik)",
+   "rules": [
+    "R-11",
+    "R-13"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "group",
+    "tiles": [
+     "R7a",
+     "Y7a",
+     "B7a"
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "value": 21,
+    "repr": [
+     {
+      "c": "R",
+      "n": 7
+     },
+     {
+      "c": "Y",
+      "n": 7
+     },
+     {
+      "c": "B",
+      "n": 7
+     }
+    ]
+   }
+  },
+  {
+   "id": "MELD-06",
+   "title": "Grupta aynı renk iki kez olamaz",
+   "rules": [
+    "R-11"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "group",
+    "tiles": [
+     "R9a",
+     "R9b",
+     "Y9a"
+    ]
+   },
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "id": "MELD-07",
+   "title": "Grup en çok 4 taş",
+   "rules": [
+    "R-11"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "group",
+    "tiles": [
+     "R9a",
+     "Y9a",
+     "K9a",
+     "B9a",
+     "B7a"
+    ]
+   },
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "id": "MELD-08",
+   "title": "Sarma yok: 12-13-1 geçersiz",
+   "rules": [
+    "R-12"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "run",
+    "tiles": [
+     "R12a",
+     "R13a",
+     "R1a"
+    ]
+   },
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "id": "MELD-09",
+   "title": "13-1-2 geçersiz",
+   "rules": [
+    "R-12"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "run",
+    "tiles": [
+     "R13a",
+     "R1a",
+     "R2a"
+    ]
+   },
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "id": "MELD-10",
+   "title": "Seri en az 3 taş",
+   "rules": [
+    "R-10"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "run",
+    "tiles": [
+     "R3a",
+     "R4a"
+    ]
+   },
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "id": "MELD-11",
+   "title": "Okey 13ten sonra gelemez: 12-13-okey geçersiz",
+   "rules": [
+    "R-12",
+    "R-13"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "run",
+    "tiles": [
+     "R12a",
+     "R13a",
+     "B7a"
+    ]
+   },
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "id": "MELD-12",
+   "title": "Okey seri başında: okey-R12-R13 = R11",
+   "rules": [
+    "R-13"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "run",
+    "tiles": [
+     "B7a",
+     "R12a",
+     "R13a"
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "value": 36
+   }
+  },
+  {
+   "id": "MELD-13",
+   "title": "Çift: iki aynı taş",
+   "rules": [
+    "R-15"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "pair",
+    "tiles": [
+     "R5a",
+     "R5b"
+    ]
+   },
+   "expect": {
+    "ok": true
+   }
+  },
+  {
+   "id": "MELD-14",
+   "title": "Çift: okey her taşla çift olur",
+   "rules": [
+    "R-15"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "pair",
+    "tiles": [
+     "R5a",
+     "B7a"
+    ]
+   },
+   "expect": {
+    "ok": true
+   }
+  },
+  {
+   "id": "MELD-15",
+   "title": "Çift: farklı taşlar olmaz",
+   "rules": [
+    "R-15"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "pair",
+    "tiles": [
+     "R5a",
+     "Y5a"
+    ]
+   },
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "id": "MELD-16",
+   "title": "Çift: iki sahte okey",
+   "rules": [
+    "R-15"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "pair",
+    "tiles": [
+     "Ja",
+     "Jb"
+    ]
+   },
+   "expect": {
+    "ok": true
+   }
+  },
+  {
+   "id": "MELD-17",
+   "title": "Yalnız okeylerden per olmaz",
+   "rules": [
+    "R-14"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "run",
+    "tiles": [
+     "B7a",
+     "B7b"
+    ]
+   },
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "id": "MELD-18",
+   "title": "Seri tek renk olmalı",
+   "rules": [
+    "R-10"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "run",
+    "tiles": [
+     "R3a",
+     "Y4a",
+     "R5a"
+    ]
+   },
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "id": "MELD-19",
+   "title": "İki okeyli seri: R3-okey-okey-R6 = 18",
+   "rules": [
+    "R-13"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "run",
+    "tiles": [
+     "R3a",
+     "B7a",
+     "B7b",
+     "R6a"
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "value": 18
+   }
+  },
+  {
+   "id": "MELD-20",
+   "title": "En iyi per kümesi (bot/sıralama): okey en yüksek boşluğu doldurur, R11-R12-okey(R13) + 9lar = 63",
+   "rules": [
+    "R-16"
+   ],
+   "call": {
+    "fn": "bestMelds",
+    "indicator": "B6a",
+    "tiles": [
+     "R11a",
+     "R12a",
+     "B7a",
+     "K9a",
+     "Y9a",
+     "R9a"
+    ]
+   },
+   "expect": {
+    "value": 63,
+    "left": 0
+   }
+  },
+  {
+   "id": "MELD-19",
+   "title": "Okey 11 yerine: okey-12-13 = 36",
+   "rules": [
+    "R-12",
+    "R-13"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "run",
+    "tiles": [
+     "B7a",
+     "R12a",
+     "R13a"
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "value": 36,
+    "repr": [
+     {
+      "c": "R",
+      "n": 11
+     },
+     {
+      "c": "R",
+      "n": 12
+     },
+     {
+      "c": "R",
+      "n": 13
+     }
+    ]
+   }
+  },
+  {
+   "id": "MELD-20",
+   "title": "1 her zaman 1: 1-2-3 = 6",
+   "rules": [
+    "R-12"
+   ],
+   "call": {
+    "fn": "analyzeMeld",
+    "indicator": "B6a",
+    "kind": "run",
+    "tiles": [
+     "K1a",
+     "K2a",
+     "K3a"
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "value": 6
+   }
+  }
+ ]
+}

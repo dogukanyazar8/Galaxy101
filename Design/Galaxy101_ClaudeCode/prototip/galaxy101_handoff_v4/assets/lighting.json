@@ -1,5 +1,5 @@
 {
- "version": "0.4.0",
+ "version": "0.5.0",
  "source": "table3d.js · ışıklar ve görüntü ayarları (oyundaki değerler)",
  "renderer": { "toneMapping": "ACES Filmic", "exposure": 1.05, "outputColorSpace": "sRGB", "shadows": "PCF, 2048×2048 (ana ışık)", "pixelRatio": "min(2, ölçek × cihaz)", "clear": "şeffaf (arkada CSS gezegen/yıldız katmanı)" },
  "lights": [

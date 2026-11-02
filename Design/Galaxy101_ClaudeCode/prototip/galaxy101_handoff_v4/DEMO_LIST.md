@@ -1,4 +1,4 @@
-# DEMO_LIST.md · yalnız prototipe ait sahte veri ve kısayollar · v0.4.0
+# DEMO_LIST.md · yalnız prototipe ait sahte veri ve kısayollar · v0.5.0
 
 Gerçek sunucuya taşınmaz. Kodda her biri `// DEMO:` ile işaretli.
 

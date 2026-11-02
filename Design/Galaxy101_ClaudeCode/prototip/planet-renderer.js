@@ -54,7 +54,7 @@
   // Saturn ring profile, r in planet radii
   function ringAt(r, out) {
     let a = 0, c0 = 0, c1 = 0, c2 = 0;
-    if (r > 1.24 && r < 1.53) { a = .1 + .12 * sm(1.24, 1.53, r); c0 = 150; c1 = 140; c2 = 124; }
+    if (r > 1.45 && r < 1.53) { a = .2 * sm(1.45, 1.53, r); c0 = 150; c1 = 140; c2 = 124; }   // C halkası kaldırıldı (gezegenle halka arasında fazladan daire gibi görünüyordu); yalnız B halkasına yumuşak geçiş
     else if (r >= 1.53 && r < 1.95) { const t = (r - 1.53) / .42; a = .78 + .18 * Math.sin(t * PI); c0 = 214 + 22 * Math.sin(t * PI); c1 = 194 + 18 * Math.sin(t * PI); c2 = 152 + 10 * t; }
     else if (r >= 1.95 && r < 2.03) { a = .05; c0 = 120; c1 = 112; c2 = 100; }
     else if (r >= 2.03 && r < 2.27) { a = (r > 2.205 && r < 2.218) ? .05 : .62; c0 = 196; c1 = 182; c2 = 156; }
@@ -123,20 +123,43 @@
         ramp(VEN, cn(fB(x * 2 + wx * 1.6, y * 4.5 + wx * 1.2, z * 2 + wx * 1.6, 4), 2.1), c);
       } },
   };
+  const GR = { sat: 1.22, con: 1.12, exp: 1.04 };
   const texCache = {};
-  function buildTex(name, W) {
+  const jobs = {};
+  // Doku satır satır, zaman bütçesiyle üretilir; ana iş parçacığı kilitlenmez. Bitince texCache'e girer.
+  function stepTex(name, W, budget) {
     const key = name + W; if (texCache[key]) return texCache[key];
-    const H = W / 2, P = PLANETS[name], fA = mkNoise(P.seed), fB = mkNoise(P.seed + 77);
-    const tr = new Uint8ClampedArray(W * H), tg = new Uint8ClampedArray(W * H), tb = new Uint8ClampedArray(W * H), c = [0, 0, 0];
-    for (let j = 0; j < H; j++) {
+    let J = jobs[key];
+    if (!J) { const H = W / 2, P = PLANETS[name]; J = jobs[key] = { H, P, j: 0, fA: mkNoise(P.seed), fB: mkNoise(P.seed + 77), tr: new Uint8ClampedArray(W * H), tg: new Uint8ClampedArray(W * H), tb: new Uint8ClampedArray(W * H) }; }
+    const { H, P, fA, fB, tr, tg, tb } = J, c = [0, 0, 0], t0 = performance.now();
+    for (; J.j < H; J.j++) {
+      if (performance.now() - t0 > budget) return null;
+      const j = J.j;
       const lat = (.5 - (j + .5) / H) * PI, cl = Math.cos(lat), y = Math.sin(lat);
       for (let i = 0; i < W; i++) {
         const lon = ((i + .5) / W) * 2 * PI - PI, x = cl * Math.sin(lon), z = cl * Math.cos(lon);
         P.gen(fA, fB, x, y, z, lat, lon, c);
-        const o = j * W + i; tr[o] = c[0]; tg[o] = c[1]; tb[o] = c[2];
+        const L = .299 * c[0] + .587 * c[1] + .114 * c[2], o = j * W + i;
+        for (let q = 0; q < 3; q++) { let v = L + (c[q] - L) * GR.sat; v = (v - 128) * GR.con + 128; c[q] = v * GR.exp; }
+        tr[o] = c[0]; tg[o] = c[1]; tb[o] = c[2];
       }
     }
+    delete jobs[key];
     return (texCache[key] = { tr, tg, tb, W, H });
+  }
+  const texW = (S) => (S > 600 ? 2048 : S > 380 ? 1536 : 1024);
+  const sizeS = (scale) => Math.round(300 * Math.min(scale * (window.devicePixelRatio || 1) * 1.25, 3));
+  let warmS = 0, warmT = 0;
+  function warm(S) {
+    if (S === warmS) return; warmS = S; clearTimeout(warmT);
+    const W = texW(S), names = Object.keys(PLANETS);
+    const run = (dl) => {
+      const left = names.filter((n) => !texCache[n + W]); if (!left.length || warmS !== S) return;
+      const b = dl && dl.timeRemaining ? Math.max(4, dl.timeRemaining() - 1) : 8;
+      stepTex(left[0], W, b); next();
+    };
+    const next = () => { warmT = window.requestIdleCallback ? requestIdleCallback(run, { timeout: 400 }) : setTimeout(run, 30); };
+    warmT = setTimeout(next, 600);
   }
   function buildGeo(name, S, Wc, tex, img) {
     const P = PLANETS[name], a = P.tilt * PI / 180, ca = Math.cos(a), sa = Math.sin(a), W = tex.W, H = tex.H;
@@ -168,7 +191,7 @@
         continue;
       }
       const diff = dx * Lx + dy * Ly + nz * Lz;
-      const lam = clamp((diff + .06) / 1.06);
+      const lam = clamp((diff + .1) / 1.1);
       let s = P.amb + (1 - P.amb) * Math.pow(lam, 1.15) * ((1 - P.k) + P.k * Math.pow(nz, .55));
       const qx = dx, qy = dy * ca + nz * sa, qz = -dy * sa + nz * ca;
       if (P.ring && Lpy > 0 && qy < 0) {
@@ -198,17 +221,23 @@
       this.raf = requestAnimationFrame(this.tick);
       if (!this.visible || document.hidden || (this.paused && this.gName === this.name && this.gS) || now - (this.last || 0) < 33) return;
       this.last = now;
-      const S = Math.round(300 * Math.min(this.scale * (window.devicePixelRatio || 1), 2.2)), P = PLANETS[this.name];
+      const S = sizeS(this.scale), P = PLANETS[this.name];
       const Wc = P.ring ? Math.round(S * 2.4) : S;
+      warm(S);
       if (this.gName !== this.name || this.gS !== S) {
-        this.tex = buildTex(this.name, S > 420 ? 1024 : 768);
-        this.cv.width = Wc; this.cv.height = S; this.ctx = this.cv.getContext('2d');
+        const tex = stepTex(this.name, texW(S), this.geo ? 10 : 1e9);
+        if (!tex) { if (this.geo) this.draw(now); return; }
+        this.tex = tex;
+        this.cv.width = Wc; this.cv.height = S; this.ctx = this.cv.getContext('2d'); this.ctx.imageSmoothingQuality = 'high';
         const cssW = 300 * Wc / S;
         Object.assign(this.cv.style, { position: 'absolute', left: (150 - cssW / 2) + 'px', top: '0px', width: cssW + 'px', height: '300px', borderRadius: '0' });
         this.img = this.ctx.createImageData(Wc, S);
         this.geo = buildGeo(this.name, S, Wc, this.tex, this.img);
         this.gName = this.name; this.gS = S;
       }
+      this.draw(now);
+    }
+    draw(now) {
       const g = this.geo, t = this.tex, W = t.W, d = this.img.data, tr = t.tr, tg = t.tg, tb = t.tb;
       const [ar, ag, ab] = g.atm, off = ((now / 1000) / this.period * W) % W;
       const { n, pix, u0, r0, fv, sh, rim, ra, rr } = g;

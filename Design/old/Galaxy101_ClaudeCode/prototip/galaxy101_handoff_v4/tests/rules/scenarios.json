@@ -1,0 +1,441 @@
+{
+ "file": "scenarios",
+ "note": "logic/scenarios/*.json ile aynı eller",
+ "tests": [
+  {
+   "id": "SCN-01",
+   "title": "R43 senaryosu: ıstakalar istendiği gibi, Burak K9 ile açar, sana +90",
+   "rules": [
+    "R-43"
+   ],
+   "init": {
+    "scenario": {
+     "id": "R43",
+     "title": "Açtıran taş cezası: attığın K9 ile Burak açtı (+90)",
+     "rules": [
+      "R-43",
+      "R-30"
+     ],
+     "states": [
+      "T34"
+     ],
+     "note": "Sen (koltuk 0) başlarsın, 22 taşla K9 atarsın. Açmamış Burak (koltuk 1) soldan K9'u alır, K9-K10-K11 + iki 13/12 grubuyla 105 açar. Turu bitince sana 9 × 10 = +90 yazılır.",
+     "opts": {
+      "mode": "solo",
+      "hands": 5
+     },
+     "seed": 7,
+     "deal": {
+      "dealer": 3,
+      "dice": [
+       4,
+       3
+      ],
+      "indicator": "Y4a",
+      "racks": [
+       [
+        "K9b",
+        "R1a",
+        "R3a",
+        "R5b",
+        "R7b",
+        "R9a",
+        "R11b",
+        "B2a",
+        "B5a",
+        "B7b",
+        "B11a",
+        "B13b",
+        "K4a",
+        "K7b",
+        "Y1a",
+        "Y3b",
+        "Y6a",
+        "Y10b",
+        "Y12b",
+        "R10b",
+        "B4b",
+        "K2b"
+       ],
+       [
+        "R13a",
+        "B13a",
+        "Y13a",
+        "R12a",
+        "B12a",
+        "Y12a",
+        "K10a",
+        "K11a",
+        "R2a",
+        "R4a",
+        "R6a",
+        "R8a",
+        "B1a",
+        "B3a",
+        "B6a",
+        "B9a",
+        "K1a",
+        "K3a",
+        "K5a",
+        "Y8a",
+        "Y11a"
+       ]
+      ]
+     },
+     "me": [
+      {
+       "do": "discard",
+       "tile": "K9b"
+      }
+     ],
+     "expect": {
+      "penalty": {
+       "seat": 0,
+       "code": "P_OPENED_WITH",
+       "amount": 90,
+       "by": 1
+      }
+     }
+    },
+    "expect": {
+     "hand.racks.0#set": [
+      "K9b",
+      "R1a",
+      "R3a",
+      "R5b",
+      "R7b",
+      "R9a",
+      "R11b",
+      "B2a",
+      "B5a",
+      "B7b",
+      "B11a",
+      "B13b",
+      "K4a",
+      "K7b",
+      "Y1a",
+      "Y3b",
+      "Y6a",
+      "Y10b",
+      "Y12b",
+      "R10b",
+      "B4b",
+      "K2b"
+     ],
+     "hand.racks.1#set": [
+      "R13a",
+      "B13a",
+      "Y13a",
+      "R12a",
+      "B12a",
+      "Y12a",
+      "K10a",
+      "K11a",
+      "R2a",
+      "R4a",
+      "R6a",
+      "R8a",
+      "B1a",
+      "B3a",
+      "B6a",
+      "B9a",
+      "K1a",
+      "K3a",
+      "K5a",
+      "Y8a",
+      "Y11a"
+     ],
+     "hand.indicator": "Y4a",
+     "hand.turn.seat": 0,
+     "invariants": []
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "K9b"
+     },
+     "expect": {
+      "ok": true
+     }
+    },
+    {
+     "do": {
+      "t": "botTurn",
+      "seat": 1
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "drew",
+        "seat": 1,
+        "src": "side"
+       },
+       {
+        "e": "opened",
+        "seat": 1
+       },
+       {
+        "e": "penalty",
+        "seat": 0,
+        "code": "P_OPENED_WITH",
+        "amount": 90
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "SCN-02",
+   "title": "R44 senaryosu: okeyli seriyle açarsın, Burak okeyi alır, sana +101",
+   "rules": [
+    "R-44"
+   ],
+   "init": {
+    "scenario": {
+     "id": "R44",
+     "title": "Okey alma cezası: Burak masadaki okeyini aldı (+101)",
+     "rules": [
+      "R-44",
+      "R-26"
+     ],
+     "states": [
+      "T36"
+     ],
+     "note": "Sen R10-R11-okey(Y5)-R13, 13 grubu ve K10-K12 ile 118 açar, R6 atarsın. Burak 105 açar, R12 ile okeyini alır. Turu bitince sana +101 yazılır.",
+     "opts": {
+      "mode": "solo",
+      "hands": 5
+     },
+     "seed": 7,
+     "deal": {
+      "dealer": 3,
+      "dice": [
+       4,
+       3
+      ],
+      "indicator": "Y4a",
+      "racks": [
+       [
+        "R10a",
+        "R11a",
+        "Y5a",
+        "R13a",
+        "K13a",
+        "B13a",
+        "Y13a",
+        "K10a",
+        "K11a",
+        "K12a",
+        "R6a",
+        "R1a",
+        "R3a",
+        "B2a",
+        "B5b",
+        "B9b",
+        "K2a",
+        "K7b",
+        "Y1a",
+        "Y3b",
+        "Y10b",
+        "B4b"
+       ],
+       [
+        "R7a",
+        "B7a",
+        "K7a",
+        "Y7a",
+        "R8a",
+        "B8a",
+        "K8a",
+        "Y8a",
+        "B10a",
+        "B11a",
+        "B12a",
+        "K3a",
+        "K4a",
+        "K5a",
+        "R12a",
+        "R2a",
+        "R4a",
+        "B3a",
+        "Y2a",
+        "Y9a",
+        "B6a"
+       ]
+      ]
+     },
+     "me": [
+      {
+       "do": "open",
+       "melds": [
+        [
+         "R10a",
+         "R11a",
+         "Y5a",
+         "R13a"
+        ],
+        [
+         "K13a",
+         "B13a",
+         "Y13a"
+        ],
+        [
+         "K10a",
+         "K11a",
+         "K12a"
+        ]
+       ]
+      },
+      {
+       "do": "discard",
+       "tile": "R6a"
+      }
+     ],
+     "expect": {
+      "penalty": {
+       "seat": 0,
+       "code": "P_OKEY_TAKEN",
+       "amount": 101,
+       "by": 1
+      }
+     }
+    },
+    "expect": {
+     "hand.racks.0#set": [
+      "R10a",
+      "R11a",
+      "Y5a",
+      "R13a",
+      "K13a",
+      "B13a",
+      "Y13a",
+      "K10a",
+      "K11a",
+      "K12a",
+      "R6a",
+      "R1a",
+      "R3a",
+      "B2a",
+      "B5b",
+      "B9b",
+      "K2a",
+      "K7b",
+      "Y1a",
+      "Y3b",
+      "Y10b",
+      "B4b"
+     ],
+     "invariants": []
+    }
+   },
+   "steps": [
+    {
+     "do": {
+      "t": "open",
+      "seat": 0,
+      "melds": [
+       {
+        "kind": "run",
+        "tiles": [
+         "R10a",
+         "R11a",
+         "Y5a",
+         "R13a"
+        ]
+       },
+       {
+        "kind": "group",
+        "tiles": [
+         "K13a",
+         "B13a",
+         "Y13a"
+        ]
+       },
+       {
+        "kind": "run",
+        "tiles": [
+         "K10a",
+         "K11a",
+         "K12a"
+        ]
+       }
+      ]
+     },
+     "expect": {
+      "ok": true,
+      "state": {
+       "hand.opened.0": 118
+      }
+     }
+    },
+    {
+     "do": {
+      "t": "discard",
+      "seat": 0,
+      "tile": "R6a"
+     },
+     "expect": {
+      "ok": true
+     }
+    },
+    {
+     "do": {
+      "t": "botTurn",
+      "seat": 1
+     },
+     "expect": {
+      "ok": true,
+      "events": [
+       {
+        "e": "opened",
+        "seat": 1
+       },
+       {
+        "e": "okeySwapped",
+        "seat": 1,
+        "owner": 0
+       },
+       {
+        "e": "penalty",
+        "seat": 0,
+        "code": "P_OKEY_TAKEN",
+        "amount": 101
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "SCN-03",
+   "title": "rigFromHands: aynı taş iki kez → E_SPEC_DUP",
+   "rules": [
+    "R-01"
+   ],
+   "call": {
+    "fn": "rigFromHands",
+    "deal": {
+     "dealer": 3,
+     "dice": [
+      1,
+      1
+     ],
+     "indicator": "R1a",
+     "racks": [
+      [
+       "R1a"
+      ]
+     ]
+    }
+   },
+   "expect": {
+    "threw": "E_SPEC_DUP"
+   }
+  }
+ ]
+}

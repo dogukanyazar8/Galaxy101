@@ -1,4 +1,4 @@
-/* Galaxy 101 · tests/runner.js · v0.4.0 — altın test vektörü koşucusu (tarayıcı ve sunucu testleri için aynı mantık).
+/* Galaxy 101 · tests/runner.js · v0.5.0 — altın test vektörü koşucusu (tarayıcı ve sunucu testleri için aynı mantık).
  * Vektör biçimi README'de: init | call | sim, steps[{do, expect}], expect{ok,error,events,state,throws}.
  * state yolları: "hand.racks.0" (nokta + sayı), sonek "#len" uzunluk, "#set" sırasız karşılaştırma; "invariants" → 106 taşın her biri tam bir kez.
  */

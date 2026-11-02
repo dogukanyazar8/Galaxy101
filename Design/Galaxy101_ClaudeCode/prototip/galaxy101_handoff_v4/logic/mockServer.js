@@ -1,4 +1,4 @@
-/* Galaxy 101 · logic/mockServer.js · v0.4.0
+/* Galaxy 101 · logic/mockServer.js · v0.5.0
  * Gerçek sunucunun prova sürümü. İstemci durumu asla doğrudan değiştirmez: her işlem C2S mesajıyla buraya gelir,
  * buradan S2C olaylarıyla döner. Zamanlayıcılar, botlar, dağıtım töreni, zar, puanlama, bakiye hareketleri burada.
  * Kural motoru: logic/rules.js · botlar: logic/bots.js · mesaj kataloğu: protocol/protocol.json · süreler: protocol/timings.md
@@ -9,14 +9,14 @@
   'use strict';
   var R = (function () { var m = null; function get() { return m || (m = root.G101Rules || (typeof require !== 'undefined' ? require('./rules.js') : null)); } return typeof Proxy !== 'undefined' ? new Proxy({}, { get: function (_, k) { return get()[k]; } }) : get(); })();   // tarayıcıda betik yükleme sırası garanti değil → ilk kullanımda çöz (C# portunda: doğrudan bağımlılık)
   var B = (function () { var m = null; function get() { return m || (m = root.G101Bots || (typeof require !== 'undefined' ? require('./bots.js') : null)); } return typeof Proxy !== 'undefined' ? new Proxy({}, { get: function (_, k) { return get()[k]; } }) : get(); })();   // tarayıcıda betik yükleme sırası garanti değil → ilk kullanımda çöz (C# portunda: doğrudan bağımlılık)
-  var VERSION = '0.4.0';
+  var VERSION = '0.5.0';
 
   // ---------- Sunucu süreleri (ms) · protocol/timings.md ile birebir ----------
   var T = {
     preDealCountdown: 3000,      // 3-2-1 (yalnız maçın ilk eli)
     seatedToCountdown: 900,      // 4. koltuk dolunca geri sayıma geçiş (sahibi bot/demo olan masa)
     waitRoomCountdown: 3000,     // bekleme odası 3-2-1
-    deal: { build: 2940, botRollDelay: 700, humanRollWait: 15000, roll1: 1570, roll2: 1990, betweenRolls: 650, afterDice: 1000, indicator: 2300, extra: 1300, distribute: 5100, center: 2000, fill: 2136 },
+    deal: { build: 2572, botRollDelay: 700, humanRollWait: 15000, roll1: 1570, roll2: 1990, betweenRolls: 650, afterDice: 1000, indicator: 2300, extra: 1300, distribute: 4140, center: 2000, fill: 2136, skipFill: 1100 },
     turnMs: 30000,               // masa seçeneği 15/20/30/45 sn
     handEndWait: 15000,          // "Sonraki el · 15"
     inviteTtl: 30000,
@@ -371,7 +371,8 @@
       var id = 't' + (++seqTable);
       var tb = { id: id, code: 'GX-' + codeChars(4), name: m.name, mode: m.mode === 'pairs' ? 'pairs' : 'solo', private: !!m.private, pin: m.pin || null,
         hands: m.hands || 5, bet: m.bet == null ? 5000 : m.bet, katlama: !!m.katlama, katlamaPartner: m.katlamaPartner !== false, turnSec: m.turnSec || 30,
-        rules: { spectate: m.rules ? m.rules.spectate !== false : true, chat: (m.rules && m.rules.chat) || 'open', gifts: m.rules ? m.rules.gifts !== false : true, isle: m.rules ? m.rules.isle !== false : true, penalties: m.rules ? m.rules.penalties !== false : true },
+        rules: { spectate: m.rules ? m.rules.spectate !== false : true, chat: (m.rules && m.rules.chat) || 'open', gifts: m.rules ? m.rules.gifts !== false : true, isle: m.rules ? m.rules.isle !== false : true, penalties: m.rules ? m.rules.penalties !== false : true,
+          penOkey: m.rules ? m.rules.penOkey !== false : true, penIslek: m.rules ? m.rules.penIslek !== false : true, penOpener: m.rules ? m.rules.penOpener !== false : true },
         owner: owner, ranked: !!m.ranked, vsBots: !!m.vsBots, status: 'waiting', seats: [null, null, null, null], conn: [true, true, true, true], spectators: [], match: null, timers: {}, cd: 0,
         timeouts: [0, 0, 0, 0], auto: [false, false, false, false], betsPaid: 0, ready: {}, chatRng: { s: R.rngNext(rng) }, seed: R.rngNext(rng), demoOwner: !!m.demoOwner };
       tables[id] = tb; return tb;
@@ -535,7 +536,7 @@
     // ---- Botlara karşı ----
     on('vsBotsStart', function (c, m, u) {
       if (u.tableId) return E('E_ALREADY_SEATED');
-      var tb = makeTable(u.id, { name: 'Botlara karşı', mode: m.mode, bet: 0, hands: m.hands || 5, turnSec: m.turnSec || 30, katlama: !!m.katlama, katlamaPartner: m.katlamaPartner, vsBots: true, rules: { spectate: false, chat: 'open', gifts: false } });
+      var tb = makeTable(u.id, { name: 'Botlara karşı', mode: m.mode, bet: 0, hands: m.hands || 5, turnSec: m.turnSec || 30, katlama: !!m.katlama, katlamaPartner: m.katlamaPartner, vsBots: true, rules: { spectate: false, chat: 'open', gifts: false, penOkey: !(m.rules && m.rules.penOkey === false), penIslek: !(m.rules && m.rules.penIslek === false), penOpener: !(m.rules && m.rules.penOpener === false) } });
       tb.seats[0] = { id: u.id }; u.tableId = tb.id; u.seat = 0; for (var i = 1; i < 4; i++) tb.seats[i] = botSeat(0);
       emit(c, 'tableState', { table: tablePub(tb) }); startMatch(tb); return { table: tablePub(tb) };
     });
@@ -600,7 +601,7 @@
     function isBotSeat(tb, k) { var s = tb.seats[k]; return !s || s.bot || tb.auto[k] || (tb.match && tb.match.seats[k].bot); }
     function startMatch(tb) {
       tb.status = 'playing';
-      tb.match = R.newMatch({ mode: tb.mode, hands: tb.hands, penalties: tb.rules.penalties, isle: tb.rules.isle, katlama: tb.katlama, katlamaPartner: tb.katlamaPartner }, tb.seed);
+      tb.match = R.newMatch({ mode: tb.mode, hands: tb.hands, penalties: tb.rules.penalties, isle: tb.rules.isle, penOkey: tb.rules.penOkey, penIslek: tb.rules.penIslek, penOpener: tb.rules.penOpener, katlama: tb.katlama, katlamaPartner: tb.katlamaPartner }, tb.seed);
       tb.seats.forEach(function (s, k) { if (s && s.bot) tb.match.seats[k].bot = true; });
       tableEmit(tb, 'matchStart', { table: tablePub(tb), countdownMs: T.preDealCountdown }); lobbyEmit(tb);
       tb.timers.pre = clock.set(function () { startHand(tb); }, T.preDealCountdown);
@@ -636,13 +637,26 @@
       t += D.indicator; tb.timers.d2 = clock.set(function () { tableEmit(tb, 'dealStep', { step: 'extra', stack: d.extraStack }); }, t);
       t += D.extra; tb.timers.d3 = clock.set(function () { tableEmit(tb, 'dealStep', { step: 'distribute', plan: d.plan }); }, t);
       t += D.distribute; tb.timers.d4 = clock.set(function () { tableEmit(tb, 'dealStep', { step: 'center', stacks: d.centerStacks, deck: H.deck.length }); }, t);
-      t += D.center; tb.timers.d5 = clock.set(function () {
-        // Her oyuncuya yalnız kendi ıstakası; diğerlerinin sayısı.
+      t += D.center; tb.timers.d5 = clock.set(function () { sendDealt(tb); }, t);
+      t += D.fill; tb.timers.d6 = clock.set(function () { tb.deal = null; startTurn(tb); }, t);
+    }
+    // Her oyuncuya yalnız kendi ıstakası; diğerlerinin sayısı.
+    function sendDealt(tb) {
+      var H = tb.match.hand;
+      {
         tb.seats.forEach(function (s, k) { if (s && !s.bot) toUser(s.id, 'handDealt', { handNo: tb.match.handNo, rack: H.racks[k].slice(), counts: H.racks.map(function (x) { return x.length; }), deck: H.deck.length, indicator: H.indicator, okey: H.okey, starter: H.turn.seat }); });
         pushView(tb);
         tb.spectators.forEach(function (uid) { toUser(uid, 'handDealt', { handNo: tb.match.handNo, rack: null, counts: H.racks.map(function (x) { return x.length; }), deck: H.deck.length, indicator: H.indicator, okey: H.okey, starter: H.turn.seat }); });
-      }, t);
-      t += D.fill; tb.timers.d6 = clock.set(function () { tb.deal = null; startTurn(tb); }, t);
+      }
+    }
+    // Dağıtım törenini geç (D-skip): dağıtan oyuncu ya da bütün insan oyuncular "Geç" derse tören herkes için kesilir; zar ve dağıtım sonucu aynıdır (önceden belirli).
+    function skipDeal(tb) {
+      var x = tb.deal, H = tb.match.hand, d = H.deal; if (!x) return;
+      ['deal', 'roll', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6'].forEach(function (k) { cancel(tb, k); });
+      x.dice = d.dice.slice(); x.step = 'fill'; x.rolling = false;
+      tableEmit(tb, 'dealSkip', { dice: d.dice.slice(), stack: d.indStack, level: d.indLevel, fakeSkip: d.fakeSkip, indicator: H.indicator, okey: H.okey, extraStack: d.extraStack });
+      sendDealt(tb);
+      tb.timers.d6 = clock.set(function () { tb.deal = null; startTurn(tb); }, T.deal.skipFill);
     }
     function startTurn(tb) {
       var S = tb.match, Tn = S.hand.turn, ms = tb.turnSec * 1000;
@@ -766,11 +780,19 @@
     move('gAdd', function (m) { return { t: 'add', tile: m.tile, meld: m.meld, side: m.side }; });
     move('gSwap', function (m) { return { t: 'swap', tile: m.tile, meld: m.meld, index: m.index }; });
     move('gUndo', function () { return { t: 'undo' }; });
-    move('gDiscard', function (m) { return { t: 'discard', tile: m.tile }; });
+    move('gDiscard', function (m) { return { t: 'discard', tile: m.tile, fx: m.fx || null }; });   // fx: elden bitiş efekti (nuke|blackhole|supernova|meteor)
     on('gRollDice', function (c, m, u) {
       var tb = gameCtx(u); if (tb.error) return tb; var x = tb.deal;
       if (!x || x.step !== 'dice' || x.rolling) return E('E_PHASE'); if (x.dealer !== u.seat) return E('E_NOT_DEALER');
       roll(tb); return null;
+    });
+    on('gSkipDeal', function (c, m, u) {
+      var tb = gameCtx(u); if (tb.error) return tb; var x = tb.deal; if (!x || x.step === 'fill') return E('E_PHASE');
+      // D-skip: dağıtanın basması yeterli; diğerleri oy verir, bütün insanlar basarsa da geçilir (botlar onaylı sayılır).
+      (x.skip = x.skip || {})[u.seat] = true;
+      var all = tb.seats.every(function (s, k) { return !s || s.bot || tb.auto[k] || x.skip[k]; });
+      if (x.dealer === u.seat || all) skipDeal(tb); else tableEmit(tb, 'dealSkipVote', { seat: u.seat });
+      return null;
     });
     on('gReady', function (c, m, u) { // "Sonraki el" düğmesi: bütün insan oyuncular hazırsa 15 sn beklenmez
       var tb = gameCtx(u); if (tb.error) return tb; if (tb.match.status !== 'handOver') return E('E_PHASE');

@@ -1,0 +1,149 @@
+{
+ "version": "0.4.0",
+ "note": "u ∈ [0,1] normalize zaman. CSS eğrileri cubic-bezier(x1,y1,x2,y2). 3D eğrileri table3d.js içindeki formüllerdir; Unity AnimationCurve için bezier yaklaşımı verildi.",
+ "curves": {
+  "easeOutCubic": {
+   "formula": "1 - (1-u)^3",
+   "source": "table3d.js ease",
+   "bezier": [
+    0.33,
+    1,
+    0.68,
+    1
+   ]
+  },
+  "easeInOutCubic": {
+   "formula": "u<0.5 ? 4u^3 : 1 - (-2u+2)^3/2",
+   "source": "table3d.js easeIO",
+   "bezier": [
+    0.65,
+    0,
+    0.35,
+    1
+   ]
+  },
+  "easeOutQuad24": {
+   "formula": "1 - (1-u)^2.4",
+   "source": "zar düşüşü",
+   "bezier": [
+    0.3,
+    0.7,
+    0.55,
+    1
+   ]
+  },
+  "easeOutQuart": {
+   "formula": "1 - (1-u)^4",
+   "source": "fx fire"
+  },
+  "easeInCubic": {
+   "formula": "u^3",
+   "source": "nuke iniş fazı",
+   "bezier": [
+    0.32,
+    0,
+    0.67,
+    0
+   ]
+  },
+  "smoothstepMix": {
+   "formula": "k = (u²(3-2u))·0.35 + u·0.65",
+   "source": "hediye eğri yolu"
+  },
+  "linear": {
+   "formula": "u",
+   "bezier": [
+    0,
+    0,
+    1,
+    1
+   ]
+  },
+  "cssOutExpo": {
+   "bezier": [
+    0.16,
+    1,
+    0.3,
+    1
+   ],
+   "source": "logo/taş girişleri, menuIn"
+  },
+  "cssPanel": {
+   "bezier": [
+    0.2,
+    1,
+    0.4,
+    1
+   ],
+   "source": "panelIn"
+  },
+  "cssInOutStrong": {
+   "bezier": [
+    0.7,
+    0,
+    0.3,
+    1
+   ],
+   "source": "splashOut, tilesOut"
+  },
+  "cssFloat": {
+   "bezier": [
+    0.45,
+    0,
+    0.55,
+    1
+   ],
+   "source": "g101Float"
+  },
+  "cssPlanetMove": {
+   "bezier": [
+    0.6,
+    0,
+    0.2,
+    1
+   ],
+   "source": "gezegen konum geçişi (1 s)"
+  },
+  "cssToggle": {
+   "bezier": [
+    0.3,
+    1.5,
+    0.5,
+    1
+   ],
+   "source": "anahtar düğmesi topuzu (aşma)"
+  },
+  "ease": {
+   "bezier": [
+    0.25,
+    0.1,
+    0.25,
+    1
+   ]
+  },
+  "ease-in-out": {
+   "bezier": [
+    0.42,
+    0,
+    0.58,
+    1
+   ]
+  },
+  "ease-out": {
+   "bezier": [
+    0,
+    0,
+    0.58,
+    1
+   ]
+  },
+  "ease-in": {
+   "bezier": [
+    0.42,
+    0,
+    1,
+    1
+   ]
+  }
+ }
+}

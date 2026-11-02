@@ -1,0 +1,90 @@
+{
+ "version": "0.5.0",
+ "used": {
+  "logo": {
+   "family": "Montserrat",
+   "weights": [
+    700,
+    800
+   ],
+   "var": "--fL"
+  },
+  "heading": {
+   "family": "Montserrat",
+   "weights": [
+    600,
+    700,
+    800,
+    900
+   ],
+   "var": "--fH"
+  },
+  "body": {
+   "family": "Baloo 2",
+   "weights": [
+    600,
+    700,
+    800
+   ],
+   "var": "--fB"
+  },
+  "versionTag": {
+   "family": "Nunito",
+   "weights": [
+    700
+   ]
+  }
+ },
+ "optional": [
+  "Fredoka wght@500;600;700",
+  "Lilita One",
+  "Rubik wght@600;700;800;900",
+  "Outfit wght@600;700;800;900",
+  "Poppins wght@600;700;800;900",
+  "Exo 2 wght@600;700;800;900",
+  "Sora wght@600;700;800",
+  "Lexend wght@600;700;800;900",
+  "Quicksand wght@600;700",
+  "Orbitron wght@700;800;900",
+  "Audiowide",
+  "Russo One",
+  "Bungee",
+  "Righteous",
+  "Chakra Petch wght@600;700",
+  "Poppins wght@600;700;800",
+  "Exo 2 wght@600;700;800",
+  "Lexend wght@600;700;800",
+  "Orbitron wght@700;800"
+ ],
+ "note": "optional: masa ayarlarında/Tweaks'te seçilebilen yazı tipleri; varsayılan oyunda kullanılmaz.",
+ "license": "SIL Open Font License 1.1 (lisans metinleri fonts/ içinde). Unity: sabit ağırlıklı TTF'lerden TextMeshPro SDF atlası; Türkçe karakterler (ç ğ ı İ ö ş ü Ç Ğ Ö Ş Ü) atlasa eklenir.",
+ "urls": [
+  "https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Montserrat:wght@600;700;800;900&display=swap",
+  "https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Fredoka:wght@500;600;700&family=Lilita+One&family=Rubik:wght@600;700;800;900&family=Outfit:wght@600;700;800;900&family=Poppins:wght@600;700;800;900&family=Exo+2:wght@600;700;800;900&family=Sora:wght@600;700;800&family=Lexend:wght@600;700;800;900&family=Quicksand:wght@600;700&family=Nunito:wght@600;700;800;900&family=Montserrat:wght@600;700;800;900&family=Orbitron:wght@700;800;900&family=Audiowide&family=Russo+One&family=Bungee&family=Righteous&family=Chakra+Petch:wght@600;700&display=swap",
+  "https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Fredoka:wght@500;600;700&family=Lilita+One&family=Rubik:wght@600;700;800;900&family=Outfit:wght@600;700;800;900&family=Poppins:wght@600;700;800&family=Exo+2:wght@600;700;800&family=Sora:wght@600;700;800&family=Lexend:wght@600;700;800&family=Quicksand:wght@600;700&family=Montserrat:wght@600;700;800;900&family=Orbitron:wght@700;800&family=Audiowide&family=Russo+One&family=Bungee&family=Righteous&family=Chakra+Petch:wght@600;700&family=Nunito:wght@600;700;800;900&display=swap"
+ ],
+ "files": {
+  "Montserrat": [
+   "fonts/Montserrat-SemiBold.ttf",
+   "fonts/Montserrat-Bold.ttf",
+   "fonts/Montserrat-ExtraBold.ttf",
+   "fonts/Montserrat-Black.ttf",
+   "fonts/Montserrat-Variable.ttf"
+  ],
+  "Baloo 2": [
+   "fonts/Baloo2-SemiBold.ttf",
+   "fonts/Baloo2-Bold.ttf",
+   "fonts/Baloo2-ExtraBold.ttf",
+   "fonts/Baloo2-Variable.ttf"
+  ],
+  "Nunito": [
+   "fonts/Nunito-Bold.ttf",
+   "fonts/Nunito-Variable.ttf"
+  ],
+  "license": [
+   "fonts/OFL-Montserrat.txt",
+   "fonts/OFL-Baloo2.txt",
+   "fonts/OFL-Nunito.txt"
+  ]
+ }
+}

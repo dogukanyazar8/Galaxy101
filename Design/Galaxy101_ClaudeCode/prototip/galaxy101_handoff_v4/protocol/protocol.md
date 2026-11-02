@@ -1,4 +1,4 @@
-# protocol.md · Galaxy 101 istemci–sunucu protokolü · v0.4.0
+# protocol.md · Galaxy 101 istemci–sunucu protokolü · v0.5.0
 
 Makine okunur kaynak: `protocol.json` (bu belge ondan üretildi). Prova sunucusu: `logic/mockServer.js`. Süreler: `timings.md`.
 
@@ -242,5 +242,5 @@ ui: `silent` görünmez (düğme zaten pasif / taş geri döner) · `inline` ala
 | `E_SEAT_NOT_BOT` | silent | — | yalnız motor |
 
 
-### tableView (S2C) · v0.4.0 faz 2b
+### tableView (S2C) · v0.5.0 faz 2b
 Her `commit` sonrasında (oyun olaylarından hemen sonra), her tur başında ve `handDealt` ile birlikte sunucu her insan oyuncuya **kendi** `GameView` görünümünü gönderir (`snapshot.game` ile aynı biçim; `turn.sideMust` eklendi). Gizli bilgi: `rack` yalnız alıcının ıstakası, rakipler yalnız `counts`. İstemci bir commit'e ait `game` olaylarını biriktirir, `tableView` gelince birlikte canlandırır.

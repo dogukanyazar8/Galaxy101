@@ -1,5 +1,5 @@
 {
- "version": "0.4.0",
+ "version": "0.5.0",
  "note": "Arayüzdeki satır içi SVG ikonlar, kopyalar birleştirildi. Renk currentColor (oyunda temanın --ic / --aT / --a1 rengi). Ad, ikonun kullanıldığı ilk öğe kimliğinden türetildi; usedBy tüm öğeleri listeler. İçinde {{ }} olan (veriye göre çizilen) SVG'ler burada yok; onlar kodla çizilir.",
  "count": 69,
  "icons": [

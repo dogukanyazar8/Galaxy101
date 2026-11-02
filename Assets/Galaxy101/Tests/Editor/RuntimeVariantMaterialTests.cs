@@ -9,6 +9,34 @@ namespace Galaxy101.Tests
     /// <summary>Player builds keep the shader variants of the table's code-made materials (RuntimeVariantMaterials).</summary>
     public sealed class RuntimeVariantMaterialTests
     {
+        [TestCase("station", false)]
+        [TestCase("station", true)]
+        [TestCase("wood", false)]
+        [TestCase("wood", true)]
+        [TestCase("holo", false)]
+        [TestCase("holo", true)]
+        [TestCase("andromeda", false)]
+        [TestCase("andromeda", true)]
+        public void RuntimeFeltFeatureCombinationsHaveAPlayerKeeper(string skin, bool normalMap)
+        {
+            var source = new Material(Shader.Find("Universal Render Pipeline/Lit")) { name = "cuha" };
+            if (normalMap) source.EnableKeyword("_NORMALMAP");
+            var owner = new GameObject("Runtime felt variant");
+            var renderer = owner.AddComponent<MeshRenderer>(); renderer.sharedMaterial = source;
+            var service = new Galaxy101.Table.SkinService();
+            try
+            {
+                service.SetTheme(new Galaxy101.Table.TableTheme { A1 = Color.red });
+                service.SetTableSkin(skin); service.Adopt(owner);
+                var actual = renderer.sharedMaterial;
+                string[] keywords = actual.shaderKeywords.OrderBy(k => k).ToArray();
+                Assert.That(RuntimeVariantMaterials.Sets.Any(set => set.Shader == actual.shader.name
+                    && set.Keywords.OrderBy(k => k).SequenceEqual(keywords)), Is.True,
+                    skin + ": runtime material features must survive stripping: " + string.Join(" ", keywords));
+            }
+            finally { service.Release(); Object.DestroyImmediate(owner); Object.DestroyImmediate(source); }
+        }
+
         [Test]
         public void EveryKeeperCarriesExactlyTheKeywordsTheCodeEnables()
         {

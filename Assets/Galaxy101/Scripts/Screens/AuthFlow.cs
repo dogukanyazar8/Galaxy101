@@ -28,6 +28,7 @@ namespace Galaxy101
         private readonly Transform owner;
         private readonly GalaxyOnline online;
         private VisualElement layer, body;
+        private AuthCursorVisual authCursor;
         private GalaxyBackground background;
         private string screen;
         private bool busy;
@@ -53,6 +54,7 @@ namespace Galaxy101
         // runSplash(): target 18 → 46 fonts ready → 62 planet ready → 84 heavy module (here: the session check) in; every
         // 40 ms sp += 0.9 + rand × 1.8 up to cap = (elapsed > 2800 and target ≥ 84) or elapsed > 7000 ? 100 : min(target, 96).
         private float splashProgress, splashTarget = 18, splashStepAt;
+        private bool splashSkipRequested;
         private Mulberry32 splashRandom;
         private float SplashScale => Mathf.Max(.01f, SplashSeconds) / 2.8f;
         /// <summary>Realtime the splash began (the state router times S01 from it, as the prototype's 'fresh' page load).</summary>
@@ -73,19 +75,22 @@ namespace Galaxy101
         {
             var canvas = view.Root.Q<VisualElement>("galaxy-canvas") ?? view.Root;
             layer = Fill("auth-flow"); layer.pickingMode = PickingMode.Position; canvas.Add(layer);
+            layer.RegisterCallback<PointerDownEvent>(ClickRipple, TrickleDown.TrickleDown);
+            layer.RegisterCallback<ClickEvent>(evt => { if (screen == "splash" && splashProgress > 60) splashSkipRequested = true; });
             var backdrop = Fill("auth-background"); backdrop.pickingMode = PickingMode.Ignore; layer.Add(backdrop);
             background = new GameObject("Auth background").AddComponent<GalaxyBackground>(); background.transform.SetParent(owner, false);
             background.Initialize(backdrop);
             background.Configure(view.Model.Planet, (bool?)view.Model.Settings["motion"] ?? true, (string)view.Model.Settings["quality"] ?? "Yüksek");
             background.SetFocused(UnityEngine.Application.isFocused || UnityEngine.Application.isBatchMode);
             body = Fill("auth-body"); body.pickingMode = PickingMode.Ignore; layer.Add(body);
-            screen = "splash"; splashStarted = Time.realtimeSinceStartup; splashProgress = 0; splashStepAt = splashStarted;
+            authCursor = new AuthCursorVisual(layer, planet: () => view.Model.Planet);
+            screen = "splash"; splashStarted = Time.realtimeSinceStartup; splashProgress = 0; splashStepAt = splashStarted; splashSkipRequested = false;
             splashTarget = 62; // the fonts ship with the build and the planet is drawn above: 46 and 62 at once
             splashRandom = GameClock.Stream("splash"); Render();
             var resume = online.ResumeAsync();
-            while (splashProgress < 100 || !resume.IsCompleted) { if (resume.IsCompleted) splashTarget = 84; await Task.Yield(); }
+            while ((splashProgress < 100 && !splashSkipRequested) || !resume.IsCompleted) { if (layer == null) return; if (resume.IsCompleted) splashTarget = 84; await Task.Yield(); }
             float hold = Time.realtimeSinceStartup + .38f * SplashScale;   // setTimeout(afterSplash, 380)
-            while (Time.realtimeSinceStartup < hold) await Task.Yield();
+            while (!splashSkipRequested && Time.realtimeSinceStartup < hold) { if (layer == null) return; await Task.Yield(); }
             bool resumed = false; string banned = null;
             try { resumed = resume.Result; }
             catch (Exception e)
@@ -124,7 +129,9 @@ namespace Galaxy101
 
         public void Hide()
         {
+            splashPresentation?.Dispose(); splashPresentation = null;
             ticker?.Pause(); ticker = null; motions.Clear(); planetJob?.Pause(); planetJob = null; planetPlaced = false;
+            authCursor?.Dispose(); authCursor = null;
             layer?.RemoveFromHierarchy(); layer = null;
             if (background != null) UnityEngine.Object.Destroy(background.gameObject); background = null;
         }
@@ -133,9 +140,13 @@ namespace Galaxy101
         private void Render()
         {
             if (body == null) return;
+            splashPresentation?.Dispose(); splashPresentation = null;
+            Galaxy101.Audio.GalaxyCursor.Lock(layer, busy ? "wait" : null);
             // Keep the caret where it was across the redraw (typing never loses focus).
             var focused = body.panel?.focusController?.focusedElement as VisualElement;
-            string focusName = focused?.GetFirstAncestorOfType<TextField>()?.name ?? (focused as TextField)?.name;
+            var focusedField = focused?.GetFirstAncestorOfType<TextField>() ?? focused as TextField;
+            string focusName = focusedField?.name;
+            int cursor = focusedField?.cursorIndex ?? 0, selection = focusedField?.selectIndex ?? 0;
             body.Clear(); motions.Clear();
             bool splash = screen == "splash";
             // Planet: centred for the splash (640,330), left for the auth screens (310,340 ×1.05) — spec/18.
@@ -152,7 +163,7 @@ namespace Galaxy101
             }
             AppVersionLabel.Attach(body);
             if (focusName != null && body.Q<TextField>(focusName) is TextField again)
-                again.schedule.Execute(() => { again.Focus(); again.SelectRange(again.value.Length, again.value.Length); });
+                again.schedule.Execute(() => { again.Focus(); again.SelectRange(Mathf.Clamp(cursor, 0, again.value.Length), Mathf.Clamp(selection, 0, again.value.Length)); });
         }
 
         // ---------- planet and splash exit ----------
@@ -178,9 +189,10 @@ namespace Galaxy101
         }
 
         private void ApplyPlanet() =>
-            background?.UseStaticLayout(new Vector4(640, 360, 1280, 720), new Vector4(planetNow.x, planetNow.y, 330, 1), planetNow, view.C("var(--pg)"));
+            background?.UseAuthLayout(planetNow, view.C("var(--pg)"));
 
         private VisualElement splashColumn, splashTiles, splashBar;
+        private LogoTilePresentation splashPresentation;
 
         /// <summary>
         /// splashOut .75s cubic-bezier(.7,0,.3,1): the splash fades, shrinks to .96 and blurs 10 px while the tiles rise 36 px
@@ -210,12 +222,17 @@ namespace Galaxy101
         private void BuildSplash()
         {
             var column = Box(); MenuView.Place(column, 0, 118, 1280, 300); column.style.alignItems = Align.Center; body.Add(column); splashColumn = column;
-            column.Add(Logo(66, 8)); splashTiles = Tiles(1f); column.Add(splashTiles);
+            // The padded logo texture paints inside the source's 66px/1.15 line; its transparent margins do not take flow space.
+            var logoLine = Box(); logoLine.style.width = 1280; logoLine.style.height = 66 * 1.15f; logoLine.style.flexShrink = 0; logoLine.style.alignItems = Align.Center;
+            var logo = Logo(66, 8); logo.style.position = Position.Absolute; logo.style.top = LogoCapOffset(66, 66 * 1.15f); logo.style.opacity = 0;
+            logoLine.Add(logo); column.Add(logoLine); splashTiles = Tiles(1f); column.Add(splashTiles);
             var bar = Box("splash-progress"); MenuView.Place(bar, 420, 478, 440, 40); body.Add(bar); splashBar = bar;
+            bar.style.height = StyleKeyword.Auto;
+            bar.style.opacity = 0;
             var labels = Row(); labels.style.justifyContent = Justify.SpaceBetween;
             var message = Text("", 14, "Baloo2-800", "var(--ic)"); var pct = Text("0%", 14, "Baloo2-800", "var(--a1)"); pct.name = "splash-percent";
             labels.Add(message); labels.Add(pct); bar.Add(labels);
-            var track = Box(); track.style.height = 14; track.style.marginTop = 9; track.style.overflow = Overflow.Hidden; view.Decorate(track, "var(--dp)", 7);
+            var track = Box(); track.style.height = 14; track.style.flexShrink = 0; track.style.marginTop = 9; track.style.overflow = Overflow.Hidden; view.Decorate(track, "var(--dp)", 7);
             var fill = Box(); fill.style.position = Position.Absolute; fill.style.left = fill.style.top = fill.style.bottom = 0; view.Decorate(fill, "linear-gradient(90deg,var(--a2),var(--a1))", 7);
             GalaxyFilters.Shadow(fill, 0, 0, 7, view.C("var(--gl)")); track.Add(fill); bar.Add(track);
             var messages = new[] { L("Gezegenler hizalanıyor…", "Aligning planets…"), L("Taşlar diziliyor…", "Racking tiles…"), L("Masalar hazırlanıyor…", "Setting up tables…"), L("Neredeyse hazır…", "Almost ready…"), L("Hazır", "Ready") };
@@ -245,6 +262,17 @@ namespace Galaxy101
             var bulb = Box(); bulb.style.width = bulb.style.height = 30; bulb.style.alignItems = Align.Center; bulb.style.justifyContent = Justify.Center; bulb.style.marginRight = 12;
             view.Decorate(bulb, "linear-gradient(160deg,var(--a1),var(--a2))", 10); bulb.Add(view.Icon("tip-bulb", 16, "var(--aT)")); tip.Add(bulb);
             tip.Add(Text(tips[(int)(GameClock.Stream("splash-tip").NextDouble() * tips.Length)], 14, "Baloo2-700", "var(--ic)")); body.Add(tip);
+            tip.style.opacity = 0;
+            Animate(() =>
+            {
+                float elapsed = GameClock.Frozen ? (float)(GameClock.CanonMs / 1000) : Time.realtimeSinceStartup - splashStarted;
+                float logoProgress = CubicBezier(.16f, 1, .3f, 1, Mathf.Clamp01((elapsed - .85f) / 1.1f));
+                logo.style.opacity = logoProgress;
+                logo.style.translate = new Translate(0, 14 * (1 - logoProgress));
+                logo.style.scale = new Scale(Vector2.one * Mathf.Lerp(.94f, 1, logoProgress));
+                bar.style.opacity = CubicBezier(.25f, .1f, .25f, 1, Mathf.Clamp01((elapsed - 1.1f) / .5f));
+                tip.style.opacity = CubicBezier(.25f, .1f, .25f, 1, Mathf.Clamp01((elapsed - 1.4f) / .5f));
+            });
             var mark = Row(); mark.style.position = Position.Absolute; mark.style.right = 20; mark.style.bottom = 14;
             var diamond = Box(); diamond.style.width = diamond.style.height = 9; diamond.style.rotate = new Rotate(45); diamond.style.marginRight = 5; view.Decorate(diamond, "linear-gradient(135deg,var(--a1),var(--a2))", 2); mark.Add(diamond);
             mark.Add(Text("CDX", 12, "Montserrat-800", "#F4F1E8")); var games = Text("GAMES", 11, "Baloo2-700", "var(--mt)"); MenuView.Tracking(games, 1.5f, 11); games.style.marginLeft = 5; mark.Add(games);
@@ -296,35 +324,40 @@ namespace Galaxy101
             var welcome = Line(L("Hoş geldin", "Welcome"), 32, 1.15f, "Montserrat-700", "#F4F1E8"); welcome.style.marginTop = 12 + 6; panel.Add(welcome);
             var how = Text(L("Nasıl devam etmek istersin?", "How would you like to continue?"), 15, "Baloo2-700", "var(--mt)"); how.style.marginTop = 4; how.style.marginBottom = 8 + 12; panel.Add(how);
 
-            var guest = Row(); guest.name = "auth-guest"; guest.style.height = 76; Pad(guest, 0, 20, 0, 20); guest.style.overflow = Overflow.Hidden;
-            view.Decorate(guest, "linear-gradient(var(--a1),var(--a2))", 20);
+            var guest = Row(); guest.name = "auth-guest"; guest.style.height = 76; Pad(guest, 0, 20, 0, 20);
+            view.Decorate(guest, "linear-gradient(var(--a1),var(--a2))", 20, 6, "var(--aS)");
+            var glow = GalaxyFilters.SpreadRing(guest, 14);
+            var shineClip = Fill("auth-guest-shine-clip"); shineClip.style.overflow = Overflow.Hidden; Radius(shineClip, 20); guest.Add(shineClip);
+            var shine = Box(); shine.style.position = Position.Absolute; shine.style.top = shine.style.bottom = 0; shine.style.width = 56; shine.style.left = 0;
+            shine.style.backgroundColor = new Color(1, 1, 1, .4f); SkewX(shine, -20); shineClip.Add(shine);
             var gIcon = Box(); gIcon.style.width = gIcon.style.height = 44; gIcon.style.alignItems = Align.Center; gIcon.style.justifyContent = Justify.Center; gIcon.style.marginRight = 14;
             view.Decorate(gIcon, "rgba(255,255,255,.35)", 14); gIcon.Add(view.Icon("auth-guest", 24, "var(--aT)")); guest.Add(gIcon);
             // shine 3 s: a 56 px white bar sweeping across; pulseG 2.2 s: a glow ring growing to 14 px.
-            var shine = Box(); shine.style.position = Position.Absolute; shine.style.top = shine.style.bottom = 0; shine.style.width = 56; shine.style.left = 0;
-            shine.style.backgroundColor = new Color(1, 1, 1, .4f); shine.style.rotate = new Rotate(0); SkewX(shine, -20); guest.Add(shine);
             float shineFrom = sideAt;
             Animate(() =>
             {
                 // translateX(-160% → 520%) skewX(-20deg) over the first 60 % of each 3 s cycle (ease).
                 float p = Mathf.Repeat((Time.realtimeSinceStartup - shineFrom) / 3f, 1), u = CubicBezier(.25f, .1f, .25f, 1, Mathf.Clamp01(p / .6f));
                 shine.style.translate = new Translate(56 * Mathf.Lerp(-1.6f, 5.2f, u), 0);
+                float pulse = Mathf.Repeat((Time.realtimeSinceStartup - shineFrom) / 2.2f, 1);
+                float progress = CubicBezier(.25f, .1f, .25f, 1, pulse < .5f ? pulse * 2 : (1 - pulse) * 2);
+                var tint = view.C("var(--gl)"); tint.a *= 1 - progress; glow(14 * progress, tint);
             });
             var gWords = Box(); gWords.Add(Line(L("MİSAFİR OLARAK OYNA", "PLAY AS GUEST"), 21, 1.1f, "Montserrat-800", "var(--aT)"));
             var gSub = Text(L("Kayıt yok · hemen başla", "No sign-up · start now"), 13, "Baloo2-800", "var(--aT)"); gSub.style.opacity = .8f; gSub.style.marginTop = 3; gWords.Add(gSub); guest.Add(gWords);
-            Tap(guest, () => Go("guest")); panel.Add(guest);
+            TapRaised(guest, () => Go("guest"), 6, "var(--aS)", true, true); panel.Add(guest);
 
             var login = Row(); login.name = "auth-login"; login.style.height = 60; login.style.marginTop = 12; Pad(login, 0, 20, 0, 20); view.Decorate(login, "var(--pnH)", 18, 5, "var(--pnS)");
             var lIcon = view.Icon("auth-login", 22, "var(--ic)"); lIcon.style.marginRight = 14; login.Add(lIcon); login.Add(Text(L("Giriş yap", "Log in"), 18, "Montserrat-700", "#F4F1E8"));
-            GalaxyFilters.HoverBrightness(login, 1.2f); Tap(login, () => Go("login")); panel.Add(login);
+            AuthHover(login, Bright("var(--pnH)", 1.2f), 18); TapRaised(login, () => Go("login"), 5, "var(--pnS)"); panel.Add(login);
 
             var register = Row(); register.name = "auth-register"; register.style.height = 60; register.style.marginTop = 12; Pad(register, 0, 14, 0, 20); view.Decorate(register, "#3D7BFF", 18, 5, "#2148B0");
             var rIcon = view.Icon("auth-register", 22, "#fff"); rIcon.style.marginRight = 14; register.Add(rIcon);
             var rText = Text(L("Kayıt ol", "Sign up"), 18, "Montserrat-700", "#fff"); rText.style.flexGrow = 1; register.Add(rText);
             var gift = Row(); Pad(gift, 5, 10, 5, 10); view.Decorate(gift, "rgba(0,0,0,.22)", 10);
-            var coin = Box(); coin.style.width = coin.style.height = 14; coin.style.marginRight = 6; view.Decorate(coin, "radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)", 7); gift.Add(coin);
+            var coin = view.ChipIcon(14); coin.style.marginRight = 6; gift.Add(coin);
             gift.Add(Text("+" + view.N(25000), 12, "Baloo2-800", "#FFE08A")); register.Add(gift);
-            GalaxyFilters.HoverBrightness(register, 1.1f); Tap(register, () => Go("register")); panel.Add(register);
+            AuthHover(register, Bright("#3D7BFF", 1.1f), 18); TapRaised(register, () => Go("register"), 5, "#2148B0"); panel.Add(register);
 
             panel.Add(Divider(L("ya da", "or")));
             panel.Add(GoogleButton());
@@ -344,8 +377,70 @@ namespace Galaxy101
             ring.style.borderTopColor = view.C("#3D7BFF"); ring.style.borderRightColor = view.C("#3CCB6E"); ring.style.borderBottomColor = view.C("#FFC94A"); ring.style.borderLeftColor = view.C("#FF5E6C");
             google.Add(ring); google.Add(Text(L("Google ile devam et", "Continue with Google"), font, "Montserrat-700", "#1B2340"));
             // Google needs the platform sign-in SDK and the server's OAuth client ids; until both are set the server answers invalid_token.
-            Tap(google, () => { error = L("Google ile giriş bu sürümde henüz açık değil.", "Google sign-in is not available in this version yet."); Render(); });
+            TapRaised(google, () => view.Flash(L("Google ile giriş bu sürümde henüz açık değil.", "Google sign-in is not available in this version yet."), "info", layer), edge, "#A9B4D0");
             return google;
+        }
+
+        private void TapRaised(VisualElement element, Action action, float depth, string shadow, bool liftOnHover = false, bool keepShadow = false)
+        {
+            element.pickingMode = PickingMode.Position; element.focusable = true;
+            element.AddToClassList("auth-raised");
+            Galaxy101.Audio.CursorRules.Mark(element, Galaxy101.Audio.CursorRules.Pointer);
+            bool hovered = false, pressed = false;
+            void UpdatePress()
+            {
+                float offset = pressed ? (keepShadow ? 4 : depth - 1) : hovered && liftOnHover ? -2 : 0;
+                element.style.translate = new Translate(0, offset);
+                GalaxyFilters.HardShadow(element, pressed && !keepShadow ? 1 : depth, view.C(shadow));
+            }
+            element.RegisterCallback<PointerEnterEvent>(_ => { hovered = true; UpdatePress(); });
+            element.RegisterCallback<PointerLeaveEvent>(_ => { hovered = pressed = false; UpdatePress(); });
+            element.RegisterCallback<PointerDownEvent>(evt => { if (evt.button == 0 && element.enabledInHierarchy) { pressed = true; UpdatePress(); } });
+            element.RegisterCallback<PointerUpEvent>(_ => { pressed = false; UpdatePress(); });
+            element.RegisterCallback<PointerCancelEvent>(_ => { pressed = false; UpdatePress(); });
+            element.RegisterCallback<ClickEvent>(evt => { action(); evt.StopPropagation(); });
+        }
+
+        // A UI Toolkit tint above 1 did not produce CSS brightness above 100% in the rendered output.
+        // Draw a pre-brightened face instead, keeping the existing ledge and content in their original layers.
+        private string Bright(string color, float gain)
+        {
+            Color c = view.C(color);
+            c.r = Mathf.Clamp01(c.r * gain); c.g = Mathf.Clamp01(c.g * gain); c.b = Mathf.Clamp01(c.b * gain);
+            return "#" + ColorUtility.ToHtmlStringRGBA(c);
+        }
+
+        private void AuthHover(VisualElement element, string background, int radius)
+        {
+            var face = Fill("auth-hover-face"); face.AddToClassList("auth-hover-face"); face.style.opacity = 0;
+            view.Decorate(face, background, radius);
+            int index = element.childCount > 0 && element[0].name == "ledge" ? 1 : 0;
+            element.Insert(index, face);
+            element.RegisterCallback<PointerEnterEvent>(_ => face.style.opacity = 1);
+            element.RegisterCallback<PointerLeaveEvent>(_ => face.style.opacity = 0);
+        }
+
+        private void ClickRipple(PointerDownEvent evt)
+        {
+            if (evt.button != 0 || evt.pointerType != UnityEngine.UIElements.PointerType.mouse || Galaxy101.Audio.GalaxyCursor.Mode == Galaxy101.Audio.CursorSet.System) return;
+            string cursor = Galaxy101.Audio.CursorRules.Resolve(evt.target as VisualElement);
+            if (cursor != Galaxy101.Audio.CursorRules.Default && cursor != Galaxy101.Audio.CursorRules.Pointer) return;
+            float size = 38 * Galaxy101.Audio.CursorSet.ModeScale(Galaxy101.Audio.GalaxyCursor.Mode);
+            Vector2 position = layer.WorldToLocal(new Vector2(evt.position.x, evt.position.y));
+            var ripple = Box("auth-click-ripple"); ripple.style.position = Position.Absolute;
+            ripple.style.left = position.x - size / 2; ripple.style.top = position.y - size / 2;
+            ripple.style.width = ripple.style.height = size; Radius(ripple, size / 2); Border(ripple, 2, view.C("var(--a1)"));
+            ripple.style.scale = new Scale(Vector2.one * .25f); ripple.style.opacity = .9f;
+            GalaxyFilters.Shadow(ripple, 0, 0, 6, view.C("var(--a1)")); layer.Add(ripple);
+            float started = Time.realtimeSinceStartup;
+            ripple.schedule.Execute(() =>
+            {
+                float t = Mathf.Clamp01((Time.realtimeSinceStartup - started) / .45f);
+                float ease = CubicBezier(.2f, .8f, .3f, 1, t);
+                ripple.style.scale = new Scale(Vector2.one * Mathf.Lerp(.25f, 1, ease));
+                ripple.style.opacity = .9f * (1 - ease);
+                if (t >= 1) ripple.RemoveFromHierarchy();
+            }).Every(0);
         }
 
         // ---------- forms (isForm: right 70, top/bottom 46, 470 wide, padding 24 30, gap 12) ----------
@@ -359,7 +454,7 @@ namespace Galaxy101
             var head = Row(); head.style.marginBottom = 4;
             var back = Box("auth-back"); back.style.width = back.style.height = 42; back.style.alignItems = Align.Center; back.style.justifyContent = Justify.Center; back.style.marginRight = 12; back.style.flexShrink = 0;
             view.Decorate(back, "var(--pnH)", 13, 4, "var(--pnS)"); back.Add(view.Icon("back", 18, "var(--ic)")); back.tooltip = L("Geri", "Back");
-            GalaxyFilters.HoverBrightness(back, 1.25f); Tap(back, () => Go("choice")); head.Add(back);
+            AuthHover(back, Bright("var(--pnH)", 1.25f), 13); Tap(back, () => Go("choice")); head.Add(back);
             var words = Box(); words.style.flexShrink = 1;
             words.Add(Line(title, 26, 1.1f, "Montserrat-700", "#F4F1E8"));
             var s = Text(sub, 13, "Baloo2-700", "var(--mt)"); s.style.whiteSpace = WhiteSpace.Normal; s.style.marginTop = 2; words.Add(s); head.Add(words);
@@ -379,15 +474,16 @@ namespace Galaxy101
         /// green "Kullanılabilir"), a 50 px box (padding 0 8 0 14, radius 14) ringed red on error, gold when focused, and
         /// the eye (34 px) or the green tick.
         /// </summary>
-        private TextField Field(VisualElement panel, string key, string label, string name, string value, string placeholder, bool secret, Action<string> changed, int maxLength = 64, bool ok = false, string goodHint = null)
+        private TextField Field(VisualElement panel, string key, string label, string name, string value, string placeholder, bool secret, Action<string> changed, int maxLength = 64, bool ok = false, string goodHint = null, bool showEye = true)
         {
             var errors = Errors; errors.TryGetValue(key, out var hint);
             var column = Box("auth-field-" + key); column.style.flexShrink = 0;
-            // 800 12px Baloo 2 at line-height normal: a 19.2 px row (form.field[i].label h 19, fields 75 px apart + 12 gap).
-            var top = Row(); top.style.justifyContent = Justify.SpaceBetween; top.style.height = 19.2f;
-            var cap = MenuView.CssLine(Text(label, 12, "Baloo2-800", "var(--mt)"), 19.2f); MenuView.Tracking(cap, 0.6f, 12); top.Add(cap);
+            // The browser's normal line height for Baloo 2 at 12px is 18 2/3px.
+            const float labelHeight = 56f / 3f;
+            var top = Row(); top.style.justifyContent = Justify.SpaceBetween; top.style.height = labelHeight;
+            var cap = MenuView.CssLine(Text(label, 12, "Baloo2-800", "var(--mt)"), labelHeight); MenuView.Tracking(cap, 0.6f, 12); top.Add(cap);
             string shown = hint ?? goodHint;
-            if (shown != null) { var h = MenuView.CssLine(Text(shown, 12, "Baloo2-800", hint != null ? "#FF8A94" : "#8EF0B0"), 19.2f); h.name = "auth-hint-" + key; top.Add(h); }
+            if (shown != null) { var h = MenuView.CssLine(Text(shown, 12, "Baloo2-800", hint != null ? "#FF8A94" : "#8EF0B0"), labelHeight); h.name = "auth-hint-" + key; top.Add(h); }
             column.Add(top);
             var boxRow = Row(); boxRow.name = "auth-box-" + key; boxRow.style.height = 50; boxRow.style.marginTop = 6; Pad(boxRow, 0, 8, 0, 14); view.Decorate(boxRow, "var(--dp)", 14);
             // ring: error inset 2px #FF5E6C; focus inset 2px --a1 + 0 0 0 4px rgba(255,201,74,.12); rest inset 0 2px 0 — no layout.
@@ -420,21 +516,23 @@ namespace Galaxy101
             field.RegisterCallback<FocusOutEvent>(_ => Ring(false));
             field.RegisterCallback<KeyDownEvent>(evt => { if (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.KeypadEnter) { evt.StopPropagation(); Submit(); } }, TrickleDown.TrickleDown);
             boxRow.Add(field);
-            if (secret)
+            if (secret && showEye)
             {
                 var eye = Box("auth-eye"); eye.style.width = eye.style.height = 34; eye.style.flexShrink = 0; eye.style.alignItems = Align.Center; eye.style.justifyContent = Justify.Center; Radius(eye, 10);
-                eye.style.opacity = showPassword ? 1 : .55f; eye.Add(view.Icon("eye", 18, "var(--ic)")); eye.tooltip = showPassword ? L("Gizle", "Hide") : L("Göster", "Show");
+                eye.style.marginLeft = 10; eye.style.opacity = showPassword ? 1 : .55f; eye.Add(view.Icon("v4/form-field-eye", 18, "var(--ic)")); eye.tooltip = showPassword ? L("Gizle", "Hide") : L("Göster", "Show");
                 eye.RegisterCallback<PointerEnterEvent>(_ => eye.style.backgroundColor = view.C("var(--pnH)")); eye.RegisterCallback<PointerLeaveEvent>(_ => eye.style.backgroundColor = Color.clear);
                 Tap(eye, () => { showPassword = !showPassword; error = null; Render(); }); boxRow.Add(eye);
             }
-            if (ok)
-            {
-                var tick = Box("auth-ok-" + key); tick.style.width = tick.style.height = 22; tick.style.marginRight = 6; tick.style.flexShrink = 0; tick.style.alignItems = Align.Center; tick.style.justifyContent = Justify.Center;
-                view.Decorate(tick, "#3CCB6E", 11); tick.Add(view.Icon("tick", 12, "#fff")); boxRow.Add(tick);
-            }
+            if (ok) boxRow.Add(MatchTick(key));
             column.Add(boxRow);
             Add(panel, column);
             return field;
+        }
+
+        private VisualElement MatchTick(string key)
+        {
+            var tick = Box("auth-ok-" + key); tick.style.width = tick.style.height = 22; tick.style.marginLeft = 10; tick.style.marginRight = 6; tick.style.flexShrink = 0; tick.style.alignItems = Align.Center; tick.style.justifyContent = Justify.Center;
+            view.Decorate(tick, "#3CCB6E", 11); tick.Add(view.Icon("tick", 12, "#fff")); return tick;
         }
 
         /// <summary>Şifre gücü: length ≥ 8, an upper-case letter, a digit, a symbol → Zayıf / Orta / Güçlü on three 5 px bars.</summary>
@@ -455,11 +553,11 @@ namespace Galaxy101
         private VisualElement Switch42(string name, bool on, string text, Action flip)
         {
             var row = Row(); row.name = name;
-            var track = Box(); track.style.width = 42; track.style.height = 24; track.style.flexShrink = 0; view.Decorate(track, on ? "#3CCB6E" : "var(--dp)", 12);
-            track.style.borderTopWidth = 2; track.style.borderTopColor = new Color(0, 0, 0, .25f);
-            var knob = Box(); MenuView.Place(knob, on ? 21 : 3, 1, 18, 18); view.Decorate(knob, "#fff", 9); track.Add(knob);
+            var track = Box(name + "-track"); track.style.width = 42; track.style.height = 24; track.style.flexShrink = 0; track.AddToClassList("auth-switch-track"); view.Decorate(track, on ? "#3CCB6E" : "var(--dp)", 12);
+            var inset = Fill("auth-remember-inset"); Radius(inset, 12); inset.style.borderTopWidth = 2; inset.style.borderTopColor = new Color(0, 0, 0, .25f); track.Add(inset);
+            var knob = Box(name + "-thumb"); MenuView.Place(knob, 3, 3, 18, 18); knob.AddToClassList("auth-switch-thumb"); knob.style.translate = new Translate(on ? 18 : 0, 0); view.Decorate(knob, "#fff", 9); track.Add(knob);
             row.Add(track); var label = Text(text, 14, "Baloo2-700", "var(--ic)"); label.style.marginLeft = 10; row.Add(label);
-            Tap(row, flip); return row;
+            Tap(row, () => { on = !on; flip(); track.style.backgroundColor = view.C(on ? "#3CCB6E" : "var(--dp)"); knob.style.translate = new Translate(on ? 18 : 0, 0); }); return row;
         }
 
         private VisualElement Cta(string name, string text)
@@ -472,7 +570,8 @@ namespace Galaxy101
                 Animate(() => ring.style.rotate = new Rotate(Mathf.Repeat(Time.realtimeSinceStartup / .8f, 1) * 360)); cta.Add(ring);
             }
             cta.Add(Text(text, 19, "Montserrat-800", "var(--aT)"));
-            GalaxyFilters.HoverBrightness(cta, 1.07f); Tap(cta, Submit); return cta;
+            AuthHover(cta, "linear-gradient(" + Bright("var(--a1)", 1.07f) + "," + Bright("var(--a2)", 1.07f) + ")", 18);
+            TapRaised(cta, Submit, 5, "var(--aS)"); return cta;
         }
 
         private VisualElement Switch(string question, string link, string target)
@@ -494,7 +593,7 @@ namespace Galaxy101
             Field(panel, "email", L("E-POSTA", "EMAIL"), "auth-email", email, "ornek@mail.com", false, v => email = v);
             Field(panel, "pass", L("ŞİFRE", "PASSWORD"), "auth-password", password, L("En az 6 karakter", "At least 6 characters"), true, v => password = v, 40);
             var options = Row();
-            options.Add(Switch42("auth-remember", remember, L("Beni hatırla", "Remember me"), () => { remember = !remember; error = null; Render(); }));
+            options.Add(Switch42("auth-remember", remember, L("Beni hatırla", "Remember me"), () => { remember = !remember; if (error != null) { error = null; Render(); } }));
             options.Add(Grow());
             var forgot = Text(L("Şifremi unuttum", "Forgot password"), 14, "Baloo2-800", "var(--a1)"); forgot.name = "auth-forgot";
             Tap(forgot, () => { resetSent = false; resetCode = ""; password = password2 = ""; Go("reset"); });
@@ -519,7 +618,7 @@ namespace Galaxy101
             {
                 Field(panel, "code", L("KOD", "CODE"), "auth-reset-code", resetCode, "123456", false, v => resetCode = v, 6);
                 Field(panel, "pass", L("YENİ ŞİFRE", "NEW PASSWORD"), "auth-password", password, L("En az 6 karakter", "At least 6 characters"), true, v => password = v, 40);
-                Field(panel, "pass2", L("YENİ ŞİFRE (TEKRAR)", "NEW PASSWORD (AGAIN)"), "auth-password2", password2, L("Aynı şifre", "Same password"), true, v => password2 = v, 40);
+                Field(panel, "pass2", L("YENİ ŞİFRE (TEKRAR)", "NEW PASSWORD (AGAIN)"), "auth-password2", password2, L("Aynı şifre", "Same password"), true, v => password2 = v, 40, showEye: false);
                 var again = Text(L("Kodu yeniden gönder", "Send the code again"), 14, "Baloo2-800", "var(--a1)"); again.name = "auth-reset-again";
                 Tap(again, () => { resetSent = false; Submit(); });
                 var row = Row(); row.Add(Grow()); row.Add(again); Add(panel, row);
@@ -538,17 +637,27 @@ namespace Galaxy101
             Field(panel, "email", L("E-POSTA", "EMAIL"), "auth-email", email, "ornek@mail.com", false, v => email = v);
             Field(panel, "pass", L("ŞİFRE", "PASSWORD"), "auth-password", password, L("En az 6 karakter", "At least 6 characters"), true, v => { password = v; UpdateMeter(panel); }, 40);
             Meter(panel.Q("auth-field-pass"));
-            Field(panel, "pass2", L("ŞİFRE TEKRAR", "REPEAT PASSWORD"), "auth-password2", password2, L("Şifreni tekrar yaz", "Type your password again"), true, v => password2 = v, 40, ok: password2.Length > 0 && password2 == password);
+            Field(panel, "pass2", L("ŞİFRE TEKRAR", "REPEAT PASSWORD"), "auth-password2", password2, L("Şifreni tekrar yaz", "Type your password again"), true, v => { password2 = v; UpdateRepeatTick(panel); }, 40, ok: password2.Length > 0 && password2 == password, showEye: false);
             // Terms: a 22 px checkbox (radius 7), gold when ticked, red ring once a submit was tried without it.
             var agree = Row(); agree.name = "auth-terms"; agree.style.alignItems = Align.FlexStart;
             var check = Box(); check.style.width = check.style.height = 22; check.style.flexShrink = 0; check.style.marginTop = 1; check.style.alignItems = Align.Center; check.style.justifyContent = Justify.Center;
-            view.Decorate(check, terms ? "linear-gradient(var(--a1),var(--a2))" : "var(--dp)", 7);
-            if (!terms) Border(check, 2, view.C(tried.Contains("register") ? "#FF5E6C" : "var(--bd)")); else check.Add(view.Icon("tick", 13, "var(--aT)"));
+            view.Decorate(check, "var(--dp)", 7);
+            var fill = Fill("auth-terms-fill"); fill.AddToClassList("auth-terms-fill"); fill.style.opacity = terms ? 1 : 0;
+            fill.style.alignItems = Align.Center; fill.style.justifyContent = Justify.Center; view.Decorate(fill, "linear-gradient(var(--a1),var(--a2))", 7);
+            fill.Add(view.Icon("tick", 13, "var(--aT)")); check.Add(fill);
+            var ring = Fill("auth-terms-ring"); Radius(ring, 7); Border(ring, 2, view.C(tried.Contains("register") && !terms ? "#FF5E6C" : "var(--bd)")); ring.style.opacity = terms ? 0 : 1; check.Add(ring);
             agree.Add(check);
             var agreeText = Text(L("Kullanım Koşulları’nı ve Gizlilik Politikası’nı okudum, kabul ediyorum.", "I have read and accept the Terms of Use and Privacy Policy."), 13, "Baloo2-700", terms ? "var(--ic)" : "var(--mt)");
             // 700 13px/1.45, text-wrap: pretty (the last line never holds one word alone).
             MenuView.CssParagraph(agreeText, 13 * 1.45f, true); agreeText.style.flexGrow = 1; agreeText.style.flexShrink = 1; agreeText.style.flexBasis = 0; agreeText.style.marginLeft = 10; agree.Add(agreeText);
-            Tap(agree, () => { terms = !terms; error = null; Render(); }); Add(panel, agree);
+            Tap(agree, () =>
+            {
+                terms = !terms;
+                if (error != null) { error = null; Render(); return; }
+                fill.style.opacity = terms ? 1 : 0; ring.style.opacity = terms ? 0 : 1;
+                Border(ring, 2, view.C(tried.Contains("register") && !terms ? "#FF5E6C" : "var(--bd)"));
+                agreeText.style.color = view.C(terms ? "var(--ic)" : "var(--mt)");
+            }); Add(panel, agree);
             AddError(panel);
             Spacer(panel);
             Add(panel, Cta("auth-submit", L("Hesabı oluştur", "Create account")));
@@ -559,9 +668,15 @@ namespace Galaxy101
         {
             var column = panel.Q("auth-field-pass"); if (column == null) return;
             column.Q("auth-strength")?.RemoveFromHierarchy(); Meter(column);
-            // The repeat field's tick follows the first password.
-            var tick = panel.Q("auth-ok-pass2"); bool same = password2.Length > 0 && password2 == password;
-            if ((tick != null) != same) Render();
+            UpdateRepeatTick(panel);
+        }
+
+        private void UpdateRepeatTick(VisualElement panel)
+        {
+            var box = panel.Q<VisualElement>("auth-box-pass2"); if (box == null) return;
+            var tick = box.Q<VisualElement>("auth-ok-pass2"); bool same = password2.Length > 0 && password2 == password;
+            if (same && tick == null) box.Add(MatchTick("pass2"));
+            else if (!same && tick != null) tick.RemoveFromHierarchy();
         }
 
         private void BuildGuest()
@@ -594,7 +709,7 @@ namespace Galaxy101
             row.Add(grid); section.Add(row);
             var notes = Box(); notes.style.marginTop = 10 + 8; Pad(notes, 14, 16, 14, 16); view.Decorate(notes, "var(--sd)", 16);
             var chips = Row(); chips.style.alignItems = Align.Center;
-            var coin = Box(); coin.style.width = coin.style.height = 22; coin.style.flexShrink = 0; coin.style.marginRight = 10; view.Decorate(coin, "radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)", 11); chips.Add(coin);
+            var coin = view.ChipIcon(22); coin.style.marginRight = 10; chips.Add(coin);
             var c1 = Text(L("Başlangıçta 10.000 çip hesabına yüklenir.", "You start with 10,000 chips."), 14, "Baloo2-700", "var(--ic)"); MenuView.CssParagraph(c1, 14 * 1.35f, false); c1.style.flexShrink = 1; chips.Add(c1); notes.Add(chips); // 700 14px/1.35
             var device = Row(); device.style.marginTop = 10;
             var phone = view.Icon("phone", 22, "var(--mt)"); phone.style.marginRight = 10; device.Add(phone);
@@ -807,23 +922,55 @@ namespace Galaxy101
             var row = Row(); row.style.alignItems = Align.FlexEnd; row.style.marginTop = 10 * scale; row.style.height = 136 * scale;
             float began = screen == "splash" ? splashStarted : sideAt;
             int[] w = { 78, 88, 78 }, h = { 108, 122, 108 }; float[] rot = { -10, 2, 10 }; string[] tint = { "t1", "t2", "t3" };
-            for (int i = 0; i < 3; i++)
+            VisualElement Face(int i)
             {
-                var tile = Box("auth-tile-" + i); tile.style.width = w[i] * scale; tile.style.height = h[i] * scale; tile.style.rotate = new Rotate(rot[i]);
-                tile.style.alignItems = Align.Center; tile.style.justifyContent = Justify.Center; if (i > 0) tile.style.marginLeft = 12 * scale;
+                var tile = Box("auth-tile-" + i); tile.style.width = w[i] * scale; tile.style.height = h[i] * scale; tile.style.rotate = new Rotate(rot[i]); tile.style.flexShrink = 0;
+                tile.style.alignItems = Align.Center; tile.style.paddingTop = 8 * scale;
                 view.Decorate(tile, "linear-gradient(var(--tf1),var(--tf2))", Mathf.RoundToInt((i == 1 ? 13 : 12) * scale), Mathf.RoundToInt((i == 1 ? 6 : 5) * scale), "var(--te2)");
                 tile.style.borderBottomWidth = (i == 1 ? 8 : 7) * scale; tile.style.borderBottomColor = view.C("var(--te)");
-                var number = view.Text(i == 1 ? "0" : "1", Mathf.RoundToInt((i == 1 ? 74 : 64) * scale), true, "var(--" + tint[i] + ")"); number.style.unityTextAlign = TextAnchor.MiddleCenter; number.pickingMode = PickingMode.Ignore; tile.Add(number);
+                int numberSize = Mathf.RoundToInt((i == 1 ? 74 : 64) * scale);
+                var number = MenuView.CssLine(view.Text(i == 1 ? "0" : "1", numberSize, true, "var(--" + tint[i] + ")"), numberSize); number.style.unityTextAlign = TextAnchor.MiddleCenter; number.pickingMode = PickingMode.Ignore; tile.Add(number);
                 var dot = Box(); dot.style.width = dot.style.height = (i == 1 ? 16 : 14) * scale; dot.style.marginTop = 3; view.Decorate(dot, "var(--" + tint[i] + ")", 99); tile.Add(dot);
-                float phase = i * 2f, delay = .1f + i * .2f;
-                Animate(() =>
-                {
-                    float t = Time.realtimeSinceStartup - began, u = Mathf.Clamp01((t - delay) / 1.15f), k = 1 - Mathf.Pow(1 - u, 4);
-                    float bob = -7 * (0.5f - 0.5f * Mathf.Cos((t + phase) / 6f * Mathf.PI * 2));
-                    tile.style.translate = new Translate(0, 80 * (1 - k) + bob); tile.style.opacity = Mathf.Clamp01(u * 3); tile.style.scale = new Scale(Vector2.one * Mathf.Lerp(.78f, 1, k));
-                });
-                row.Add(tile);
+                return tile;
             }
+            var flat = new VisualElement[3];
+            for (int i = 0; i < flat.Length; i++) { flat[i] = Face(i); if (i > 0) flat[i].style.marginLeft = 12 * scale; row.Add(flat[i]); }
+            VisualElement Spatial(int i)
+            {
+                var position = SplashTileMotion.Position(i); var size = LogoTileMotion.Size(i);
+                var wrapper = Box("splash-tile-entry-" + i); wrapper.usageHints = UsageHints.DynamicTransform;
+                MenuView.Place(wrapper, Mathf.Floor(position.x), Mathf.Floor(position.y), size.x, size.y);
+                wrapper.style.transformOrigin = new TransformOrigin(Length.Percent(50), Length.Percent(100), 0);
+                var face = Face(i); face.name = "splash-tile-face-" + i; wrapper.Add(face); return wrapper;
+            }
+            void Apply(VisualElement wrapper, int i, float time)
+            {
+                var pose = SplashTileMotion.Sample(i, time); var position = SplashTileMotion.Position(i);
+                wrapper.style.opacity = pose.Opacity;
+                wrapper.style.translate = new Translate(position.x - Mathf.Floor(position.x), position.y - Mathf.Floor(position.y) + pose.Lift);
+                wrapper.style.scale = new Scale(Vector3.one * pose.Scale); wrapper.style.rotate = new Rotate(Quaternion.AngleAxis(pose.Tilt, Vector3.right));
+                wrapper.ElementAt(0).style.translate = new Translate(0, pose.Bob);
+            }
+            Animate(() =>
+            {
+                float time = GameClock.Frozen ? (float)(GameClock.CanonMs / 1000) : Time.realtimeSinceStartup - began;
+                for (int i = 0; i < flat.Length; i++)
+                {
+                    var pose = SplashTileMotion.Sample(i, time);
+                    flat[i].style.translate = new Translate(0, pose.Lift + pose.Bob); flat[i].style.opacity = pose.Opacity;
+                    flat[i].style.scale = new Scale(Vector2.one * pose.Scale);
+                }
+                if (Application.isPlaying && time < SplashTileMotion.EntryEnd && splashPresentation == null)
+                    splashPresentation = new LogoTilePresentation(view, row, flat, Spatial,
+                        () => Application.isFocused || Application.isBatchMode,
+                        new LogoTilePresentation.Configuration
+                        {
+                            Crop = new Rect(424, 160, 432, 336), HostOrigin = SplashTileMotion.RowOrigin,
+                            PerspectiveOrigin = SplashTileMotion.PerspectiveOrigin, Perspective = SplashTileMotion.Perspective,
+                            EntryEnd = SplashTileMotion.EntryEnd, Name = "Galaxy101 splash perspective", ImageName = "splash-perspective", Apply = Apply,
+                        });
+                splashPresentation?.Step(time);
+            });
             return row;
         }
 

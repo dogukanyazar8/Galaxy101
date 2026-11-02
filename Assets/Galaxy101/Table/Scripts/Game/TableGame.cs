@@ -54,7 +54,7 @@ namespace Galaxy101.Table
 
         [SerializeField] private TableScene table;
         [SerializeField] private TableHud hud;
-        [SerializeField] private bool autoSort = true, doubleClickDiscard = true, turnHint = true, highlightSets = true;
+        [SerializeField] private bool autoSort = true, doubleClickDiscard = true, turnHint = true;
         [SerializeField] private float warnSeconds = 5;
         [Tooltip("Scene the exit returns to (the Galaxy 101 main menu).")]
         [SerializeField] private string menuScene = "Bootstrap";
@@ -76,11 +76,14 @@ namespace Galaxy101.Table
         public TableCeremony Ceremony { get; private set; }
         public TableTargets Markers { get; private set; }
         public RackGrid Rack { get; } = new RackGrid();
+        private bool pairGauge;
         public Phase Current { get; private set; } = Phase.Waiting;
         /// <summary>The table seat whose turn it is (-1 none).</summary>
         public int Active { get; private set; } = -1;
         public bool DoubleClickDiscard => doubleClickDiscard;
         public int LastDrawn { get; private set; } = -1;
+        /// <summary>The publicly announced closing tile, kept for the flat renderer until the next hand.</summary>
+        public int LastFinishedTile { get; private set; } = -1;
         public bool ExitOpen { get; private set; }
         public bool ResultOpen { get; private set; }
         /// <summary>The match is over: the last result card closes the table (no match-end screen, REMOVED.md T45/T46).</summary>
@@ -96,11 +99,12 @@ namespace Galaxy101.Table
         private float turnStartedReal;
         private string momentTitle, momentSub; private int momentSeat = -1; private bool momentOn; private float momentAt, resultAt;
         private readonly List<string>[] penaltyWhy = { new List<string>(), new List<string>(), new List<string>(), new List<string>() };
-        private int glowTile = -1; private float glowUntil;
         private int invalidOkey = -1; private float invalidUntil;
         private Task ceremony;
         private CancellationTokenSource ceremonyLife;
         private bool settled;
+        private bool skipSent;
+        private int skipRequest;
         private Pose? drawSpawn;
         private RackSlot? drawSlot;
         // R-23 shown the prototype's way (badOpen): the short opening lies on the board 1.5 s, then returns with its +101.
@@ -108,6 +112,14 @@ namespace Galaxy101.Table
         private (string Text, string Sub, int Amount)? shortPenalty;
         private float shortUntil;
         private List<MeldSpec> lastOpen;
+        private bool isleAllRunning;
+        /// <summary>The elden finish show is running (the tile is in flight; no other discard).</summary>
+        private bool finishing;
+        private BoardLayout.Snapshot turnBoardSnapshot;
+        /// <summary>undoTurn restores snap.rows: the rack as it stood before the turn's first opening or lay-off.</summary>
+        private RackGrid turnRackSnapshot, pendingRackRestore;
+        private ITableSession turnBoardSession;
+        private int turnBoardHand, turnBoardNumber;
         private Dictionary<int, RackSlot> shortPlacement;
 
         // ---------- seats: absolute (the server's) ↔ the table's (0 = me) ----------
@@ -135,6 +147,7 @@ namespace Galaxy101.Table
             Gifts = table.gameObject.GetComponent<TableGifts>() ?? table.gameObject.AddComponent<TableGifts>(); Gifts.Init(table, Fx);
             Markers = table.gameObject.GetComponent<TableTargets>() ?? table.gameObject.AddComponent<TableTargets>(); Markers.Init(this);
             Ceremony = new TableCeremony(table, Fx, Seconds); Ceremony.Changed += Notify;
+            Ceremony.DieRolling += OnDieRolling;
             life = new CancellationTokenSource();
 
             Launch = Pending ?? new TableLaunch(); Pending = null;
@@ -189,6 +202,8 @@ namespace Galaxy101.Table
         public void RunFlow(string flow)
         {
             if (!(Session is LocalTableSession offline) || offline.Started && flow != null && !TableScenarios.Has(flow)) return;
+            ClearTurnBoardSnapshot();
+            pairGauge = false;
             if (flow == "seat") { _ = SeatThenStart(offline); return; }
             if (flow != null && TableScenarios.Has(flow))
             {
@@ -273,6 +288,7 @@ namespace Galaxy101.Table
             var pendingTimers = timers.ToArray(); timers.Clear();
             foreach (var t in pendingTimers) t.Done.TrySetResult(false);
             if (Model != null) Model.Applied -= OnMessage;
+            if (Ceremony != null) Ceremony.DieRolling -= OnDieRolling;
             if (Session is Galaxy101.Online.V4TableSession net) net.ConnectionChanged -= OnConnectionChanged;
             if (hud != null) { hud.Command -= OnHudCommand; hud.GiftSent -= OnGiftSent; if (hud.Settings != null) hud.Settings.Changed -= OnSetting; }
             Board?.Clear();
@@ -297,7 +313,7 @@ namespace Galaxy101.Table
             if (Fx != null && Model != null && Model.HasHand && settled)
             {
                 var left = Model.Discards[G101Rules.LeftOf(Base)];
-                Fx.SetState(CanDiscard, CanDraw, CanDrawSide && left.Count > 0, Board.DeckShown);
+                Fx.SetState(CanDiscard, CanDraw, CanDrawSide && left.Count > 0, Board.DeckShown, SideRingState);
             }
             if (HumanTurn && !warned && warnSeconds > 0 && TurnLeftMs() <= warnSeconds * 1000) { warned = true; Notify(); GalaxyAudio.Play(GalaxyAudio.Table.TurnWarning()); } // "Süren bitiyor!"
             if (Model != null && Model.Status == G101Rules.StatusLobby && Model.MatchStartAt > 0)
@@ -308,7 +324,6 @@ namespace Galaxy101.Table
             if (shortMelds != null && Time.time >= shortUntil) EndShortOpening();
             if (ExitOpen && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) CancelExit();
             if (invalidOkey >= 0 && Time.unscaledTime > invalidUntil) { invalidOkey = -1; Notify(); }
-            if (glowTile >= 0 && Time.unscaledTime > glowUntil) { glowTile = -1; Notify(); }
             if (ResultOpen && MatchOver && Time.realtimeSinceStartup - resultAt >= TableTimings.HandEndWait / 1000f) CloseTable();
         }
 
@@ -317,6 +332,7 @@ namespace Galaxy101.Table
         // ---------- the server's messages ----------
         private void OnMessage(ClientMessage m)
         {
+            if (turnBoardSnapshot != null && !SameBoardTurn()) ClearTurnBoardSnapshot();
             switch (m.Type)
             {
                 case V4Messages.MatchStart: ApplySeats(); Current = Phase.Seating; break;
@@ -341,11 +357,15 @@ namespace Galaxy101.Table
 
         private void BeginDeal()
         {
+            ClearTurnBoardSnapshot();
             preparedHand = false;
+            skipSent = false;
+            skipRequest++;
+            pairGauge = false;
             Current = Phase.Deal; Active = -1; settled = false; ResultOpen = false; momentOn = false;
             Gifts.Clear(); hud?.NewHand();
             foreach (var list in penaltyWhy) list.Clear();
-            LastDrawn = -1; LastXp = 0; Rack.Clear();
+            LastDrawn = LastFinishedTile = -1; LastXp = 0; Rack.Clear();
             ceremonyLife?.Cancel(); ceremonyLife = CancellationTokenSource.CreateLinkedTokenSource(life.Token);
             var token = ceremonyLife.Token;
             Board.Clear(); Board.LayoutDeck(0);
@@ -355,13 +375,22 @@ namespace Galaxy101.Table
 
         private async Task RunCeremony(CancellationToken token)
         {
-            try { await Ceremony.Run(Model, LocalSeat, () => { if (Rack.Count == 0 && Model.Rack != null) Rack.Deal(TileIds.ToInts(Model.Rack)); return BuildBoard(); }, token); }
+            try
+            {
+                await Ceremony.Run(Model, LocalSeat, () =>
+                {
+                    token.ThrowIfCancellationRequested();
+                    if (Rack.Count == 0 && Model.Rack != null) Rack.Deal(TileIds.ToInts(Model.Rack));
+                    // G101-Masa dealFill starts the player camera while the hands are still flying, including fast skip.
+                    table.CameraRig.GoTo(TableCameraRig.View.Player, 1.4f);
+                    return BuildBoard();
+                }, token);
+            }
             catch (OperationCanceledException) { return; }
             catch (Exception e) { if (life != null && !life.IsCancellationRequested) Debug.LogException(e); return; }   // the scene going away mid-roll is not an error
             finally { Ceremony.Clear(); }
             if (token.IsCancellationRequested) return;
             Settle(false);
-            table.CameraRig.GoTo(hud != null ? hud.PreferredView : TableCameraRig.View.Player, 1.4f);
             OnTurn(); Notify();
         }
 
@@ -377,6 +406,24 @@ namespace Galaxy101.Table
         }
 
         private string soundedTurn;
+
+        private bool SameBoardTurn() => ReferenceEquals(turnBoardSession, Session) && Model != null && Model.MyTurn &&
+            Model.HandNo == turnBoardHand && Model.TurnN == turnBoardNumber;
+
+        private void ClearTurnBoardSnapshot() { turnBoardSnapshot = null; turnBoardSession = null; turnRackSnapshot = null; }
+
+        private void SaveTurnBoardSnapshot()
+        {
+            if (turnBoardSnapshot != null && SameBoardTurn() || Board == null) return;
+            turnBoardSnapshot = Board.Layout.Capture(); turnBoardSession = Session; turnRackSnapshot = Rack.Clone();
+            turnBoardHand = Model.HandNo; turnBoardNumber = Model.TurnN;
+        }
+
+        private void RestoreTurnBoardSnapshot()
+        {
+            if (turnBoardSnapshot != null && SameBoardTurn()) { Board.Layout.Restore(turnBoardSnapshot); pendingRackRestore = turnRackSnapshot; }
+            ClearTurnBoardSnapshot();
+        }
 
         private void OnTurn()
         {
@@ -397,6 +444,10 @@ namespace Galaxy101.Table
             int seat = ev != null && ev.TryGetValue("seat", out var s) && s != null ? TableClient.I(s) : -1;
             int local = seat >= 0 ? LocalSeat(seat) : -1;
             bool me = seat >= 0 && seat == Model.Seat;
+            // The client's tile model has applied the accepted event; the presentation still holds the pre-move anchors.
+            if (me && (e == "opened" || e == "laid" || e == "added" || e == "okeySwapped")) SaveTurnBoardSnapshot();
+            if (me && (e == "undone" || e == "sideReturned")) RestoreTurnBoardSnapshot();
+            if (me && (e == "discarded" || e == "finished")) ClearTurnBoardSnapshot();
             // Sound (docs/v4/audio/RAPOR.md §5): each engine event as it is animated; my turn's cue in OnTurn, the finish
             // with the hand's result (nuke for an elden or okey finish, EK-908) and hand.end when the result card opens.
             if (e != "turn" && e != "finished" && e != "handEnd") GalaxyAudio.Play(GalaxyAudio.Table.ForEngine(e, local, Me, false, Current == Phase.Deal));
@@ -409,9 +460,8 @@ namespace Galaxy101.Table
                     {
                         int id = TileIds.ToInt(ev["tile"] as string);
                         if (drawSpawn.HasValue) Board.SpawnFrom(drawSpawn.Value);
-                        if (id >= 0) { Rack.Add(id, TileCodes.FaceFor(Model), autoSort, drawSlot); LastDrawn = id; }
+                        if (id >= 0) { Rack.Add(id, TileCodes.FaceFor(Model), autoSort, drawSlot ?? Rack.FreeSlot(RackEval.Of(Rack, Model).ValidTiles)); LastDrawn = id; }
                         drawSpawn = null; drawSlot = null;
-                        if ((string)ev["src"] == "side") Message(TableHud.ToastKind.Info, T("msg.canPutBack"));
                     }
                     break;
                 }
@@ -440,7 +490,8 @@ namespace Galaxy101.Table
                     break;
                 case "penalty": Penalty(ev); break;
                 case "auto": if (me) Message(TableHud.ToastKind.Warning, T("msg.timeUp")); break;
-                case "discarded": case "finished": LastDrawn = -1; break;
+                case "discarded": LastDrawn = -1; break;
+                case "finished": LastDrawn = -1; LastFinishedTile = TileIds.ToInt((string)ev["tile"]); break;
                 case "handEnd": HandEnd(); break;
                 case "matchEnd": MatchOver = true; break;
                 case "seatLeft": case "seatTaken": ApplySeats(); break;
@@ -475,42 +526,42 @@ namespace Galaxy101.Table
             }
             SyncRack(); SyncBoard();
             turnStartedReal = Time.realtimeSinceStartup;
-            if (shortPenalty is var (text, sub, amount)) { hud?.Post(TableHud.ToastKind.Penalty, text, sub, amount); shortPenalty = null; }
+            if (shortPenalty is var (text, _, _)) { hud?.Post(TableHud.ToastKind.Penalty, text); shortPenalty = null; }
             Notify();
         }
 
-        /// <summary>A written penalty (R-40…R-44): mine as a Penalty toast, others' as a balloon; the reason in the result card.</summary>
+        /// <summary>
+        /// A written penalty (R-40…R-44): G101-Masa penalize() flashes "{Sen|name} +{amount} ceza · {why}" for any seat (no
+        /// balloon); the reason also goes into the result card.
+        /// </summary>
         private void Penalty(IDictionary<string, object> ev)
         {
-            int seat = TableClient.I(ev["seat"]), by = TableClient.I(ev["by"]), amount = TableClient.I(ev["amount"]);
-            int local = LocalSeat(seat), byLocal = LocalSeat(by);
-            string code = (string)ev["code"], mine, theirs, why, sub = null;
+            int seat = TableClient.I(ev["seat"]), amount = TableClient.I(ev["amount"]);
+            int local = LocalSeat(seat);
+            string code = (string)ev["code"], why, reason;
             switch (code)
             {
                 case G101Rules.PenOpenShort:
                     why = T("why.short");
-                    mine = shortMode == G101Rules.KindPair ? T("pen.shortPairs", shortValue) : T("pen.short", shortValue);
-                    theirs = T("ev.penShort", FirstName(local)); sub = T("pen.returned");
+                    reason = shortMode == G101Rules.KindPair ? L("hatalı çift açma · " + shortValue + "/5 çift", "wrong pair open · " + shortValue + "/5 pairs") : L("hatalı el açma · " + shortValue + "/101", "wrong open · " + shortValue + "/101");
                     break;
-                case G101Rules.PenIslek: why = T("why.playable"); mine = T("pen.playable"); theirs = T("penBubbleTile"); break;
-                case G101Rules.PenOkeyDiscard: why = T("why.okey"); mine = T("pen.okey"); theirs = T("penBubbleOkey"); break;
+                case G101Rules.PenIslek: why = T("why.playable"); reason = L("işlek taş attı", "discarded a playable tile"); break;
+                case G101Rules.PenOkeyDiscard: why = T("why.okey"); reason = L("okey attı", "discarded the okey"); break;
                 case G101Rules.PenOpenedWith:
                 {
                     int number = amount / G101Rules.Const.OpenedWithX;
-                    // T34: the tile that fed the opening glows in the opener's meld for 1.2 s.
-                    glowTile = TileIds.ToInt(ev["tile"] as string); glowUntil = Time.unscaledTime + 1.2f;
-                    why = T("why.fed", number); mine = T("pen.fed", number, FirstName(byLocal)); theirs = T("ev.penFed", FirstName(local), number, amount);
+                    // T34's 1.2 s gold frame around the fed tile is gone (UF-521: no tile on the table is ever framed).
+                    why = T("why.fed", number); reason = L("açtıran taşı attı", "fed the opening tile");
                     break;
                 }
-                default: why = T("why.okeyTaken"); mine = T("pen.okeyTaken", FirstName(byLocal)); theirs = T("ev.penOkeyTaken"); break;
+                default: why = T("why.okeyTaken"); reason = L("okeyi aldırdı", "lost the okey"); break;
             }
             penaltyWhy[local].Add(why);
-            if (seat == Model.Seat && !Watching)
-            {
-                if (code == G101Rules.PenOpenShort && shortMelds != null) shortPenalty = (mine, sub, amount);
-                else hud?.Post(TableHud.ToastKind.Penalty, mine, sub, amount);
-            }
-            else hud?.Balloon(local, theirs, true);
+            string who = seat == Model.Seat && !Watching ? L("Sen", "You") : FirstName(local);
+            string text = who + " +" + amount.ToString("N0", new System.Globalization.CultureInfo(L("tr-TR", "en-US"))) + L(" ceza · ", " penalty · ") + reason;
+            // badOpen: the toast waits until the 1.5 s display of the short melds ends.
+            if (seat == Model.Seat && !Watching && code == G101Rules.PenOpenShort && shortMelds != null) shortPenalty = (text, null, amount);
+            else hud?.Post(TableHud.ToastKind.Penalty, text);
         }
 
         /// <summary>The emoji row (table_content.json emoji): chat quick keys emoji.0–emoji.9.</summary>
@@ -554,12 +605,12 @@ namespace Galaxy101.Table
             if (finisher >= 0)
             {
                 int w = LocalSeat(finisher); momentSeat = w;
-                momentTitle = elden && w == Me && !Watching ? L("ELDEN BİTTİN!", "FINISHED FROM THE HAND!") : w == Me && !Watching ? L("BİTİRDİN!", "YOU FINISHED!") : Upper(Name(w)) + L(" BİTİRDİ!", " FINISHED!");
+                momentTitle = elden && w == Me && !Watching ? L("ELDEN BİTTİN!", "FINISHED FROM THE HAND!") : w == Me && !Watching ? L("BİTİRDİN!", "YOU FINISHED!") : Name(w) + L(" BİTİRDİ!", " FINISHED!");
                 momentSub = L("Son taşını desteye kapattı · ", "Closed the last tile on the deck · ") + Signed(score[finisher]) + L(" puan", " points");
-                Fx.Celebrate(table.Corner(w), AvatarOnScreen(w));
-                if (w != Me) table.CameraRig.Lean(table.CornerThree(w), 1.3f);
+                if (hud?.IsTwoDimensional == true) { if (TableSounds.IsNuke(r) && LastFinishedTile >= 0) hud.FlatFinish(LastFinishedTile); }
+                else { Fx.Celebrate(table.Corner(w), AvatarOnScreen(w)); if (w != Me) table.CameraRig.Lean(table.CornerThree(w), 1.3f); }
             }
-            else { momentSeat = -1; momentTitle = L("TAŞ BİTTİ", "DECK EMPTY"); momentSub = L("En düşük puanlı oyuncu eli alır", "Lowest score takes the hand"); Fx.DealFx(); }
+            else { momentSeat = -1; momentTitle = L("TAŞ BİTTİ", "DECK EMPTY"); momentSub = L("En düşük puanlı oyuncu eli alır", "Lowest score takes the hand"); if (hud?.IsTwoDimensional != true) Fx.DealFx(); }
             momentOn = true; momentAt = Time.realtimeSinceStartup; Notify();
             Debug.Log("GALAXY101_TABLE_HAND_END hand=" + Model.HandNo + " reason=" + reason + " finisher=" + finisher + " scores=" + string.Join(",", score));
             await Seconds(finisher >= 0 ? 3.8f : 2.4f);
@@ -624,12 +675,16 @@ namespace Galaxy101.Table
         /// The state router's drag simulation (g101-state.js scDrag → table3d debugDrag): the rack tile follows the pointer
         /// <paramref name="k"/> of the way to <paramref name="to"/> while it is the dragged tile (its targets glow, T39, T47).
         /// </summary>
+        /// <summary>The left pile's ring as the pointer leaves it (RackInput: hovered, dragged, returning; TableFx draws it).</summary>
+        public TableFx.SideRing SideRingState { get; set; }
+
         public void SimulateDrag(int id, Pose to, float k)
         {
             if (!(Board.ViewOf(id) is TileView v) || v == null) return;
             SetDragTile(id);
             var from = new Pose(v.transform.position, v.transform.rotation);
             v.Follow(new Pose(Vector3.Lerp(from.position, to.position, k) + Vector3.up * 0.03f, Quaternion.Slerp(from.rotation, to.rotation, k)));
+            if (id == PickedTile) SideRingState = new TableFx.SideRing { Returning = true };   // T39: the ring of the taken tile pulses
             Notify();
         }
 
@@ -641,7 +696,7 @@ namespace Galaxy101.Table
         private LegalMoves Legal => Model?.Legal() ?? new LegalMoves();
         public bool CanDraw => HumanTurn && Legal.Draw;
         public bool CanDrawSide => HumanTurn && Legal.Side;
-        public bool CanDiscard => HumanTurn && Model.TurnPhase == G101Rules.PhasePlay && shortMelds == null;
+        public bool CanDiscard => HumanTurn && Model.TurnPhase == G101Rules.PhasePlay && shortMelds == null && !finishing;
         public bool CanUndo => CanDiscard && Legal.Undo;
         public bool IOpened => Model != null && Model.Seat >= 0 && Model.Opened[Model.Seat] > 0;
         public bool CanArrange => settled && !Ceremony.Running && Current != Phase.Seating && Current != Phase.Deal && !Watching;
@@ -650,10 +705,11 @@ namespace Galaxy101.Table
         public string Indicator => Model?.Indicator;
 
         /// <summary>Elden bit (R-53): every tile but one in sets reaching the bar (katlamalı raises it), never opened, nothing laid this turn.</summary>
-        private (List<MeldSpec> Melds, string Last)? FromHand()
+        private (List<MeldSpec> Melds, string Last, List<string> Lays)? FromHand()
         {
-            if (!CanDiscard || IOpened || Legal.Undo) return null;
-            return RackEval.Of(Rack, Model).Melds.FromHand(Model.OpenNeed(G101Rules.KindRun), Model.OpenNeed(G101Rules.KindPair));
+            if (!CanDiscard || IOpened || Legal.Undo || !Model.OkeyKnown) return null;
+            var table = Model.Table?.Rules?.Isle == false ? null : Model.Melds.Select(m => (m.Kind, m.Tiles));
+            return RackEval.Of(Rack, Model).Melds.FromHand(Model.OpenNeed(G101Rules.KindRun), Model.OpenNeed(G101Rules.KindPair), table, new ColorNum(Model.OkeyColor, Model.OkeyNumber));
         }
         public bool CanFinishFromHand => FromHand() != null;
 
@@ -698,6 +754,8 @@ namespace Galaxy101.Table
         {
             if (!CanDiscard || !Rack.TryFind(id, out _)) return;
             if (id == PickedTile) { Message(TableHud.ToastKind.Error, T("msg.cantDiscardPicked")); return; }
+            // R-53: the last tile of the turn I opened in is an elden finish, however the sets reached the table.
+            if (Rack.Count == 1 && IOpened && Model.OpenedTurn[Model.Seat] == Model.TurnN && !Watching) { FinishWithShow(id); return; }
             _ = Do(Session.Discard(TileIds.ToV4(id)));
         }
 
@@ -707,7 +765,9 @@ namespace Galaxy101.Table
             if (!CanDiscard) return;
             var e = RackEval.Of(Rack, Model);
             if (IOpened && Model.OpenMode[Model.Seat] == G101Rules.KindPair) { Message(TableHud.ToastKind.Error, T("msg.pairsOnly")); return; }
-            if (e.Groups.Count == 0) return;
+            // openHand: no segment as laid out → the rack is sorted by runs and read again; still none → flash.
+            if (e.Groups.Count == 0 && !IOpened) { SortRack(true); e = RackEval.Of(Rack, Model); }
+            if (e.Groups.Count == 0) { if (!IOpened) Message(TableHud.ToastKind.Error, T("msg.noRunOpen")); return; }
             lastOpen = e.Groups;
             _ = Do(IOpened ? Session.Lay(e.Groups) : Session.Open(e.Groups));
         }
@@ -726,32 +786,81 @@ namespace Galaxy101.Table
         {
             if (!CanDiscard) return;
             var e = RackEval.Of(Rack, Model);
-            if (e.Pairs.Count == 0) return;
+            if (e.Pairs.Count == 0 && !IOpened) { SortRack(false); e = RackEval.Of(Rack, Model); }
+            if (e.Pairs.Count == 0) { if (!IOpened) Message(TableHud.ToastKind.Error, T("msg.noPairOpen")); return; }
             lastOpen = e.Pairs;
             _ = Do(IOpened ? Session.Lay(e.Pairs) : Session.Open(e.Pairs));
+        }
+
+        private RackEval Potential(bool runs)
+        {
+            var sorted = Rack.Clone(); sorted.Sort(runs, TileCodes.FaceFor(Model));
+            return RackEval.Of(sorted, Model);
+        }
+
+        /// <summary>
+        /// drawThenOpen: Aç / Çift aç pressed in the draw phase (not opened yet) draws from the deck, then opens 650 ms after
+        /// the discard phase begins.
+        /// </summary>
+        public async void DrawThenOpen(bool pairs)
+        {
+            if (!CanDraw || IOpened) return;
+            if (!await Draw(false, null)) return;
+            await Seconds(.65f);
+            if (this == null || life.IsCancellationRequested || !CanDiscard) return;
+            if (pairs) OpenPairs(); else OpenRuns();
         }
 
         /// <summary>Geri topla (gUndo, R-34).</summary>
         public void Undo() { if (CanUndo) _ = Do(Session.Undo()); }
 
-        /// <summary>Elden bit: open with every set (R-53), then the last tile launched into the deck finishes (×2).</summary>
+        /// <summary>Elden bit: open with every set (R-53), then finish with the selected fixed-centre effect (×2).</summary>
         public async void FinishFromHand()
         {
             var plan = FromHand(); if (plan == null) return;
-            var (melds, last) = plan.Value;
+            var (melds, last, lays) = plan.Value;
+            var session = Session; var model = Model; int turn = model.TurnN;
+            bool Same() => this != null && life?.IsCancellationRequested != true && ReferenceEquals(Session, session) && ReferenceEquals(Model, model) && model.TurnN == turn && CanDiscard && IOpened;
             lastOpen = melds;
-            if (await Do(Session.Open(melds)) != null) return;
-            int id = TileIds.ToInt(last);
-            if (Board.ViewOf(id) is TileView bomb && bomb != null)
+            if (await Do(session.Open(melds)) != null || !Same()) return;
+            // The loose tiles go onto the table one by one (R-25), each where the engine accepts it now.
+            foreach (var tile in lays)
             {
-                // spec/23: the last tile is launched into the deck with the nuclear landing, then the discard finishes.
+                var target = model.Melds.Select(m => (m.Id, Sides: model.AddSides(m.Id, tile))).FirstOrDefault(m => m.Sides.Count > 0);
+                if (target.Id == null || await Do(session.Add(tile, target.Id, target.Sides[0])) != null || !Same()) return;
+            }
+            if (Rack.Count != 1 || !Rack.TryFind(TileIds.ToInt(last), out _)) return;
+            FinishWithShow(TileIds.ToInt(last));
+        }
+
+        /// <summary>The elden finish: the last tile flies to the table's centre with the chosen effect, then it is discarded.</summary>
+        private async void FinishWithShow(int id)
+        {
+            if (finishing) return;
+            finishing = true;
+            try { await FinishShow(id); }
+            finally { finishing = false; }
+        }
+
+        private async Task FinishShow(int id)
+        {
+            string last = TileIds.ToV4(id);
+            if (hud?.IsTwoDimensional == true)
+            {
+                float wait = hud.FlatFinish(id);
+                await Seconds(wait + .9f);
+                if (this == null || life.IsCancellationRequested) return;
+            }
+            else if (Board.ViewOf(id) is TileView bomb && bomb != null)
+            {
                 bomb.enabled = false;
-                var impact = table.DeckTop(Board.DeckShown).position;
-                float wait = Fx.Nuclear(bomb.transform, impact, table.CameraRig, () => hud?.NuclearFlash());
+                string style = hud?.Settings?.Text("bombFx") ?? "nuke";
+                float wait = Fx.Finish(style, bomb.transform, table.CameraRig, () => hud?.NuclearFlash());
                 await Seconds(wait + 0.9f);
                 if (this == null || life.IsCancellationRequested) return;
-                if (bomb != null) bomb.enabled = true;
+                if (bomb != null) { bomb.Snap(FinishFlightMotion.Target); bomb.enabled = true; }
             }
+            finishing = false;
             await Do(Session.Discard(last));
         }
 
@@ -768,14 +877,37 @@ namespace Galaxy101.Table
             _ = Do(Session.Add(tile, meld, side));
         }
 
-        /// <summary>İşle button (prototype isle()): every rack tile that fits a meld, in rack order, one gAdd each.</summary>
+        /// <summary>Source isleAll(): lay this opening mode's segments first, then add ordinary rack tiles, keeping one tile to discard.</summary>
         public async void IsleAll()
         {
-            for (int guard = 0; guard < 20 && CanDiscard && IOpened && Rack.Count > 1; guard++)
+            if (!CanDiscard || !IOpened || isleAllRunning) return;
+            var session = Session; var model = Model;
+            int hand = model.HandNo, turn = model.TurnN;
+            bool CanContinue() => this != null && !leaving && life?.IsCancellationRequested != true &&
+                ReferenceEquals(Session, session) && ReferenceEquals(Model, model) && model.HandNo == hand && model.TurnN == turn && CanDiscard && IOpened;
+            isleAllRunning = true;
+            try
             {
-                var next = Addable(); if (next == null) return;
-                if (await Do(Session.Add(next.Value.Tile, next.Value.Meld, next.Value.Side)) != null) return;
+                var evaluation = RackEval.Of(Rack, model);
+                var segments = (model.OpenMode[model.Seat] == G101Rules.KindPair ? evaluation.Pairs : evaluation.Groups).ToList();
+                int tileCount = segments.Sum(segment => segment.Tiles.Count);
+                while (segments.Count > 0 && tileCount >= Rack.Count)
+                {
+                    tileCount -= segments[segments.Count - 1].Tiles.Count;
+                    segments.RemoveAt(segments.Count - 1);
+                }
+                if (segments.Count > 0)
+                {
+                    lastOpen = segments;
+                    if (await Do(session.Lay(segments)) != null || !CanContinue()) return;
+                }
+                for (int guard = 0; guard < 24 && CanContinue() && Rack.Count > 1 && model.Table?.Rules?.Isle != false; guard++)
+                {
+                    var next = Addable(); if (next == null) return;
+                    if (await Do(session.Add(next.Value.Tile, next.Value.Meld, next.Value.Side)) != null) return;
+                }
             }
+            finally { isleAllRunning = false; }
         }
 
         private (string Tile, string Meld, string Side)? Addable()
@@ -784,7 +916,8 @@ namespace Galaxy101.Table
                 foreach (var id in seg.Ids)
                 {
                     string tile = TileIds.ToV4(id);
-                    foreach (var meld in Model.Melds.OrderBy(m => m.Owner))
+                    if (Model.IsOkey(tile)) continue;
+                    foreach (var meld in Model.Melds.OrderBy(m => LocalSeat(m.Owner)))
                     {
                         var sides = Model.AddSides(meld.Id, tile);
                         if (sides.Count > 0) return (tile, meld.Id, sides[0]);
@@ -803,7 +936,8 @@ namespace Galaxy101.Table
             if (!Model.SwapFits(okey.Meld, okey.Index, TileIds.ToV4(tileId)))
             {
                 invalidOkey = okeyId; invalidUntil = Time.unscaledTime + 1.2f;
-                Message(TableHud.ToastKind.Error, T("msg.okeyOnlyWith", FaceName(okey.Face))); Notify(); return;
+                // meldDrop(…, 'okey') → flash(cantIsle): the reference names no tile.
+                Message(TableHud.ToastKind.Error, L("Bu taş o pere işlenemez", "That tile does not fit this set")); Notify(); return;
             }
             _ = Do(Session.Swap(TileIds.ToV4(tileId), okey.Meld, okey.Index));
         }
@@ -819,10 +953,32 @@ namespace Galaxy101.Table
             finally { rollingRequest = false; if (this != null) Notify(); }
         }
 
-        public void SortRack(bool runs) { if (!CanArrange) return; Rack.Sort(runs, TileCodes.FaceFor(Model)); SyncBoard(); Notify(); }
+        public bool CanSkipDeal => !skipSent && !Watching && Model?.Deal is { } deal && deal.Step != "fill"
+            && !deal.SkipVotes.Contains(Model.Seat) && Ceremony?.Running == true && Ceremony.Step != "fill";
+
+        /// <summary>One gSkipDeal vote; only the server's dealSkip event can fast-forward the ceremony.</summary>
+        public async void SkipDeal()
+        {
+            if (!CanSkipDeal) return;
+            var session = Session; int hand = Model.HandNo, request = ++skipRequest;
+            skipSent = true; Notify();
+            string error = await Do(session.SkipDeal(), false);
+            if (this == null || life == null || life.IsCancellationRequested) return;
+            // A rejected request can retry; an accepted vote stays waiting until the authoritative ceremony advances.
+            if (error != null && request == skipRequest && ReferenceEquals(Session, session) && Model?.HandNo == hand)
+            { skipSent = false; Notify(); }
+        }
+
+        public void SortRack(bool runs) { if (!CanArrange) return; pairGauge = !runs; Rack.Sort(runs, TileCodes.FaceFor(Model)); SyncBoard(); Notify(); }
 
         /// <summary>Commit a rack rearrangement the input previewed (singlePlan / groupPlan); the arrangement is the client's.</summary>
-        public void ApplyRackPlan(IReadOnlyDictionary<int, RackSlot> plan) { Rack.Apply(plan); SyncBoard(); Notify(); GalaxyAudio.Play(GalaxyAudio.Table.RackMove()); }
+        public void ApplyRackPlan(IReadOnlyDictionary<int, RackSlot> plan)
+        {
+            Rack.Apply(plan);
+            // table3d.js onUp: every tile of the committed plan slides to its slot in 0.2 s.
+            if (Board != null) foreach (var id in plan.Keys) Board.ForceDuration(id, .2f);
+            SyncBoard(); Notify(); GalaxyAudio.Play(GalaxyAudio.Table.RackMove());
+        }
 
         // ---------- okeys and lay-off targets (spec/23 işleme göstergeleri) ----------
         /// <summary>Every okey in a table meld with the face it stands for (its position, R-13).</summary>
@@ -887,19 +1043,26 @@ namespace Galaxy101.Table
         {
             if (Model?.Rack == null || shortMelds != null) return;
             Rack.Sync(TileIds.ToInts(Model.Rack), TileCodes.FaceFor(Model), autoSort);
+            // Geri topla / Geri bırak: the returned tiles take their places from before the turn when the rack is that rack again.
+            if (pendingRackRestore != null)
+            {
+                var before = pendingRackRestore; pendingRackRestore = null;
+                if (new HashSet<int>(before.Tiles).SetEquals(Rack.Tiles))
+                    Rack.Apply(before.Tiles.ToDictionary(id => id, id => { before.TryFind(id, out var slot); return slot; }));
+            }
         }
 
         public void SyncBoard(bool instant = false)
         {
             if (Board == null || Model == null || !Model.HasHand || !settled) return;
             Board.Sync(BuildBoard(), instant);
+            hud?.SyncFlatTable(instant);
             RefreshRackMarkers();
             targetsFor = -2;
         }
 
         private void RefreshRackMarkers()
         {
-            Board.SetValid(highlightSets && Model.OkeyKnown ? RackEval.Of(Rack, Model).ValidTiles : null);
             Board.SetTags(id => !Rack.TryFind(id, out _) ? null : id == PickedTile ? "side" :
                 !Model.IsOkey(TileIds.ToV4(id)) && Model.IsIslek(TileIds.ToV4(id)) ? "islek" : null);
         }
@@ -971,7 +1134,7 @@ namespace Galaxy101.Table
             var s = new TableHud.State
             {
                 Phase = Current == Phase.Seating ? "seat" : dealing ? "deal" : Current == Phase.Draw ? "draw" : Current == Phase.Discard ? "discard" : Current == Phase.Finished ? "fin" : "opp",
-                Active = Active, DeckCount = Current == Phase.Seating ? 106 : dealing ? 0 : m.Deck, TurnSeconds = Mathf.RoundToInt(m.TurnMs / 1000f), TurnStartedAt = turnStartedReal,
+                Active = Active, DeckCount = Current == Phase.Seating ? 106 : dealing ? 0 : m.Deck, TurnSeconds = Mathf.RoundToInt(m.TurnMs / 1000f), TableTurnSeconds = m.Table?.TurnSec > 0 ? m.Table.TurnSec : (int)(TableTimings.DefaultTurnMs / 1000), TurnStartedAt = turnStartedReal,
                 Warn = HumanTurn && warned, TurnHint = turnHint, ShowIndicator = !dealing && Current != Phase.Seating,
                 // tDiscardFirst only on a dealt hand's first move (a prepared flow's hand is past it: the prototype's _turns ≥ 1).
                 FirstTurn = m.TurnN == 1 && m.TurnPhase == G101Rules.PhasePlay && !preparedHand,
@@ -979,6 +1142,7 @@ namespace Galaxy101.Table
                 Pairs = eval.Pairs.Count, PickedTile = PickedTile, DeckOnly = HumanTurn && m.TurnPhase == G101Rules.PhaseDraw && m.SideReturned, ShowPutBack = PickedTile >= 0 && CanDiscard && Legal.ReturnSide,
                 Countdown = m.Status == G101Rules.StatusLobby ? countdown : 0, CountdownAt = countdownAt, ExitOpen = ExitOpen,
                 Hand = Math.Max(1, m.HandNo), MatchHands = m.Hands,
+                ScoreHistory = ScoreHistory(),
             };
             for (int k = 0; k < 4; k++) s.Seated[k] = !seating || seated[k];
             if (hud?.Model != null) { s.Level = hud.Model.Level; s.XpInLevel = hud.Model.Xp; s.XpNeed = 375L * Math.Max(1, hud.Model.Level); }
@@ -991,20 +1155,38 @@ namespace Galaxy101.Table
                 s.Opened[k] = m.Opened[abs]; s.OpenedPairs[k] = m.OpenMode[abs] == G101Rules.KindPair;
                 s.Penalties[k] = m.Pen[abs];
             }
-            if (shortMelds != null) { s.Opened[Me] = shortValue; s.OpenedPairs[Me] = shortMode == G101Rules.KindPair; }
+            if (shortMelds != null)
+            {
+                // badOpen's 1.5 s: the melds lie open ("Açtı · 66", "Elini açtın"), the penalty is not on the plate yet.
+                s.Opened[Me] = shortValue; s.OpenedPairs[Me] = shortMode == G101Rules.KindPair; s.OpenedThisTurn = HumanTurn;
+                if (shortPenalty is var (_, _, pending)) s.Penalties[Me] = Math.Max(0, s.Penalties[Me] - pending);
+            }
             s.OpenSum = s.Opened[Me] > 0 ? s.Opened[Me] : eval.Sum;
-            s.GlowTile = glowTile;
+            // potRun / potPair: with nothing laid out yet, Aç and Çift aç count what the sorted rack would give (the gauge
+            // keeps the rack as laid out).
+            s.OpenPotential = s.Opened[Me] > 0 || eval.Groups.Count > 0 ? s.OpenSum : Potential(true).Sum;
+            s.PairsPotential = s.Opened[Me] > 0 || eval.Pairs.Count > 0 ? s.Pairs : Potential(false).Pairs.Count;
+            s.PairGauge = pairGauge;
+            s.CanDraw = CanDraw;
+            if (m.OkeyKnown && m.Rack != null)
+            {
+                var okey = new ColorNum(m.OkeyColor, m.OkeyNumber);
+                var laid = shortMelds != null ? new HashSet<string>(shortMelds.SelectMany(g => g).Select(TileIds.ToV4)) : null;
+                s.LeftPoints = m.Rack.Where(tile => laid == null || !laid.Contains(tile)).Sum(tile => G101Rules.HandValueOf(okey, tile));
+            }
             var dragFace = dragTile >= 0 ? m.FaceOf(TileIds.ToV4(dragTile)) : null;
             bool canTake = CanDiscard && IOpened;
             foreach (var okey in TableOkeys())
             {
                 bool target = canTake && dragTile >= 0 && m.SwapFits(okey.Meld, okey.Index, TileIds.ToV4(dragTile));
                 s.Okeys.Add(new TableHud.OkeyMark { Id = okey.Id, Number = okey.Face.N.ToString(), Color = FaceColor(okey.Face.C), Target = target, Invalid = okey.Id == invalidOkey });
-                if (target) s.DragBanner = T("takeOkeyBanner", FaceName(okey.Face));
             }
             bool pairsOpened = IOpened && m.OpenMode[m.Seat] == G101Rules.KindPair;
-            s.CanOpen = CanDiscard && eval.Groups.Count > 0 && !pairsOpened;
-            s.CanPair = CanDiscard && eval.Pairs.Count > 0;
+            // canOpen / canPair: my turn (draw or discard, drawThenOpen in the draw phase) and not opened yet — under the bar
+            // the button is the orange-red warning, not disabled. Once opened: Yere aç with a segment, Yere çift aç with a pair.
+            bool openTurn = !IOpened && (CanDiscard || CanDraw && m.TurnPhase == G101Rules.PhaseDraw);
+            s.CanOpen = IOpened ? CanDiscard && eval.Groups.Count > 0 && !pairsOpened : openTurn;
+            s.CanPair = IOpened ? CanDiscard && eval.Pairs.Count > 0 : openTurn;
             if (ResultOpen && m.Result != null) s.Result = ResultInfo();
             s.Deal = DealCard();
             s.CanUndo = CanUndo; s.CanFromHand = CanFinishFromHand;
@@ -1015,8 +1197,8 @@ namespace Galaxy101.Table
             if (Session is Galaxy101.Online.V4TableSession net) { s.NetAttempt = net.Dropped ? Math.Max(1, net.Attempt) : 0; s.NetGaveUp = net.GaveUp; s.NetReplaced = net.Replaced; }
             if (netDemo > 0) s.NetAttempt = netDemo;
             s.OpenBar = m.OpenNeed(G101Rules.KindRun); s.PairsBar = m.OpenNeed(G101Rules.KindPair);
-            s.ShortOpen = CanDiscard && !IOpened && eval.Sum < s.OpenBar;
-            s.ShortPairs = CanDiscard && !IOpened && eval.Pairs.Count < s.PairsBar;
+            s.ShortOpen = openTurn && s.OpenPotential < s.OpenBar;
+            s.ShortPairs = openTurn && s.PairsPotential < s.PairsBar;
             if (Launch.Room != null) s.RoomName = Launch.Room;
             else if (m.Table != null && !m.Table.VsBots) s.RoomName = m.Table.Name + " · " + (m.Table.Mode == "pairs" ? L("Eşli", "Pairs") : L("Tekli", "Singles"));
             s.RoomStake = Launch.Stake > 0 ? Launch.Stake : m.Table?.Bet ?? 0;
@@ -1035,9 +1217,36 @@ namespace Galaxy101.Table
             bool myRoll = CanRollDice;
             return new TableHud.DealInfoCard
             {
-                Dealer = LocalSeat(d.Dealer), DieA = Ceremony.Dice[0], DieB = Ceremony.Dice[1], LastDie = Ceremony.LastDie, Roll = myRoll ? d.Dice.Count : -1,
-                Step = Ceremony.Step, Indicator = ind, Okey = okey, Fake = Ceremony.Fake, Revealed = Ceremony.Revealed, StepAt = Time.realtimeSinceStartup,
+                Dealer = LocalSeat(d.Dealer),
+                DieA = d.Skipped && d.Dice.Count > 0 ? d.Dice[0].Value : Ceremony.Dice[0],
+                DieB = d.Skipped && d.Dice.Count > 1 ? d.Dice[1].Value : Ceremony.Dice[1],
+                LastDie = d.Skipped ? Mathf.Min(1, d.Dice.Count - 1) : Ceremony.LastDie, Roll = myRoll ? d.Dice.Count : -1,
+                Step = Ceremony.Step, Indicator = ind, Okey = okey, Fake = d.Skipped ? d.FakeSkip : Ceremony.Fake, Revealed = Ceremony.Revealed, StepAt = Time.realtimeSinceStartup,
+                CanSkip = !Watching && d.Step != "fill" && Ceremony.Step != "fill",
+                SkipWait = skipSent || d.SkipVotes.Contains(Model.Seat),
             };
+        }
+
+        private IReadOnlyList<TableHud.ScoreHand> ScoreHistory()
+        {
+            if (Model.History.Count == 0) return Array.Empty<TableHud.ScoreHand>();
+            var history = new List<TableHud.ScoreHand>(Model.History.Count); var totals = new int[4];
+            foreach (var hand in Model.History)
+            {
+                var score = TableClient.Ints(hand["score"]);
+                IReadOnlyList<int> opened = hand.TryGetValue("opened", out var state) ? TableClient.Ints(state)
+                    : Model.TryObservedOpenings(hand, out var observed) ? observed : null;
+                int finisher = TableClient.I(hand["finisher"]);
+                var row = new TableHud.ScoreHand { Number = TableClient.I(hand["handNo"]), Finisher = finisher >= 0 ? LocalSeat(finisher) : -1 };
+                for (int absolute = 0; absolute < 4; absolute++)
+                {
+                    int local = LocalSeat(absolute), points = absolute < score.Count ? score[absolute] : 0;
+                    totals[local] += points; row.Points[local] = points; row.Totals[local] = totals[local];
+                    row.Opened[local] = opened != null && absolute < opened.Count ? opened[absolute] > 0 : (bool?)null;
+                }
+                history.Add(row);
+            }
+            return history;
         }
 
         /// <summary>Hand result card (T24, T42–T43): the engine's result (R-50…R-58) explained per seat.</summary>
@@ -1053,7 +1262,7 @@ namespace Galaxy101.Table
             var result = new TableHud.ResultInfo
             {
                 Title = T("resTitle", hand),
-                Sub = finisher >= 0 ? T("resFin", Upper(FirstName(LocalSeat(finisher)))) : T("resSub"),
+                Sub = finisher >= 0 ? T("resFin", Upper(!Watching && LocalSeat(finisher) == Me ? T("you") : FirstName(LocalSeat(finisher)))) : T("resSub"),
                 Head = LocalSeat(winner) == Me && !Watching ? L("Kazandın!", "You won!") : FirstName(LocalSeat(winner)) + L(" kazandı", " won"),
                 Xp = LastXp, TotalXp = (int)Math.Min(int.MaxValue, XpEarned), Winner = LocalSeat(winner), StartedAt = resultAt, Seconds = Mathf.RoundToInt(seconds),
                 Multiplier = mul, Unscored = false, LastHand = hand >= hands,
@@ -1114,7 +1323,7 @@ namespace Galaxy101.Table
         private void ReadSettings()
         {
             var s = hud.Settings;
-            autoSort = s.AutoSort; doubleClickDiscard = s.DoubleClick; highlightSets = s.Highlight; warnSeconds = s.WarnSeconds; turnHint = s.TurnHints;
+            autoSort = s.AutoSort; doubleClickDiscard = s.DoubleClick; warnSeconds = s.WarnSeconds; turnHint = s.TurnHints;
             // The table's sliders and sound switches drive the sound service (docs/v4/audio/RAPOR.md §5.1, EK-902).
             try { GalaxyAudio.SetLevels(new SoundLevels(s.Int("master"), s.Int("sfx"), s.Int("music"), s.Bool("tileSnd"), s.Bool("chatSnd"), GalaxyAudio.Engine.Levels?.NotificationSounds ?? true)); }
             catch (Exception e) { Debug.LogWarning("GALAXY101_TABLE_SOUND_LEVELS " + e.Message); }
@@ -1125,24 +1334,31 @@ namespace Galaxy101.Table
             ReadSettings();
             if (key == null || key == "tableSkin" || key == "rackSkin") Fx?.RescanTable();
             if (key == null || key == "tileSkin") Board?.Restyle();
-            if (settled && (key == null || key == "rackSkin" || key == "highlight")) SyncBoard(key != "highlight");
+            if (settled && (key == null || key == "rackSkin")) SyncBoard(true);
             Notify();
         }
 
         private void OnGiftSent(string kind, int from, int to)
         {
-            if (!kind.StartsWith("e:", StringComparison.Ordinal)) Gifts.Send(kind, from, to);
+            if (!kind.StartsWith("e:", StringComparison.Ordinal))
+            {
+                if (hud?.IsTwoDimensional == true) hud.FlatGift(kind, from, to); else Gifts.Send(kind, from, to);
+            }
         }
+
+        private void OnDieRolling(int seat, int value) { if (hud?.IsTwoDimensional == true) hud.FlatRollDie(LocalSeat(seat), value); }
 
         private void OnHudCommand(string command)
         {
             switch (command)
             {
                 case "roll": RollDice(); break;
+                case "skipDeal": SkipDeal(); break;
+                case "draw": _ = Draw(false, null); break;
                 case "undo": Undo(); break;
                 case "fromhand": FinishFromHand(); break;
-                case "open": OpenRuns(); break;
-                case "pairs": OpenPairs(); break;
+                case "open": if (CanDraw && !IOpened) DrawThenOpen(false); else OpenRuns(); break;
+                case "pairs": if (CanDraw && !IOpened) DrawThenOpen(true); else OpenPairs(); break;
                 case "isle": IsleAll(); break;
                 case "sort-run": SortRack(true); break;
                 case "sort-pair": SortRack(false); break;

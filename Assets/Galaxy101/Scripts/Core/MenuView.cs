@@ -16,13 +16,15 @@ namespace Galaxy101
         public MenuServices Services {get;}
         public LocalizationBridge Loc {get;}
         public VisualElement Root {get;}
+        /// <summary>The live table store when these panels are hosted over a running match.</summary>
+        public Galaxy101.Table.TableSettings TableSettings {get;set;}
         public ModalStack Modals {get;}=new ModalStack();
         public event Action<int> PlayRequested;
         public event Action<string,bool,string> BackgroundChanged;
         private readonly Dictionary<string,int> tabs=new Dictionary<string,int>();
         private readonly Dictionary<string,Font> fonts=new Dictionary<string,Font>();
         private readonly Dictionary<string,Texture2D> paints=new Dictionary<string,Texture2D>();
-        private sealed class GradientPaint { public string Css; }
+        private sealed class GradientPaint { public string Css; public Texture2D Texture; }
         private readonly ConditionalWeakTable<VisualElement,GradientPaint> gradientPaints=new ConditionalWeakTable<VisualElement,GradientPaint>();
         private sealed class Corners{public float Radius;}
         private readonly ConditionalWeakTable<VisualElement,Corners> corners=new ConditionalWeakTable<VisualElement,Corners>();
@@ -119,13 +121,13 @@ namespace Galaxy101
             return asset.CloneTree();
         }
         /// <summary>
-        /// Every text input's look: the caret in the text colour (caret-color: auto), the browser's selection highlight and,
-        /// while empty, the shell's placeholder colour (input::placeholder rgba(169,174,221,.5)).
+        /// Every text input's look: the blinking caret in the text colour (caret-color: auto), the browser's selection
+        /// highlight and, while empty, the shell's placeholder colour (input::placeholder rgba(169,174,221,.5)).
         /// </summary>
         public void InputLook(TextField field,string color)
         {
             Color text=C(color),hint=new Color(169/255f,174/255f,221/255f,.5f);
-            field.textSelection.cursorColor=text;field.textSelection.selectionColor=new Color(.2f,.56f,1f,.45f);
+            CaretBlink.Attach(field,text,new Color(.2f,.56f,1f,.45f));
             var input=field.Q(className:TextField.inputUssClassName);if(input==null)return;
             void Tint()=>input.style.color=string.IsNullOrEmpty(field.value)?hint:text;
             field.RegisterValueChangedCallback(_=>Tint());Tint();
@@ -138,11 +140,26 @@ namespace Galaxy101
         {
             var ring=Box();ring.name="inset-ring";ring.pickingMode=PickingMode.Ignore;ring.style.position=Position.Absolute;ring.style.left=ring.style.top=ring.style.right=ring.style.bottom=0;
             ring.style.borderTopLeftRadius=ring.style.borderTopRightRadius=ring.style.borderBottomLeftRadius=ring.style.borderBottomRightRadius=radius;box.Add(ring);
+            bool rest=false;
+            ring.generateVisualContent+=context=>
+            {
+                if(!rest)return;
+                float width=ring.contentRect.width,height=ring.contentRect.height;
+                if(width<=0||height<=0)return;
+                float r=Mathf.Min(radius,width*.5f,height*.5f),k=.55228475f,shift=Mathf.Min(2,height);
+                var p=context.painter2D;p.fillColor=new Color(0,0,0,.3f);p.BeginPath();
+                p.MoveTo(new Vector2(0,r));p.BezierCurveTo(new Vector2(0,r-k*r),new Vector2(r-k*r,0),new Vector2(r,0));
+                p.LineTo(new Vector2(width-r,0));p.BezierCurveTo(new Vector2(width-r+k*r,0),new Vector2(width,r-k*r),new Vector2(width,r));
+                p.LineTo(new Vector2(width,r+shift));p.BezierCurveTo(new Vector2(width,r+shift-k*r),new Vector2(width-r+k*r,shift),new Vector2(width-r,shift));
+                p.LineTo(new Vector2(r,shift));p.BezierCurveTo(new Vector2(r-k*r,shift),new Vector2(0,r+shift-k*r),new Vector2(0,r+shift));
+                p.ClosePath();p.Fill();
+            };
             return state=>
             {
+                rest=state=="rest";ring.MarkDirtyRepaint();
                 float all=state=="rest"?0:2;Color edge=state=="focus"?C("var(--a1)"):state=="bad"?C("#FF5E6C"):C("var(--bd)");
-                ring.style.borderLeftWidth=ring.style.borderRightWidth=ring.style.borderBottomWidth=all;ring.style.borderTopWidth=2;
-                ring.style.borderLeftColor=ring.style.borderRightColor=ring.style.borderBottomColor=edge;ring.style.borderTopColor=state=="rest"?new Color(0,0,0,.3f):edge;
+                ring.style.borderLeftWidth=ring.style.borderRightWidth=ring.style.borderBottomWidth=ring.style.borderTopWidth=all;
+                ring.style.borderLeftColor=ring.style.borderRightColor=ring.style.borderBottomColor=ring.style.borderTopColor=edge;
             };
         }
         public void Decorate(VisualElement element,string background,int radius=0,int shadow=0,string shadowColor=null)
@@ -168,10 +185,12 @@ namespace Galaxy101
                 {
                     paint=new GradientPaint();gradientPaints.Add(element,paint);var binding=paint;
                     element.RegisterCallback<GeometryChangedEvent>(evt=>{if(evt.newRect.size!=evt.oldRect.size&&binding.Css!=null)PaintGradient(element,binding.Css);});
+                    // Ahead of the element's own content (a button's or label's text).
+                    element.generateVisualContent=(Action<MeshGenerationContext>)(context=>FillGradient(context,element,binding))+element.generateVisualContent;
                 }
                 paint.Css=background;PaintGradient(element,background);
             }
-            else{if(gradientPaints.TryGetValue(element,out var paint))paint.Css=null;element.style.backgroundImage=StyleKeyword.None;element.style.backgroundColor=C(background);}
+            else{if(gradientPaints.TryGetValue(element,out var paint)&&paint.Texture!=null){paint.Css=null;paint.Texture=null;element.MarkDirtyRepaint();}element.style.backgroundImage=StyleKeyword.None;element.style.backgroundColor=C(background);}
             GalaxyFilters.HardShadow(element,shadow,C(shadowColor??"var(--pnS)"));
         }
         private void PaintGradient(VisualElement element,string css)
@@ -184,7 +203,57 @@ namespace Galaxy101
             float aspect=aspectMatters&&width>0&&height>0?Mathf.Round(width/height*10000)/10000:1;
             string key=Model.Planet+":"+css+":"+aspect.ToString("F4",CultureInfo.InvariantCulture);
             if(!paints.TryGetValue(key,out var texture)){texture=new GalaxySurface(this).CreateGradient(css,Mathf.Max(.0001f,aspect),1);paints.Add(key,texture);}
-            element.style.backgroundColor=Color.clear;element.style.backgroundImage=new StyleBackground(texture);
+            element.style.backgroundColor=Color.clear;
+            // A bordered element keeps the background image, drawn under its border like CSS background-clip: border-box (the
+            // logo tiles' 7px --te bottom edge); the painted fill comes after the border and could only sit inside it.
+            var styled=element.style;var resolved=element.resolvedStyle;
+            bool bordered=styled.borderTopWidth.value>0||styled.borderRightWidth.value>0||styled.borderBottomWidth.value>0||styled.borderLeftWidth.value>0
+                ||resolved.borderTopWidth>0||resolved.borderRightWidth>0||resolved.borderBottomWidth>0||resolved.borderLeftWidth>0;
+            if(bordered||!gradientPaints.TryGetValue(element,out var paint))
+            {
+                element.style.backgroundImage=new StyleBackground(texture);
+                if(gradientPaints.TryGetValue(element,out var held)&&held.Texture!=null){held.Texture=null;element.MarkDirtyRepaint();}
+                return;
+            }
+            element.style.backgroundImage=StyleKeyword.None;paint.Texture=texture;element.MarkDirtyRepaint();
+        }
+        /// <summary>
+        /// A gradient background as an anti-aliased rounded fill: UI Toolkit draws a background-image's rounded corners
+        /// with hard, stepped edges (visible on small gold buttons and icon tiles), where CSS smooths them. The rounded
+        /// outline carries a one-pixel alpha feather. A plain textured mesh also works on a filtered element (hover
+        /// brightness, glows), which roots its own render tree where a Painter2D texture fill cannot be used.
+        /// </summary>
+        private static void FillGradient(MeshGenerationContext context,VisualElement element,GradientPaint paint)
+        {
+            var texture=paint.Texture;float w=element.layout.width,h=element.layout.height;
+            if(paint.Css==null||texture==null||float.IsNaN(w)||float.IsNaN(h)||w<=0||h<=0)return;
+            var s=element.resolvedStyle;float limit=Mathf.Min(w,h)/2;
+            var corner=new[]{Mathf.Min(s.borderTopLeftRadius,limit),Mathf.Min(s.borderTopRightRadius,limit),Mathf.Min(s.borderBottomRightRadius,limit),Mathf.Min(s.borderBottomLeftRadius,limit)};
+            // Painted after the element's border, so the fill stays inside it (the padding box) with the border's inner radii.
+            float left=s.borderLeftWidth,top=s.borderTopWidth,right=w-s.borderRightWidth,bottom=h-s.borderBottomWidth;if(right<=left||bottom<=top)return;
+            var radii=new[]{Mathf.Max(0,corner[0]-Mathf.Max(left,top)),Mathf.Max(0,corner[1]-Mathf.Max(w-right,top)),Mathf.Max(0,corner[2]-Mathf.Max(w-right,h-bottom)),Mathf.Max(0,corner[3]-Mathf.Max(left,h-bottom))};
+            var centers=new[]{new Vector2(left+radii[0],top+radii[0]),new Vector2(right-radii[1],top+radii[1]),new Vector2(right-radii[2],bottom-radii[2]),new Vector2(left+radii[3],bottom-radii[3])};
+            // Clockwise on screen (y down): top-left, top-right, bottom-right, bottom-left corners.
+            var points=new List<Vector2>();var normals=new List<Vector2>();
+            for(int c=0;c<4;c++)
+            {
+                float r=radii[c],start=180+90*c;
+                if(r<=.01f){float a=(start+45)*Mathf.Deg2Rad;points.Add(centers[c]);normals.Add(new Vector2(Mathf.Cos(a),Mathf.Sin(a))*Mathf.Sqrt(2));continue;}
+                int steps=Mathf.Clamp(Mathf.CeilToInt(r*.75f),2,24);
+                for(int i=0;i<=steps;i++){float a=(start+90f*i/steps)*Mathf.Deg2Rad;var n=new Vector2(Mathf.Cos(a),Mathf.Sin(a));points.Add(centers[c]+n*r);normals.Add(n);}
+            }
+            int count=points.Count;var vertices=new Vertex[1+count*2];var indices=new ushort[count*9];
+            Vertex At(Vector2 q,byte alpha)=>new Vertex{position=new Vector3(q.x,q.y,Vertex.nearZ),tint=new Color32(255,255,255,alpha),uv=new Vector2(Mathf.Clamp01(q.x/w),Mathf.Clamp01(1-q.y/h))};
+            vertices[0]=At(new Vector2(w/2,h/2),255);
+            for(int i=0;i<count;i++){vertices[1+i]=At(points[i]-normals[i]*.5f,255);vertices[1+count+i]=At(points[i]+normals[i]*.5f,0);}
+            for(int i=0,k=0;i<count;i++)
+            {
+                ushort inner=(ushort)(1+i),next=(ushort)(1+(i+1)%count),outer=(ushort)(1+count+i),outerNext=(ushort)(1+count+(i+1)%count);
+                indices[k++]=0;indices[k++]=inner;indices[k++]=next;
+                indices[k++]=inner;indices[k++]=outer;indices[k++]=outerNext;
+                indices[k++]=inner;indices[k++]=outerNext;indices[k++]=next;
+            }
+            var mesh=context.Allocate(vertices.Length,indices.Length,texture);mesh.SetAllVertices(vertices);mesh.SetAllIndices(indices);
         }
         /// <summary>
         /// A framed avatar as G101-Menu draws it (frameOf / frameOpts): Klasik is the conic a1/dp face, a league frame
@@ -227,6 +296,30 @@ namespace Galaxy101
             return root;
         }
         private int Level24=>Model.Level;
+        /// <summary>
+        /// The chip as the main menu's currency pill draws it, at any size: radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623
+        /// 60%,#B86E0F) with the dashed #FFF3C8 rim inside (2px at 28px) and, from 20px up, its soft gold glow. Every chip in
+        /// the game uses it.
+        /// </summary>
+        public VisualElement ChipIcon(float size)
+        {
+            var coin=new VisualElement{pickingMode=PickingMode.Ignore};coin.AddToClassList("chip-icon");coin.style.width=coin.style.height=size;coin.style.flexShrink=0;
+            Decorate(coin,"radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)",Mathf.RoundToInt(size/2));
+            coin.Add(new CssDashedCircle(size,Mathf.Max(1,size/14),C("#FFF3C8")));
+            if(size>=20)GalaxyFilters.Shadow(coin,0,0,5*size/28,new Color(1,.788f,.29f,.45f));
+            return coin;
+        }
+        /// <summary>
+        /// The gem as the main menu draws it: a 45° square, linear-gradient(135deg,#7FE3FF,#3D7BFF), radius 4 at 22px and, from
+        /// 16px up, its soft blue glow. Every gem in the game uses it.
+        /// </summary>
+        public VisualElement GemIcon(float size)
+        {
+            var gem=new VisualElement{pickingMode=PickingMode.Ignore};gem.AddToClassList("gem-icon");gem.style.width=gem.style.height=size;gem.style.flexShrink=0;gem.style.rotate=new Rotate(45);
+            Decorate(gem,"linear-gradient(135deg,#7FE3FF,#3D7BFF)",Mathf.Max(2,Mathf.RoundToInt(size*4/22)));
+            if(size>=16)GalaxyFilters.Shadow(gem,0,0,5*size/22,new Color(.498f,.89f,1,.5f));
+            return gem;
+        }
         public VisualElement Icon(string name,int size=24,string color=null)
         {var icon=new GalaxyIcon(name,C(color??"var(--ic)"));icon.style.width=icon.style.height=size;icon.style.flexShrink=0;return icon;}
         public VisualElement Tile(string code,int width=46,int height=62)
@@ -278,11 +371,11 @@ namespace Galaxy101
         /// The game shell's flash(text, kind): a pill at the top centre (Baloo 800 15 px, a dark disc with a diamond in the
         /// text colour), toastIn .35s, gone after 3.4 s. Kinds: ok, gold, bad, info.
         /// </summary>
-        public void Flash(string text,string kind="info")
+        public void Flash(string text,string kind="info",VisualElement container=null)
         {
-            if(toastLayer==null)return;
+            var target=container??toastLayer;if(target==null)return;
             Galaxy101.Audio.GalaxyAudio.Toast(kind); // v4 audio: gold → ui.reward, bad → ui.error
-            foreach(var old in toastLayer.Query<VisualElement>("shell-flash").ToList())old.RemoveFromHierarchy();
+            foreach(var old in target.Query<VisualElement>("shell-flash").ToList())old.RemoveFromHierarchy();
             (string bg,string fg)=kind=="ok"?("#3CCB6E","#062B14"):kind=="bad"?("linear-gradient(#FF7A86,#E8455A)","#fff"):kind=="gold"?("linear-gradient(var(--a1),var(--a2))","var(--aT)"):("rgba(5,8,22,.85)","#F4F1E8");
             var pill=new VisualElement{name="shell-flash",pickingMode=PickingMode.Ignore};pill.style.position=Position.Absolute;pill.style.top=22;pill.style.left=640;
             pill.style.flexDirection=FlexDirection.Row;pill.style.alignItems=Align.Center;pill.style.paddingTop=pill.style.paddingBottom=10;pill.style.paddingLeft=10;pill.style.paddingRight=20;
@@ -290,7 +383,7 @@ namespace Galaxy101
             var disc=new VisualElement{pickingMode=PickingMode.Ignore};disc.style.width=disc.style.height=26;disc.style.marginRight=10;disc.style.alignItems=Align.Center;disc.style.justifyContent=Justify.Center;Decorate(disc,"rgba(0,0,0,.18)",13);
             var diamond=new VisualElement{pickingMode=PickingMode.Ignore};diamond.style.width=diamond.style.height=9;diamond.style.rotate=new Rotate(45);Decorate(diamond,fg,2);disc.Add(diamond);pill.Add(disc);
             var label=Text(text,15,false,fg);label.style.unityFont=Font("Baloo2-800");label.style.whiteSpace=WhiteSpace.NoWrap;label.style.paddingLeft=label.style.paddingRight=label.style.paddingTop=label.style.paddingBottom=0;label.style.marginLeft=label.style.marginRight=0;pill.Add(label);
-            toastLayer.Add(pill);
+            target.Add(pill);
             float began=UnityEngine.Time.realtimeSinceStartup;IVisualElementScheduledItem job=null;
             // toastIn: translate(-50%,-14px) → translate(-50%,0), opacity 0 → 1 (ease).
             job=pill.schedule.Execute(()=>
@@ -354,6 +447,17 @@ namespace Galaxy101
 #endif
             }).ExecuteLater(1100);
         }
+        /// <summary>
+        /// A new sign-in starts from the bare main menu: whatever the previous account left open (the settings panel and the
+        /// "Çıkış yapıldı" farewell over it) closes without animation and unsaved settings are dropped. The prototype gets
+        /// there by unmounting the menu on logout (onLogout, 1.5 s after the farewell).
+        /// </summary>
+        public void CloseAllModals()
+        {
+            if(Modals.Panel==null&&Modals.Dialog==null)return;
+            if(Modals.Panel=="settings"){settings.Discard();preview=null;}
+            focusAfterClose=null;Modals.Clear();Refresh();
+        }
         public void CloseTop()
         {
             bool dialog=Modals.Dialog!=null;if(!dialog&&Modals.Panel=="settings"){settings.Discard();preview=null;}
@@ -402,9 +506,11 @@ namespace Galaxy101
         }
         public void Dispose()
         {
+            settings.Flush();
             if(disposed)return;disposed=true;Model.Changed-=Refresh;Loc.Changed-=Refresh;refreshJob?.Pause();
             Root.UnregisterCallback<KeyDownEvent>(OnKey,TrickleDown.TrickleDown);Root.UnregisterCallback<PointerDownEvent>(OnPointer,TrickleDown.TrickleDown);Root.UnregisterCallback<NavigationSubmitEvent>(OnSubmit,TrickleDown.TrickleDown);
             animationJob?.Pause();
+            fpsJob?.Pause();
             foreach(var texture in paints.Values)if(texture!=null){if(UnityEngine.Application.isPlaying)UnityEngine.Object.Destroy(texture);else UnityEngine.Object.DestroyImmediate(texture);}paints.Clear();motions.Clear();panelMotions.Clear();dialogMotions.Clear();
         }
     }

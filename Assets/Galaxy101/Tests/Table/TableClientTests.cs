@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Galaxy101.Contracts;
@@ -292,6 +293,97 @@ namespace Galaxy101.Table.Tests
                 host.Deliver();
                 Same(c, rt, host.Now, 0, "trusted");
             }
+        }
+
+        private static LocalTableHost FinishedObservedHand(bool trustViews = true)
+        {
+            var options = new MatchOptions { Mode = "solo", Hands = 5 };
+            var host = new LocalTableHost(0, Start);
+            host.Start(new TableSetup { Options = options, Seed = 42, TurnMs = 30000 }, TableTestHost.Table(options, 30, true, new[] { false, true, true, true }));
+            host.ResumeFrom(TableScenarios.Create("end").State());
+            host.Client.TrustViews = trustViews;
+            while (host.Client.Status == G101Rules.StatusPlaying && host.Now - Start < 5000) Assert.That(host.Step(), Is.True);
+            Assert.That(host.Client.History.Count, Is.EqualTo(1));
+            return host;
+        }
+
+        private static Dictionary<string, object> FirstHistory(IDictionary<string, object> view) => TableClient.Tree(((IList)view["history"])[0]);
+        private static IReadOnlyList<int> ScoreboardOpenings(TableClient client, Dictionary<string, object> hand)
+        {
+            if (hand.TryGetValue("opened", out var authoritative)) return TableClient.Ints(authoritative);
+            return client.TryObservedOpenings(hand, out var observed) ? observed : null;
+        }
+
+        [Test]
+        public void HistoryOpeningNotesSurviveTheHandEndsImmediateAuthoritativeView()
+        {
+            var host = FinishedObservedHand();
+            Assert.That(ScoreboardOpenings(host.Client, host.Client.History[0]), Is.EqualTo(new[] { 0, 0, 117, 0 }));
+            Same(host.Client, host.Runtime, host.Now, 0, "the handEnd's immediate PushView");
+        }
+
+        [Test]
+        public void HistoryOpeningNotesDoNotChangeTheEventOnlyProtocolView()
+        {
+            var host = FinishedObservedHand(false);
+            Same(host.Client, host.Runtime, host.Now, 0, "event-only history with locally observed opening notes");
+        }
+
+        [Test]
+        public void HistoryOpeningNotesDoNotCarryIntoANewMatchWithIdenticalResults()
+        {
+            var host = FinishedObservedHand(); var view = host.Runtime.GameView(0);
+            host.Client.Apply(V4Messages.MatchStart, new V4MatchStart { Table = host.Client.Table, At = host.Now + 1 });
+            host.Client.Load(view);
+            Assert.That(ScoreboardOpenings(host.Client, host.Client.History[0]), Is.Null);
+        }
+
+        [Test]
+        public void HistoryOpeningNotesDoNotCarryIntoAnotherTablesSnapshot()
+        {
+            var host = FinishedObservedHand(); var view = host.Runtime.GameView(0);
+            var table = TableTestHost.Table(new MatchOptions { Mode = "solo", Hands = 5 }, 30); table.Id = "other-table";
+            host.Client.Apply(V4Messages.Snapshot, new V4Snapshot { Table = table, Game = view, At = host.Now + 1 });
+            Assert.That(ScoreboardOpenings(host.Client, host.Client.History[0]), Is.Null);
+        }
+
+        [Test]
+        public void HistoryOpeningNotesStayUnknownOnAReconnectWithoutObservedHands()
+        {
+            var host = FinishedObservedHand(); var client = new TableClient(0);
+            client.Apply(V4Messages.Snapshot, new V4Snapshot { Table = host.Client.Table, Game = host.Runtime.GameView(0), At = host.Now });
+            Assert.That(ScoreboardOpenings(client, client.History[0]), Is.Null);
+            Same(client, host.Runtime, host.Now, 0, "a newly connected client");
+        }
+
+        [Test]
+        public void HistoryOpeningNotesUseAuthoritativeMetadataWhenTheServerSuppliesIt()
+        {
+            var host = FinishedObservedHand(); var view = host.Runtime.GameView(0);
+            FirstHistory(view)["opened"] = V4Tree.Ints(new[] { 101, 0, 0, 5 });
+            host.Client.Load(view);
+            Assert.That(ScoreboardOpenings(host.Client, host.Client.History[0]), Is.EqualTo(new[] { 101, 0, 0, 5 }));
+            Assert.That(Canon(host.Client.View(host.Now)), Is.EqualTo(Canon(view)));
+        }
+
+        [TestCase("handNo")]
+        [TestCase("finisher")]
+        [TestCase("score")]
+        public void HistoryOpeningNotesRequireTheSameHandFinisherAndScores(string changed)
+        {
+            var host = FinishedObservedHand(); var view = host.Runtime.GameView(0); var hand = FirstHistory(view);
+            hand[changed] = changed == "score" ? (object)V4Tree.Ints(new[] { 202, 203, -101, 202 }) : TableClient.I(hand[changed]) + 1;
+            host.Client.Load(view);
+            Assert.That(ScoreboardOpenings(host.Client, host.Client.History[0]), Is.Null);
+        }
+
+        [Test]
+        public void HistoryOpeningNotesForRemovedAuthoritativeRowsCannotReappear()
+        {
+            var host = FinishedObservedHand(); var view = host.Runtime.GameView(0);
+            var empty = new Dictionary<string, object>(view) { ["history"] = new List<object>() };
+            host.Client.Load(empty); host.Client.Load(view);
+            Assert.That(ScoreboardOpenings(host.Client, host.Client.History[0]), Is.Null);
         }
 
         [Test]

@@ -22,7 +22,7 @@ namespace Galaxy101.Audio
 
         public VisualElement Pick(Vector2 screenPosition)
         {
-            if (Time.frameCount - scannedAt >= RescanFrames || documents.Exists(d => d == null)) Scan();
+            if (scannedAt == int.MinValue || Time.frameCount - scannedAt >= RescanFrames || documents.Exists(d => d == null)) Scan();
             VisualElement best = null;
             float bestOrder = float.NegativeInfinity;
             seen.Clear();
@@ -54,7 +54,7 @@ namespace Galaxy101.Audio
         {
             scannedAt = Time.frameCount;
             documents.Clear();
-            documents.AddRange(Object.FindObjectsByType<UIDocument>(FindObjectsInactive.Exclude, FindObjectsSortMode.None));
+            documents.AddRange(Object.FindObjectsByType<UIDocument>(FindObjectsInactive.Exclude));
         }
     }
 }

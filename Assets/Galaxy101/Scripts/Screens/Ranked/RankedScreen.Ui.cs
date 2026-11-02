@@ -109,11 +109,10 @@ namespace Galaxy101
             return css;
         }
 
-        /// <summary>radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F) coin; 2 px dashed #FFF3C8 from 24 px up.</summary>
+        /// <summary>The main menu chip (MenuView.ChipIcon) at every size.</summary>
         private VisualElement Coin(int size, bool dashed)
         {
-            var coin = Box(); Square(coin, size); view.Decorate(coin, "radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)", size / 2);
-            if (dashed) DashedBorder(coin, 2, view.C("#FFF3C8"));
+            var coin = view.ChipIcon(size); // the main menu chip at every size
             return coin;
         }
 

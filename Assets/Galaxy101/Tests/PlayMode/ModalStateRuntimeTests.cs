@@ -211,11 +211,11 @@ namespace Galaxy101.Tests
         [UnityTest]
         public IEnumerator NestedDialogBlocksNavigationSubmitOnUnderlyingSave()
         {
-            view.OpenPanel("settings", 1);
-            yield return Until(() => view.Root.Q<GalaxySlider>("setting-master") != null, "Sound settings did not open.");
-            yield return Until(() => ModalReady(false), "Sound settings opening animation did not complete.");
-            view.Root.Q<GalaxySlider>("setting-master").Value = 12;
-            Assert.That((int)model.Settings["master"], Is.EqualTo(80));
+            view.OpenPanel("settings", 2);
+            yield return Until(() => view.Root.Q<Button>("setting-fps-next") != null, "Display settings did not open.");
+            yield return Until(() => ModalReady(false), "Display settings opening animation did not complete.");
+            Submit(view.Root.Q<Button>("setting-fps-next"));
+            Assert.That((int)model.Settings["fps"], Is.EqualTo(FramePacing.Auto));
             view.OpenDialog("profile");
             yield return Until(() => view.Root.Q<TextField>("menu.pf.onName") != null, "Nested profile form did not open.");
             yield return Until(() => ModalReady(true), "Nested profile opening animation did not complete.");
@@ -223,7 +223,7 @@ namespace Galaxy101.Tests
             Assert.That(underlyingSave, Is.Not.Null);
             Submit(underlyingSave);
             yield return null;
-            Assert.That((int)model.Settings["master"], Is.EqualTo(80), "Underlying submit saved a settings draft through the modal.");
+            Assert.That((int)model.Settings["fps"], Is.EqualTo(FramePacing.Auto), "Underlying submit saved a display draft through the modal.");
             Assert.That(view.Modals.Dialog, Is.EqualTo("profile"));
             Assert.That(view.Modals.Panel, Is.EqualTo("settings"));
         }

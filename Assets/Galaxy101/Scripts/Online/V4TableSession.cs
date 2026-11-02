@@ -150,6 +150,7 @@ namespace Galaxy101.Online
         }
 
         public Task<string> RollDice() => Request(V4Messages.GRollDice);
+        public Task<string> SkipDeal() => Request(V4Messages.GSkipDeal);
         public Task<string> Draw(string src) => Request(V4Messages.GDraw, new V4DrawRequest { Src = src });
         public Task<string> ReturnSide() => Request(V4Messages.GReturnSide);
         public Task<string> Open(List<MeldSpec> melds) => Request(V4Messages.GOpen, Melds(melds));

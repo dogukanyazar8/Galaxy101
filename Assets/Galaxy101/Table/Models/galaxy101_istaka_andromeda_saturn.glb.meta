@@ -15,9 +15,9 @@ ScriptedImporter:
     animationMethod: 2
     generateMipMaps: 1
     texturesReadable: 0
-    defaultMinFilterMode: 9729
+    defaultMinFilterMode: 9987
     defaultMagFilterMode: 9729
-    anisotropicFilterLevel: 1
+    anisotropicFilterLevel: 16
   instantiationSettings:
     mask: -1
     layer: 0
@@ -29,8 +29,8 @@ ScriptedImporter:
   - type: 2
     code: 20
     messages:
-    - KHR_materials_emissive_strength
+    - KHR_materials_iridescence
   - type: 2
     code: 20
     messages:
-    - KHR_materials_iridescence
+    - KHR_materials_emissive_strength

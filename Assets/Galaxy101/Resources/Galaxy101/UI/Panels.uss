@@ -34,6 +34,7 @@
 .g-settings-heading { padding: 22px 28px 14px; flex-shrink: 0; }
 .g-settings-list { flex-grow: 1; padding-left: 28px; padding-right: 20px; min-height: 0; }
 .g-settings-row { padding: 10px 0; min-height: 62px; border-bottom-width: 1px; border-bottom-color: rgba(255,255,255,.07); flex-shrink: 0; }
+.g-step-arrow { background-color: transparent; }
 .g-settings-footer { padding: 16px 28px; background-color: rgba(0,0,0,.12); border-top-width: 1px; border-top-color: rgba(255,255,255,.07); flex-shrink: 0; }
 .g-toggle { width: 56px; height: 32px; min-width: 56px; border-radius: 16px; padding: 0; margin: 0; border-width: 0; background-color: var(--dp); }
 .g-toggle.on { background-color: #3ccb6e; }
@@ -84,6 +85,7 @@
 .g-edit-swatch { width: 28px; height: 28px; min-width: 28px; padding: 0; margin: 4px; border-radius: 14px; border-width: 2px; border-color: transparent; }
 .g-edit-swatch.selected { border-color: white; }
 .g-share-card { height: 180px; border-radius: 22px; padding: 20px; overflow: hidden; }
-.g-share-target { flex-grow: 1; flex-basis: 0; align-items: center; padding: 14px 8px 10px; border-radius: 18px; background-color: var(--sd); border-width: 0; margin: 0; transition-property: translate, background-color; transition-duration: .15s; }
-.g-share-target:hover { translate: 0 -4px; }
+.g-share-target { flex-grow: 1; flex-basis: 0; min-width: 0; align-items: center; padding: 14px 0 12px; border-radius: 18px; background-color: var(--sd); border-width: 0; margin: 0; transition-property: translate, background-color; transition-duration: .15s; }
+.g-share-target:hover { translate: 0 -4px; background-color: var(--pnH); }
+.g-share-target:hover:active { translate: 0 0; }
 .g-losses { padding: 14px 16px; border-radius: 14px; background-color: rgba(255,94,108,.1); border-width: 1px; border-color: rgba(255,94,108,.22); margin-top: 16px; margin-bottom: 16px; }

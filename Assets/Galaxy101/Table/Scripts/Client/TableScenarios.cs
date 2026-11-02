@@ -22,8 +22,8 @@ namespace Galaxy101.Table
     /// HAND_BOMB, AYSE_MELDS, setupPenOpenTest, setupIsleTest; DEMO-17/18, dev and state runs only) as engine hands in
     /// progress (<see cref="G101Rules.FromSpec"/>), so the flows play on the v4 engine with real bots instead of the
     /// prototype's engine-less path. Faces without a copy letter take copy a, then b; "J" is a fake okey. The others' racks
-    /// hold the counts the flow shows, filled from the unused tiles in the engine's order; the deck takes up to 20 of the
-    /// rest (the prototype's counts do not add up to 106, docs/v4/table/UNITY_FARKLARI.md UF-504).
+    /// hold the counts the flow shows, filled from the unused tiles in the engine's order; the deck takes 20 of the rest,
+    /// the left and right players' hidden racks giving up what it lacks (the prototype's counts do not add up to 106).
     /// </summary>
     public static class TableScenarios
     {
@@ -108,13 +108,15 @@ namespace Galaxy101.Table
 
         /// <summary>
         /// Copies of each face in play: a before b; "J" takes Ja then Jb. A face asked for a third time (the prototype's
-        /// hands overlap Ayşe's melds: B12) is replaced, as setupPlay's fix() does, by a free copy of the okey when there is
-        /// one (it fits any meld: G13 opens 131 in the reference), else by the first free tile in the engine's order.
+        /// hands overlap Ayşe's melds: B12) is replaced, as setupPlay's fix() does, by the face the reference drew (Spare),
+        /// else by a free copy of the okey, else by the first free tile in the engine's order.
         /// </summary>
         private sealed class Tiles
         {
             private readonly HashSet<string> used = new HashSet<string>();
             public string Okey;
+            /// <summary>The face setupPlay's seeded fix() drew for the third copy (seed 42), before the okey fallback.</summary>
+            public string Spare;
             public string Take(string code)
             {
                 foreach (var copy in new[] { "a", "b" })
@@ -123,6 +125,7 @@ namespace Galaxy101.Table
                     if (!G101Rules.IsTile(id)) throw new ArgumentException("Not a tile face: " + code);
                     if (used.Add(id)) return id;
                 }
+                if (Spare != null) { var spare = Spare; Spare = null; foreach (var copy in new[] { "a", "b" }) if (used.Add(spare + copy)) return spare + copy; }
                 if (Okey != null) foreach (var copy in new[] { "a", "b" }) if (used.Add(Okey + copy)) return Okey + copy;
                 foreach (var id in G101Rules.AllTiles) if (!G101Rules.IsFake(id) && used.Add(id)) return id;
                 throw new InvalidOperationException("No tile left for " + code + ".");
@@ -152,6 +155,12 @@ namespace Galaxy101.Table
             var racks = new List<List<string>> { myRack, new List<string>(), new List<string>(), new List<string>() };
             if (fixedOpponent != null) racks[fixedSeat] = fixedOpponent;
             var rest = tiles.Rest();
+            // The prototype's flows show a deck of 20 whatever the piles hold: the left and right players' hidden racks give up
+            // the tiles the deck lacks (never below 14), so the deck count reads as in the reference.
+            int deficit = G101Rules.Const.Deck - (rest.Count - (counts[1] - racks[1].Count) - (counts[2] - racks[2].Count) - (counts[3] - racks[3].Count));
+            counts = (int[])counts.Clone();
+            for (int k = 3; deficit > 0 && (counts[1] > 14 && fixedSeat != 1 || counts[3] > 14 && fixedSeat != 3); k = 4 - k)
+                if (counts[k] > 14 && k != fixedSeat) { counts[k]--; deficit--; }
             for (int k = 1; k < 4; k++)
                 while (racks[k].Count < counts[k] && rest.Count > 0) { racks[k].Add(rest[0]); rest.RemoveAt(0); }
             var seats = new SeatInfo[4];
@@ -187,6 +196,10 @@ namespace Galaxy101.Table
             var tiles = new Tiles(); tiles.Take(Indicator);
             var okey = G101Rules.OkeyFromIndicator(Indicator + "a");
             tiles.Okey = okey.C + okey.N;
+            // HAND_DEAL's and HAND_OPEN's B12 is a third copy beside Ayşe's two. setupPlay's fix() draws a random free face
+            // for it — B3 in most reference frames (G30, T06, T11; K4 in some, docs/v4/table/UNITY_FARKLARI.md UF-503) —
+            // so G13 opens 95, a short opening (R-23) in the reference too.
+            tiles.Spare = "B3";
             var melds = MeldsOf(tiles, 2, AyseMelds, okey, new List<SpecMeld>());
             var discards = new List<List<string>> { Ids(tiles, "K1"), Ids(tiles, "R4", "Y13"), Ids(tiles, "B3"), Ids(tiles, "Y2", "R9") };
             var rack = new List<string>();

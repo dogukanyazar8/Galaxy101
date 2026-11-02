@@ -59,7 +59,7 @@ namespace Galaxy101
         {
             if (layer != null) return;
             var canvas = view.Root.Q<VisualElement>("galaxy-canvas") ?? view.Root;
-            var main = canvas.Q<VisualElement>("main-layer"); if (main != null) main.style.display = DisplayStyle.None;
+            var main = canvas.Q<VisualElement>("main-layer"); if (main != null) main.style.visibility = Visibility.Hidden;
             layer = Fill("ranked"); layer.pickingMode = PickingMode.Position;
             var modal = canvas.Q<VisualElement>("modal-layer");
             if (modal?.parent != null) modal.parent.Insert(modal.parent.IndexOf(modal), layer); else canvas.Add(layer);
@@ -109,7 +109,7 @@ namespace Galaxy101
             Unhook();
             ticker?.Pause(); ticker = null; motions.Clear();
             var canvas = layer.parent; layer.RemoveFromHierarchy(); layer = null; body = modalLayer = toastLayer = null;
-            var main = canvas?.Q<VisualElement>("main-layer"); if (main != null) main.style.display = DisplayStyle.Flex;
+            var main = canvas?.Q<VisualElement>("main-layer"); if (main != null) main.style.visibility = Visibility.Visible;
         }
 
         /// <summary>back(): a running search is cancelled first.</summary>

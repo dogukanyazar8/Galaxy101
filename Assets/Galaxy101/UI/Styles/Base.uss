@@ -6,6 +6,19 @@
 .heading { white-space: normal; margin: 0; padding: 0; }
 .body { white-space: normal; margin: 0; padding: 0; }
 .galaxy-button { margin: 0; padding: 10px 18px; border-width: 0; align-items: center; justify-content: center; flex-shrink: 0; transition-property: translate, scale, opacity; transition-duration: .15s; transition-timing-function: ease-out; }
+.auth-raised { transition-property: translate; transition-duration: .12s; transition-timing-function: ease; }
+.auth-hover-face { transition-property: opacity; transition-duration: .15s; transition-timing-function: ease; }
+.auth-switch-track { transition-property: background-color; transition-duration: .2s; }
+.auth-switch-thumb { transition-property: translate; transition-duration: .2s; transition-timing-function: ease-out-back; }
+.auth-terms-fill { transition-property: opacity; transition-duration: .15s; }
+.auth-cursor-root { transition-property: opacity; transition-duration: .18s; }
+.auth-cursor-icon { opacity: 0; scale: .6 .6; rotate: 0deg; transition-property: opacity, scale, rotate; transition-duration: .12s, .22s, .22s; transition-timing-function: ease-out, ease-out-back, ease-out-back; }
+.auth-cursor-icon.auth-cursor-active { opacity: 1; scale: 1 1; }
+.auth-cursor-pointer.auth-cursor-active { scale: 1.06 1.06; rotate: -6deg; }
+.auth-cursor-pointer.auth-cursor-active.auth-cursor-pressed { scale: .84 .84; rotate: -8deg; }
+.auth-cursor-default.auth-cursor-active.auth-cursor-pressed, .auth-cursor-no.auth-cursor-active.auth-cursor-pressed { scale: .86 .86; }
+.auth-cursor-grabbing.auth-cursor-active { scale: .96 .96; }
+.auth-cursor-wait { transition-property: opacity, scale; transition-duration: .12s, .22s; transition-timing-function: ease-out, ease-out-back; }
 /* Hover brightens (MenuView.Button); only the settings gear also rises, as in the design. */
 .settings-button:hover { translate: 0 -2px; }
 .galaxy-button:active { translate: 0 3px; }

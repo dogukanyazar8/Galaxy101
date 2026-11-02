@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -10,7 +11,7 @@ namespace Galaxy101.Table
         {
             public int Dealer, DieA, DieB, LastDie = -1, Roll = -1;
             public string Step, Indicator, Okey;
-            public bool Fake, Revealed;
+            public bool Fake, Revealed, CanSkip, SkipWait;
             public float StepAt;
         }
 
@@ -51,16 +52,18 @@ namespace Galaxy101.Table
             // The dealer: a 46 px disc in the seat colour, 2 px white ring, initials 700 16px; DAĞITAN at right −5, bottom −4.
             var seat = Seat(d.Dealer);
             var who = new VisualElement { pickingMode = PickingMode.Ignore }; who.style.width = who.style.height = 46; who.style.flexShrink = 0;
-            var disc = new VisualElement { pickingMode = PickingMode.Ignore }; MenuView.Place(disc, 0, 0, 46, 46); disc.style.alignItems = Align.Center; disc.style.justifyContent = Justify.Center;
+            var disc = new VisualElement { name = "table.dh.ini", pickingMode = PickingMode.Ignore }; MenuView.Place(disc, 0, 0, 46, 46); disc.style.alignItems = Align.Center; disc.style.justifyContent = Justify.Center;
             view.Decorate(disc, (string)seat["color"], 23); Border(disc, 2, new Color(1, 1, 1, .85f)); disc.Add(Text((string)seat["ini"], "Montserrat-700", 16, "#fff")); who.Add(disc);
             var badge = Text(L("DAĞITAN", "DEALER"), "Baloo2-800", 9, "var(--aT)"); MenuView.Tracking(badge, .8f, 9);
+            badge.name = "table.t.dealerCap";
             badge.style.position = Position.Absolute; badge.style.right = -5; badge.style.bottom = -4; badge.style.height = 18; badge.style.whiteSpace = WhiteSpace.NoWrap; badge.style.flexShrink = 0; badge.style.unityTextAlign = TextAnchor.MiddleCenter; Pad(badge, 0, 6, 0, 6);
             view.Decorate(badge, "linear-gradient(var(--a1),var(--a2))", 9, 2, "var(--aS)"); who.Add(badge); card.Add(who);
 
             var words = new VisualElement { pickingMode = PickingMode.Ignore }; words.style.minWidth = 220; words.style.justifyContent = Justify.Center;
             var title = Text(d.Dealer == 0 ? L("Taşları sen dağıtıyorsun", "You are dealing") : L("Taşları " + FirstName(d.Dealer) + " dağıtıyor", FirstName(d.Dealer) + " is dealing"), "Montserrat-700", 18, "#F4F1E8");
+            title.name = "table.dh.title";
             title.style.height = 18 * 1.1f; title.style.unityTextAlign = TextAnchor.MiddleLeft; words.Add(title);
-            var step = Text(DealStepText(d), "Baloo2-700", 12, "var(--ic)"); step.name = "deal-step"; step.style.height = 12 * 1.3f; step.style.unityTextAlign = TextAnchor.MiddleLeft; step.style.marginTop = 3; words.Add(step);
+            var step = Text(DealStepText(d), "Baloo2-700", 12, "var(--ic)"); step.name = "table.dh.sub"; step.style.height = 12 * 1.3f; step.style.unityTextAlign = TextAnchor.MiddleLeft; step.style.marginTop = 3; words.Add(step);
             // dhSub .4s on every step or roll (the design keys the line by both).
             float at = Since("deal-step-" + d.Step + (d.LastDie + 1) + (d.Fake ? "f" : ""));
             motions.Add(t => { float k = MenuView.CssBezier(.25f, .1f, .25f, 1, Mathf.Clamp01((t - at) / .4f)); step.style.opacity = k; step.style.translate = new Translate(0, 5 * (1 - k)); });
@@ -70,7 +73,7 @@ namespace Galaxy101.Table
             var diceColumn = new VisualElement { pickingMode = PickingMode.Ignore }; diceColumn.style.alignItems = Align.Center; diceColumn.style.justifyContent = Justify.Center;
             var dice = Row(7);
             for (int i = 0; i < 2; i++) dice.Add(DieIcon(i <= d.LastDie ? (i == 0 ? d.DieA : d.DieB) : 0, i == d.LastDie));
-            diceColumn.Add(dice); diceColumn.Add(Caption(L("ZAR", "DICE"), "var(--mt)")); card.Add(diceColumn);
+            diceColumn.Add(dice); var diceCaption = Caption(L("ZAR", "DIE"), "var(--mt)"); diceCaption.name = "table.t.diceCap"; diceColumn.Add(diceCaption); card.Add(diceColumn);
 
             if (d.Revealed && d.Indicator != null)
             {
@@ -85,9 +88,87 @@ namespace Galaxy101.Table
                 pair.Add(DealTile(d.Okey, true, L("OKEY", "OKEY"), revealed + .25f));
                 card.Add(pair);
             }
+            if (d.CanSkip)
+            {
+                card.Add(Divider());
+                if (d.SkipWait) BuildDealSkipWaiting(card); else BuildDealSkipButton(card);
+            }
             row.Add(card); hudLayer.Add(row);
 
             if (d.Roll >= 0) BuildRollButton(d.Roll);
+        }
+
+        private void BuildDealSkipButton(VisualElement card)
+        {
+            var button = Row(7); button.name = "table.dh.skip"; button.style.height = 40; button.style.flexShrink = 0;
+            Pad(button, 0, 14, 0, 12); button.tooltip = L("Zar atma ve dağıtmayı geç, oyuna hemen başla", "Skip the dice and dealing, start playing now");
+            view.Decorate(button, "var(--pnH)", 13, 4, "var(--pnS)");
+            button.Add(view.Icon("table-deal-skip", 16, "var(--a1)"));
+            var caption = Text(L("Geç", "Skip"), "Montserrat-800", 14, "#F4F1E8"); button.Add(caption);
+            FitDealCaption(caption, button);
+            button.style.translate = new Translate(0, 0);
+            button.style.transitionProperty = new List<StylePropertyName> { new StylePropertyName("translate") };
+            button.style.transitionDuration = new List<TimeValue> { new TimeValue(.15f, TimeUnit.Second) };
+            button.style.transitionTimingFunction = new List<EasingFunction> { new EasingFunction(EasingMode.Ease) };
+            bool hover = false, down = false;
+            float brightness = 1, from = 1, to = 1, changed = 0;
+            GalaxyFilters.StableLook(button, 1, 1, 0, 0, 1, Color.clear);
+            void Target()
+            {
+                button.style.translate = new Translate(0, down ? 3 : hover ? -1 : 0);
+                GalaxyFilters.HardShadow(button, down ? 1 : 4, view.C("var(--pnS)"));
+                from = brightness; to = hover ? 1.25f : 1; changed = Time.realtimeSinceStartup;
+            }
+            button.RegisterCallback<PointerEnterEvent>(_ => { hover = true; Target(); });
+            button.RegisterCallback<PointerLeaveEvent>(_ => { hover = down = false; Target(); });
+            button.RegisterCallback<PointerDownEvent>(_ => { down = true; Target(); });
+            button.RegisterCallback<PointerUpEvent>(_ => { down = false; Target(); });
+            button.RegisterCallback<PointerCancelEvent>(_ => { down = false; Target(); });
+            button.schedule.Execute(() =>
+            {
+                if (Mathf.Approximately(brightness, to)) return;
+                float progress = MenuView.CssBezier(.25f, .1f, .25f, 1, Mathf.Clamp01((Time.realtimeSinceStartup - changed) / .15f));
+                brightness = Mathf.Lerp(from, to, progress); GalaxyFilters.StableLook(button, 1, brightness, 0, 0, 1, Color.clear);
+            }).Every(16);
+            Galaxy101.Audio.CursorRules.Mark(button, "pointer");
+            Tap(button, () => Press("skipDeal"));
+            button.RegisterCallback<NavigationSubmitEvent>(evt => { Press("skipDeal"); evt.StopPropagation(); });
+            card.Add(button);
+        }
+
+        private static void FitDealCaption(Label caption, VisualElement owner)
+        {
+            // Same high-resolution font measurement used by LobbyScreen.Exact: avoid TextCore's per-glyph
+            // pixel rounding inflating short CSS controls. Measure the authored font, never a fixed translated width.
+            var probe = new Label(caption.text) { enableRichText = false, pickingMode = PickingMode.Ignore };
+            probe.style.position = Position.Absolute; probe.style.visibility = Visibility.Hidden;
+            probe.style.paddingLeft = probe.style.paddingRight = probe.style.paddingTop = probe.style.paddingBottom = 0;
+            probe.style.marginLeft = probe.style.marginRight = probe.style.marginTop = probe.style.marginBottom = 0;
+            probe.style.whiteSpace = WhiteSpace.NoWrap; probe.style.unityFont = caption.style.unityFont; probe.style.fontSize = 140;
+            owner.Add(probe);
+            probe.schedule.Execute(() =>
+            {
+                if (probe.panel == null || Mathf.Abs(probe.resolvedStyle.fontSize - 140) > .01f) return;
+                float width = probe.MeasureTextSize(caption.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).x / 10;
+                if (width <= 0) return;
+                caption.style.width = width; probe.RemoveFromHierarchy();
+            }).Every(0).Until(() => probe.parent == null);
+        }
+
+        private void BuildDealSkipWaiting(VisualElement card)
+        {
+            var waiting = Row(8); waiting.name = "table.dh.skipWait"; waiting.style.height = 40; waiting.style.flexShrink = 0; Pad(waiting, 0, 12, 0, 12);
+            view.Decorate(waiting, "rgba(0,0,0,.25)", 13);
+            // Source width/height12 are content dimensions; two 2px CSS borders make a 16px outer circle.
+            var spinner = new VisualElement { name = "table.dh.skipSpinner", pickingMode = PickingMode.Ignore }; spinner.style.width = spinner.style.height = 16; spinner.style.flexShrink = 0;
+            spinner.generateVisualContent += context =>
+            {
+                var painter = context.painter2D; painter.lineWidth = 2; painter.lineCap = LineCap.Butt;
+                painter.strokeColor = view.C("var(--mt)"); painter.BeginPath(); painter.Arc(new Vector2(8, 8), 7, 0, 360); painter.Stroke();
+                painter.strokeColor = view.C("var(--a1)"); painter.BeginPath(); painter.Arc(new Vector2(8, 8), 7, -135, -45); painter.Stroke();
+            };
+            motions.Add(t => spinner.style.rotate = new Rotate(Mathf.Repeat(t, .8f) / .8f * 360)); waiting.Add(spinner);
+            waiting.Add(Text(L("Bekleniyor", "Waiting"), "Baloo2-800", 12, "var(--mt)")); card.Add(waiting);
         }
 
         /// <summary>

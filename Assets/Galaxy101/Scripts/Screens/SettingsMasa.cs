@@ -18,13 +18,13 @@ namespace Galaxy101
         private TableSettings table, probe;
         // LOOK.vars: --f1:#2C3790; --f2:#11153F; --rim:#4a5080 (the previews' felt and rim).
         private const string F1 = "#2C3790", F2 = "#11153F", Rim = "#4a5080";
-        private static readonly string[] Views = { "seat", "mid", "top" }, Tables = { "station", "wood", "holo", "andromeda" }, Racks = { "walnut", "sedef", "chrome", "carbon", "neon", "andromeda" }, Tiles = { "classic", "galaxy", "gold", "neon", "marble" };
+        private static readonly string[] Views = { "seat", "mid", "top", "2d" }, Tables = { "station", "wood", "holo", "andromeda" }, Racks = { "walnut", "sedef", "chrome", "carbon", "neon", "andromeda" }, Tiles = { "classic", "galaxy", "gold", "neon", "marble" };
         private static readonly string[] Notifs = { "bubbles", "giftNotif", "emojiFx", "turnHint", "chatSnd" };
 
         public void Build(MenuView v, VisualElement list)
         {
             // Read afresh on every build: the table may have changed its settings since (both keep them in PlayerPrefs).
-            table = new TableSettings(v.Model); probe = probe ?? new TableSettings(null, false);
+            table = v.TableSettings ?? new TableSettings(v.Model); probe = probe ?? new TableSettings(null, false);
             bool en = v.Loc.Language == "en";
             var names = Names(en);
             string Cur(string[] keys, string[][] labels, string key) => labels[Math.Max(0, Array.IndexOf(keys, key))][0];
@@ -46,6 +46,7 @@ namespace Galaxy101
                 var card = v.Box(); v.Decorate(card, "sd", 18); card.style.overflow = Overflow.Hidden; card.style.flexShrink = 0; if (i > 0) card.style.marginTop = 10;
                 if (isOpen) card.Add(PanelUi.Ring(v, 1, "rgba(255,255,255,.08)", 18));
                 var head = PanelUi.CustomButton(v, "", () => { if (!open.Remove(key)) open.Add(key); v.Refresh(); }, "g-masa-head"); head.name = "menu.sec.toggle[" + i + "]";
+                head.style.backgroundColor = Color.clear; head.style.unityTextAlign = TextAnchor.MiddleLeft;
                 head.style.flexDirection = FlexDirection.Row; head.style.alignItems = Align.Center; head.style.justifyContent = Justify.FlexStart; PanelUi.Pad(head, 14, 16);
                 var tile = v.Box(); tile.style.width = tile.style.height = 34; tile.style.flexShrink = 0; tile.style.alignItems = Align.Center; tile.style.justifyContent = Justify.Center; tile.style.marginRight = 14; v.Decorate(tile, "pnH", 11, 3, "pnS");
                 tile.Add(PanelUi.Diamond(v, 10, "a1", 3)); head.Add(tile);
@@ -79,11 +80,11 @@ namespace Galaxy101
 
         /// <summary>LOOK.tr / LOOK.en names and descriptions.</summary>
         private static (string[][] views, string[][] tables, string[][] racks, string[][] tiles) Names(bool en) => en
-            ? (new[] { new[] { "Player view", "Low angle, rack up front" }, new[] { "Mid view", "Medium angle, rack and table balanced" }, new[] { "Top view", "High angle, whole table visible" } },
+            ? (new[] { new[] { "Player view", "Low angle, rack up front" }, new[] { "Mid view", "Medium angle, rack and table balanced" }, new[] { "Top view", "High angle, whole table visible" }, new[] { "2D table", "Flat top-down view, large rack" } },
                new[] { new[] { "Station", "Metal rim, light strip" }, new[] { "Walnut lounge", "Polished walnut, brass trim" }, new[] { "Hologram", "Glass rim, glowing grid" }, new[] { "Andromeda", "Spiral galaxy, iridescent rim" } },
                new[] { new[] { "Classic walnut", "Solid walnut, maple inlay" }, new[] { "Mother-of-pearl", "Rosewood, pearl inlay" }, new[] { "Aluminium", "Anodised metal, smoked glass" }, new[] { "Carbon", "Carbon fibre, glowing seams" }, new[] { "Neon glass", "Smoked glass, neon tubes" }, new[] { "Andromeda", "Galaxy panel, iridescent" } },
                new[] { new[] { "Classic", "Ivory, classic colours" }, new[] { "Galaxy", "Nebula texture, glowing numbers" }, new[] { "Gold", "Black onyx, gold frame" }, new[] { "Neon", "Smoked body, glowing edge" }, new[] { "Marble", "White marble, gold veins" } })
-            : (new[] { new[] { "Oyuncu gözü", "Alçak açı, ıstaka önde" }, new[] { "Yarı yüksek", "Orta açı, ıstaka ve masa dengeli" }, new[] { "Kuşbakışı", "Yüksek açı, tüm masa görünür" } },
+            : (new[] { new[] { "Oyuncu gözü", "Alçak açı, ıstaka önde" }, new[] { "Yarı yüksek", "Orta açı, ıstaka ve masa dengeli" }, new[] { "Kuşbakışı", "Yüksek açı, tüm masa görünür" }, new[] { "2D masa", "Tepeden düz görünüm, büyük ıstaka" } },
                new[] { new[] { "İstasyon", "Metal kenar, ışık şeridi" }, new[] { "Ceviz salon", "Cilalı ceviz, pirinç detay" }, new[] { "Hologram", "Cam kenar, ışıklı ızgara" }, new[] { "Andromeda", "Sarmal galaksi, yanardöner kenar" } },
                new[] { new[] { "Klasik ceviz", "Masif ceviz, akçaağaç kakma" }, new[] { "Sedef kakma", "Gül ağacı, sedef desen" }, new[] { "Alüminyum", "Eloksal metal, füme cam" }, new[] { "Karbon", "Karbon fiber, ışıklı dikiş" }, new[] { "Neon cam", "Füme cam, neon tüpler" }, new[] { "Andromeda", "Galaksi panel, yanardöner" } },
                new[] { new[] { "Klasik", "Fildişi, klasik renkler" }, new[] { "Galaksi", "Nebula doku, parlayan rakam" }, new[] { "Altın", "Siyah oniks, altın çerçeve" }, new[] { "Neon", "Füme gövde, ışıklı kenar" }, new[] { "Mermer", "Beyaz mermer, altın damar" } });
@@ -94,7 +95,7 @@ namespace Galaxy101
         /// </summary>
         private Button Card(MenuView v, string id, bool picked, string setting, string value)
         {
-            bool usable = true; try { probe.Set(setting, value); } catch (ArgumentException) { usable = false; } // e.g. the table has no "mid" view yet
+            bool usable = true; try { probe.Set(setting, value); } catch (ArgumentException) { usable = false; }
             var card = PanelUi.CustomButton(v, "", () => { if (!usable) return; table.Set(setting, value); v.Refresh(); }, "g-masa-card"); card.name = id;
             card.style.flexBasis = 0; card.style.flexGrow = 1; card.style.minWidth = 0; card.style.alignItems = Align.Center; PanelUi.Pad(card, 10, 10);
             v.Decorate(card, picked ? "pnH" : "dp", 14); if (picked) { card.Add(PanelUi.Ring(v, 2, "a1", 14)); GalaxyFilters.Shadow(card, 0, 0, 9, v.C("gl")); }
@@ -288,6 +289,12 @@ namespace Galaxy101
                 if (view == "top")
                 {
                     Rect(24, 5, 48, 48, 8, Felt, accent); Rect(30, 54, 36, 6, 2, RimColor); Rect(15, 15, 6, 28, 2, RimColor); Rect(75, 15, 6, 28, 2, RimColor); Rect(30, 0, 36, 4, 2, RimColor); Rect(42, 23, 12, 12, 2, tileFace);
+                    return;
+                }
+                if (view == "2d")
+                {
+                    Rect(22, 3, 52, 34, 7, Felt, accent); Rect(40, 15, 16, 10, 2, RimColor, null, .6f); Rect(12, 42, 72, 17, 3, RimColor);
+                    for (int k = 0; k < 7; k++) Rect(15 + k * 10, 44, k == 6 ? 6 : 8, 13, 1.5f, tileFace);
                     return;
                 }
                 bool mid = view == "mid";

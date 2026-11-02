@@ -28,10 +28,14 @@ namespace Galaxy101
             if (draft == null) OnOpen(v);
             var root = PanelUi.Shell(v, "EditProfile");
             // Header: padding 20px 24px 6px, 700 24px/1.15 title, 40px close; body padding 14px 24px 22px.
-            root.style.paddingTop = 20; root.style.paddingBottom = 22;
+            // The sections carry their own padding: the dialog's page clips at the card edge, so the full-width footer band
+            // cannot reach out of a padded root with negative margins (that cut off its note and the buttons' bottoms).
+            root.style.paddingTop = root.style.paddingBottom = root.style.paddingLeft = root.style.paddingRight = 0;
             PanelUi.Header(v, root, v.L("Profili düzenle", "Edit profile"));
-            var header = root.Q<VisualElement>("header"); header.style.marginBottom = 20; header.Q<Label>().name = "menu.pf.title"; header.Q<Button>("dialog-close").name = "menu.closeDlg#2";
+            var header = root.Q<VisualElement>("header"); header.style.marginBottom = 0; header.style.paddingTop = 20; header.style.paddingBottom = 6; header.style.paddingLeft = header.style.paddingRight = 24;
+            header.Q<Label>().name = "menu.pf.title"; header.Q<Button>("dialog-close").name = "menu.closeDlg#2";
             var content = root.Q<VisualElement>("content"); content.style.flexDirection = FlexDirection.Row; content.style.alignItems = Align.Stretch;
+            content.style.paddingTop = 14; content.style.paddingBottom = 22; content.style.paddingLeft = content.style.paddingRight = 24;
             // Preview column: 220 px, centred, gap 14, padding 18px 14px, radius 20, --sd.
             var left = v.Box("g-edit-preview"); left.style.marginRight = 24; left.style.paddingLeft = left.style.paddingRight = 14;
             var preview = v.Box(); preview.name = "profile-preview"; preview.style.alignItems = Align.Center; left.Add(preview);
@@ -52,9 +56,9 @@ namespace Galaxy101
             var frames = v.Row(); frames.name = "profile-frames"; frames.style.marginTop = 6; frames.style.alignItems = Align.Stretch; PanelUi.Pad(frames, 6, 6); v.Decorate(frames, "dp", 14); form.Add(frames);
             var footer = root.Q<VisualElement>("footer");
             // Reference footer: full-width band, padding 14px 24px, rgba(0,0,0,.12) over a 1px top rule.
-            footer.style.marginLeft = footer.style.marginRight = -24; footer.style.marginBottom = -22; footer.style.marginTop = 22;
+            footer.style.marginLeft = footer.style.marginRight = footer.style.marginBottom = footer.style.marginTop = 0;
             footer.style.paddingTop = footer.style.paddingBottom = 14; footer.style.paddingLeft = footer.style.paddingRight = 24;
-            footer.style.backgroundColor = v.C("rgba(0,0,0,.12)"); footer.style.borderBottomLeftRadius = footer.style.borderBottomRightRadius = 25; footer.style.alignItems = Align.Center;
+            footer.style.backgroundColor = v.C("rgba(0,0,0,.12)"); footer.style.alignItems = Align.Center;
             var note = PanelUi.Wrap(v, v.L("Adını 30 günde bir değiştirebilirsin.", "You can change your name once every 30 days."), 12); note.name = "menu.pf.note"; PanelUi.Grow(note); footer.Add(note);
             var cancel = PanelUi.CssButton(v, v.L("Vazgeç", "Cancel"), v.CloseTop, "secondary bright-120", 12, 22, 16); cancel.name = "menu.closeDlg#3"; footer.Add(cancel);
             Button save = null;
@@ -127,7 +131,7 @@ namespace Galaxy101
             {
                 int id = MenuView.FrameIds[i]; bool on = id == current, locked = MenuView.FrameLocked(id, peak);
                 var league = id >= 10 ? (JObject)MenuView.Leagues[id - 10] : null; string name = league == null ? v.L("Klasik", "Classic") : (string)league[en ? "en" : "tr"];
-                var tile = PanelUi.CustomButton(v, "", () => { if (locked) return; draft["frame"] = id; changed(); }, "g-frame-option"); tile.name = "menu.o.pick[" + i + "]";
+                var tile = PanelUi.CustomButton(v, "", () => { if (locked) return; draft["frame"] = id; changed(); }, "g-frame-option bright-100"); tile.name = "menu.o.pick[" + i + "]";
                 tile.style.flexGrow = 1; tile.style.flexBasis = 0; tile.style.minWidth = 0; tile.style.flexDirection = FlexDirection.Column; tile.style.alignItems = Align.Center; tile.style.justifyContent = Justify.FlexStart;
                 tile.style.paddingTop = 8; tile.style.paddingBottom = 6; tile.style.paddingLeft = tile.style.paddingRight = 2; if (i < MenuView.FrameIds.Length - 1) tile.style.marginRight = 6;
                 v.Decorate(tile, on ? "pnH" : "transparent", 10); if (on) tile.Add(PanelUi.Ring(v, 2, "a1", 10));

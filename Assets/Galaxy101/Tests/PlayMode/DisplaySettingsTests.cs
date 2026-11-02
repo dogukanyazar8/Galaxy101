@@ -89,14 +89,16 @@ namespace Galaxy101.Tests
             var root = menu.View.Root;
             var rows = root.Query<VisualElement>(className: "g-settings-row").ToList();
             var titles = rows.Select(r => r.Query<Label>().First().text).ToList();
-            Assert.That(titles, Is.EqualTo(new[] { "Arka plan hareketi", "Görüntü modu", "Çözünürlük", "Kare hızı", "Efekt kalitesi", "İmleç" }).Or.EqualTo(new[] { "Background motion", "Display mode", "Resolution", "Frame rate", "Effect quality", "İmleç" }),
+            Assert.That(titles, Is.EqualTo(new[] { "Arka plan hareketi", "FPS göster", "Görüntü modu", "Çözünürlük", "Kare hızı", "Efekt kalitesi", "İmleç" }).Or.EqualTo(new[] { "Background motion", "Show FPS", "Display mode", "Resolution", "Frame rate", "Effect quality", "İmleç" }),
                 "v4 order (ref 12 / en 12): spec/19 rows + İmleç, which the prototype leaves untranslated in English");
             Assert.That(root.Q<VisualElement>("setting-wmode-fullscreen").ClassListContains("selected"), Is.True);
 
             Click(root, "setting-wmode-borderless"); yield return null;
+            yield return SettingsParityTests.SaveDisplayAndReopen(menu);
             Assert.That((string)menu.Model.Settings["wmode"], Is.EqualTo("borderless"));
             Assert.That(GameDisplay.LastRequest.Mode, Is.EqualTo(FullScreenMode.FullScreenWindow));
             Click(root, "setting-wmode-windowed"); yield return null;
+            yield return SettingsParityTests.SaveDisplayAndReopen(menu);
             Assert.That(GameDisplay.LastRequest.Mode, Is.EqualTo(FullScreenMode.Windowed));
 
             var native = GameDisplay.NativeSize; var options = GameDisplay.Options(native);
@@ -105,6 +107,7 @@ namespace Galaxy101.Tests
             if (options.Count > 1)
             {
                 Click(root, "setting-res-prev"); yield return null;
+                yield return SettingsParityTests.SaveDisplayAndReopen(menu);
                 var smaller = options[options.Count - 2];
                 Assert.That((string)menu.Model.Settings["res"], Is.EqualTo(GameDisplay.Format(smaller)));
                 Assert.That(root.Q<Label>("setting-res-value").text, Is.EqualTo(GameDisplay.Label(smaller)));
@@ -115,10 +118,12 @@ namespace Galaxy101.Tests
             var fps = root.Q<VisualElement>("setting-fps");
             using (var key = KeyDownEvent.GetPooled('\0', KeyCode.RightArrow, EventModifiers.None)) { key.target = fps; fps.SendEvent(key); }
             yield return null;
+            yield return SettingsParityTests.SaveDisplayAndReopen(menu);
             Assert.That((int)menu.Model.Settings["fps"], Is.EqualTo(30));
 
             // Varsayılana dön: Tam ekran, native, Otomatik.
             Click(root, "menu.resetSettings"); yield return null;
+            yield return SettingsParityTests.SaveDisplayAndReopen(menu);
             Assert.That((string)menu.Model.Settings["wmode"], Is.EqualTo("fullscreen")); Assert.That((string)menu.Model.Settings["res"], Is.EqualTo(GameDisplay.Native));
             Assert.That((int)menu.Model.Settings["fps"], Is.EqualTo(FramePacing.Auto));
             Assert.That(GameDisplay.LastRequest.Mode, Is.EqualTo(FullScreenMode.ExclusiveFullScreen));

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using System.Text.RegularExpressions;
 using Galaxy101.Table;
 using NUnit.Framework;
 using UnityEngine;
@@ -44,21 +45,30 @@ namespace Galaxy101.Tests
             using (var click = ClickEvent.GetPooled()) { click.target = element; element.SendEvent(click); }
         }
 
+        private static string VisibleText(TextElement element) => Regex.Replace(element.text ?? "", "<[^>]+>", "");
+
         [UnityTest]
-        public IEnumerator CameraCardsSelectAllThreePackageViewsAndKeepFpsAfterThePackageSections()
+        public IEnumerator CameraCardsSelectAllFourPackageViewsAndKeepFpsAfterThePackageSections()
         {
             hud.OpenSettings(2); yield return new WaitForSecondsRealtime(.5f);
             var root = hud.Canvas;
             foreach (var id in new[] { "table.t.setTitle", "table.setHead.title", "table.setHead.sub", "table.t.lkView", "table.t.lkTable", "table.t.lkRack", "table.t.lkTile", "table.resetSettings", "table.closeSettings#2", "table.closeSettings#3" })
                 Assert.That(root.Q<VisualElement>(id), Is.Not.Null, id);
-            Assert.That(root.Q<Label>("table.v.name[1]").text, Does.Contain("Yarı yüksek"));
+            Assert.That(root.Q<Label>("table.v.name[1]").text.Replace('\n', ' '), Does.Contain("Yarı yüksek"), "four columns: one word per line");
             Assert.That(root.Q<VisualElement>("table.v.pick[2]"), Is.Not.Null);
+            Assert.That(VisibleText(root.Q<Label>("table.v.name[3]")), Is.EqualTo("2D\nmasa"));
             Assert.That(root.Q<VisualElement>("setting-row-fps").worldBound.yMin, Is.GreaterThan(root.Q<VisualElement>("table.t.lkTile").worldBound.yMax));
             Assert.That(root.Q<VisualElement>("setting-row-fps").worldBound.yMin, Is.GreaterThan(root.Q<VisualElement>("table-settings-list").worldBound.yMax), "The existing FPS preference must not shift G32/T15's initial package viewport.");
             Click(root.Q<VisualElement>("table.v.pick[1]")); yield return null;
             Assert.That(hud.Settings.View, Is.EqualTo("mid")); Assert.That(hud.PreferredView, Is.EqualTo(TableCameraRig.View.Mid));
             Click(root.Q<VisualElement>("table.v.pick[2]")); yield return null;
             Assert.That(hud.Settings.View, Is.EqualTo("top")); Assert.That(hud.PreferredView, Is.EqualTo(TableCameraRig.View.Top));
+            Click(root.Q<VisualElement>("table.v.pick[3]")); yield return null;
+            Assert.That(hud.Settings.View, Is.EqualTo("2d")); Assert.That(hud.IsTwoDimensional, Is.True); Assert.That(hud.Table.CameraRig.Camera.enabled, Is.False);
+            Click(root.Q<VisualElement>("table.v.pick[0]")); yield return null;
+            Assert.That(hud.Settings.View, Is.EqualTo("seat")); Assert.That(hud.Table.CameraRig.Camera.enabled, Is.True);
+            hud.Settings.Set("lang", "en"); yield return null;
+            Assert.That(VisibleText(root.Q<Label>("table.v.name[3]")), Is.EqualTo("2D\ntable"));
         }
 
         [UnityTest]

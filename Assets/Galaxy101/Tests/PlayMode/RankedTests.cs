@@ -20,6 +20,8 @@ namespace Galaxy101.Tests
         private GameObject owner;
         private string statePath;
         private FakeRanked fake;
+        private bool hadSavedSession;
+        private string savedSession;
 
         private sealed class FakeRanked : IRankedBackend
         {
@@ -64,6 +66,8 @@ namespace Galaxy101.Tests
         [SetUp]
         public void SetUp()
         {
+            hadSavedSession = PlayerPrefs.HasKey(Galaxy101.Online.GalaxyOnline.SessionKey);
+            savedSession = PlayerPrefs.GetString(Galaxy101.Online.GalaxyOnline.SessionKey, "");
             fake = new FakeRanked();
             MainMenuController.RankedBackend = () => fake; MainMenuController.OpenMatchTable = false;
         }
@@ -75,6 +79,9 @@ namespace Galaxy101.Tests
             if (owner != null) UnityEngine.Object.Destroy(owner);
             if (Galaxy101.Online.GalaxyOnline.Instance != null) UnityEngine.Object.Destroy(Galaxy101.Online.GalaxyOnline.Instance.gameObject);
             yield return null;
+            if (hadSavedSession) PlayerPrefs.SetString(Galaxy101.Online.GalaxyOnline.SessionKey, savedSession);
+            else PlayerPrefs.DeleteKey(Galaxy101.Online.GalaxyOnline.SessionKey);
+            PlayerPrefs.Save();
             if (statePath != null && File.Exists(statePath)) File.Delete(statePath);
         }
 
@@ -165,7 +172,8 @@ namespace Galaxy101.Tests
             var play = root.Q<Button>("menu.play"); using (var evt = NavigationSubmitEvent.GetPooled()) { evt.target = play; play.SendEvent(evt); }
             yield return null; yield return null;
             Assert.That(menu.Ranked, Is.Not.Null); Assert.That(menu.Ranked.Visible, Is.True);
-            Assert.That(root.Q<VisualElement>("main-layer").resolvedStyle.display, Is.EqualTo(DisplayStyle.None), "the menu hides under the ranked screen");
+            Assert.That(root.Q<VisualElement>("main-layer").resolvedStyle.visibility, Is.EqualTo(Visibility.Hidden), "the menu hides under the ranked screen");
+            Assert.That(root.Q<VisualElement>("main-layer").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex), "the hidden menu keeps its nested filter layout allocated");
             Assert.That(fake.QueuedMode, Is.Null, "the queue starts only with MAÇ ARA");
             // The entrances (rkFade .25 s, rkSeat .45 s) run on real time: measure once they are over, as the 900 ms S16 hold does.
             yield return new WaitForSecondsRealtime(1f);
@@ -350,8 +358,9 @@ namespace Galaxy101.Tests
         private static void Inbound(Galaxy101.Online.GalaxyRealtime realtime, string type, string json)
         {
             var field = typeof(Galaxy101.Online.GalaxyRealtime).GetField("inbox", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var inbox = (System.Collections.Concurrent.ConcurrentQueue<(string, Newtonsoft.Json.Linq.JToken)>)field.GetValue(realtime);
-            inbox.Enqueue((type, Newtonsoft.Json.Linq.JToken.Parse(json.Replace('\'', '"'))));
+            var inbox = (System.Collections.Concurrent.ConcurrentQueue<(int, string, Newtonsoft.Json.Linq.JToken)>)field.GetValue(realtime);
+            int epoch = (int)typeof(Galaxy101.Online.GalaxyRealtime).GetField("epoch", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(realtime);
+            inbox.Enqueue((epoch, type, Newtonsoft.Json.Linq.JToken.Parse(json.Replace('\'', '"'))));
             realtime.Pump();
         }
 
@@ -360,6 +369,11 @@ namespace Galaxy101.Tests
         public IEnumerator OnlineBackendSpeaksTheV4RankedMessages()
         {
             var online = Galaxy101.Online.GalaxyOnline.Ensure("http://127.0.0.1:9");
+            // A backend only accepts events belonging to a signed-in session. This fixture owns no real account/socket.
+            online.Api.Use(new Galaxy101.Contracts.TokenResponse
+            {
+                AccountId = Guid.NewGuid(), AccessToken = "ranked-test-session", RefreshToken = "ranked-test-refresh"
+            });
             var backend = RankedOnlineBackend.For(online);
             Assert.That(RankedOnlineBackend.For(online), Is.SameAs(backend), "one backend per session");
             RankedFound found = null; IReadOnlyList<bool> accepted = null; int ready = 0, incoming = 0; RankedStart start = null; RankedResult result = null; string cancelled = null;

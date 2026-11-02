@@ -26,7 +26,7 @@ namespace Galaxy101.Table
             Apply(Time.time);
         }
 
-        /// <summary>Move to a view with easeInOutCubic (1.3 s for a view change, 3.0 s countdown, 0.8 s deal start).</summary>
+        /// <summary>Move to a view with smootherstep (1.3 s for a view change, 3.0 s countdown, 0.8 s deal start).</summary>
         public void GoTo(View view, float seconds)
         {
             Evaluate(Time.time, out fromPos, out fromTarget);
@@ -45,9 +45,19 @@ namespace Galaxy101.Table
 
         private void Evaluate(float now, out Vector3 pos, out Vector3 target)
         {
-            float u = duration <= 0 ? 1 : TableConstants.EaseInOutCubic(Mathf.Clamp01((now - started) / duration));
+            // table3d.js frame: cam.p / cam.t lerp by ss(u) — smootherstep, not a cubic.
+            float u = duration <= 0 ? 1 : Smoother(Mathf.Clamp01((now - started) / duration));
             pos = Vector3.Lerp(fromPos, toPos, u); target = Vector3.Lerp(fromTarget, toTarget, u);
         }
+
+        /// <summary>The state router's freeze (g101-clock.js: tweens at the canonical 100000 ms): the move has arrived, the shake is over.</summary>
+        public void Settle()
+        {
+            fromPos = toPos; fromTarget = toTarget; duration = 0; shakeUntil = 0;
+            if (cam != null) Apply(Time.time);
+        }
+
+        private static float Smoother(float u) => u * u * u * (u * (u * 6 - 15) + 10);
 
         private void LateUpdate() { if (cam != null) Apply(Time.time); }
 
@@ -56,7 +66,12 @@ namespace Galaxy101.Table
             Evaluate(now, out var pos, out var target);
             // Breathing: x += sin(t·0.21)·0.006, y += sin(t·0.33)·0.004 (three space).
             pos.x += Mathf.Sin(now * 0.21f) * 0.006f; pos.y += Mathf.Sin(now * 0.33f) * 0.004f;
-            if (now < shakeUntil) { float k = (shakeUntil - now) * 0.03f; pos.x += (Random.value - 0.5f) * k; pos.y += (Random.value - 0.5f) * k; }
+            if (now < shakeUntil)
+            {
+                float k = (shakeUntil - now) * 0.03f;
+                float shake = Mathf.Sin(now * 61) * 0.6f + Mathf.Sin(now * 37) * 0.4f;
+                pos.x += shake * k * 0.5f; pos.y += Mathf.Cos(now * 53) * k * 0.4f;
+            }
             var p = ThreeSpace.ToUnity(pos); var t = ThreeSpace.ToUnity(target);
             cam.transform.SetPositionAndRotation(p, Quaternion.LookRotation(t - p, Vector3.up));
             FitAspect();

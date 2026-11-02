@@ -143,15 +143,15 @@ namespace Galaxy101
 
         private static VisualElement Coin(MenuView v, int size, string shadow)
         {
-            var coin = new CoinPaint(size); coin.style.width = coin.style.height = size; coin.style.flexShrink = 0;
-            v.Decorate(coin, "transparent", size / 2, 4, shadow);
+            // The main menu chip, standing on the artwork's 4px ledge.
+            var coin = v.ChipIcon(size); GalaxyFilters.HardShadow(coin, 4, v.C(shadow));
             return coin;
         }
 
         private static VisualElement Gem(MenuView v, int size, int radius, string paint)
         {
-            var gem = Canvas(v, size, size); gem.style.rotate = new Rotate(45); v.Decorate(gem, paint, radius);
-            return gem;
+            // The main menu gem at the artwork's size.
+            return v.GemIcon(size);
         }
 
         private static VisualElement Canvas(MenuView v, int width, int height)
@@ -183,45 +183,6 @@ namespace Galaxy101
                     p.fillColor = new Color(1, 1, 1, .35f); p.BeginPath();
                     p.MoveTo(new Vector2(-skew, 0)); p.LineTo(new Vector2(70 - skew, 0));
                     p.LineTo(new Vector2(70 + skew, height)); p.LineTo(new Vector2(skew, height)); p.ClosePath(); p.Fill();
-                };
-            }
-        }
-
-        private sealed class CoinPaint : VisualElement
-        {
-            private Texture2D texture;
-            internal CoinPaint(int size)
-            {
-                pickingMode = PickingMode.Ignore;
-                RegisterCallback<AttachToPanelEvent>(_ =>
-                {
-                    const int samples = 192;
-                    texture = new Texture2D(samples, samples, TextureFormat.RGBA32, false) { name = "Shop CSS radial coin", hideFlags = HideFlags.HideAndDontSave, wrapMode = TextureWrapMode.Clamp };
-                    var pixels = new Color32[samples * samples];
-                    ColorUtility.TryParseHtmlString("#FFF3C8", out var first); ColorUtility.TryParseHtmlString("#F5A623", out var mid); ColorUtility.TryParseHtmlString("#B86E0F", out var last);
-                    var radius = new Vector2(.65f, .7f).magnitude; // CSS circle farthest-corner from 35% 30%.
-                    for (var y = 0; y < samples; y++) for (var x = 0; x < samples; x++)
-                    {
-                        var t = Vector2.Distance(new Vector2((x + .5f) / samples, 1 - (y + .5f) / samples), new Vector2(.35f, .3f)) / radius;
-                        pixels[y * samples + x] = t < .6f ? Color.Lerp(first, mid, t / .6f) : Color.Lerp(mid, last, (t - .6f) / .4f);
-                    }
-                    texture.SetPixels32(pixels); texture.Apply(false, true); style.backgroundImage = new StyleBackground(texture);
-                });
-                RegisterCallback<DetachFromPanelEvent>(_ =>
-                {
-                    style.backgroundImage = StyleKeyword.None;
-                    if (texture != null)
-                    {
-                        if (Application.isPlaying) UnityEngine.Object.Destroy(texture);
-                        else UnityEngine.Object.DestroyImmediate(texture);
-                    }
-                    texture = null;
-                });
-                generateVisualContent += context =>
-                {
-                    var p = context.painter2D; p.strokeColor = new Color(1, 243f / 255, 200f / 255); p.lineWidth = 2; p.lineCap = LineCap.Butt;
-                    var layout = new CssDashedCircle.Layout(size, 2); var step = layout.StepRadians * Mathf.Rad2Deg;
-                    for (var i = 0; i < layout.Count; i++) { p.BeginPath(); p.Arc(new Vector2(size / 2f, size / 2f), layout.Radius, new Angle(i * step), new Angle((i + CssDashedCircle.DashFraction) * step)); p.Stroke(); }
                 };
             }
         }

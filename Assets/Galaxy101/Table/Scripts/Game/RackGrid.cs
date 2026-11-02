@@ -158,6 +158,25 @@ namespace Galaxy101.Table
             return null;
         }
 
+        /// <summary>
+        /// drawFrom's freeSlot(): a drawn tile never goes between sets — the empty cell with the fewest neighbours (2 each),
+        /// +4 beside a valid segment, bottom row first on a tie, scanning each row from the right.
+        /// </summary>
+        public RackSlot? FreeSlot(ICollection<int> valid)
+        {
+            RackSlot? best = null; int bestScore = int.MaxValue;
+            foreach (int r in new[] { 1, 0 })
+                for (int i = Columns - 1; i >= 0; i--)
+                {
+                    if (rows[r][i] != Empty) continue;
+                    int left = i > 0 ? rows[r][i - 1] : Empty, right = i < Columns - 1 ? rows[r][i + 1] : Empty;
+                    bool nearSet = left != Empty && valid.Contains(left) || right != Empty && valid.Contains(right);
+                    int score = ((left != Empty ? 2 : 0) + (right != Empty ? 2 : 0) + (nearSet ? 4 : 0)) * 10 + r;
+                    if (score < bestScore) { bestScore = score; best = new RackSlot(r, i); }
+                }
+            return best;
+        }
+
         /// <summary>Insert a new tile at <paramref name="at"/>, pushing towards the first free cell to the right, else left, else the other row.</summary>
         public bool Insert(int id, RackSlot at)
         {

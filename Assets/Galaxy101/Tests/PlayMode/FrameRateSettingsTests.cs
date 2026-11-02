@@ -49,6 +49,7 @@ namespace Galaxy101.Tests
             Assert.That(root.Q<VisualElement>("setting-fps-prev").ClassListContains("at-end"), Is.True, "Otomatik is the first choice");
 
             Click(root, "setting-fps-next"); yield return null;
+            yield return SettingsParityTests.SaveDisplayAndReopen(menu);
             Assert.That((int)menu.Model.Settings["fps"], Is.EqualTo(30));
             Assert.That(QualitySettings.vSyncCount, Is.EqualTo(0)); Assert.That(Application.targetFrameRate, Is.EqualTo(30));
             Assert.That(root.Q<Label>("setting-fps-value").text, Is.EqualTo("30 FPS"));
@@ -56,6 +57,7 @@ namespace Galaxy101.Tests
             // Last choice: the monitor's own maximum, VSync off.
             var options = FramePacing.Options(FramePacing.MaxHz, FramePacing.IsMobile);
             for (int i = 1; i < options.Count; i++) { Click(root, "setting-fps-next"); yield return null; }
+            yield return SettingsParityTests.SaveDisplayAndReopen(menu);
             Assert.That((int)menu.Model.Settings["fps"], Is.EqualTo(options[options.Count - 1]));
             Assert.That(root.Q<VisualElement>("setting-fps-next").ClassListContains("at-end"), Is.True);
             Click(root, "setting-fps-next"); yield return null;

@@ -181,6 +181,25 @@ namespace Galaxy101.Table
 
         private void Remove(Gift g) { g.Phase = Phase.Out; g.Left = Time.time; }
 
+        /// <summary>
+        /// The state router's freeze (g101-clock.js freeze: every tween and animation sits at the canonical 100000 ms, long
+        /// after it began): flights are down at their seat, landings settled, leavers gone — without the landing effects.
+        /// </summary>
+        public void Settle()
+        {
+            for (int k = 0; k < 4; k++)
+            {
+                var list = gifts[k];
+                for (int i = list.Count - 1; i >= 0; i--)
+                {
+                    var g = list[i]; var tr = g.Go.transform;
+                    if (g.Phase == Phase.Out) { Destroy(g.Go); list.RemoveAt(i); continue; }
+                    if (g.Phase == Phase.Fly) { tr.position = g.End; tr.rotation = ThreeRotation(0, g.Yaw, 0); foreach (var part in g.FlameParts) part.SetActive(false); }
+                    g.Phase = Phase.Idle; tr.localScale = Vector3.one * g.Scale;
+                }
+            }
+        }
+
         /// <summary>originOf(): my hand at the lower left (−0.6, 1.1, 1.25), an opponent above their rack (0, 1.15, 1.1).</summary>
         private Vector3 Origin(int seat) => seat == 0 ? scene.SeatPoint(0, -0.6f, 1.1f, 1.25f) : scene.SeatPoint(seat, 0, 1.15f, 1.1f);
 

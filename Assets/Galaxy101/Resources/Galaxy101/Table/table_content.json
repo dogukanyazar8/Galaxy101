@@ -413,7 +413,9 @@
   },
   "cameraViews": {
     "Oyuncu gözü": "seat",
-    "Kuşbakışı": "top"
+    "Yarı yüksek": "mid",
+    "Kuşbakışı": "top",
+    "2D masa": "2d"
   },
   "tableSkins": {
     "İstasyon": "station",

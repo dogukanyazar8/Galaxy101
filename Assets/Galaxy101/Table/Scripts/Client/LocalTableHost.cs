@@ -160,6 +160,7 @@ namespace Galaxy101.Table
         public string Move(GameAction action) => Move(action, out _);
 
         public string RollDice() { var e = Runtime.RollDice(Seat); Flush(); return e; }
+        public string SkipDeal() { var error = Runtime.SkipDeal(Seat); Flush(); return error; }
         public string Ready() { var e = Runtime.ReadyUp(Seat); Flush(); return e; }
         public string RackOrder(IList<string> tiles) => Runtime.RackOrder(Seat, tiles);
 

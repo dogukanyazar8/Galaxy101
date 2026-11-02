@@ -30,11 +30,12 @@ namespace Galaxy101
                 // pulse phases of artifacts/v4/ref agree), whatever GameClock.Freeze was given.
                 if(GameClock.Frozen)animationTime=(float)(GameClock.CanonMs/1000);else animationTime+=delta;
                 foreach(var motion in motions)motion(animationTime);
-                if(mainLayer!=null&&mainLayer.resolvedStyle.display!=DisplayStyle.None)foreach(var section in sections.Values)foreach(var motion in section.Motions)motion(animationTime);
+                if(mainLayer!=null&&mainLayer.resolvedStyle.display!=DisplayStyle.None&&mainLayer.resolvedStyle.visibility!=Visibility.Hidden)foreach(var section in sections.Values)foreach(var motion in section.Motions)motion(animationTime);
                 foreach(var motion in panelMotions)motion(animationTime);
                 foreach(var motion in dialogMotions)motion(animationTime);
             }).Every(0);
             Rebuild();
+            AttachFpsCounter(canvas);
         }
         private sealed class MainSection{public VisualElement Host;public string Signature;public readonly List<Action<float>> Motions=new List<Action<float>>();}
         private readonly Dictionary<string,MainSection> sections=new Dictionary<string,MainSection>();
@@ -67,12 +68,15 @@ namespace Galaxy101
                 // Each part of the menu is rebuilt only when what it shows changed: picking a mode must not recreate the
                 // top bar, logo or footer (their filtered shadows would blink for a frame).
                 string common=Model.Planet+"|"+Loc.Language;
+                if (!overlayOnly)
+                {
                 Section("top",common+"|"+Model.Chips+"|"+Model.Gems+"|"+Model.Level+"|"+CurrentRankIndex()+"|"+Model.Profile.ToString(Newtonsoft.Json.Formatting.None),BuildTopBar);
                 Section("logo",common,()=>BuildLogo(planetIndex));
                 Section("play",common,BuildPlay);
                 Section("modes",common,BuildModes);
                 ApplyModes();
-                Section("footer",common+"|"+Model.DayClaimed+"|"+Services.Friends.GetFriends(true).Count,BuildFooter);
+                Section("footer",common+"|"+DayRewardWaiting()+"|"+Services.Friends.GetFriends(true).Count,BuildFooter);
+                }
                 mainSignature=common;
                 mainLayer.EnableInClassList("main-blocked",Modals.Panel!=null||Modals.Dialog!=null);mainLayer.SetEnabled(Modals.Panel==null&&Modals.Dialog==null);
                 mainLayer.pickingMode=Modals.Panel==null&&Modals.Dialog==null?PickingMode.Position:PickingMode.Ignore;
@@ -142,24 +146,35 @@ namespace Galaxy101
             var logo=Resources.Load<Texture2D>("Galaxy101/Artwork/logo-"+PlanetIds[planet]);
             if(logo==null)throw new InvalidOperationException("Missing Galaxy logo artwork.");
             var image=new Image{image=logo,pickingMode=PickingMode.Ignore};image.name="galaxy-logo";image.style.position=Position.Absolute;image.style.width=logo.width*.5f;image.style.height=logo.height*.5f;image.style.left=640-logo.width*.25f;image.style.top=44;AddMain(image);
-            float[] x={506,596,696},y={191.6f,177.6f,191.6f};int[] w={78,88,78},h={108,122,108};float[] rotation={-10,2,10};string[] tint={"t1","t2","t3"};
-            for(int i=0;i<3;i++)
+            string[] tint={"t1","t2","t3"};
+            VisualElement CreateTile(int i)
             {
-                int index=i;var tile=Box("logo-tile");tile.name="logo-tile-"+i;Place(tile,x[i],y[i],w[i],h[i]);tile.style.rotate=new Rotate(rotation[i]);
+                var position=LogoTileMotion.Position(i)-LogoTileMotion.SubpixelOffset(i);var size=LogoTileMotion.Size(i);int radius=i==1?13:12;
+                var group=Box();group.name="logo-tile-"+i;group.usageHints=UsageHints.DynamicTransform;
+                Place(group,position.x,position.y,size.x,size.y);group.style.rotate=new Rotate(LogoTileMotion.Angle(i));
+                // CSS paints its last box-shadow first. Blur a rounded filled mask, rather than duplicating a crisp face.
+                var glow=Box();glow.name="logo-tile-glow-"+i;glow.pickingMode=PickingMode.Ignore;Place(glow,0,0,size.x,size.y);Decorate(glow,"var(--gl)",radius);GalaxyFilters.Blur(glow,i==1?13:11);group.Add(glow);
+                var shadow=Box();shadow.name="logo-tile-shadow-"+i;shadow.pickingMode=PickingMode.Ignore;Place(shadow,0,i==1?18:16,size.x,size.y);Decorate(shadow,"rgba(0,0,0,.45)",radius);GalaxyFilters.Blur(shadow,i==1?15:13);group.Add(shadow);
+                var tile=Box("logo-tile");tile.name="logo-tile-face-"+i;Place(tile,0,0,size.x,size.y);
                 Decorate(tile,"linear-gradient(var(--tf1),var(--tf2))",i==1?13:12,i==1?6:5,"var(--te2)");tile.style.borderBottomWidth=i==1?8:7;tile.style.borderBottomColor=C("var(--te)");
                 var number=Text(i==1?"0":"1",i==1?74:64,true,"var(--"+tint[i]+")");number.style.height=i==1?74:64;number.style.unityTextAlign=TextAnchor.MiddleCenter;tile.Add(number);
-                var dot=Box();dot.style.width=dot.style.height=i==1?16:14;dot.style.marginTop=3;Decorate(dot,"var(--"+tint[i]+")",99);tile.Add(dot);AddMain(tile);
-                // g101TileIn 1.1s cubic-bezier(.16,1,.3,1) both, delays .15/.29/.43 s: opacity 0 → 1 by 55 %, translateY(46px)
-                // scale(.82) → none (its rotateX(-70deg) has no 2D equivalent, UNITY_FARKLARI UF-601); then g101Float 6 s
-                // cubic-bezier(.45,0,.55,1) infinite, delays 0/-2/-4 s: translate 0 → -7px (50 %) → 0.
-                float delay=.15f+.14f*i;
-                Animate(t=>
-                {
-                    float f=Mathf.Clamp01((t-delay)/1.1f),k=CssBezier(.16f,1,.3f,1,f);tile.style.opacity=f>=.55f?1:CssBezier(.16f,1,.3f,1,f/.55f);
-                    float p=Mathf.Repeat(t+2*index,6)/6,y=-7*(p<.5f?CssBezier(.45f,0,.55f,1,p*2):1-CssBezier(.45f,0,.55f,1,p*2-1));
-                    tile.style.translate=new Translate(0,y+46*(1-k));tile.style.scale=new Scale(Vector2.one*(.82f+.18f*k));
-                });
+                var dot=Box();dot.style.width=dot.style.height=i==1?16:14;dot.style.marginTop=3;Decorate(dot,"var(--"+tint[i]+")",99);tile.Add(dot);group.Add(tile);return group;
             }
+            var tiles=new VisualElement[3];for(int i=0;i<tiles.Length;i++){tiles[i]=CreateTile(i);AddMain(tiles[i]);}
+            var presentationHost=sectionHost??mainLayer;LogoTilePresentation perspective=null;
+            Animate(t=>
+            {
+                for(int i=0;i<tiles.Length;i++)
+                {
+                    var pose=LogoTileMotion.Sample(i,t);tiles[i].style.opacity=pose.Opacity;
+                    var translation=pose.Translation+LogoTileMotion.SubpixelOffset(i);
+                    tiles[i].style.translate=new Translate(translation.x,translation.y);tiles[i].style.scale=new Scale(Vector2.one*pose.Scale);
+                }
+                // Unity 6.6 world-space UI preserves the native text/rounded tiles under a real perspective camera.
+                // The bounded extra pass exists only during entry; settled floating remains the original native UI.
+                if(Application.isPlaying&&t<LogoTileMotion.EntryEnd&&perspective==null)perspective=new LogoTilePresentation(this,presentationHost,tiles,CreateTile,()=>focused);
+                perspective?.Step(t);
+            });
         }
         private void BuildPlay()
         {
@@ -201,6 +216,7 @@ namespace Galaxy101
                 int index=V3Modes[i];string color=colors[i],shade=shades[i];
                 var slot=Box("mode-slot");slot.style.width=208;slot.style.height=78;slot.style.marginRight=i==2?0:12;
                 var card=Button("",()=>PickMode(index),"mode-card");
+                card.style.overflow=Overflow.Visible; // Override .mode-card: only the inner glyph layer clips, not the 5 px ledge.
                 card.name="menu.m.pick["+i+"]";Place(card,0,0,208,78);Decorate(card,color,18,5,shade);
                 card.style.flexDirection=FlexDirection.Column;card.style.justifyContent=Justify.Center;card.style.alignItems=Align.FlexStart;card.style.paddingLeft=card.style.paddingRight=14;
                 // overflow: hidden on an inner layer, so the card's 5 px ledge below it is not clipped with the glyph.
@@ -247,7 +263,7 @@ namespace Galaxy101
             {
                 if(settled)return;
                 // Never restyle filters inside a hidden menu (the lobby covers it): the compositor asserts on those.
-                for(var up=Card.parent;up!=null;up=up.parent)if(up.resolvedStyle.display==DisplayStyle.None){began=-9;return;}
+                for(var up=Card.parent;up!=null;up=up.parent)if(up.resolvedStyle.display==DisplayStyle.None||up.resolvedStyle.visibility==Visibility.Hidden){began=-9;return;}
                 float f=Mathf.Clamp01((now-began)/.2f),k=CssBezier(.3f,1.5f,.6f,1,f),e=CssBezier(.25f,.1f,.25f,1,f);
                 lift=Mathf.LerpUnclamped(fromLift,toLift,k);scale=Mathf.LerpUnclamped(fromScale,toScale,k);
                 saturation=Mathf.Lerp(fromSaturation,toSaturation,e);brightness=Mathf.Lerp(fromBrightness,toBrightness,e);ring=Mathf.Lerp(fromRing,toRing,e);
@@ -282,6 +298,13 @@ namespace Galaxy101
             if(IsSoon(Model.SelectedMode)){Toast(L("Botlara karşı yakında açılıyor","Vs bots is coming soon"));return;}
             PlayRequested?.Invoke(Model.SelectedMode);
         }
+        /// <summary>Today's streak reward is still to collect (the daily panel's "Topla" card).</summary>
+        private bool DayRewardWaiting()
+        {
+            var streak=Services.Rewards.GetStreak();if(streak==null)return false;
+            foreach(var day in streak)if((bool?)day["today"]==true&&(bool?)day["claimed"]!=true)return true;
+            return false;
+        }
         private void BuildFooter()
         {
             var shade=Box();Place(shade,0,610,1280,110);shade.pickingMode=PickingMode.Ignore;Decorate(shade,"linear-gradient(transparent,rgba(0,0,0,.55))");AddMain(shade);
@@ -297,8 +320,9 @@ namespace Galaxy101
                 var highlight=Box();highlight.pickingMode=PickingMode.Ignore;Place(highlight,0,0,56,56);highlight.style.borderTopLeftRadius=highlight.style.borderTopRightRadius=18;highlight.style.borderTopWidth=1;highlight.style.borderTopColor=new Color(1,1,1,i==0?.5f:i==3?.35f:.4f);square.Add(highlight);
                 square.Add(Icon(key,i==0?30:28,i==0?"var(--aT)":"#fff"));item.Add(square);
                 var label=Text(L(tr[i],en[i]),12,false,labels[i]);label.name="menu.t."+keys[i];label.style.unityFont=Font("Baloo2-800");label.style.whiteSpace=WhiteSpace.NoWrap;label.style.marginTop=6;item.Add(label);
-                if(i==0)Badge(item,"%50",true);if(i==1)Badge(item,Services.Friends.GetFriends(true).Count.ToString());// The prototype's Günlük ödül badge is static markup ("1", also after Topla — EKSIKLER EK-609).
-                if(i==3){var badge=Badge(square,"1");badge.style.top=-7;badge.style.right=-8;}
+                if(i==0)Badge(item,"%50",true);if(i==1)Badge(item,Services.Friends.GetFriends(true).Count.ToString());
+                // EK-609 (decided): the Günlük ödül "1" shows only while today's reward waits; it goes once collected.
+                if(i==3&&DayRewardWaiting()){var badge=Badge(square,"1");badge.style.top=-7;badge.style.right=-8;}
                 // bob 1.6s, default ease: 0 → -4px → 0.
                 if(i==3)Animate(t=>{float f=Mathf.Repeat(t,1.6f)/1.6f;item.style.translate=new Translate(0,-4*(f<.5f?CssBezier(.25f,.1f,.25f,1,f*2):1-CssBezier(.25f,.1f,.25f,1,f*2-1)));});nav.Add(item);
             }
@@ -349,7 +373,7 @@ namespace Galaxy101
         }
         private Label Badge(VisualElement parent,string text,bool sale=false)
         {
-            var badge=Text(text,sale?10:11,false,"#fff");badge.style.unityFont=Font(sale?"Nunito-700":"Baloo2-800");badge.AddToClassList(sale?"sale-badge":"notification-badge");badge.style.whiteSpace=WhiteSpace.NoWrap; // %50: 900 10px Nunito — the prototype loads only Nunito 700 (vendor/fonts.css)
+            var badge=Text(text,sale?10:11,false,"#fff");badge.style.unityFont=Font(sale?"Nunito-900":"Baloo2-800");badge.AddToClassList(sale?"sale-badge":"notification-badge");badge.style.whiteSpace=WhiteSpace.NoWrap; // %50: 900 10px Nunito
             if(sale){badge.style.height=18;badge.style.paddingTop=badge.style.paddingBottom=4;badge.style.paddingLeft=badge.style.paddingRight=6;badge.style.unityTextAlign=TextAnchor.MiddleCenter;}
             Decorate(badge,"#FF5E6C",sale?7:10,sale?2:0,"#C23E4A");parent.Add(badge);return badge;
         }

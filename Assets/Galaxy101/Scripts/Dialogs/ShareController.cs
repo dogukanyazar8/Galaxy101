@@ -8,14 +8,14 @@ namespace Galaxy101
         public VisualElement Build(MenuView v)
         {
             var root = PanelUi.Shell(v, "ShareProfile");
-            PanelUi.Header(v, root, v.L("Profili paylaş", "Share profile"), v.L("Profil kartını arkadaşlarına gönder", "Send your profile card to friends"), "share", "linear-gradient(160deg,#FFA27A,#F0683A)", 22);
+            PanelUi.Header(v, root, v.L("Profili paylaş", "Share profile"), v.L("Profil kartını arkadaşlarına gönder", "Send your profile card to friends"), "share", "linear-gradient(160deg,#FFA27A,#F0683A)", 22, "#B2441E", 20);
             root.Q<VisualElement>("footer").style.display = DisplayStyle.None;
             var shHeader = root.Q<VisualElement>("header"); var shTexts = shHeader.Query<Label>().ToList(); shTexts[0].name = "menu.sh.title"; shTexts[1].name = "menu.sh.sub"; shHeader.Q<Button>("dialog-close").name = "menu.closeDlg#6";
             var body = root.Q<VisualElement>("content");
             // height 180, padding 0 26px, gap 20, radius 22.
             var card = v.Row(); card.AddToClassList("g-share-card"); card.style.paddingLeft = card.style.paddingRight = 26; card.style.paddingTop = card.style.paddingBottom = 0;
             v.Decorate(card, "radial-gradient(ellipse 70% 120% at 85% 50%,var(--bg1),var(--bg2) 55%,var(--bg3))", 22);
-            var planet = PanelUi.Circle(v, 220, "radial-gradient(circle at 35% 30%,var(--lg1),var(--a2) 55%,var(--aS))"); planet.style.position = Position.Absolute; planet.style.right = -40; planet.style.top = -30; planet.style.opacity = .35f; card.Add(planet);
+            var planet = PanelUi.Circle(v, 220, "radial-gradient(circle at 35% 30%,var(--lg1),var(--a2) 55%,var(--aS))"); planet.style.position = Position.Absolute; planet.style.right = -40; planet.style.top = -30; planet.style.opacity = .35f; GalaxyFilters.Blur(planet, 1); card.Add(planet); // filter:blur(1px)
             foreach (var point in new[] { new UnityEngine.Vector2(550, 18), new UnityEngine.Vector2(490, 58), new UnityEngine.Vector2(410, 28), new UnityEngine.Vector2(520, 138), new UnityEngine.Vector2(350, 148) })
             {
                 var star = PanelUi.Circle(v, 3, "st"); star.style.position = Position.Absolute; star.style.left = point.x; star.style.top = point.y; card.Add(star);
@@ -42,7 +42,10 @@ namespace Galaxy101
             info.Add(mini); card.Add(info);
             var galaxy = v.Text("GALAXY", 15, true, "a1"); MenuView.Tracking(galaxy, 2, 15);
             var numeral = PanelUi.Badge(v, "101", "a1", "aT", 11); PanelUi.Pad(numeral, 1, 5);
-            var logo = v.Row(galaxy, numeral); PanelUi.Gap(logo, 6); logo.style.position = Position.Absolute; logo.style.right = 20; logo.style.bottom = 14; card.Add(logo); body.Add(card);
+            var logo = v.Row(galaxy, numeral); PanelUi.Gap(logo, 6); logo.style.position = Position.Absolute; logo.style.right = 20; logo.style.bottom = 14; card.Add(logo);
+            // box-shadow: inset 0 0 0 1px rgba(255,255,255,.1) (the light rim that closes the planet's corner), 0 6px 20px rgba(0,0,0,.35).
+            card.Add(PanelUi.Ring(v, 1, "rgba(255,255,255,.1)", 22)); GalaxyFilters.Shadow(card, 0, 6, 10, v.C("rgba(0,0,0,.35)"));
+            body.Add(card);
             var linkLabel = MenuView.CssLine(v.Text(v.L("Profil bağlantısı", "Profile link"), 12, false, "mt")); linkLabel.name = "menu.sh.linkLabel"; linkLabel.style.unityFont = v.Font("Baloo2-800"); linkLabel.style.marginTop = 16; linkLabel.style.marginBottom = 6; body.Add(linkLabel);
             var url = v.Row(v.Icon("link", 16, "mt"), v.Text(v.Services.Share.ProfileUrl.Replace("https://", ""), 15)); PanelUi.Gap(url, 10); PanelUi.Grow(url); PanelUi.Pad(url, 0, 14); v.Decorate(url, "dp", 14); url.style.height = 48;
             Button copy = null;
@@ -69,7 +72,7 @@ namespace Galaxy101
                 {
                     v.Services.Share.ShareTo(platform);
                     v.Toast(v.L(name + " açılıyor…", "Opening " + name + "…"));
-                }, "g-share-target");
+                }, "g-share-target bright-100");
                 button.name = "menu.a.go[" + i + "]";
                 // 46px tile, radius 14, box-shadow 0 3px 0 shade; 700 18px glyph; gap 8; 700 13px name.
                 var icon = v.Box(); icon.style.width = icon.style.height = 46; icon.style.flexShrink = 0; icon.style.alignItems = Align.Center; icon.style.justifyContent = Justify.Center; icon.style.marginBottom = 8; v.Decorate(icon, colors[i], 14, 3, shades[i]);

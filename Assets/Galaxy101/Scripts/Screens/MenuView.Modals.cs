@@ -76,13 +76,25 @@ namespace Galaxy101
         }
         /// <summary>
         /// The card's rounded clip lives on its page: the card itself stays unclipped so its ledge (0 10px 0 --pnS),
-        /// drawn below its box, is not cut away.
+        /// drawn below its box, is not cut away. CSS overflow:hidden clips at the card's padding edge, so the page takes over
+        /// the card's padding (pulled out by negative margins, given back as its own padding): content stays where it was,
+        /// and what reaches into the padding — the confirm buttons' 4px ledges, a corner icon tile — is no longer cut.
         /// </summary>
         private static void Clip(VisualElement page,float radius)
         {
             if(page==null)return;page.style.overflow=Overflow.Hidden;
             page.style.borderTopLeftRadius=page.style.borderTopRightRadius=page.style.borderBottomLeftRadius=page.style.borderBottomRightRadius=Mathf.Max(0,radius);
+            void Fit()
+            {
+                var s=page.parent?.resolvedStyle;float left=Pad(s?.paddingLeft),top=Pad(s?.paddingTop),right=Pad(s?.paddingRight),bottom=Pad(s?.paddingBottom);
+                void Set(ref StyleLength margin,ref StyleLength padding,float value){if(Mathf.Approximately(padding.value.value,value)&&padding.keyword==StyleKeyword.Undefined)return;margin=-value;padding=value;}
+                var st=page.style;StyleLength ml=st.marginLeft,pl=st.paddingLeft,mt=st.marginTop,pt=st.paddingTop,mr=st.marginRight,pr=st.paddingRight,mb=st.marginBottom,pb=st.paddingBottom;
+                Set(ref ml,ref pl,left);Set(ref mt,ref pt,top);Set(ref mr,ref pr,right);Set(ref mb,ref pb,bottom);
+                st.marginLeft=ml;st.paddingLeft=pl;st.marginTop=mt;st.paddingTop=pt;st.marginRight=mr;st.paddingRight=pr;st.marginBottom=mb;st.paddingBottom=pb;
+            }
+            Fit();page.RegisterCallback<GeometryChangedEvent>(_=>Fit());
         }
+        private static float Pad(float? value)=>value.HasValue&&!float.IsNaN(value.Value)?value.Value:0;
         /// <summary>
         /// A refreshed modal: the new page replaces the old one in place and, within the same tab, takes over its scroll
         /// offsets — no jump to the top. (Old and new are never on screen together: overlapping filtered subtrees trip

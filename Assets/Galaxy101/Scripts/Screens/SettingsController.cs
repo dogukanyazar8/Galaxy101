@@ -10,6 +10,10 @@ namespace Galaxy101
     public sealed class SettingsController
     {
         private JObject draft;
+        private string draftCursor;
+        private readonly Dictionary<string, JToken> pendingSliders = new Dictionary<string, JToken>();
+        private IVisualElementScheduledItem sliderSave;
+        private static readonly string[] DisplayKeys = { "motion", "showFps", "wmode", "res", "fps", "quality" };
         private MenuView owner;
         private readonly SettingsMasa masa = new SettingsMasa();
         // D-62 ids of the rows, numbered per kind within a tab as the design's lists are (setToggles, setSliders, setSegs).
@@ -29,12 +33,15 @@ namespace Galaxy101
 
         public void OnOpen(MenuView view)
         {
+            Flush();
             owner = view;
             draft = view.Services.Settings.Load();
+            draftCursor = Audio.GalaxyCursor.Mode;
         }
 
         public void Discard()
         {
+            Flush();
             owner?.PreviewSettings(null);
             draft = null;
         }
@@ -79,7 +86,7 @@ namespace Galaxy101
             sidebar.Add(quit);
             var content = root.Q<VisualElement>("content");
             var subtitles = Subtitles(v);
-            var tabTitle = v.Text(titles[tab], 24, true); tabTitle.name = "menu.tabTitle";
+            var tabTitle = MenuView.CssLine(v.Text(titles[tab], 24, true), 24 * 1.15f); tabTitle.name = "menu.tabTitle";
             var tabSub = v.Text(subtitles[tab], 13, false, "mt"); tabSub.name = "menu.tabSub"; tabSub.style.marginTop = 2; tabSub.style.whiteSpace = WhiteSpace.NoWrap; tabSub.style.overflow = Overflow.Hidden; tabSub.style.textOverflow = TextOverflow.Ellipsis;
             var headingText = v.Column(tabTitle, tabSub); PanelUi.Grow(headingText);
             var heading = v.Row(headingText); heading.AddToClassList("g-settings-heading");
@@ -90,7 +97,6 @@ namespace Galaxy101
             {
                 case 0:
                     Toggle(v, scroll, "autoSort", v.L("Otomatik sırala", "Auto-sort"), v.L("Yeni çekilen taş ıstakada uygun yere yerleşsin", "Drawn tiles go to the right spot on your rack"));
-                    Toggle(v, scroll, "highlight", v.L("Perleri vurgula", "Highlight sets"), v.L("Geçerli perlerin çevresi yeşil yansın", "Valid sets glow green"));
                     Toggle(v, scroll, "dbl", v.L("Çift tıkla taş at", "Double-click to discard"), v.L("Sürüklemeden hızlı atış", "Discard quickly without dragging"));
                     Toggle(v, scroll, "chat", v.L("Masa sohbeti", "Table chat"), v.L("Masa içi mesaj ve emojiler görünsün", "Show messages and emojis at the table"));
                     Slider(v, scroll, "warn", v.L("Tur süresi uyarısı", "Turn timer warning"), v.L("Süre bitmeden kaç saniye önce uyarılsın", "How many seconds before your time runs out"), 1, 10, " sn"); // sl('warn', …, ' sn'): the unit is not in SET_EN, English shows "5 sn" too (EK-611)
@@ -104,7 +110,8 @@ namespace Galaxy101
                     Slider(v, scroll, "sfx", v.L("Efektler", "Effects"), v.L("Taş, zar ve buton sesleri", "Tile, dice and button sounds"), 0, 100, "%");
                     break;
                 case 2:
-                    Toggle(v, scroll, "motion", v.L("Arka plan hareketi", "Background motion"), v.L("Dönen gezegen ve kayan yıldızlar", "Spinning planet and shooting stars"), true);
+                    Toggle(v, scroll, "motion", v.L("Arka plan hareketi", "Background motion"), v.L("Dönen gezegen ve kayan yıldızlar", "Spinning planet and shooting stars"));
+                    Toggle(v, scroll, "showFps", v.L("FPS göster", "Show FPS"), v.L("Oyunda sol üstte anlık kare hızı (FPS) görünsün", "Show the live frame rate (FPS) at the top left"));
                     // spec/19 (S07): görüntü modu, çözünürlük (monitöre göre), kare hızı; the planet row moved to the main menu picker.
                     DisplayMode(v, scroll);
                     Resolution(v, scroll);
@@ -120,39 +127,115 @@ namespace Galaxy101
             var reset = PanelUi.CustomButton(v, v.L("Varsayılana dön", "Reset to default"), () =>
             {
                 draft = v.Services.Settings.ResetToDefaults();
-                if (!v.Services.Settings.SetLanguage((string)draft["lang"])) { draft["lang"] = v.Model.Settings["lang"]; PanelUi.SaveFailure(v); }
-                if (!v.Services.Settings.SetDisplay((string)draft["wmode"], (string)draft["res"])) { draft["wmode"] = v.Model.Settings["wmode"]; draft["res"] = v.Model.Settings["res"]; PanelUi.SaveFailure(v); }
-                if (!v.Services.Settings.SetFrameRate((int)draft["fps"])) { draft["fps"] = v.Model.Settings["fps"]; PanelUi.SaveFailure(v); }
-                v.PreviewSettings(draft); v.Refresh();
-            }, "");
+                draft["lang"] = v.Model.Settings["lang"].DeepClone();
+                draftCursor = Audio.CursorSet.Normal;
+                var next = v.Services.Settings.Load();
+                foreach (var property in draft.Properties()) if (!DisplayKeys.Contains(property.Name)) next[property.Name] = property.Value.DeepClone();
+                if (!v.Services.Settings.Save(next)) { OnOpen(v); PanelUi.SaveFailure(v); }
+                v.Refresh();
+            }, "bright-100");
             reset.name = "menu.resetSettings"; reset.style.backgroundColor = UnityEngine.Color.clear; reset.style.color = v.C("mt"); reset.style.fontSize = 14;
             reset.style.paddingLeft = reset.style.paddingRight = 0; reset.style.unityFont = v.Text("", 14).style.unityFont;
+            reset.style.paddingTop = reset.style.paddingBottom = 0;
+            reset.style.height = MenuView.CssLineHeight("Baloo2-700", 14);
+            reset.style.unityTextAlign = TextAnchor.MiddleLeft;
+            // style-hover="color:#F4F1E8" — the text lights up; no brightness filter and no press sink (a text link).
+            reset.RemoveFromClassList("galaxy-button"); reset.RemoveFromClassList("bright-100");
+            reset.style.borderTopWidth = reset.style.borderRightWidth = reset.style.borderBottomWidth = reset.style.borderLeftWidth = 0;
+            reset.style.marginTop = reset.style.marginRight = reset.style.marginBottom = reset.style.marginLeft = 0;
+            reset.RegisterCallback<PointerEnterEvent>(_ => reset.style.color = v.C("#F4F1E8")); reset.RegisterCallback<PointerLeaveEvent>(_ => reset.style.color = v.C("mt"));
             footer.Add(reset); footer.Add(PanelUi.Spacer(v));
+            if (tab == 2)
+            {
+                var note = v.Text(DisplayDirty(v) ? v.L("Kaydet ile geçerli olur", "Takes effect on Save") : "", 13, false, "mt");
+                note.name = "menu.dispNote"; note.style.fontSize = 12.5f; note.style.whiteSpace = WhiteSpace.NoWrap; note.style.marginRight = 12; footer.Add(note);
+            }
             var cancel = PanelUi.CssButton(v, v.L("Vazgeç", "Cancel"), () => Cancel(v), "secondary bright-120", 12, 22, 16); cancel.name = "menu.closeSettings#3"; footer.Add(cancel);
             var save = PanelUi.CssButton(v, v.L("Kaydet", "Save"), () =>
             {
-                if (!v.Services.Settings.Save(draft)) { PanelUi.SaveFailure(v); return; }
+                if (!ApplyDisplay(v)) return;
                 draft = null; v.CloseTop();
             }, "primary", 12, 28, 16);
             save.name = "menu.closeSettings#4"; save.style.marginLeft = 12; footer.Add(save); content.Add(footer);
             return root;
         }
 
+        private bool DisplayDirty(MenuView v) => DisplayKeys.Any(key => !JToken.DeepEquals(draft[key], v.Model.Settings[key])) || draftCursor != Audio.GalaxyCursor.Mode;
+
+        private bool ApplyDisplay(MenuView v)
+        {
+            if (!FlushImmediate(v)) return false;
+            if (!DisplayDirty(v)) return true;
+            var next = v.Services.Settings.Load();
+            foreach (var key in DisplayKeys) next[key] = draft[key].DeepClone();
+            if (!v.Services.Settings.Save(next)) { PanelUi.SaveFailure(v); return false; }
+            Audio.GalaxyCursor.Mode = draftCursor;
+            return true;
+        }
+
+        private bool SetValue(MenuView v, string key, JToken value)
+        {
+            if (DisplayKeys.Contains(key))
+            {
+                draft[key] = value;
+                v.Refresh(); return true;
+            }
+            if (!FlushImmediate(v)) return false;
+            var next = v.Services.Settings.Load(); next[key] = value;
+            if (!v.Services.Settings.Save(next)) { PanelUi.SaveFailure(v); return false; }
+            draft[key] = value; return true;
+        }
+
+        /// <summary>Sound/gameplay responds during a drag; persist once after release or before closing the window.</summary>
+        private bool SetSlider(MenuView v, GalaxySlider slider, string key, int value)
+        {
+            if (!slider.IsDragging) return SetValue(v, key, value);
+            if (!pendingSliders.ContainsKey(key)) pendingSliders.Add(key, v.Model.Settings[key].DeepClone());
+            v.Model.Settings[key] = value; draft[key] = value; v.Model.NotifyChanged();
+            if (sliderSave == null)
+                sliderSave = v.Root.schedule.Execute(() =>
+                {
+                    if (v.Root.Query<GalaxySlider>().ToList().Any(item => item.IsDragging)) return;
+                    FlushImmediate(v);
+                }).Every(50);
+            return true;
+        }
+
+        public void Flush() { if (owner != null) FlushImmediate(owner); }
+
+        private bool FlushImmediate(MenuView v)
+        {
+            sliderSave?.Pause(); sliderSave = null;
+            if (pendingSliders.Count == 0) return true;
+            bool saved = v.Services.Settings.Save(v.Services.Settings.Load());
+            if (!saved)
+            {
+                foreach (var entry in pendingSliders)
+                {
+                    v.Model.Settings[entry.Key] = entry.Value;
+                    if (draft != null) draft[entry.Key] = entry.Value.DeepClone();
+                }
+                v.Model.NotifyChanged(); PanelUi.SaveFailure(v);
+            }
+            pendingSliders.Clear();
+            return saved;
+        }
+
         private static VisualElement SettingRow(MenuView v, VisualElement list, string title, string description, VisualElement control, string kind = null, int index = 0)
         {
-            var name = v.Text(title, 17, true); var desc = PanelUi.Wrap(v, description, 13);
+            var name = MenuView.CssLine(v.Text(title, 17, true), 17 * 1.25f); var desc = PanelUi.Wrap(v, description, 13);
             if (kind != null) { name.name = "menu." + kind + ".name[" + index + "]"; desc.name = "menu." + kind + ".desc[" + index + "]"; }
             var labels = v.Column(name, desc); PanelUi.Grow(labels); labels.style.marginRight = 16;
             var row = v.Row(labels, control); row.AddToClassList("g-settings-row"); list.Add(row); return row;
         }
 
-        private void Toggle(MenuView v, VisualElement list, string key, string title, string description, bool preview = false)
+        private void Toggle(MenuView v, VisualElement list, string key, string title, string description)
         {
             var on = (bool)draft[key]; Button button = null;
             button = PanelUi.CustomButton(v, "", () =>
             {
-                on = !on; draft[key] = on; button.EnableInClassList("on", on);
-                if (preview) v.PreviewSettings(draft);
+                if (!SetValue(v, key, !on)) return;
+                on = !on; button.EnableInClassList("on", on);
             }, "g-toggle");
             button.name = "setting-" + key; button.EnableInClassList("on", on);
             button.Add(v.Box("g-toggle-knob")); SettingRow(v, list, title, description, button, "t", toggles++);
@@ -165,7 +248,7 @@ namespace Galaxy101
             label.style.color = v.C(value == min ? "mt" : "#F4F1E8");
             var slider = new GalaxySlider(min, max, value, v); slider.name = "setting-" + key;
             slider.style.marginRight = 18;
-            slider.ValueChanged += x => { draft[key] = x; label.text = x + unit; label.style.color = v.C(x == min ? "mt" : "#F4F1E8"); };
+            slider.ValueChanged += x => { if (!SetSlider(v, slider, key, x)) return; label.text = x + unit; label.style.color = v.C(x == min ? "mt" : "#F4F1E8"); };
             var row = v.Row(slider, label); row.style.flexShrink = 0; row.style.marginLeft = 2;
             SettingRow(v, list, title, description, row, "s", sliders++);
         }
@@ -176,7 +259,7 @@ namespace Galaxy101
             for (var i = 0; i < values.Length; i++)
             {
                 var option = values[i];
-                var button = PanelUi.CustomButton(v, v.L(option), () => { draft[key] = option; v.Refresh(); }, "g-segment-button"); button.name = "menu.o.pick[" + i + "]";
+                var button = PanelUi.CustomButton(v, v.L(option), () => { if (SetValue(v, key, option)) v.Refresh(); }, "g-segment-button"); button.name = "menu.o.pick[" + i + "]";
                 button.EnableInClassList("selected", (string)draft[key] == option);
                 if ((string)draft[key] == option) v.Decorate(button, "linear-gradient(var(--a1),var(--a2))", 10, 3, "aS");
                 group.Add(button);
@@ -191,11 +274,11 @@ namespace Galaxy101
         /// </summary>
         private void CursorRow(MenuView v, VisualElement list)
         {
-            var group = v.Row(); group.AddToClassList("g-segment"); group.name = "setting-cursor"; var current = Galaxy101.Audio.GalaxyCursor.Mode;
+            var group = v.Row(); group.AddToClassList("g-segment"); group.name = "setting-cursor"; var current = draftCursor;
             for (var i = 0; i < Galaxy101.Audio.GalaxyCursor.Modes.Length; i++)
             {
                 var mode = Galaxy101.Audio.GalaxyCursor.Modes[i];
-                var button = PanelUi.CustomButton(v, mode, () => { Galaxy101.Audio.GalaxyCursor.Mode = mode; v.Refresh(); }, "g-segment-button"); button.name = "menu.o.pick[" + i + "]";
+                var button = PanelUi.CustomButton(v, mode, () => { draftCursor = mode; v.Refresh(); }, "g-segment-button"); button.name = "menu.o.pick[" + i + "]";
                 button.EnableInClassList("selected", mode == current);
                 if (mode == current) v.Decorate(button, "linear-gradient(var(--a1),var(--a2))", 10, 3, "aS");
                 group.Add(button);
@@ -205,7 +288,7 @@ namespace Galaxy101
             var desc = row.Query<Label>().AtIndex(1); desc.style.whiteSpace = WhiteSpace.NoWrap; desc.style.overflow = Overflow.Hidden; desc.style.textOverflow = TextOverflow.Ellipsis;
         }
 
-        /// <summary>Görüntü modu: Tam ekran (exclusive) / Çerçevesiz / Pencere; applied and saved at once.</summary>
+        /// <summary>Display changes stay in the draft until Kaydet.</summary>
         private void DisplayMode(MenuView v, VisualElement list)
         {
             var group = v.Row(); group.AddToClassList("g-segment"); group.name = "setting-wmode";
@@ -216,7 +299,6 @@ namespace Galaxy101
                 var button = PanelUi.CustomButton(v, labels[i], () =>
                 {
                     draft["wmode"] = mode;
-                    if (!v.Services.Settings.SetDisplay(mode, (string)draft["res"])) { draft["wmode"] = v.Model.Settings["wmode"]; PanelUi.SaveFailure(v); }
                     v.Refresh();
                 }, "g-segment-button");
                 button.name = "setting-wmode-" + mode; button.EnableInClassList("selected", on);
@@ -241,7 +323,6 @@ namespace Galaxy101
             {
                 string value = options[next] == native ? GameDisplay.Native : GameDisplay.Format(options[next]);
                 draft["res"] = value;
-                if (!v.Services.Settings.SetDisplay((string)draft["wmode"], value)) { draft["res"] = v.Model.Settings["res"]; PanelUi.SaveFailure(v); }
             });
         }
 
@@ -255,7 +336,6 @@ namespace Galaxy101
                 FramePacing.Label(current, v.Loc.Language, FramePacing.CurrentHz), options.IndexOf(current), options.Count, next =>
             {
                 int value = options[next]; draft["fps"] = value;
-                if (!v.Services.Settings.SetFrameRate(value)) { draft["fps"] = v.Model.Settings["fps"]; PanelUi.SaveFailure(v); }
             });
         }
 
@@ -327,21 +407,33 @@ namespace Galaxy101
             list.Add(row);
         }
 
+        /// <summary>Eight digits of the account's server id, grouped "#### ####".</summary>
+        private static string PlayerNumber(System.Guid id)
+        {
+            ulong value = System.BitConverter.ToUInt64(id.ToByteArray(), 0) % 100000000UL;
+            var digits = value.ToString("D8", System.Globalization.CultureInfo.InvariantCulture); return digits.Substring(0, 4) + " " + digits.Substring(4);
+        }
+
         private void Account(MenuView v, VisualElement list)
         {
             Toggle(v, list, "friendReq", v.L("Arkadaşlık istekleri", "Friend requests"), v.L("Yeni istekler için bildirim al", "Get notified about new requests"));
             Toggle(v, list, "invites", v.L("Masa davetleri", "Table invites"), v.L("Arkadaşların seni masaya çağırabilsin", "Let friends invite you to their table"));
             var accountName = v.Text((string)v.Model.Profile["name"], 20, true); accountName.name = "menu.me.name#2"; accountName.style.height = 24;
-            var playerId = v.Text(v.L("Oyuncu ID · 4821 9930", "Player ID · 4821 9930"), 13, false, "mt"); playerId.name = "menu.t.playerId";
+            // The signed-in account's own id (eight digits of its server id, shown "#### ####" like the design); none offline.
+            var profileResponse = Online.GalaxyOnline.Instance is { SignedIn: true } online ? online.Profile : null;
+            var playerId = v.Text(profileResponse != null ? v.L("Oyuncu ID · ", "Player ID · ") + PlayerNumber(profileResponse.Id) : "", 13, false, "mt"); playerId.name = "menu.t.playerId";
+            if (profileResponse == null) playerId.style.display = DisplayStyle.None;
             var details = v.Column(accountName, playerId); PanelUi.Grow(details);
             // v4: the 62px framed avatar of the top bar (frameOf: insetS, a 3px ring in the frame's gap colour), gap 16.
             var avatar = v.Avatar(62); avatar.style.marginRight = 16; avatar.Q<Label>("avatar-initials").name = "menu.me.ini#2";
             var edit = PanelUi.CssButton(v, v.L("Profili düzenle", "Edit profile"), () => v.OpenDialog("profile"), "secondary bright-120", 9, 16, 14, 12); edit.name = "menu.openProfile";
             var profile = v.Row(avatar, details, edit); profile.AddToClassList("g-panel-card"); profile.style.borderTopLeftRadius = profile.style.borderTopRightRadius = profile.style.borderBottomLeftRadius = profile.style.borderBottomRightRadius = 20; profile.style.marginTop = 6; profile.style.marginBottom = 14; list.Add(profile);
             var google = v.Box(); google.style.width = google.style.height = 36; google.style.flexShrink = 0; google.style.alignItems = Align.Center; google.style.justifyContent = Justify.Center; google.style.marginRight = 14; v.Decorate(google, "#fff", 10); google.Add(v.Text("G", 18, true, "#4285F4"));
-            var email = v.Column(MenuView.CssLine(v.Text("Google", 16, true), 19.2f), MenuView.CssLine(v.Text("dogukan•••@gmail.com", 12, false, "mt"))); PanelUi.Grow(email); // 700 16px/1.2 over 700 12px
-            var linkedLabel = v.Text(v.L("Bağlı", "Linked"), 12, false, "#8EF0B0"); linkedLabel.style.unityFont = v.Font("Baloo2-800");
-            var linkedDot = PanelUi.Circle(v, 8, "#3CCB6E"); linkedDot.style.marginRight = 6;
+            // Linked or not as the server says (profile linkedProviders): nothing about the Google account is assumed.
+            bool googleLinked = profileResponse?.LinkedProviders?.Exists(p => string.Equals(p, "google", System.StringComparison.OrdinalIgnoreCase)) == true;
+            var email = v.Column(MenuView.CssLine(v.Text("Google", 16, true), 19.2f), MenuView.CssLine(v.Text(googleLinked ? v.L("Hesabın Google ile bağlı", "Your account is linked to Google") : v.L("Hesabın Google'a bağlı değil", "Your account is not linked to Google"), 12, false, "mt"))); PanelUi.Grow(email); // 700 16px/1.2 over 700 12px
+            var linkedLabel = v.Text(googleLinked ? v.L("Bağlı", "Linked") : v.L("Bağlı değil", "Not linked"), 12, false, googleLinked ? "#8EF0B0" : "mt"); linkedLabel.name = "menu.t.linked"; linkedLabel.style.unityFont = v.Font("Baloo2-800");
+            var linkedDot = PanelUi.Circle(v, 8, googleLinked ? "#3CCB6E" : "rgba(169,174,221,.5)"); linkedDot.style.marginRight = 6;
             var linked = v.Row(google, email, v.Row(linkedDot, linkedLabel)); linked.AddToClassList("g-panel-card"); PanelUi.Pad(linked, 14, 18); linked.style.borderTopLeftRadius = linked.style.borderTopRightRadius = linked.style.borderBottomLeftRadius = linked.style.borderBottomRightRadius = 18; linked.style.marginBottom = 14; list.Add(linked);
             var logout = PanelUi.CssButton(v, v.L("Çıkış yap", "Log out"), () => v.OpenDialog("logout"), "danger bright-120", 12, 20, 15); logout.name = "menu.askLogout";
             var delete = PanelUi.CustomButton(v, v.L("Hesabı sil", "Delete account"), () => v.OpenDialog("delete"), ""); delete.name = "menu.askDelete"; delete.style.color = v.C("mt"); delete.style.fontSize = 14; delete.style.unityFont = v.Text("", 14).style.unityFont;

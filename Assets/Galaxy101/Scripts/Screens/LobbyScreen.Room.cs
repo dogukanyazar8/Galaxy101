@@ -228,7 +228,8 @@ namespace Galaxy101
             string error = await backend.LeaveAsync();
             if (layer == null) return;
             if (error != null && error != ErrorCodes.NotFound && error != "E_NOT_SEATED") { leaving = false; Flash(L("Ayrılamadın (" + error + ")", "Could not leave (" + error + ")"), "bad"); return; }
-            if (backend.Room == null || error != null) { screen = "list"; animateCards = true; Render(); }
+            // RoomChanged can already have rebuilt the list before LeaveAsync completes. Keep that live tree.
+            if ((backend.Room == null || error != null) && screen != "list") { screen = "list"; animateCards = true; Render(); }
             Flash(S("leftRoom"), "info");
         }
 

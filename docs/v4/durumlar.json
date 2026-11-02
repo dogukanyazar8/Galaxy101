@@ -353,318 +353,318 @@
   },
   "G01": {
    "unity": "Scripts/Screens/TableLoadingOverlay.cs",
-   "not": "[safe18-all-tr] metin 26/30 (kayık 2, eksik 2, fazla 2) · ad 26/41 · UI piksel %4.44",
-   "durum": "bekliyor"
+   "not": "UF-506: yükleme yüzdesi ve rastgele ipucu [p5d-masa] metin 28/32 (kayık 2, eksik 2, fazla 2) · ad 28/45 · UI piksel %5.5",
+   "durum": "bilinçli fark"
   },
   "G02": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[safe18-all-tr] metin 26/28 (kayık 0, eksik 2, fazla 2) · ad 17/37 · UI piksel %12.68",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 31/31 (kayık 0, eksik 0, fazla 0) · ad 25/43 · UI piksel %10.56",
+   "durum": "eşleşti"
   },
   "G03": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[safe18-all-tr] metin 25/28 (kayık 0, eksik 3, fazla 5) · ad 17/37 · UI piksel %12.22",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 31/31 (kayık 0, eksik 0, fazla 0) · ad 25/43 · UI piksel %10.1",
+   "durum": "eşleşti"
   },
   "G04": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[safe18-all-tr] metin 25/28 (kayık 0, eksik 3, fazla 5) · ad 17/37 · UI piksel %14.67",
-   "durum": "bekliyor"
+   "not": "UF-501: dağıtan/zar/gösterge referansla aynı (ReferenceDeal); tören adımının dondurma anı ve balya/ıstaka dizilimi motorun [p5d-masa] metin 30/31 (kayık 0, eksik 1, fazla 1) · ad 25/43 · UI piksel %12.4",
+   "durum": "bilinçli fark"
   },
   "G05": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[safe18-all-tr] metin 25/28 (kayık 0, eksik 3, fazla 5) · ad 17/37 · UI piksel %15.11",
-   "durum": "bekliyor"
+   "not": "UF-501: dağıtan/zar/gösterge referansla aynı (ReferenceDeal); tören adımının dondurma anı ve balya/ıstaka dizilimi motorun [p5d-masa] metin 30/31 (kayık 0, eksik 1, fazla 3) · ad 25/43 · UI piksel %15.56",
+   "durum": "bilinçli fark"
   },
   "G06": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[safe18-all-tr] metin 25/28 (kayık 0, eksik 3, fazla 5) · ad 17/37 · UI piksel %14.77",
-   "durum": "bekliyor"
+   "not": "UF-501: dağıtan/zar/gösterge referansla aynı (ReferenceDeal); tören adımının dondurma anı ve balya/ıstaka dizilimi motorun [p5d-masa] metin 30/31 (kayık 0, eksik 1, fazla 1) · ad 25/43 · UI piksel %10.65",
+   "durum": "bilinçli fark"
   },
   "G07": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[safe18-all-tr] metin 26/32 (kayık 1, eksik 5, fazla 5) · ad 17/41 · UI piksel %15.97",
-   "durum": "bekliyor"
+   "not": "UF-501: dağıtan/zar/gösterge referansla aynı (ReferenceDeal); tören adımının dondurma anı ve balya/ıstaka dizilimi motorun [p5d-masa] metin 35/35 (kayık 0, eksik 0, fazla 0) · ad 25/47 · UI piksel %12.69",
+   "durum": "bilinçli fark"
   },
   "G08": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[safe18-all-tr] metin 28/32 (kayık 0, eksik 4, fazla 4) · ad 17/41 · UI piksel %14.42",
-   "durum": "bekliyor"
+   "not": "UF-501: dağıtan/zar/gösterge referansla aynı (ReferenceDeal); tören adımının dondurma anı ve balya/ıstaka dizilimi motorun [p5d-masa] metin 35/35 (kayık 0, eksik 0, fazla 0) · ad 25/47 · UI piksel %13.58",
+   "durum": "bilinçli fark"
   },
   "G09": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[safe18-all-tr] metin 28/32 (kayık 1, eksik 3, fazla 3) · ad 17/41 · UI piksel %14.36",
-   "durum": "bekliyor"
+   "not": "UF-501: dağıtan/zar/gösterge referansla aynı (ReferenceDeal); tören adımının dondurma anı ve balya/ıstaka dizilimi motorun [p5d-masa] metin 35/35 (kayık 0, eksik 0, fazla 0) · ad 25/47 · UI piksel %12.91",
+   "durum": "bilinçli fark"
   },
   "G10": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[safe18-all-tr] metin 28/32 (kayık 1, eksik 3, fazla 3) · ad 17/41 · UI piksel %12.87",
-   "durum": "bekliyor"
+   "not": "UF-501: dağıtan/zar/gösterge referansla aynı (ReferenceDeal); tören adımının dondurma anı ve balya/ıstaka dizilimi motorun [p5d-masa] metin 35/35 (kayık 0, eksik 0, fazla 0) · ad 25/47 · UI piksel %12.79",
+   "durum": "bilinçli fark"
   },
   "G11": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[safe18-all-tr] metin 19/32 (kayık 9, eksik 4, fazla 4) · ad 17/41 · UI piksel %38.52",
-   "durum": "bekliyor"
+   "not": "UF-501: dağıtan/zar/gösterge referansla aynı (ReferenceDeal); tören adımının dondurma anı ve balya/ıstaka dizilimi motorun [p5d-masa] metin 34/34 (kayık 0, eksik 0, fazla 0) · ad 24/46 · UI piksel %23.8",
+   "durum": "bilinçli fark"
   },
   "G12": {
    "unity": "Table/Scripts/Game/TableCeremony.cs, Hud/TableHud.Deal.cs",
-   "not": "[safe18-all-tr] metin 28/30 (kayık 0, eksik 2, fazla 2) · ad 23/38 · UI piksel %15.79",
-   "durum": "bekliyor"
+   "not": "UF-501 / UF-516: Zeynep bot olarak daha hızlı oynar, kare benim turumda [p5d-masa] metin 34/37 (kayık 1, eksik 2, fazla 2) · ad 29/48 · UI piksel %19.87",
+   "durum": "bilinçli fark"
   },
   "G13": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 31/33 (kayık 1, eksik 1, fazla 1) · ad 25/40 · UI piksel %15.86",
-   "durum": "bekliyor"
+   "not": "UF-503: üçüncü B12 yerine rastgele yüz (referans K4, Unity B3) → elde kalan 79/78 [p5d-masa] metin 38/40 (kayık 0, eksik 2, fazla 2) · ad 32/49 · UI piksel %12.47",
+   "durum": "bilinçli fark"
   },
   "G14": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 28/34 (kayık 6, eksik 0, fazla 0) · ad 25/40 · UI piksel %17.39",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 41/41 (kayık 0, eksik 0, fazla 0) · ad 32/50 · UI piksel %10.15",
+   "durum": "eşleşti"
   },
   "G15": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 28/34 (kayık 6, eksik 0, fazla 0) · ad 25/40 · UI piksel %14.62",
-   "durum": "bekliyor"
+   "not": "UF-513: tur rozeti ±1–2 sn [p5d-masa] metin 40/41 (kayık 0, eksik 1, fazla 1) · ad 32/50 · UI piksel %16.53",
+   "durum": "bilinçli fark"
   },
   "G16": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 28/34 (kayık 6, eksik 0, fazla 0) · ad 25/40 · UI piksel %14.67",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 41/41 (kayık 0, eksik 0, fazla 0) · ad 32/50 · UI piksel %12.07",
+   "durum": "bilinçli fark"
   },
   "G17": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 35/36 (kayık 1, eksik 0, fazla 0) · ad 27/42 · UI piksel %13.16",
-   "durum": "bekliyor"
+   "not": "UF-513: tur rozeti ±1–2 sn [p5d-masa] metin 40/41 (kayık 0, eksik 1, fazla 1) · ad 32/50 · UI piksel %11.57",
+   "durum": "bilinçli fark"
   },
   "G18": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 33/34 (kayık 1, eksik 0, fazla 0) · ad 25/40 · UI piksel %14.89",
-   "durum": "bekliyor"
+   "not": "UF-513: tur rozeti ±1–2 sn [p5d-masa] metin 39/41 (kayık 1, eksik 1, fazla 1) · ad 32/50 · UI piksel %12.01",
+   "durum": "bilinçli fark"
   },
   "G19": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 28/34 (kayık 5, eksik 1, fazla 1) · ad 25/40 · UI piksel %14.2",
-   "durum": "bekliyor"
+   "not": "UF-513: tur rozeti ±1–2 sn [p5d-masa] metin 39/41 (kayık 1, eksik 1, fazla 1) · ad 32/50 · UI piksel %18.19",
+   "durum": "bilinçli fark"
   },
   "G20": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 30/32 (kayık 1, eksik 1, fazla 1) · ad 24/39 · UI piksel %13.8",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 38/39 (kayık 1, eksik 0, fazla 0) · ad 31/49 · UI piksel %11.84",
+   "durum": "eşleşti"
   },
   "G21": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 28/33 (kayık 4, eksik 1, fazla 2) · ad 24/39 · UI piksel %13.82",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 41/41 (kayık 0, eksik 0, fazla 0) · ad 32/50 · UI piksel %10.79",
+   "durum": "eşleşti"
   },
   "G22": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 30/32 (kayık 1, eksik 1, fazla 2) · ad 24/39 · UI piksel %15.46",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 39/39 (kayık 0, eksik 0, fazla 0) · ad 31/49 · UI piksel %17.31",
+   "durum": "bilinçli fark"
   },
   "G23": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 28/34 (kayık 6, eksik 0, fazla 0) · ad 25/40 · UI piksel %15.63",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 41/41 (kayık 0, eksik 0, fazla 0) · ad 32/50 · UI piksel %10.72",
+   "durum": "eşleşti"
   },
   "G24": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 27/32 (kayık 3, eksik 2, fazla 3) · ad 23/38 · UI piksel %12.71",
-   "durum": "bekliyor"
+   "not": "UF-513 / UF-516: rozet ±1 sn, Ayşe henüz çekmedi (deste 20/19) [p5d-masa] metin 37/40 (kayık 0, eksik 3, fazla 2) · ad 31/49 · UI piksel %16.13",
+   "durum": "bilinçli fark"
   },
   "G25": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 30/31 (kayık 0, eksik 1, fazla 1) · ad 24/39 · UI piksel %14.09",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 38/38 (kayık 0, eksik 0, fazla 0) · ad 31/49 · UI piksel %10.84",
+   "durum": "eşleşti"
   },
   "G26": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 30/31 (kayık 0, eksik 1, fazla 1) · ad 24/39 · UI piksel %14.48",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 37/38 (kayık 1, eksik 0, fazla 0) · ad 31/49 · UI piksel %10.32",
+   "durum": "eşleşti"
   },
   "G27": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 30/31 (kayık 0, eksik 1, fazla 1) · ad 24/39 · UI piksel %13.73",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 38/38 (kayık 0, eksik 0, fazla 0) · ad 31/49 · UI piksel %15.53",
+   "durum": "bilinçli fark"
   },
   "G28": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 29/31 (kayık 1, eksik 1, fazla 1) · ad 24/39 · UI piksel %14.54",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 34/38 (kayık 4, eksik 0, fazla 0) · ad 31/49 · UI piksel %17.93",
+   "durum": "bilinçli fark"
   },
   "G29": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 29/31 (kayık 1, eksik 1, fazla 1) · ad 24/39 · UI piksel %17.01",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 38/38 (kayık 0, eksik 0, fazla 0) · ad 31/49 · UI piksel %11.2",
+   "durum": "eşleşti"
   },
   "G30": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 28/31 (kayık 1, eksik 2, fazla 3) · ad 23/39 · UI piksel %16.91",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 37/38 (kayık 1, eksik 0, fazla 0) · ad 30/49 · UI piksel %12.85",
+   "durum": "bilinçli fark"
   },
   "G31": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 29/33 (kayık 2, eksik 2, fazla 7) · ad 25/41 · UI piksel %15.87",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 36/39 (kayık 3, eksik 0, fazla 0) · ad 31/50 · UI piksel %20.95",
+   "durum": "bilinçli fark"
   },
   "G32": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 83/88 (kayık 3, eksik 2, fazla 32) · ad 70/85 · UI piksel %6.58",
-   "durum": "bekliyor"
+   "not": "UF-518: görünüm kartlarının metin satırları [p5d-masa] metin 58/94 (kayık 36, eksik 0, fazla 33) · ad 80/97 · UI piksel %11.57",
+   "durum": "bilinçli fark"
   },
   "G33": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 27/34 (kayık 5, eksik 2, fazla 2) · ad 23/43 · UI piksel %10.17",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 30/41 (kayık 11, eksik 0, fazla 0) · ad 34/53 · UI piksel %9.48",
+   "durum": "bilinçli fark"
   },
   "G34": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 61/68 (kayık 5, eksik 2, fazla 1) · ad 59/75 · UI piksel %7.03",
-   "durum": "bekliyor"
+   "not": "UF-514: Sonraki el sayacı sunucunun nextAt'ından · UF-519 okunmamış rozeti [p5d-masa] metin 69/76 (kayık 5, eksik 2, fazla 1) · ad 68/87 · UI piksel %3.09",
+   "durum": "bilinçli fark"
   },
   "T01": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 18/19 (kayık 1, eksik 0, fazla 0) · ad 17/26 · UI piksel %9.19",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 20/21 (kayık 1, eksik 0, fazla 0) · ad 19/31 · UI piksel %8.37",
+   "durum": "eşleşti"
   },
   "T02": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 16/26 (kayık 10, eksik 0, fazla 0) · ad 19/36 · UI piksel %43.94",
-   "durum": "bekliyor"
+   "not": "UF-519: okunmamış rozeti (rastgele bot sohbeti) [p5d-masa] metin 26/28 (kayık 1, eksik 1, fazla 0) · ad 21/40 · UI piksel %9.54",
+   "durum": "bilinçli fark"
   },
   "T03": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 26/28 (kayık 0, eksik 2, fazla 2) · ad 17/37 · UI piksel %13.98",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 31/31 (kayık 0, eksik 0, fazla 0) · ad 25/43 · UI piksel %10.39",
+   "durum": "eşleşti"
   },
   "T04": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 26/30 (kayık 2, eksik 2, fazla 2) · ad 23/38 · UI piksel %14.95",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 36/37 (kayık 1, eksik 0, fazla 0) · ad 30/48 · UI piksel %10.24",
+   "durum": "eşleşti"
   },
   "T05": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 28/31 (kayık 1, eksik 2, fazla 3) · ad 23/39 · UI piksel %14.01",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 37/38 (kayık 1, eksik 0, fazla 0) · ad 30/49 · UI piksel %11.33",
+   "durum": "eşleşti"
   },
   "T06": {
    "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs",
-   "not": "[safe18-all-tr] metin 28/31 (kayık 1, eksik 2, fazla 3) · ad 23/39 · UI piksel %14.08",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 37/38 (kayık 1, eksik 0, fazla 0) · ad 30/49 · UI piksel %14.03",
+   "durum": "bilinçli fark"
   },
   "T07": {
    "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs",
-   "not": "[safe18-all-tr] metin 44/47 (kayık 1, eksik 2, fazla 4) · ad 39/54 · UI piksel %11.67",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 53/54 (kayık 1, eksik 0, fazla 1) · ad 46/64 · UI piksel %9.99",
+   "durum": "eşleşti"
   },
   "T08": {
    "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs",
-   "not": "[safe18-all-tr] metin 55/59 (kayık 2, eksik 2, fazla 3) · ad 56/72 · UI piksel %7.52",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 65/66 (kayık 1, eksik 0, fazla 0) · ad 63/82 · UI piksel %8.16",
+   "durum": "eşleşti"
   },
   "T09": {
    "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs",
-   "not": "[safe18-all-tr] metin 51/55 (kayık 2, eksik 2, fazla 3) · ad 52/68 · UI piksel %8.14",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 61/62 (kayık 1, eksik 0, fazla 0) · ad 59/78 · UI piksel %8.11",
+   "durum": "eşleşti"
   },
   "T10": {
    "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs",
-   "not": "[safe18-all-tr] metin 52/65 (kayık 11, eksik 2, fazla 3) · ad 62/78 · UI piksel %7.1",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 56/72 (kayık 16, eksik 0, fazla 0) · ad 69/97 · UI piksel %11.6",
+   "durum": "bilinçli fark"
   },
   "T11": {
    "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs",
-   "not": "[safe18-all-tr] metin 30/34 (kayık 2, eksik 2, fazla 3) · ad 23/42 · UI piksel %17.81",
-   "durum": "bekliyor"
+   "not": "UF-513: tur rozeti ±1–2 sn [p5d-masa] metin 39/41 (kayık 1, eksik 1, fazla 1) · ad 30/52 · UI piksel %17.63",
+   "durum": "bilinçli fark"
   },
   "T12": {
    "unity": "Table/Scripts/Game/TableGifts.cs, Hud/TableHud.Gifts.cs",
-   "not": "[safe18-all-tr] metin 28/31 (kayık 1, eksik 2, fazla 2) · ad 23/39 · UI piksel %16.37",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 37/41 (kayık 4, eksik 0, fazla 0) · ad 30/52 · UI piksel %15.64",
+   "durum": "bilinçli fark"
   },
   "T13": {
    "unity": "Table/Scripts/Hud/TableHud.Social.cs",
-   "not": "[safe18-all-tr] metin 46/49 (kayık 1, eksik 2, fazla 3) · ad 46/61 · UI piksel %7.65",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 52/56 (kayık 4, eksik 0, fazla 0) · ad 53/71 · UI piksel %10.63",
+   "durum": "bilinçli fark"
   },
   "T14": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 31/33 (kayık 1, eksik 1, fazla 1) · ad 25/40 · UI piksel %13.03",
-   "durum": "bekliyor"
+   "not": "UF-503: üçüncü B12 yerine rastgele yüz (referans K4, Unity B3) → elde kalan 79/78 [p5d-masa] metin 34/40 (kayık 4, eksik 2, fazla 2) · ad 32/50 · UI piksel %17.51",
+   "durum": "bilinçli fark"
   },
   "T15": {
    "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs",
-   "not": "[safe18-all-tr] metin 83/88 (kayık 3, eksik 2, fazla 32) · ad 70/85 · UI piksel %6.63",
-   "durum": "bekliyor"
+   "not": "UF-518: görünüm kartlarının metin satırları [p5d-masa] metin 51/94 (kayık 43, eksik 0, fazla 33) · ad 80/98 · UI piksel %12.34",
+   "durum": "bilinçli fark"
   },
   "T16": {
    "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs",
-   "not": "[safe18-all-tr] metin 51/55 (kayık 2, eksik 2, fazla 2) · ad 55/70 · UI piksel %4.95",
-   "durum": "bekliyor"
+   "not": "UF-512: Perleri vurgula kaldırıldı (kullanıcı kararı) [p5d-masa] metin 47/62 (kayık 13, eksik 2, fazla 0) · ad 59/80 · UI piksel %13.69",
+   "durum": "bilinçli fark"
   },
   "T17": {
    "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs",
-   "not": "[safe18-all-tr] metin 48/52 (kayık 2, eksik 2, fazla 2) · ad 56/71 · UI piksel %6.19",
-   "durum": "bekliyor"
+   "not": "UF-515 müzik %60 (paylaşılan ayar) · UF-513 [p5d-masa] metin 56/59 (kayık 1, eksik 2, fazla 2) · ad 63/81 · UI piksel %6.53",
+   "durum": "bilinçli fark"
   },
   "T18": {
    "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs",
-   "not": "[safe18-all-tr] metin 43/47 (kayık 2, eksik 2, fazla 2) · ad 50/65 · UI piksel %4.84",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 53/54 (kayık 1, eksik 0, fazla 0) · ad 57/75 · UI piksel %5.46",
+   "durum": "eşleşti"
   },
   "T19": {
    "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs",
-   "not": "[safe18-all-tr] metin 29/31 (kayık 1, eksik 1, fazla 2) · ad 23/39 · UI piksel %11.85",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 37/38 (kayık 1, eksik 0, fazla 0) · ad 30/49 · UI piksel %10.21",
+   "durum": "eşleşti"
   },
   "T20": {
    "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs",
-   "not": "[safe18-all-tr] metin 29/31 (kayık 1, eksik 1, fazla 2) · ad 23/39 · UI piksel %14.54",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 37/38 (kayık 1, eksik 0, fazla 0) · ad 30/49 · UI piksel %11.56",
+   "durum": "eşleşti"
   },
   "T21": {
    "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs",
-   "not": "[safe18-all-tr] metin 29/31 (kayık 1, eksik 1, fazla 2) · ad 23/39 · UI piksel %14.38",
-   "durum": "bekliyor"
+   "not": "UF-513: tur rozeti ±1–2 sn [p5d-masa] metin 36/38 (kayık 1, eksik 1, fazla 1) · ad 30/49 · UI piksel %11.33",
+   "durum": "bilinçli fark"
   },
   "T22": {
    "unity": "Table/Scripts/Hud/TableHud.Windows.cs, Core/TableSettings.cs",
-   "not": "[safe18-all-tr] metin 29/31 (kayık 1, eksik 1, fazla 2) · ad 23/39 · UI piksel %16.4",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 37/38 (kayık 1, eksik 0, fazla 0) · ad 30/49 · UI piksel %11.75",
+   "durum": "bilinçli fark"
   },
   "T23": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 29/33 (kayık 2, eksik 2, fazla 2) · ad 23/42 · UI piksel %28.37",
-   "durum": "bekliyor"
+   "not": "UF-519 okunmamış rozeti · UF-517 kutlama kamerası/ışık pikselleri [p5d-masa] metin 36/39 (kayık 2, eksik 1, fazla 0) · ad 29/51 · UI piksel %26.64",
+   "durum": "bilinçli fark"
   },
   "T24": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 61/68 (kayık 5, eksik 2, fazla 1) · ad 59/75 · UI piksel %6.95",
-   "durum": "bekliyor"
+   "not": "UF-514: Sonraki el sayacı sunucunun nextAt'ından · UF-519 okunmamış rozeti [p5d-masa] metin 69/76 (kayık 5, eksik 2, fazla 1) · ad 68/87 · UI piksel %3.12",
+   "durum": "bilinçli fark"
   },
   "T25": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 27/34 (kayık 5, eksik 2, fazla 2) · ad 23/43 · UI piksel %10.29",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 37/41 (kayık 4, eksik 0, fazla 0) · ad 34/53 · UI piksel %2.96",
+   "durum": "bilinçli fark"
   },
   "T26": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 30/36 (kayık 5, eksik 1, fazla 1) · ad 29/44 · UI piksel %13.52",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 39/43 (kayık 4, eksik 0, fazla 0) · ad 36/54 · UI piksel %4.94",
+   "durum": "bilinçli fark"
   },
   "T27": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 26/31 (kayık 1, eksik 4, fazla 5) · ad 23/39 · UI piksel %14.35",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 35/38 (kayık 3, eksik 0, fazla 0) · ad 30/49 · UI piksel %12.11",
+   "durum": "bilinçli fark"
   },
   "T28": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 24/31 (kayık 5, eksik 2, fazla 4) · ad 23/39 · UI piksel %15.82",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 36/38 (kayık 2, eksik 0, fazla 0) · ad 30/49 · UI piksel %12.95",
+   "durum": "bilinçli fark"
   },
   "T30": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 23/34 (kayık 9, eksik 2, fazla 3) · ad 23/43 · UI piksel %11.15",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 39/41 (kayık 2, eksik 0, fazla 0) · ad 34/53 · UI piksel %3.72",
+   "durum": "eşleşti"
   },
   "T33": {
    "unity": "Table/Scripts/Hud/TableHud.cs + Game/RackInput.cs okey ipucu (ShowOkeyTip)",
@@ -673,28 +673,28 @@
   },
   "T34": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 26/35 (kayık 8, eksik 1, fazla 4) · ad 23/42 · UI piksel %16.65",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 31/42 (kayık 11, eksik 0, fazla 0) · ad 30/52 · UI piksel %22.57",
+   "durum": "bilinçli fark"
   },
   "T35": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 28/33 (kayık 4, eksik 1, fazla 2) · ad 24/39 · UI piksel %14.57",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 41/41 (kayık 0, eksik 0, fazla 0) · ad 32/50 · UI piksel %11.31",
+   "durum": "eşleşti"
   },
   "T36": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 27/36 (kayık 8, eksik 1, fazla 3) · ad 23/42 · UI piksel %14.81",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 42/44 (kayık 2, eksik 0, fazla 0) · ad 31/53 · UI piksel %22.33",
+   "durum": "bilinçli fark"
   },
   "T38": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 29/33 (kayık 2, eksik 2, fazla 7) · ad 25/41 · UI piksel %15.88",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 39/39 (kayık 0, eksik 0, fazla 0) · ad 31/50 · UI piksel %16.89",
+   "durum": "bilinçli fark"
   },
   "T39": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 32/36 (kayık 2, eksik 2, fazla 7) · ad 25/44 · UI piksel %15.51",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 42/42 (kayık 0, eksik 0, fazla 0) · ad 31/53 · UI piksel %18.84",
+   "durum": "bilinçli fark"
   },
   "T40": {
    "unity": "—",
@@ -708,13 +708,13 @@
   },
   "T42": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 57/68 (kayık 9, eksik 2, fazla 2) · ad 59/75 · UI piksel %6.87",
-   "durum": "bekliyor"
+   "not": "UF-514: Sonraki el sayacı sunucunun nextAt'ından · UF-519 okunmamış rozeti [p5d-masa] metin 65/76 (kayık 9, eksik 2, fazla 1) · ad 68/87 · UI piksel %3.06",
+   "durum": "bilinçli fark"
   },
   "T43": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 61/68 (kayık 5, eksik 2, fazla 1) · ad 59/75 · UI piksel %6.91",
-   "durum": "bekliyor"
+   "not": "UF-514: Sonraki el sayacı sunucunun nextAt'ından · UF-519 okunmamış rozeti [p5d-masa] metin 69/76 (kayık 5, eksik 2, fazla 1) · ad 68/87 · UI piksel %3.07",
+   "durum": "bilinçli fark"
   },
   "T44": {
    "unity": "Table/Scripts/Hud/TableHud.cs el sonu",
@@ -733,8 +733,8 @@
   },
   "T47": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 27/34 (kayık 6, eksik 1, fazla 1) · ad 25/40 · UI piksel %14.97",
-   "durum": "bekliyor"
+   "not": "[p5d-masa] metin 41/41 (kayık 0, eksik 0, fazla 0) · ad 32/50 · UI piksel %11.23",
+   "durum": "eşleşti"
   },
   "T48": {
    "unity": "Table/Scripts/Game/TableGame.cs ShowOkeyTip",
@@ -743,18 +743,18 @@
   },
   "T49": {
    "unity": "Table/Scripts/Game/TableGame.cs, Hud/TableHud.cs",
-   "not": "[safe18-all-tr] metin 28/34 (kayık 5, eksik 1, fazla 1) · ad 25/40 · UI piksel %14.42",
-   "durum": "bekliyor"
+   "not": "UF-517: 3D sahne pikselleri / metin ±4 px (eksik metin yok) [p5d-masa] metin 36/41 (kayık 5, eksik 0, fazla 0) · ad 32/50 · UI piksel %14.56",
+   "durum": "bilinçli fark"
   },
   "T50": {
    "unity": "Scripts/Screens/TableLoadingOverlay.cs",
-   "not": "[safe18-all-tr] metin 25/30 (kayık 2, eksik 3, fazla 3) · ad 26/41 · UI piksel %5.62",
-   "durum": "bekliyor"
+   "not": "UF-506: yükleme yüzdesi ve rastgele ipucu [p5d-masa] metin 28/32 (kayık 2, eksik 2, fazla 2) · ad 28/46 · UI piksel %4.94",
+   "durum": "bilinçli fark"
   },
   "T51": {
    "unity": "Scripts/Screens/TableLoadingOverlay.cs",
-   "not": "[safe18-all-tr] metin 7/10 (kayık 1, eksik 2, fazla 26) · ad 13/14 · UI piksel %4.57",
-   "durum": "bekliyor"
+   "not": "UF-506: yükleme yüzdesi ve rastgele ipucu [p5d-masa] metin 8/11 (kayık 1, eksik 2, fazla 27) · ad 13/14 · UI piksel %4.88",
+   "durum": "bilinçli fark"
   }
  }
 }

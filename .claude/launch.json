@@ -4,8 +4,26 @@
     {
       "name": "design-ref",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8765", "--directory", "Design/galaxy101_unity_handoff/reference"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8765",
+        "--directory",
+        "Design/galaxy101_unity_handoff/reference"
+      ],
       "port": 8765
+    },
+    {
+      "name": "design-full",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8766",
+        "--directory",
+        "Design/Galaxy101_ClaudeCode/full project"
+      ],
+      "port": 8766
     }
   ]
 }

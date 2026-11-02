@@ -10,7 +10,7 @@ import asyncio, base64, json, os, re
 from playwright.async_api import async_playwright
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-JS = open(os.path.join(ROOT, 'Design/galaxy101_unity_handoff/reference/game/table3d.js'), encoding='utf-8').read()
+JS = open(os.path.join(ROOT, 'Design/Galaxy101_ClaudeCode/full project/table3d.js'), encoding='utf-8').read()
 THEMES = json.load(open(os.path.join(ROOT, 'Assets/Galaxy101/Resources/Galaxy101/Table/table_content.json'), encoding='utf-8'))['planets_table']
 FONT = os.path.join(ROOT, 'Assets/Galaxy101/Resources/Galaxy101/Fonts/Montserrat-700.ttf')
 OUT = os.path.join(ROOT, 'Assets/Galaxy101/Resources/Galaxy101/Table/Felt')
@@ -34,6 +34,7 @@ const THREE = { SRGBColorSpace: 'srgb', RepeatWrapping: 1000, CanvasTexture: fun
 function cvs(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return [c, c.getContext('2d')]; }
 %s
 %s
+%s
 window.render = (kind, c1, c2, acc) => {
   const t = kind === 'andromeda' ? andromedaTex(1024, 1024, false) : kind === 'holo' ? feltTex(c2, '#03050d', acc, 'holo') : kind === 'wood' ? feltTex(c1, c2, acc, 'wood') : feltTex(c1, c2, acc);
   const src = t.image, out = document.createElement('canvas'); out.width = src.width; out.height = src.height;
@@ -45,7 +46,7 @@ window.render = (kind, c1, c2, acc) => {
 
 async def main():
     os.makedirs(OUT, exist_ok=True)
-    script = HARNESS % (function_source('feltTex'), function_source('andromedaTex'))
+    script = HARNESS % (function_source('arcText'), function_source('feltTex'), function_source('andromedaTex'))
     font = base64.b64encode(open(FONT, 'rb').read()).decode()
     async with async_playwright() as p:
         browser = await p.chromium.launch(channel='chrome')

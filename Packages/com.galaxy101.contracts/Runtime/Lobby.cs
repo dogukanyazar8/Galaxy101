@@ -63,9 +63,9 @@ namespace Galaxy101.Contracts
         /// <summary>Okey atma cezası: +101 for discarding the okey.</summary>
         public bool OkeyPenalty { get; set; } = true;
 
-        public static readonly int[] HandChoices = { 3, 5, 7 };
+        public static readonly int[] HandChoices = { 3, 5, 7, 9, 11 };
         public static readonly long[] StakeChoices = { 1000, 5000, 10000, 50000, 100000 };
-        public static readonly int[] TurnChoices = { 15, 20, 30, 45 };
+        public static readonly int[] TurnChoices = { 15, 20, 30, 40, 50, 60 };
     }
 
     public sealed class TableSeat

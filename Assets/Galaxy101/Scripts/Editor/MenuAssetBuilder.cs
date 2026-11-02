@@ -67,7 +67,7 @@ namespace Galaxy101.Editor
             var menu=new GameObject("Galaxy 101 Main Menu",typeof(UIDocument),typeof(MainMenuController));
             var document=menu.GetComponent<UIDocument>();document.panelSettings=AssetDatabase.LoadAssetAtPath<PanelSettings>(ResourcesRoot+"/PanelSettings.asset");document.visualTreeAsset=AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(ResourcesRoot+"/MainMenu.uxml");
             if(!EditorSceneManager.SaveScene(scene,scenePath))throw new IOException("Cannot save Galaxy101 Bootstrap scene.");
-            PlayerSettings.productName="Galaxy 101";PlayerSettings.bundleVersion="0.4.0";
+            PlayerSettings.productName="Galaxy 101";PlayerSettings.bundleVersion="0.5.0";
             // Bootstrap leads the build; every other listed scene (the 3D table GalaxyTable.unity included) stays.
             var scenes=EditorBuildSettings.scenes.Where(s=>s.path!=scenePath).ToList();scenes.Insert(0,new EditorBuildSettingsScene(scenePath,true));
             if(!scenes.Any(s=>s.path=="Assets/Okey101/Scenes/Table.unity"))scenes.Add(new EditorBuildSettingsScene("Assets/Okey101/Scenes/Table.unity",true));

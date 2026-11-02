@@ -2,13 +2,15 @@
     "name": "Galaxy101.PlayMode.Tests",
     "references": [
         "Galaxy101.Runtime",
+        "Galaxy101.Ships",
         "Unity.Localization",
         "Okey101.Core",
         "Okey101.Application",
         "Unity.InputSystem",
         "Galaxy101.Contracts",
         "Galaxy101.Table.Client",
-        "Galaxy101.Table.Runtime"
+        "Galaxy101.Table.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"

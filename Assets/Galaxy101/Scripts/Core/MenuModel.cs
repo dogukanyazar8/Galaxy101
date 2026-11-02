@@ -62,6 +62,7 @@ namespace Galaxy101
             defaults["wmode"] = "fullscreen"; // spec/19: Tam ekran / Çerçevesiz / Pencere
             defaults["res"] = GameDisplay.Native; // or "1920x1080"
             defaults["fps"] = FramePacing.Auto; // Kare hızı: 0 Otomatik, −1 Sınırsız, 30–1000 üst sınır
+            defaults["showFps"] = false;
             return defaults;
         }
 
@@ -83,7 +84,7 @@ namespace Galaxy101
             {
                 var directory = Path.GetDirectoryName(Path.GetFullPath(persistencePath));
                 Directory.CreateDirectory(directory);
-                var state = new JObject { ["version"] = 1, ["Settings"] = Settings.DeepClone(), ["Profile"] = Profile.DeepClone(),
+                var state = new JObject { ["version"] = StateVersion, ["Settings"] = Settings.DeepClone(), ["Profile"] = Profile.DeepClone(),
                     ["SelectedMode"] = SelectedMode, ["Planet"] = Planet, ["Progress"] = new JObject { ["level"] = Level, ["xp"] = Xp } };
                 File.WriteAllText(temporary, state.ToString(Formatting.Indented));
                 if (File.Exists(persistencePath)) File.Replace(temporary, persistencePath, null);
@@ -103,6 +104,9 @@ namespace Galaxy101
             }
         }
 
+        /// <summary>Saved-state format: 2 resets the version-1 "Çift tıkla at" default (see Restore).</summary>
+        private const int StateVersion = 2;
+
         private void Restore()
         {
             if (string.IsNullOrEmpty(persistencePath) || !File.Exists(persistencePath)) return;
@@ -115,8 +119,14 @@ namespace Galaxy101
                     if (state["Settings"] is JObject settings)
                     {
                         var merged = DefaultSettings();
+                        int version = SettingsValidation.TryInteger(state["version"], out long v) ? (int)v : 1;
                         foreach (var key in merged.Properties().Select(x => x.Name).ToArray())
+                        {
+                            // Version 1 saved "dbl" while its default was still false (the design's default is on):
+                            // those files carry the old default, not a choice, so it starts from the design's again.
+                            if (version < 2 && key == "dbl") continue;
                             if (settings[key] != null) merged[key] = settings[key].DeepClone();
+                        }
                         if (SettingsValidation.IsValid(merged, DefaultSettings())) Settings = merged;
                     }
                     if (state["Profile"] is JObject profile && ProfileValidation.IsValid(profile))

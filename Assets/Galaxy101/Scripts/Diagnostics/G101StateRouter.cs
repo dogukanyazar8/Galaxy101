@@ -35,6 +35,9 @@ namespace Galaxy101.Diagnostics
             public int Width = 1280, Height = 720;
             /// <summary>-g101Fps=seconds: before freezing, measure the frame times for this long (Faz 3, 60 FPS at 1080p).</summary>
             public float FpsSeconds;
+            /// <summary>Development-only renderer proof, independent of the catalogue's sometimes invalid demo hands.</summary>
+            public string FinishPreview;
+            public int FinishSampleMs = 700;
         }
 
         public static readonly IReadOnlyDictionary<string, string> Planets = new Dictionary<string, string>
@@ -76,6 +79,13 @@ namespace Galaxy101.Diagnostics
                 if (wh.Length != 2 || !int.TryParse(wh[0], out o.Width) || !int.TryParse(wh[1], out o.Height) || !GameDisplay.IsValidResolution(o.Width + "x" + o.Height)) throw new ArgumentException("-g101Size must be WxH, e.g. 1920x1080.");
             }
             if (float.TryParse(Value("g101Fps"), NumberStyles.Float, CultureInfo.InvariantCulture, out float fps)) o.FpsSeconds = fps;
+            o.FinishPreview = Value("g101FinishPreview");
+            if (o.FinishPreview != null && !new[] { "nuke", "blackhole", "supernova", "meteor" }.Contains(o.FinishPreview))
+                throw new ArgumentException("-g101FinishPreview must be nuke, blackhole, supernova or meteor.");
+            string finishSample = Value("g101FinishSample");
+            if (finishSample != null && (!int.TryParse(finishSample, NumberStyles.None, CultureInfo.InvariantCulture, out o.FinishSampleMs) || o.FinishSampleMs < 0 || o.FinishSampleMs > 8000))
+                throw new ArgumentException("-g101FinishSample must be milliseconds between 0 and 8000.");
+            if (finishSample != null && o.FinishPreview == null) throw new ArgumentException("-g101FinishSample requires -g101FinishPreview.");
             o.States.AddRange(state.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()));
             if (o.Theme != null && !Planets.ContainsKey(o.Theme)) throw new ArgumentException("-g101Theme must be saturn, mars, neptun, jupiter or venus.");
             if (o.Lang != null && o.Lang != "tr" && o.Lang != "en") throw new ArgumentException("-g101Lang must be tr or en.");
@@ -176,7 +186,28 @@ namespace Galaxy101.Diagnostics
             // g101-state.js run(): G101Clock.freeze() without an argument — every reference frame sits at the canonical
             // 100000 ms (DECISIONS D-61 says 100000 + ft; the code that made the references does not: EKSIKLER EK-005).
             if (options.FpsSeconds > 0) yield return MeasureFrames(record);
+            if (options.FinishPreview != null)
+            {
+                var game = FindAnyObjectByType<Galaxy101.Table.TableGame>();
+                if (game == null || game.Fx == null) { record["error"] = "Finish renderer preview requires a loaded table."; }
+                else
+                {
+                    // Stop the diagnostic host from advancing turns while the actual renderer runs on frame time.
+                    game.enabled = false;
+                    float began = Time.time;
+                    game.Fx.FinishImpact(options.FinishPreview, FindAnyObjectByType<Galaxy101.Table.TableScene>()?.CameraRig);
+                    while ((Time.time - began) * 1000 < options.FinishSampleMs) yield return null;
+                    record["finishPreview"] = options.FinishPreview;
+                    record["finishSampleMs"] = (Time.time - began) * 1000;
+                }
+            }
             GameClock.Freeze(0);
+            // At the canonical instant the reference's finite animations have run out: gifts are down, balloons gone.
+            FindAnyObjectByType<Galaxy101.Table.TableGifts>()?.Settle();
+            FindAnyObjectByType<Galaxy101.Table.TableFx>()?.Settle();
+            foreach (var tile in FindObjectsByType<Galaxy101.Table.TileView>()) tile.Settle();
+            FindAnyObjectByType<Galaxy101.Table.TableCameraRig>()?.Settle();
+            FindAnyObjectByType<Galaxy101.Table.TableHud>()?.SettleForFreeze();
             yield return null; yield return new WaitForEndOfFrame();
             yield return Capture(id, record);
             Time.timeScale = 1;
@@ -270,8 +301,9 @@ namespace Galaxy101.Diagnostics
             }
             Menu = menu;
             var model = menu.Model;
-            // The window the frame is captured from: 1280×720, windowed (the isolated settings start from the defaults).
-            model.Settings["wmode"] = "windowed"; model.Settings["res"] = "1280x720"; model.Settings["lang"] = lang;
+            // GameDisplay's capture guard controls the physical window without replacing
+            // the isolated model's default fullscreen/native-resolution preferences.
+            model.Settings["lang"] = lang;
             model.Planet = Planets[theme];
             model.Profile["name"] = AccountName; model.Profile["color"] = AccountColor; model.Profile["status"] = ""; model.Profile["frame"] = 0;
             model.Chips = AccountChips; model.Gems = AccountGems;

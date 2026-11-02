@@ -30,6 +30,7 @@ namespace Galaxy101.Table
             [V4Messages.Kicked] = typeof(V4Kicked), [V4Messages.Countdown] = typeof(V4Countdown), [V4Messages.SeatConnection] = typeof(V4SeatConnection),
             [V4Messages.LeftTable] = typeof(V4LeftTable), [V4Messages.RankChange] = typeof(V4RankChange), [V4Messages.MatchStart] = typeof(V4MatchStart),
             [V4Messages.DealStart] = typeof(V4DealStart), [V4Messages.DealStep] = typeof(V4DealStep), [V4Messages.DealDie] = typeof(V4DealDie),
+            [V4Messages.DealSkip] = typeof(V4DealSkip), [V4Messages.DealSkipVote] = typeof(V4DealSkipVote),
             [V4Messages.HandDealt] = typeof(V4HandDealt), [V4Messages.Turn] = typeof(V4Turn), [V4Messages.Legal] = typeof(V4Legal),
             [V4Messages.Game] = typeof(V4GameEvent), [V4Messages.HandWait] = typeof(V4HandWait), [V4Messages.ReadyState] = typeof(V4ReadyState),
             [V4Messages.MatchResult] = typeof(V4MatchResult), [V4Messages.Chat] = typeof(V4Chat), [V4Messages.Gift] = typeof(V4Gift),
@@ -39,7 +40,7 @@ namespace Galaxy101.Table
         /// <summary>The table messages a match session listens to (protocol.json s2c, table and deal groups).</summary>
         public static readonly string[] TableMessages =
         {
-            V4Messages.MatchStart, V4Messages.DealStart, V4Messages.DealStep, V4Messages.DealDie, V4Messages.HandDealt, V4Messages.Turn,
+            V4Messages.MatchStart, V4Messages.DealStart, V4Messages.DealStep, V4Messages.DealDie, V4Messages.DealSkip, V4Messages.DealSkipVote, V4Messages.HandDealt, V4Messages.Turn,
             V4Messages.Legal, V4Messages.Game, V4Messages.HandWait, V4Messages.ReadyState, V4Messages.MatchResult, V4Messages.TableView,
             V4Messages.SeatConnection, V4Messages.Chat, V4Messages.Gift, V4Messages.Snapshot, V4Messages.LeftTable, V4Messages.TableClosed,
             V4Messages.Xp, V4Messages.Balance, V4Messages.RankChange,

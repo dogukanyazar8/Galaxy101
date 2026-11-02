@@ -13,6 +13,9 @@ namespace Galaxy101
         public MenuView View {get;private set;}
         public MenuModel Model {get;private set;}
         private GalaxyBackground background;
+        private GalaxyShips ships;
+        private VisualElement shipsLayer;
+        private AuthCursorVisual menuCursor;
         private UIDocument document;
         private bool navigating;
         private LocalizationBridge localization;
@@ -40,8 +43,14 @@ namespace Galaxy101
             if(content==null||themes==null)throw new InvalidOperationException("Galaxy101 menu data resources are missing.");
             Model=new MenuModel(content.text,themes.text,path);var services=new MenuServices(Model);var loc=new LocalizationBridge(Model);localization=loc;
             View=new MenuView(document.rootVisualElement,Model,services,loc);View.BuildMain();
+            menuCursor=new AuthCursorVisual(View.Root,()=>Auth==null||!Auth.Visible,"game-cursor",()=>Model.Planet,()=>View.C("var(--a1)"));
             var effects=new GameObject("Galaxy background");effects.transform.SetParent(transform,false);background=effects.AddComponent<GalaxyBackground>();background.Initialize(View.BackgroundTarget);
             View.BackgroundChanged+=background.Configure;View.PlayRequested+=OnPlay;Model.Changed+=ApplySettings;
+            shipsLayer=View.Box("fill");shipsLayer.name="menu.ships";shipsLayer.pickingMode=PickingMode.Ignore;
+            View.Root.Q<VisualElement>("main-layer").Insert(0,shipsLayer);
+            ships=new GameObject("Galaxy ships").AddComponent<GalaxyShips>();ships.transform.SetParent(transform,false);
+            ships.Initialize(shipsLayer);ships.UseMenuLayout();View.BackgroundChanged+=ships.Configure;
+            ships.Configure(Model.Planet,(bool)Model.Settings["motion"],(string)Model.Settings["quality"]);
             Galaxy101.Audio.GalaxyAudio.TrackScreens(this,()=>Auth!=null&&Auth.Visible?Auth.Screen:Lobby!=null&&Lobby.Visible?"lobby":Ranked!=null&&Ranked.Visible?"ranked":"menu"); // v4 audio: screen music + ui.screen
             ApplySettings();background.Configure(Model.Planet,(bool)Model.Settings["motion"],(string)Model.Settings["quality"]);
             background.SetFocused(UnityEngine.Application.isFocused||UnityEngine.Application.isBatchMode);
@@ -62,7 +71,7 @@ namespace Galaxy101
         {
             var online=Galaxy101.Online.GalaxyOnline.Ensure();
             Auth=new AuthFlow(View,transform,online);
-            Auth.Completed+=()=>{ApplyOnline(online);HookOnline(online);};
+            Auth.Completed+=()=>{View.CloseAllModals();ApplyOnline(online);HookOnline(online);};
             Auth.Show();
         }
         /// <summary>The menu shows the server's profile card and balance once signed in; signed out, the sign-in comes back.</summary>
@@ -84,6 +93,7 @@ namespace Galaxy101
         }
         private void Update()
         {
+            if(shipsLayer!=null)shipsLayer.style.display=Auth!=null&&Auth.Visible?DisplayStyle.None:DisplayStyle.Flex;
             if(!DevTestMenu.Available||View==null)return;
             var keyboard=UnityEngine.InputSystem.Keyboard.current;
             if(keyboard!=null&&keyboard.f9Key.wasPressedThisFrame){DevMenu=DevMenu??new DevTestMenu(View,StartScenario);DevMenu.Toggle();}
@@ -256,9 +266,12 @@ namespace Galaxy101
             Galaxy101.Audio.GalaxyAudio.ApplySettings(Model.Settings); // v4 audio: master × music/sfx per source (was AudioListener.volume = master)
             FramePacing.Apply((int)Model.Settings["fps"]);
         }
-        private void OnApplicationFocus(bool value){background?.SetFocused(value||UnityEngine.Application.isBatchMode);View?.SetFocused(value||UnityEngine.Application.isBatchMode);}
+        private void OnApplicationFocus(bool value){background?.SetFocused(value||UnityEngine.Application.isBatchMode);ships?.SetFocused(value||UnityEngine.Application.isBatchMode);View?.SetFocused(value||UnityEngine.Application.isBatchMode);}
         private void OnDestroy()
         {
+            Auth?.Hide();
+            menuCursor?.Dispose();
+            if(View!=null&&ships!=null)View.BackgroundChanged-=ships.Configure;
             if(Model!=null)Model.Changed-=ApplySettings;
             if(View!=null){if(background!=null)View.BackgroundChanged-=background.Configure;View.PlayRequested-=OnPlay;View.Dispose();}
             localization?.Dispose();lobbyClient?.Dispose();inviteOff?.Invoke();rankedOff?.Invoke();

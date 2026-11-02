@@ -62,13 +62,24 @@ namespace Galaxy101.Table.Tests
             var play = TableScenarios.Create("play");
             var ok = G101Rules.OkeyFromIndicator(play.Spec.Indicator);
             Assert.That(RackMelds.Of(Segments(play.Rows), ok).Sum, Is.EqualTo(88), "T30: 88 / 101");
-            Assert.That(play.State().Hand.Racks.Select(r => r.Count), Is.EqualTo(new[] { 21, 21, 9, 21 }));
+            Assert.That(play.State().Hand.Racks.Select(r => r.Count), Is.EqualTo(new[] { 21, 19, 9, 18 }), "the hidden side racks give up what the deck lacks");
+            Assert.That(play.State().Hand.Deck.Count, Is.EqualTo(20), "G30: Taş çek · 20");
+            Assert.That(play.Rows[1][12], Is.EqualTo("B3b"), "G30: the third B12 is the reference's B3");
             var open = TableScenarios.Create("open");
-            Assert.That(RackMelds.Of(Segments(open.Rows), ok).Sum, Is.EqualTo(131), "G13: Açtı · 131");
+            Assert.That(RackMelds.Of(Segments(open.Rows), ok).Sum, Is.EqualTo(95), "G13: Açtı · 95 (the reference's B3 for the third B12)");
             var bomb = TableScenarios.Create("bomb");
             var bm = RackMelds.Of(Segments(bomb.Rows), ok);
             Assert.That(bm.Sum, Is.EqualTo(89), "G25: 89 / 101");
             Assert.That(bm.FromHand(101, 5), Is.Null, "R-53: no Elden bit below the bar");
+            // Elden with işleme (UF-522): R9 and R8 go onto a table run R10-R12 (R9 first), K5 stays to finish with.
+            var okey = G101Rules.OkeyFromIndicator("B1a");
+            var hand = RackMelds.Of(new List<IList<string>> { new[] { "K10a", "K11a", "K12a", "K13a" }, new[] { "Y10a", "Y11a", "Y12a", "Y13a" }, new[] { "B11a", "B12a", "B13a" }, new[] { "R8a", "R9a", "K5a" } }, okey);
+            Assert.That(hand.FromHand(101, 5), Is.Null, "three loose tiles: no plain Elden bit");
+            var table = new List<(string, List<string>)> { (G101Rules.KindRun, new List<string> { "R10b", "R11b", "R12b" }) };
+            var plan = hand.FromHand(101, 5, table, okey);
+            Assert.That(plan.HasValue, Is.True);
+            Assert.That(plan.Value.Lays, Is.EqualTo(new[] { "R9a", "R8a" })); Assert.That(plan.Value.Last, Is.EqualTo("K5a"));
+            Assert.That(hand.FromHand(101, 5, new List<(string, List<string>)>(), okey), Is.Null, "nothing to lay onto");
             var pen = TableScenarios.Create("penOpen");
             Assert.That(RackMelds.Of(Segments(pen.Rows), ok).Sum, Is.EqualTo(66), "G20: 66 / 101");
         }
@@ -89,15 +100,18 @@ namespace Galaxy101.Table.Tests
         }
 
         [Test]
-        public void OpenFlowOpensWithTheRackSegments()
+        public void OpenFlowIsTheReferencesShortOpening()
         {
+            // G13: the reference's B3 for the third B12 leaves 95 on the rack segments, a short opening (R-23).
             var (host, sc) = Flow("open");
+            var events = Events(host);
             Assert.That(host.Client.MyTurn, Is.True);
             Assert.That(host.Client.Rack.Count, Is.EqualTo(22));
             var melds = RackMelds.Of(Segments(sc.Rows), new ColorNum(host.Client.OkeyColor, host.Client.OkeyNumber));
+            Assert.That(melds.Sum, Is.EqualTo(95));
             Assert.That(host.Move(GameAction.Open(0, melds.Groups)), Is.Null);
-            Assert.That(host.Client.Opened[0], Is.EqualTo(131));
-            Assert.That(host.Client.Legal().Undo, Is.True, "G13: Geri topla");
+            Assert.That(events, Is.EqualTo(new[] { "openShort", "penalty" }));
+            Assert.That(host.Client.Opened[0], Is.EqualTo(0));
         }
 
         [Test]
@@ -250,10 +264,12 @@ namespace Galaxy101.Table.Tests
         }
 
         [Test]
-        public void TheDealCeremonyFollowsTheServerSchedule()
+        public void TheDealCeremonyFollowsTheCurrentPrototypeSchedule()
         {
-            // D-24: dealStart → first turn 21 686 ms with a bot dealer; the client sees every step in order.
-            var host = Local(42);
+            // Current prototip/galaxy101_handoff_v4/logic/mockServer.js, not the older timings.md snapshot.
+            // The authored DOM movement durations are separate: these are authoritative message timestamps.
+            var rig = G101Rules.RigFromHands(new ScenarioDeal { Dealer = 3, Dice = new[] { 4, 3 }, Indicator = "Y4a" });
+            var host = Local(42, rig: rig);
             var steps = new List<(string, long)>();
             host.Delivered += (type, payload) =>
             {
@@ -267,7 +283,8 @@ namespace Galaxy101.Table.Tests
             var names = steps.Select(s => s.Item1).ToList();
             Assert.That(names, Is.EqualTo(new[] { "dealStart", "dice", "die", "die", "indicator", "extra", "distribute", "center", "handDealt", "turn" }));
             var dealer = host.Runtime.Match.Hand.Deal.Dealer;
-            if (dealer != 0) Assert.That(steps.Last().Item2 - steps[0].Item2, Is.EqualTo(TableTimings.DealTotalBotDealer));
+            Assert.That(steps.Select(s => s.Item2 - steps[0].Item2), Is.EqualTo(new long[] { 0, 2572, 3272, 5492, 8482, 10782, 12082, 16222, 18222, 20358 }),
+                "The current prototype shortens build and bundle delivery; every downstream server event must move with them.");
             Assert.That(host.Client.Rack.Count, Is.EqualTo(dealer == 3 ? 22 : 21));
         }
     }

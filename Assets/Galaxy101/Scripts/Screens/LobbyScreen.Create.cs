@@ -70,8 +70,8 @@ namespace Galaxy101
             words.Add(Text(S("createT"), 26, "Montserrat-700", "#F4F1E8", 1.1f, "lobby.text.createT"));
             var sub = Text(S("createS"), 13, "Baloo2-700", "var(--mt)", 0, "lobby.text.createS"); sub.style.marginTop = 2; words.Add(sub);
             head.Add(words); left.Add(head);
-            // scrollbar-width: thin takes no room in the reference (the rows span 138–818): the scroller is hidden here (UF-802).
-            var scroll = view.Scroll(false); scroll.name = "lobby-create-scroll"; scroll.verticalScrollerVisibility = ScrollerVisibility.Hidden; scroll.style.flexGrow = 1;
+            // Source overflow-y:auto / scrollbar-width:thin reserves the existing 10px scroller when the form overflows.
+            var scroll = view.Scroll(false); scroll.name = "lobby-create-scroll"; scroll.style.flexGrow = 1;
             scroll.contentContainer.style.paddingLeft = 28; scroll.contentContainer.style.paddingRight = 22; scroll.contentContainer.style.paddingBottom = 18;
             left.Add(scroll);
 
@@ -101,9 +101,15 @@ namespace Galaxy101
 
             // Şifre: 150 × 44 field (padding 0 12, gap 8, radius 13, passRing bad / inset 2px --bd) and the switch.
             var pass = FormRow(scroll, S("rPass"), "lobby.text.rPass", pinBad ? S("passErr") : c.PinOn ? S("passOnD") : S("passOffD"), "lobby.cf.passD", pinBad ? "#FF8A94" : null);
-            if (c.PinOn)
+            // The PIN field's place is kept while the switch is off, so turning it on changes nothing else in the form
+            // (the row's text keeps its width and wrapping, the rows below stay put).
+            if (!c.PinOn)
             {
-                var pinBox = Row(); pinBox.name = "lobby-create-pin"; pinBox.style.width = 150; pinBox.style.height = 44; pinBox.style.marginRight = 16; Pad(pinBox, 0, 12, 0, 12); view.Decorate(pinBox, "var(--dp)", 13);
+                var slot = Box("lobby-create-pin-slot"); slot.style.width = 150; slot.style.height = 44; slot.style.marginRight = 16; slot.style.flexShrink = 0; slot.style.visibility = Visibility.Hidden; pass.Add(slot);
+            }
+            else
+            {
+                var pinBox = Row(); pinBox.name = "lobby-create-pin"; pinBox.style.width = 150; pinBox.style.height = 44; pinBox.style.marginRight = 16; pinBox.style.flexShrink = 0; Pad(pinBox, 0, 12, 0, 12); view.Decorate(pinBox, "var(--dp)", 13);
                 FieldRing(pinBox, 13)(pinBad ? "bad" : "line");
                 var lockIcon = view.Icon(IconLock, 15, "var(--a1)"); lockIcon.style.marginRight = 8; pinBox.Add(lockIcon);
                 var pin = Input("lobby.cf.onPass", c.Pin, "••••", 18, "Montserrat-700", "#F4F1E8", 4); pin.style.flexGrow = 1; MenuView.Tracking(pin, 6, 18);
@@ -112,9 +118,9 @@ namespace Galaxy101
             }
             pass.Add(Switch("lobby.cf.passT.flip", c.PinOn, () => { c.PinOn = !c.PinOn; Render(); }));
 
-            // El sayısı: min-width 44px (content box) + padding 8 12.
+            // El sayısı 3–11: the option keeps the source's min-width 44px + padding 8 12, in a swipeable window of three.
             var hands = FormRow(scroll, S("rHands"), "lobby.text.rHands", S("rHandsD"), "lobby.text.rHandsD", null);
-            hands.Add(Options("lobby-create-hands", TableOptions.HandChoices.Select(h => (h.ToString(), h.ToString())).ToArray(), c.Hands.ToString(), v => { c.Hands = int.Parse(v); Render(); }, 12, 44));
+            hands.Add(Carousel("lobby-create-hands", TableOptions.HandChoices.Select(h => (h.ToString(), h.ToString())).ToArray(), c.Hands.ToString(), v => { c.Hands = int.Parse(v); Render(); }, 68));
 
             // Bahis: column, gap 10, padding 12 0; the head aligns on the baseline; five tiers, then the warning.
             var betSection = Box(); Pad(betSection, 12, 0, 12, 0); Divider(betSection, .07f); scroll.Add(betSection);
@@ -174,7 +180,8 @@ namespace Galaxy101
                 partner.Add(Switch("lobby.cf.katPT.flip", c.PartnerRaises, () => { c.PartnerRaises = !c.PartnerRaises; Render(); }));
             }
             var turn = FormRow(scroll, S("rTurn"), "lobby.text.rTurn", S("rTurnD"), "lobby.text.rTurnD", null);
-            turn.Add(Options("lobby-create-turn", TableOptions.TurnChoices.Select(t => (t.ToString(), t == 45 ? "45 sn" : t.ToString())).ToArray(), c.Turn.ToString(), v => { c.Turn = int.Parse(v); Render(); }, 12));
+            // Tur süresi 15–60 sn, swiped like El sayısı.
+            turn.Add(Carousel("lobby-create-turn", TableOptions.TurnChoices.Select(t => (t.ToString(), t + L(" sn", " s"))).ToArray(), c.Turn.ToString(), v => { c.Turn = int.Parse(v); Render(); }, 68));
 
             // Kural özelleştirme: padding 14 0, gap 14 — sliders badge, title + rulesSum, the chevron (rotate 180° open).
             var rules = Row(); rules.name = "lobby.cf.toggleRules"; Pad(rules, 14, 0, 14, 0);
@@ -199,6 +206,8 @@ namespace Galaxy101
                 FadeIn(box, rulesOpenedAt, .2f);
                 scroll.Add(box);
             }
+
+            MatchCreateNormalText(left);
 
             // Right: the summary (330 wide, padding 22, gap 14, --sd, border-left 1px rgba(255,255,255,.06)).
             var right = Box("lobby-create-summary"); right.style.width = 330; Pad(right, 22, 22, 22, 22); view.Decorate(right, "var(--sd)", 0); right.style.borderLeftWidth = 1; right.style.borderLeftColor = new Color(1, 1, 1, .06f);
@@ -241,11 +250,11 @@ namespace Galaxy101
         }
 
         /// <summary>The draft as a table (summary(t)): a PIN switched on counts as Şifreli even before its digits.</summary>
-        private TableSummary Preview(CreateDraft c) => new TableSummary
+        private TableSummary Preview(CreateDraft c) => LobbyRulePresentation.WithOpeningTilePenalty(new TableSummary
         {
             Name = c.Name.Trim(), Type = c.Type, Private = c.Visibility == "private", Locked = c.PinOn, Doubling = c.Doubling, PartnerRaises = c.PartnerRaises, Hands = c.Hands, TurnSeconds = c.Turn,
             Stake = c.Stake, Penalties = c.Penalties, OkeyPenalty = c.OkeyPenalty, Processing = true, Spectators = c.Spectators, Chat = c.Chat, Gifts = c.Gifts,
-        };
+        }, c.Penalties);
 
         public TableOptions Options(CreateDraft c) => new TableOptions
         {
@@ -289,13 +298,39 @@ namespace Galaxy101
         }
 
         // ---------- form pieces ----------
+        private static float CreateNormalLineHeight(string font, float size, float density)
+        {
+            density = Mathf.Max(.01f, density);
+            bool baloo = font != null && font.StartsWith("Baloo", StringComparison.Ordinal);
+            float ascent = baloo ? 1.078f : .968f, descent = baloo ? .524f : .251f;
+            return (Mathf.Floor(ascent * size * density + .5f) + Mathf.Floor(descent * size * density + .5f)) / density;
+        }
+
+        private static void MatchCreateNormalText(VisualElement root)
+        {
+            root.Query<Label>().ForEach(label =>
+            {
+                var font = label.style.unityFont.value; float size = label.style.fontSize.value.value;
+                if (font == null || size <= 0 || label.style.whiteSpace.value == WhiteSpace.Normal ||
+                    label.style.height.keyword != StyleKeyword.Undefined || Mathf.Abs(label.style.height.value.value - MenuView.CssLineHeight(font.name, size)) > .01f) return;
+                void Sync()
+                {
+                    float height = CreateNormalLineHeight(font.name, size, label.scaledPixelsPerPoint);
+                    if (Mathf.Abs(label.style.height.value.value - height) > .01f) label.style.height = height;
+                }
+                label.RegisterCallback<AttachToPanelEvent>(_ => Sync());
+                label.RegisterCallback<GeometryChangedEvent>(_ => Sync());
+                if (label.panel != null) Sync();
+            });
+        }
+
         /// <summary>A form row: padding 12 0, border-bottom 1px rgba(255,255,255,.07), gap 16 — title (700 16px/1.25) and its 12.5px line.</summary>
         private VisualElement FormRow(VisualElement scroll, string title, string titleName, string description, string descriptionName, string descriptionColor, int titleSize = 16)
         {
             var row = Row(); Pad(row, 12, 0, 12, 0); Divider(row, .07f);
             var words = Box(); words.style.flexGrow = 1; words.style.flexShrink = 1; words.style.marginRight = 16;
             words.Add(Text(title, titleSize, "Montserrat-700", "#F4F1E8", 1.25f, titleName));
-            var d = Text(description, 12.5f, "Baloo2-700", descriptionColor ?? "var(--mt)", descriptionName); Paragraph(d); words.Add(d);
+            var d = Text(description, 12.5f, "Baloo2-700", descriptionColor ?? "var(--mt)", descriptionName); Paragraph(d, createPixelMetrics: true); words.Add(d);
             row.Add(words); scroll.Add(row); return row;
         }
 
@@ -315,6 +350,88 @@ namespace Galaxy101
             }
             return segment;
         }
+
+        /// <summary>
+        /// A swipeable segment for the longer choice lists (El sayısı 3–11, Tur süresi 15–60 sn): the same --dp segment and
+        /// gold option, a window of <paramref name="visible"/> fixed-width options that slides left and right (drag, horizontal
+        /// wheel or the ‹ › steps) and settles on the nearest option. The choice always sits in the middle (the ends leave an
+        /// empty slot, like a picker wheel), so every option has its own resting place. Its size never changes with the choice.
+        /// </summary>
+        private VisualElement Carousel(string name, (string Value, string Label)[] options, string current, Action<string> pick, float optionWidth, int visible = 3)
+        {
+            const float gap = 4, arrowWidth = 26;
+            int index = Mathf.Max(0, Array.FindIndex(options, o => o.Value == current));
+            float step = optionWidth + gap, windowWidth = visible * optionWidth + (visible - 1) * gap, trackWidth = options.Length * optionWidth + (options.Length - 1) * gap;
+            float Offset(int i) => windowWidth / 2 - (i * step + optionWidth / 2);
+            int Nearest(float x) => Mathf.Clamp(Mathf.RoundToInt((windowWidth / 2 - optionWidth / 2 - x) / step), 0, options.Length - 1);
+
+            var segment = Segment(4); segment.name = name; segment.style.flexShrink = 0;
+            // The window clips the sliding strip but not the picked option's 3px ledge (or its 3px press): it reaches 2px into
+            // the segment's bottom padding, so the segment keeps the height of the other form segments.
+            var window = Box(); window.pickingMode = PickingMode.Position; window.style.width = windowWidth; window.style.overflow = Overflow.Hidden; window.style.flexShrink = 0;
+            window.style.paddingBottom = 6; window.style.marginBottom = -2;
+            var track = Row(); track.style.width = trackWidth; track.style.flexShrink = 0;
+            for (int i = 0; i < options.Length; i++)
+            {
+                var (value, label) = options[i]; string chosen = value;
+                var option = SegmentOption("lobby.o.pick[" + i + "]", label, i == index, () => pick(chosen), 14, 8, 0, i < options.Length - 1 ? (int)gap : 0);
+                option.style.width = optionWidth; option.style.flexShrink = 0; option.style.justifyContent = Justify.Center;
+                track.Add(option);
+            }
+            window.Add(track);
+            float offset = Offset(index);
+            void Place(float x) { offset = x; track.style.translate = new Translate(x, 0); }
+            // The redraw after a pick starts the strip where it was and eases it onto the new choice (.2s ease-out).
+            if (carouselFrom.TryGetValue(name, out var from) && Time.realtimeSinceStartup - from.At < .2f)
+            {
+                float target = offset, began = from.At, start = from.Offset; Place(start);
+                Animate(() => { float u = Mathf.Clamp01((Time.realtimeSinceStartup - began) / .2f); Place(Mathf.Lerp(start, target, 1 - (1 - u) * (1 - u))); }, track);
+            }
+            else Place(offset);
+            carouselFrom.Remove(name);
+            void Choose(int i)
+            {
+                i = Mathf.Clamp(i, 0, options.Length - 1);
+                if (i == index) { Place(Offset(index)); return; }
+                carouselFrom[name] = (Time.realtimeSinceStartup, offset); pick(options[i].Value);
+            }
+
+            // Drag: the strip follows the pointer, then settles; a drag never also counts as a click on an option.
+            bool dragging = false, moved = false; float startX = 0, startOffset = 0; int pointer = -1;
+            window.RegisterCallback<PointerDownEvent>(e => { if (e.button != 0) return; dragging = true; moved = false; pointer = e.pointerId; startX = e.position.x; startOffset = offset; }, TrickleDown.TrickleDown);
+            window.RegisterCallback<PointerMoveEvent>(e =>
+            {
+                if (!dragging || e.pointerId != pointer) return;
+                float dx = e.position.x - startX;
+                if (!moved && Mathf.Abs(dx) > 4) { moved = true; window.CapturePointer(pointer); }
+                if (moved) Place(Mathf.Clamp(startOffset + dx, Offset(options.Length - 1) - 12, Offset(0) + 12));
+            }, TrickleDown.TrickleDown);
+            void Release(bool settle) { if (!dragging) return; dragging = false; if (window.HasPointerCapture(pointer)) window.ReleasePointer(pointer); if (moved && settle) Choose(Nearest(offset)); else if (moved) Place(Offset(index)); }
+            window.RegisterCallback<PointerUpEvent>(e => { if (e.pointerId == pointer) Release(true); }, TrickleDown.TrickleDown);
+            window.RegisterCallback<PointerCaptureOutEvent>(_ => Release(true));
+            window.RegisterCallback<ClickEvent>(e => { if (moved) { moved = false; e.StopImmediatePropagation(); } }, TrickleDown.TrickleDown);
+            window.RegisterCallback<WheelEvent>(e => { if (Mathf.Abs(e.delta.x) > Mathf.Abs(e.delta.y)) { Choose(index + (e.delta.x > 0 ? 1 : -1)); e.StopPropagation(); } });
+
+            VisualElement Arrow(int direction)
+            {
+                bool enabled = direction < 0 ? index > 0 : index < options.Length - 1;
+                var arrow = Box(name + (direction < 0 ? "-prev" : "-next")); arrow.style.width = arrowWidth; arrow.style.alignSelf = Align.Stretch; arrow.style.flexShrink = 0;
+                arrow.style.alignItems = Align.Center; arrow.style.justifyContent = Justify.Center; Radius(arrow, 10);
+                arrow.style.marginLeft = direction > 0 ? gap : 0; arrow.style.marginRight = direction < 0 ? gap : 0;
+                var glyph = view.Icon(IconChevron, 14, "var(--mt)"); glyph.style.rotate = new Rotate(direction < 0 ? 90 : -90); arrow.Add(glyph);
+                arrow.style.opacity = enabled ? 1 : .35f;
+                if (enabled)
+                {
+                    arrow.RegisterCallback<PointerEnterEvent>(_ => arrow.style.backgroundColor = view.C("var(--pnH)"));
+                    arrow.RegisterCallback<PointerLeaveEvent>(_ => arrow.style.backgroundColor = Color.clear);
+                    Tap(arrow, () => Choose(index + direction));
+                }
+                return arrow;
+            }
+            segment.Add(Arrow(-1)); segment.Add(window); segment.Add(Arrow(1));
+            return segment;
+        }
+        private readonly Dictionary<string, (float At, float Offset)> carouselFrom = new Dictionary<string, (float, float)>();
 
         /// <summary>tog(on, flip, small): 56 × 32 (small 52 × 30), on #3CCB6E / off --dp, inset 0 2px 0 rgba(0,0,0,.25); white knob, left .22s cubic-bezier(.3,1.5,.5,1).</summary>
         private VisualElement Switch(string name, bool on, Action flip, int width = 56, int height = 32)
@@ -360,7 +477,7 @@ namespace Galaxy101
         {
             var row = Row(); Pad(row, 11, 0, 11, 0); Divider(row, .06f);
             var words = Box(); words.style.flexGrow = 1; words.style.flexShrink = 1; words.style.marginRight = 16;
-            words.Add(Text(title, 15, "Montserrat-700", "#F4F1E8", 1.25f, titleName)); var d = Text(description, 12, "Baloo2-700", "var(--mt)", 0, descriptionName); Paragraph(d); words.Add(d); row.Add(words);
+            words.Add(Text(title, 15, "Montserrat-700", "#F4F1E8", 1.25f, titleName)); var d = Text(description, 12, "Baloo2-700", "var(--mt)", 0, descriptionName); Paragraph(d, createPixelMetrics: true); words.Add(d); row.Add(words);
             box.Add(row); return row;
         }
 
@@ -407,6 +524,8 @@ namespace Galaxy101
             if (t.Doubling && t.Type == "pairs") rows.Add((S("sKatP"), t.PartnerRaises, t.PartnerRaises ? S("sYes") : S("sNo")));
             rows.Add((S("sOkey"), t.OkeyPenalty, t.OkeyPenalty ? "+101" : S("off")));
             rows.Add((S("sIsle"), t.Penalties, t.Penalties ? "+101" : S("off")));
+            bool opener = LobbyRulePresentation.OpeningTilePenalty(t);
+            rows.Add((S("sOpen"), opener, opener ? "×10" : S("off")));
             rows.Add((S("rSpec"), t.Spectators, t.Spectators ? S("on") : S("off")));
             rows.Add((S("rChat"), t.Chat != "off", t.Chat == "quick" ? S("sQuick") : t.Chat == "off" ? S("off") : S("on")));
             rows.Add((S("rGift"), t.Gifts, t.Gifts ? S("on") : S("off")));

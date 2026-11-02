@@ -62,6 +62,9 @@ namespace Galaxy101.Table
             public int Dealer;
             public long T0;
             public bool Rolling;
+            public readonly HashSet<int> SkipVotes = new HashSet<int>();
+            public bool Skipped;
+            public long SkipAt;
         }
 
         /// <param name="bots">Seats a bot holds from the start.</param>
@@ -136,6 +139,37 @@ namespace Galaxy101.Table
             return null;
         }
 
+        /// <summary>gSkipDeal: the dealer alone, or every human voter (bots/autoplay count as ready), shortcuts only the ceremony.</summary>
+        public string SkipDeal(int seat)
+        {
+            if (seat < 0) return V4Errors.E_SPECTATOR;
+            if (seat >= 4 || !IsHuman(seat) || Match == null || Match.Seats[seat].Left) return V4Errors.E_NOT_SEATED;
+            var current = deal;
+            if (current == null || current.Step == "fill") return V4Errors.E_PHASE;
+            if (!current.SkipVotes.Add(seat)) return null;
+            bool all = true;
+            for (int k = 0; k < 4; k++) if (!IsBotSeat(k) && !current.SkipVotes.Contains(k)) all = false;
+            if (current.Dealer == seat || all) SkipCeremony();
+            else Emit(V4Messages.DealSkipVote, new V4DealSkipVote { Seat = seat, At = host.Now });
+            return null;
+        }
+
+        private void SkipCeremony()
+        {
+            foreach (string timer in new[] { "deal", "roll", "d1", "d2", "d3", "d4", "d5", "d6" }) Disarm(timer);
+            var hand = Match.Hand; var result = hand.Deal;
+            deal.Dice.Clear(); deal.Dice.AddRange(result.Dice); deal.Step = "fill"; deal.Rolling = false;
+            deal.Skipped = true; deal.SkipAt = host.Now;
+            deal.SkipVotes.Clear();
+            Emit(V4Messages.DealSkip, new V4DealSkip
+            {
+                Dice = new List<int>(result.Dice), Stack = result.IndStack, Level = result.IndLevel, FakeSkip = result.FakeSkip,
+                Indicator = hand.Indicator, Okey = Face(hand.Okey), ExtraStack = result.ExtraStack, At = host.Now,
+            });
+            SendDealt();
+            Arm("d6", host.Now + TableTimings.SkipFill, () => { deal = null; StartTurn(); });
+        }
+
         private void Roll()
         {
             var x = deal;
@@ -190,14 +224,18 @@ namespace Galaxy101.Table
             Arm("d5", t, () =>
             {
                 deal.Step = "fill";
-                // Each person gets only their own rack; everyone the counts.
-                for (var k = 0; k < 4; k++)
-                    if (IsHuman(k)) host.Send(k, V4Messages.HandDealt, Dealt(k));
-                PushView();
-                host.Send(-1, V4Messages.HandDealt, Dealt(-1));
+                SendDealt();
             });
             t += TableTimings.Fill;
             Arm("d6", t, () => { deal = null; StartTurn(); });
+        }
+
+        private void SendDealt()
+        {
+            // Each person gets only their own rack; everyone the counts.
+            for (int k = 0; k < 4; k++) if (IsHuman(k)) host.Send(k, V4Messages.HandDealt, Dealt(k));
+            PushView();
+            host.Send(-1, V4Messages.HandDealt, Dealt(-1));
         }
 
         private V4HandDealt Dealt(int seat)
@@ -493,12 +531,26 @@ namespace Galaxy101.Table
                     { "seat", h.Turn.Seat }, { "phase", h.Turn.Phase }, { "n", h.Turn.N }, { "sideTake", h.Turn.SideTake }, { "sideMust", h.Turn.SideMust },
                     { "deadline", TurnDeadline },
                 };
+            Dictionary<string, object> dealView = null;
+            if (deal != null)
+            {
+                dealView = new Dictionary<string, object> { { "step", deal.Step }, { "dice", V4Tree.Ints(deal.Dice) }, { "dealer", deal.Dealer }, { "elapsed", host.Now - deal.T0 } };
+                if (deal.SkipVotes.Count > 0)
+                {
+                    var votes = new List<int>(deal.SkipVotes); votes.Sort(); dealView["skip"] = V4Tree.Ints(votes);
+                }
+                if (deal.Skipped)
+                {
+                    dealView["skipped"] = true; dealView["skipAt"] = deal.SkipAt;
+                    dealView["stack"] = h.Deal.IndStack; dealView["level"] = h.Deal.IndLevel;
+                    dealView["fakeSkip"] = h.Deal.FakeSkip; dealView["extraStack"] = h.Deal.ExtraStack;
+                }
+            }
             return new Dictionary<string, object>
             {
                 { "status", s.Status }, { "handNo", s.HandNo }, { "hands", s.Opts.Hands }, { "dealer", s.Dealer }, { "totals", tree["totals"] },
                 { "history", tree["history"] }, { "seats", tree["seats"] },
-                { "deal", deal == null ? null : new Dictionary<string, object>
-                    { { "step", deal.Step }, { "dice", V4Tree.Ints(deal.Dice) }, { "dealer", deal.Dealer }, { "elapsed", host.Now - deal.T0 } } },
+                { "deal", dealView },
                 { "indicator", hidden ? null : h.Indicator }, { "okey", hidden ? null : h.Okey?.ToTree() },
                 { "autoplay", Bools(Autoplay) }, { "connected", Bools(Connected) }, { "deck", h.Deck.Count },
                 { "rack", rackShown ? V4Tree.Strings(h.Racks[seat]) : null }, { "counts", V4Tree.Ints(Counts()) },

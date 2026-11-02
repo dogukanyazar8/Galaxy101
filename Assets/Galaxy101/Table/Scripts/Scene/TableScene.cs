@@ -37,6 +37,11 @@ namespace Galaxy101.Table
         /// <summary>The Blender die prefab, or null when the catalog predates it.</summary>
         public GameObject DiePrefab => catalog != null ? catalog.Die : null;
         public Transform DiscardZone { get; private set; }
+        private MeshRenderer pairDivider, pairLabel;
+        private Material pairDividerMaterial, pairLabelMaterial;
+        private TableHud pairZoneHud;
+        private float pairZoneAlpha;
+        private string pairZoneLanguage;
 
         /// <summary>Finish celebration points (table3d.js celebrate): the finisher's corner on the felt and above their avatar.</summary>
         public Vector3 CornerThree(int seat) => seat == 0 ? seatFrames[0].Pose(0, TY, 0.5f).Position : seatFrames[seat].Pose(0, TY, 0.6f).Position;
@@ -111,7 +116,7 @@ namespace Galaxy101.Table
         private readonly System.Collections.Generic.List<TileFactory> retiredTiles = new System.Collections.Generic.List<TileFactory>();
         /// <summary>Runtime assets this scene made (post profile and its overrides, the discard ring's mesh and material).</summary>
         private readonly System.Collections.Generic.List<Object> owned = new System.Collections.Generic.List<Object>();
-        private float savedShadowDistance; private int savedCascades, savedMsaa; private UniversalRenderPipelineAsset urp;
+        private float savedShadowDistance; private int savedCascades, savedMsaa, savedShadowResolution; private UniversalRenderPipelineAsset urp;
 
         private void OnDestroy()
         {
@@ -122,19 +127,19 @@ namespace Galaxy101.Table
             foreach (var o in owned) Kill(o);
             owned.Clear();
             // Restore the shared URP asset (the menu and the classic table use it too).
-            if (urp != null) { urp.shadowDistance = savedShadowDistance; urp.shadowCascadeCount = savedCascades; urp.msaaSampleCount = savedMsaa; }
+            if (urp != null) { urp.shadowDistance = savedShadowDistance; urp.shadowCascadeCount = savedCascades; urp.msaaSampleCount = savedMsaa; urp.mainLightShadowmapResolution = savedShadowResolution; }
         }
 
         /// <summary>
-        /// spec/14: shadows only need the 3 m table (key light ortho ±1.5, 2048 map) and MSAA 4×. The project URP
-        /// asset is tuned for 50 m with four cascades, which smears 2048 texels over the room and causes acne on the felt.
+        /// The current table3d.js key uses a 4096² shadow map. Keep it concentrated on the table with one cascade
+        /// and MSAA 4×; restore the shared pipeline's original settings when the table closes.
         /// </summary>
         private void ApplyRenderSettings()
         {
             urp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
             if (urp == null) return;
-            savedShadowDistance = urp.shadowDistance; savedCascades = urp.shadowCascadeCount; savedMsaa = urp.msaaSampleCount;
-            urp.shadowDistance = 4.5f; urp.shadowCascadeCount = 1; urp.msaaSampleCount = 4;
+            savedShadowDistance = urp.shadowDistance; savedCascades = urp.shadowCascadeCount; savedMsaa = urp.msaaSampleCount; savedShadowResolution = urp.mainLightShadowmapResolution;
+            urp.shadowDistance = 4.5f; urp.shadowCascadeCount = 1; urp.msaaSampleCount = 4; urp.mainLightShadowmapResolution = 4096;
         }
 
         /// <summary>
@@ -143,7 +148,9 @@ namespace Galaxy101.Table
         /// </summary>
         public void SetEffectQuality(int level)
         {
-            if (urp != null) urp.shadowDistance = level == 0 ? 0 : 4.5f;
+            if (urp == null) return;
+            urp.shadowDistance = level == 0 ? 0 : 4.5f;
+            urp.mainLightShadowmapResolution = level >= 2 ? 4096 : 2048;
         }
 
         private static void Kill(Object o) { if (o == null) return; if (Application.isPlaying) Destroy(o); else DestroyImmediate(o); }
@@ -165,7 +172,7 @@ namespace Galaxy101.Table
                 return light;
             }
             var key = Make("Key", LightType.Directional, new Color32(0xff, 0xf4, 0xe2, 255), 1.7f, new Vector3(1.1f, 4.2f, 2.0f), new Vector3(0, TY, 0));
-            key.shadows = LightShadows.Soft; key.shadowResolution = LightShadowResolution.VeryHigh;
+            key.shadows = LightShadows.Soft;
             var keyData = key.GetComponent<UniversalAdditionalLightData>() ?? key.gameObject.AddComponent<UniversalAdditionalLightData>();
             keyData.usePipelineSettings = false; key.shadowBias = 1.0f; key.shadowNormalBias = 0.8f; // URP texel-scaled biases
             var spot = Make("Spot", LightType.Spot, Color.white, 9f, new Vector3(0, 3.2f, 0.3f), new Vector3(0, TY, 0));
@@ -253,6 +260,7 @@ namespace Galaxy101.Table
             tilesRoot = new GameObject("Tiles").transform; tilesRoot.SetParent(transform, false);
             SetTileSkin(tileSkin);
             BuildDiscardZone();
+            BuildPairZone();
         }
 
         private GameObject tileSource;
@@ -362,6 +370,55 @@ namespace Galaxy101.Table
             var mesh = new Mesh { name = "Ring", vertices = v, triangles = tri }; mesh.RecalculateNormals(); return mesh;
         }
 
+        private void BuildPairZone()
+        {
+            pairDivider = PairPlane("cift_ayrac", .003f, .7f, BoardX + 14 * BoardStepX, 0, true, out pairDividerMaterial);
+            pairLabel = PairPlane("cift_etiket", .22f, .033f, BoardX + 17 * BoardStepX, BoardZ - .058f, false, out pairLabelMaterial);
+            ColorUtility.TryParseHtmlString("#FFC94A", out var gold); gold.a = 0; pairDividerMaterial.SetColor("_BaseColor", gold);
+            pairLabelMaterial.SetColor("_BaseColor", new Color(1, 1, 1, 0));
+        }
+
+        private MeshRenderer PairPlane(string name, float width, float height, float x, float z, bool additive, out Material material)
+        {
+            var go = new GameObject(name); go.transform.SetParent(transform, false);
+            go.transform.position = ThreeSpace.ToUnity(x, TY + .0012f, z);
+            var mesh = new Mesh { name = name, vertices = new[] {
+                new Vector3(-width / 2, 0, -height / 2), new Vector3(width / 2, 0, -height / 2),
+                new Vector3(width / 2, 0, height / 2), new Vector3(-width / 2, 0, height / 2) },
+                triangles = new[] { 0, 2, 1, 0, 3, 2 },
+                uv = new[] { new Vector2(1, 1), new Vector2(0, 1), new Vector2(0, 0), new Vector2(1, 0) } };
+            mesh.RecalculateNormals(); go.AddComponent<MeshFilter>().sharedMesh = mesh; owned.Add(mesh);
+            material = new Material(Shader.Find("Universal Render Pipeline/Unlit")) { name = name };
+            material.SetFloat("_Surface", 1); material.SetFloat("_Blend", additive ? 2 : 0); material.SetFloat("_ZWrite", 0);
+            material.SetInt("_SrcBlend", (int)BlendMode.SrcAlpha); material.SetInt("_DstBlend", (int)(additive ? BlendMode.One : BlendMode.OneMinusSrcAlpha));
+            material.SetInt("_SrcBlendAlpha", (int)BlendMode.One); material.SetInt("_DstBlendAlpha", (int)BlendMode.OneMinusSrcAlpha);
+            material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT"); material.renderQueue = (int)RenderQueue.Transparent; owned.Add(material);
+            var renderer = go.AddComponent<MeshRenderer>(); renderer.sharedMaterial = material;
+            renderer.shadowCastingMode = ShadowCastingMode.Off; renderer.receiveShadows = false; renderer.enabled = false; return renderer;
+        }
+
+        /// <summary>Source pzA: fade at dt×4, hide during the deck heap, and use the live HUD language.</summary>
+        public void UpdatePairZone(bool hasPairs, float deltaTime)
+        {
+            if (pairDivider == null || pairLabel == null) return;
+            bool on = hasPairs && !DeckHeap;
+            if (on)
+            {
+                if (pairZoneHud == null) pairZoneHud = FindAnyObjectByType<TableHud>();
+                string language = pairZoneHud?.View?.Loc.Language == "en" ? "en" : "tr";
+                if (pairZoneLanguage != language)
+                {
+                    var texture = Resources.Load<Texture2D>("Galaxy101/Table/Board/pairs-" + language);
+                    if (texture == null) throw new System.InvalidOperationException("Missing source pair-zone texture: " + language);
+                    pairLabelMaterial.SetTexture("_BaseMap", texture); pairZoneLanguage = language;
+                }
+            }
+            pairZoneAlpha += ((on ? 1 : 0) - pairZoneAlpha) * Mathf.Min(1, deltaTime * 4);
+            pairDivider.enabled = pairLabel.enabled = pairZoneAlpha > .01f;
+            var color = pairDividerMaterial.GetColor("_BaseColor"); color.a = .32f * pairZoneAlpha; pairDividerMaterial.SetColor("_BaseColor", color);
+            color = pairLabelMaterial.GetColor("_BaseColor"); color.a = .5f * pairZoneAlpha; pairLabelMaterial.SetColor("_BaseColor", color);
+        }
+
         // ---------- tile placement (poseFor in table3d.js) ----------
         private static readonly Quaternion FlatUp = ThreeSpace.Euler(-Mathf.PI / 2, 0, 0);
         private static readonly Quaternion FaceDown = ThreeSpace.Euler(Mathf.PI / 2, 0, 0);
@@ -417,10 +474,11 @@ namespace Galaxy101.Table
         public float DeckShift;
         public const float DeckLeft = -0.62f;
 
+        private const float BoardX = -.49f, BoardStepX = .0515f, BoardZ = -.3f, BoardStepZ = .0857f;
         /// <summary>Centre board cell (spec/23): 8 rows × 20 columns in my frame, face up, readable by me.</summary>
-        public Pose BoardPose(int column, int row) => Unity(seatFrames[0].Pose(-0.465f + column * 0.049f, TY + TD / 2, -0.30f + row * 0.0857f, FlatUp));
-        /// <summary>Row-start marker spot (x −0.505) for a board row.</summary>
-        public Vector3 BoardRowStart(int row) => seatFrames[0].Pose(-0.505f, TY + 0.0012f, -0.30f + row * 0.0857f).UnityPosition;
+        public Pose BoardPose(int column, int row) => Unity(seatFrames[0].Pose(BoardX + column * BoardStepX, TY + TD / 2, BoardZ + row * BoardStepZ, FlatUp));
+        /// <summary>Source tagFor(): 0.046 m before the common board's first column.</summary>
+        public Vector3 BoardRowStart(int row) => seatFrames[0].Pose(BoardX - .046f, TY + .0012f, BoardZ + row * BoardStepZ).UnityPosition;
 
         /// <summary>
         /// table3d.js layoutDeck: up to 21 tiles (outside the deal) stand in two piles — the first six under the indicator at

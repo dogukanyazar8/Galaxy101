@@ -163,7 +163,13 @@ namespace Galaxy101
                 DisplayChanged?.Invoke();
             }
 
-            private void OnApplicationFocus(bool value) { focused = value; Refresh(); }
+            private void OnApplicationFocus(bool value)
+            {
+                focused = value; Refresh();
+                // Windows refuses exclusive full screen to a window without focus (DXGI_ERROR_NOT_CURRENTLY_AVAILABLE) and
+                // Unity falls back to a borderless window at the desktop size: ask again once the window has focus.
+                if (value && GameDisplay.CanResize && GameDisplay.CurrentMode == GameDisplay.Mode.Fullscreen && Screen.fullScreenMode != FullScreenMode.ExclusiveFullScreen) GameDisplay.Refresh();
+            }
         }
     }
 }

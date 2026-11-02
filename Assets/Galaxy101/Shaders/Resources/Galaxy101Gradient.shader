@@ -1,7 +1,7 @@
 Shader "Galaxy101/Gradient"
 {
     // Defaults are the menu layout; GalaxyBackground.UseTableLayout overrides them for the game table.
-    Properties { _Shape("Gradient centre, radii",Vector)=(640,252,1024,504) _HaloShape("Halo centre, radius, mode",Vector)=(640,300,231,0) }
+    Properties { _Shape("Gradient centre, radii",Vector)=(640,252,1024,504) _HaloShape("Halo centre, radius, mode",Vector)=(640,300,231,0) _AuthLayout("Auth layout",Float)=0 _AuthPlacement("Auth planet placement",Vector)=(640,330,1,0) _HaloOpacity("Menu halo opacity",Float)=1 }
     SubShader
     {
         Tags { "RenderPipeline"="UniversalPipeline" }
@@ -11,8 +11,8 @@ Shader "Galaxy101/Gradient"
         #include "../CanvasColor.hlsl"
         sampler2D _CanvasBackdrop;
         float4 _Bg1,_Bg2,_Bg3,_Halo,_GlowAtmosphere;
-        float4 _Shape,_HaloShape; // gradient centre+radii; halo centre, radius, mode (0 menu glow, 1 table radial)
-        float _Flattening,_GroupAngle;
+        float4 _Shape,_HaloShape,_AuthPlacement; // gradient centre+radii; halo centre, radius, mode (0 menu glow, 1 table radial)
+        float _Flattening,_GroupAngle,_AuthLayout,_HaloOpacity;
         struct Input {float4 vertex:POSITION;};
         struct Varyings {float4 position:SV_POSITION;float2 pixelPosition:TEXCOORD0;};
         Varyings Vert(Input i) {
@@ -28,19 +28,26 @@ Shader "Galaxy101/Gradient"
             // Table: radial-gradient(closest-side,var(--pg),transparent 70%) only, no planet glow or rim.
             if(_HaloShape.w>.5) return float4(CanvasToLinear(lerp(color,_Halo.rgb,_Halo.a*saturate(1-length(i.pixelPosition-_HaloShape.xy)/_HaloShape.z))),1);
             float2 p=i.pixelPosition-_HaloShape.xy;float s=sin(-_GroupAngle),c=cos(-_GroupAngle);p=float2(c*p.x-s*p.y,s*p.x+c*p.y);
-            float halo=_Halo.a*saturate(1-length(p)/_HaloShape.z);
+            float scale=_AuthLayout>.5?max(_AuthPlacement.z,.0001):1;
+            float opacity=_AuthLayout>.5?saturate(1-_AuthPlacement.w):1;p/=scale;
+            float halo=_Halo.a*saturate(1-length(p)/_HaloShape.z)*opacity*_HaloOpacity;
             float ellipse=length(p*float2(1,_Flattening));
             // CSS shadow Gaussian approximation: 80px broad glow plus shifted 14px rim.
             float broadDistance=max(0,ellipse-148)/35;
             float rimDistance=(length((p+3)*float2(1,_Flattening))-142)/7;
-            float broad=_Halo.a*exp(-broadDistance*broadDistance)*.55;
-            float rim=_GlowAtmosphere.a*exp(-rimDistance*rimDistance);
+            float broad=_Halo.a*exp(-broadDistance*broadDistance)*.55*opacity;
+            float rim=_GlowAtmosphere.a*exp(-rimDistance*rimDistance)*opacity;
             color=lerp(color,_Halo.rgb,halo);
             color=lerp(color,_Halo.rgb,broad);
             color=lerp(color,_GlowAtmosphere.rgb,rim);
             return float4(CanvasToLinear(color),1);
         }
-        float4 Overlay(Varyings i):SV_Target {float r=length((i.pixelPosition-float2(640,345.6))/float2(704,324));float a=.28*saturate(1-r/.7);float3 background=CanvasToGamma(tex2D(_CanvasBackdrop,CanvasUv(i.pixelPosition)).rgb);return float4(CanvasToLinear(background*(1-a)),1);}
+        float4 Overlay(Varyings i):SV_Target {
+            float a;
+            if(_AuthLayout>.5) {float r=length((i.pixelPosition-float2(640,360))/float2(896,432));a=.35*saturate((r-.55)/.45);}
+            else {float r=length((i.pixelPosition-float2(640,345.6))/float2(704,324));a=.28*saturate(1-r/.7);}
+            float3 background=CanvasToGamma(tex2D(_CanvasBackdrop,CanvasUv(i.pixelPosition)).rgb);return float4(CanvasToLinear(background*(1-a)),1);
+        }
         ENDHLSL
         Pass
         {

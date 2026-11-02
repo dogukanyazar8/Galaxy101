@@ -152,6 +152,53 @@ namespace Galaxy101.Tests
         }
 
         [Test]
+        public void AuthVignettePreservesCenterAndDarkensEdgesLikeTheReference()
+        {
+            if(SystemInfo.graphicsDeviceType==UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Ignore("A graphics device is required to validate canvas color compositing.");
+            var target=new RenderTexture(1280,720,0,RenderTextureFormat.ARGB32,RenderTextureReadWrite.sRGB);
+            var mesh=new Mesh();var material=new Material(Resources.Load<Shader>("Galaxy101Gradient"));
+            var commands=new UnityEngine.Rendering.CommandBuffer();Texture2D pixels=null;var previous=RenderTexture.active;
+            try
+            {
+                target.Create();mesh.vertices=new[]{new Vector3(0,0),new Vector3(1280,0),new Vector3(1280,720),new Vector3(0,720)};mesh.triangles=new[]{0,1,2,0,2,3};
+                material.SetTexture("_CanvasBackdrop",Texture2D.whiteTexture);material.SetFloat("_AuthLayout",1);
+                commands.SetRenderTarget(target);commands.SetViewport(new Rect(0,0,1280,720));commands.ClearRenderTarget(false,true,Color.black);
+                commands.DrawMesh(mesh,Matrix4x4.identity,material,0,2);Graphics.ExecuteCommandBuffer(commands);
+                RenderTexture.active=target;pixels=new Texture2D(1280,720,TextureFormat.RGBA32,false);pixels.ReadPixels(new Rect(0,0,1280,720),0,0);pixels.Apply();
+                Assert.That(pixels.GetPixel(640,360).r,Is.EqualTo(1).Within(.015f),"reference vignette is transparent at the center");
+                Assert.That(pixels.GetPixel(1,1).r,Is.EqualTo(.65f).Within(.02f),"reference vignette darkens the far corner by 35 percent");
+            }
+            finally
+            {
+                RenderTexture.active=previous;commands.Release();target.Release();
+                if(pixels!=null)UnityEngine.Object.DestroyImmediate(pixels);
+                UnityEngine.Object.DestroyImmediate(target);UnityEngine.Object.DestroyImmediate(mesh);UnityEngine.Object.DestroyImmediate(material);
+            }
+        }
+
+        [Test]
+        public void AuthLayoutUsesReferenceBackgroundAndFadesPlanetHalo()
+        {
+            if(SystemInfo.graphicsDeviceType==UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Ignore("A graphics device is required to validate canvas color compositing.");
+            var owner=new GameObject("Auth background layout");
+            try
+            {
+                var type=Require("GalaxyBackground");var background=owner.AddComponent(type);
+                var configure=type.GetMethod("UseAuthLayout");Assert.That(configure,Is.Not.Null);
+                type.GetMethod("Initialize").Invoke(background,new object[]{new VisualElement()});
+                configure.Invoke(background,new object[]{new Vector4(310,340,1.05f,.4f),new Color(1,.8f,.5f,.35f)});
+                type.GetMethod("RenderOnce").Invoke(background,new object[]{1280,720});
+                var material=(Material)type.GetField("gradientMaterial",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(background);
+                Assert.That(material.GetVector("_Shape"),Is.EqualTo(new Vector4(640,252,1024,504)));
+                Assert.That(material.GetFloat("_AuthLayout"),Is.EqualTo(1));
+                Assert.That(material.GetVector("_AuthPlacement"),Is.EqualTo(new Vector4(310,340,1.05f,.4f)));
+            }
+            finally { UnityEngine.Object.DestroyImmediate(owner); }
+        }
+
+        [Test]
         public void ExplicitOffscreenCaptureRendersGradientAndPlanetWithoutAdvancingPausedTime()
         {
             if(SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)

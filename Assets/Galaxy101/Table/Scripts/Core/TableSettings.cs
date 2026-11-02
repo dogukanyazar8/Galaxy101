@@ -14,7 +14,7 @@ namespace Galaxy101.Table
     {
         public const string PrefsKey = "galaxy101.table.settings";
         public static readonly int[] WarnChoices = { 3, 5, 10, 0 };
-        public static readonly string[] Views = { "seat", "mid", "top" };
+        public static readonly string[] Views = { "seat", "mid", "top", "2d" };
 
         private readonly JObject values;
         private readonly MenuModel menu;
@@ -51,17 +51,19 @@ namespace Galaxy101.Table
             defaults["tableSkin"] = TableAssetCatalog.TableSkins[0];
             defaults["rackSkin"] = TableAssetCatalog.RackSkins[0];
             defaults["tileSkin"] = TableAssetCatalog.TileSkins[0];
+            defaults["bombFx"] = "nuke";
             return defaults;
         }
 
-        public bool Bool(string key) => key == "lang" || key == "master" ? throw new ArgumentException(key) : (bool)values[key];
-        public int Int(string key) => key == "master" ? (int?)menu?.Settings["master"] ?? 80 : key == "fps" ? (int?)menu?.Settings["fps"] ?? FramePacing.Auto : (int)values[key];
+        public bool Bool(string key) => (bool)(menu?.Settings[key] ?? values[key] ?? throw new ArgumentException(key));
+        public int Int(string key) => menu?.Settings[key] != null ? (int)menu.Settings[key] : key == "master" ? 80 : key == "fps" ? FramePacing.Auto : (int)values[key];
         /// <summary>Kare hızı (menu setting, shared): <see cref="FramePacing.Auto"/>, <see cref="FramePacing.Unlimited"/> or a cap.</summary>
         public int FrameRate => Int("fps");
-        public string Text(string key) => key == "lang" ? ((string)menu?.Settings["lang"] == "en" ? "en" : "tr") : (string)values[key];
+        public string Text(string key) => key == "lang" ? ((string)menu?.Settings["lang"] == "en" ? "en" : "tr") : (string)(menu?.Settings[key] ?? values[key]);
+
+        public void NotifySharedSettingsChanged(string key = null) => Changed?.Invoke(key);
 
         public bool AutoSort => Bool("autoSort");
-        public bool Highlight => Bool("highlight");
         public bool DoubleClick => Bool("dbl");
         public int WarnSeconds => Int("warn");
         public bool Bubbles => Bool("bubbles");
@@ -76,7 +78,7 @@ namespace Galaxy101.Table
         public void Set(string key, JToken value)
         {
             if (!Valid(key, value)) throw new ArgumentException("Invalid table setting " + key + " = " + value);
-            if (key == "lang" || key == "master" || key == "fps") { if (!SetMenu(key, value)) return; if (key == "fps") FramePacing.Apply((int)value); }
+            if (menu?.Settings[key] != null || key == "lang" || key == "master" || key == "fps") { if (!SetMenu(key, value)) return; if (key == "fps") FramePacing.Apply((int)value); }
             else
             {
                 if (JToken.DeepEquals(values[key], value)) return;
@@ -88,9 +90,19 @@ namespace Galaxy101.Table
         /// <summary>"Varsayılana dön": every row back to the design default, the language to Türkçe, the master volume to 80 and the frame rate to Otomatik.</summary>
         public void Reset()
         {
-            foreach (var property in Defaults().Properties()) values[property.Name] = property.Value;
-            Save(); SetMenu("lang", "tr"); SetMenu("master", 80);
-            if (SetMenu("fps", FramePacing.Auto) || FramePacing.Choice != FramePacing.Auto) FramePacing.Apply(FramePacing.Auto);
+            var defaults = Defaults();
+            if (menu != null)
+            {
+                var previous = menu.Settings; var next = (JObject)previous.DeepClone(); var shared = menu.DefaultSettings();
+                foreach (var property in defaults.Properties())
+                    if (next[property.Name] != null && shared[property.Name] != null) next[property.Name] = shared[property.Name].DeepClone();
+                next["lang"] = "tr"; next["master"] = 80; next["fps"] = FramePacing.Auto;
+                menu.Settings = next;
+                if (!menu.Persist()) { menu.Settings = previous; Debug.LogWarning("Table settings could not reset: " + menu.LastPersistenceError); return; }
+            }
+            foreach (var property in defaults.Properties()) values[property.Name] = property.Value;
+            Save(); menu?.NotifyChanged();
+            if (FramePacing.Choice != FramePacing.Auto) FramePacing.Apply(FramePacing.Auto);
             Changed?.Invoke(null);
         }
 
@@ -144,6 +156,7 @@ namespace Galaxy101.Table
                 case "fps": return value.Type == JTokenType.Integer && FramePacing.IsValidChoice((long)value);
                 case "warn": return value.Type == JTokenType.Integer && Array.IndexOf(WarnChoices, (int)value) >= 0;
                 case "view": return value.Type == JTokenType.String && Array.IndexOf(Views, (string)value) >= 0;
+                case "bombFx": return value.Type == JTokenType.String && Array.IndexOf(new[] { "nuke", "blackhole", "supernova", "meteor" }, (string)value) >= 0;
                 case "tableSkin": return value.Type == JTokenType.String && Array.IndexOf(TableAssetCatalog.TableSkins, (string)value) >= 0;
                 case "rackSkin": return value.Type == JTokenType.String && Array.IndexOf(TableAssetCatalog.RackSkins, (string)value) >= 0;
                 case "tileSkin": return value.Type == JTokenType.String && Array.IndexOf(TableAssetCatalog.TileSkins, (string)value) >= 0;

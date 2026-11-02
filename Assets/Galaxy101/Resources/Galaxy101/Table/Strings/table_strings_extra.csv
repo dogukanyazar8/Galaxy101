@@ -12,3 +12,5 @@
 "tlSkins.4.1","Beyaz mermer, altın damar","White marble, gold veins"
 "netReplacedTitle","Hesabın başka cihazda açıldı","Signed in on another device"
 "netReplacedBody","Masan artık diğer cihazda sürüyor. Buradan lobiye dönebilirsin.","Your table goes on on the other device. You can return to the lobby here."
+"msg.noRunOpen","Istakada açılacak seri ya da grup yok","No runs or groups to open on your rack"
+"msg.noPairOpen","Istakada açılacak çift yok","No pairs to open on your rack"

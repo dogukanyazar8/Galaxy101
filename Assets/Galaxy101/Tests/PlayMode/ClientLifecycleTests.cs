@@ -202,6 +202,49 @@ namespace Galaxy101.Tests
         }
 
         [UnityTest]
+        public IEnumerator SkipDealSendsOneIntentAndAnAcceptedVoteWaitsForTheAuthoritativeSkipEvent()
+        {
+            yield return Refresh(A, "Player A", 1000); yield return ConnectSocket();
+            var table = TableGame.DefaultTable(); table.Id = "skip-lifecycle"; table.VsBots = false; table.Seats[0].User.Id = A.ToString();
+            yield return Frame(V4Messages.MatchStart, new V4MatchStart { Table = table, CountdownMs = 0 });
+            yield return Until(() => V4TableSession.Current?.Client.Seat == 0, "the skip session"); tableSession = V4TableSession.Current;
+            TableGame.Pending = new TableLaunch { Session = tableSession };
+            tableOwner = new GameObject("Skip lifecycle table"); tableOwner.AddComponent<TableScene>();
+            gameOwner = new GameObject("Skip lifecycle game"); var game = gameOwner.AddComponent<TableGame>();
+            yield return Until(() => game.Session == tableSession, "table initialized");
+            yield return Frame(V4Messages.DealStart, new V4DealStart { HandNo = 1, Dealer = 3, BuildMs = TableTimings.DealBuild, At = tableSession.ServerNow });
+            yield return Until(() => game.CanSkipDeal, "skip affordance");
+            game.SkipDeal(); game.SkipDeal();
+            var request = ClientFrame(); yield return Until(() => request.IsCompleted, "one skip intent");
+            var sent = request.GetAwaiter().GetResult(); Assert.That((string)sent["type"], Is.EqualTo(V4Messages.GSkipDeal));
+            Assert.That(game.CanSkipDeal, Is.False); Assert.That(game.HudState().Deal?.CanSkip, Is.True);
+            Assert.That(game.HudState().Deal?.SkipWait, Is.True);
+            yield return Frame(MessageTypes.Ack, new AckMessage { Id = (string)sent["id"], Ok = true });
+            yield return Frame(V4Messages.DealSkipVote, new V4DealSkipVote { Seat = 0, At = tableSession.ServerNow });
+            float deadline = Time.realtimeSinceStartup + .25f;
+            while (Time.realtimeSinceStartup < deadline)
+            {
+                game.SkipDeal();
+                Assert.That(peer.GetStream().DataAvailable, Is.False, "The same seat must not send another vote after its ACK.");
+                Assert.That(tableSession.Client.Deal.Skipped, Is.False, "An accepted vote must not bypass server authority.");
+                Assert.That(tableSession.Client.Rack, Is.Null, "A vote does not reveal any hand tiles.");
+                Assert.That(game.HudState().Deal?.SkipWait, Is.True);
+                yield return null;
+            }
+            yield return Frame(V4Messages.DealSkip, new V4DealSkip
+            {
+                Dice = new System.Collections.Generic.List<int> { 4, 3 }, Stack = 3, Level = 2, ExtraStack = 4,
+                Indicator = "Y4a", Okey = new V4OkeyFace { C = "Y", N = 5 }, At = tableSession.ServerNow,
+            });
+            yield return Until(() => tableSession.Client.Deal?.Skipped == true, "authoritative skip");
+            Assert.That(game.HudState().Deal?.CanSkip, Is.Not.True);
+            Assert.That(game.HudState().Deal?.DieA, Is.EqualTo(4), "Public skip dice must update even when the private hand payload is delayed.");
+            Assert.That(game.HudState().Deal?.DieB, Is.EqualTo(3));
+            Assert.That(game.HudState().Deal?.LastDie, Is.EqualTo(1));
+            Assert.That(tableSession.Client.Rack, Is.Null, "The authoritative skip still waits for the private handDealt payload.");
+        }
+
+        [UnityTest]
         public IEnumerator AnnouncedDieBlocksTheRollAffordanceAndCommandUntilItsAnimationCompletes()
         {
             yield return Refresh(A, "Player A", 1000); yield return ConnectSocket();

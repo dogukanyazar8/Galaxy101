@@ -40,7 +40,7 @@ namespace Okey101.Editor
             PlayerSettings.SetApiCompatibilityLevel(NamedBuildTarget.Standalone, ApiCompatibilityLevel.NET_Standard);
             PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.StandaloneWindows64, false);
             PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneWindows64, new[] { GraphicsDeviceType.Direct3D11 });
-            PlayerSettings.companyName = "Okey101"; PlayerSettings.productName = "Galaxy 101"; PlayerSettings.bundleVersion="0.4.0";
+            PlayerSettings.companyName = "Okey101"; PlayerSettings.productName = "Galaxy 101"; PlayerSettings.bundleVersion="0.5.0";
             PlayerSettings.defaultScreenWidth = 1280; PlayerSettings.defaultScreenHeight = 720;
             PlayerSettings.fullScreenMode = FullScreenMode.Windowed; PlayerSettings.resizableWindow = true;
             PlayerSettings.runInBackground = true;
@@ -49,6 +49,7 @@ namespace Okey101.Editor
             PlayerSettings.insecureHttpOption = InsecureHttpOption.AlwaysAllowed;
             // Shader variants for materials the table creates in code (see RuntimeVariantMaterials).
             Galaxy101.Table.EditorTools.RuntimeVariantMaterials.Ensure();
+            Galaxy101.EditorTools.ShipBuildMaterials.RequireCurrent();
             PlayerSettings.enableFrameTimingStats = true;
             var buildRoot = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../artifacts/builds"));
             var output = Argument("-okeyBuildPath") ?? Path.Combine(buildRoot, DateTime.UtcNow.ToString("yyyyMMddTHHmmssfffZ") + "-" + Guid.NewGuid().ToString("N").Substring(0, 8), "Galaxy101.exe");

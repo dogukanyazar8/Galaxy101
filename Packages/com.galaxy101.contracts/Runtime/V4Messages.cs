@@ -54,6 +54,7 @@ namespace Galaxy101.Contracts
         public const string RankedAccept = "rankedAccept";
         public const string RankedCancel = "rankedCancel";
         public const string GRollDice = "gRollDice";
+        public const string GSkipDeal = "gSkipDeal";
         public const string GDraw = "gDraw";
         public const string GReturnSide = "gReturnSide";
         public const string GOpen = "gOpen";
@@ -103,6 +104,8 @@ namespace Galaxy101.Contracts
         public const string DealStart = "dealStart";
         public const string DealStep = "dealStep";
         public const string DealDie = "dealDie";
+        public const string DealSkip = "dealSkip";
+        public const string DealSkipVote = "dealSkipVote";
         public const string HandDealt = "handDealt";
         public const string Turn = "turn";
         public const string Legal = "legal";

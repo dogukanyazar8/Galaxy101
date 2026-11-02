@@ -48,10 +48,13 @@ namespace Galaxy101.Diagnostics
                 {
                     if (string.IsNullOrEmpty(e.name)) return;
                     var b = e.worldBound; var s = e.resolvedStyle;
-                    var text = e is TextElement te && e.childCount == 0 ? Regex.Replace(te.text ?? "", "<[^>]+>", "").Trim() : null;
+                    var text = e is TextElement te && e.childCount == 0 ? PlainText(te).Trim() : null;
+                    var input = e as TextField;
                     items.Add(new JObject
                     {
                         ["id"] = e.name, ["doc"] = doc.name,
+                        ["type"] = e.GetType().Name,
+                        ["value"] = input == null ? null : input.isPasswordField ? new string('•', input.value?.Length ?? 0) : input.value,
                         ["box"] = new JObject { ["x"] = R((b.x - frame.x) * k), ["y"] = R((b.y - frame.y) * k), ["w"] = R(b.width * k), ["h"] = R(b.height * k) },
                         ["visible"] = b.width > 0 && b.height > 0 && Visible(e), ["text"] = text,
                         ["style"] = new JObject
@@ -64,7 +67,7 @@ namespace Galaxy101.Diagnostics
                     });
                 });
             }
-            return new JObject { ["version"] = "0.4.0", ["state"] = state, ["seed"] = seed, ["t"] = t, ["unit"] = "1280x720 tasarım birimi", ["count"] = items.Count, ["items"] = items };
+            return new JObject { ["version"] = Application.version, ["state"] = state, ["seed"] = seed, ["t"] = t, ["unit"] = "1280x720 tasarım birimi", ["count"] = items.Count, ["items"] = items };
         }
 
         /// <summary>Every visible text: [text, x, y, w, h, fontSize, font, color, name] like tools/ref_capture.py TEXT_DUMP.</summary>
@@ -77,7 +80,8 @@ namespace Galaxy101.Diagnostics
                 foreach (var label in root.Query<TextElement>().ToList())
                 {
                     if (label is GalaxyButton) continue;   // its "button-caption" child draws the text
-                    string text = Regex.Replace(label.text ?? "", "<[^>]+>", "");
+                    if (label.GetFirstAncestorOfType<TextField>() is { isPasswordField: true }) continue;
+                    string text = PlainText(label);
                     if (string.IsNullOrWhiteSpace(text) || !Visible(label) || label.resolvedStyle.color.a < .02f) continue;
                     var b = label.worldBound; if (b.width < 1 || b.height < 1) continue;
                     // The glyph block is laid out in the label's own (local) space and then transformed, so a rotated or
@@ -94,13 +98,15 @@ namespace Galaxy101.Diagnostics
                     float minX = Mathf.Min(Mathf.Min(c0.x, c1.x), Mathf.Min(c2.x, c3.x)), maxX = Mathf.Max(Mathf.Max(c0.x, c1.x), Mathf.Max(c2.x, c3.x));
                     float minY = Mathf.Min(Mathf.Min(c0.y, c1.y), Mathf.Min(c2.y, c3.y)), maxY = Mathf.Max(Mathf.Max(c0.y, c1.y), Mathf.Max(c2.y, c3.y));
                     float textX = minX, textY = minY; textW = maxX - minX; float boxH = maxY - minY;
-                    output.Add(new JArray(text.Trim().Length > 80 ? text.Trim().Substring(0, 80) : text.Trim(), Mathf.RoundToInt((textX - frame.x) * k), Mathf.RoundToInt((textY - frame.y) * k),
+                    output.Add(new JArray(text.Trim(), Mathf.RoundToInt((textX - frame.x) * k), Mathf.RoundToInt((textY - frame.y) * k),
                         Mathf.RoundToInt(textW * k), Mathf.RoundToInt(boxH * k), (p.fontSize * k).ToString("0.##", CultureInfo.InvariantCulture) + "px",
                         p.unityFontDefinition.fontAsset != null ? p.unityFontDefinition.fontAsset.name : p.unityFont != null ? p.unityFont.name : "", Hex(p.color), label.name));
                 }
             }
             return output;
         }
+
+        private static string PlainText(TextElement element) => element.enableRichText ? Regex.Replace(element.text ?? "", "<[^>]+>", "") : element.text ?? "";
     }
 }
 #endif

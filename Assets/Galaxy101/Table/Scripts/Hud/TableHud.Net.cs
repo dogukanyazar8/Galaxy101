@@ -16,24 +16,36 @@ namespace Galaxy101.Table
             layer.style.position = Position.Absolute; layer.style.left = layer.style.top = layer.style.right = layer.style.bottom = 0;
             layer.style.alignItems = Align.Center; layer.style.justifyContent = Justify.Center;
             var dim = new VisualElement { pickingMode = PickingMode.Ignore }; dim.style.position = Position.Absolute; dim.style.left = dim.style.top = dim.style.right = dim.style.bottom = 0;
-            dim.style.backgroundColor = new Color(2 / 255f, 4 / 255f, 14 / 255f, .66f); layer.Add(dim);
+            dim.style.backgroundColor = new Color(2 / 255f, 4 / 255f, 14 / 255f, .66f); GalaxyFilters.BackdropBlur(dim, 8); layer.Add(dim);   // blur(8px) grayscale(.6)
             var card = new VisualElement { name = "table-net-card", pickingMode = PickingMode.Position };
-            card.style.width = 470; card.style.alignItems = Align.Center; Pad(card, 30, 28, 26, 28);
+            // width: 470px with padding 30px 28px 26px in a content-box: the card is 526 px wide.
+            card.style.width = 470 + 2 * 28; card.style.alignItems = Align.Center; Pad(card, 30, 28, 26, 28);
             view.Decorate(card, "var(--pn)", 28, 10, "var(--pnS)"); Border(card, 1, new Color(1, 1, 1, .1f)); GalaxyFilters.Shadow(card, 0, 40, 90, new Color(0, 0, 0, .6f));
             float shown = Since("table-net");
             motions.Add(t => { float k = MenuView.CssBezier(.2f, 1.2f, .4f, 1, Mathf.Clamp01((t - shown) / .28f)); card.style.opacity = Mathf.Clamp01(k * 2); card.style.scale = new Scale(Vector2.one * (.9f + .1f * k)); });
 
-            // Three arcs and a dot, each arc pulsing (wifi 1.6 s, 0 / .3 / .6 s apart).
+            // The 76×62 svg: three stroked arcs (width 6, round caps: M6 22a46 46 0 0 1 64 0, M16 33a32…, M27 44a17…) and a
+            // 4 px dot at (38, 54); each arc pulses (wifi 1.6 s: opacity .2 → 1 → .2, delays .6 / .3 / 0 s).
             var icon = new VisualElement { pickingMode = PickingMode.Ignore }; icon.style.width = 76; icon.style.height = 62;
-            for (int i = 0; i < 3; i++)
+            var arcs = new (float X0, float X1, float Y, float R, float Delay)[] { (6, 70, 22, 46, .6f), (16, 60, 33, 32, .3f), (27, 49, 44, 17, 0) };
+            var arcOpacity = new float[3]; var gold = view.C("var(--a1)");
+            icon.generateVisualContent += context =>
             {
-                float size = 64 - i * 20, delay = .6f - i * .3f;
-                var arc = new ArcRing(view.C("var(--a1)"), new Color(0, 0, 0, 0)) { Fraction = .25f };
-                MenuView.Place(arc, 38 - size / 2, 6 + i * 11, size, size); arc.style.rotate = new Rotate(-45);
-                motions.Add(t => arc.style.opacity = .35f + .65f * Mathf.Abs(Mathf.Sin(Mathf.PI * Mathf.Repeat(t - delay, 1.6f) / 1.6f)));
-                icon.Add(arc);
-            }
-            var dot = new VisualElement { pickingMode = PickingMode.Ignore }; MenuView.Place(dot, 34, 50, 8, 8); view.Decorate(dot, "var(--a1)", 4); icon.Add(dot);
+                var p = context.painter2D; p.lineWidth = 6; p.lineCap = LineCap.Round;
+                for (int i = 0; i < 3; i++)
+                {
+                    var (x0, x1, y, r, _) = arcs[i]; float half = (x1 - x0) / 2, cy = y + Mathf.Sqrt(r * r - half * half);
+                    float a0 = Mathf.Atan2(y - cy, x0 - (x0 + half)) * Mathf.Rad2Deg, a1 = Mathf.Atan2(y - cy, x1 - (x0 + half)) * Mathf.Rad2Deg;
+                    var c = gold; c.a *= arcOpacity[i]; p.strokeColor = c;
+                    p.BeginPath(); p.Arc(new Vector2(x0 + half, cy), r, a0, a1); p.Stroke();
+                }
+                p.fillColor = gold; p.BeginPath(); p.Arc(new Vector2(38, 54), 4, 0, 360); p.Fill();
+            };
+            motions.Add(t =>
+            {
+                for (int i = 0; i < 3; i++) { float u = Mathf.Repeat(t - arcs[i].Delay, 1.6f) / 1.6f; arcOpacity[i] = .2f + .8f * (1 - Mathf.Abs(1 - 2 * u)); }
+                icon.MarkDirtyRepaint();
+            });
             card.Add(icon);
 
             var title = Text(TableStrings.Get(s.NetReplaced ? "netReplacedTitle" : "netTitle", Lang), "Montserrat-700", 26, "#F4F1E8"); title.name = "table.t.netTitle"; title.style.marginTop = 12; card.Add(title);
@@ -63,7 +75,8 @@ namespace Galaxy101.Table
             var fill = new VisualElement { pickingMode = PickingMode.Ignore }; fill.style.position = Position.Absolute; fill.style.left = fill.style.top = fill.style.bottom = 0;
             view.Decorate(fill, "linear-gradient(90deg,var(--a2),var(--a1))", 5); bar.Add(fill);
             float attemptStarted = Since("net-attempt-" + s.NetAttempt);
-            motions.Add(t => fill.style.width = Length.Percent(s.NetGaveUp ? 100 : Mathf.Clamp01((t - attemptStarted) / (TableTimings.ClientRetryMs / 1000f)) * 100));
+            // barFill 3 s linear both: full at the g101-clock freeze (the animation has run out at the canonical instant).
+            motions.Add(t => fill.style.width = Length.Percent(s.NetGaveUp || GameClock.Frozen ? 100 : Mathf.Clamp01((t - attemptStarted) / (TableTimings.ClientRetryMs / 1000f)) * 100));
             progress.Add(bar); card.Add(progress);
 
             var buttons = Row(10); buttons.style.alignSelf = Align.Stretch; buttons.style.marginTop = 20;

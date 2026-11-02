@@ -298,7 +298,7 @@ namespace Galaxy101.Online
                 seats.Add(s?.User == null ? null : new TableSeat { Bot = s.Bot, Player = new PlayerSummary { Id = Id(s.User.Id), Name = s.User.Name, Color = s.User.Color, Level = s.User.Level, Frame = s.User.Frame } });
             }
             bool playing = t.Status == "playing" || t.Status == "over";
-            return new TableSummary
+            return LobbyRulePresentation.WithOpeningTilePenalty(new TableSummary
             {
                 Id = Id(t.Id), Name = t.Name, Type = t.Mode == "pairs" ? "pairs" : "single", Stake = t.Bet, Hands = t.Hands, TurnSeconds = t.TurnSec,
                 Doubling = t.Katlama, PartnerRaises = t.KatlamaPartner ?? true, Locked = t.Locked, Private = t.Private,
@@ -306,7 +306,7 @@ namespace Galaxy101.Online
                 Status = playing ? "playing" : "waiting", Hand = t.HandNo,
                 OpenSeats = playing && !t.Ranked && !t.VsBots ? seats.Count(s => s != null && s.Bot) : 0,
                 HostId = Id(t.Owner), Seats = seats,
-            };
+            }, r.Penalties);
         }
 
         public void Dispose()

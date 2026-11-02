@@ -1130,6 +1130,10 @@
    "tr": "İşlek +101",
    "en": "Playable +101"
   },
+  "lobby.STR.bOpen": {
+   "tr": "Açtıran ×10",
+   "en": "Opener ×10"
+  },
   "lobby.STR.bNoSpec": {
    "tr": "İzleyici yok",
    "en": "No spectators"
@@ -1430,6 +1434,10 @@
   "lobby.STR.sIsle": {
    "tr": "İşlek taş atma cezası",
    "en": "Playable tile penalty"
+  },
+  "lobby.STR.sOpen": {
+   "tr": "Açtıran taş cezası",
+   "en": "Opening-tile penalty"
   },
   "lobby.STR.sQuick": {
    "tr": "Hazır cümleler",

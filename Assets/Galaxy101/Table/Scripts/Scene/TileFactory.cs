@@ -25,7 +25,7 @@ namespace Galaxy101.Table
         private Material sideTag, islekTag;
         private Mesh tagMesh;
         /// <summary>Under-tile bars (table3d.js barGeo): green = valid set, yellow = new tile (its alpha blinks, set by TableFx).</summary>
-        public static Material ValidBar, NewBar;
+        public static Material NewBar;
         /// <summary>The v2 gold okey frame instead of the blank v3 face (kept for comparison captures).</summary>
         public static bool LegacyOkeyMark;
         private Mesh okeyFrame, okeyDot;
@@ -50,6 +50,7 @@ namespace Galaxy101.Table
             flatFace = new Material(Shader.Find("Galaxy101/FlatFace")) { name = "tas_yuz_isiksiz_" + skin };
             flatFace.SetTexture("_BaseMap", atlas); flatFace.SetColor("_BaseColor", Color.white);
             flatFace.SetFloat("_Galaxy101Exposure", ThreeToneMapping.DesignExposure); flatFace.SetFloat("_Galaxy101ToneMapped", 1);
+            flatFace.SetFloat("_Galaxy101SrgbBlend", 1);   // the ink's soft edges over the white tile, blended as the browser does
             flatFace.renderQueue = (int)RenderQueue.Transparent;
         }
 
@@ -210,9 +211,8 @@ namespace Galaxy101.Table
         {
             var bar = tile.transform.Find("tas_cubuk");
             if (bar != null) return bar.gameObject;
-            if (ValidBar == null)
+            if (NewBar == null)
             {
-                ValidBar = new Material(Shader.Find("Universal Render Pipeline/Unlit")) { name = "gecerli" }; ValidBar.SetColor("_BaseColor", new Color32(0x3C, 0xCB, 0x6E, 255));
                 NewBar = new Material(Shader.Find("Universal Render Pipeline/Unlit")) { name = "yeni_tas" };
                 NewBar.SetFloat("_Surface", 1); NewBar.SetFloat("_ZWrite", 0); NewBar.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha); NewBar.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
                 NewBar.SetFloat("_SrcBlendAlpha", (float)BlendMode.One); NewBar.SetFloat("_DstBlendAlpha", (float)BlendMode.OneMinusSrcAlpha);
@@ -229,7 +229,7 @@ namespace Galaxy101.Table
             bar.localPosition = new Vector3(0, -TableConstants.TH / 2 + 0.009f, TableConstants.TD / 2 + 0.0012f);
             bar.localScale = new Vector3(TableConstants.TW * 0.78f, 0.0035f, 0.001f);
             bar.gameObject.AddComponent<MeshFilter>().sharedMesh = barMesh;
-            var r = bar.gameObject.AddComponent<MeshRenderer>(); r.sharedMaterial = ValidBar; r.shadowCastingMode = ShadowCastingMode.Off;
+            var r = bar.gameObject.AddComponent<MeshRenderer>(); r.sharedMaterial = NewBar; r.shadowCastingMode = ShadowCastingMode.Off;
             bar.gameObject.SetActive(false);
             return bar.gameObject;
         }

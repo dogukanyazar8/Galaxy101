@@ -75,25 +75,9 @@ namespace Galaxy101
             return Circle(v, size, (string)(person["c"] ?? person["color"]) ?? "a2", (string)person["ini"] ?? "?");
         }
 
-        internal static VisualElement Coin(MenuView v, int size = 30)
-        {
-            var coin = Circle(v, size, "radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F)");
-            coin.style.borderTopWidth = coin.style.borderBottomWidth = coin.style.borderLeftWidth = coin.style.borderRightWidth = 2;
-            coin.style.borderTopColor = coin.style.borderBottomColor = coin.style.borderLeftColor = coin.style.borderRightColor = v.C("#FFF3C8");
-            var inner = Circle(v, Mathf.Max(6, size - 10), "rgba(255,224,138,.35)");
-            coin.Add(inner);
-            return coin;
-        }
+        internal static VisualElement Coin(MenuView v, int size = 30) => v.ChipIcon(size);
 
-        internal static VisualElement Gem(MenuView v, int size = 22)
-        {
-            var gem = v.Box();
-            gem.style.width = gem.style.height = size;
-            gem.style.flexShrink = 0;
-            gem.style.rotate = new Rotate(45);
-            v.Decorate(gem, "linear-gradient(135deg,#C8F6FF,#3D7BFF)", 4, 3, "#2450A8");
-            return gem;
-        }
+        internal static VisualElement Gem(MenuView v, int size = 22) => v.GemIcon(size);
 
         internal static VisualElement CoinPile(MenuView v, float scale = 1)
         {
@@ -113,7 +97,8 @@ namespace Galaxy101
 
         internal static Button CustomButton(MenuView v, string text, System.Action action, string classes)
         {
-            var button = v.Button(text, action, "plain");
+            var tuned = System.Text.RegularExpressions.Regex.Match(classes ?? "", @"(?<![\w-])bright-\d+");
+            var button = v.Button(text, action, tuned.Success ? "plain " + tuned.Value : "plain");
             button.RemoveFromClassList("plain");
             button.style.backgroundColor = string.IsNullOrEmpty(classes) ? new StyleColor(Color.clear) : new StyleColor(StyleKeyword.Null);
             button.style.backgroundImage = StyleKeyword.None;
@@ -283,7 +268,7 @@ namespace Galaxy101
             return row;
         }
 
-        internal static void Header(MenuView v, VisualElement root, string title, string subtitle = null, string icon = null, string background = null, int titleSize = 24)
+        internal static void Header(MenuView v, VisualElement root, string title, string subtitle = null, string icon = null, string background = null, int titleSize = 24, string shade = "pnS", int iconSize = 22)
         {
             var header = root.Q<VisualElement>("header");
             if (icon != null)
@@ -293,8 +278,8 @@ namespace Galaxy101
                 tile.style.alignItems = Align.Center;
                 tile.style.justifyContent = Justify.Center;
                 tile.style.marginRight = 12;
-                v.Decorate(tile, background ?? "pnH", 14, 4, "pnS");
-                tile.Add(v.Icon(icon, 22, "#fff"));
+                v.Decorate(tile, background ?? "pnH", 14, 4, shade);
+                tile.Add(v.Icon(icon, iconSize, "#fff"));
                 header.Add(tile);
             }
             var captions = v.Column(v.Text(title, titleSize, true));

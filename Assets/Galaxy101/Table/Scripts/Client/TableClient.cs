@@ -43,6 +43,10 @@ namespace Galaxy101.Table
         public readonly List<(int Value, long At, long DoneAt)> Dice = new List<(int, long, long)>();
         public int IndicatorStack = -1, IndicatorLevel = -1, RolledLevel = -1, ExtraStack = -1;
         public bool FakeSkip;
+        /// <summary>Only dealSkip (or its authoritative snapshot) activates fast fill; a request/vote never does.</summary>
+        public bool Skipped;
+        public long SkipAt;
+        public readonly HashSet<int> SkipVotes = new HashSet<int>();
         public List<V4DealPlan> Plan;
         public List<int> CenterStacks;
 
@@ -97,6 +101,14 @@ namespace Galaxy101.Table
         public int Dealer { get; private set; } = -1;
         public readonly int[] Totals = new int[4];
         public readonly List<Dictionary<string, object>> History = new List<Dictionary<string, object>>();
+        private sealed class ObservedOpening
+        {
+            public int Finisher;
+            public int[] Score;
+            public IReadOnlyList<int> Opened;
+        }
+        // Presentation notes observed at handEnd; never serialized into the protocol's History / View.
+        private readonly Dictionary<int, ObservedOpening> observedOpenings = new Dictionary<int, ObservedOpening>();
         public readonly bool[] SeatBot = new bool[4], SeatLeft = new bool[4];
         public readonly int[] SeatLeftSeq = new int[4];
         public readonly bool[] Connected = { true, true, true, true };
@@ -179,6 +191,8 @@ namespace Galaxy101.Table
                 case V4Messages.DealStart: OnDealStart((V4DealStart)payload); break;
                 case V4Messages.DealStep: OnDealStep((V4DealStep)payload); break;
                 case V4Messages.DealDie: OnDealDie((V4DealDie)payload); break;
+                case V4Messages.DealSkip: OnDealSkip((V4DealSkip)payload); break;
+                case V4Messages.DealSkipVote: if (Deal != null) Deal.SkipVotes.Add(((V4DealSkipVote)payload).Seat); break;
                 case V4Messages.HandDealt: OnHandDealt((V4HandDealt)payload); break;
                 case V4Messages.Turn: OnTurn((V4Turn)payload); break;
                 case V4Messages.Legal: LegalEvent = Tree(((V4Legal)payload).Legal); break;
@@ -202,7 +216,11 @@ namespace Galaxy101.Table
                 case V4Messages.Snapshot:
                 {
                     var s = (V4Snapshot)payload;
-                    if (s.Table != null) Table = s.Table;
+                    if (s.Table != null)
+                    {
+                        if (Table?.Id != s.Table.Id) observedOpenings.Clear();
+                        Table = s.Table;
+                    }
                     var view = Tree(s.Game);
                     if (view != null) Load(view, true);
                     break;
@@ -219,6 +237,7 @@ namespace Galaxy101.Table
             Status = G101Rules.StatusLobby; HandNo = 0; Dealer = -1; HasHand = false; Deal = null;
             Hands = m.Table != null && m.Table.Hands > 0 ? m.Table.Hands : 5;
             Array.Clear(Totals, 0, 4); History.Clear(); Ranking = null; MatchResult = null; NextAt = 0; Deadline = 0; Ready.Clear(); leaveSeq = 0;
+            observedOpenings.Clear();
             for (int k = 0; k < 4; k++)
             {
                 var seat = m.Table?.Seats != null && k < m.Table.Seats.Count ? m.Table.Seats[k] : null;
@@ -240,6 +259,7 @@ namespace Galaxy101.Table
 
         private void OnDealStart(V4DealStart d)
         {
+            Rack = null; // A new ceremony never exposes the previous hand before its handStart / handDealt arrives.
             Deal = new DealProgress { Step = "build", Dealer = d.Dealer, T0 = d.At, StepAt = d.At, HumanDealer = d.HumanDealer, BuildMs = d.BuildMs };
             HandNo = d.HandNo; Dealer = d.Dealer;
         }
@@ -266,6 +286,32 @@ namespace Galaxy101.Table
         {
             if (Deal == null) Deal = new DealProgress { Step = "dice", Dealer = Dealer, T0 = d.At };
             Deal.Dice.Add((d.Value, d.At, d.At + d.RollMs));
+        }
+
+        private void OnDealSkip(V4DealSkip message)
+        {
+            if (Deal == null) Deal = new DealProgress { Dealer = Dealer, T0 = message.At };
+            Deal.Step = "fill"; Deal.StepAt = message.At; Deal.Skipped = true; Deal.SkipAt = message.At;
+            Deal.Dice.Clear();
+            foreach (int value in message.Dice) Deal.Dice.Add((value, message.At, message.At));
+            Deal.IndicatorStack = message.Stack; Deal.IndicatorLevel = message.Level;
+            Deal.RolledLevel = message.Dice.Count > 1 ? message.Dice[1] - 1 : message.Level;
+            Deal.FakeSkip = message.FakeSkip; Deal.ExtraStack = message.ExtraStack; Deal.SkipVotes.Clear();
+            CompleteSkippedLayout(Deal);
+            Indicator = message.Indicator;
+            if (message.Okey != null) { OkeyColor = message.Okey.C; OkeyNumber = message.Okey.N; }
+        }
+
+        private static void CompleteSkippedLayout(DealProgress deal)
+        {
+            int Stack(int offset) => (deal.IndicatorStack + offset) % 15;
+            if (deal.Plan == null)
+            {
+                deal.Plan = new List<V4DealPlan>();
+                for (int seat = 0; seat < 4; seat++) deal.Plan.Add(new V4DealPlan { Seat = (deal.Dealer + 1 + seat) % 4, Stacks = new List<int> { Stack(1 + seat), Stack(5 + seat) } });
+                for (int seat = 0; seat < 4; seat++) deal.Plan.Add(new V4DealPlan { Seat = (deal.Dealer + 1 + seat) % 4, Stacks = new List<int> { Stack(9 + seat) } });
+            }
+            if (deal.CenterStacks == null) deal.CenterStacks = new List<int> { deal.IndicatorStack, Math.Max(Stack(13), Stack(14)), Math.Min(Stack(13), Stack(14)) };
         }
 
         private void OnHandDealt(V4HandDealt h)
@@ -413,6 +459,10 @@ namespace Galaxy101.Table
                         { "handNo", I(e["handNo"]) }, { "score", V4Tree.Ints(Ints(Result["score"])) }, { "reason", (string)Result["reason"] },
                         { "finisher", I(Result["finisher"]) }, { "mul", I(Result["mul"]) },
                     });
+                    observedOpenings[I(e["handNo"])] = new ObservedOpening {
+                        Finisher = I(Result["finisher"]), Score = Ints(Result["score"]).ToArray(),
+                        Opened = Array.AsReadOnly((int[])Opened.Clone()),
+                    };
                     break;
                 }
                 case "matchEnd":
@@ -503,12 +553,26 @@ namespace Galaxy101.Table
                 };
             List<object> revealed = null;
             if (Result != null && RacksRevealed != null) { revealed = new List<object>(); foreach (var r in RacksRevealed) revealed.Add(V4Tree.Strings(r)); }
+            Dictionary<string, object> dealView = null;
+            if (Deal != null)
+            {
+                dealView = new Dictionary<string, object> { { "step", step }, { "dice", V4Tree.Ints(Deal.Landed(now)) }, { "dealer", Deal.Dealer }, { "elapsed", now - Deal.T0 } };
+                if (Deal.SkipVotes.Count > 0)
+                {
+                    var votes = new List<int>(Deal.SkipVotes); votes.Sort(); dealView["skip"] = V4Tree.Ints(votes);
+                }
+                if (Deal.Skipped)
+                {
+                    dealView["skipped"] = true; dealView["skipAt"] = Deal.SkipAt;
+                    dealView["stack"] = Deal.IndicatorStack; dealView["level"] = Deal.IndicatorLevel;
+                    dealView["fakeSkip"] = Deal.FakeSkip; dealView["extraStack"] = Deal.ExtraStack;
+                }
+            }
             return new Dictionary<string, object>
             {
                 { "status", Status }, { "handNo", HandNo }, { "hands", Hands }, { "dealer", Dealer }, { "totals", V4Tree.Ints(Totals) },
                 { "history", history }, { "seats", seats },
-                { "deal", Deal == null ? null : new Dictionary<string, object>
-                    { { "step", step }, { "dice", V4Tree.Ints(Deal.Landed(now)) }, { "dealer", Deal.Dealer }, { "elapsed", now - Deal.T0 } } },
+                { "deal", dealView },
                 { "indicator", hidden ? null : Indicator }, { "okey", hidden || !OkeyKnown ? null : new Dictionary<string, object> { { "c", OkeyColor }, { "n", OkeyNumber } } },
                 { "autoplay", Bools(Autoplay) }, { "connected", Bools(Connected) }, { "deck", Deck },
                 { "rack", rackShown && Rack != null ? V4Tree.Strings(Rack) : null }, { "counts", V4Tree.Ints(Counts) },
@@ -539,6 +603,7 @@ namespace Galaxy101.Table
             Dealer = I(v["dealer"]);
             History.Clear();
             if (v["history"] is IList history) foreach (var h in history) History.Add(Tree(h));
+            PruneObservedOpenings();
             if (v["seats"] is IList seats)
                 for (int k = 0; k < 4 && k < seats.Count; k++)
                 {
@@ -565,6 +630,15 @@ namespace Galaxy101.Table
                     for (int i = d.Dice.Count; i < keep.Dice.Count; i++) d.Dice.Add(keep.Dice[i]);
                 }
                 if (d.Step == "afterDice") d.Step = "dice";
+                if (deal.TryGetValue("skip", out var votes) && votes != null) foreach (int voter in Ints(votes)) d.SkipVotes.Add(voter);
+                if (deal.TryGetValue("skipped", out var skipped) && skipped is bool fast && fast)
+                {
+                    d.Skipped = true; d.SkipAt = Convert.ToInt64(deal["skipAt"]); d.StepAt = d.SkipAt;
+                    d.IndicatorStack = I(deal["stack"]); d.IndicatorLevel = I(deal["level"]);
+                    d.FakeSkip = deal["fakeSkip"] is bool fake && fake; d.ExtraStack = I(deal["extraStack"]);
+                    d.RolledLevel = d.Dice.Count > 1 ? d.Dice[1].Value - 1 : d.IndicatorLevel;
+                    CompleteSkippedLayout(d);
+                }
                 Deal = d;
             }
             Indicator = v["indicator"] as string ?? (Deal != null ? Indicator : null);
@@ -674,6 +748,26 @@ namespace Galaxy101.Table
         }
 
         public bool MyTurn => Seat >= 0 && HasHand && Deal == null && Status == G101Rules.StatusPlaying && TurnSeat == Seat;
+
+        /// <summary>Opening notes are known only for a hand this client saw end with the same authoritative result.</summary>
+        public bool TryObservedOpenings(IDictionary<string, object> hand, out IReadOnlyList<int> opened)
+        {
+            opened = null;
+            if (hand == null || !hand.TryGetValue("handNo", out var number) || !hand.TryGetValue("finisher", out var finisher) ||
+                !hand.TryGetValue("score", out var points) || !observedOpenings.TryGetValue(I(number), out var known) || known.Finisher != I(finisher)) return false;
+            var score = Ints(points);
+            if (score.Count != known.Score.Length) return false;
+            for (int k = 0; k < score.Count; k++) if (score[k] != known.Score[k]) return false;
+            opened = known.Opened; return true;
+        }
+
+        private void PruneObservedOpenings()
+        {
+            var retained = new HashSet<int>();
+            foreach (var hand in History)
+                if (!hand.ContainsKey("opened") && TryObservedOpenings(hand, out _)) retained.Add(I(hand["handNo"]));
+            foreach (int number in new List<int>(observedOpenings.Keys)) if (!retained.Contains(number)) observedOpenings.Remove(number);
+        }
 
         public bool IsOkey(string id) => OkeyKnown && G101Rules.IsOkey(new ColorNum(OkeyColor, OkeyNumber), id);
 

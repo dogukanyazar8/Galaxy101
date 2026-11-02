@@ -20,6 +20,15 @@ namespace Galaxy101.Audio
         private static string mode;
         private static string world = CursorRules.Default;
         private static string held;
+        internal static VisualElement AnimatedLayer { get; set; }
+        internal static bool AnimatedVisible { get; set; }
+
+        internal static void HideHardwareForAnimatedCursor()
+        {
+            if (AnimatedVisible && AnimatedLayer?.panel != null && Mode != CursorSet.System &&
+                (Application.isFocused || Application.isBatchMode) && UnityEngine.Cursor.visible)
+                UnityEngine.Cursor.visible = false;
+        }
 
         /// <summary>The cursor setting: <see cref="CursorSet.Normal"/>, <see cref="CursorSet.Large"/> or <see cref="CursorSet.System"/>.</summary>
         public static string Mode
@@ -72,7 +81,7 @@ namespace Galaxy101.Audio
         public static void Lock(VisualElement element, string name) => CursorRules.Lock(element, name);
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetStatics() { mode = null; world = CursorRules.Default; held = null; Current = null; Changed = null; }
+        private static void ResetStatics() { mode = null; world = CursorRules.Default; held = null; Current = null; Changed = null; AnimatedLayer = null; AnimatedVisible = false; }
     }
 
     /// <summary>Draws <see cref="GalaxyCursor"/> each frame with Cursor.SetCursor (run by the audio host).</summary>
@@ -127,11 +136,16 @@ namespace Galaxy101.Audio
             }
             if (name == CursorSet.None)
             {
-                if (!hidden) { UnityEngine.Cursor.visible = false; hidden = true; }
+                if (!hidden || UnityEngine.Cursor.visible) { UnityEngine.Cursor.visible = false; hidden = true; }
                 applied = GalaxyCursor.Current = name;
                 return;
             }
             if (!set.Has(name)) name = CursorRules.Default;
+            if (GalaxyCursor.AnimatedVisible && GalaxyCursor.AnimatedLayer?.panel != null && (Application.isFocused || Application.isBatchMode))
+            {
+                if (!hidden || UnityEngine.Cursor.visible) { UnityEngine.Cursor.visible = false; hidden = true; }
+                applied = null; GalaxyCursor.Current = name; return;
+            }
             float scale = Screen.dpi > 0 ? Screen.dpi / ReferenceDpi : 1;
             int pixels = set.PixelSize(scale, GalaxyCursor.Mode);
             string key = name + "@" + pixels;
@@ -145,7 +159,7 @@ namespace Galaxy101.Audio
 
         private void Show()
         {
-            if (!hidden) return;
+            if (!hidden && UnityEngine.Cursor.visible) return;
             UnityEngine.Cursor.visible = true; hidden = false;
         }
 

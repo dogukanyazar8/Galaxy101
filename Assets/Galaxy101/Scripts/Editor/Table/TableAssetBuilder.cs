@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -60,6 +61,27 @@ namespace Galaxy101.Table.EditorTools
 
         private static TableAssetCatalog.Entry Entry(string key, GameObject prefab) => new TableAssetCatalog.Entry { Key = key, Prefab = prefab };
 
+        /// <summary>Refresh only the six rack assets after exporting a newer racks3d.js; preserve scenes and other models.</summary>
+        [MenuItem("Galaxy 101/Rebuild Rack Assets")]
+        public static void RebuildRacks()
+        {
+            AssetDatabase.Refresh(); TableMaterialConverter.ResetCache();
+            foreach (var model in RackFiles.Values)
+            {
+                var importer = AssetImporter.GetAtPath(Models + "/galaxy101_" + model + "_saturn.glb");
+                var serialized = new SerializedObject(importer);
+                serialized.FindProperty("importSettings.generateMipMaps").boolValue = true;
+                serialized.FindProperty("importSettings.defaultMinFilterMode").intValue = 9987; // LINEAR_MIPMAP_LINEAR, racks3d.js tex().
+                serialized.FindProperty("importSettings.anisotropicFilterLevel").intValue = 16;
+                if (serialized.ApplyModifiedPropertiesWithoutUndo()) importer.SaveAndReimport();
+            }
+            var catalog = AssetDatabase.LoadAssetAtPath<TableAssetCatalog>(CatalogPath)
+                ?? throw new InvalidOperationException("The table asset catalog must exist before refreshing racks.");
+            catalog.Racks = RackFiles.Select(p => Entry(p.Key, MakePrefab("galaxy101_" + p.Value + "_saturn", "Rack_" + p.Key, true))).ToArray();
+            EditorUtility.SetDirty(catalog); AssetDatabase.SaveAssets();
+            Debug.Log("GALAXY101_RACK_ASSETS_READY count=" + catalog.Racks.Length);
+        }
+
         private static GameObject MakePrefab(string model, string prefabName, bool rackSlots)
         {
             var source = AssetDatabase.LoadAssetAtPath<GameObject>(Models + "/" + model + ".glb") ?? throw new InvalidOperationException("Model not imported: " + model);
@@ -69,11 +91,52 @@ namespace Galaxy101.Table.EditorTools
                 PrefabUtility.UnpackPrefabInstance(instance, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
                 instance.name = prefabName;
                 TableMaterialConverter.ConvertAll(instance, "Assets/Galaxy101/Table/Materials/" + prefabName);
+                if (rackSlots) ExtractRackCanvasTextures(instance, Models + "/" + model + ".glb", "Assets/Galaxy101/Table/Materials/" + prefabName);
                 AddLodGroup(instance);
                 if (rackSlots) AddSlots(instance.transform);
                 return PrefabUtility.SaveAsPrefabAsset(instance, Prefabs + "/" + prefabName + ".prefab");
             }
             finally { UnityEngine.Object.DestroyImmediate(instance); }
+        }
+
+        // Imported embedded glTF images lose their sampler settings in the Editor import path.
+        // Keep the exact PNG bytes from the source canvas as ordinary texture assets, with
+        // the source's mipmaps/trilinear/16x sampling explicitly serialized for player builds.
+        private static void ExtractRackCanvasTextures(GameObject root, string modelPath, string folder)
+        {
+            var bytes = File.ReadAllBytes(modelPath); int jsonLength = BitConverter.ToInt32(bytes, 12);
+            var json = JObject.Parse(System.Text.Encoding.UTF8.GetString(bytes, 20, jsonLength));
+            int binaryStart = 20 + jsonLength + 8;
+            foreach (var material in root.GetComponentsInChildren<Renderer>(true).SelectMany(r => r.sharedMaterials).Distinct())
+            {
+                var source = json["materials"]?.FirstOrDefault(m => (string)m["name"] == material.name);
+                var slot = source?["pbrMetallicRoughness"]?["baseColorTexture"];
+                if (slot == null) continue;
+                var texture = json["textures"][(int)slot["index"]];
+                var image = json["images"][(int)texture["source"]];
+                if ((string)image["mimeType"] != "image/png" || image["bufferView"] == null)
+                    throw new InvalidOperationException("Rack canvas must be an embedded PNG: " + modelPath + "/" + material.name);
+                var view = json["bufferViews"][(int)image["bufferView"]];
+                int offset = checked(binaryStart + ((int?)view["byteOffset"] ?? 0)), length = (int)view["byteLength"];
+                if (offset < binaryStart || length < 8 || offset > bytes.Length - length)
+                    throw new InvalidDataException("Invalid rack canvas range: " + modelPath);
+                var png = new byte[length]; Buffer.BlockCopy(bytes, offset, png, 0, length);
+                string path = folder + "/" + material.name + "_BaseColor.png";
+                if (!File.Exists(path) || !File.ReadAllBytes(path).SequenceEqual(png)) File.WriteAllBytes(path, png);
+                AssetDatabase.ImportAsset(path);
+                var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+                importer.sRGBTexture = true; importer.mipmapEnabled = true; importer.alphaIsTransparency = true;
+                importer.wrapMode = TextureWrapMode.Repeat; importer.filterMode = FilterMode.Trilinear;
+                importer.anisoLevel = 16; importer.maxTextureSize = 2048;
+                importer.npotScale = TextureImporterNPOTScale.None;
+                importer.textureCompression = TextureImporterCompression.Uncompressed;
+                importer.SaveAndReimport();
+                material.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(path));
+                if (source?["emissiveTexture"]?["index"] is JToken emissionIndex &&
+                    (int)json["textures"][(int)emissionIndex]["source"] == (int)texture["source"])
+                    material.SetTexture("_EmissionMap", material.GetTexture("_BaseMap"));
+                EditorUtility.SetDirty(material);
+            }
         }
 
         private static void AddLodGroup(GameObject root)
@@ -126,7 +189,7 @@ namespace Galaxy101.Table.EditorTools
             // Optional: GALAXY_TABLE_HIDE=name1,name2 disables renderers (and their _LOD1 twins) for diagnostics.
             var hide = Environment.GetEnvironmentVariable("GALAXY_TABLE_HIDE");
             if (!string.IsNullOrEmpty(hide))
-                foreach (var r in UnityEngine.Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None))
+                foreach (var r in UnityEngine.Object.FindObjectsByType<Renderer>())
                     if (hide.Split(',').Any(h => r.name == h || r.name == h + "_LOD1")) r.enabled = false;
             string output = Environment.GetEnvironmentVariable("GALAXY_TABLE_CAPTURE") ?? "table.png";
             string view = Environment.GetEnvironmentVariable("GALAXY_TABLE_VIEW");

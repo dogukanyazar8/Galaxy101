@@ -23,7 +23,30 @@ namespace Galaxy101.Diagnostics
         private TableGame Game => FindAnyObjectByType<TableGame>();
         private TableHud Hud => FindAnyObjectByType<TableHud>();
         private string scenarioId;
-        private string tableFlow;
+        private string tableFlow, tableState;
+
+        /// <summary>
+        /// The deal the reference frames show (its dealer is the prototype's seeded Math.random, the same within a path):
+        /// dealer seat, dice and indicator. G07–G11 read "4. balya · alttan 6. taş gösterge" with a blue 6 → okey B7.
+        /// </summary>
+        private static DealRig ReferenceDeal(string id)
+        {
+            int? dealer = id switch
+            {
+                "G02" or "G05" => 0,
+                "G06" => 3,
+                "G03" or "G04" or "G07" or "G08" or "G09" or "G10" or "G11" or "G12" or "T03" => 2,
+                _ => null,
+            };
+            if (dealer == null) return null;
+            // The racks are a seeded shuffle (the reference's are random too); rigFromHands alone would fill them in its
+            // sorted order and the racks would read as runs and pairs.
+            var rest = G101Rules.AllTiles.Where(t => t != "B6a").ToList(); var random = new System.Random(42);
+            for (int i = rest.Count - 1; i > 0; i--) { int j = random.Next(i + 1); (rest[i], rest[j]) = (rest[j], rest[i]); }
+            int starter = (dealer.Value + 1) % 4, at = 0; var racks = new List<List<string>>();
+            for (int k = 0; k < 4; k++) { int n = k == starter ? 22 : 21; racks.Add(rest.GetRange(at, n)); at += n; }
+            return G101Rules.RigFromHands(new ScenarioDeal { Dealer = dealer, Dice = new[] { 4, 6 }, Indicator = "B6a", Racks = racks });
+        }
         /// <summary>The table state being run: timed extras of an earlier state never reach the next state's table.</summary>
         private int tableRun;
 
@@ -35,10 +58,12 @@ namespace Galaxy101.Diagnostics
         private IEnumerator TableState(string id, string theme, string lang)
         {
             var path = (JArray)Entry(id)["path"];
-            scenarioId = null; tableFlow = null; tableRun++;
+            scenarioId = null; tableFlow = null; tableRun++; tableState = id;
             TableSettings.DesignDefaultsOnly = true;
             foreach (JObject step in path)
             {
+                // Only the final path step may anchor Ft. A following wait/action starts its own hold at path completion.
+                holdOrigin = null;
                 if (step["acct"] != null) { yield return OpenMenu(theme, lang, false); continue; }
                 if (step["scenario"] != null) { scenarioId = (string)step["scenario"]; continue; }
                 if (step["table"] is JObject t) { yield return OpenTable(t); continue; }
@@ -64,17 +89,18 @@ namespace Galaxy101.Diagnostics
                 Setup = new TableSetup
                 {
                     Options = new MatchOptions { Mode = "solo", Hands = 5 }, Seed = scenarioId != null ? TableScenarios.ScenarioSeed : Current.Seed, TurnMs = TableTimings.DefaultTurnMs,
-                    FirstHandRig = scenarioId != null ? TableScenarios.Rig(scenarioId) : null,
+                    FirstHandRig = scenarioId != null ? TableScenarios.Rig(scenarioId) : ReferenceDeal(tableState),
                 },
                 Manual = true,
             };
             if (bots) { launch.Table = TableGame.DefaultTable(); launch.VsBots = true; launch.Chips = AccountChips; }
             else
             {
-                var table = new V4Table { Id = "state", Name = L("Test masası", "Test table"), Mode = "solo", Hands = 5, Bet = TestBet, TurnSec = 30, Status = "playing", Rules = new V4TableRules() };
+                var table = new V4Table { Id = "state", Name = "Test masası", Mode = "solo", Hands = 5, Bet = TestBet, TurnSec = 30, Status = "playing", Rules = new V4TableRules() };
                 table.Seats.Add(new V4Seat { User = new V4User { Id = "me", Name = AccountName, Color = AccountColor } });
                 for (int k = 1; k < 4; k++) table.Seats.Add(new V4Seat { Bot = true, User = new V4User { Id = "s" + k, Name = TestSeats[k].Name, Color = TestSeats[k].Color, Level = TestSeats[k].Level } });
-                launch.Table = table; launch.Room = L("Test masası · Tekli", "Test table · Singles"); launch.Stake = TestBet; launch.Chips = AccountChips - TestBet; launch.Seats = TestSeats;
+                // g101-state.js names the table in Turkish in both languages.
+                launch.Table = table; launch.Room = L("Test masası · Tekli", "Test masası · Singles"); launch.Stake = TestBet; launch.Chips = AccountChips - TestBet; launch.Seats = TestSeats;
             }
             TableGame.Pending = launch;
             _ = Menu.StartLocalAsync(MainMenuController.GalaxyTableScene);
@@ -124,7 +150,12 @@ namespace Galaxy101.Diagnostics
         {
             var game = Game; var hud = Hud;
             string key = flow == "gift" || flow == "chat" || flow == "exit" || flow == "net" || flow == "settings" ? "play" : flow;
-            if (flow == "deal") { yield return Settle(.25f); game.RunFlow("deal"); yield break; }
+            if (flow == "deal")
+            {
+                // Masa.go('deal') returns before its 250 ms startDeal timer; G02–G04 count Ft from that call.
+                holdOrigin = Time.realtimeSinceStartup;
+                yield return Settle(.25f); game.RunFlow("deal"); yield break;
+            }
             game.RunFlow(key);
             if (flow == null || flow == "seat") yield break;
             // G101-Masa setupPlay/setupIsleTest/setupPenOpenTest all use the same seedChat history.
@@ -140,7 +171,9 @@ namespace Galaxy101.Diagnostics
             string quick4 = TableStrings.Get("quick.4", hud.L("tr", "en"));
             switch (flow)
             {
-                case "open": At(1.1f, () => game.OpenRuns()); break;
+                // openHand at 1.1 s; its 1.5 s badOpen display still stands at G13's 2.6 s hold in the reference (the
+                // prototype's timer is queued at the freeze), so the opening is not allowed to land a frame early here.
+                case "open": At(1.15f, () => game.OpenRuns()); break;
                 case "gift": At(.3f, () => { hud.OpenGifts("2"); hud.Press("gift-tab:0"); hud.Press("gift-pick:tea"); }); At(.6f, () => hud.BotGift(2, "tea", -1, quick4)); break;
                 case "chat": At(.3f, () => hud.OpenChat()); At(1.4f, () => hud.Say(1, TableStrings.Get("bot.4", hud.L("tr", "en")))); break;
                 case "exit": At(.4f, () => game.RequestExit()); break;

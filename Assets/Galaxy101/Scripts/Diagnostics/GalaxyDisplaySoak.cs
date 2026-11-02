@@ -20,6 +20,8 @@ namespace Galaxy101
     public sealed class GalaxyDisplaySoak : MonoBehaviour
     {
         private string output;
+        /// <summary><c>-galaxyDisplaySoakAll</c>: on the table, every resolution offered per mode, and every Efekt kalitesi × kare hızı.</summary>
+        private bool all;
         private readonly JArray steps = new JArray();
         private readonly List<string> errors = new List<string>();
         private bool failed;
@@ -32,7 +34,7 @@ namespace Galaxy101
             int i = Array.IndexOf(args, "-galaxyDisplaySoak");
             if (i < 0 || i + 1 >= args.Length || !Path.IsPathFullyQualified(args[i + 1])) return;
             var go = new GameObject("Galaxy101 display soak"); DontDestroyOnLoad(go);
-            var soak = go.AddComponent<GalaxyDisplaySoak>(); soak.output = Path.GetFullPath(args[i + 1]);
+            var soak = go.AddComponent<GalaxyDisplaySoak>(); soak.output = Path.GetFullPath(args[i + 1]); soak.all = Array.IndexOf(args, "-galaxyDisplaySoakAll") >= 0;
             Directory.CreateDirectory(soak.output);
         }
 
@@ -52,6 +54,7 @@ namespace Galaxy101
             yield return new WaitForSecondsRealtime(2);
             // The soak switches through the real settings service: put the player's own choices back at the end.
             var saved = ((string)menu.Model.Settings["wmode"], (string)menu.Model.Settings["res"], (int)menu.Model.Settings["fps"]);
+            var savedQuality = menu.Model.Settings["quality"]?.DeepClone();
             var native = GameDisplay.NativeSize; int hz = Mathf.RoundToInt((float)FramePacing.MaxHz);
             string mid = GameDisplay.Options(native).Count > 1 ? GameDisplay.Format(GameDisplay.Options(native)[GameDisplay.Options(native).Count - 2]) : GameDisplay.Native;
             var plan = new List<(string Where, string Mode, string Res, int Fps)>
@@ -80,10 +83,28 @@ namespace Galaxy101
                     ("borderless", GameDisplay.Native, FramePacing.Auto), ("windowed", "1280x720", 60), ("fullscreen", mid, hz),
                     ("windowed", "1600x900", FramePacing.Auto), ("fullscreen", GameDisplay.Native, FramePacing.Auto), ("borderless", GameDisplay.Native, 144),
                 };
+                if (all)
+                {
+                    tablePlan.Clear();
+                    foreach (var mode in new[] { "windowed", "fullscreen" })
+                        foreach (var size in GameDisplay.OptionsFor(mode)) tablePlan.Add((mode, GameDisplay.Format(size), FramePacing.Auto));
+                }
                 foreach (var s in tablePlan) yield return TableStep(game, s.Mode, s.Res, s.Fps);
+                if (all)
+                {
+                    var hud = FindAnyObjectByType<Galaxy101.Table.TableHud>();
+                    foreach (var quality in new[] { "Düşük", "Orta", "Yüksek" })
+                        foreach (int fps in new[] { 30, 60, hz, FramePacing.Auto, FramePacing.Unlimited })
+                        {
+                            // TableStep stores its display too: the shared settings re-apply the stored one on every change.
+                            hud.Model.Settings["quality"] = quality; hud.Model.NotifyChanged();
+                            yield return TableStep(game, "borderless", GameDisplay.Native, fps, quality);
+                        }
+                }
             }
             var model = FindAnyObjectByType<Galaxy101.Table.TableHud>()?.Model ?? menu.Model;
             var services = new MenuServices(model).Settings;
+            if (all && savedQuality != null) { model.Settings["quality"] = savedQuality; model.NotifyChanged(); }
             services.SetDisplay(saved.Item1, saved.Item2); services.SetFrameRate(saved.Item3);
             GameDisplay.Apply(saved.Item1, saved.Item2); FramePacing.Apply(saved.Item3);
             var report = new JObject { ["native"] = GameDisplay.Format(native), ["maxHz"] = FramePacing.MaxHz, ["steps"] = steps, ["errors"] = new JArray(errors.Distinct().Take(50)), ["passed"] = !failed && errors.Count == 0 };
@@ -103,14 +124,16 @@ namespace Galaxy101
             yield return Shot(entry);
         }
 
-        private IEnumerator TableStep(Galaxy101.Table.TableGame game, string mode, string res, int fps)
+        private IEnumerator TableStep(Galaxy101.Table.TableGame game, string mode, string res, int fps, string quality = null)
         {
             var hud = FindAnyObjectByType<Galaxy101.Table.TableHud>();
+            hud.Model.Settings["wmode"] = mode; hud.Model.Settings["res"] = res;
             GameDisplay.Apply(mode, res); hud.Settings.Set("fps", fps);
             yield return Settle();
             var entry = Measure("table", mode, res, fps, hud.GetComponent<UIDocument>().rootVisualElement, null);
             entry["phase"] = game.Current.ToString();
             entry["tilesOnRack"] = game.Rack.Count;
+            if (quality != null) entry["quality"] = quality;
             yield return Shot(entry);
         }
 
@@ -160,9 +183,9 @@ namespace Galaxy101
             entry["measuredFps"] = Math.Round(measured, 1);
             int fps = entry["fps"].Value<int>(); double hz = entry["hz"].Value<double>();
             double expected = fps == FramePacing.Auto ? hz : fps;
-            // Above the target is a pacing bug; far below may be the GPU (reported, not failed).
-            if (measured > expected * 1.12 + 2) { ((JArray)entry["problems"]).Add("measured " + measured.ToString("0") + " > " + expected); failed = true; }
-            entry["reachedTarget"] = measured >= expected * .85;
+            // Above the target is a pacing bug; far below may be the GPU (reported, not failed). Sınırsız has no ceiling.
+            if (fps != FramePacing.Unlimited && measured > expected * 1.12 + 2) { ((JArray)entry["problems"]).Add("measured " + measured.ToString("0") + " > " + expected); failed = true; }
+            entry["reachedTarget"] = fps == FramePacing.Unlimited || measured >= expected * .85;
             yield return new WaitForEndOfFrame();
             var image = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
             image.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0); image.Apply();

@@ -1,7 +1,7 @@
 namespace Galaxy101.Table
 {
     /// <summary>
-    /// Server durations (ms) of the v4 package, <c>protocol/timings.md</c> §1 = <c>logic/mockServer.js</c> T. Bot thinking times
+    /// Server durations (ms) of the current prototype's <c>logic/mockServer.js</c> T. Bot thinking times
     /// are the engine's (<c>Okey101.Core.V4.G101Bots.Timing</c>, D-20). One source for the server and the offline client.
     /// </summary>
     public static class TableTimings
@@ -14,8 +14,8 @@ namespace Galaxy101.Table
         public const int WaitRoomCountdown = 3000;
         public const int CountdownTick = 1000;
 
-        // Deal ceremony (timings.md "Dağıtım töreni", D-24): dealStart → first turn 21 686 ms with a bot dealer.
-        public const int DealBuild = 2940;        // 450 + 106 × 15 + 900
+        // Current prototype dealStart → first turn: 20 358 ms with a bot dealer.
+        public const int DealBuild = 2572;        // 400 + 106 × 12 + 900
         public const int BotRollDelay = 700;      // dealStep:dice → first die (bot dealer)
         public const int HumanRollWait = 15000;   // D-23: per die, a human dealer's gRollDice or the server rolls
         public const int Roll1 = 1570;            // 1450 + 120
@@ -24,11 +24,12 @@ namespace Galaxy101.Table
         public const int AfterDice = 1000;
         public const int Indicator = 2300;
         public const int Extra = 1300;
-        public const int Distribute = 5100;       // 250 + 4 × 620 + 4 × 480 + 450
+        public const int Distribute = 4140;       // 250 + 4 × 480 + 4 × 380 + 450
         public const int Center = 2000;
         public const int Fill = 2136;             // 80 + 22 × 48 + 1000
+        public const int SkipFill = 1100;         // mockServer.js T.deal.skipFill; the server still owns the first turn
 
-        /// <summary>dealStart → first turn with a bot dealer: 21 686 ms (D-24).</summary>
+        /// <summary>dealStart → first turn with a bot dealer: 20 358 ms in the current prototype.</summary>
         public const int DealTotalBotDealer = DealBuild + BotRollDelay + Roll1 + BetweenRolls + Roll2 + AfterDice + Indicator + Extra + Distribute + Center + Fill;
 
         /// <summary>turnMs default (table option 15 / 20 / 30 / 45 s).</summary>
@@ -61,8 +62,8 @@ namespace Galaxy101.Table
         /// <summary>R-95: weekly leaderboard points by place.</summary>
         public static readonly int[] Weekly = { 30, 15, 5, 1 };
         public static readonly long[] Bets = { 1000, 5000, 10000, 50000, 100000 };
-        public static readonly int[] Hands = { 3, 5, 7 };
-        public static readonly int[] TurnSec = { 15, 20, 30, 45 };
+        public static readonly int[] Hands = { 3, 5, 7, 9, 11 };
+        public static readonly int[] TurnSec = { 15, 20, 30, 40, 50, 60 };
         /// <summary>R-94: ranked is 5 hands, 30 s, no stake, no katlama.</summary>
         public const int RankedHands = 5, RankedTurnSec = 30;
         /// <summary>D-32: free chat text limit.</summary>

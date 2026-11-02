@@ -64,7 +64,7 @@
   "settingsDefaults": {
     "autoSort": true,
     "highlight": true,
-    "dbl": false,
+    "dbl": true,
     "chat": true,
     "warn": 5,
     "tile": "Orta",

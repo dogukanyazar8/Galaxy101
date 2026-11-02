@@ -32,7 +32,8 @@ namespace Galaxy101.Table
             if (HandleSocial(command) || HandleGifts(command)) return true;
             switch (command)
             {
-                case "settings": OpenSettings(SettingsTab); return true;
+                case "settings": OpenGameSettings(); return true;
+                case "scoreboard": OpenScoreboard(); return true;
                 case "settings-close": CloseWindow(); return true;
                 case "settings-reset": Settings.Reset(); return true;
             }
@@ -51,6 +52,11 @@ namespace Galaxy101.Table
         public void CloseWindow()
         {
             if (Window == null) return;
+            if (Window == "shared-settings")
+            {
+                while (view.Modals.Dialog != null || view.Modals.Panel != null) view.CloseTop();
+                sharedSettingsLayer.style.display = DisplayStyle.None;
+            }
             Window = null; CardSeat = 0; RenderWindows(false);
         }
 
@@ -63,6 +69,7 @@ namespace Galaxy101.Table
             Settings = new TableSettings(model, persist);
             ApplySceneSettings(null, 0);
             Settings.Changed += OnSettingChanged;
+            InitializeSharedSettings();
             FramePacing.DisplayChanged += OnDisplayChanged;
             // A table opened straight from the editor (no menu first) still uses the saved frame rate.
             if (persist && FramePacing.Choice != Settings.FrameRate) FramePacing.Apply(Settings.FrameRate);
@@ -70,14 +77,18 @@ namespace Galaxy101.Table
 
         private void UpdateWindows()
         {
-            if (Window != null && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) CloseWindow();
+            if (Window == "shared-settings")
+            {
+                if (view.Modals.Panel == null && view.Modals.Dialog == null) { sharedSettingsLayer.style.display = DisplayStyle.None; Window = null; }
+            }
+            else if (Window != null && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) CloseWindow();
             UpdateSocial(); UpdateNotice();
         }
 
         /// <summary>Camera view and the three skins (T19–T22). The game reacts to the same event for its own state.</summary>
         private void ApplySceneSettings(string key, float viewSeconds)
         {
-            if ((key == null || key == "view") && table.CameraRig.Current != TableCameraRig.View.Lobby)
+            if ((key == null || key == "view") && !IsTwoDimensional && table.CameraRig.Current != TableCameraRig.View.Lobby)
             {
                 var target = PreferredView;
                 if (table.CameraRig.Current != target) table.CameraRig.GoTo(target, viewSeconds);
@@ -90,7 +101,7 @@ namespace Galaxy101.Table
         /// <summary>The v4 playing views: Oyuncu gözü, Yarı yüksek and Kuşbakışı.</summary>
         public TableCameraRig.View PreferredView => Settings?.View == "top" ? TableCameraRig.View.Top : Settings?.View == "mid" ? TableCameraRig.View.Mid : TableCameraRig.View.Player;
 
-        private static readonly HashSet<string> InPlaceKeys = new HashSet<string> { "autoSort", "highlight", "dbl", "master", "music", "sfx", "tileSnd", "chatSnd", "bubbles", "giftNotif", "emojiFx", "turnHint" };
+        private static readonly HashSet<string> InPlaceKeys = new HashSet<string> { "autoSort", "dbl", "master", "music", "sfx", "tileSnd", "chatSnd", "bubbles", "giftNotif", "emojiFx", "turnHint" };
 
         private void OnSettingChanged(string key)
         {
@@ -111,6 +122,7 @@ namespace Galaxy101.Table
             else if (Window == "chat") BuildChat();
             else if (Window == "card" && CardSeat > 0) BuildCard();
             else if (Window == "gift") BuildGifts();
+            else if (Window == "scoreboard") BuildScoreboard();
             ApplyGaps(windowLayer);
         }
 
@@ -138,12 +150,12 @@ namespace Galaxy101.Table
         // A window redrawn in place (a skin, view or language change) keeps still: its entrance runs from when it opened.
         private string openedWindow; private float windowOpenedAt;
 
-        private void ModalIn(VisualElement card)
+        private void ModalIn(VisualElement card, float duration = .28f)
         {
             float began = windowOpenedAt;
             windowMotions.Add(t =>
             {
-                float u = Mathf.Clamp01((t - began) / .28f), k = MenuView.CssBezier(.2f, 1.2f, .4f, 1, u);
+                float u = Mathf.Clamp01((t - began) / duration), k = MenuView.CssBezier(.2f, 1.2f, .4f, 1, u);
                 card.style.translate = new Translate(0, 18 * (1 - k)); card.style.scale = new Scale(Vector2.one * Mathf.LerpUnclamped(.95f, 1, k));
                 card.style.opacity = Mathf.Clamp01(k);
             });
@@ -218,7 +230,7 @@ namespace Galaxy101.Table
             switch (SettingsTab)
             {
                 case 0:
-                    ToggleRow(list, "autoSort"); ToggleRow(list, "highlight"); ToggleRow(list, "dbl");
+                    ToggleRow(list, "autoSort"); ToggleRow(list, "dbl");
                     string sec = Lang == "en" ? "s" : " sn";
                     SegmentRow(list, "warn", new[] { ("3" + sec, "3"), ("5" + sec, "5"), ("10" + sec, "10"), (L("Kapalı", "Off"), "0") }, Settings.WarnSeconds.ToString(), v => Settings.Set("warn", int.Parse(v)));
                     SegmentRow(list, "lang", new[] { ("Türkçe", "tr"), ("English", "en") }, Lang, v => Settings.Set("lang", v));
@@ -362,19 +374,23 @@ namespace Galaxy101.Table
         private void BuildLookTab(VisualElement list)
         {
             list.Add(LookCaption(SettingText("lkView"), "table.t.lkView"));
-            var views = CardGrid(3);
+            // G101-Masa isLookTab: grid-template-columns repeat(4, minmax(0, 1fr)) — the four views in one row; the 96 px art
+            // keeps its size (flex: none) and the words take what is left.
+            var views = CardGrid(4);
             for (int i = 0; i < TableSettings.Views.Length; i++)
             {
                 string key = TableSettings.Views[i]; bool on = Settings.View == key;
                 var card = Row(14); card.name = "table.v.pick[" + i + "]"; Pad(card, 12, 12, 12, 12); CardFace(card, on);
                 var art = Box(); art.style.width = 96; art.style.height = 62; art.style.flexShrink = 0; art.style.overflow = Overflow.Hidden; view.Decorate(art, "var(--sd)", 11);
-                if (key == "seat") SeatViewArt(art); else if (key == "mid") MidViewArt(art); else TopViewArt(art);
+                if (key == "seat") SeatViewArt(art); else if (key == "mid") MidViewArt(art); else if (key == "2d") FlatViewArt(art); else TopViewArt(art);
                 card.Add(art);
-                var words = Box(); words.style.flexShrink = 1; words.style.minWidth = 0;
-                string title = SettingText("views." + i + ".0");
-                // CSS wraps at spaces; UI Toolkit would also split an overflowing single word (Kuşbakışı).
-                words.Add(SettingsText(title, "Montserrat-700", 16, "#F4F1E8", "table.v.name[" + i + "]", 0, title.Contains(" ")));
-                words.Add(SettingsText(SettingText("views." + i + ".1"), "Baloo2-700", 12, "var(--mt)", "table.v.desc[" + i + "]", 16.2f, true));
+                // Four columns leave the words a sliver: CSS breaks at every space and a flex item never shrinks below its
+                // longest word (min-width: auto), so the column is one word per line and spills past the card's edge.
+                // UI Toolkit would break inside words instead, so the lines are explicit and the column does not shrink.
+                var words = Box(); words.style.flexShrink = 0;
+                string title = SettingText("views." + i + ".0"), desc = SettingText("views." + i + ".1");
+                words.Add(SettingsText(title.Replace(' ', '\n'), "Montserrat-700", 16, "#F4F1E8", "table.v.name[" + i + "]", 0, title.Contains(" ")));
+                words.Add(SettingsText(desc.Replace(' ', '\n'), "Baloo2-700", 12, "var(--mt)", "table.v.desc[" + i + "]", 16.2f, true));
                 card.Add(words);
                 Tap(card, () => Settings.Set("view", key)); AddCell(views, card);
             }
@@ -542,6 +558,14 @@ namespace Galaxy101.Table
             foreach (var (x, y, w, h) in new[] { (30, 54, 36, 6), (15, 15, 6, 28), (75, 15, 6, 28), (30, 0, 36, 4) })
             { var r = Box(); MenuView.Place(r, x, y, w, h); view.Decorate(r, "var(--rim)", 2); art.Add(r); }
             foreach (var x in new[] { 42, 49 }) { var t = Box(); MenuView.Place(t, x, 25, 5, 7); view.Decorate(t, "var(--tf1)", 1); art.Add(t); }
+        }
+
+        private void FlatViewArt(VisualElement art)
+        {
+            var felt = Box(); MenuView.Place(felt, 22, 3, 52, 34); view.Decorate(felt, "var(--f1)", 7); Border(felt, 1.5f, view.C("var(--a1)")); art.Add(felt);
+            var centre = Box(); MenuView.Place(centre, 40, 15, 16, 10); view.Decorate(centre, "var(--rim)", 2); centre.style.opacity = .6f; art.Add(centre);
+            var rack = Box(); MenuView.Place(rack, 12, 42, 72, 17); view.Decorate(rack, "var(--rim)", 3); art.Add(rack);
+            for (int i = 0; i < 7; i++) { var tile = Box(); MenuView.Place(tile, 15 + i * 10, 44, i == 6 ? 6 : 8, 13); view.Decorate(tile, "var(--tf1)", 2); art.Add(tile); }
         }
     }
 }

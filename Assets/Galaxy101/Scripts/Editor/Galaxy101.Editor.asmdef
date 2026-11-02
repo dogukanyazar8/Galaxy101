@@ -3,6 +3,7 @@
   "rootNamespace": "Galaxy101",
   "references": [
     "Galaxy101.Runtime",
+    "glTFast",
     "Unity.Localization",
     "Unity.Localization.Editor",
     "Unity.ResourceManager",

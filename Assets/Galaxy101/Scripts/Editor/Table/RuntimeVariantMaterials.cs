@@ -20,7 +20,10 @@ namespace Galaxy101.Table.EditorTools
         {
             ("lit_transparent", "Universal Render Pipeline/Lit", new[] { "_SURFACE_TYPE_TRANSPARENT" }),
             ("lit_transparent_emission", "Universal Render Pipeline/Lit", new[] { "_SURFACE_TYPE_TRANSPARENT", "_EMISSION" }),
+            ("lit_specular", "Universal Render Pipeline/Lit", new[] { "_SPECULAR_SETUP" }),
+            ("lit_specular_emission", "Universal Render Pipeline/Lit", new[] { "_SPECULAR_SETUP", "_EMISSION" }),
             ("lit_specular_normal", "Universal Render Pipeline/Lit", new[] { "_SPECULAR_SETUP", "_NORMALMAP" }),
+            ("lit_specular_normal_emission", "Universal Render Pipeline/Lit", new[] { "_SPECULAR_SETUP", "_NORMALMAP", "_EMISSION" }),
             ("unlit_transparent", "Universal Render Pipeline/Unlit", new[] { "_SURFACE_TYPE_TRANSPARENT" }),
             ("particles_unlit_transparent", "Universal Render Pipeline/Particles/Unlit", new[] { "_SURFACE_TYPE_TRANSPARENT" }),
         };

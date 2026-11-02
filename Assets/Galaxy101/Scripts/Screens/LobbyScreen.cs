@@ -55,7 +55,7 @@ namespace Galaxy101
         {
             if (layer != null) return;
             var canvas = view.Root.Q<VisualElement>("galaxy-canvas") ?? view.Root;
-            var main = canvas.Q<VisualElement>("main-layer"); if (main != null) main.style.display = DisplayStyle.None;
+            var main = canvas.Q<VisualElement>("main-layer"); if (main != null) main.style.visibility = Visibility.Hidden;
             layer = Fill("lobby"); layer.pickingMode = PickingMode.Position;
             var modal = canvas.Q<VisualElement>("modal-layer");
             if (modal?.parent != null) modal.parent.Insert(modal.parent.IndexOf(modal), layer); else canvas.Add(layer);
@@ -98,7 +98,7 @@ namespace Galaxy101
             backend.Unsubscribe();
             ticker?.Pause(); ticker = null; motions.Clear(); toastStep = null;
             var canvas = layer.parent; layer.RemoveFromHierarchy(); layer = null;
-            var main = canvas?.Q<VisualElement>("main-layer"); if (main != null) main.style.display = DisplayStyle.Flex;
+            var main = canvas?.Q<VisualElement>("main-layer"); if (main != null) main.style.visibility = Visibility.Visible;
         }
 
         private void Back() { Hide(); Closed?.Invoke(); }
@@ -405,6 +405,7 @@ namespace Galaxy101
             if (full) { yield return Badge(S("bHands", t.Hands), nb, nf, full); yield return Badge(S("bTurn", t.TurnSeconds), nb, nf, full); }
             if (t.OkeyPenalty) yield return Badge(S("bOkey"), "rgba(255,94,108,.14)", "#FFB3BA", full);
             if (t.Penalties) yield return Badge(S("bIsle"), "rgba(255,94,108,.14)", "#FFB3BA", full);
+            if (LobbyRulePresentation.OpeningTilePenalty(t)) yield return Badge(S("bOpen"), "rgba(255,94,108,.14)", "#FFB3BA", full);
             yield return t.Spectators ? Badge(S("bSpec"), nb, nf, full) : Badge(S("bNoSpec"), nb, "var(--mt)", full);
             if (t.Chat == "quick") yield return Badge(S("bQuick"), nb, nf, full);
             if (t.Chat == "off") yield return Badge(S("bChatOff"), nb, "var(--mt)", full);
@@ -621,8 +622,8 @@ namespace Galaxy101
 
         private VisualElement Coin(int size, bool dashed = true)
         {
-            var coin = Box(); Square(coin, size); view.Decorate(coin, "radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)", size / 2);
-            if (dashed && size >= 24) DashedBorder(coin, 2, view.C("#FFF3C8"));
+            // The main menu chip at every size (its dashed rim scales with it).
+            var coin = view.ChipIcon(size);
             return coin;
         }
 
@@ -912,12 +913,13 @@ namespace Galaxy101
         /// A wrapping paragraph: as many CSS lines as the text needs at its width, each <paramref name="lineHeight"/> em
         /// or the font's "normal" (<see cref="MenuView.CssLineHeight"/>).
         /// </summary>
-        private static void Paragraph(Label label, float lineHeight = 0)
+        private static void Paragraph(Label label, float lineHeight = 0, bool createPixelMetrics = false)
         {
             // A redraw lays the paragraph out at its last height at once: no frame at the single-line height first.
             string key = label.text + "|" + label.style.fontSize.value.value + "|" + lineHeight;
+            string CacheKey() => createPixelMetrics ? key + "|create|" + label.scaledPixelsPerPoint.ToString("R", System.Globalization.CultureInfo.InvariantCulture) : key;
             label.style.whiteSpace = WhiteSpace.Normal;
-            if (paragraphHeights.TryGetValue(key, out float known)) label.style.height = known; else label.style.height = StyleKeyword.Auto;
+            if (paragraphHeights.TryGetValue(CacheKey(), out float known)) label.style.height = known; else label.style.height = StyleKeyword.Auto;
             label.RegisterCallback<GeometryChangedEvent>(_ =>
             {
                 float width = label.layout.width; if (float.IsNaN(width) || width <= 0 || string.IsNullOrEmpty(label.text)) return;
@@ -925,9 +927,9 @@ namespace Galaxy101
                 float one = label.MeasureTextSize("Ag", 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).y;
                 float all = label.MeasureTextSize(label.text, width - label.resolvedStyle.paddingLeft - label.resolvedStyle.paddingRight, VisualElement.MeasureMode.Exactly, 0, VisualElement.MeasureMode.Undefined).y;
                 if (one <= 0) return;
-                float line = lineHeight > 0 ? size * lineHeight : MenuView.CssLineHeight(font != null ? font.name : null, size);
+                float line = lineHeight > 0 ? size * lineHeight : createPixelMetrics ? CreateNormalLineHeight(font != null ? font.name : null, size, label.scaledPixelsPerPoint) : MenuView.CssLineHeight(font != null ? font.name : null, size);
                 float target = Mathf.Max(1, Mathf.Round(all / one)) * line + label.resolvedStyle.paddingTop + label.resolvedStyle.paddingBottom;
-                paragraphHeights[key] = target;
+                paragraphHeights[CacheKey()] = target;
                 var h = label.style.height;
                 if (h.keyword != StyleKeyword.Undefined || Mathf.Abs(h.value.value - target) > .01f) label.style.height = target;
             });

@@ -21,6 +21,7 @@ namespace Galaxy101.Table
         /// <summary>Per frame on the main thread (the offline runtime's timers run here).</summary>
         void Tick();
         Task<string> RollDice();
+        Task<string> SkipDeal();
         Task<string> Draw(string src);
         Task<string> ReturnSide();
         Task<string> Open(List<MeldSpec> melds);
@@ -91,6 +92,7 @@ namespace Galaxy101.Table
         private static Task<string> Done(string error) => Task.FromResult(error);
 
         public Task<string> RollDice() => Done(Host.RollDice());
+        public Task<string> SkipDeal() => Done(Host.SkipDeal());
         public Task<string> Draw(string src) => Done(Host.Move(GameAction.Draw(Host.Seat, src)));
         public Task<string> ReturnSide() => Done(Host.Move(GameAction.ReturnSide(Host.Seat)));
         public Task<string> Open(List<MeldSpec> melds) => Done(Host.Move(GameAction.Open(Host.Seat, melds)));

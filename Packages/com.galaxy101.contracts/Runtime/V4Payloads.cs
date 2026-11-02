@@ -499,6 +499,25 @@ namespace Galaxy101.Contracts
         public long At { get; set; }
     }
 
+    /// <summary>Authoritative shortcut to fill: the already-determined dice and public indicator, never another seat's rack.</summary>
+    public sealed class V4DealSkip
+    {
+        public List<int> Dice { get; set; } = new List<int>();
+        public int Stack { get; set; }
+        public int Level { get; set; }
+        public bool FakeSkip { get; set; }
+        public string Indicator { get; set; }
+        public V4OkeyFace Okey { get; set; }
+        public int ExtraStack { get; set; }
+        public long At { get; set; }
+    }
+
+    public sealed class V4DealSkipVote
+    {
+        public int Seat { get; set; }
+        public long At { get; set; }
+    }
+
     public sealed class V4HandDealt
     {
         public int HandNo { get; set; }

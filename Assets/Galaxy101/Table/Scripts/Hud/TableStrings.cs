@@ -35,6 +35,9 @@ namespace Galaxy101.Table
                 foreach (var row in Rows(asset.text))
                     if (row.Count >= 3 && row[0] != "key") table[row[0]] = (row[1], row[2]);
             }
+            // G101-Masa.dc.html STR.tr/en: the composed action panel's tooltip is absent from the handoff CSVs.
+            table["isleTip"] = ("Istakadaki perleri yere aç ve masadaki perlere uyan taşları işle",
+                "Lay the sets on your rack and add matching tiles to the sets on the table");
             // The v4 package's flat CSV has a distinct Resources key from strings_v4.json (the lobby's JSON).
             // ("app.STR.ldMsg.0", "table.STR.quick.0", …); the table's own tables above keep their keys.
             var v4 = Resources.Load<TextAsset>("Galaxy101/Strings/strings_v4_flat");

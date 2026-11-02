@@ -12,7 +12,8 @@
         "Okey101.Bots",
         "Galaxy101.Contracts",
         "Galaxy101.Table.Runtime",
-        "Galaxy101.Table.Client"
+        "Galaxy101.Table.Client",
+        "Galaxy101.Ships"
     ],
     "autoReferenced": true
 }

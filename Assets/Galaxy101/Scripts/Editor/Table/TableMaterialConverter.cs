@@ -80,9 +80,10 @@ namespace Galaxy101.Table.EditorTools
                     m.SetTexture("_MetallicGlossMap", Repack(mr, metallic, roughness, folder + "/" + source.name + "_MetallicGloss.png"));
                     m.SetFloat("_Smoothness", 1); m.SetFloat("_Metallic", 1); m.EnableKeyword("_METALLICSPECGLOSSMAP");
                 }
-                else { m.SetFloat("_Metallic", metallic); m.SetFloat("_Smoothness", 1 - roughness); }
+                else { m.SetTexture("_MetallicGlossMap", null); m.SetFloat("_Metallic", metallic); m.SetFloat("_Smoothness", 1 - roughness); }
                 var normal = Tex(source, "normalTexture");
                 if (normal != null) { m.SetTexture("_BumpMap", ExtractNormal(normal, folder + "/" + source.name + "_Normal.png")); m.SetFloat("_BumpScale", Float(source, "normalTexture_scale", 1)); m.EnableKeyword("_NORMALMAP"); }
+                else m.SetTexture("_BumpMap", null);
                 var emissive = Get(source, "emissiveFactor", Color.black);
                 // Some glTFast shader variants (clearcoat liquids: tea, cola, syrup) drop emissiveFactor; read it from the GLB.
                 if (emissive.maxColorComponent <= 0 && GlbEmissive(source) is Color fromGlb) emissive = fromGlb;

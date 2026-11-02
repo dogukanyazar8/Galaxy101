@@ -33,6 +33,12 @@ namespace Galaxy101.Table
         private float deckFrom, deckTo, deckT0, deckDuration;
         private Pose? spawnHint;
         private readonly Dictionary<int, float> forcedDurations = new Dictionary<int, float>();
+        /// <summary>
+        /// G101-Masa pushDisc: a pile shows its last <see cref="PileShown"/> tiles; an older one is gone for good (it never
+        /// comes back when the top is taken), so the 3D pile never stacks tiles at one height.
+        /// </summary>
+        public const int PileShown = 4;
+        private readonly HashSet<int> buried = new HashSet<int>();
 
         /// <summary>Real okeys (set by the game once the indicator is known): they carry the gold okey mark.</summary>
         public System.Func<int, bool> IsOkey = _ => false;
@@ -88,7 +94,7 @@ namespace Galaxy101.Table
         {
             foreach (var v in known.Values) Kill(v); known.Clear();
             foreach (var h in hidden) { foreach (var v in h) Kill(v); h.Clear(); }
-            meldOf.Clear(); spawnHint = null; Layout.Reset(); indicatorId = -1;
+            meldOf.Clear(); buried.Clear(); spawnHint = null; Layout.Reset(); indicatorId = -1;
         }
 
         // ---------- deck ----------
@@ -118,12 +124,13 @@ namespace Galaxy101.Table
                 int shown = deckShown; deckShown = -1; LayoutDeck(shown);
                 if (indicatorId >= 0 && known.TryGetValue(indicatorId, out var ind) && ind != null && !ind.Tweening) ind.Snap(scene.IndicatorPose());
             }
-            if (deckDuration <= 0) return;
+            if (deckDuration <= 0) { scene.UpdatePairZone(Layout.HasPairs, Time.deltaTime); return; }
             float u = Mathf.Clamp01((Time.time - deckT0) / deckDuration);
             if (u >= 1) deckDuration = 0;
             // The deal over, the stock settles into its piles (and the indicator onto the six-tile pile).
             LayoutDeck(Mathf.RoundToInt(Mathf.Lerp(deckFrom, deckTo, u)));
             if (deckDuration <= 0 && indicatorId >= 0 && known.TryGetValue(indicatorId, out var settled) && settled != null && !settled.Tweening) settled.Snap(scene.IndicatorPose());
+            scene.UpdatePairZone(Layout.HasPairs, Time.deltaTime);
         }
 
         // ---------- deal (spec/10 §2) ----------
@@ -188,17 +195,30 @@ namespace Galaxy101.Table
         {
             var desired = new Dictionary<int, (Pose Pose, int Seat, bool Rack, int Meld)>();
             foreach (var id in state.Rack.Tiles) desired[id] = (RackPose(state.Rack, id), 0, true, -1);
+            var inPiles = new HashSet<int>();
             for (int k = 0; k < 4; k++)
-                for (int j = 0; j < state.Discards[k].Count; j++)
-                {
-                    int id = state.Discards[k][j];
-                    desired[id] = (scene.DiscardPose(k, j, id.ToString()), k, false, -1);
-                }
-            Layout.Retain(state.Melds.Select(m => m.Id));
+            {
+                var pile = state.Discards[k];
+                int shown = 0;
+                for (int j = 0; j < pile.Count; j++) { inPiles.Add(pile[j]); if (!buried.Contains(pile[j])) shown++; }
+                for (int j = 0; j < pile.Count && shown > PileShown; j++)
+                    if (buried.Add(pile[j])) { shown--; if (known.TryGetValue(pile[j], out var gone)) { known.Remove(pile[j]); Kill(gone); } }
+                int level = 0;
+                foreach (int id in pile)
+                    if (!buried.Contains(id)) desired[id] = (scene.DiscardPose(k, level++, id.ToString()), k, false, -1);
+            }
+            buried.RemoveWhere(id => !inPiles.Contains(id));
+            var layoutMelds = new BoardLayout.Meld[state.Melds.Count];
+            for (int i = 0; i < state.Melds.Count; i++)
+            {
+                var meld = state.Melds[i]; var kind = Classify(meld.Tiles);
+                layoutMelds[i] = new BoardLayout.Meld(meld.Id, meld.Owner, kind.Run, kind.Start, meld.Tiles.Length, meld.Tiles);
+            }
+            Layout.Reconcile(layoutMelds);
             foreach (var meld in state.Melds)
             {
-                var (run, start) = Classify(meld.Tiles);
-                var (row, column) = Layout.Place(meld.Id, meld.Owner, run, start, meld.Tiles.Length);
+                Layout.TryGet(meld.Id, out var at);
+                int row = at.Row, column = at.Column;
                 for (int t = 0; t < meld.Tiles.Length; t++) desired[meld.Tiles[t]] = (scene.BoardPose(Mathf.Min(column + t, BoardLayout.Columns - 1), row), meld.Owner, false, meld.Id);
             }
             indicatorId = state.Indicator;
@@ -212,11 +232,12 @@ namespace Galaxy101.Table
             var deckTop = spawnHint ?? scene.DeckTop(Mathf.Max(lastStock, state.Stock));
             foreach (var pair in desired)
             {
+                bool fromRack = false;
                 if (!known.TryGetValue(pair.Key, out var view))
                 {
                     int seat = pair.Value.Seat;
                     // A newly visible tile from an opponent: it leaves their hidden rack (discard, meld).
-                    if (seat > 0 && hidden[seat].Count > state.HandCounts[seat]) { view = hidden[seat][hidden[seat].Count - 1]; hidden[seat].RemoveAt(hidden[seat].Count - 1); }
+                    if (seat > 0 && hidden[seat].Count > state.HandCounts[seat]) { view = hidden[seat][hidden[seat].Count - 1]; hidden[seat].RemoveAt(hidden[seat].Count - 1); fromRack = true; }
                     else view = Spawn(null, deckTop);
                     view.Id = pair.Key; view.Seat = -1; view.Code = TileCodes.Code(pair.Key); scene.Tiles.SetFace(view.gameObject, view.Code);
                     known[pair.Key] = view;
@@ -224,12 +245,15 @@ namespace Galaxy101.Table
                 if (pair.Value.Meld >= 0) meldOf[view] = pair.Value.Meld;
                 scene.Tiles.SetOkeyMark(view.gameObject, IsOkey(pair.Key));
                 scene.Tiles.SetLying(view.gameObject, !pair.Value.Rack);
-                bool slide = pair.Value.Rack && view.HasTarget && IsOnMyRack(view);
+                fromRack |= view.HasTarget && IsOnMyRack(view);
+                bool slide = pair.Value.Rack && fromRack;
+                // table3d.js sync: rack → meld is 'lay' (no arc, no landing effect), as an opponent's opening is.
+                bool lay = !pair.Value.Rack && pair.Value.Meld >= 0 && fromRack;
                 float forced = forcedDurations.TryGetValue(pair.Key, out var d) ? d : 0;
                 // Landing effects (spec/12 §1): pile → gold ring, meld → green ring, my rack from outside → "new" bar.
-                string fx = slide ? null : pair.Value.Rack ? "mine" : pair.Value.Meld >= 0 ? "meld" : pair.Key == state.Indicator ? null : "disc";
+                string fx = slide || lay ? null : pair.Value.Rack ? "mine" : pair.Value.Meld >= 0 ? "meld" : pair.Key == state.Indicator ? null : "disc";
                 if (pair.Value.Rack && view.Bar == null) view.Bar = scene.Tiles.Bar(view.gameObject);
-                if (instant) view.Snap(pair.Value.Pose); else view.MoveTo(pair.Value.Pose, slide ? TileView.Motion.Slide : TileView.Motion.Travel, 0, forced, fx);
+                if (instant) view.Snap(pair.Value.Pose); else view.MoveTo(pair.Value.Pose, slide ? TileView.Motion.Slide : lay ? TileView.Motion.Lay : TileView.Motion.Travel, 0, forced, fx);
                 view.name = pair.Value.Rack ? "tas_" + view.Code + "_rack" : "tas_" + view.Code;
             }
 
@@ -244,7 +268,8 @@ namespace Galaxy101.Table
                     view.Id = -1; view.Code = null; scene.Tiles.SetFace(view.gameObject, null); scene.Tiles.SetOkeyMark(view.gameObject, false);
                     view.Seat = k; view.OpponentSlot = FreeOpponentSlot(k); hidden[k].Add(view);
                     var pose = scene.SlotPose(k, view.OpponentSlot.Row, view.OpponentSlot.Index);
-                    if (instant) view.Snap(pose); else view.MoveTo(pose, TileView.Motion.Travel);
+                    // An opponent's rack from the deck or a pile: 'travel' (gold trail, two small hops, pop).
+                    if (instant) view.Snap(pose); else view.MoveTo(pose, TileView.Motion.Travel, 0, 0, "travel");
                 }
             }
             foreach (var v in leftovers) Kill(v);
@@ -259,7 +284,6 @@ namespace Galaxy101.Table
             return Mathf.Abs(local.x) < 0.5f && local.y > -0.06f && local.y < 0.25f && Mathf.Abs(local.z) < 0.08f;
         }
 
-        /// <summary>Green bars under my rack tiles that form valid sets ("Geçerli perleri vurgula").</summary>
         /// <summary>Tile style change: every tile object (rack, table, opponents, deck) takes the scene's new factory look.</summary>
         public void Restyle()
         {
@@ -276,11 +300,6 @@ namespace Galaxy101.Table
                 scene.Tiles.SetTag(pair.Value.gameObject, tagOf(pair.Key));
                 pair.Value.RefreshVisibility();
             }
-        }
-
-        public void SetValid(ICollection<int> valid)
-        {
-            foreach (var pair in known) pair.Value.Valid = valid != null && valid.Contains(pair.Key);
         }
 
         // ---------- rack preview (drag) ----------
@@ -303,75 +322,204 @@ namespace Galaxy101.Table
 namespace Galaxy101.Table
 {
     /// <summary>
-    /// The shared centre board (spec/23, layoutBoard): 8 rows × 20 columns. Each player gets two rows in the order they
-    /// opened. Runs sit on their numbers (n → column n−1) and keep one free column at each end for laying off; sets and
-    /// pairs take 4 / 2 columns from column 14 on. Melds never overlap and keep their place; a meld that grows into a
-    /// neighbour moves alone — to its owner's other row, an empty row, then any row.
+    /// HTML layoutBoard: retained physical-tile anchors are reconciled before new melds. Runs and groups prefer
+    /// columns 0–13, pairs 15–19; column 14 divides the zones. New runs reserve their extendable ends and groups
+    /// reserve four cells. Existing anchors only require the actual tiles and their one-cell gap to fit.
     /// </summary>
     public sealed class BoardLayout
     {
         public const int Rows = 8, Columns = 20;
+        public readonly struct Meld
+        {
+            public readonly int Id, Owner, Start, Length;
+            public readonly bool Run;
+            public readonly int[] Tiles;
+            public Meld(int id, int owner, bool run, int start, int length, int[] tiles = null)
+            { Id = id; Owner = owner; Start = start; Length = Mathf.Clamp(length, 1, Columns); Run = run && Length != 2; Tiles = tiles; }
+        }
+
+        /// <summary>Source cloneAnch(): one independent snapshot, retaining aliases between every tile of a meld.</summary>
+        public sealed class Snapshot
+        {
+            private readonly BoardLayout state = new BoardLayout();
+            internal Snapshot(BoardLayout source) { state.CopyFrom(source); }
+            internal void ApplyTo(BoardLayout target) => target.CopyFrom(state);
+        }
+
+        private sealed class Anchor { public int Sequence, Row = -1, X0, Kind; public int? Base; }
+        private static int KindOf(Meld meld) => meld.Run ? 0 : meld.Length == 2 ? 2 : 1;
+        private sealed class Item
+        {
+            public Meld Meld; public Anchor Anchor; public int Column;
+            public bool Pair => Meld.Length == 2;
+            public int Width => Meld.Run ? Meld.Length : Pair ? 2 : Mathf.Max(4, Meld.Length);
+        }
+        private readonly struct Interval
+        {
+            public readonly int Start, End, ReserveStart, ReserveEnd;
+            public Interval(int start, int end, int reserveStart, int reserveEnd)
+            { Start = start; End = end; ReserveStart = reserveStart; ReserveEnd = reserveEnd; }
+        }
+
         private readonly List<int> order = new List<int>();
         private readonly Dictionary<int, (int Owner, int Row, int Column, int Length)> placed = new Dictionary<int, (int, int, int, int)>();
+        private readonly Dictionary<int, Anchor> byTile = new Dictionary<int, Anchor>();
+        private readonly Dictionary<int, Anchor> byMeld = new Dictionary<int, Anchor>();
+        private readonly List<Meld> active = new List<Meld>();
+        private int sequence;
 
         public int Count => placed.Count;
         public IReadOnlyList<int> OpeningOrder => order;
+        public bool HasPairs { get { foreach (var meld in active) if (meld.Length == 2) return true; return false; } }
         public bool TryGet(int meld, out (int Owner, int Row, int Column, int Length) at) => placed.TryGetValue(meld, out at);
 
-        public void Reset() { order.Clear(); placed.Clear(); }
+        public void Reset() { ResetAnchors(); active.Clear(); }
+        private void ResetAnchors() { order.Clear(); placed.Clear(); byTile.Clear(); byMeld.Clear(); sequence = 0; }
+
+        public Snapshot Capture() => new Snapshot(this);
+        public void Restore(Snapshot snapshot)
+        {
+            if (snapshot == null) throw new System.ArgumentNullException(nameof(snapshot));
+            snapshot.ApplyTo(this);
+        }
+
+        private void CopyFrom(BoardLayout source)
+        {
+            Reset(); order.AddRange(source.order); sequence = source.sequence;
+            var copies = new Dictionary<Anchor, Anchor>();
+            Anchor Copy(Anchor anchor)
+            {
+                if (!copies.TryGetValue(anchor, out var clone))
+                {
+                    clone = new Anchor { Sequence = anchor.Sequence, Row = anchor.Row, X0 = anchor.X0, Kind = anchor.Kind, Base = anchor.Base };
+                    copies.Add(anchor, clone);
+                }
+                return clone;
+            }
+            foreach (var pair in source.byTile) byTile.Add(pair.Key, Copy(pair.Value));
+            foreach (var pair in source.byMeld) byMeld.Add(pair.Key, Copy(pair.Value));
+            foreach (var pair in source.placed) placed.Add(pair.Key, pair.Value);
+            foreach (var meld in source.active)
+                active.Add(new Meld(meld.Id, meld.Owner, meld.Run, meld.Start, meld.Length, meld.Tiles == null ? null : (int[])meld.Tiles.Clone()));
+        }
 
         /// <summary>Forget melds no longer on the table (undo, new hand).</summary>
         public void Retain(IEnumerable<int> melds)
         {
             var keep = new HashSet<int>(melds);
-            foreach (var id in placed.Keys.Where(k => !keep.Contains(k)).ToList()) placed.Remove(id);
-            if (placed.Count == 0) order.Clear();
+            Reconcile(active.Where(m => keep.Contains(m.Id)).ToArray());
         }
 
         public (int Row, int Column) Place(int meld, int owner, bool run, int start, int length)
         {
-            if (!order.Contains(owner)) order.Add(owner);
-            length = Mathf.Clamp(length, 1, Columns);
-            int wanted = run ? Mathf.Clamp(start - 1, 0, Columns - length) : -1;
-            if (placed.TryGetValue(meld, out var at))
+            var next = active.ToList();
+            int index = next.FindIndex(m => m.Id == meld);
+            var value = new Meld(meld, owner, run, start, length);
+            if (index < 0) next.Add(value); else next[index] = value;
+            Reconcile(next);
+            var at = placed[meld]; return (at.Row, at.Column);
+        }
+
+        /// <summary>One complete state, sorted by source owner/group order, with old anchors kept in a separate first pass.</summary>
+        public void Reconcile(IReadOnlyList<Meld> melds)
+        {
+            var next = melds.OrderBy(m => m.Owner).ToArray();
+            // Source sync discards the anchor board if no current physical tile belongs to it (new hand / full undo).
+            bool retained = next.Any(m => m.Tiles != null ? m.Tiles.Any(byTile.ContainsKey) : byMeld.ContainsKey(m.Id));
+            if (!retained) ResetAnchors();
+            active.Clear(); active.AddRange(next);
+            foreach (var meld in next) if (!order.Contains(meld.Owner)) order.Add(meld.Owner);
+            // A single tile that left its meld (an okey taken from a run or group, then laid in a new pair) must not drag
+            // the new meld onto its old meld's place: an anchor goes to the meld holding most of its tiles, and only to a
+            // meld of the same kind (run / group / pair keep their own zones).
+            var claims = new Anchor[next.Length];
+            var hits = new int[next.Length];
+            for (int i = 0; i < next.Length; i++)
             {
-                // Same place if it still fits (a run growing to the left moves its first column).
-                int column = run ? wanted : at.Column;
-                if (column + length > Columns) column = Columns - length;
-                if (Free(at.Row, column, length, meld)) { placed[meld] = (owner, at.Row, column, length); return (at.Row, column); }
+                var meld = next[i];
+                if (meld.Tiles == null) { if (byMeld.TryGetValue(meld.Id, out var own) && own.Kind == KindOf(meld)) { claims[i] = own; hits[i] = int.MaxValue; } continue; }
+                foreach (int tile in meld.Tiles)
+                {
+                    if (!byTile.TryGetValue(tile, out var anchor) || anchor.Kind != KindOf(meld)) continue;
+                    int count = meld.Tiles.Count(t => byTile.TryGetValue(t, out var a) && a == anchor);
+                    if (count > hits[i]) { hits[i] = count; claims[i] = anchor; }
+                }
             }
+            var items = new List<Item>(next.Length);
+            var owner = new Dictionary<Anchor, int>();
+            for (int i = 0; i < next.Length; i++)
+            {
+                if (claims[i] == null) continue;
+                if (!owner.TryGetValue(claims[i], out int other) || hits[i] > hits[other]) owner[claims[i]] = i;
+            }
+            var currentTiles = new HashSet<int>();
+            for (int i = 0; i < next.Length; i++)
+            {
+                var meld = next[i];
+                var anchor = claims[i] != null && owner[claims[i]] == i ? claims[i] : new Anchor { Sequence = ++sequence, Kind = KindOf(meld) };
+                if (meld.Tiles != null) foreach (int tile in meld.Tiles) { byTile[tile] = anchor; currentTiles.Add(tile); }
+                byMeld[meld.Id] = anchor;
+                items.Add(new Item { Meld = meld, Anchor = anchor });
+            }
+            foreach (int tile in byTile.Keys.Where(t => !currentTiles.Contains(t)).ToArray()) byTile.Remove(tile);
+            items.Sort((a, b) => a.Anchor.Sequence.CompareTo(b.Anchor.Sequence));
+            var occupied = new List<Interval>[Rows];
+            for (int row = 0; row < Rows; row++) occupied[row] = new List<Interval>();
+            var later = new List<Item>();
+            foreach (var item in items)
+                if (item.Anchor.Row < 0 || item.Meld.Run && !item.Anchor.Base.HasValue || !Put(item, item.Anchor.Row, item.Anchor.X0, true, 0, 19, occupied)) later.Add(item);
+            foreach (var item in later)
+            {
+                if (item.Meld.Run) item.Anchor.Base = item.Meld.Start;
+                var preferences = item.Meld.Run ? new[] { Mathf.Max(0, item.Meld.Start - 1) } : item.Pair ? new[] { 15, 18 } : new[] { 9, 10, 8, 5, 0 };
+                var columns = preferences.Concat(Enumerable.Range(0, Columns).Where(x => !preferences.Contains(x))).ToArray();
+                var rows = RowsFor(item.Meld.Owner);
+                bool found = false;
+                for (int zone = 0; zone < 2 && !found; zone++)
+                {
+                    bool pairZone = item.Pair ? zone == 0 : zone == 1;
+                    foreach (int row in rows)
+                    {
+                        foreach (int column in columns)
+                            if (Put(item, row, column, false, pairZone ? 15 : 0, pairZone ? 19 : 13, occupied)) { found = true; break; }
+                        if (found) break;
+                    }
+                }
+                if (found) continue;
+                // Same source full-board fallback: preserve every tile even when no valid interval remains.
+                item.Anchor.Row = rows[0]; item.Anchor.X0 = item.Column = Mathf.Max(0, Columns - item.Width);
+                occupied[rows[0]].Add(new Interval(item.Column, item.Column + item.Width - 1, item.Column, item.Column + item.Width - 1));
+                Debug.LogWarning("[G101] tahtada yer kalmadı");
+            }
+            placed.Clear();
+            foreach (var item in items) placed[item.Meld.Id] = (item.Meld.Owner, item.Anchor.Row, item.Column, item.Meld.Length);
+        }
+
+        private List<int> RowsFor(int owner)
+        {
             int k = order.IndexOf(owner);
             var rows = new List<int>();
             if (k < 4) { rows.Add(k * 2); rows.Add(k * 2 + 1); }
-            for (int r = 0; r < Rows; r++) if (!rows.Contains(r) && !placed.Values.Any(p => p.Row == r)) rows.Add(r);
+            for (int r = 0; r < Rows; r++) if (!rows.Contains(r) && r / 2 >= order.Count) rows.Add(r);
             for (int r = 0; r < Rows; r++) if (!rows.Contains(r)) rows.Add(r);
-            // Column first, then row: runs keep their numbers, sets keep to column 14+, both in the owner's rows first.
-            foreach (int column in Candidates(run, wanted, length))
-                foreach (int r in rows)
-                    if (Free(r, column, length, meld)) { placed[meld] = (owner, r, column, length); return (r, column); }
-            // Board full: overlap in the owner's first row rather than lose the meld.
-            int fallback = rows[0]; int c = Mathf.Max(0, wanted);
-            placed[meld] = (owner, fallback, c, length); return (fallback, c);
+            return rows;
         }
 
-        private static IEnumerable<int> Candidates(bool run, int wanted, int length)
+        private static bool Put(Item item, int row, int x0, bool keep, int zoneStart, int zoneEnd, List<Interval>[] occupied)
         {
-            if (run) { yield return wanted; for (int d = 1; d < Columns; d++) { if (wanted + d + length <= Columns) yield return wanted + d; if (wanted - d >= 0) yield return wanted - d; } yield break; }
-            for (int c = 14; c + length <= Columns; c++) yield return c;
-            for (int c = 0; c + length <= Columns && c < 14; c++) yield return c;
-        }
-
-        /// <summary>Free when no other meld in the row is within one column (the laying-off margin).</summary>
-        private bool Free(int row, int column, int length, int self)
-        {
-            if (column < 0 || column + length > Columns) return false;
-            foreach (var pair in placed)
+            int column = item.Meld.Run ? x0 + item.Meld.Start - item.Anchor.Base.Value : x0;
+            int end = column + item.Width - 1;
+            var interval = new Interval(column, column + item.Meld.Length - 1,
+                item.Meld.Run && item.Meld.Start > 1 ? column - 1 : column,
+                item.Meld.Run && item.Meld.Start + item.Meld.Length - 1 < 13 ? end + 1 : end);
+            if (interval.Start < zoneStart || interval.End > zoneEnd || !keep && (interval.ReserveStart < zoneStart || interval.ReserveEnd > zoneEnd)) return false;
+            foreach (var other in occupied[row])
             {
-                if (pair.Key == self || pair.Value.Row != row) continue;
-                int a0 = column - 1, a1 = column + length, b0 = pair.Value.Column, b1 = pair.Value.Column + pair.Value.Length - 1;
-                if (a0 <= b1 && b0 <= a1) return false;
+                bool free = keep ? interval.End < other.Start - 1 || interval.Start > other.End + 1
+                    : interval.ReserveEnd < other.ReserveStart - 1 || interval.ReserveStart > other.ReserveEnd + 1;
+                if (!free) return false;
             }
-            return true;
+            occupied[row].Add(interval); item.Anchor.Row = row; item.Anchor.X0 = x0; item.Column = column; return true;
         }
     }
 }

@@ -396,13 +396,15 @@ namespace Okey101.Core.V4
         }
 
         // R-41 işlek: a tile that can be added to any meld on the table or can take the place of an okey.
-        private static List<string> AddSides(HandState h, TableMeld meld, string tile)
+        private static List<string> AddSides(HandState h, TableMeld meld, string tile) => AddSides(h.Okey, meld.Kind, meld.Tiles, tile);
+        /// <summary>R-25 on a meld's tiles alone (no table state): the ends where <paramref name="tile"/> may be laid.</summary>
+        public static List<string> AddSides(ColorNum okey, string kind, List<string> tiles, string tile)
         {
             var o = new List<string>();
-            if (meld.Kind == KindPair) return o;
-            if (meld.Kind == KindGroup) { if (GroupKeepsOkeys(h.Okey, meld.Tiles, Concat(meld.Tiles, tile))) o.Add("post"); return o; }
-            if (AnalyzeMeld(h.Okey, KindRun, Prepend(tile, meld.Tiles)).Ok) o.Add("pre");
-            if (AnalyzeMeld(h.Okey, KindRun, Concat(meld.Tiles, tile)).Ok) o.Add("post");
+            if (kind == KindPair) return o;
+            if (kind == KindGroup) { if (GroupKeepsOkeys(okey, tiles, Concat(tiles, tile))) o.Add("post"); return o; }
+            if (AnalyzeMeld(okey, KindRun, Prepend(tile, tiles)).Ok) o.Add("pre");
+            if (AnalyzeMeld(okey, KindRun, Concat(tiles, tile)).Ok) o.Add("post");
             return o;
         }
         private static bool SwapFits(HandState h, TableMeld meld, int index, string tile)

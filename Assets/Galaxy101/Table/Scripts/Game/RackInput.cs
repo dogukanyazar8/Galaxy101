@@ -46,10 +46,25 @@ namespace Galaxy101.Table
             if (hud == null) hud = FindAnyObjectByType<TableHud>();
         }
 
+        private void OnDisable() { Galaxy101.Audio.GalaxyCursor.Release(); Galaxy101.Audio.GalaxyCursor.World = null; }
+
         private void Update()
         {
             if (game == null) Awake();
             var pointer = Pointer.current;
+            if (hud != null && hud.IsTwoDimensional)
+            {
+                if (drag != null)
+                {
+                    if (drag.Ghost != null) Destroy(drag.Ghost);
+                    if (drag.Members != null) foreach (var member in drag.Members) if (member.View != null) member.View.Release();
+                    if (drag.View != null) drag.View.Release();
+                    drag = null; if (game != null) { game.Board?.ClearPreview(game.Rack); game.SetDragTile(-1); }
+                }
+                if (selected >= 0 || hover != null)
+                    foreach (int id in game.Rack.Tiles) { var tile = game.Board?.ViewOf(id); if (tile != null) tile.LiftWant = 0; }
+                selected = -1; hover = null; return;
+            }
             if (pointer == null || game == null || game.Board == null || table.CameraRig == null) return;
             Vector2 screen = pointer.position.ReadValue();
             bool down = pointer.press.wasPressedThisFrame, up = pointer.press.wasReleasedThisFrame;
@@ -115,7 +130,38 @@ namespace Galaxy101.Table
             return pile.Count > 0 ? game.Board.ViewOf(TileIds.ToInt(pile[pile.Count - 1])) : null;
         }
 
-        private bool InZone(Ray ray) => table.TableHit(ray, out var p) && Vector3.Distance(p, table.DiscardCenter(0)) < 0.1f;
+        // table3d.js inZoneTight / inZone / zoneDrop / returnNear: the felt within 14 cm of my discard ring, or the pointer
+        // within 100 canvas px of it on screen; a drop counts unless it lands on a rack slot. The left ring (geri bırak)
+        // catches within 22 cm or 160 px.
+        private bool InZoneTight(Ray ray) => table.TableHit(ray, out var p) && Vector3.Distance(p, table.DiscardCenter(0)) < 0.14f;
+        private bool InZone(Ray ray) => InZoneTight(ray) || ScreenNear(ray, table.DiscardCenter(0), 100);
+        private bool ZoneDrop(Ray ray) => InZoneTight(ray) || !SlotUnder(ray).HasValue && InZone(ray);
+        private bool ReturnNear(Ray ray) => !SlotUnder(ray).HasValue && (table.TableHit(ray, out var p) && Vector3.Distance(p, table.DiscardCenter(3)) < 0.22f || ScreenNear(ray, table.DiscardCenter(3), 160));
+        /// <summary>The pointer within <paramref name="px"/> canvas pixels (1280 × 720) of a world point on screen.</summary>
+        private bool ScreenNear(Ray ray, Vector3 world, float px)
+        {
+            var camera = table.CameraRig.Camera; var target = camera.WorldToViewportPoint(world); var pointer = camera.WorldToViewportPoint(ray.origin + ray.direction);
+            if (target.z <= 0) return false;
+            return new Vector2((target.x - pointer.x) * TableHud.Width, (target.y - pointer.y) * TableHud.Height).sqrMagnitude < px * px;
+        }
+
+        /// <summary>
+        /// table3d.js nearTarget(id, px): the lay-off / okey target of the focused tile closest to the pointer on screen, within
+        /// <paramref name="px"/> canvas pixels (80 while dragging, 60 for a click with a tile selected); none on a rack slot.
+        /// </summary>
+        private int NearestTarget(Ray ray, float px)
+        {
+            if (!game.CanDiscard || SlotUnder(ray).HasValue) return -1;
+            var camera = table.CameraRig.Camera; var pointer = camera.WorldToViewportPoint(ray.origin + ray.direction);
+            int best = -1; float bestSq = px * px; var targets = game.Targets;
+            for (int i = 0; i < targets.Count; i++)
+            {
+                var at = camera.WorldToViewportPoint(targets[i].Pose.position); if (at.z <= 0) continue;
+                float d = new Vector2((at.x - pointer.x) * TableHud.Width, (at.y - pointer.y) * TableHud.Height).sqrMagnitude;
+                if (d < bestSq) { bestSq = d; best = i; }
+            }
+            return best;
+        }
 
         private static RackSlot? SlotAt(Vector3 l)
         {
@@ -143,7 +189,7 @@ namespace Galaxy101.Table
             {
                 if (selected >= 0 && game.CanDiscard && InZone(ray)) { int id = selected; selected = -1; game.Discard(id); return; }
                 // A click on a lay-off / okey marker plays the selected tile there.
-                if (selected >= 0 && game.Markers != null && table.TableHit(ray, out var felt)) { int t = game.Markers.Nearest(felt, 0.045f); if (t >= 0) { var marker = game.Targets[t]; int id = selected; selected = -1; game.SetSelected(-1); game.UseTarget(id, marker); } } // read before deselecting empties the targets
+                if (selected >= 0 && game.Markers != null) { int t = NearestTarget(ray, 60); if (t >= 0) { var marker = game.Targets[t]; int id = selected; selected = -1; game.SetSelected(-1); game.UseTarget(id, marker); } } // read before deselecting empties the targets
                 return;
             }
             drag = new Drag { Kind = hit.Value.Kind, View = hit.Value.View, Start = screen };
@@ -161,6 +207,8 @@ namespace Galaxy101.Table
 
         private bool InValidSet(int id) => RackEval.Of(game.Rack, game.Model).ValidTiles.Contains(id);
 
+        private Vector2? ringScreen;
+
         private void OnMove(Ray ray, bool hasRay, Vector2 screen)
         {
             if (drag == null)
@@ -170,6 +218,14 @@ namespace Galaxy101.Table
                 hoverScreen = screen; hoverAt = Time.unscaledTime + 0.1f;
                 var hit = hasRay ? Pick(ray) : null;
                 hover = hit?.Kind == Kind.Okey ? null : hit?.View;   // T33 / T48 removed: no okey badge or long-press tip
+                // table3d.js canvas cursor: the deck pointer, a tile to take or move grab, the selected tile's ring pointer.
+                Galaxy101.Audio.GalaxyCursor.World = hit?.Kind == Kind.Deck ? "pointer" : hit != null && hit.Value.Kind != Kind.Okey ? "grab"
+                    : selected >= 0 && game.CanDiscard && hasRay && InZone(ray) ? "pointer" : null;
+                // ringGlow(p.kind === 'side' ? .28 : 0) on pointermove: once the pointer has moved, the ring shows only while
+                // the left tile is under it (a pointer that never moved leaves it shown).
+                if (ringScreen.HasValue && ringScreen.Value != screen || hit?.Kind == Kind.Side)
+                    game.SideRingState = new TableFx.SideRing { Hidden = hit?.Kind != Kind.Side, Hover = hit?.Kind == Kind.Side };
+                ringScreen = screen;
                 return;
             }
             if (drag.Kind == Kind.Okey) return;
@@ -202,6 +258,27 @@ namespace Galaxy101.Table
             }
             if (!drag.Moved) return;
             var follow = FollowPose(ray, 0);
+            var ring = new TableFx.SideRing { Hidden = drag.Kind != Kind.Side, Hover = drag.Kind == Kind.Side };
+            if (drag.Kind == Kind.Rack)
+            {
+                // table3d.js onMove: over the discard ring the tile snaps above it and bobs (0.03 m + 4 mm · sin 8t); the
+                // taken pile tile snaps above its own ring the same way (0.035 m); near a lay-off target it sits on it.
+                bool back = drag.Id == game.PickedTile, inReturn = back && ReturnNear(ray), inZone = !inReturn && game.CanDiscard && ZoneDrop(ray);
+                float bob = Mathf.Sin(Time.time * 8) * .004f;
+                if (game.Fx != null) { game.Fx.ZoneIn = inZone; game.Fx.ZoneDrag = true; }
+                if (inZone) follow = new Pose(table.DiscardCenter(0) + Vector3.up * (.03f + bob), table.FlatForMe);
+                else if (inReturn) follow = new Pose(table.DiscardCenter(3) + Vector3.up * (.035f + bob), table.SeatPose(3, 0, 0, 0, true).rotation);
+                else if (game.Markers != null && game.Markers.Hot >= 0 && game.Markers.Hot < game.Targets.Count && !SlotUnder(ray).HasValue)
+                {
+                    var target = game.Targets[game.Markers.Hot];
+                    follow = new Pose(target.Pose.position + Vector3.up * (target.Okey >= 0 ? .035f : .022f), target.Pose.rotation);
+                }
+                if (back) ring = new TableFx.SideRing { Returning = true, Hover = ScreenNear(ray, table.DiscardCenter(3), 95) };
+            }
+            game.SideRingState = ring;
+            // Over the ring, a lay-off target or the left ring the drop is a move ("copy" → drop); else grabbing.
+            bool dropping = drag.Kind == Kind.Rack && (ring.Returning && ReturnNear(ray) || game.CanDiscard && ZoneDrop(ray) || game.Markers != null && game.Markers.Hot >= 0);
+            Galaxy101.Audio.GalaxyCursor.Hold(dropping ? "drop" : "grabbing");
             if (follow.HasValue)
             {
                 if (drag.View != null && drag.Kind != Kind.Deck) drag.View.Follow(follow.Value);
@@ -231,7 +308,7 @@ namespace Galaxy101.Table
             drag.Grabbed = System.Array.IndexOf(segment.Ids, drag.Id);
             drag.Members = segment.Ids.Select((id, k) => (game.Board.ViewOf(id), k - drag.Grabbed)).Where(m => m.Item1 != null).ToList();
             drag.MemberSet = new HashSet<TileView>(drag.Members.Select(m => m.View));
-            foreach (var m in drag.Members) { var pose = FollowPose(ray, m.Offset); if (pose.HasValue) m.View.Follow(pose.Value); m.View.transform.localScale = Vector3.one * 1.05f; }
+            foreach (var m in drag.Members) { var pose = FollowPose(ray, m.Offset); if (pose.HasValue) m.View.Follow(pose.Value); m.View.transform.localScale = Vector3.one * 1.05f; m.View.GroupBar = true; }
             game.Message(TableHud.ToastKind.Info, TableStrings.Get("msg.groupMove", hud != null ? hud.L("tr", "en") : "tr"));
         }
 
@@ -240,9 +317,11 @@ namespace Galaxy101.Table
             var d = drag; drag = null;
             // The dragged tile's targets exist only while it is the focus: take the marker under the drop before letting go.
             TableGame.LayTarget marker = null;
-            if (d.Kind == Kind.Rack && d.Moved && !d.Group && hasRay && game.Markers != null && table.TableHit(ray, out var dropAt))
-            { int t = game.Markers.Nearest(dropAt, 0.06f); if (t >= 0) marker = game.Targets[t]; }
-            game.SetDragTile(-1);
+            if (d.Kind == Kind.Rack && d.Moved && !d.Group && hasRay && game.Markers != null)
+            { int t = NearestTarget(ray, 80); if (t >= 0) marker = game.Targets[t]; }
+            game.SetDragTile(-1); game.SideRingState = new TableFx.SideRing { Hidden = true };
+            if (game.Fx != null) game.Fx.ZoneIn = game.Fx.ZoneDrag = false;
+            Galaxy101.Audio.GalaxyCursor.Release();
             if (d.Kind == Kind.Okey) return;
             if (d.Group)
             {
@@ -265,24 +344,25 @@ namespace Galaxy101.Table
             if (d.Kind == Kind.Rack)
             {
                 game.Board.ClearPreview(game.Rack);
-                d.View.Release();
-                if (!hasRay) return;
-                if (game.CanDiscard && InZone(ray)) { game.Discard(d.Id); return; }
-                // T39: the picked-up pile tile dropped back on its ring goes back.
-                if (d.Id == game.PickedTile && table.TableHit(ray, out var back) && Vector3.Distance(back, table.DiscardCenter(3)) < 0.1f) { game.PutBack(); return; }
+                if (!hasRay) { d.View.Release(); return; }
+                // A drop that plays a move leaves the tile where it was let go; the move's sync carries it on (table3d.js
+                // keeps the released tile in its drag pose). T39: the taken pile tile on its ring goes back (checked first).
+                if (d.Id == game.PickedTile && ReturnNear(ray)) { d.View.Park(); game.PutBack(); return; }
+                if (game.CanDiscard && ZoneDrop(ray)) { d.View.Park(); game.Discard(d.Id); return; }
                 if (game.Markers != null) game.Markers.Hot = -1;
                 // A marker within 6 cm takes the tile (spec/23: snaps on approach).
-                if (!target.HasValue && marker != null) { game.UseTarget(d.Id, marker); return; }
+                if (!target.HasValue && marker != null) { d.View.Park(); game.UseTarget(d.Id, marker); return; }
                 var okey = target.HasValue ? null : OkeyNear(ray);
-                if (okey != null) { game.TakeOkey(d.Id, okey.Id); return; }
+                if (okey != null) { d.View.Park(); game.TakeOkey(d.Id, okey.Id); return; }
                 int meld = target.HasValue ? -1 : MeldNear(ray);
-                if (meld >= 0) { game.LayOff(d.Id, meld); return; }
+                if (meld >= 0) { d.View.Park(); game.LayOff(d.Id, meld); return; }
+                d.View.Release();
                 if (target.HasValue && !target.Value.Equals(d.From)) game.ApplyRackPlan(game.Rack.SinglePlan(d.Id, target.Value));
                 return;
             }
             // Drawing by drag: the new tile starts where the ghost / dragged side tile was released.
             if (d.Ghost != null) { game.Board.SpawnFrom(new Pose(d.Ghost.transform.position, d.Ghost.transform.rotation)); Destroy(d.Ghost); }
-            if (d.View != null) d.View.Release(TileView.Motion.Travel);
+            if (d.View != null) d.View.Park();   // the drawn pile tile flies on from the drop to its slot
             _ = game.Draw(d.Kind != Kind.Deck, target);
         }
 
@@ -319,7 +399,7 @@ namespace Galaxy101.Table
         private void UpdateLift()
         {
             game.SetSelected(drag == null ? selected : -1);
-            if (drag != null && drag.Moved && drag.Kind == Kind.Rack && game.Markers != null && lastRay.HasValue && table.TableHit(lastRay.Value, out var over)) game.Markers.Hot = game.Markers.Nearest(over, 0.06f);
+            if (drag != null && drag.Moved && drag.Kind == Kind.Rack && game.Markers != null && lastRay.HasValue) game.Markers.Hot = NearestTarget(lastRay.Value, 80);
             foreach (var id in game.Rack.Tiles)
             {
                 var v = game.Board.ViewOf(id); if (v == null) continue;

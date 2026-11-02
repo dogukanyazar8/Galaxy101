@@ -47,7 +47,7 @@ Kalan farkların kaynağı: `EKSIKLER.md` (EK-601…614), `UNITY_FARKLARI.md` (U
 | 50, 51 | Satırlarda 24 px rozet ("Altın I" −16 px kayması), lcol #FFD45C / #7FE6FF, ben satırı rozeti | — | eşleşir |
 | 52 | 50 ile aynı | — | eşleşir |
 | 60 | Bugün kartının zıplama fazı (EK-602 → −4 px, "5. Gün" +5 px kayması gider) | Yenilenme sayacı (EK-003) | eşleşir (sayaç hariç) |
-| 61 | Yönlendirici `dayClaimed` kurar, ödül vermez (çip 10.000, EK-610); "1" rozeti kalır (EK-609) | EK-003 | eşleşir (sayaç hariç) |
+| 61 | Yönlendirici `dayClaimed` kurar, ödül vermez (çip 10.000, EK-610); "1" rozeti gizlenir (EK-609 kararı) | EK-003 | eşleşir (sayaç hariç) |
 | 70–75 | Kart 982 genişlik → kural sütunu 595 px (73'teki gereksiz satır kırılması gider) | Çok satırlı metin yüksekliği (UF-603) | eşleşir (araç farkı hariç) |
 | 80 | 124 px halkalı avatar, "Bu ay +%3", 60 px rozetli sezon kartı ("Altın II", zirve "Altın II", "72 / 100 LP", "Altın I'e 28 LP", lig çubuğu), 7 çerçeve kutusu ("Lig çerçeveleri derecelide açılır", Takılı / Sahipsin / Kilitli) | — | eşleşir |
 | 81 | Kart genişliği | Çok satırlı rozet açıklamaları (UF-603) | metin konumları ±; araç farkı |

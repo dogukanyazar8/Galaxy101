@@ -15,15 +15,21 @@ namespace Galaxy101
             foreach (JObject day in v.Services.Rewards.GetStreak())
             {
                 var index = (int)day["day"];
-                var today = (bool)day["today"];
                 var claimed = (bool)day["claimed"];
+                // The server keeps Today true after collection. In the prototype, the green card
+                // and its button represent an available reward, not an already claimed day.
+                var today = (bool)day["today"] && !claimed;
                 var card = v.Box("g-day"); card.name = "streak-day-" + index;
                 // CSS grid fractions apply to the whole card. A padded Yoga item retains its 16 px padding at basis 0;
                 // put the fractions on an unpadded slot so the seventh card receives 1.5 outer widths too.
                 var slot = v.Box(); slot.style.flexDirection = FlexDirection.Row;
                 slot.style.flexBasis = 0; slot.style.flexGrow = index == 7 ? 1.5f : 1; slot.style.minWidth = 0;
                 card.style.flexBasis = 0; card.style.flexGrow = 1; card.style.minWidth = 0;
-                if (index < 7) slot.style.marginRight = 10;
+                if (index < 7)
+                {
+                    slot.style.marginRight = 10;
+                    if (!today) card.Add(PanelUi.Ring(v, 1, "rgba(255,255,255,.07)", 18));
+                }
                 else
                 {
                     // big: inset 0 0 0 2px var(--a1), 0 0 20px var(--gl) — an overlay ring, no layout (a border moved the label and amount 2 px).
@@ -48,11 +54,13 @@ namespace Galaxy101
                 else card.Add(MenuView.CssLine(v.Text(v.N((int)day["chips"]), 15, true, index == 7 ? "a1" : "#F4F1E8"), 15)); // 700 15px/1
                 if (claimed)
                 {
-                    var cover = v.Box(); cover.style.position = Position.Absolute;
+                    var cover = v.Box(); cover.name = "day-claimed-cover"; cover.style.position = Position.Absolute;
                     cover.style.left = cover.style.right = cover.style.top = cover.style.bottom = 0;
                     cover.style.alignItems = Align.Center; cover.style.justifyContent = Justify.Center;
                     v.Decorate(cover, "rgba(0,0,0,.38)", 18);
-                    var check = PanelUi.Circle(v, 36, "#3CCB6E"); check.Add(v.Icon("tick", 18, "#fff")); cover.Add(check); card.Add(cover);
+                    var check = PanelUi.Circle(v, 36, "#3CCB6E"); check.name = "day-claimed-check";
+                    GalaxyFilters.HardShadow(check, 3, v.C("#22914A"));
+                    check.Add(v.Icon("tick", 18, "#fff")); cover.Add(check); card.Add(cover);
                 }
                 slot.Add(card); days.Add(slot);
             }
@@ -84,9 +92,9 @@ namespace Galaxy101
                 var details = v.Column(text, progress); PanelUi.Grow(details); row.Add(details);
                 // Reference reward: 18px radial coin, gap 6, 700 15px; optional 12px gem (radius 3) after a 6px extra margin.
                 var amount = v.Text(v.N((int)q["rw"]), 15, true);
-                var reward = v.Row(PanelUi.Circle(v, 18, "radial-gradient(circle at 35% 30%,#FFF3C8,#F5A623 60%,#B86E0F)"), amount);
+                var reward = v.Row(PanelUi.Coin(v, 18), amount);
                 reward.style.width = 150; reward.style.justifyContent = Justify.FlexEnd; reward.style.marginLeft = 14; reward.style.marginRight = 14; PanelUi.Gap(reward, 6);
-                if ((int?)q["gem"] > 0) { amount.style.marginRight = 6; var gem = PanelUi.Diamond(v, 12, "linear-gradient(135deg,#C8F6FF,#3D7BFF)", 3); gem.style.marginLeft = 6; gem.style.marginRight = 6; reward.Add(gem); reward.Add(v.Text(q["gem"].ToString(), 15, true)); }
+                if ((int?)q["gem"] > 0) { amount.style.marginRight = 6; var gem = v.GemIcon(12); gem.style.marginLeft = 6; gem.style.marginRight = 6; reward.Add(gem); reward.Add(v.Text(q["gem"].ToString(), 15, true)); }
                 row.Add(reward);
                 VisualElement state;
                 if (complete && !claimed)

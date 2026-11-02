@@ -166,7 +166,7 @@ namespace Galaxy101.Audio
         {
             if (listener == null) return;
             bool other = false;
-            foreach (var l in FindObjectsByType<AudioListener>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+            foreach (var l in FindObjectsByType<AudioListener>(FindObjectsInactive.Exclude))
                 if (l != listener && l.isActiveAndEnabled) { other = true; break; }
             listener.enabled = !other;
         }

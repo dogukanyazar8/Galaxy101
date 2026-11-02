@@ -22,5 +22,6 @@ namespace Galaxy101
         public void CloseTop(){if(Dialog!=null)Dialog=null;else Panel=null;}
         /// <summary>Closes the panel under an open dialog (Oyundan çık: settingsOpen false under the farewell).</summary>
         public void ClosePanel(){Panel=null;}
+        public void Clear(){Dialog=null;Panel=null;}
     }
 }

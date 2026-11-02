@@ -1,0 +1,6 @@
+{
+  "name": "Galaxy101.Ships",
+  "rootNamespace": "Galaxy101",
+  "references": ["glTFast", "Unity.RenderPipelines.Core.Runtime", "Unity.RenderPipelines.Universal.Runtime"],
+  "autoReferenced": true
+}

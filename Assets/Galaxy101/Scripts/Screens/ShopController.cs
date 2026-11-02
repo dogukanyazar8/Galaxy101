@@ -72,20 +72,28 @@ namespace Galaxy101
                     badge.AddToClassList("g-shop-bonus"); badge.style.top = badge.style.right = 14; badge.style.unityFont = v.Font("Baloo2-800");
                     badge.style.borderTopLeftRadius = badge.style.borderTopRightRadius = badge.style.borderBottomLeftRadius = badge.style.borderBottomRightRadius = 8; card.Add(badge);
                 }
+                // The source gives equal flex space above the artwork and below the caption.
+                var topSpace = PanelUi.Spacer(v); topSpace.style.marginBottom = 4; card.Add(topSpace);
                 var image = v.Box("g-shop-art");
                 if (tab == 0) image.Add(ShopArtwork.Coins(v, (float)offer["scale"]));
                 else if (tab == 1) image.Add(ShopArtwork.Gems(v, (float)offer["scale"]));
                 else image.Add(ShopArtwork.Tile(v, offer));
                 image.style.marginBottom = 4;
                 card.Add(image);
-                var amount = v.Text(tab == 2 ? v.L((string)offer["tr"], (string)offer["en"]) : v.N((long)offer["amount"]), 22, true); amount.style.marginBottom = 4; card.Add(amount);
-                var sub = v.Text(tab == 0 ? v.L("çip", "chips") : tab == 1 ? v.L("elmas", "gems") : v.L("Taş görünümü", "Tile skin"), 12, false, "mt"); sub.style.marginBottom = 4; card.Add(sub);
+                // Flex spacers centre the whole art/caption stack, so its CSS line boxes must participate in layout.
+                var amount = MenuView.CssLine(v.Text(tab == 2 ? v.L((string)offer["tr"], (string)offer["en"]) : v.N((long)offer["amount"]), 22, true), 22 * 1.15f);
+                amount.name = "menu.i.amount[" + index + "]"; amount.style.unityTextAlign = UnityEngine.TextAnchor.MiddleCenter; amount.style.marginBottom = 4; card.Add(amount);
+                var sub = MenuView.CssLine(v.Text(tab == 0 ? v.L("çip", "chips") : tab == 1 ? v.L("elmas", "gems") : v.L("Taş görünümü", "Tile skin"), 12, false, "mt"));
+                sub.name = "menu.i.sub[" + index + "]"; sub.style.marginBottom = 4; card.Add(sub);
                 var spacer = PanelUi.Spacer(v); spacer.style.marginBottom = 4; card.Add(spacer);
                 var id = (string)offer["id"];
                 var button = v.Button(tab == 2 ? v.N((long)(decimal)offer["price"]) : PanelUi.Money(v, (decimal)offer["price"]), () => Purchase(v, id));
                 button.name = "purchase-" + id;
                 button.AddToClassList("g-shop-price");
                 button.style.flexDirection = FlexDirection.Row; button.style.fontSize = 17; button.style.unityFont = v.Font("Montserrat-700");
+                button.style.color = v.C("aT");
+                var priceCaption = MenuView.CssLine(button.Q<Label>("button-caption"), MenuView.CssLineHeight("Montserrat-700", 17));
+                priceCaption.name = "menu.i.price[" + index + "]";
                 button.style.height = StyleKeyword.Auto; button.style.marginTop = 0; PanelUi.Pad(button, 11, 0);
                 if (tab == 2)
                 {

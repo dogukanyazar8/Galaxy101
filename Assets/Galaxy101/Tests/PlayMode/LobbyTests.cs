@@ -216,6 +216,7 @@ namespace Galaxy101.Tests
             menu.Lobby.Hide();
             yield return new WaitForSeconds(.3f);
             Assert.That(root.Q<VisualElement>("main-layer").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+            Assert.That(root.Q<VisualElement>("main-layer").resolvedStyle.visibility, Is.EqualTo(Visibility.Visible));
         }
 
         /// <summary>The list with the design's own tables, dumped for tools/compare_ui.py (only with GALAXY_UI_DUMP_DIR).</summary>
@@ -262,7 +263,8 @@ namespace Galaxy101.Tests
             var play = root.Q<Button>("menu.play"); using (var evt = NavigationSubmitEvent.GetPooled()) { evt.target = play; play.SendEvent(evt); }
             yield return null; yield return null;
             Assert.That(menu.Lobby, Is.Not.Null); Assert.That(menu.Lobby.Visible, Is.True); Assert.That(fake.Subscribes, Is.GreaterThan(0));
-            Assert.That(root.Q<VisualElement>("main-layer").resolvedStyle.display, Is.EqualTo(DisplayStyle.None), "the menu hides under the lobby");
+            Assert.That(root.Q<VisualElement>("main-layer").resolvedStyle.visibility, Is.EqualTo(Visibility.Hidden), "the menu hides under the lobby");
+            Assert.That(root.Q<VisualElement>("main-layer").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex), "the hidden menu keeps its nested filter layout allocated");
             Assert.That(Cards(root), Is.EqualTo(7));
             yield return new WaitForSeconds(.7f);
             yield return Shot("S09_list.png");
@@ -355,7 +357,14 @@ namespace Galaxy101.Tests
             Assert.That(fake.Joined.Pin, Is.EqualTo("1234"));
 
             // Code: six characters (GX + 4) before the server, then the server's "no such table".
-            Click(root, "lobby.w.leave"); yield return null; yield return null;
+            VisualElement closedList = null;
+            void OnLeft(TableStateMessage state) { if (state.Closed) closedList = root.Q<VisualElement>("lobby.openCode"); }
+            fake.RoomChanged += OnLeft;
+            Click(root, "lobby.w.leave");
+            fake.RoomChanged -= OnLeft;
+            Assert.That(closedList, Is.Not.Null, "The room-closed event must show the list.");
+            Assert.That(root.Q<VisualElement>("lobby.openCode"), Is.SameAs(closedList), "The leave response must keep the list already shown by the room-closed event.");
+            yield return null; yield return null;
             Assert.That(menu.Lobby.Screen, Is.EqualTo("list"));
             Assert.That(LobbyScreen.NormalizeCode("gx7q2m"), Is.EqualTo("GX-7Q2M"));
             Assert.That(LobbyScreen.NormalizeCode("GX-7Q2M"), Is.EqualTo("GX-7Q2M"));
@@ -472,7 +481,7 @@ namespace Galaxy101.Tests
             Assert.That(fake.Created, Is.Not.Null);
             Assert.That(fake.Created.Name, Is.EqualTo("Gece Kuşları"));
             Assert.That(fake.Created.Type, Is.EqualTo("pairs")); Assert.That(fake.Created.Stake, Is.EqualTo(10000));
-            Assert.That(fake.Created.Hands, Is.EqualTo(7)); Assert.That(fake.Created.TurnSeconds, Is.EqualTo(45)); Assert.That(fake.Created.Doubling, Is.True); Assert.That(fake.Created.PartnerRaises, Is.False);
+            Assert.That(fake.Created.Hands, Is.EqualTo(7)); Assert.That(fake.Created.TurnSeconds, Is.EqualTo(40)); Assert.That(fake.Created.Doubling, Is.True); Assert.That(fake.Created.PartnerRaises, Is.False);
             Assert.That(fake.Created.Visibility, Is.EqualTo("private")); Assert.That(fake.Created.Pin, Is.EqualTo("1234"));
             Assert.That(fake.Created.Chat, Is.EqualTo("quick")); Assert.That(fake.Created.OkeyPenalty, Is.False); Assert.That(fake.Created.Penalties, Is.True); Assert.That(fake.Created.Processing, Is.True);
             Assert.That(menu.Lobby.Screen, Is.EqualTo("wait"));

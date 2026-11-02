@@ -170,7 +170,9 @@ namespace Galaxy101.Table
             if (to != 0) return;
             received.Add(kind);
             if (Settings != null && !Settings.GiftNotices) return;
-            noticeInfo = (kind, from); noticeUntil = Time.realtimeSinceStartup + 5.2f;
+            // G101-Masa botGift: receive() at 1.4 s (rocket 5.8 s) after the send, then 5.2 s on screen (setTimeout, which
+            // runs late under load: T12's frame at 8.2 s still shows it). The flight lands a little earlier (1.35 / 5.6 s).
+            noticeInfo = (kind, from); noticeUntil = Time.realtimeSinceStartup + 5.2f + (kind == "rocket" ? .2f : .05f) + .3f;
             BuildNotice();
         }
 
@@ -379,7 +381,7 @@ namespace Galaxy101.Table
             if (!FreeGifts)
             {
                 var cap = Text(S("balance"), "Baloo2-800", 10, "var(--mt)"); cap.name = "table.t.balance"; MenuView.Tracking(cap, 1.4f, 10); left.Add(cap);
-                var chips = Row(6); var coin = Box(); coin.style.width = coin.style.height = 16; view.Decorate(coin, "radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)", 8); chips.Add(coin);
+                var chips = Row(6); var coin = view.ChipIcon(16); chips.Add(coin);
                 chips.Add(Text(view.N(Current.Chips), "Montserrat-700", 17, "#F4F1E8")); left.Add(chips);
             }
             footer.Add(left);

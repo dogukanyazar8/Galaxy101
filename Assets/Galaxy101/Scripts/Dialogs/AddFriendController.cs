@@ -16,11 +16,11 @@ namespace Galaxy101
         {
             var copyLabel = v.Text(v.L("Kopyala", "Copy"), 14, true);
             var root = PanelUi.Shell(v, "AddFriend");
-            PanelUi.Header(v, root, v.L("Arkadaş ekle", "Add friend"), v.L("Arkadaş kodu veya oyuncu adıyla ara", "Search with a friend code or player name"), "add", "linear-gradient(160deg,#7AA6FF,#3D6BF0)", 22);
+            PanelUi.Header(v, root, v.L("Arkadaş ekle", "Add friend"), v.L("Arkadaş kodu veya oyuncu adıyla ara", "Search with a friend code or player name"), "add", "linear-gradient(160deg,#7AA6FF,#3D6BF0)", 22, "#2448B8");
             root.Q<VisualElement>("footer").style.display = DisplayStyle.None;
             var afHeader = root.Q<VisualElement>("header"); var afTexts = afHeader.Query<Label>().ToList(); afTexts[0].name = "menu.af.title"; afTexts[1].name = "menu.af.sub"; afHeader.Q<Button>("dialog-close").name = "menu.closeDlg#5";
             var body = root.Q<VisualElement>("content");
-            var field = PanelUi.Input(v, "menu.af.onQ", query, v.L("Örn. MK-3321", "e.g. MK-3321"), -1, 16, true); field.AddToClassList("bare"); MenuView.Tracking(field, 1, 16);
+            var field = PanelUi.Input(v, "menu.af.onQ", query, v.L("Örn. MK-3321", "e.g. MK-3321").ToUpper(System.Globalization.CultureInfo.GetCultureInfo(v.Loc.Language == "en" ? "en-US" : "tr-TR")) /* text-transform:uppercase raises the placeholder too */, -1, 16, true); field.AddToClassList("bare"); MenuView.Tracking(field, 1, 16);
             var resultBox = v.Row(); resultBox.name = "friend-search-result"; resultBox.style.height = 96; resultBox.style.marginTop = 14; resultBox.style.marginBottom = 14; PanelUi.Pad(resultBox, 0, 16); v.Decorate(resultBox, "sd", 18);
             void Fill()
             {

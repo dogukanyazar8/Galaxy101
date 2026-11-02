@@ -385,7 +385,7 @@ namespace Galaxy101.Table
         private VisualElement PriceTag(string gift, int size, int coinSize, int gap)
         {
             var row = Row(gap); row.style.marginTop = 2;
-            if (!FreeGifts) { var coin = Box(); coin.style.width = coin.style.height = coinSize; view.Decorate(coin, "radial-gradient(circle at 35% 30%,#FFE9A8,#F5A623 60%,#B86E0F)", size); row.Add(coin); }
+            if (!FreeGifts) { var coin = view.ChipIcon(coinSize); row.Add(coin); }
             var amount = Text(FreeGifts ? S("free") : view.N(GiftPrice(gift)), "Baloo2-800", size, FreeGifts ? "#8EF0B0" : "#FFD964");
             amount.style.height = MenuView.CssLineHeight("Baloo2-800", size); amount.style.unityTextAlign = TextAnchor.MiddleCenter; row.Add(amount);
             return row;

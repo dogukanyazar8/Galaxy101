@@ -18,22 +18,21 @@ namespace Galaxy101.Table
     /// </summary>
     public sealed class TableCeremony
     {
-        private sealed class Flight
-        {
-            public GameObject Go;
-            public Pose From, To;
-            public float Start, Duration, Arc, Spin;
-            public bool Begun, Done;
-        }
+        private sealed class DealSkippedException : Exception { }
 
         private readonly TableScene scene;
         private readonly TableFx fx;
         private readonly Func<float, Task> wait;
-        private readonly List<Flight> flights = new List<Flight>();
         private readonly List<GameObject> pieces = new List<GameObject>();
+        private readonly List<GameObject> heap = new List<GameObject>();
+        private float heapStart;
+        private int heapShown = -1;
+        private bool heapAnimating;
         private GameObject die;
-        private Pose dieFrom, dieTo; private Quaternion dieFinal; private Vector3 dieAxis; private float dieStart = -1, dieSpin;
+        private DiceRollMotion dieMotion;
+        private float dieStart = -1;
         private int dieBounces;
+        private bool dieLanded;
 
         /// <summary>Step key for the HUD card (stack, roll, rolling, indicator, extra, deal, centre, start).</summary>
         public string Step { get; private set; }
@@ -42,46 +41,68 @@ namespace Galaxy101.Table
         public bool Revealed { get; private set; }
         public bool Running { get; private set; }
         public event Action Changed;
+        public event Action<int, int> DieRolling;
 
         public TableCeremony(TableScene scene, TableFx fx, Func<float, Task> wait) { this.scene = scene; this.fx = fx; this.wait = wait; }
 
         private void Set(string step) { Step = step; Changed?.Invoke(); }
 
         // ---------- poses (three formulas from spec/21, in a seat's frame) ----------
-        private Pose StackPose(int dealer, float si, int level) => scene.SeatPose(dealer, (si - 7) * 0.057f, TY + TD / 2 + level * TD, 0.36f, false);
-        private Pose DeliveryPose(int seat, int slot, int level) => scene.SeatPose(seat, (slot - 1) * (TW + 0.016f), TY + TD / 2 + level * TD, 0.53f, false);
-
-        private GameObject Tile(Pose at)
+        private Pose StackPose(int dealer, float si, int level, string key, bool faceUp = false)
         {
-            var go = scene.Tiles.Create(null, scene.TilesRoot); go.name = "toren_tas";
+            var pose = scene.SeatPose(dealer, (si - 7) * .057f + (si >= 15 ? .014f : 0), TY + TD / 2 + level * TD, .36f, faceUp);
+            if (!faceUp) pose.rotation = Quaternion.AngleAxis(-(Hash(key) - .5f) * .05f * Mathf.Rad2Deg, Vector3.up) * pose.rotation;
+            return pose;
+        }
+        private Pose DeliveryPose(int seat, int slot, int level, string key)
+        {
+            var pose = scene.SeatPose(seat, (slot - 1) * (TW + .016f), TY + TD / 2 + level * TD, .53f, false);
+            pose.rotation = Quaternion.AngleAxis(-(Hash(key) - .5f) * .05f * Mathf.Rad2Deg, Vector3.up) * pose.rotation;
+            return pose;
+        }
+
+        private Pose PilePose(int level)
+        {
+            bool under = level < 6;
+            return new Pose(ThreeSpace.ToUnity(under ? TableScene.PileX0 : -TableScene.PileX0, TY + TD / 2 + (under ? level : level - 6) * TD, 0),
+                Quaternion.AngleAxis(-((level * .37f) % 1 - .5f) * .05f * Mathf.Rad2Deg, Vector3.up) * scene.SeatPose(0, 0, 0, 0, false).rotation);
+        }
+        private Pose CentreIndicatorPose() => new Pose(ThreeSpace.ToUnity(TableScene.PileX0, TY + TD / 2 + 6 * TD, 0), Quaternion.AngleAxis(-.04f * Mathf.Rad2Deg, Vector3.up) * scene.FlatForMe);
+
+        private GameObject Tile(Pose at, int serial)
+        {
+            var go = scene.Tiles.Create(null, scene.TilesRoot); go.name = "toren_tas_" + serial;
             UnityEngine.Object.Destroy(go.GetComponent<Collider>());
-            go.transform.SetPositionAndRotation(at.position, at.rotation); pieces.Add(go); return go;
+            go.transform.SetPositionAndRotation(at.position, at.rotation);
+            var tile = go.AddComponent<TileView>(); tile.MotionKey = "t" + serial; tile.Fx = fx;
+            pieces.Add(go); return go;
         }
 
-        private void Fly(GameObject go, Pose to, float delay, float duration, float arc, float spin = 0)
+        private void Fly(GameObject go, Pose to, TileView.Motion motion, float delay = 0, float duration = 0, string effect = null)
         {
-            flights.RemoveAll(f => f.Go == go);
-            flights.Add(new Flight { Go = go, To = to, Start = Time.time + delay, Duration = duration, Arc = arc, Spin = spin });
+            go.GetComponent<TileView>().MoveTo(to, motion, delay, duration, effect);
         }
 
-        /// <summary>Per frame (TableGame.Update): tile flights (bezier lift, ¼ turn, tiny bounce) and the die.</summary>
+        /// <summary>The source heap shrinks while the separate dealt tiles fly; TileView owns their shared frame sampler.</summary>
         public void Tick()
         {
             float now = Time.time;
-            foreach (var f in flights)
+            if (heapAnimating)
             {
-                if (f.Done || f.Go == null || now < f.Start) continue;
-                // A flight starts from wherever the tile is when its delay ends (chained moves never jump back).
-                if (!f.Begun) { f.Begun = true; f.From = new Pose(f.Go.transform.position, f.Go.transform.rotation); }
-                float u = Mathf.Clamp01((now - f.Start) / f.Duration), k = EaseInOutCubic(u);
-                var pos = Vector3.Lerp(f.From.position, f.To.position, k) + Vector3.up * (f.Arc * 4 * k * (1 - k));
-                if (u < 1 && u > .85f) pos += Vector3.up * (0.004f * Mathf.Sin((u - .85f) / .15f * Mathf.PI));
-                var rot = Quaternion.Slerp(f.From.rotation, f.To.rotation, k) * Quaternion.AngleAxis(f.Spin * (1 - k), Vector3.up);
-                f.Go.transform.SetPositionAndRotation(pos, rot);
-                if (u >= 1) f.Done = true;
+                int count = Mathf.RoundToInt(106 * (1 - Mathf.Clamp01((now - heapStart - .4f) / 1.522f)));
+                if (count != heapShown)
+                {
+                    heapShown = count;
+                    for (int i = 0; i < heap.Count; i++)
+                    {
+                        if (heap[i] == null) continue;
+                        heap[i].SetActive(i < count);
+                        if (i < count) { var pose = scene.DeckPose(i, count); heap[i].transform.SetPositionAndRotation(pose.position, pose.rotation); }
+                    }
+                }
+                if (count == 0) heapAnimating = false;
             }
-            flights.RemoveAll(f => f.Done);
-            if (dieStart >= 0 && die != null) RollStep(now);
+            if (dieStart >= 0 && die != null) RollStep(now - dieStart);
         }
 
         // ---------- the ceremony ----------
@@ -103,154 +124,205 @@ namespace Galaxy101.Table
         {
             Running = true; Revealed = false; Fake = false; Dice[0] = Dice[1] = 0; LastDie = -1;
             fx?.MarkStack(null);
-            DealProgress D() => model.Deal;
-            bool Past(string step) => D() == null || Rank(D().Step) >= Rank(step);
-            async Task Until(Func<bool> done) { while (!done()) { await wait(0.05f); token.ThrowIfCancellationRequested(); } }
-            int dealerAbs = D()?.Dealer ?? model.Dealer;
-            int dealer = local(dealerAbs);
+            var progress = model.Deal;
+            var applied = new TaskCompletionSource<bool>();
+            var skipped = new TaskCompletionSource<bool>();
+            var cancelled = new TaskCompletionSource<bool>();
+            bool handReady = progress != null && progress.Step == "fill" && (model.Rack != null || model.Seat < 0);
+            void Applied(ClientMessage message)
+            {
+                if (model.Deal != null) progress = model.Deal;
+                if (message.Type == "handDealt") handReady = true;
+                if (progress?.Skipped == true) skipped.TrySetResult(true);
+                var previous = applied; applied = new TaskCompletionSource<bool>(); previous.TrySetResult(true);
+            }
+            if (progress?.Skipped == true) skipped.TrySetResult(true);
+            model.Applied += Applied;
+            using var cancellation = token.Register(() => cancelled.TrySetResult(true));
+            async Task Await(Task task, bool interrupt = true)
+            {
+                token.ThrowIfCancellationRequested();
+                if (interrupt && progress?.Skipped == true) throw new DealSkippedException();
+                await Task.WhenAny(task, interrupt ? skipped.Task : cancelled.Task, cancelled.Task);
+                token.ThrowIfCancellationRequested();
+                if (interrupt && progress?.Skipped == true) throw new DealSkippedException();
+                await task;
+            }
+            Task PhaseWait(float seconds) => Await(wait(seconds));
+            bool Past(string step) => model.Deal == null || progress == null || Rank(progress.Step) >= Rank(step);
+            async Task Until(Func<bool> done, bool interrupt = true)
+            {
+                while (true) { var next = applied.Task; if (done()) return; await Await(next, interrupt); }
+            }
+            int dealerAbs = progress?.Dealer ?? model.Dealer, dealer = local(dealerAbs);
+            var stacks = new List<GameObject>[G101Rules.Const.Stacks];
+            for (int i = 0; i < stacks.Length; i++) stacks[i] = new List<GameObject>();
+            GameObject indicator = null, extraTile = null;
+            int indicatorStack = -1;
+            bool extraPlaced = false;
+            string Key(GameObject go) => go.GetComponent<TileView>().MotionKey;
+            void ComposeIndicator()
+            {
+                if (indicator != null) return;
+                indicatorStack = Mathf.Clamp(progress != null && progress.IndicatorStack >= 0 ? progress.IndicatorStack : Dice[0] - 1, 0, 14);
+                var stack = stacks[indicatorStack];
+                int level = Mathf.Clamp(progress != null && progress.IndicatorLevel >= 0 ? progress.IndicatorLevel : Dice[1] - 1, 0, stack.Count - 1);
+                indicator = stack[level]; stack.RemoveAt(level); stack.Add(indicator);
+                Fake = progress?.FakeSkip == true;
+                scene.Tiles.SetFace(indicator, model.Indicator != null ? TileIds.Code(TileIds.ToInt(model.Indicator)) : null);
+                scene.Tiles.SetLying(indicator, true);
+            }
+            void ComposeExtra()
+            {
+                if (extraPlaced) return;
+                int target = progress != null && progress.ExtraStack >= 0 ? progress.ExtraStack : (indicatorStack + 1) % 15;
+                stacks[target].Add(extraTile); extraPlaced = true;
+            }
+            IEnumerable<(int Seat, int[] Stacks)> Plan()
+            {
+                if (progress?.Plan != null && progress.Plan.Count > 0)
+                {
+                    foreach (var p in progress.Plan) yield return (local(p.Seat), p.Stacks.ToArray());
+                    yield break;
+                }
+                for (int j = 0; j < 4; j++) yield return (local((dealerAbs + 1 + j) % 4), new[] { (indicatorStack + 1 + j) % 15, (indicatorStack + 5 + j) % 15 });
+                for (int j = 0; j < 4; j++) yield return (local((dealerAbs + 1 + j) % 4), new[] { (indicatorStack + 9 + j) % 15 });
+            }
             try
             {
-                // 1. 106 tiles from the centre heap into 15 stacks of 7 + the extra tile (450 ms, 15 ms apart, 0.6–0.9 s flights).
-                Set("stack");
-                var stacks = new List<GameObject>[G101Rules.Const.Stacks];
-                for (int s = 0; s < stacks.Length; s++) stacks[s] = new List<GameObject>();
-                int n = 0;
-                for (int level = 0; level < G101Rules.Const.StackH; level++)
-                    for (int s = 0; s < G101Rules.Const.Stacks; s++)
+                // startDeal: the old heap is separate from the fresh, delayed tiles. Every fresh tile starts at deckTop.
+                Set("stack"); scene.DeckHeap = true;
+                var spawn = scene.DeckTop(106);
+                spawn.rotation = scene.SeatPose(0, 0, 0, 0, false).rotation;
+                for (int i = 0; i < 106; i++)
+                {
+                    var at = scene.DeckPose(i, 106);
+                    var go = scene.Tiles.Create(null, scene.TilesRoot); go.name = "toren_deste_" + i;
+                    UnityEngine.Object.Destroy(go.GetComponent<Collider>()); go.transform.SetPositionAndRotation(at.position, at.rotation);
+                    heap.Add(go); pieces.Add(go);
+                }
+                heapStart = Time.time; heapShown = 106; heapAnimating = true;
+                for (int si = 0; si < 15; si++)
+                    for (int level = 0; level < 7; level++)
                     {
-                        var go = Tile(scene.DeckPose(105 - n, 106));
-                        Fly(go, StackPose(dealer, s, level), 0.45f + n * 0.015f, 0.6f + (n % 7) * 0.05f, 0.08f, 90); stacks[s].Add(go); n++;
+                        int n = si * 7 + level;
+                        var go = Tile(spawn, n + 1); stacks[si].Add(go);
+                        Fly(go, StackPose(dealer, si, level, Key(go)), TileView.Motion.Deal, .4f + n * .012f);
                     }
-                var extraTile = Tile(scene.DeckPose(0, 106));
-                Fly(extraTile, StackPose(dealer, 15.3f, 0), 0.45f + n * 0.015f, 0.8f, 0.08f, 90);
-                await wait(0.45f + n * 0.015f + 1.0f); token.ThrowIfCancellationRequested();
-
-                // 2. Two rolls, each when the server announces its die (dealDie).
-                for (int i = 0; i < 2; i++)
+                extraTile = Tile(spawn, 106);
+                Fly(extraTile, StackPose(dealer, 15.3f, 0, Key(extraTile)), TileView.Motion.Deal, .4f + 105 * .012f);
+                try
                 {
-                    Set("roll");
-                    int k = i;
-                    await Until(() => Past("indicator") || D().Dice.Count > k);
-                    bool announced = D() != null && D().Dice.Count > i;
-                    int value = announced ? D().Dice[i].Value : Mathf.Max(1, Dice[i]);
-                    if (announced && !Past("indicator")) { Set("rolling"); await Roll(dealer, i, value); }
-                    Dice[i] = value; LastDie = i; Changed?.Invoke();
-                    if (!Past("indicator")) { await wait(0.35f); token.ThrowIfCancellationRequested(); }
-                }
-
-                // 3. The indicator: out of stack a at height b, a 1.15 s somersault onto the same stack; the tiles above settle.
-                await Until(() => Past("indicator"));
-                var d = D();
-                int a = d != null && d.IndicatorStack >= 0 ? d.IndicatorStack : Mathf.Clamp(Dice[0] - 1, 0, 14);
-                int b = Mathf.Clamp(d != null && d.IndicatorLevel >= 0 ? d.IndicatorLevel : Dice[1] - 1, 0, stacks[a].Count - 1);
-                Fake = d != null && d.FakeSkip;
-                fx?.MarkStack(dealer, a);
-                var indicator = stacks[a][b]; stacks[a].RemoveAt(b);
-                var outside = StackPose(dealer, a, b); outside.position += scene.SeatDirection(dealer) * 0.07f;
-                Fly(indicator, outside, 0, 0.3f, 0.01f);
-                for (int j = b; j < stacks[a].Count; j++) Fly(stacks[a][j], StackPose(dealer, a, j), 0.42f + (j - b) * 0.045f, 0.25f, 0.004f);
-                await wait(0.32f);
-                scene.Tiles.SetFace(indicator, model.Indicator != null ? TileIds.Code(TileIds.ToInt(model.Indicator)) : null); scene.Tiles.SetLying(indicator, true);
-                var top = StackPose(dealer, a, stacks[a].Count); top.rotation = scene.FlatForMe;
-                Fly(indicator, top, 0, 1.15f, 0.12f, 360); stacks[a].Add(indicator);
-                fx?.Wave(StackPose(dealer, a, 0).position, new Color(1, .84f, .35f), 0.9f);
-                await wait(1.2f); token.ThrowIfCancellationRequested();
-                Revealed = true; Set("indicator");
-
-                // 4. The extra tile onto stack a+1.
-                await Until(() => Past("extra"));
-                Set("extra");
-                int extraStack = D() != null && D().ExtraStack >= 0 ? D().ExtraStack : (a + 1) % 15;
-                fx?.MarkStack(dealer, extraStack);
-                Fly(extraTile, StackPose(dealer, extraStack, stacks[extraStack].Count), 0, 0.65f, 0.05f); stacks[extraStack].Add(extraTile);
-                await wait(0.65f); token.ThrowIfCancellationRequested();
-
-                // 5. Hand out (dealStep distribute's plan): S(1+j) and S(5+j), then S(9+j), to the dealer's right first.
-                await Until(() => Past("distribute"));
-                fx?.MarkStack(null);
-                Set("deal");
-                var delivered = new List<GameObject>[4];
-                for (int k = 0; k < 4; k++) delivered[k] = new List<GameObject>();
-                var plan = D()?.Plan;
-                for (int step = 0; step < 8; step++)
-                {
-                    int round = step / 4, j = step % 4;
-                    bool planned = plan != null && step < plan.Count;
-                    int receiver = local(planned ? plan[step].Seat : (dealerAbs + 1 + j) % 4);
-                    var picks = planned ? plan[step].Stacks.ToArray() : round == 0 ? new[] { (a + 1 + j) % 15, (a + 5 + j) % 15 } : new[] { (a + 9 + j) % 15 };
-                    if (round == 0) fx?.MarkStack(dealer, picks[0]);
-                    for (int p = 0; p < picks.Length; p++)
+                    await PhaseWait(.4f + 106 * .012f + .9f);
+                    for (int i = 0; i < 2; i++)
                     {
-                        int slot = round == 0 ? p : 2; var stack = stacks[picks[p]];
-                        for (int level = 0; level < stack.Count; level++)
-                            Fly(stack[level], DeliveryPose(receiver, slot, level), p * 0.11f, 0.5f + 0.3f * Mathf.Abs(receiver - dealer) / 3f, 0.03f + 0.04f * (receiver == dealer ? 0 : 1));
-                        delivered[receiver].AddRange(stack); stack.Clear();
+                        Set("roll"); int index = i;
+                        await Until(() => Past("indicator") || progress.Dice.Count > index);
+                        bool announced = progress != null && progress.Dice.Count > i;
+                        int value = announced ? progress.Dice[i].Value : Mathf.Max(1, Dice[i]);
+                        if (announced && !Past("indicator")) { Set("rolling"); DieRolling?.Invoke(dealer, value); await Roll(dealer, i, value, PhaseWait); }
+                        Dice[i] = value; LastDie = i; Changed?.Invoke();
                     }
-                    if (!Past("center")) { await wait(round == 0 ? 0.62f : 0.48f); token.ThrowIfCancellationRequested(); }
+                    await Until(() => Past("indicator"));
+                    ComposeIndicator();
+                    fx?.MarkStack(dealer, indicatorStack);
+                    var stack = stacks[indicatorStack];
+                    int removedLevel = Mathf.Clamp(progress != null && progress.IndicatorLevel >= 0 ? progress.IndicatorLevel : Dice[1] - 1, 0, 6);
+                    for (int j = removedLevel; j < stack.Count - 1; j++)
+                        Fly(stack[j], StackPose(dealer, indicatorStack, j, Key(stack[j])), TileView.Motion.Drop, .42f + (j - removedLevel) * .045f);
+                    Fly(indicator, StackPose(dealer, indicatorStack, 6, Key(indicator), true), TileView.Motion.Flip, 0, 1.15f, "reveal");
+                    Revealed = true; Set("indicator");
+                    await Until(() => Past("extra"));
+                    Set("extra"); ComposeExtra();
+                    int extraStack = progress != null && progress.ExtraStack >= 0 ? progress.ExtraStack : (indicatorStack + 1) % 15;
+                    fx?.MarkStack(dealer, extraStack);
+                    Fly(extraTile, StackPose(dealer, extraStack, 7, Key(extraTile)), TileView.Motion.Block, 0, .65f);
+                    await Until(() => Past("distribute"));
+                    fx?.MarkStack(null); Set("deal");
+                    var plan = Plan().ToList();
+                    if (!Past("center")) await PhaseWait(.25f);
+                    for (int step = 0; step < plan.Count; step++)
+                    {
+                        var delivery = plan[step];
+                        if (step < 4) fx?.MarkStack(dealer, delivery.Stacks[0]);
+                        for (int p = 0; p < delivery.Stacks.Length; p++)
+                        {
+                            var tiles = stacks[delivery.Stacks[p]];
+                            for (int level = 0; level < tiles.Count; level++)
+                                Fly(tiles[level], DeliveryPose(delivery.Seat, step < 4 ? p : 2, level, Key(tiles[level])), TileView.Motion.Block, p * .1f);
+                        }
+                        if (step + 1 < plan.Count && !Past("center")) await PhaseWait(step < 4 ? .48f : .38f);
+                    }
+                    await Until(() => Past("center"));
+                    fx?.MarkStack(null); Set("centre");
+                    int a = (indicatorStack + 13) % 15, b = (indicatorStack + 14) % 15;
+                    int right = Mathf.Max(a, b), left = Mathf.Min(a, b);
+                    for (int j = 0; j < stacks[left].Count; j++)
+                        Fly(stacks[left][j], StackPose(dealer, right, 7 + j, Key(stacks[left][j])), TileView.Motion.Block, 0, .6f);
+                    if (!Past("fill")) await PhaseWait(.8f);
+                    for (int j = 0; j < stacks[right].Count; j++) Fly(stacks[right][j], PilePose(6 + j), TileView.Motion.Block, 0, .85f);
+                    for (int j = 0; j < stacks[left].Count; j++) Fly(stacks[left][j], PilePose(13 + j), TileView.Motion.Block, 0, .85f);
+                    for (int j = 0; j < stacks[indicatorStack].Count; j++)
+                        Fly(stacks[indicatorStack][j], j < 6 ? PilePose(j) : CentreIndicatorPose(), TileView.Motion.Block, .26f, .85f);
+                    await Until(() => Past("fill"));
                 }
-
-                // 6. The last two stacks onto each other, then with the indicator stack to the centre (they become the deck).
-                await Until(() => Past("center"));
-                fx?.MarkStack(null);
-                Set("centre");
-                var centre = D()?.CenterStacks;
-                int right = centre != null && centre.Count == 3 ? centre[1] : Mathf.Max((a + 13) % 15, (a + 14) % 15);
-                int leftStack = centre != null && centre.Count == 3 ? centre[2] : Mathf.Min((a + 13) % 15, (a + 14) % 15);
-                var left = stacks[leftStack]; var rightTiles = stacks[right];
-                int baseCount = rightTiles.Count;
-                for (int j = 0; j < left.Count; j++) Fly(left[j], StackPose(dealer, right, baseCount + j), 0, 0.6f, 0.06f);
-                await wait(0.8f);
-                var rest = rightTiles.Concat(left).Concat(stacks[a].Where(t => t != indicator)).ToList();
-                int stock = Mathf.Max(model.Deck, 0);
-                for (int j = 0; j < rest.Count; j++)
+                catch (DealSkippedException)
                 {
-                    if (j < stock) Fly(rest[j], scene.DeckPose(j, stock), 0, 0.85f, 0.05f);
-                    else rest[j].SetActive(false);
+                    // dealSkip cancels phase timers and dice; startTween retargets rack tiles from their live poses.
+                    if (die != null) UnityEngine.Object.Destroy(die); die = null; dieStart = -1;
                 }
-                Fly(indicator, scene.IndicatorPose(), 0.1f, 0.85f, 0.06f);
-                await wait(1.0f); token.ThrowIfCancellationRequested();
-
-                // 7. To the racks (handDealt): mine turn their faces to me (48 ms apart), the others' stay hidden (40 ms).
-                await Until(() => Past("fill"));
-                Set("fill");
+                // The skip vote never supplies a private hand. Bind faces only once handDealt (or its snapshot) arrived.
+                await Until(() => handReady, false);
+                ComposeIndicator(); ComposeExtra();
+                bool fast = progress?.Skipped == true;
+                if (fast)
+                {
+                    Dice[0] = progress.Dice.Count > 0 ? progress.Dice[0].Value : 0;
+                    Dice[1] = progress.Dice.Count > 1 ? progress.Dice[1].Value : 0;
+                    LastDie = 1; Revealed = true;
+                }
+                fx?.MarkStack(null); Set("fill");
                 var state = fill();
-                var mine = state.Rack.Tiles.OrderBy(id => { state.Rack.TryFind(id, out var s); return s.Row * RackGrid.Columns + s.Index; }).ToList();
-                float last = 0;
+                var mine = state.Rack.Tiles.OrderBy(id => { state.Rack.TryFind(id, out var slot); return slot.Row * RackGrid.Columns + slot.Index; }).ToList();
+                var delivered = new List<GameObject>[4]; for (int k = 0; k < 4; k++) delivered[k] = new List<GameObject>();
+                foreach (var delivery in Plan()) foreach (int si in delivery.Stacks) delivered[delivery.Seat].AddRange(stacks[si].AsEnumerable().Reverse());
+                float factor = fast ? .3f : 1;
                 for (int k = 0; k < 4; k++)
-                {
-                    var tiles = delivered[k]; float step = k == 0 ? 0.048f : 0.040f;
-                    if (k == 0)
+                    for (int j = 0; j < delivered[k].Count; j++)
                     {
-                        for (int j = 0; j < tiles.Count; j++)
+                        var go = delivered[k][j];
+                        if (k == 0 && mine.Count > 0)
                         {
-                            if (j >= mine.Count) { tiles[j].SetActive(false); continue; }
-                            state.Rack.TryFind(mine[j], out var slot);
-                            scene.Tiles.SetFace(tiles[j], TileCodes.Code(mine[j]));
-                            Fly(tiles[j], scene.SlotPose(0, slot.Row, slot.Index), j * step, 0.55f, 0.07f); last = Mathf.Max(last, j * step + 0.55f);
+                            if (j >= mine.Count) { go.SetActive(false); continue; }
+                            state.Rack.TryFind(mine[j], out var slot); scene.Tiles.SetFace(go, TileCodes.Code(mine[j]));
+                            Fly(go, scene.SlotPose(0, slot.Row, slot.Index), TileView.Motion.Deal, (.08f + j * .048f) * factor);
+                        }
+                        else
+                        {
+                            if (j >= state.HandCounts[k] || j >= TableBoard.OpponentFillOrder.Count) { go.SetActive(false); continue; }
+                            // A spectator's bottom rack is also anonymous; never derive an opponent face from engine ids.
+                            scene.Tiles.SetFace(go, null);
+                            var slot = k == 0 ? new RackSlot(j < 11 ? 0 : 1, 2 + j % 11) : TableBoard.OpponentFillOrder[j];
+                            Fly(go, scene.SlotPose(k, slot.Row, slot.Index), TileView.Motion.Deal, (.08f + j * (k == 0 ? .048f : .04f)) * factor);
                         }
                     }
-                    else
-                    {
-                        var order = TableBoard.OpponentFillOrder;
-                        for (int j = 0; j < tiles.Count; j++)
-                        {
-                            if (j >= state.HandCounts[k] || j >= order.Count) { tiles[j].SetActive(false); continue; }
-                            Fly(tiles[j], scene.SlotPose(k, order[j].Row, order[j].Index), j * step, 0.5f, 0.06f); last = Mathf.Max(last, j * step + 0.5f);
-                        }
-                    }
-                }
-                await wait(last + 0.25f); token.ThrowIfCancellationRequested();
+                // FQ changes the stagger and finish deadline, not startTween's distance-based duration.
+                await Await(wait((.08f + 22 * .048f) * factor + (fast ? .65f : 1)), false);
                 Set("start");
             }
-            finally { fx?.MarkStack(null); Running = false; }
+            finally
+            {
+                model.Applied -= Applied; heapAnimating = false; scene.DeckHeap = false;
+                fx?.MarkStack(null); Running = false;
+            }
         }
 
-        /// <summary>Removes the ceremony's own objects (the board has taken over the same poses).</summary>
+        /// <summary>Removes only this ceremony's objects after the board takes over, or when the scene cancels.</summary>
         public void Clear()
         {
             fx?.MarkStack(null);
             foreach (var go in pieces) if (go != null) UnityEngine.Object.Destroy(go);
-            pieces.Clear(); flights.Clear();
+            pieces.Clear(); heap.Clear(); heapAnimating = false; heapShown = -1;
             if (die != null) UnityEngine.Object.Destroy(die); die = null; dieStart = -1;
         }
 
@@ -300,48 +372,58 @@ namespace Galaxy101.Table
         }
 
         /// <summary>
-        /// rollDie: 1.45 s from the dealer's hand across the felt, three bounces (at 32 / 56 / 72 %, 5 / 1.8 / 0.6 cm), spin
-        /// A = 10–15 rad damped by (1−u)^2.2 ending with the wanted face up; dust on each bounce, a gold ring on landing.
-        /// The second roll first returns the die to the hand (0.42 s).
+        /// rollDie: the source's 1.75 s segmented throw, two spin axes and final wobble, ending on the server's face.
+        /// An existing die first returns to the dealer's hand over 0.45 s without jumping or restarting its orientation.
         /// </summary>
-        private async Task Roll(int dealer, int index, int value)
+        private async Task Roll(int dealer, int index, int value, Func<float, Task> pause)
         {
+            bool returning = die != null && die.activeSelf;
             if (die == null) die = BuildDie();
-            var hand = scene.SeatPose(dealer, 0.16f, TY + 0.14f, 0.44f, true);
-            if (index == 1)
-            {
-                Fly(die, new Pose(hand.position, die.transform.rotation), 0, 0.42f, 0.05f); await wait(0.45f);
-            }
-            else die.transform.SetPositionAndRotation(hand.position, Quaternion.identity);
-            var land = scene.SeatPose(dealer, -0.04f + index * 0.07f, TY + 0.015f, 0.17f, true);
-            dieFrom = new Pose(die.transform.position, die.transform.rotation); dieTo = land;
+            var resting = new Pose(die.transform.position, die.transform.rotation);
             var rng = new System.Random(dealer * 31 + index * 7 + value);
-            dieFinal = Quaternion.AngleAxis((float)rng.NextDouble() * 360, Vector3.up) * Quaternion.FromToRotation(FaceNormal[value], Vector3.up);
-            dieAxis = new Vector3((float)rng.NextDouble() - .5f, (float)rng.NextDouble() * .3f, (float)rng.NextDouble() - .5f).normalized;
-            if (dieAxis == Vector3.zero) dieAxis = Vector3.right;
-            dieSpin = 10 + (float)rng.NextDouble() * 5; dieBounces = 0; dieStart = Time.time;
-            await wait(1.5f);
-            dieStart = -1; die.transform.SetPositionAndRotation(land.position, dieFinal);
-            fx?.Wave(land.position, new Color(1, .84f, .35f));
+            float Next() => (float)rng.NextDouble();
+            var start = scene.SeatPose(dealer, .1f + (Next() - .5f) * .08f, TY + .42f, .6f, true).position;
+            var land = scene.SeatPose(dealer, (Next() - .5f) * .14f, TY + DiceRollMotion.Size / 2, -.04f + Next() * .08f, true).position;
+            var final = Quaternion.AngleAxis(Next() * 6.283f * Mathf.Rad2Deg, Vector3.up) * Quaternion.FromToRotation(FaceNormal[value], Vector3.up);
+            var direction = land - start; direction.y = 0; direction.Normalize();
+            var axis = Vector3.Cross(Vector3.up, direction).normalized;
+            // Mirroring three-space X also mirrors a rotation's handedness (ThreeSpace.ToUnity quaternion).
+            var secondary = new Vector3(Next() - .5f, -(Next() - .5f) * .4f, -(Next() - .5f)).normalized;
+            float spin = 11 + Next() * 4, secondarySpin = 2.2f + Next() * 1.6f;
+            float wobble = (Next() < .5f ? 1 : -1) * (.22f + Next() * .1f);
+            dieMotion = new DiceRollMotion(start, land, final, axis, secondary, spin, secondarySpin, wobble, resting, returning);
+            dieBounces = 0; dieLanded = false; dieStart = Time.time;
+            float began = dieStart; var rollingDie = die;
+            // The first pose is assigned immediately; the second throw's return starts from the actual resting pose.
+            var first = returning ? resting : dieMotion.InitialPose;
+            die.transform.SetPositionAndRotation(first.position, first.rotation);
+            await pause(dieMotion.TotalDuration);
+            if (die != rollingDie || die == null || dieStart != began) return;
+            // A wait may complete before this frame's Tick; sample the exact endpoint and emit landing effects once.
+            RollStep(dieMotion.TotalDuration);
+            dieStart = -1;
         }
 
-        private void RollStep(float now)
+        private void RollStep(float elapsed)
         {
-            float u = Mathf.Clamp01((now - dieStart) / 1.45f);
-            float k = 1 - Mathf.Pow(1 - u, 2.4f);
-            var pos = Vector3.Lerp(dieFrom.position, dieTo.position, k);
-            float start = dieFrom.position.y - dieTo.position.y, y;
-            if (u < .32f) { float s = u / .32f; y = start * (1 - s * s); }
-            else if (u < .56f) y = Hop(u, .32f, .56f, .05f);
-            else if (u < .72f) y = Hop(u, .56f, .72f, .018f);
-            else y = Hop(u, .72f, 1f, .006f);
-            pos.y = dieTo.position.y + y;
-            int bounce = u >= .72f ? 3 : u >= .56f ? 2 : u >= .32f ? 1 : 0;
-            if (bounce > dieBounces) { dieBounces = bounce; fx?.Burst(new Vector3(pos.x, dieTo.position.y - 0.01f, pos.z), new Color(1, .95f, .85f, .7f), 8, 0.18f); }
-            var spin = Quaternion.AngleAxis(dieSpin * Mathf.Pow(1 - u, 2.2f) * Mathf.Rad2Deg, dieAxis);
-            die.transform.SetPositionAndRotation(pos, spin * dieFinal);
+            elapsed = Mathf.Max(0, elapsed);
+            var pose = dieMotion.Sample(elapsed);
+            die.transform.SetPositionAndRotation(pose.position, pose.rotation);
+            int impacts = dieMotion.ImpactsAt(elapsed);
+            while (dieBounces < impacts)
+            {
+                bool first = dieBounces++ == 0;
+                var at = new Vector3(pose.position.x, TY + .004f, pose.position.z);
+                fx?.DiceDust(at, first ? 9 : 4, first ? .09f : .05f);
+                if (first) fx?.DiceShock(new Vector3(at.x, TY + .001f, at.z), new Color32(0xFF, 0xF1, 0xC0, 255), .5f, .06f);
+            }
+            if (!dieLanded && elapsed >= dieMotion.TotalDuration)
+            {
+                dieLanded = true;
+                var at = new Vector3(pose.position.x, TY + .001f, pose.position.z);
+                fx?.DiceShock(at, fx.Accent, .9f, .1f);
+                fx?.Burst(new Vector3(at.x, TY + .03f, at.z), new Color32(0xFF, 0xE0, 0x8A, 255), 10, .08f);
+            }
         }
-
-        private static float Hop(float u, float a, float b, float height) { float s = (u - a) / (b - a); return height * 4 * s * (1 - s); }
     }
 }

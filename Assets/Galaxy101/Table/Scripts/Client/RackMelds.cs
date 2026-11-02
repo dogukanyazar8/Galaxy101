@@ -64,13 +64,49 @@ namespace Galaxy101.Table
         /// </summary>
         public (List<MeldSpec> Melds, string Last)? FromHand(int runNeed, int pairNeed)
         {
+            var plan = FromHand(runNeed, pairNeed, null, null);
+            return plan.HasValue ? (plan.Value.Melds, plan.Value.Last) : ((List<MeldSpec>, string)?)null;
+        }
+
+        /// <summary>
+        /// Elden bitiş with işleme (R-53 + R-25): the hand opens, the loose tiles are laid onto the table's melds and the
+        /// opening's own runs/groups, one tile is left to finish with. <paramref name="table"/> null: no laying off.
+        /// <c>Lays</c> lists the tiles to lay, in an order the engine accepts one by one.
+        /// </summary>
+        public (List<MeldSpec> Melds, string Last, List<string> Lays)? FromHand(int runNeed, int pairNeed, IEnumerable<(string Kind, List<string> Tiles)> table, ColorNum okey)
+        {
             var loose = new List<string>();
             foreach (var id in All) if (!Valid.Contains(id)) loose.Add(id);
-            if (Groups.Count > 0 && loose.Count == 1 && Sum >= runNeed) return (Groups, loose[0]);
+            if (Groups.Count > 0 && Sum >= runNeed && Lay(Groups, loose, table, okey) is var runs && runs.HasValue) return (Groups, runs.Value.Last, runs.Value.Lays);
             var single = new List<string>();
             foreach (var id in All) if (!Paired.Contains(id)) single.Add(id);
-            if (Pairs.Count >= pairNeed && single.Count == 1) return (Pairs, single[0]);
+            if (Pairs.Count >= pairNeed && Pairs.Count > 0 && Lay(Pairs, single, table, okey) is var pairs && pairs.HasValue) return (Pairs, pairs.Value.Last, pairs.Value.Lays);
             return null;
+        }
+
+        private static (string Last, List<string> Lays)? Lay(List<MeldSpec> opening, List<string> loose, IEnumerable<(string Kind, List<string> Tiles)> table, ColorNum okey)
+        {
+            if (loose.Count == 1) return (loose[0], new List<string>());
+            if (loose.Count == 0 || table == null || okey == null) return null;
+            var melds = new List<(string Kind, List<string> Tiles)>();
+            foreach (var m in table) melds.Add((m.Kind, new List<string>(m.Tiles)));
+            foreach (var m in opening) melds.Add((m.Kind, new List<string>(m.Tiles)));
+            var left = new List<string>(loose); var lays = new List<string>();
+            for (bool progress = true; progress && left.Count > 0;)
+            {
+                progress = false;
+                for (int i = 0; i < left.Count && !progress; i++)
+                    foreach (var m in melds)
+                    {
+                        var sides = G101Rules.AddSides(okey, m.Kind, m.Tiles, left[i]);
+                        if (sides.Count == 0) continue;
+                        if (sides[0] == "pre") m.Tiles.Insert(0, left[i]); else m.Tiles.Add(left[i]);
+                        lays.Add(left[i]); left.RemoveAt(i); progress = true; break;
+                    }
+            }
+            // Every loose tile fits: the last one laid (nothing was laid after it) is the one to finish with.
+            if (left.Count == 0) { string last = lays[lays.Count - 1]; lays.RemoveAt(lays.Count - 1); return (last, lays); }
+            return left.Count == 1 ? (left[0], lays) : ((string, List<string>)?)null;
         }
     }
 }

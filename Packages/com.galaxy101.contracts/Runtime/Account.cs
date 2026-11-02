@@ -41,6 +41,10 @@ namespace Galaxy101.Contracts
         public const string Inappropriate = "inappropriate";
         /// <summary>Sign-in refused: a moderator's ban runs for <see cref="LoginErrorResponse.RetryAfter"/> more seconds.</summary>
         public const string Banned = "banned";
+        /// <summary>The sign-in provider is not set up on this server (no OAuth client configured).</summary>
+        public const string ProviderDisabled = "provider_disabled";
+        /// <summary>The sign-in provider could not be reached; try again later.</summary>
+        public const string ProviderUnavailable = "provider_unavailable";
     }
 
     public sealed class ErrorResponse
@@ -114,6 +118,25 @@ namespace Galaxy101.Contracts
     {
         public string Provider { get; set; }
         public string IdToken { get; set; }
+    }
+
+    /// <summary>
+    /// Desktop Google sign-in (OAuth authorization code + PKCE, loopback redirect): the client hands the code to the
+    /// server, which exchanges it with its client secret, so the secret never ships in the game.
+    /// </summary>
+    public sealed class GoogleCodeRequest
+    {
+        public string Code { get; set; }
+        public string CodeVerifier { get; set; }
+        /// <summary>The loopback redirect the code was issued for: http://127.0.0.1:{port}/.</summary>
+        public string RedirectUri { get; set; }
+    }
+
+    /// <summary>Sign-in providers this server accepts; a null client id means the provider is off.</summary>
+    public sealed class AuthProvidersResponse
+    {
+        /// <summary>The desktop OAuth client id the game opens Google's consent page with.</summary>
+        public string GoogleDesktopClientId { get; set; }
     }
 
     public sealed class RefreshRequest

@@ -181,6 +181,26 @@ namespace Galaxy101.Tests
             }
         }
         [UnityTest]
+        public IEnumerator GoogleWaitingForTheBrowserShowsTheDesignsSpinnerAndLabel()
+        {
+            controller.ShowAuth();
+            var auth=controller.Auth;auth.Go("choice");yield return null;yield return null;
+            // The design's busy 'google' while the browser is open (the flow itself is covered by GoogleDesktopSignInTests).
+            var type=typeof(Galaxy101.AuthFlow);var flags=System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance;
+            var cancel=new System.Threading.CancellationTokenSource();
+            type.GetField("googleCancel",flags).SetValue(auth,cancel);type.GetField("busy",flags).SetValue(auth,true);
+            type.GetMethod("Render",flags).Invoke(auth,null);yield return null;yield return null;
+            var root=controller.View.Root;
+            Assert.That(root.Q<VisualElement>("auth-google-spinner"),Is.Not.Null);Assert.That(root.Q<VisualElement>("auth-google-ring"),Is.Null);
+            Assert.That(root.Q<Label>("auth-google-label").text,Is.EqualTo("Google’a bağlanılıyor…"));
+            var spinner=root.Q<VisualElement>("auth-google-spinner");float first=spinner.resolvedStyle.rotate.angle.value;
+            yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(spinner.resolvedStyle.rotate.angle.value,Is.Not.EqualTo(first),"one turn per .8 s");
+            var captureDirectory=Environment.GetEnvironmentVariable("GALAXY_AUTH_CAPTURE_DIR");
+            if(!string.IsNullOrEmpty(captureDirectory)){Directory.CreateDirectory(captureDirectory);yield return DisplaySettingsTests.Shot(owner.GetComponent<UIDocument>(),1280,720,Path.Combine(captureDirectory,"choice-google-busy.png"));}
+            type.GetField("googleCancel",flags).SetValue(auth,null);type.GetField("busy",flags).SetValue(auth,false);cancel.Dispose();
+        }
+        [UnityTest]
         public IEnumerator GoogleNoticeKeepsChoiceAndLoginLayoutsAndInputState()
         {
             controller.ShowAuth();
@@ -204,7 +224,8 @@ namespace Galaxy101.Tests
                 Assert.That(root.Q<VisualElement>("auth-panel"),Is.SameAs(panel),screen+" must not rebuild the form");
                 Assert.That(panel.layout,Is.EqualTo(before),screen+" panel layout changed");
                 Assert.That(auth.Layer.Q<VisualElement>("shell-flash"),Is.Not.Null,"notice must be above the auth panel");
-                Assert.That(controller.View.LastFlash,Does.Contain("henüz"));
+                // No Google client on this server, or no server: a notice over the untouched form (never the browser).
+                Assert.That(controller.View.LastFlash,Does.Contain("henüz").Or.Contain("Sunucuya bağlanılamadı"));
                 if(email!=null)
                 {
                     Assert.That(email.value,Is.EqualTo("ornek@example.com"));

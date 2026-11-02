@@ -51,6 +51,7 @@ Migration ekleme: `dotnet tool restore` sonra `dotnet ef migrations add <Ad> -p 
 |---|---|---|
 | `Auth__SigningKey` | evet | `openssl rand -base64 48` |
 | `Auth__GoogleClientIds__0..n` | Google girişi için | Android/iOS/masaüstü OAuth istemci kimlikleri |
+| `Auth__GoogleDesktopClientId`, `Auth__GoogleDesktopClientSecret` | Windows/macOS/Linux oyununda "Google ile devam et" için | Google Cloud Console → Kimlik bilgileri → OAuth istemci kimliği, tür **Masaüstü uygulaması**. Kimlik herkese açıktır (oyun `/v1/auth/providers` ile alır); gizli anahtar yalnız sunucuda kalır. İzin ekranında kapsamlar: `openid`, `email`, `profile` |
 | `Auth__AppleClientIds__0` | Apple girişi için | Bundle / Services ID |
 | `Store__GooglePackageName`, `Store__GoogleServiceAccountJson` | Play satın alımı için | Hizmet hesabına Play Console'da finans izni |
 | `Store__AppleBundleId`, `Store__AppleRootCertificate` | App Store satın alımı için | Apple Root CA - G3, base64 DER |
@@ -65,6 +66,7 @@ Kimlik: `Authorization: Bearer <access>`. Hatalar `{ "code": "...", "message": "
 | Uç nokta | Açıklama |
 |---|---|
 | `POST /v1/auth/guest` · `/external` · `/refresh` · `/link` · `/logout` | Misafir, Google/Apple girişi, token yenileme (dönüşümlü, tekrar kullanımda aile iptal), hesap bağlama |
+| `GET /v1/auth/providers` · `POST /v1/auth/google/code` | Masaüstü Google girişi: oyun Google sayfasını tarayıcıda açar, yanıtı `http://127.0.0.1:{port}/` üzerinde PKCE (S256) ve `state` ile yakalar; sunucu kodu gizli anahtarla takas eder ve id token'ı doğrular. Yalnız loopback yönlendirmesi kabul edilir; Google kapalıysa `503 provider_disabled`, ulaşılamıyorsa `503 provider_unavailable`. Yeni hesap Google'daki ilk adı alır (geçerli ve temizse) |
 | `POST /v1/realtime/ticket` | 30 sn'lik tek kullanımlık WebSocket bileti |
 | `GET/PUT /v1/profile`, `GET /v1/profile/stats|badges|history`, `POST /v1/profile/privacy` | Profil, istatistik, rozet, geçmiş, KVKK onayı |
 | `GET/PUT /v1/settings` (revision), `PUT /v1/settings/planet` | Bulut ayarları; çözünürlük cihazda kalır |

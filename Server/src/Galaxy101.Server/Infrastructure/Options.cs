@@ -11,6 +11,14 @@ public sealed class AuthOptions
     public int RefreshTokenDays { get; set; } = 90;
     /// <summary>OAuth client ids whose Google id tokens are accepted (Android, iOS, desktop).</summary>
     public string[] GoogleClientIds { get; set; } = [];
+    /// <summary>
+    /// The "Desktop app" OAuth client the Windows game signs in with (authorization code + PKCE, loopback redirect). Its id
+    /// is public (the game opens Google's page with it) and is accepted as an id-token audience; the secret stays here and
+    /// is used only for the server-side code exchange. Set through the environment in production.
+    /// </summary>
+    public string GoogleDesktopClientId { get; set; } = "";
+    public string GoogleDesktopClientSecret { get; set; } = "";
+    public bool GoogleDesktopEnabled => GoogleDesktopClientId.Length > 0 && GoogleDesktopClientSecret.Length > 0;
     /// <summary>Bundle / service ids whose Sign in with Apple tokens are accepted.</summary>
     public string[] AppleClientIds { get; set; } = [];
 }

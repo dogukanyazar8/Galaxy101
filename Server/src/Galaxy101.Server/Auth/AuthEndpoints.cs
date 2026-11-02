@@ -60,13 +60,27 @@ public static class AuthEndpoints
         {
             var identity = await validator.ValidateAsync(request.Provider, request.IdToken, ct);
             if (identity is null) return Api.Error(ErrorCodes.InvalidToken, StatusCodes.Status401Unauthorized, error: V4Errors.E_OAUTH_FAILED);
-            var existing = await db.ExternalLogins.AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Provider == identity.Provider && x.Subject == identity.Subject, ct);
-            if (existing is not null) return Results.Ok(await tokens.IssueAsync(existing.AccountId, false, ct));
-            var account = await accounts.CreateAsync(null, null, ct, registered: true);
-            db.ExternalLogins.Add(new ExternalLogin { Provider = identity.Provider, Subject = identity.Subject, AccountId = account.Id, CreatedAt = clock.GetUtcNow() });
-            await db.SaveChangesAsync(ct);
-            return Results.Ok(await tokens.IssueAsync(account.Id, true, ct));
+            return Results.Ok(await SignInAsync(identity, accounts, tokens, db, clock, ct));
+        });
+
+        // Which providers this server is set up for: the game shows Google's page only when it can finish the sign-in.
+        anonymous.MapGet("/providers", (Microsoft.Extensions.Options.IOptions<AuthOptions> auth) =>
+            Results.Ok(new AuthProvidersResponse { GoogleDesktopClientId = auth.Value.GoogleDesktopEnabled ? auth.Value.GoogleDesktopClientId : null }));
+
+        // Google ile devam et (S02) on desktop: the game caught Google's code on a loopback redirect (RFC 8252) with a PKCE
+        // verifier (RFC 7636); the server exchanges it with the desktop client's secret and verifies the id token.
+        anonymous.MapPost("/google/code", async (GoogleCodeRequest request, IGoogleCodeExchange exchange, IExternalIdentityValidator validator,
+            Microsoft.Extensions.Options.IOptions<AuthOptions> auth, AccountService accounts, TokenService tokens, GameDb db, TimeProvider clock, CancellationToken ct) =>
+        {
+            if (!auth.Value.GoogleDesktopEnabled) return Api.Error(ErrorCodes.ProviderDisabled, StatusCodes.Status503ServiceUnavailable, error: V4Errors.E_OAUTH_FAILED);
+            if (string.IsNullOrEmpty(request.Code) || request.Code.Length > 2048 || !GoogleCodeExchange.IsLoopbackRedirect(request.RedirectUri)
+                || request.CodeVerifier is not { Length: >= 43 and <= 128 }) return Api.Error(ErrorCodes.Validation, error: V4Errors.E_OAUTH_FAILED);
+            string? idToken;
+            try { idToken = await exchange.ExchangeAsync(request.Code, request.CodeVerifier, request.RedirectUri!, ct); }
+            catch (ExternalProviderUnavailableException) { return Api.Error(ErrorCodes.ProviderUnavailable, StatusCodes.Status503ServiceUnavailable, error: V4Errors.E_OAUTH_FAILED); }
+            var identity = idToken is null ? null : await validator.ValidateAsync("google", idToken, ct);
+            if (identity is null) return Api.Error(ErrorCodes.InvalidToken, StatusCodes.Status401Unauthorized, error: V4Errors.E_OAUTH_FAILED);
+            return Results.Ok(await SignInAsync(identity, accounts, tokens, db, clock, ct));
         });
 
         anonymous.MapPasswordReset();
@@ -109,6 +123,31 @@ public static class AuthEndpoints
                 !await db.Accounts.AnyAsync(a => a.Id == me && a.SessionVersion == version, ct)) return Results.Unauthorized();
             return Results.Ok(new RealtimeTicketResponse { Ticket = tickets.Issue(me, version), ExpiresIn = (int)RealtimeTickets.Lifetime.TotalSeconds });
         }).RequireAuthorization();
+    }
+
+    /// <summary>
+    /// The account a verified provider identity signs into; an unknown identity gets a new registered account (R-96:
+    /// 25.000 chips) named after the provider's first name when that is a valid, clean game name.
+    /// </summary>
+    private static async Task<TokenResponse> SignInAsync(ExternalIdentity identity, AccountService accounts, TokenService tokens, GameDb db,
+        TimeProvider clock, CancellationToken ct)
+    {
+        var existing = await db.ExternalLogins.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Provider == identity.Provider && x.Subject == identity.Subject, ct);
+        if (existing is not null) return await tokens.IssueAsync(existing.AccountId, false, ct);
+        var name = identity.Name?.Trim();
+        if (name is not null && (name.Length > 16 || !Profile.ProfileRules.ValidName(name) || !Social.TextFilter.IsClean(name))) name = null;
+        var account = await accounts.CreateAsync(null, null, ct, registered: true, name: name);
+        db.ExternalLogins.Add(new ExternalLogin { Provider = identity.Provider, Subject = identity.Subject, AccountId = account.Id, CreatedAt = clock.GetUtcNow() });
+        try { await db.SaveChangesAsync(ct); }
+        catch (DbUpdateException error) when (error.IsUniqueViolation())
+        {
+            // The same identity signed in twice at once: the other request created the link; use its account.
+            db.ChangeTracker.Clear();
+            var winner = await db.ExternalLogins.AsNoTracking().FirstAsync(x => x.Provider == identity.Provider && x.Subject == identity.Subject, ct);
+            return await tokens.IssueAsync(winner.AccountId, false, ct);
+        }
+        return await tokens.IssueAsync(account.Id, true, ct);
     }
 }
 

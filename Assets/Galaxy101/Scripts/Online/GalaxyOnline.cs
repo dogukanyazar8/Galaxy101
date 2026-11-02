@@ -143,6 +143,17 @@ namespace Galaxy101.Online
         public async Task LoginAsync(string email, string password, bool remember) { Guest = false; Remember = remember; var signIn = Api.LoginAsync(email, password); int generation = Generation; await signIn; await AfterSignInAsync(generation); }
         public async Task RegisterAsync(RegisterRequest request) { Guest = false; Remember = true; var signIn = Api.RegisterAsync(request); int generation = Generation; await signIn; await AfterSignInAsync(generation); }
 
+        /// <summary>
+        /// Google ile devam et: the browser consent (<see cref="GoogleDesktopSignIn"/>), then the server's code exchange.
+        /// Remembered like any account. Throws <see cref="GoogleSignInCancelledException"/> when the player backs out.
+        /// </summary>
+        public async Task GoogleAsync(string clientId, bool english, CancellationToken cancel)
+        {
+            var code = await GoogleDesktopSignIn.AuthorizeAsync(clientId, english, cancel);
+            Guest = false; Remember = true;
+            var signIn = Api.GoogleCodeAsync(code); int generation = Generation; await signIn; await AfterSignInAsync(generation);
+        }
+
         public async Task SignOutAsync()
         {
             await Api.LogoutAsync();

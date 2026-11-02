@@ -80,6 +80,8 @@ services.AddSingleton<IEmailSender, SmtpEmailSender>();
 services.AddSingleton<PasswordResetCodes>();
 services.Configure<Galaxy101.Server.Social.AdminOptions>(configuration.GetSection(Galaxy101.Server.Social.AdminOptions.Section));
 services.AddSingleton<IExternalIdentityValidator, OidcIdentityValidator>();
+services.AddHttpClient(GoogleCodeExchange.HttpClientName, c => c.Timeout = TimeSpan.FromSeconds(10));
+services.AddSingleton<IGoogleCodeExchange, GoogleCodeExchange>();
 services.AddScoped<TokenService>();
 services.AddScoped<AccountService>();
 services.AddScoped<Passwords>();

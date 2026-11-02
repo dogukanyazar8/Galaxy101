@@ -32,6 +32,8 @@ namespace Galaxy101
         private GalaxyBackground background;
         private string screen;
         private bool busy;
+        /// <summary>Google ile devam et is waiting for the browser (the design's busy 'google'): pressing it again cancels.</summary>
+        private System.Threading.CancellationTokenSource googleCancel;
         private string error;
         // Form fields keep their values across rebuilds (language switch, error redraw).
         private string email = "", password = "", password2 = "", name = "", nick, color;
@@ -129,6 +131,7 @@ namespace Galaxy101
 
         public void Hide()
         {
+            googleCancel?.Cancel();
             splashPresentation?.Dispose(); splashPresentation = null;
             ticker?.Pause(); ticker = null; motions.Clear(); planetJob?.Pause(); planetJob = null; planetPlaced = false;
             authCursor?.Dispose(); authCursor = null;
@@ -368,17 +371,80 @@ namespace Galaxy101
             AddError(panel);
         }
 
-        /// <summary>Google: 56 px / radius 18 / edge 5 / 22 px ring / 17 px on the choice panel, 50 / 16 / 4 / 20 / 16 on the login form.</summary>
+        /// <summary>
+        /// Google: 56 px / radius 18 / edge 5 / 22 px ring / 17 px on the choice panel, 50 / 16 / 4 / 20 / 16 on the login form.
+        /// While the browser is open (busy 'google') the four-colour ring becomes the design's spinner — 20 px, 3 px #3D7BFF
+        /// with a clear top, one turn per .8 s — and the label reads "Google’a bağlanılıyor…".
+        /// </summary>
         private VisualElement GoogleButton(int height = 56, int radius = 18, int edge = 5, int ringSize = 22, int font = 17)
         {
+            bool waiting = googleCancel != null;
             var google = Row(); google.name = "auth-google"; google.style.height = height; google.style.justifyContent = Justify.Center; google.style.flexShrink = 0; view.Decorate(google, "#fff", radius, edge, "#A9B4D0");
-            var ring = Box(); ring.style.width = ring.style.height = ringSize; ring.style.marginRight = 12; Radius(ring, ringSize / 2f);
-            ring.style.borderTopWidth = ring.style.borderRightWidth = ring.style.borderBottomWidth = ring.style.borderLeftWidth = 4;
-            ring.style.borderTopColor = view.C("#3D7BFF"); ring.style.borderRightColor = view.C("#3CCB6E"); ring.style.borderBottomColor = view.C("#FFC94A"); ring.style.borderLeftColor = view.C("#FF5E6C");
-            google.Add(ring); google.Add(Text(L("Google ile devam et", "Continue with Google"), font, "Montserrat-700", "#1B2340"));
-            // Google needs the platform sign-in SDK and the server's OAuth client ids; until both are set the server answers invalid_token.
-            TapRaised(google, () => view.Flash(L("Google ile giriş bu sürümde henüz açık değil.", "Google sign-in is not available in this version yet."), "info", layer), edge, "#A9B4D0");
+            var ring = Box(); ring.name = waiting ? "auth-google-spinner" : "auth-google-ring"; ring.style.marginRight = 12;
+            if (waiting)
+            {
+                ring.style.width = ring.style.height = 20; Radius(ring, 10); Border(ring, 3, view.C("#3D7BFF")); ring.style.borderTopColor = Color.clear;
+                Animate(() => ring.style.rotate = new Rotate(Mathf.Repeat(Time.realtimeSinceStartup / .8f, 1) * 360));
+            }
+            else
+            {
+                ring.style.width = ring.style.height = ringSize; Radius(ring, ringSize / 2f);
+                ring.style.borderTopWidth = ring.style.borderRightWidth = ring.style.borderBottomWidth = ring.style.borderLeftWidth = 4;
+                ring.style.borderTopColor = view.C("#3D7BFF"); ring.style.borderRightColor = view.C("#3CCB6E"); ring.style.borderBottomColor = view.C("#FFC94A"); ring.style.borderLeftColor = view.C("#FF5E6C");
+            }
+            google.Add(ring);
+            var label = Text(waiting ? L("Google’a bağlanılıyor…", "Connecting to Google…") : L("Google ile devam et", "Continue with Google"), font, "Montserrat-700", "#1B2340");
+            label.name = "auth-google-label"; google.Add(label);
+            TapRaised(google, () => { if (googleCancel != null) googleCancel.Cancel(); else Google(); }, edge, "#A9B4D0");
             return google;
+        }
+
+        /// <summary>
+        /// The design's google(): busy 'google', then loginAs() — the menu with "Hoş geldin" (gold with the 25.000 welcome
+        /// chips for a new account). Here the browser asks Google and the server exchanges its answer.
+        /// </summary>
+        private async void Google()
+        {
+            if (busy) return;
+            if (!GoogleDesktopSignIn.Supported) { view.Flash(L("Google ile giriş bu cihazda henüz açık değil.", "Google sign-in is not available on this device yet."), "info", layer); return; }
+            // Ask the server first: a server without Google (or no server) is a notice over the untouched form.
+            string clientId;
+            try { clientId = (await online.Api.ProvidersAsync())?.GoogleDesktopClientId; }
+            // A server from before Google sign-in has no /providers (404): the same notice as one without a Google client.
+            catch (ApiException e) when (e.Status == 404) { clientId = null; }
+            catch (ApiException e) { if (layer != null) view.Flash(Explain(e), "bad", layer); return; }
+            if (layer == null || busy) return;
+            if (string.IsNullOrEmpty(clientId)) { view.Flash(L("Google ile giriş bu sürümde henüz açık değil.", "Google sign-in is not available in this version yet."), "info", layer); return; }
+            var cancel = new System.Threading.CancellationTokenSource();
+            busy = true; googleCancel = cancel; error = null; Render();
+            try
+            {
+                await online.GoogleAsync(clientId, view.Loc.Language == "en", cancel.Token);
+                busy = false; googleCancel = null;
+                string who = (online.Profile?.Name ?? "").Trim().Split(' ')[0];
+                if (online.Api.Tokens?.IsNewAccount == true)
+                    Finish(L("Hoş geldin, " + who + "! " + view.N(online.Wallet?.Chips ?? 0) + " çip hesabına eklendi", "Welcome, " + who + "! " + view.N(online.Wallet?.Chips ?? 0) + " chips added"), "gold");
+                else Finish(L("Hoş geldin, " + who + "!", "Welcome, " + who + "!"), "ok");
+            }
+            catch (GoogleSignInCancelledException e)
+            {
+                busy = false; googleCancel = null; if (layer == null) return;
+                Render();
+                view.Flash(e.TimedOut ? L("Google girişi zaman aşımına uğradı. Tekrar dene.", "Google sign-in timed out. Try again.")
+                    : L("Google girişi iptal edildi.", "Google sign-in cancelled."), "info", layer);
+            }
+            catch (ApiException e)
+            {
+                busy = false; googleCancel = null; if (layer == null) return;
+                error = Explain(e); errorAt = Time.realtimeSinceStartup; Render();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                busy = false; googleCancel = null; if (layer == null) return;
+                error = L("Google ile giriş yapılamadı. Tekrar dene.", "Could not sign in with Google. Try again."); errorAt = Time.realtimeSinceStartup; Render();
+            }
+            finally { cancel.Dispose(); }
         }
 
         private void TapRaised(VisualElement element, Action action, float depth, string shadow, bool liftOnHover = false, bool keepShadow = false)
@@ -835,6 +901,8 @@ namespace Galaxy101
                 case ErrorCodes.CodeInvalid: return L("Kod hatalı ya da süresi doldu. Yeni kod iste.", "The code is wrong or expired. Ask for a new one.");
                 case ErrorCodes.EmailUnavailable: return L("Şu an e-posta gönderilemiyor. Biraz sonra tekrar dene.", "E-mail cannot be sent right now. Try again later.");
                 case ErrorCodes.Inappropriate: return L("Bu ad uygun değil; başka bir ad seç.", "This name is not allowed; pick another one.");
+                case ErrorCodes.InvalidToken: return L("Google ile giriş yapılamadı. Tekrar dene.", "Could not sign in with Google. Try again.");
+                case ErrorCodes.ProviderUnavailable: return L("Google’a şu an ulaşılamıyor. Biraz sonra tekrar dene.", "Google cannot be reached right now. Try again later.");
                 case ErrorCodes.Banned:
                     int hours = Mathf.CeilToInt(((int?)e.Body?["retryAfter"] ?? 0) / 3600f);
                     return L("Hesabın askıya alındı (" + hours + " saat).", "Your account is suspended (" + hours + " h).");

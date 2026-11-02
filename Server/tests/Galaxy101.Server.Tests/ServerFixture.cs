@@ -17,6 +17,7 @@ public sealed class ServerFixture : WebApplicationFactory<Program>, IAsyncLifeti
     private readonly PostgreSqlContainer postgres = new PostgreSqlBuilder("postgres:17-alpine").Build();
     public FakeTimeProvider Clock { get; } = new(new DateTimeOffset(2026, 10, 22, 9, 0, 0, TimeSpan.Zero));
     public FakeIdentityValidator Identities { get; } = new();
+    public FakeGoogleCodeExchange GoogleCodes { get; } = new();
     public FakeEmailSender Mail { get; } = new();
     public const string AdminKey = "test-admin-key-0123456789-abcdefghij";
 
@@ -35,12 +36,16 @@ public sealed class ServerFixture : WebApplicationFactory<Program>, IAsyncLifeti
         builder.UseSetting("Game:HandsPerMatch", "2");
         builder.UseSetting("Game:TimeoutsBeforeAuto", "1");
         builder.UseSetting("Admin:Key", AdminKey);
+        builder.UseSetting("Auth:GoogleDesktopClientId", "desktop-client.apps.googleusercontent.com");
+        builder.UseSetting("Auth:GoogleDesktopClientSecret", "test-secret");
         builder.ConfigureServices(services =>
         {
             services.RemoveAll<TimeProvider>();
             services.AddSingleton<TimeProvider>(Clock);
             services.RemoveAll<IExternalIdentityValidator>();
             services.AddSingleton<IExternalIdentityValidator>(Identities);
+            services.RemoveAll<IGoogleCodeExchange>();
+            services.AddSingleton<IGoogleCodeExchange>(GoogleCodes);
             services.RemoveAll<IEmailSender>();
             services.AddSingleton<IEmailSender>(Mail);
         });
@@ -82,9 +87,26 @@ public sealed class FakeEmailSender : IEmailSender
 
 public sealed class FakeIdentityValidator : IExternalIdentityValidator
 {
-    /// <summary>Token format for tests: "provider:subject".</summary>
+    /// <summary>Token format for tests: "provider:subject" or "provider:subject:name".</summary>
     public Task<ExternalIdentity?> ValidateAsync(string provider, string idToken, CancellationToken ct) =>
-        Task.FromResult(idToken?.Split(':', 2) is [var p, var s] && p == provider ? new ExternalIdentity(p, s) : null);
+        Task.FromResult(idToken?.Split(':', 3) switch
+        {
+            [var p, var s] when p == provider => new ExternalIdentity(p, s),
+            [var p, var s, var n] when p == provider => new ExternalIdentity(p, s, n),
+            _ => null,
+        });
+}
+
+/// <summary>Code format for tests: "ok|{id token}" exchanges, "down" is Google unreachable, anything else is refused.</summary>
+public sealed class FakeGoogleCodeExchange : IGoogleCodeExchange
+{
+    public (string Code, string Verifier, string Redirect)? Last { get; private set; }
+    public Task<string?> ExchangeAsync(string code, string codeVerifier, string redirectUri, CancellationToken ct)
+    {
+        Last = (code, codeVerifier, redirectUri);
+        if (code == "down") throw new ExternalProviderUnavailableException("down");
+        return Task.FromResult(code.StartsWith("ok|", StringComparison.Ordinal) ? code[3..] : null);
+    }
 }
 
 [CollectionDefinition(Name)]

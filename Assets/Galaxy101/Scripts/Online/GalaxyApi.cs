@@ -85,6 +85,11 @@ namespace Galaxy101.Online
         { request.Platform = Application.platform.ToString(); return await AuthenticateAsync("/v1/auth/register", request); }
         public async Task<TokenResponse> LoginAsync(string email, string password)
         { return await AuthenticateAsync("/v1/auth/login", new PasswordLoginRequest { Email = email, Password = password }); }
+        /// <summary>Sign-in providers the server is set up for (no sign-in needed).</summary>
+        public Task<AuthProvidersResponse> ProvidersAsync() => SendAsync<AuthProvidersResponse>("GET", "/v1/auth/providers", null, false);
+        /// <summary>Google ile devam et (desktop): the server exchanges the loopback authorization code.</summary>
+        public async Task<TokenResponse> GoogleCodeAsync(GoogleCodeRequest request)
+        { return await AuthenticateAsync("/v1/auth/google/code", request); }
         public async Task<bool> ResumeAsync(string refreshToken)
         {
             try { await AuthenticateAsync("/v1/auth/refresh", new RefreshRequest { RefreshToken = refreshToken }); return true; }
